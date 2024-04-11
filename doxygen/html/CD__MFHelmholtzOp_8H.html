@@ -82,6 +82,7 @@ $(function() {
 <p>Declaration of a class for solving multiphase Helmholtz equations.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;map&gt;</code><br />
+<code>#include &lt;chrono&gt;</code><br />
 <code>#include &lt;MFCellFAB.H&gt;</code><br />
 <code>#include &lt;MFFluxFAB.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__Location_8H_source.html">CD_Location.H</a>&gt;</code><br />
@@ -97,61 +98,62 @@ $(function() {
 <code>#include &lt;<a class="el" href="CD__MFHelmholtzJumpBCFactory_8H_source.html">CD_MFHelmholtzJumpBCFactory.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__MFHelmholtzOpImplem_8H_source.html">CD_MFHelmholtzOpImplem.H</a>&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for CD_MFHelmholtzOp.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__MFHelmholtzOp_8H__incl.png" border="0" usemap="#aSource_2Elliptic_2CD__MFHelmholtzOp_8H" alt=""/></div>
 <map name="aSource_2Elliptic_2CD__MFHelmholtzOp_8H" id="aSource_2Elliptic_2CD__MFHelmholtzOp_8H">
-<area shape="rect" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="2349,5,2497,47"/>
-<area shape="rect" title=" " alt="" coords="483,393,534,420"/>
-<area shape="rect" title=" " alt="" coords="4221,244,4327,271"/>
-<area shape="rect" title=" " alt="" coords="4453,95,4561,121"/>
-<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="2339,319,2457,345"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1708,468,1893,495"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2091,468,2270,495"/>
-<area shape="rect" href="CD__MFMultigridInterpolator_8H.html" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="89,244,304,271"/>
-<area shape="rect" href="CD__MFCoarAve_8H.html" title="Wrapper class for holding multifluid EBCoarAves." alt="" coords="1475,244,1611,271"/>
-<area shape="rect" href="CD__MFReflux_8H.html" title="Declaration of a class for refluxing in a multiphase context." alt="" coords="329,244,451,271"/>
-<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2689,319,2833,345"/>
-<area shape="rect" href="CD__MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB&lt;Real&gt;" alt="" coords="3671,244,3821,271"/>
-<area shape="rect" href="CD__MFHelmholtzJumpBC_8H.html" title="Declaration of class for computing &quot;jump interface&quot; boundary conditions for multifluid Helmholtz code..." alt="" coords="2902,169,3102,196"/>
-<area shape="rect" href="CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="1195,169,1359,196"/>
-<area shape="rect" href="CD__MFHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="1859,169,2121,196"/>
-<area shape="rect" href="CD__MFHelmholtzEBBCFactory_8H.html" title="Declaration of an EB boundary condition factory class for MFHelmholtzOp." alt="" coords="2385,95,2614,121"/>
-<area shape="rect" href="CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="2845,95,3090,121"/>
-<area shape="rect" title=" " alt="" coords="3523,393,3614,420"/>
-<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="2244,393,2411,420"/>
-<area shape="rect" href="CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="751,319,963,345"/>
-<area shape="rect" title=" " alt="" coords="1091,393,1206,420"/>
-<area shape="rect" title=" " alt="" coords="863,393,965,420"/>
-<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="1390,319,1523,345"/>
-<area shape="rect" title=" " alt="" coords="3065,393,3171,420"/>
-<area shape="rect" title=" " alt="" coords="1281,393,1387,420"/>
-<area shape="rect" title=" " alt="" coords="1411,393,1523,420"/>
-<area shape="rect" href="CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="1598,393,1713,420"/>
-<area shape="rect" title=" " alt="" coords="1932,319,2061,345"/>
-<area shape="rect" href="CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="382,319,502,345"/>
-<area shape="rect" title=" " alt="" coords="331,393,409,420"/>
-<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="3246,393,3449,420"/>
-<area shape="rect" title=" " alt="" coords="3273,468,3422,495"/>
-<area shape="rect" title=" " alt="" coords="3677,319,3813,345"/>
-<area shape="rect" title=" " alt="" coords="2976,319,3081,345"/>
-<area shape="rect" title=" " alt="" coords="3397,319,3500,345"/>
-<area shape="rect" title=" " alt="" coords="4051,319,4143,345"/>
-<area shape="rect" title=" " alt="" coords="4167,319,4277,345"/>
-<area shape="rect" title=" " alt="" coords="2791,244,2901,271"/>
-<area shape="rect" title=" " alt="" coords="3837,319,3924,345"/>
-<area shape="rect" href="CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut&#45;cells." alt="" coords="3481,244,3595,271"/>
-<area shape="rect" href="CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="3157,244,3321,271"/>
-<area shape="rect" href="CD__MFHelmholtzJumpBCImplem_8H_source.html" title=" " alt="" coords="2790,393,3041,420"/>
-<area shape="rect" title=" " alt="" coords="816,244,919,271"/>
-<area shape="rect" title=" " alt="" coords="943,244,1042,271"/>
-<area shape="rect" title=" " alt="" coords="1066,244,1189,271"/>
-<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="627,319,726,345"/>
-<area shape="rect" href="CD__EBMGRestrict_8H.html" title="Declaration of a restriction operator for EB geometric multigrid." alt="" coords="1161,319,1312,345"/>
-<area shape="rect" href="CD__EBMGProlong_8H.html" title="Declaration of a prolongation operator for EB geometric multigrid." alt="" coords="987,319,1137,345"/>
-<area shape="rect" href="CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="2027,244,2209,271"/>
-<area shape="rect" href="CD__EBHelmholtzDomainBC_8H_source.html" title=" " alt="" coords="1737,244,1952,271"/>
+<area shape="rect" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="1871,5,2019,47"/>
+<area shape="rect" title=" " alt="" coords="1207,393,1258,420"/>
+<area shape="rect" title=" " alt="" coords="70,393,137,420"/>
+<area shape="rect" title=" " alt="" coords="2229,244,2335,271"/>
+<area shape="rect" title=" " alt="" coords="861,95,969,121"/>
+<area shape="rect" href="CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3162,319,3279,345"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1659,468,1844,495"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2598,468,2777,495"/>
+<area shape="rect" href="CD__MFMultigridInterpolator_8H.html" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="768,319,983,345"/>
+<area shape="rect" href="CD__MFCoarAve_8H.html" title="Wrapper class for holding multifluid EBCoarAves." alt="" coords="1058,319,1194,345"/>
+<area shape="rect" href="CD__MFReflux_8H.html" title="Declaration of a class for refluxing in a multiphase context." alt="" coords="1573,244,1695,271"/>
+<area shape="rect" href="CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2103,319,2247,345"/>
+<area shape="rect" href="CD__MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB&lt;Real&gt;" alt="" coords="2560,244,2711,271"/>
+<area shape="rect" href="CD__MFHelmholtzJumpBC_8H.html" title="Declaration of class for computing &quot;jump interface&quot; boundary conditions for multifluid Helmholtz code..." alt="" coords="2535,169,2735,196"/>
+<area shape="rect" href="CD__EBHelmholtzOp_8H.html" title="Declaration of Helmholtz multigrid operators." alt="" coords="757,169,921,196"/>
+<area shape="rect" href="CD__MFHelmholtzDomainBCFactory_8H_source.html" title=" " alt="" coords="1404,169,1667,196"/>
+<area shape="rect" href="CD__MFHelmholtzEBBCFactory_8H.html" title="Declaration of an EB boundary condition factory class for MFHelmholtzOp." alt="" coords="1982,95,2211,121"/>
+<area shape="rect" href="CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="2438,95,2683,121"/>
+<area shape="rect" href="CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="3899,319,4116,345"/>
+<area shape="rect" title=" " alt="" coords="3495,393,3586,420"/>
+<area shape="rect" href="CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="3152,393,3319,420"/>
+<area shape="rect" href="CD__EBMultigridInterpolator_8H.html" title="Declaration of a class that can interpolate more ghost cells near the coarse&#45;fine boundary near the E..." alt="" coords="871,393,1083,420"/>
+<area shape="rect" title=" " alt="" coords="423,468,538,495"/>
+<area shape="rect" title=" " alt="" coords="567,468,669,495"/>
+<area shape="rect" href="CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="161,393,294,420"/>
+<area shape="rect" title=" " alt="" coords="5,468,111,495"/>
+<area shape="rect" title=" " alt="" coords="285,468,391,495"/>
+<area shape="rect" title=" " alt="" coords="149,468,261,495"/>
+<area shape="rect" title=" " alt="" coords="1464,319,1593,345"/>
+<area shape="rect" href="CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="1218,319,1338,345"/>
+<area shape="rect" href="CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2397,393,2599,420"/>
+<area shape="rect" title=" " alt="" coords="2775,319,2911,345"/>
+<area shape="rect" title=" " alt="" coords="1973,319,2079,345"/>
+<area shape="rect" title=" " alt="" coords="3304,319,3407,345"/>
+<area shape="rect" title=" " alt="" coords="2608,319,2700,345"/>
+<area shape="rect" title=" " alt="" coords="2474,319,2583,345"/>
+<area shape="rect" title=" " alt="" coords="3208,244,3319,271"/>
+<area shape="rect" title=" " alt="" coords="3635,319,3721,345"/>
+<area shape="rect" href="CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut&#45;cells." alt="" coords="3445,244,3559,271"/>
+<area shape="rect" href="CD__MFInterfaceFAB_8H.html" title="Declaration of a class that allocates irregular data holders over the interface between two phases." alt="" coords="2800,244,2964,271"/>
+<area shape="rect" href="CD__MFHelmholtzJumpBCImplem_8H_source.html" title=" " alt="" coords="2826,393,3077,420"/>
+<area shape="rect" title=" " alt="" coords="429,244,532,271"/>
+<area shape="rect" title=" " alt="" coords="557,244,655,271"/>
+<area shape="rect" title=" " alt="" coords="679,244,802,271"/>
+<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="594,319,693,345"/>
+<area shape="rect" href="CD__EBMGRestrict_8H.html" title="Declaration of a restriction operator for EB geometric multigrid." alt="" coords="696,393,847,420"/>
+<area shape="rect" href="CD__EBMGProlong_8H.html" title="Declaration of a prolongation operator for EB geometric multigrid." alt="" coords="521,393,672,420"/>
+<area shape="rect" href="CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="1871,244,2053,271"/>
+<area shape="rect" href="CD__EBHelmholtzDomainBC_8H_source.html" title=" " alt="" coords="1283,244,1497,271"/>
+<area shape="rect" href="CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="3763,393,3897,420"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -159,9 +161,10 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__MFHelmholtzOp_8H__dep__incl.png" border="0" usemap="#aSource_2Elliptic_2CD__MFHelmholtzOp_8Hdep" alt=""/></div>
 <map name="aSource_2Elliptic_2CD__MFHelmholtzOp_8Hdep" id="aSource_2Elliptic_2CD__MFHelmholtzOp_8Hdep">
-<area shape="rect" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="611,5,759,47"/>
+<area shape="rect" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="821,5,969,47"/>
 <area shape="rect" href="CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="504,95,665,136"/>
 <area shape="rect" href="CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="689,95,883,136"/>
+<area shape="rect" href="CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="907,95,1105,136"/>
 <area shape="rect" href="CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="576,184,772,225"/>
 <area shape="rect" href="CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="796,184,1003,225"/>
 <area shape="rect" href="CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="275,281,537,307"/>

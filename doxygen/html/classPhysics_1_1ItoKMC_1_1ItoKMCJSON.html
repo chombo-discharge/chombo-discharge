@@ -101,13 +101,11 @@ Collaboration diagram for Physics::ItoKMC::ItoKMCJSON:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCJSON__coll__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCJSON_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCJSON_coll__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCJSON_coll__map">
-<area shape="rect" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="1123,65,1336,92"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="843,65,1073,92"/>
-<area shape="rect" href="classKMCDualState.html" title=" " alt="" coords="457,7,627,33"/>
-<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="23,7,178,33"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="427,58,657,99"/>
-<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="443,123,641,165"/>
-<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="5,131,196,157"/>
+<area shape="rect" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="115,289,329,316"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="107,213,337,240"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,109,236,151"/>
+<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="260,109,459,151"/>
+<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="264,5,455,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -358,9 +356,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::tuple&lt; std::string, std::vector&lt; std::string &gt;, std::vector&lt; std::string &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a65c007ad6bc243ccc02f900f8eab2ceb">parseReactionWildcards</a> (const std::vector&lt; std::string &gt; &amp;a_reactants, const std::vector&lt; std::string &gt; &amp;a_products, const nlohmann::json &amp;a_reactionJSON) const noexcept</td></tr>
 <tr class="memdesc:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Make a reaction set into a superset. This parses wildcards '@' in reaction string.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a65c007ad6bc243ccc02f900f8eab2ceb">More...</a><br /></td></tr>
 <tr class="separator:a65c007ad6bc243ccc02f900f8eab2ceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed799670f17fe11a73652bc5e8badfa7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aed799670f17fe11a73652bc5e8badfa7">updateReactionRates</a> (const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
-<tr class="memdesc:aed799670f17fe11a73652bc5e8badfa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aed799670f17fe11a73652bc5e8badfa7">More...</a><br /></td></tr>
-<tr class="separator:aed799670f17fe11a73652bc5e8badfa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a203dcddde789dd39c5afb10e0c7ec2ef"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a203dcddde789dd39c5afb10e0c7ec2ef">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dx, const Real a_kappa) const noexcept override</td></tr>
+<tr class="memdesc:a203dcddde789dd39c5afb10e0c7ec2ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a203dcddde789dd39c5afb10e0c7ec2ef">More...</a><br /></td></tr>
+<tr class="separator:a203dcddde789dd39c5afb10e0c7ec2ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98d867d578f2eecb36df2039d80119b6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; size_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a98d867d578f2eecb36df2039d80119b6">multinomial</a> (const size_t N, const std::discrete_distribution&lt; size_t &gt; &amp;a_distribution) const noexcept</td></tr>
 <tr class="memdesc:a98d867d578f2eecb36df2039d80119b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample a multinomial distribution with N samples.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a98d867d578f2eecb36df2039d80119b6">More...</a><br /></td></tr>
 <tr class="separator:a98d867d578f2eecb36df2039d80119b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -575,10 +573,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aeb965c335c41dd5a92e8f76b73c1951f">m_isDefined</a></td></tr>
 <tr class="memdesc:aeb965c335c41dd5a92e8f76b73c1951f inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:aeb965c335c41dd5a92e8f76b73c1951f inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af720727d0e56eafa7e9350c6088862e3 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="af720727d0e56eafa7e9350c6088862e3"></a>
-<a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa1768b8abe941660e8a9a9">KMCState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af720727d0e56eafa7e9350c6088862e3">m_kmcState</a></td></tr>
-<tr class="memdesc:af720727d0e56eafa7e9350c6088862e3 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinetic Monte Carlo state. <br /></td></tr>
-<tr class="separator:af720727d0e56eafa7e9350c6088862e3 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae24def42b87eb15f8fa6e39ee9b71b87 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="ae24def42b87eb15f8fa6e39ee9b71b87"></a>
 <a class="el" href="CD__ItoKMCPhysics_8H.html#a3125af9aa2e74060b4fd0751a02c4a46">KMCSolverType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae24def42b87eb15f8fa6e39ee9b71b87">m_kmcSolver</a></td></tr>
 <tr class="memdesc:ae24def42b87eb15f8fa6e39ee9b71b87 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinetic Monte Carlo solver. <br /></td></tr>
@@ -592,7 +586,7 @@ std::vector&lt; std::shared_ptr&lt; const <a class="el" href="classPhysics_1_1It
 <tr class="memdesc:ac0a8170481285c012f5e533a208fa330 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of photoionization reactions. <br /></td></tr>
 <tr class="separator:ac0a8170481285c012f5e533a208fa330 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; std::discrete_distribution&lt; int &gt;, std::map&lt; int, int &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">m_photoPathways</a></td></tr>
-<tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
+<tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation. This class is MPI and OpenMP safe.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
 <tr class="separator:a8f66156f4d8ec2366f17d65039d588f9 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab40ef30340dd1038995d29bf86ccd369 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memItemLeft" align="right" valign="top"><a id="ab40ef30340dd1038995d29bf86ccd369"></a>
 <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html">ItoKMCSurfaceReactionSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab40ef30340dd1038995d29bf86ccd369">m_surfaceReactions</a></td></tr>
@@ -2325,8 +2319,8 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a id="aed799670f17fe11a73652bc5e8badfa7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed799670f17fe11a73652bc5e8badfa7">&#9670;&nbsp;</a></span>updateReactionRates()</h2>
+<a id="a203dcddde789dd39c5afb10e0c7ec2ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a203dcddde789dd39c5afb10e0c7ec2ef">&#9670;&nbsp;</a></span>updateReactionRates()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2337,6 +2331,12 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">void ItoKMCJSON::updateReactionRates </td>
           <td>(</td>
+          <td class="paramtype">std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_kmcReactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const RealVect&#160;</td>
           <td class="paramname"><em>a_E</em>, </td>
         </tr>
@@ -2386,6 +2386,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Update reaction rates. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_kmcReactions</td><td>Reaction rates to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Plasma species densities </td></tr>
@@ -2396,7 +2397,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a27ccea903576f8a027ef2e69bdf8ca98">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a81ba0a3bbbd622cd4d00a9c370cacb5e">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>

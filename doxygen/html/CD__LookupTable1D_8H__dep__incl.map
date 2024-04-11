@@ -1,13 +1,11 @@
 <map id="Source/Utilities/CD_LookupTable1D.H" name="Source/Utilities/CD_LookupTable1D.H">
-<area shape="rect" id="node1" title="Declaration of a lookup table in one independent variable." alt="" coords="445,5,589,47"/>
-<area shape="rect" id="node2" href="$CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="349,95,493,136"/>
-<area shape="rect" id="node11" href="$CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="517,95,708,136"/>
-<area shape="rect" id="node3" href="$CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="235,191,379,233"/>
-<area shape="rect" id="node8" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="9,184,208,240"/>
-<area shape="rect" id="node9" href="$CD__ItoKMCAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="404,191,664,233"/>
-<area shape="rect" id="node10" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="695,191,923,233"/>
+<area shape="rect" id="node1" title="Declaration of a lookup table in one independent variable." alt="" coords="325,5,469,47"/>
+<area shape="rect" id="node2" href="$CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="229,95,373,136"/>
+<area shape="rect" id="node9" href="$CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="397,95,588,136"/>
+<area shape="rect" id="node3" href="$CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="229,191,373,233"/>
+<area shape="rect" id="node7" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="5,184,204,240"/>
+<area shape="rect" id="node8" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="400,191,628,233"/>
 <area shape="rect" id="node4" href="$CD__DataParser_8cpp.html" title="Implementation of CD_DataParser.H." alt="" coords="229,295,373,337"/>
 <area shape="rect" id="node5" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,288,204,344"/>
-<area shape="rect" id="node6" href="$CD__ItoKMCAir3LFA_8cpp.html" title="Implementation of CD_ItoKMCAir3LFA.H." alt="" coords="397,295,671,337"/>
-<area shape="rect" id="node7" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="695,295,936,337"/>
+<area shape="rect" id="node6" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="397,295,639,337"/>
 </map>

@@ -96,41 +96,49 @@ $(function() {
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;{</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;  CH_TIME(<span class="stringliteral">&quot;DataOps::setValue&quot;</span>);</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  <span class="keywordflow">for</span> (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    a_lhs[dit()].setVal(a_value);</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;  }</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;}</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;  <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = a_lhs.disjointBoxLayout();</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;  <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keywordtype">int</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">   34</a></span>&#160;<a class="code" href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">DataOps::sgn</a>(<span class="keyword">const</span> T a_value)</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;  <span class="keywordflow">return</span> ((a_value &gt; 0.0) - (a_value &lt; 0.0));</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classDataOps.html#ad8098fcedc68a9105187d5e0696b321e">   41</a></span>&#160;<a class="code" href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps::copy</a>(<a class="code" href="classEBAMRData.html">EBAMRData&lt;T&gt;</a>&amp; a_dst, <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRData&lt;T&gt;</a>&amp; a_src, <span class="keyword">const</span> Interval a_dstInterv, <span class="keyword">const</span> Interval a_srcInterv)</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;{</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;  CH_TIME(<span class="stringliteral">&quot;DataOps::copy(EBAMRData)&quot;</span>);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;  CH_assert(a_dst.<a class="code" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a>() == a_src.<a class="code" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a>());</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  CH_assert(a_dstInterv.size() == a_srcInterv.size());</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt; a_dst.<a class="code" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a>(); lvl++) {</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    CH_assert(a_dst[lvl]-&gt;nComp() &gt; a_dstInterv.end());</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    CH_assert(a_src[lvl]-&gt;nComp() &gt; a_srcInterv.end());</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    a_src[lvl]-&gt;localCopyTo(a_srcInterv, *a_dst[lvl], a_dstInterv);</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  }</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;}</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    a_lhs[din].setVal(a_value);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;  }</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keywordtype">int</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">   42</a></span>&#160;<a class="code" href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">DataOps::sgn</a>(<span class="keyword">const</span> T a_value)</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keywordflow">return</span> ((a_value &gt; 0.0) - (a_value &lt; 0.0));</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classDataOps.html#ad8098fcedc68a9105187d5e0696b321e">   49</a></span>&#160;<a class="code" href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps::copy</a>(<a class="code" href="classEBAMRData.html">EBAMRData&lt;T&gt;</a>&amp; a_dst, <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRData&lt;T&gt;</a>&amp; a_src, <span class="keyword">const</span> Interval a_dstInterv, <span class="keyword">const</span> Interval a_srcInterv)</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;{</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  CH_TIME(<span class="stringliteral">&quot;DataOps::copy(EBAMRData)&quot;</span>);</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  CH_assert(a_dst.<a class="code" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a>() == a_src.<a class="code" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a>());</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;  CH_assert(a_dstInterv.size() == a_srcInterv.size());</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassDataOps_html_a431748ec65eb6252e0c8d5dcd380d858"><div class="ttname"><a href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">DataOps::sgn</a></div><div class="ttdeci">static int sgn(const T a_value)</div><div class="ttdoc">Sign function. Returns +/- if the value is &gt; 0 or &lt; 0.</div><div class="ttdef"><b>Definition:</b> CD_DataOpsImplem.H:34</div></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt; a_dst.<a class="code" href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">size</a>(); lvl++) {</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    CH_assert(a_dst[lvl]-&gt;nComp() &gt; a_dstInterv.end());</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    CH_assert(a_src[lvl]-&gt;nComp() &gt; a_srcInterv.end());</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    a_src[lvl]-&gt;localCopyTo(a_srcInterv, *a_dst[lvl], a_dstInterv);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassDataOps_html_a431748ec65eb6252e0c8d5dcd380d858"><div class="ttname"><a href="classDataOps.html#a431748ec65eb6252e0c8d5dcd380d858">DataOps::sgn</a></div><div class="ttdeci">static int sgn(const T a_value)</div><div class="ttdoc">Sign function. Returns +/- if the value is &gt; 0 or &lt; 0.</div><div class="ttdef"><b>Definition:</b> CD_DataOpsImplem.H:42</div></div>
 <div class="ttc" id="aclassDataOps_html_a4429514331ff31eb2f7a0bfb896884e3"><div class="ttname"><a href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a></div><div class="ttdeci">static void setValue(LevelData&lt; MFInterfaceFAB&lt; T &gt;&gt; &amp;a_lhs, const T &amp;a_value)</div><div class="ttdoc">Set value in an MFInterfaceFAB data holder.</div><div class="ttdef"><b>Definition:</b> CD_DataOpsImplem.H:23</div></div>
-<div class="ttc" id="aclassDataOps_html_af9695c22d415df5658913bd9de3aade3"><div class="ttname"><a href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps::copy</a></div><div class="ttdeci">static void copy(MFAMRCellData &amp;a_dst, const MFAMRCellData &amp;a_src)</div><div class="ttdoc">Copy data from one data holder to another.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1006</div></div>
+<div class="ttc" id="aclassDataOps_html_af9695c22d415df5658913bd9de3aade3"><div class="ttname"><a href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps::copy</a></div><div class="ttdeci">static void copy(MFAMRCellData &amp;a_dst, const MFAMRCellData &amp;a_src)</div><div class="ttdoc">Copy data from one data holder to another.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1118</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData</a></div><div class="ttdoc">Default class for holding LevelData&lt;T&gt; data across an EBAMR realm.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRData.H:40</div></div>
 <div class="ttc" id="aclassEBAMRData_html_a959f38f7adb9f012ce1ddf4efc855bde"><div class="ttname"><a href="classEBAMRData.html#a959f38f7adb9f012ce1ddf4efc855bde">EBAMRData::size</a></div><div class="ttdeci">int size() const noexcept</div><div class="ttdoc">Get size of m_data.</div><div class="ttdef"><b>Definition:</b> CD_EBAMRDataImplem.H:66</div></div>
 <div class="ttc" id="aclassMFInterfaceFAB_html"><div class="ttname"><a href="classMFInterfaceFAB.html">MFInterfaceFAB</a></div><div class="ttdoc">Class for holding BaseIVFAB&lt;T&gt; on the interface between two phases.</div><div class="ttdef"><b>Definition:</b> CD_MFInterfaceFAB.H:30</div></div>

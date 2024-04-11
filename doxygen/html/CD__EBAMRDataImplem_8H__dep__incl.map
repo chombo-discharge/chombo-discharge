@@ -7,7 +7,7 @@
 <area shape="rect" id="node35" href="$CD__EBAMRParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh operations with AMR." alt="" coords="2822,169,2995,211"/>
 <area shape="rect" id="node38" href="$CD__EBAMRSurfaceDeposition_8H.html" title="Declaration of a class for handling surface deposition of particles with EB and AMR." alt="" coords="3080,169,3289,211"/>
 <area shape="rect" id="node41" href="$CD__DataOps_8H.html" title="Agglomeration of useful data operations." alt="" coords="4146,423,4290,464"/>
-<area shape="rect" id="node50" href="$CD__DischargeIO_8H.html" title="Silly, but useful functions that override standard Chombo HDF5 IO." alt="" coords="6023,512,6167,553"/>
+<area shape="rect" id="node50" href="$CD__DischargeIO_8H.html" title="Silly, but useful functions that override standard Chombo HDF5 IO." alt="" coords="5957,512,6101,553"/>
 <area shape="rect" id="node4" href="$CD__AmrMesh_8cpp.html" title="Implementation of CD_AmrMesh.H." alt="" coords="2593,519,2843,546"/>
 <area shape="rect" id="node5" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="1766,512,1990,553"/>
 <area shape="rect" id="node6" href="$CD__CellTagger_8H.html" title="Declaration of a base class for tagging cells across an AMR hierarchy." alt="" coords="228,512,389,553"/>
@@ -27,8 +27,8 @@
 <area shape="rect" id="node26" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="1339,512,1523,553"/>
 <area shape="rect" id="node27" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="465,512,653,553"/>
 <area shape="rect" id="node28" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="1548,512,1741,553"/>
-<area shape="rect" id="node8" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="4737,705,4944,732"/>
-<area shape="rect" id="node12" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="5856,601,6057,643"/>
+<area shape="rect" id="node8" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="4671,705,4877,732"/>
+<area shape="rect" id="node12" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="5789,601,5991,643"/>
 <area shape="rect" id="node20" href="$CD__FieldSolver_8cpp.html" title="Implementation of CD_FieldSolver.H." alt="" coords="4217,601,4376,643"/>
 <area shape="rect" id="node21" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="2840,601,3036,643"/>
 <area shape="rect" id="node23" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="2435,601,2580,643"/>
@@ -41,12 +41,12 @@
 <area shape="rect" id="node37" href="$CD__EBAMRParticleMeshImplem_8H.html" title="Implementation of CD_EBAMRParticleMesh.H." alt="" coords="2868,512,3091,553"/>
 <area shape="rect" id="node39" href="$CD__EBAMRSurfaceDeposition_8cpp.html" title="Implementation of CD_EBAMRSurfaceDeposition.H." alt="" coords="3233,259,3456,300"/>
 <area shape="rect" id="node40" href="$CD__EBAMRSurfaceDepositionImplem_8H.html" title="Implementation of CD_EBAMRSurfaceDeposition.H." alt="" coords="3114,512,3373,553"/>
-<area shape="rect" id="node42" href="$CD__CellInfo_8cpp.html" title="Implementation of CD_CellInfo.H." alt="" coords="4879,519,5117,546"/>
-<area shape="rect" id="node43" href="$CD__EBMGProlong_8cpp.html" title="Implementation of CD_EBMGProlong.H." alt="" coords="5142,519,5419,546"/>
-<area shape="rect" id="node44" href="$CD__EBMGRestrict_8cpp.html" title="Implementation of CD_EBMGRestrict.H." alt="" coords="5444,519,5723,546"/>
-<area shape="rect" id="node45" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="5747,512,5948,553"/>
+<area shape="rect" id="node42" href="$CD__CellInfo_8cpp.html" title="Implementation of CD_CellInfo.H." alt="" coords="4812,519,5051,546"/>
+<area shape="rect" id="node43" href="$CD__EBMGProlong_8cpp.html" title="Implementation of CD_EBMGProlong.H." alt="" coords="5075,519,5353,546"/>
+<area shape="rect" id="node44" href="$CD__EBMGRestrict_8cpp.html" title="Implementation of CD_EBMGRestrict.H." alt="" coords="5377,519,5656,546"/>
+<area shape="rect" id="node45" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="5680,512,5881,553"/>
 <area shape="rect" id="node46" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="3781,512,3996,553"/>
 <area shape="rect" id="node47" href="$CD__CdrLayoutImplem_8H.html" title="Implementation of CD_CdrLayout.H." alt="" coords="4020,512,4259,553"/>
 <area shape="rect" id="node48" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="4334,512,4550,553"/>
-<area shape="rect" id="node49" href="$CD__EBCoarseFineParticleMesh_8cpp.html" title="Implementation of CD_EBCoarseFineParticleMesh.H." alt="" coords="4575,512,4803,553"/>
+<area shape="rect" id="node49" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="4575,512,4736,553"/>
 </map>

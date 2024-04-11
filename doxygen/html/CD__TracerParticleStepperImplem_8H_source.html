@@ -560,189 +560,239 @@ $(function() {
 <div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160; </div>
 <div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
 <div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160; </div>
-<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;      List&lt;P&gt;&amp; particles = amrParticles[lvl][dit].listItems();</div>
+<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;    <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160; </div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
 <div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160; </div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;        P&amp; p = lit();</div>
-<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160; </div>
-<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;        p.position() += p.velocity() * a_dt;</div>
-<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;      }</div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;    }</div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;  }</div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160; </div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;  amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160; </div>
-<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;  m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;}</div>
+<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160; </div>
+<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;      List&lt;P&gt;&amp; particles = amrParticles[lvl][din].listItems();</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160; </div>
+<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;        P&amp; p = lit();</div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160; </div>
+<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;        p.position() += p.velocity() * a_dt;</div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;      }</div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;    }</div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;  }</div>
 <div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160; </div>
-<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00511"></a><span class="lineno"><a class="line" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">  511</a></span>&#160;<a class="code" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">TracerParticleStepper&lt;P&gt;::advanceParticlesRK2</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;{</div>
-<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK2()&quot;</span>);</div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK2()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;  }</div>
-<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160; </div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;  <span class="comment">// TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k.</span></div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160; </div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;  <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; amrParticles = m_solver-&gt;<a class="code" href="classParticleContainer.html#af23c6d6970db0730bd235d76a12b5843">getParticles</a>();</div>
-<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160; </div>
-<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;  <span class="comment">// First step. Store old position and velocity and do the Euler advance.</span></div>
-<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;  amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
+<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160; </div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;  m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;}</div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160; </div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00517"></a><span class="lineno"><a class="line" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">  517</a></span>&#160;<a class="code" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">TracerParticleStepper&lt;P&gt;::advanceParticlesRK2</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;{</div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK2()&quot;</span>);</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK2()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;  }</div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160; </div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;  <span class="comment">// TLDR: The new positions are x^(k+1) = x^k + 0.5*dt*[ v(x^k) + v(x^*) ] where x^* = x^k + dt*v^k.</span></div>
 <div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160; </div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;      List&lt;P&gt;&amp; particles = amrParticles[lvl][dit].listItems();</div>
-<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160; </div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;        P&amp; p = lit();</div>
-<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160; </div>
-<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;        p.template vect&lt;0&gt;() = p.position();</div>
-<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;        p.template vect&lt;1&gt;() = p.velocity();</div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;  <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; amrParticles = m_solver-&gt;<a class="code" href="classParticleContainer.html#af23c6d6970db0730bd235d76a12b5843">getParticles</a>();</div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160; </div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;  <span class="comment">// First step. Store old position and velocity and do the Euler advance.</span></div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;    <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160; </div>
+<div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
 <div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160; </div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;        p.position() += p.velocity() * a_dt;</div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;      }</div>
-<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;    }</div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;  }</div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160; </div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;  <span class="comment">// Remap and interpolate the velocities again. This puts the velocity v = v(x^*) into the particles</span></div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;  amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
-<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;  m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160; </div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;  <span class="comment">// Do the second RK2 stage.</span></div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160; </div>
-<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;      List&lt;P&gt;&amp; particles = amrParticles[lvl][dit].listItems();</div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160; </div>
+<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;      List&lt;P&gt;&amp; particles = amrParticles[lvl][din].listItems();</div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160; </div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;        P&amp; p = lit();</div>
+<div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160; </div>
+<div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;        p.template vect&lt;0&gt;() = p.position();</div>
+<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;        p.template vect&lt;1&gt;() = p.velocity();</div>
+<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160; </div>
+<div class="line"><a name="l00547"></a><span class="lineno">  547</span>&#160;        p.position() += p.velocity() * a_dt;</div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;      }</div>
+<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;    }</div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;  }</div>
 <div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160; </div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;        P&amp; p = lit();</div>
-<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160; </div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;        <span class="comment">// x^k+1     = x^k                  + dt/2     * [v(x^k)               + v(x^*)      ]</span></div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;        p.position() = p.template vect&lt;0&gt;() + 0.5 * a_dt * (p.template vect&lt;1&gt;() + p.velocity());</div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;      }</div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;    }</div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;  }</div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160; </div>
-<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;  <span class="comment">// Remap and interpolate the velocities again</span></div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;  amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;  m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;}</div>
-<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160; </div>
-<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00569"></a><span class="lineno"><a class="line" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">  569</a></span>&#160;<a class="code" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">TracerParticleStepper&lt;P&gt;::advanceParticlesRK4</a>(<span class="keyword">const</span> Real a_dt)</div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;{</div>
-<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK4()&quot;</span>);</div>
-<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK4()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;  }</div>
-<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160; </div>
-<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;  <span class="comment">// TLDR: Just the standard RK4 method.</span></div>
-<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160; </div>
-<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;  <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; amrParticles = m_solver-&gt;<a class="code" href="classParticleContainer.html#af23c6d6970db0730bd235d76a12b5843">getParticles</a>();</div>
-<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160; </div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;  <span class="keyword">const</span> Real dtHalf  = a_dt / 2.0;</div>
-<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;  <span class="keyword">const</span> Real dtThird = a_dt / 3.0;</div>
-<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;  <span class="keyword">const</span> Real dtSixth = a_dt / 6.0;</div>
-<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160; </div>
-<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;  <span class="comment">// k1 step.</span></div>
-<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;  {</div>
-<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;      <span class="keywordflow">for</span> (DataIterator dit(m_amr-&gt;getGrids(m_realm)[lvl]); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;          P&amp; p = lit();</div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160; </div>
-<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;          <span class="comment">// Store old position.</span></div>
-<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;          p.template vect&lt;0&gt;() = p.position();</div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;  <span class="comment">// Remap and interpolate the velocities again. This puts the velocity v = v(x^*) into the particles</span></div>
+<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;  amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;  m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160; </div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;  <span class="comment">// Do the second RK2 stage.</span></div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;    <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160; </div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160; </div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160; </div>
+<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;      List&lt;P&gt;&amp; particles = amrParticles[lvl][din].listItems();</div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160; </div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;        P&amp; p = lit();</div>
+<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160; </div>
+<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;        <span class="comment">// x^k+1     = x^k                  + dt/2     * [v(x^k)               + v(x^*)      ]</span></div>
+<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;        p.position() = p.template vect&lt;0&gt;() + 0.5 * a_dt * (p.template vect&lt;1&gt;() + p.velocity());</div>
+<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;      }</div>
+<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;    }</div>
+<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;  }</div>
+<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160; </div>
+<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;  <span class="comment">// Remap and interpolate the velocities again</span></div>
+<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;  amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;  m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;}</div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160; </div>
+<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00587"></a><span class="lineno"><a class="line" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">  587</a></span>&#160;<a class="code" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">TracerParticleStepper&lt;P&gt;::advanceParticlesRK4</a>(<span class="keyword">const</span> Real a_dt)</div>
+<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;{</div>
+<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK4()&quot;</span>);</div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;    pout() &lt;&lt; <span class="stringliteral">&quot;TracerParticleStepper::advanceParticlesRK4()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;  }</div>
 <div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160; </div>
-<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;          p.template vect&lt;1&gt;() = p.velocity();                                 <span class="comment">// k1 = v(x^k)</span></div>
-<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;          p.position()         = p.template vect&lt;0&gt;() + dtHalf * p.velocity(); <span class="comment">// x = x^k + 0.5*dt*k1</span></div>
-<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;        }</div>
-<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;      }</div>
-<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;    }</div>
-<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160; </div>
-<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
-<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;  }</div>
-<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160; </div>
-<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;  <span class="comment">// k2 step.</span></div>
-<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;  {</div>
-<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;      <span class="keywordflow">for</span> (DataIterator dit(m_amr-&gt;getGrids(m_realm)[lvl]); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;          P&amp; p = lit();</div>
-<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160; </div>
-<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;          p.template vect&lt;2&gt;() = p.velocity();                                 <span class="comment">// k2 = v(x^k + 0.5 * k1 * dt)</span></div>
-<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;          p.position()         = p.template vect&lt;0&gt;() + dtHalf * p.velocity(); <span class="comment">// x = x^k + 0.5*dt*k2</span></div>
-<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;        }</div>
-<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;      }</div>
-<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160;    }</div>
-<div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160; </div>
-<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
-<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;  }</div>
-<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160; </div>
-<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;  <span class="comment">// k3 step.</span></div>
-<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;  {</div>
-<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;      <span class="keywordflow">for</span> (DataIterator dit(m_amr-&gt;getGrids(m_realm)[lvl]); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;          P&amp; p = lit();</div>
-<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160; </div>
-<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;          p.template vect&lt;3&gt;() = p.velocity();                               <span class="comment">// k3 = v(x^k + 0.5 * k2 * dt)</span></div>
-<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;          p.position()         = p.template vect&lt;0&gt;() + a_dt * p.velocity(); <span class="comment">// x^k + k3*a_dt</span></div>
-<div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;        }</div>
-<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;      }</div>
-<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;    }</div>
-<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160; </div>
-<div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
-<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;  }</div>
-<div class="line"><a name="l00640"></a><span class="lineno">  640</span>&#160; </div>
-<div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;  <span class="comment">// Final step.</span></div>
-<div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160;  {</div>
-<div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
-<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;      <span class="keywordflow">for</span> (DataIterator dit(m_amr-&gt;getGrids(m_realm)[lvl]); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;          P&amp; p = lit();</div>
-<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160; </div>
-<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;          p.position() = p.template vect&lt;0&gt;() + dtSixth * p.template vect&lt;1&gt;() + dtHalf * p.template vect&lt;2&gt;() +</div>
-<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;                         dtHalf * p.template vect&lt;3&gt;() + dtSixth * p.velocity();</div>
-<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;        }</div>
-<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;      }</div>
-<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;    }</div>
-<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160; </div>
-<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
-<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
-<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
-<div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160;  }</div>
-<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160; </div>
-<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
-<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;}</div>
-<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160; </div>
-<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160; </div>
-<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;  <span class="comment">// TLDR: Just the standard RK4 method.</span></div>
+<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160; </div>
+<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;  <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; amrParticles = m_solver-&gt;<a class="code" href="classParticleContainer.html#af23c6d6970db0730bd235d76a12b5843">getParticles</a>();</div>
+<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160; </div>
+<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;  <span class="keyword">const</span> Real dtHalf  = a_dt / 2.0;</div>
+<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;  <span class="keyword">const</span> Real dtThird = a_dt / 3.0;</div>
+<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;  <span class="keyword">const</span> Real dtSixth = a_dt / 6.0;</div>
+<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160; </div>
+<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;  <span class="comment">// k1 step.</span></div>
+<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;  {</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;      <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;      <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160; </div>
+<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160; </div>
+<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;        <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160; </div>
+<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;          P&amp; p = lit();</div>
+<div class="line"><a name="l00616"></a><span class="lineno">  616</span>&#160; </div>
+<div class="line"><a name="l00617"></a><span class="lineno">  617</span>&#160;          <span class="comment">// Store old position.</span></div>
+<div class="line"><a name="l00618"></a><span class="lineno">  618</span>&#160;          p.template vect&lt;0&gt;() = p.position();</div>
+<div class="line"><a name="l00619"></a><span class="lineno">  619</span>&#160; </div>
+<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;          p.template vect&lt;1&gt;() = p.velocity();                                 <span class="comment">// k1 = v(x^k)</span></div>
+<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;          p.position()         = p.template vect&lt;0&gt;() + dtHalf * p.velocity(); <span class="comment">// x = x^k + 0.5*dt*k1</span></div>
+<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;        }</div>
+<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;      }</div>
+<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;    }</div>
+<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160; </div>
+<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
+<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;  }</div>
+<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160; </div>
+<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;  <span class="comment">// k2 step.</span></div>
+<div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;  {</div>
+<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;      <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;      <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160; </div>
+<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160; </div>
+<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00640"></a><span class="lineno">  640</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;        <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160; </div>
+<div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;          P&amp; p = lit();</div>
+<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160; </div>
+<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;          p.template vect&lt;2&gt;() = p.velocity();                                 <span class="comment">// k2 = v(x^k + 0.5 * k1 * dt)</span></div>
+<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;          p.position()         = p.template vect&lt;0&gt;() + dtHalf * p.velocity(); <span class="comment">// x = x^k + 0.5*dt*k2</span></div>
+<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;        }</div>
+<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;      }</div>
+<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;    }</div>
+<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160; </div>
+<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
+<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;  }</div>
+<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160; </div>
+<div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160;  <span class="comment">// k3 step.</span></div>
+<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;  {</div>
+<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;      <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;      <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160; </div>
+<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160; </div>
+<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;        <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160; </div>
+<div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;          P&amp; p = lit();</div>
+<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160; </div>
+<div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160;          p.template vect&lt;3&gt;() = p.velocity();                               <span class="comment">// k3 = v(x^k + 0.5 * k2 * dt)</span></div>
+<div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;          p.position()         = p.template vect&lt;0&gt;() + a_dt * p.velocity(); <span class="comment">// x^k + k3*a_dt</span></div>
+<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;        }</div>
+<div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;      }</div>
+<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;    }</div>
+<div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160; </div>
+<div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
+<div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00681"></a><span class="lineno">  681</span>&#160;  }</div>
+<div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160; </div>
+<div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;  <span class="comment">// Final step.</span></div>
+<div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;  {</div>
+<div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
+<div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;      <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
+<div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;      <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160; </div>
+<div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160; </div>
+<div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;        <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160; </div>
+<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;        <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;          P&amp; p = lit();</div>
+<div class="line"><a name="l00697"></a><span class="lineno">  697</span>&#160; </div>
+<div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;          p.position() = p.template vect&lt;0&gt;() + dtSixth * p.template vect&lt;1&gt;() + dtHalf * p.template vect&lt;2&gt;() +</div>
+<div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160;                         dtHalf * p.template vect&lt;3&gt;() + dtSixth * p.velocity();</div>
+<div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;        }</div>
+<div class="line"><a name="l00701"></a><span class="lineno">  701</span>&#160;      }</div>
+<div class="line"><a name="l00702"></a><span class="lineno">  702</span>&#160;    }</div>
+<div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160; </div>
+<div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;    <span class="comment">// Remap and compute v = v(x)</span></div>
+<div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160;    amrParticles.<a class="code" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a>();</div>
+<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;    m_solver-&gt;interpolateVelocities();</div>
+<div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;  }</div>
+<div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160; </div>
+<div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160;  m_amr-&gt;removeCoveredParticlesIF(amrParticles, m_phase);</div>
+<div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;}</div>
+<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160; </div>
+<div class="line"><a name="l00712"></a><span class="lineno">  712</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00713"></a><span class="lineno">  713</span>&#160; </div>
+<div class="line"><a name="l00714"></a><span class="lineno">  714</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ParticleManagement_8H_html"><div class="ttname"><a href="CD__ParticleManagement_8H.html">CD_ParticleManagement.H</a></div><div class="ttdoc">Namespace containing various particle management utilities.</div></div>
 <div class="ttc" id="aCD__Random_8H_html"><div class="ttname"><a href="CD__Random_8H.html">CD_Random.H</a></div><div class="ttdoc">File containing some useful static methods related to random number generation.</div></div>
 <div class="ttc" id="aCD__TracerParticleStepper_8H_html"><div class="ttname"><a href="CD__TracerParticleStepper_8H.html">CD_TracerParticleStepper.H</a></div><div class="ttdoc">Declaration of a TimeStepper implementation for advancing a tracer particle solver.</div></div>
 <div class="ttc" id="aclassDataOps_html_a4429514331ff31eb2f7a0bfb896884e3"><div class="ttname"><a href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a></div><div class="ttdeci">static void setValue(LevelData&lt; MFInterfaceFAB&lt; T &gt;&gt; &amp;a_lhs, const T &amp;a_value)</div><div class="ttdoc">Set value in an MFInterfaceFAB data holder.</div><div class="ttdef"><b>Definition:</b> CD_DataOpsImplem.H:23</div></div>
-<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:48</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a81d7610978813e98b3c5e968d4495139"><div class="ttname"><a href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Remap over the entire AMR hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:777</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a8677866e8070b8925e3f98689faba582"><div class="ttname"><a href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">ParticleContainer::clearParticles</a></div><div class="ttdeci">void clearParticles()</div><div class="ttdoc">Clear all particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1211</div></div>
-<div class="ttc" id="aclassParticleContainer_html_ad0d3d3f8df2c0b373ff720e1b744d390"><div class="ttname"><a href="classParticleContainer.html#ad0d3d3f8df2c0b373ff720e1b744d390">ParticleContainer::addParticlesDestructive</a></div><div class="ttdeci">void addParticlesDestructive(List&lt; P &gt; &amp;a_particles)</div><div class="ttdoc">Add particles to container. The input particles are destroyed by this routine.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:519</div></div>
-<div class="ttc" id="aclassParticleContainer_html_af23c6d6970db0730bd235d76a12b5843"><div class="ttname"><a href="classParticleContainer.html#af23c6d6970db0730bd235d76a12b5843">ParticleContainer::getParticles</a></div><div class="ttdeci">AMRParticles&lt; P &gt; &amp; getParticles()</div><div class="ttdoc">Get all particles on all levels.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:229</div></div>
+<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:49</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a81d7610978813e98b3c5e968d4495139"><div class="ttname"><a href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">ParticleContainer::remap</a></div><div class="ttdeci">void remap()</div><div class="ttdoc">Remap over the entire AMR hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:839</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a8677866e8070b8925e3f98689faba582"><div class="ttname"><a href="classParticleContainer.html#a8677866e8070b8925e3f98689faba582">ParticleContainer::clearParticles</a></div><div class="ttdeci">void clearParticles()</div><div class="ttdoc">Clear all particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1344</div></div>
+<div class="ttc" id="aclassParticleContainer_html_ad0d3d3f8df2c0b373ff720e1b744d390"><div class="ttname"><a href="classParticleContainer.html#ad0d3d3f8df2c0b373ff720e1b744d390">ParticleContainer::addParticlesDestructive</a></div><div class="ttdeci">void addParticlesDestructive(List&lt; P &gt; &amp;a_particles)</div><div class="ttdoc">Add particles to container. The input particles are destroyed by this routine.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:541</div></div>
+<div class="ttc" id="aclassParticleContainer_html_af23c6d6970db0730bd235d76a12b5843"><div class="ttname"><a href="classParticleContainer.html#af23c6d6970db0730bd235d76a12b5843">ParticleContainer::getParticles</a></div><div class="ttdeci">AMRParticles&lt; P &gt; &amp; getParticles()</div><div class="ttdoc">Get all particles on all levels.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:239</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html">Physics::TracerParticle::TracerParticleStepper</a></div><div class="ttdoc">Implementation of TimeStepper for advancing tracer particles in a fixed velocity field.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepper.H:51</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_a10136c0eacc5b848047409ea92e2d412"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a10136c0eacc5b848047409ea92e2d412">Physics::TracerParticle::TracerParticleStepper::registerRealms</a></div><div class="ttdeci">void registerRealms() override</div><div class="ttdoc">Register realms. Primal is the only realm we need.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:93</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_a140e4a29ee847ca51e506ada1383930a"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a140e4a29ee847ca51e506ada1383930a">Physics::TracerParticle::TracerParticleStepper::parseInitialConditions</a></div><div class="ttdeci">virtual void parseInitialConditions()</div><div class="ttdoc">Parse initial conditions.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:200</div></div>
@@ -759,10 +809,10 @@ $(function() {
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_a68b9e786991e93e7cf937648dbf886e9"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a68b9e786991e93e7cf937648dbf886e9">Physics::TracerParticle::TracerParticleStepper::advance</a></div><div class="ttdeci">virtual Real advance(const Real a_dt) override</div><div class="ttdoc">Advancement method. Swaps between various kernels.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:299</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_a88dfd2e80c183fe65715b683e8dc9882"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a88dfd2e80c183fe65715b683e8dc9882">Physics::TracerParticle::TracerParticleStepper::parseOptions</a></div><div class="ttdeci">void parseOptions()</div><div class="ttdoc">Parse options.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:117</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_a8c58fab38e6d07427b22e20e8b95c1a8"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a8c58fab38e6d07427b22e20e8b95c1a8">Physics::TracerParticle::TracerParticleStepper::synchronizeSolverTimes</a></div><div class="ttdeci">virtual void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override</div><div class="ttdoc">Synchronize solver times and time steps.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:332</div></div>
-<div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_aaf7ad061949d03bb5ca3795ccaeade86"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">Physics::TracerParticle::TracerParticleStepper::advanceParticlesRK2</a></div><div class="ttdeci">virtual void advanceParticlesRK2(const Real a_dt)</div><div class="ttdoc">Advance particles using second order Runge-Kutta.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:511</div></div>
+<div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_aaf7ad061949d03bb5ca3795ccaeade86"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#aaf7ad061949d03bb5ca3795ccaeade86">Physics::TracerParticle::TracerParticleStepper::advanceParticlesRK2</a></div><div class="ttdeci">virtual void advanceParticlesRK2(const Real a_dt)</div><div class="ttdoc">Advance particles using second order Runge-Kutta.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:517</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_ab3d48182242d4283316429f77fbdae29"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ab3d48182242d4283316429f77fbdae29">Physics::TracerParticle::TracerParticleStepper::setupSolvers</a></div><div class="ttdeci">void setupSolvers() override</div><div class="ttdoc">Instantiate the tracer particle solver.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:48</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_ac15ea9b5e47ebbe3b8f54f22c57e0dd1"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ac15ea9b5e47ebbe3b8f54f22c57e0dd1">Physics::TracerParticle::TracerParticleStepper::~TracerParticleStepper</a></div><div class="ttdeci">virtual ~TracerParticleStepper()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:38</div></div>
-<div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_acb54de8d6c35cc2d1e98cb87bf705269"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">Physics::TracerParticle::TracerParticleStepper::advanceParticlesRK4</a></div><div class="ttdeci">virtual void advanceParticlesRK4(const Real a_dt)</div><div class="ttdoc">Advance particles using fourth order Runge-Kutta.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:569</div></div>
+<div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_acb54de8d6c35cc2d1e98cb87bf705269"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#acb54de8d6c35cc2d1e98cb87bf705269">Physics::TracerParticle::TracerParticleStepper::advanceParticlesRK4</a></div><div class="ttdeci">virtual void advanceParticlesRK4(const Real a_dt)</div><div class="ttdoc">Advance particles using fourth order Runge-Kutta.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:587</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_ad1a63c515c50694b95bec62006a95ec7"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ad1a63c515c50694b95bec62006a95ec7">Physics::TracerParticle::TracerParticleStepper::getPlotVariableNames</a></div><div class="ttdeci">Vector&lt; std::string &gt; getPlotVariableNames() const override</div><div class="ttdoc">Get plot variable names.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:257</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_ad4b96bc8b00b5053eaccf1cec2efa701"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ad4b96bc8b00b5053eaccf1cec2efa701">Physics::TracerParticle::TracerParticleStepper::parseVelocityField</a></div><div class="ttdeci">virtual void parseVelocityField()</div><div class="ttdoc">Parse velocity field.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:175</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_ae6cde54752fe54790d570ff35f84dc3f"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ae6cde54752fe54790d570ff35f84dc3f">Physics::TracerParticle::TracerParticleStepper::parseIntegrator</a></div><div class="ttdeci">virtual void parseIntegrator()</div><div class="ttdoc">Parse reactive integrator.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:145</div></div>
@@ -770,10 +820,10 @@ $(function() {
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_af7c29069e43b53778d4cef530964513b"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#af7c29069e43b53778d4cef530964513b">Physics::TracerParticle::TracerParticleStepper::initialParticles</a></div><div class="ttdeci">virtual void initialParticles()</div><div class="ttdoc">Fill initial particles.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:428</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_afc4531d0b17a258847fbba33ee47e6b1"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#afc4531d0b17a258847fbba33ee47e6b1">Physics::TracerParticle::TracerParticleStepper::TracerParticleStepper</a></div><div class="ttdeci">TracerParticleStepper()</div><div class="ttdoc">Constructor. Does nothing.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:27</div></div>
 <div class="ttc" id="aclassPhysics_1_1TracerParticle_1_1TracerParticleStepper_html_affb0d52c3a9e41410c8cee0c58b2827a"><div class="ttname"><a href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#affb0d52c3a9e41410c8cee0c58b2827a">Physics::TracerParticle::TracerParticleStepper::setVelocity</a></div><div class="ttdeci">virtual void setVelocity()</div><div class="ttdoc">Set the velocity on the mesh.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleStepperImplem.H:391</div></div>
-<div class="ttc" id="aclassRandom_html_a6b7bc4a5071c4946e36f9fabdaf7490d"><div class="ttname"><a href="classRandom.html#a6b7bc4a5071c4946e36f9fabdaf7490d">Random::getUniformReal01</a></div><div class="ttdeci">static Real getUniformReal01()</div><div class="ttdoc">Get a uniform real number on the interval [0,1].</div><div class="ttdef"><b>Definition:</b> CD_RandomImplem.H:133</div></div>
+<div class="ttc" id="aclassRandom_html_a6b7bc4a5071c4946e36f9fabdaf7490d"><div class="ttname"><a href="classRandom.html#a6b7bc4a5071c4946e36f9fabdaf7490d">Random::getUniformReal01</a></div><div class="ttdeci">static Real getUniformReal01()</div><div class="ttdoc">Get a uniform real number on the interval [0,1].</div><div class="ttdef"><b>Definition:</b> CD_RandomImplem.H:147</div></div>
 <div class="ttc" id="aclassRealm_html_ae7b66527325a72d0b3aa2db67d34078e"><div class="ttname"><a href="classRealm.html#ae7b66527325a72d0b3aa2db67d34078e">Realm::Primal</a></div><div class="ttdeci">static const std::string Primal</div><div class="ttdoc">Identifier for perimal realm.</div><div class="ttdef"><b>Definition:</b> CD_Realm.H:46</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolver.H:37</div></div>
-<div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:157</div></div>
+<div class="ttc" id="anamespaceParallelOps_html_a1e1c7f162c522c6fecace086d6cdd10d"><div class="ttname"><a href="namespaceParallelOps.html#a1e1c7f162c522c6fecace086d6cdd10d">ParallelOps::max</a></div><div class="ttdeci">Real max(const Real &amp;a_input) noexcept</div><div class="ttdoc">Get the maximum of the input, reduced over MPI ranks (in the Chombo communicator)</div><div class="ttdef"><b>Definition:</b> CD_ParallelOpsImplem.H:176</div></div>
 <div class="ttc" id="anamespacePhysics_1_1TracerParticle_html"><div class="ttname"><a href="namespacePhysics_1_1TracerParticle.html">Physics::TracerParticle</a></div><div class="ttdoc">Namespace for encapsulating physics code for tracer particles.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticlePhysics.H:21</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

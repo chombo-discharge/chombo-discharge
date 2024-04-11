@@ -1,52 +1,52 @@
 <map id="Source/RadiativeTransfer/CD_McPhoto.H" name="Source/RadiativeTransfer/CD_McPhoto.H">
-<area shape="rect" id="node1" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="2515,5,2699,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,77,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="203,319,287,345"/>
-<area shape="rect" id="node4" title=" " alt="" coords="312,319,427,345"/>
-<area shape="rect" id="node5" title=" " alt="" coords="471,393,558,420"/>
-<area shape="rect" id="node6" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="2549,95,2665,121"/>
-<area shape="rect" id="node15" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="2682,393,2867,420"/>
-<area shape="rect" id="node16" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3657,393,3836,420"/>
-<area shape="rect" id="node29" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="906,244,1078,271"/>
-<area shape="rect" id="node37" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="4075,244,4237,271"/>
-<area shape="rect" id="node41" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="5121,244,5228,271"/>
-<area shape="rect" id="node48" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="5482,244,5625,271"/>
-<area shape="rect" id="node50" href="$CD__McPhotoImplem_8H.html" title="Implementation of CD_McPhoto.H." alt="" coords="3951,169,4119,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="1619,393,1706,420"/>
-<area shape="rect" id="node8" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="1895,244,2116,271"/>
-<area shape="rect" id="node20" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="2545,169,2669,196"/>
-<area shape="rect" id="node34" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="2813,319,2939,345"/>
-<area shape="rect" id="node35" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3596,244,3713,271"/>
-<area shape="rect" id="node9" title=" " alt="" coords="1517,393,1595,420"/>
-<area shape="rect" id="node10" title=" " alt="" coords="2277,393,2408,420"/>
-<area shape="rect" id="node11" title=" " alt="" coords="2001,393,2063,420"/>
-<area shape="rect" id="node12" title=" " alt="" coords="2892,393,2985,420"/>
-<area shape="rect" id="node13" title=" " alt="" coords="1229,319,1371,345"/>
-<area shape="rect" id="node14" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="1547,319,1671,345"/>
-<area shape="rect" id="node17" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="1943,319,2065,345"/>
-<area shape="rect" id="node18" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="2484,319,2687,345"/>
-<area shape="rect" id="node19" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="2191,319,2307,345"/>
-<area shape="rect" id="node21" title=" " alt="" coords="1051,319,1205,345"/>
-<area shape="rect" id="node22" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2963,319,3103,345"/>
-<area shape="rect" id="node24" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="3229,319,3363,345"/>
-<area shape="rect" id="node25" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="3077,244,3240,271"/>
-<area shape="rect" id="node26" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="2703,244,2860,271"/>
-<area shape="rect" id="node27" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="2535,244,2679,271"/>
-<area shape="rect" id="node28" href="$CD__EBReflux_8H.html" title="Declaration of a class which can reflux over the coarse&#45;fine interface." alt="" coords="3437,319,3557,345"/>
-<area shape="rect" id="node23" title=" " alt="" coords="3270,393,3373,420"/>
-<area shape="rect" id="node30" title=" " alt="" coords="711,319,873,345"/>
-<area shape="rect" id="node31" title=" " alt="" coords="897,319,975,345"/>
-<area shape="rect" id="node32" title=" " alt="" coords="553,319,687,345"/>
-<area shape="rect" id="node33" href="$CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="1695,319,1918,345"/>
-<area shape="rect" id="node36" title=" " alt="" coords="3835,319,3925,345"/>
-<area shape="rect" id="node38" title=" " alt="" coords="4474,319,4550,345"/>
-<area shape="rect" id="node39" href="$CD__DepositionType_8H.html" title="Declaration of deposition types." alt="" coords="4287,319,4449,345"/>
-<area shape="rect" id="node40" href="$CD__EBParticleMeshImplem_8H.html" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="4050,319,4262,345"/>
-<area shape="rect" id="node42" title=" " alt="" coords="5953,393,6012,420"/>
-<area shape="rect" id="node43" title=" " alt="" coords="5574,393,5650,420"/>
-<area shape="rect" id="node44" title=" " alt="" coords="5749,393,5811,420"/>
-<area shape="rect" id="node45" title=" " alt="" coords="5850,393,5913,420"/>
-<area shape="rect" id="node46" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="5532,319,5692,345"/>
-<area shape="rect" id="node47" href="$CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="4929,319,5087,345"/>
-<area shape="rect" id="node49" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="5263,319,5457,345"/>
+<area shape="rect" id="node1" title="Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real p..." alt="" coords="3517,5,3701,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="759,95,831,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="3406,319,3490,345"/>
+<area shape="rect" id="node4" title=" " alt="" coords="3717,319,3832,345"/>
+<area shape="rect" id="node5" title=" " alt="" coords="2282,393,2369,420"/>
+<area shape="rect" id="node6" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="1205,95,1321,121"/>
+<area shape="rect" id="node15" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1807,468,1993,495"/>
+<area shape="rect" id="node16" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2901,468,3080,495"/>
+<area shape="rect" id="node28" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="2338,244,2510,271"/>
+<area shape="rect" id="node37" href="$CD__EBParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh interpolation and deposition." alt="" coords="3000,319,3163,345"/>
+<area shape="rect" id="node41" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="4011,319,4117,345"/>
+<area shape="rect" id="node48" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="4371,319,4514,345"/>
+<area shape="rect" id="node50" href="$CD__McPhotoImplem_8H.html" title="Implementation of CD_McPhoto.H." alt="" coords="3525,169,3693,196"/>
+<area shape="rect" id="node7" title=" " alt="" coords="66,468,153,495"/>
+<area shape="rect" id="node8" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="589,319,811,345"/>
+<area shape="rect" id="node20" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="1445,169,1569,196"/>
+<area shape="rect" id="node34" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="395,393,522,420"/>
+<area shape="rect" id="node35" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="3213,319,3331,345"/>
+<area shape="rect" id="node9" title=" " alt="" coords="263,468,342,495"/>
+<area shape="rect" id="node10" title=" " alt="" coords="515,468,645,495"/>
+<area shape="rect" id="node11" title=" " alt="" coords="177,468,239,495"/>
+<area shape="rect" id="node12" title=" " alt="" coords="1059,468,1152,495"/>
+<area shape="rect" id="node13" title=" " alt="" coords="985,393,1127,420"/>
+<area shape="rect" id="node14" href="$CD__Dielectric_8H.html" title="Dielectric class." alt="" coords="145,393,269,420"/>
+<area shape="rect" id="node17" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="737,393,860,420"/>
+<area shape="rect" id="node18" href="$CD__MultiFluidIndexSpace_8H.html" title="Multi&#45;fluid index space." alt="" coords="1151,393,1353,420"/>
+<area shape="rect" id="node19" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="546,393,662,420"/>
+<area shape="rect" id="node21" title=" " alt="" coords="1660,319,1815,345"/>
+<area shape="rect" id="node22" href="$CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="2835,319,2975,345"/>
+<area shape="rect" id="node24" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="1833,393,1967,420"/>
+<area shape="rect" id="node25" href="$CD__IrregAmrStencil_8H.html" title="Class for holding stencils on irregular over an entire AMR hierarchy." alt="" coords="2535,244,2697,271"/>
+<area shape="rect" id="node26" href="$CD__LoadBalancing_8H.html" title="Declaration of a static class for various load balancing operations." alt="" coords="1428,319,1585,345"/>
+<area shape="rect" id="node27" href="$CD__MFLevelGrid_8H.html" title="Declaration of a wrapper for wrapping multifluid EBLevelGrids." alt="" coords="1260,319,1404,345"/>
+<area shape="rect" id="node23" title=" " alt="" coords="2495,393,2598,420"/>
+<area shape="rect" id="node29" title=" " alt="" coords="2650,319,2811,345"/>
+<area shape="rect" id="node30" title=" " alt="" coords="2389,319,2467,345"/>
+<area shape="rect" id="node31" title=" " alt="" coords="2491,319,2626,345"/>
+<area shape="rect" id="node32" href="$CD__OpenMP_8H.html" title="Declaration of various useful OpenMP&#45;related utilities." alt="" coords="2092,393,2207,420"/>
+<area shape="rect" id="node33" href="$CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="2041,319,2263,345"/>
+<area shape="rect" id="node36" title=" " alt="" coords="3248,393,3339,420"/>
+<area shape="rect" id="node38" title=" " alt="" coords="3097,393,3173,420"/>
+<area shape="rect" id="node39" href="$CD__DepositionType_8H.html" title="Declaration of deposition types." alt="" coords="2909,393,3072,420"/>
+<area shape="rect" id="node40" href="$CD__EBParticleMeshImplem_8H.html" title="Implementatoin of CD_EBParticleMesh.H." alt="" coords="2673,393,2885,420"/>
+<area shape="rect" id="node42" title=" " alt="" coords="4843,468,4901,495"/>
+<area shape="rect" id="node43" title=" " alt="" coords="4463,468,4539,495"/>
+<area shape="rect" id="node44" title=" " alt="" coords="4639,468,4700,495"/>
+<area shape="rect" id="node45" title=" " alt="" coords="4739,468,4802,495"/>
+<area shape="rect" id="node46" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="4421,393,4581,420"/>
+<area shape="rect" id="node47" href="$CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="3819,393,3976,420"/>
+<area shape="rect" id="node49" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="4153,393,4346,420"/>
 </map>

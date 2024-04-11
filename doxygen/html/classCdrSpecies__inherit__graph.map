@@ -1,9 +1,7 @@
 <map id="CdrSpecies" name="CdrSpecies">
-<area shape="rect" id="node1" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,177,100,203"/>
+<area shape="rect" id="node1" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,107,100,134"/>
 <area shape="rect" id="node2" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionSpecies.html" title="Advection and diffused species for AdvectionDiffusionStepper." alt="" coords="176,5,379,47"/>
 <area shape="rect" id="node3" href="$classPhysics_1_1CdrPlasma_1_1CdrSpeciesJSON.html" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="203,71,352,112"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_1_1Negative.html" title=" " alt="" coords="174,136,381,177"/>
-<area shape="rect" id="node5" href="$classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_1_1Positive.html" title="Positive ion species." alt="" coords="174,201,381,243"/>
-<area shape="rect" id="node6" href="$classPhysics_1_1ItoKMC_1_1ItoKMCCDRSpecies.html" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="148,267,407,294"/>
-<area shape="rect" id="node7" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionSpecies.html" title="Advection and diffused species for StreamerInceptionStepper." alt="" coords="177,319,377,360"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1ItoKMC_1_1ItoKMCCDRSpecies.html" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="148,137,407,163"/>
+<area shape="rect" id="node5" href="$classPhysics_1_1StreamerInception_1_1StreamerInceptionSpecies.html" title="Advection and diffused species for StreamerInceptionStepper." alt="" coords="177,188,377,229"/>
 </map>

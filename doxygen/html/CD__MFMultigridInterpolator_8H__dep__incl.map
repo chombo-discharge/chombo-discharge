@@ -1,9 +1,10 @@
 <map id="Source/Multifluid/CD_MFMultigridInterpolator.H" name="Source/Multifluid/CD_MFMultigridInterpolator.H">
-<area shape="rect" id="node1" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="688,5,884,47"/>
-<area shape="rect" id="node2" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="600,95,748,136"/>
+<area shape="rect" id="node1" title="Declaration of a wrapper class for holding multifluid EBMultigridInterpolators." alt="" coords="889,5,1085,47"/>
+<area shape="rect" id="node2" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="913,95,1061,136"/>
 <area shape="rect" id="node4" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="689,184,883,225"/>
-<area shape="rect" id="node19" href="$CD__MFMultigridInterpolator_8cpp.html" title="Implmementation of CD_MFMultigridInterpolator.H." alt="" coords="824,95,1033,136"/>
-<area shape="rect" id="node3" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="504,184,665,225"/>
+<area shape="rect" id="node20" href="$CD__MFMultigridInterpolator_8cpp.html" title="Implmementation of CD_MFMultigridInterpolator.H." alt="" coords="1085,95,1295,136"/>
+<area shape="rect" id="node3" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="907,184,1068,225"/>
+<area shape="rect" id="node19" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="1092,184,1291,225"/>
 <area shape="rect" id="node5" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="576,273,772,315"/>
 <area shape="rect" id="node18" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="796,273,1003,315"/>
 <area shape="rect" id="node6" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="275,370,537,397"/>

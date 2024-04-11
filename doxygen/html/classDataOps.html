@@ -112,6 +112,9 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae0b2f78fdee7dfd457d03da57a1fabb1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae0b2f78fdee7dfd457d03da57a1fabb1">averageFaceToCell</a> (LevelData&lt; EBCellFAB &gt; &amp;a_cellData, const LevelData&lt; EBFluxFAB &gt; &amp;a_fluxData, const ProblemDomain &amp;a_domain)</td></tr>
 <tr class="memdesc:ae0b2f78fdee7dfd457d03da57a1fabb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average all components of face centered data to cell centers.  <a href="classDataOps.html#ae0b2f78fdee7dfd457d03da57a1fabb1">More...</a><br /></td></tr>
 <tr class="separator:ae0b2f78fdee7dfd457d03da57a1fabb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affeaff7994a57f6d0c08aeb47f546b3d"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#affeaff7994a57f6d0c08aeb47f546b3d">axby</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_x, const LevelData&lt; EBCellFAB &gt; &amp;a_y, const Real a_a, const Real a_b) noexcept</td></tr>
+<tr class="memdesc:affeaff7994a57f6d0c08aeb47f546b3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute lhs = a * x + b * y.  <a href="classDataOps.html#affeaff7994a57f6d0c08aeb47f546b3d">More...</a><br /></td></tr>
+<tr class="separator:affeaff7994a57f6d0c08aeb47f546b3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a380921f9b664379fc6738dffdfe6bfcd"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a380921f9b664379fc6738dffdfe6bfcd">compute</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const std::function&lt; Real(const Real a_cellValue)&gt; &amp;a_func) noexcept</td></tr>
 <tr class="memdesc:a380921f9b664379fc6738dffdfe6bfcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a new value given the old cell value.  <a href="classDataOps.html#a380921f9b664379fc6738dffdfe6bfcd">More...</a><br /></td></tr>
 <tr class="separator:a380921f9b664379fc6738dffdfe6bfcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -139,18 +142,18 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ac0cf66aa022399705b36d49cad9b4de9"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac0cf66aa022399705b36d49cad9b4de9">filterSmooth</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept</td></tr>
 <tr class="memdesc:ac0cf66aa022399705b36d49cad9b4de9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction.  <a href="classDataOps.html#ac0cf66aa022399705b36d49cad9b4de9">More...</a><br /></td></tr>
 <tr class="separator:ac0cf66aa022399705b36d49cad9b4de9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77d3d9b487c6182b3941fcab221e727f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">incr</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_rhs, const Real a_scale)</td></tr>
-<tr class="memdesc:a77d3d9b487c6182b3941fcab221e727f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">More...</a><br /></td></tr>
-<tr class="separator:a77d3d9b487c6182b3941fcab221e727f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad378bfb45533d3cff03d5f38d0175286"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ad378bfb45533d3cff03d5f38d0175286">incr</a> (LevelData&lt; MFCellFAB &gt; &amp;a_lhs, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, const Real a_scale)</td></tr>
-<tr class="memdesc:ad378bfb45533d3cff03d5f38d0175286"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#ad378bfb45533d3cff03d5f38d0175286">More...</a><br /></td></tr>
-<tr class="separator:ad378bfb45533d3cff03d5f38d0175286"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a286804b303d4c74fdcb79ea20522b745"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a286804b303d4c74fdcb79ea20522b745">incr</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_rhs, const Real &amp;a_scale)</td></tr>
-<tr class="memdesc:a286804b303d4c74fdcb79ea20522b745"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#a286804b303d4c74fdcb79ea20522b745">More...</a><br /></td></tr>
-<tr class="separator:a286804b303d4c74fdcb79ea20522b745"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbd55a67f0ab7f80a053c71dffed1413"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#acbd55a67f0ab7f80a053c71dffed1413">incr</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const Real &amp;a_scale)</td></tr>
-<tr class="memdesc:acbd55a67f0ab7f80a053c71dffed1413"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#acbd55a67f0ab7f80a053c71dffed1413">More...</a><br /></td></tr>
-<tr class="separator:acbd55a67f0ab7f80a053c71dffed1413"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92454e47ebc4876caec80e40743d469c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">incr</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_rhs, const Real a_scale) noexcept</td></tr>
+<tr class="memdesc:a92454e47ebc4876caec80e40743d469c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">More...</a><br /></td></tr>
+<tr class="separator:a92454e47ebc4876caec80e40743d469c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad886916d0e943b6bbdf99f8e67b19fd"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#aad886916d0e943b6bbdf99f8e67b19fd">incr</a> (LevelData&lt; MFCellFAB &gt; &amp;a_lhs, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, const Real a_scale) noexcept</td></tr>
+<tr class="memdesc:aad886916d0e943b6bbdf99f8e67b19fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#aad886916d0e943b6bbdf99f8e67b19fd">More...</a><br /></td></tr>
+<tr class="separator:aad886916d0e943b6bbdf99f8e67b19fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5a22bfb52b7a1e55a4c2744e8612020"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ab5a22bfb52b7a1e55a4c2744e8612020">incr</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_rhs, const Real &amp;a_scale) noexcept</td></tr>
+<tr class="memdesc:ab5a22bfb52b7a1e55a4c2744e8612020"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#ab5a22bfb52b7a1e55a4c2744e8612020">More...</a><br /></td></tr>
+<tr class="separator:ab5a22bfb52b7a1e55a4c2744e8612020"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a112afd863e01f07c9bf71aef5f8932b4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a112afd863e01f07c9bf71aef5f8932b4">incr</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const Real &amp;a_scale) noexcept</td></tr>
+<tr class="memdesc:a112afd863e01f07c9bf71aef5f8932b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#a112afd863e01f07c9bf71aef5f8932b4">More...</a><br /></td></tr>
+<tr class="separator:a112afd863e01f07c9bf71aef5f8932b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f3b52c379710ee0e21bf3af2f63b1e8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a1f3b52c379710ee0e21bf3af2f63b1e8">incr</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_lhs, const <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_rhs, const Real &amp;a_scale)</td></tr>
 <tr class="memdesc:a1f3b52c379710ee0e21bf3af2f63b1e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.  <a href="classDataOps.html#a1f3b52c379710ee0e21bf3af2f63b1e8">More...</a><br /></td></tr>
 <tr class="separator:a1f3b52c379710ee0e21bf3af2f63b1e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -254,9 +257,15 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a5de2e0bae557d084310a1991f183d339"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a5de2e0bae557d084310a1991f183d339">getMaxMin</a> (Real &amp;<a class="el" href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">max</a>, Real &amp;min, <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const int a_comp)</td></tr>
 <tr class="memdesc:a5de2e0bae557d084310a1991f183d339"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#a5de2e0bae557d084310a1991f183d339">More...</a><br /></td></tr>
 <tr class="separator:a5de2e0bae557d084310a1991f183d339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9670a14cbaddb9258b7b7740e152d11"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac9670a14cbaddb9258b7b7740e152d11">getMaxMin</a> (Real &amp;<a class="el" href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">max</a>, Real &amp;min, LevelData&lt; EBCellFAB &gt; &amp;a_data, const int a_comp)</td></tr>
-<tr class="memdesc:ac9670a14cbaddb9258b7b7740e152d11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#ac9670a14cbaddb9258b7b7740e152d11">More...</a><br /></td></tr>
-<tr class="separator:ac9670a14cbaddb9258b7b7740e152d11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a058a124c4f611c433b738f62c838fa2e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a058a124c4f611c433b738f62c838fa2e">getMaxMin</a> (Real &amp;a_max, Real &amp;a_min, LevelData&lt; EBCellFAB &gt; &amp;a_data, const int a_comp)</td></tr>
+<tr class="memdesc:a058a124c4f611c433b738f62c838fa2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#a058a124c4f611c433b738f62c838fa2e">More...</a><br /></td></tr>
+<tr class="separator:a058a124c4f611c433b738f62c838fa2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3a4f574c3c54492d3a91a584d1cc132"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#af3a4f574c3c54492d3a91a584d1cc132">getMaxMin</a> (Real &amp;a_max, Real &amp;a_min, <a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_data, const int a_comp) noexcept</td></tr>
+<tr class="memdesc:af3a4f574c3c54492d3a91a584d1cc132"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#af3a4f574c3c54492d3a91a584d1cc132">More...</a><br /></td></tr>
+<tr class="separator:af3a4f574c3c54492d3a91a584d1cc132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4ecc5b4b1336f1c3647a9fdd1536d38"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac4ecc5b4b1336f1c3647a9fdd1536d38">getMaxMin</a> (Real &amp;a_max, Real &amp;a_min, LevelData&lt; EBFluxFAB &gt; &amp;a_data, const int a_comp) noexcept</td></tr>
+<tr class="memdesc:ac4ecc5b4b1336f1c3647a9fdd1536d38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value of specified component.  <a href="classDataOps.html#ac4ecc5b4b1336f1c3647a9fdd1536d38">More...</a><br /></td></tr>
+<tr class="separator:ac4ecc5b4b1336f1c3647a9fdd1536d38"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37af20b672ebecacc0bfd111ce11aadb"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a37af20b672ebecacc0bfd111ce11aadb">getMaxMin</a> (Vector&lt; Real &gt; &amp;a_max, Vector&lt; Real &gt; &amp;a_min, Vector&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt; &amp;a_data)</td></tr>
 <tr class="memdesc:a37af20b672ebecacc0bfd111ce11aadb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get maximum and minimum value. Assumes single-component data.  <a href="classDataOps.html#a37af20b672ebecacc0bfd111ce11aadb">More...</a><br /></td></tr>
 <tr class="separator:a37af20b672ebecacc0bfd111ce11aadb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -284,18 +293,18 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae4261230f2d9ceb036ad1294b8f947d0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae4261230f2d9ceb036ad1294b8f947d0">kappaSum</a> (Real &amp;a_mass, const LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const int a_comp=0)</td></tr>
 <tr class="memdesc:ae4261230f2d9ceb036ad1294b8f947d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the kappa-weighted sum of the input data. Assumes one component.  <a href="classDataOps.html#ae4261230f2d9ceb036ad1294b8f947d0">More...</a><br /></td></tr>
 <tr class="separator:ae4261230f2d9ceb036ad1294b8f947d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1139f7cd961f218905b627acc8a19e2e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a1139f7cd961f218905b627acc8a19e2e">kappaScale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data)</td></tr>
-<tr class="memdesc:a1139f7cd961f218905b627acc8a19e2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a1139f7cd961f218905b627acc8a19e2e">More...</a><br /></td></tr>
-<tr class="separator:a1139f7cd961f218905b627acc8a19e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2937f528899e9f13ec2244e366514c1e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a2937f528899e9f13ec2244e366514c1e">kappaScale</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data)</td></tr>
-<tr class="memdesc:a2937f528899e9f13ec2244e366514c1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a2937f528899e9f13ec2244e366514c1e">More...</a><br /></td></tr>
-<tr class="separator:a2937f528899e9f13ec2244e366514c1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8cb248476bdb7363b0220cfc8e7e69c5"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a8cb248476bdb7363b0220cfc8e7e69c5">kappaScale</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data)</td></tr>
-<tr class="memdesc:a8cb248476bdb7363b0220cfc8e7e69c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a8cb248476bdb7363b0220cfc8e7e69c5">More...</a><br /></td></tr>
-<tr class="separator:a8cb248476bdb7363b0220cfc8e7e69c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b4e399aab0ca657b6c746eaf99807f8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a0b4e399aab0ca657b6c746eaf99807f8">kappaScale</a> (LevelData&lt; MFCellFAB &gt; &amp;a_data)</td></tr>
-<tr class="memdesc:a0b4e399aab0ca657b6c746eaf99807f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a0b4e399aab0ca657b6c746eaf99807f8">More...</a><br /></td></tr>
-<tr class="separator:a0b4e399aab0ca657b6c746eaf99807f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e95d1a5a251b178adf9f508f4ba1077"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a7e95d1a5a251b178adf9f508f4ba1077">kappaScale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data) noexcept</td></tr>
+<tr class="memdesc:a7e95d1a5a251b178adf9f508f4ba1077"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a7e95d1a5a251b178adf9f508f4ba1077">More...</a><br /></td></tr>
+<tr class="separator:a7e95d1a5a251b178adf9f508f4ba1077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3007f0a487f4185d940f1d38dfcc2d5e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a3007f0a487f4185d940f1d38dfcc2d5e">kappaScale</a> (LevelData&lt; EBCellFAB &gt; &amp;a_data) noexcept</td></tr>
+<tr class="memdesc:a3007f0a487f4185d940f1d38dfcc2d5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a3007f0a487f4185d940f1d38dfcc2d5e">More...</a><br /></td></tr>
+<tr class="separator:a3007f0a487f4185d940f1d38dfcc2d5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4afbcfffd8d3def566feaaa58e492b44"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a4afbcfffd8d3def566feaaa58e492b44">kappaScale</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_data) noexcept</td></tr>
+<tr class="memdesc:a4afbcfffd8d3def566feaaa58e492b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#a4afbcfffd8d3def566feaaa58e492b44">More...</a><br /></td></tr>
+<tr class="separator:a4afbcfffd8d3def566feaaa58e492b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc7a4da6d97a159097dd9e532d4dd13f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#abc7a4da6d97a159097dd9e532d4dd13f">kappaScale</a> (LevelData&lt; MFCellFAB &gt; &amp;a_data) noexcept</td></tr>
+<tr class="memdesc:abc7a4da6d97a159097dd9e532d4dd13f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by volume fraction.  <a href="classDataOps.html#abc7a4da6d97a159097dd9e532d4dd13f">More...</a><br /></td></tr>
+<tr class="separator:abc7a4da6d97a159097dd9e532d4dd13f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b3e0e1adb30575c6a4342f5bb5931de"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de">volumeScale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_data, const Vector&lt; Real &gt; &amp;a_dx)</td></tr>
 <tr class="memdesc:a2b3e0e1adb30575c6a4342f5bb5931de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by dx^SpaceDim.  <a href="classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de">More...</a><br /></td></tr>
 <tr class="separator:a2b3e0e1adb30575c6a4342f5bb5931de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -338,12 +347,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a1d9897e0082692437768f37b5213d59c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a1d9897e0082692437768f37b5213d59c">plus</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp)</td></tr>
 <tr class="memdesc:a1d9897e0082692437768f37b5213d59c"><td class="mdescLeft">&#160;</td><td class="mdescRight">General addition operator for adding together data. The user can choose which components to add.  <a href="classDataOps.html#a1d9897e0082692437768f37b5213d59c">More...</a><br /></td></tr>
 <tr class="separator:a1d9897e0082692437768f37b5213d59c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accd8d88fb7786769bbdd16c39ee6637a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#accd8d88fb7786769bbdd16c39ee6637a">scale</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const Real &amp;a_scale)</td></tr>
-<tr class="memdesc:accd8d88fb7786769bbdd16c39ee6637a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#accd8d88fb7786769bbdd16c39ee6637a">More...</a><br /></td></tr>
-<tr class="separator:accd8d88fb7786769bbdd16c39ee6637a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae60cd8dc87c3127c81c5ec99aca333a8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ae60cd8dc87c3127c81c5ec99aca333a8">scale</a> (LevelData&lt; MFCellFAB &gt; &amp;a_lhs, const Real &amp;a_scale)</td></tr>
-<tr class="memdesc:ae60cd8dc87c3127c81c5ec99aca333a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#ae60cd8dc87c3127c81c5ec99aca333a8">More...</a><br /></td></tr>
-<tr class="separator:ae60cd8dc87c3127c81c5ec99aca333a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0526ab53a5a7c72d202ac38e8ba3d1f0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a0526ab53a5a7c72d202ac38e8ba3d1f0">scale</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const Real &amp;a_scale) noexcept</td></tr>
+<tr class="memdesc:a0526ab53a5a7c72d202ac38e8ba3d1f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a0526ab53a5a7c72d202ac38e8ba3d1f0">More...</a><br /></td></tr>
+<tr class="separator:a0526ab53a5a7c72d202ac38e8ba3d1f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b6217b262947e00b860602305cf6a76"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a4b6217b262947e00b860602305cf6a76">scale</a> (LevelData&lt; MFCellFAB &gt; &amp;a_lhs, const Real &amp;a_scale) noexcept</td></tr>
+<tr class="memdesc:a4b6217b262947e00b860602305cf6a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a4b6217b262947e00b860602305cf6a76">More...</a><br /></td></tr>
+<tr class="separator:a4b6217b262947e00b860602305cf6a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6605122661a344974cd6b0b540c50d96"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a6605122661a344974cd6b0b540c50d96">scale</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_lhs, const Real &amp;a_scale)</td></tr>
 <tr class="memdesc:a6605122661a344974cd6b0b540c50d96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a6605122661a344974cd6b0b540c50d96">More...</a><br /></td></tr>
 <tr class="separator:a6605122661a344974cd6b0b540c50d96"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -353,12 +362,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4379faf3a9701f15c0ed16f549d048a0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a4379faf3a9701f15c0ed16f549d048a0">scale</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_lhs, const Real &amp;a_scale)</td></tr>
 <tr class="memdesc:a4379faf3a9701f15c0ed16f549d048a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a4379faf3a9701f15c0ed16f549d048a0">More...</a><br /></td></tr>
 <tr class="separator:a4379faf3a9701f15c0ed16f549d048a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73881aa89a4288cd0120292991a005f2"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a73881aa89a4288cd0120292991a005f2">scale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const Real a_scale)</td></tr>
-<tr class="memdesc:a73881aa89a4288cd0120292991a005f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a73881aa89a4288cd0120292991a005f2">More...</a><br /></td></tr>
-<tr class="separator:a73881aa89a4288cd0120292991a005f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afddaf35e97f5d99bdbeea6312944e91b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#afddaf35e97f5d99bdbeea6312944e91b">scale</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const Real a_scale)</td></tr>
-<tr class="memdesc:afddaf35e97f5d99bdbeea6312944e91b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#afddaf35e97f5d99bdbeea6312944e91b">More...</a><br /></td></tr>
-<tr class="separator:afddaf35e97f5d99bdbeea6312944e91b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1328f5d8a1b9588c9f97bdc1ef2ade3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ab1328f5d8a1b9588c9f97bdc1ef2ade3">scale</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const Real a_scale) noexcept</td></tr>
+<tr class="memdesc:ab1328f5d8a1b9588c9f97bdc1ef2ade3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#ab1328f5d8a1b9588c9f97bdc1ef2ade3">More...</a><br /></td></tr>
+<tr class="separator:ab1328f5d8a1b9588c9f97bdc1ef2ade3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cda67e3e8f6dd29581ede7b781c48c7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a9cda67e3e8f6dd29581ede7b781c48c7">scale</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const Real a_scale) noexcept</td></tr>
+<tr class="memdesc:a9cda67e3e8f6dd29581ede7b781c48c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a9cda67e3e8f6dd29581ede7b781c48c7">More...</a><br /></td></tr>
+<tr class="separator:a9cda67e3e8f6dd29581ede7b781c48c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21800fc80d4cf5cc8e0813ba33d91bfe"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a21800fc80d4cf5cc8e0813ba33d91bfe">scale</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_lhs, const Real a_scale)</td></tr>
 <tr class="memdesc:a21800fc80d4cf5cc8e0813ba33d91bfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale data by factor.  <a href="classDataOps.html#a21800fc80d4cf5cc8e0813ba33d91bfe">More...</a><br /></td></tr>
 <tr class="separator:a21800fc80d4cf5cc8e0813ba33d91bfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -375,11 +384,23 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:a12c8d0741771e046f92dd12d1171abbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in covered cells. Does specified component.  <a href="classDataOps.html#a12c8d0741771e046f92dd12d1171abbe">More...</a><br /></td></tr>
 <tr class="separator:a12c8d0741771e046f92dd12d1171abbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa432e87a368830570a43a296990c74c0"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#aa432e87a368830570a43a296990c74c0">setCoveredValue</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const Real a_value)</td></tr>
-<tr class="memdesc:aa432e87a368830570a43a296990c74c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Version of setCoveredValue which does all component.  <a href="classDataOps.html#aa432e87a368830570a43a296990c74c0">More...</a><br /></td></tr>
+<tr class="memdesc:aa432e87a368830570a43a296990c74c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Version of setCoveredValue which does all components.  <a href="classDataOps.html#aa432e87a368830570a43a296990c74c0">More...</a><br /></td></tr>
 <tr class="separator:aa432e87a368830570a43a296990c74c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab902dba90673edace2259eb4581f66e7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ab902dba90673edace2259eb4581f66e7">setCoveredValue</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const Real a_value)</td></tr>
 <tr class="memdesc:ab902dba90673edace2259eb4581f66e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Version of setCoveredValue which does all component.  <a href="classDataOps.html#ab902dba90673edace2259eb4581f66e7">More...</a><br /></td></tr>
 <tr class="separator:ab902dba90673edace2259eb4581f66e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab492f7f8e84b92ad6e8d665d6280c38e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ab492f7f8e84b92ad6e8d665d6280c38e">setCoveredValue</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_lhs, const int a_comp, const Real a_value) noexcept</td></tr>
+<tr class="memdesc:ab492f7f8e84b92ad6e8d665d6280c38e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value on covered faces.  <a href="classDataOps.html#ab492f7f8e84b92ad6e8d665d6280c38e">More...</a><br /></td></tr>
+<tr class="separator:ab492f7f8e84b92ad6e8d665d6280c38e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41e0af27185316ffa0f4813cae7b06d7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a41e0af27185316ffa0f4813cae7b06d7">setCoveredValue</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_lhs, const int a_comp, const Real a_value) noexcept</td></tr>
+<tr class="memdesc:a41e0af27185316ffa0f4813cae7b06d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value on covered faces.  <a href="classDataOps.html#a41e0af27185316ffa0f4813cae7b06d7">More...</a><br /></td></tr>
+<tr class="separator:a41e0af27185316ffa0f4813cae7b06d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3eb0264c944ae7e5e1673e843aef2480"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a3eb0264c944ae7e5e1673e843aef2480">setCoveredValue</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_lhs, const Real a_value) noexcept</td></tr>
+<tr class="memdesc:a3eb0264c944ae7e5e1673e843aef2480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set all covered face values.  <a href="classDataOps.html#a3eb0264c944ae7e5e1673e843aef2480">More...</a><br /></td></tr>
+<tr class="separator:a3eb0264c944ae7e5e1673e843aef2480"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a288f6d23b4175eddbddc43f1c8e57b83"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a288f6d23b4175eddbddc43f1c8e57b83">setCoveredValue</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_lhs, const Real a_value) noexcept</td></tr>
+<tr class="memdesc:a288f6d23b4175eddbddc43f1c8e57b83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set all covered face values.  <a href="classDataOps.html#a288f6d23b4175eddbddc43f1c8e57b83">More...</a><br /></td></tr>
+<tr class="separator:a288f6d23b4175eddbddc43f1c8e57b83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a575d4b28f80135f82786b19d8011faee"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a575d4b28f80135f82786b19d8011faee">setInvalidValue</a> (<a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_lhs, const Vector&lt; int &gt; &amp;a_refRat, const Real a_value)</td></tr>
 <tr class="memdesc:a575d4b28f80135f82786b19d8011faee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in cells that are covered by a finer grid.  <a href="classDataOps.html#a575d4b28f80135f82786b19d8011faee">More...</a><br /></td></tr>
 <tr class="separator:a575d4b28f80135f82786b19d8011faee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -437,12 +458,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ac245ba9f041399abc500abc70ed252a1"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#ac245ba9f041399abc500abc70ed252a1">setValue</a> (<a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;a_lhs, const Real &amp;a_value)</td></tr>
 <tr class="memdesc:ac245ba9f041399abc500abc70ed252a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in data.  <a href="classDataOps.html#ac245ba9f041399abc500abc70ed252a1">More...</a><br /></td></tr>
 <tr class="separator:ac245ba9f041399abc500abc70ed252a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb0d43ba9750041a999eb649b7f3aba8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#adb0d43ba9750041a999eb649b7f3aba8">setValue</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const Real &amp;a_value)</td></tr>
-<tr class="memdesc:adb0d43ba9750041a999eb649b7f3aba8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in data.  <a href="classDataOps.html#adb0d43ba9750041a999eb649b7f3aba8">More...</a><br /></td></tr>
-<tr class="separator:adb0d43ba9750041a999eb649b7f3aba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11e2d55727161e4430e3de6a5ecc3275"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a11e2d55727161e4430e3de6a5ecc3275">setValue</a> (LevelData&lt; MFCellFAB &gt; &amp;a_lhs, const Real &amp;a_value)</td></tr>
-<tr class="memdesc:a11e2d55727161e4430e3de6a5ecc3275"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in data.  <a href="classDataOps.html#a11e2d55727161e4430e3de6a5ecc3275">More...</a><br /></td></tr>
-<tr class="separator:a11e2d55727161e4430e3de6a5ecc3275"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dced65c752c77dbadb3a1ace6f780ac"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a7dced65c752c77dbadb3a1ace6f780ac">setValue</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_lhs, const Real &amp;a_value) noexcept</td></tr>
+<tr class="memdesc:a7dced65c752c77dbadb3a1ace6f780ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in data.  <a href="classDataOps.html#a7dced65c752c77dbadb3a1ace6f780ac">More...</a><br /></td></tr>
+<tr class="separator:a7dced65c752c77dbadb3a1ace6f780ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97ebd1f317407ce1def19e878dacfaba"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#a97ebd1f317407ce1def19e878dacfaba">setValue</a> (LevelData&lt; MFCellFAB &gt; &amp;a_lhs, const Real &amp;a_value) noexcept</td></tr>
+<tr class="memdesc:a97ebd1f317407ce1def19e878dacfaba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in data.  <a href="classDataOps.html#a97ebd1f317407ce1def19e878dacfaba">More...</a><br /></td></tr>
+<tr class="separator:a97ebd1f317407ce1def19e878dacfaba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf67a93627ccd787e3bfc7529084a70c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDataOps.html#acf67a93627ccd787e3bfc7529084a70c">setValue</a> (<a class="el" href="classEBAMRData.html">MFAMRFluxData</a> &amp;a_lhs, const Real &amp;a_value)</td></tr>
 <tr class="memdesc:acf67a93627ccd787e3bfc7529084a70c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set value in data.  <a href="classDataOps.html#acf67a93627ccd787e3bfc7529084a70c">More...</a><br /></td></tr>
 <tr class="separator:acf67a93627ccd787e3bfc7529084a70c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -995,6 +1016,72 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Only valid cells are filled (not ghost cells) </dd></dl>
+
+</div>
+</div>
+<a id="affeaff7994a57f6d0c08aeb47f546b3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affeaff7994a57f6d0c08aeb47f546b3d">&#9670;&nbsp;</a></span>axby()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::axby </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_b</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compute lhs = a * x + b * y. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_lhs</td><td>Result </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_x</td><td>First FAB </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_y</td><td>Second FAB </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_a</td><td>Scaling factor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_b</td><td>Scaling factor </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2336,8 +2423,186 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
+<a id="af3a4f574c3c54492d3a91a584d1cc132"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3a4f574c3c54492d3a91a584d1cc132">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[1/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::getMaxMin </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get maximum and minimum value of specified component. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_max</td><td>Maximum value </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_min</td><td>Minium value </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Cell-centered data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This does the calculation over all levels, including grids that is covered by other grids. </dd></dl>
+
+</div>
+</div>
+<a id="a058a124c4f611c433b738f62c838fa2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a058a124c4f611c433b738f62c838fa2e">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[2/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::getMaxMin </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get maximum and minimum value of specified component. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_max</td><td>Maximum value </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_min</td><td>Minium value </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Cell-centered data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac4ecc5b4b1336f1c3647a9fdd1536d38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4ecc5b4b1336f1c3647a9fdd1536d38">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[3/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::getMaxMin </td>
+          <td>(</td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Real &amp;&#160;</td>
+          <td class="paramname"><em>a_min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get maximum and minimum value of specified component. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_max</td><td>Maximum value </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_min</td><td>Minium value </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Cell-centered data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a5de2e0bae557d084310a1991f183d339"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5de2e0bae557d084310a1991f183d339">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5de2e0bae557d084310a1991f183d339">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[4/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2396,67 +2661,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ac9670a14cbaddb9258b7b7740e152d11"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac9670a14cbaddb9258b7b7740e152d11">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void DataOps::getMaxMin </td>
-          <td>(</td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>max</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Real &amp;&#160;</td>
-          <td class="paramname"><em>min</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_comp</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get maximum and minimum value of specified component. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_max</td><td>Maximum value </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_min</td><td>Minium value </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Cell-centered data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a37af20b672ebecacc0bfd111ce11aadb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a37af20b672ebecacc0bfd111ce11aadb">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a37af20b672ebecacc0bfd111ce11aadb">&#9670;&nbsp;</a></span>getMaxMin() <span class="overload">[5/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2718,8 +2924,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a286804b303d4c74fdcb79ea20522b745"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a286804b303d4c74fdcb79ea20522b745">&#9670;&nbsp;</a></span>incr() <span class="overload">[1/15]</span></h2>
+<a id="ab5a22bfb52b7a1e55a4c2744e8612020"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5a22bfb52b7a1e55a4c2744e8612020">&#9670;&nbsp;</a></span>incr() <span class="overload">[1/15]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2753,7 +2959,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3290,8 +3496,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="acbd55a67f0ab7f80a053c71dffed1413"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acbd55a67f0ab7f80a053c71dffed1413">&#9670;&nbsp;</a></span>incr() <span class="overload">[12/15]</span></h2>
+<a id="a112afd863e01f07c9bf71aef5f8932b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a112afd863e01f07c9bf71aef5f8932b4">&#9670;&nbsp;</a></span>incr() <span class="overload">[12/15]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3325,7 +3531,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3394,8 +3600,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ad378bfb45533d3cff03d5f38d0175286"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad378bfb45533d3cff03d5f38d0175286">&#9670;&nbsp;</a></span>incr() <span class="overload">[14/15]</span></h2>
+<a id="aad886916d0e943b6bbdf99f8e67b19fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad886916d0e943b6bbdf99f8e67b19fd">&#9670;&nbsp;</a></span>incr() <span class="overload">[14/15]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3429,7 +3635,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3446,8 +3652,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a77d3d9b487c6182b3941fcab221e727f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a77d3d9b487c6182b3941fcab221e727f">&#9670;&nbsp;</a></span>incr() <span class="overload">[15/15]</span></h2>
+<a id="a92454e47ebc4876caec80e40743d469c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92454e47ebc4876caec80e40743d469c">&#9670;&nbsp;</a></span>incr() <span class="overload">[15/15]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3481,7 +3687,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3603,8 +3809,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a1139f7cd961f218905b627acc8a19e2e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1139f7cd961f218905b627acc8a19e2e">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[1/4]</span></h2>
+<a id="a7e95d1a5a251b178adf9f508f4ba1077"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e95d1a5a251b178adf9f508f4ba1077">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3622,7 +3828,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3637,8 +3843,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a2937f528899e9f13ec2244e366514c1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2937f528899e9f13ec2244e366514c1e">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[2/4]</span></h2>
+<a id="a3007f0a487f4185d940f1d38dfcc2d5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3007f0a487f4185d940f1d38dfcc2d5e">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3656,7 +3862,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3671,8 +3877,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a0b4e399aab0ca657b6c746eaf99807f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b4e399aab0ca657b6c746eaf99807f8">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[3/4]</span></h2>
+<a id="abc7a4da6d97a159097dd9e532d4dd13f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc7a4da6d97a159097dd9e532d4dd13f">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3690,7 +3896,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3705,8 +3911,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a8cb248476bdb7363b0220cfc8e7e69c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8cb248476bdb7363b0220cfc8e7e69c5">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[4/4]</span></h2>
+<a id="a4afbcfffd8d3def566feaaa58e492b44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4afbcfffd8d3def566feaaa58e492b44">&#9670;&nbsp;</a></span>kappaScale() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3724,7 +3930,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -4726,8 +4932,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a73881aa89a4288cd0120292991a005f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a73881aa89a4288cd0120292991a005f2">&#9670;&nbsp;</a></span>scale() <span class="overload">[1/10]</span></h2>
+<a id="ab1328f5d8a1b9588c9f97bdc1ef2ade3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1328f5d8a1b9588c9f97bdc1ef2ade3">&#9670;&nbsp;</a></span>scale() <span class="overload">[1/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4755,7 +4961,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -4906,8 +5112,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="afddaf35e97f5d99bdbeea6312944e91b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afddaf35e97f5d99bdbeea6312944e91b">&#9670;&nbsp;</a></span>scale() <span class="overload">[5/10]</span></h2>
+<a id="a9cda67e3e8f6dd29581ede7b781c48c7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cda67e3e8f6dd29581ede7b781c48c7">&#9670;&nbsp;</a></span>scale() <span class="overload">[5/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4935,7 +5141,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -4996,8 +5202,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="ae60cd8dc87c3127c81c5ec99aca333a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae60cd8dc87c3127c81c5ec99aca333a8">&#9670;&nbsp;</a></span>scale() <span class="overload">[7/10]</span></h2>
+<a id="a4b6217b262947e00b860602305cf6a76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b6217b262947e00b860602305cf6a76">&#9670;&nbsp;</a></span>scale() <span class="overload">[7/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5025,7 +5231,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -5086,8 +5292,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="accd8d88fb7786769bbdd16c39ee6637a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accd8d88fb7786769bbdd16c39ee6637a">&#9670;&nbsp;</a></span>scale() <span class="overload">[9/10]</span></h2>
+<a id="a0526ab53a5a7c72d202ac38e8ba3d1f0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0526ab53a5a7c72d202ac38e8ba3d1f0">&#9670;&nbsp;</a></span>scale() <span class="overload">[9/10]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5115,7 +5321,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -5177,7 +5383,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="a987ece8d8671b9165e74c1e204889061"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a987ece8d8671b9165e74c1e204889061">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a987ece8d8671b9165e74c1e204889061">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[1/8]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5220,8 +5426,8 @@ template&lt;typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Input/output data. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[ino]</td><td>a_comp Component to set </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[ino]</td><td>a_value Value to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Value to set </td></tr>
   </table>
   </dd>
 </dl>
@@ -5229,7 +5435,7 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <a id="aa432e87a368830570a43a296990c74c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa432e87a368830570a43a296990c74c0">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aa432e87a368830570a43a296990c74c0">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[2/8]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5241,6 +5447,200 @@ template&lt;typename T &gt; </div>
           <td class="memname">void DataOps::setCoveredValue </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Version of setCoveredValue which does all components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Value in covered grid cells. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab492f7f8e84b92ad6e8d665d6280c38e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab492f7f8e84b92ad6e8d665d6280c38e">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[3/8]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::setCoveredValue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set value on covered faces. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Input/output data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Value to set </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3eb0264c944ae7e5e1673e843aef2480"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3eb0264c944ae7e5e1673e843aef2480">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[4/8]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::setCoveredValue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set all covered face values. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Value in covered grid cells. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a12c8d0741771e046f92dd12d1171abbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a12c8d0741771e046f92dd12d1171abbe">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[5/8]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::setCoveredValue </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_comp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Real&#160;</td>
+          <td class="paramname"><em>a_value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set value in covered cells. Does specified component. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Input/output data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Value to set </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab902dba90673edace2259eb4581f66e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab902dba90673edace2259eb4581f66e7">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[6/8]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DataOps::setCoveredValue </td>
+          <td>(</td>
+          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_lhs</em>, </td>
         </tr>
         <tr>
@@ -5273,8 +5673,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a12c8d0741771e046f92dd12d1171abbe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12c8d0741771e046f92dd12d1171abbe">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[3/4]</span></h2>
+<a id="a41e0af27185316ffa0f4813cae7b06d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41e0af27185316ffa0f4813cae7b06d7">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[7/8]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5285,7 +5685,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="memname">void DataOps::setCoveredValue </td>
           <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_lhs</em>, </td>
         </tr>
         <tr>
@@ -5308,25 +5708,25 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Set value in covered cells. Does specified component. </p>
+<p>Set value on covered faces. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Input/output data. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[ino]</td><td>a_comp Component to set </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">[ino]</td><td>a_value Value to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_comp</td><td>Component to set </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_value</td><td>Value to set </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ab902dba90673edace2259eb4581f66e7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab902dba90673edace2259eb4581f66e7">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[4/4]</span></h2>
+<a id="a288f6d23b4175eddbddc43f1c8e57b83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a288f6d23b4175eddbddc43f1c8e57b83">&#9670;&nbsp;</a></span>setCoveredValue() <span class="overload">[8/8]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -5337,7 +5737,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="memname">void DataOps::setCoveredValue </td>
           <td>(</td>
-          <td class="paramtype">LevelData&lt; EBCellFAB &gt; &amp;&#160;</td>
+          <td class="paramtype">LevelData&lt; EBFluxFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_lhs</em>, </td>
         </tr>
         <tr>
@@ -5354,12 +5754,12 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Version of setCoveredValue which does all component. </p>
+<p>Set all covered face values. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_lhs</td><td>Data </td></tr>
@@ -6453,8 +6853,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a11e2d55727161e4430e3de6a5ecc3275"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a11e2d55727161e4430e3de6a5ecc3275">&#9670;&nbsp;</a></span>setValue() <span class="overload">[20/27]</span></h2>
+<a id="a97ebd1f317407ce1def19e878dacfaba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97ebd1f317407ce1def19e878dacfaba">&#9670;&nbsp;</a></span>setValue() <span class="overload">[20/27]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6482,7 +6882,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -6657,8 +7057,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="adb0d43ba9750041a999eb649b7f3aba8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adb0d43ba9750041a999eb649b7f3aba8">&#9670;&nbsp;</a></span>setValue() <span class="overload">[24/27]</span></h2>
+<a id="a7dced65c752c77dbadb3a1ace6f780ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7dced65c752c77dbadb3a1ace6f780ac">&#9670;&nbsp;</a></span>setValue() <span class="overload">[24/27]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6686,7 +7086,7 @@ template&lt;typename T &gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

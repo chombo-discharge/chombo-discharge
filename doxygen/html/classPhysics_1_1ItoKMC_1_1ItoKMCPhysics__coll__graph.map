@@ -1,8 +1,6 @@
 <map id="Physics::ItoKMC::ItoKMCPhysics" name="Physics::ItoKMC::ItoKMCPhysics">
-<area shape="rect" id="node1" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="843,65,1073,92"/>
-<area shape="rect" id="node2" href="$classKMCDualState.html" title=" " alt="" coords="457,7,627,33"/>
-<area shape="rect" id="node3" href="$classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="23,7,178,33"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="427,58,657,99"/>
-<area shape="rect" id="node5" href="$classKMCSolver.html" title=" " alt="" coords="443,123,641,165"/>
-<area shape="rect" id="node6" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="5,131,196,157"/>
+<area shape="rect" id="node1" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="107,213,337,240"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,109,236,151"/>
+<area shape="rect" id="node3" href="$classKMCSolver.html" title=" " alt="" coords="260,109,459,151"/>
+<area shape="rect" id="node4" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="264,5,455,32"/>
 </map>

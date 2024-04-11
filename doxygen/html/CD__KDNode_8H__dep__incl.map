@@ -1,23 +1,22 @@
 <map id="Source/Particle/CD_KDNode.H" name="Source/Particle/CD_KDNode.H">
-<area shape="rect" id="node1" title="Namespace containing various particle management utilities." alt="" coords="1795,5,1936,47"/>
-<area shape="rect" id="node2" href="$CD__KDNodeImplem_8H.html" title="Implementation of CD_KDNode.H." alt="" coords="1792,95,1939,136"/>
-<area shape="rect" id="node3" href="$CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="1963,95,2141,136"/>
-<area shape="rect" id="node4" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="287,288,433,329"/>
-<area shape="rect" id="node5" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="681,191,826,233"/>
-<area shape="rect" id="node24" href="$CD__ParticleManagementImplem_8H.html" title="Implementation of CD_ParticleManagement.H." alt="" coords="1939,191,2165,233"/>
-<area shape="rect" id="node25" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="2189,191,2373,233"/>
-<area shape="rect" id="node26" href="$CD__BrownianWalkerSpecies_8cpp.html" title="Implementation of CD_BrownianWalkerSpecies.H." alt="" coords="2397,191,2632,233"/>
-<area shape="rect" id="node27" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="2655,184,2854,240"/>
-<area shape="rect" id="node28" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1217,191,1465,233"/>
-<area shape="rect" id="node32" href="$CD__ItoKMCAir3LFA_8cpp.html" title="Implementation of CD_ItoKMCAir3LFA.H." alt="" coords="1755,474,2029,515"/>
-<area shape="rect" id="node34" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1473,474,1714,515"/>
-<area shape="rect" id="node35" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="2879,191,3132,233"/>
-<area shape="rect" id="node6" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="457,288,602,329"/>
+<area shape="rect" id="node1" title="Namespace containing various particle management utilities." alt="" coords="1649,5,1791,47"/>
+<area shape="rect" id="node2" href="$CD__KDNodeImplem_8H.html" title="Implementation of CD_KDNode.H." alt="" coords="1647,95,1793,136"/>
+<area shape="rect" id="node3" href="$CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="1818,95,1995,136"/>
+<area shape="rect" id="node4" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="145,288,290,329"/>
+<area shape="rect" id="node5" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="607,191,753,233"/>
+<area shape="rect" id="node24" href="$CD__ParticleManagementImplem_8H.html" title="Implementation of CD_ParticleManagement.H." alt="" coords="1793,191,2020,233"/>
+<area shape="rect" id="node25" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="2044,191,2228,233"/>
+<area shape="rect" id="node26" href="$CD__BrownianWalkerSpecies_8cpp.html" title="Implementation of CD_BrownianWalkerSpecies.H." alt="" coords="2252,191,2487,233"/>
+<area shape="rect" id="node27" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="2510,184,2709,240"/>
+<area shape="rect" id="node28" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1204,191,1452,233"/>
+<area shape="rect" id="node32" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1559,474,1801,515"/>
+<area shape="rect" id="node33" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="2733,191,2987,233"/>
+<area shape="rect" id="node6" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="314,288,459,329"/>
 <area shape="rect" id="node10" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="419,377,639,419"/>
-<area shape="rect" id="node12" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="663,385,926,411"/>
-<area shape="rect" id="node22" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="729,288,903,329"/>
-<area shape="rect" id="node23" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="928,288,1141,329"/>
-<area shape="rect" id="node7" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="99,377,245,419"/>
+<area shape="rect" id="node12" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="853,385,1115,411"/>
+<area shape="rect" id="node22" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="483,288,658,329"/>
+<area shape="rect" id="node23" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="683,288,896,329"/>
+<area shape="rect" id="node7" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="65,377,210,419"/>
 <area shape="rect" id="node9" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="211,474,389,515"/>
 <area shape="rect" id="node8" href="$CD__ItoIteratorImplem_8H.html" title="Implementation of CD_ItoIterator.H." alt="" coords="5,474,187,515"/>
 <area shape="rect" id="node11" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="413,474,646,515"/>
@@ -30,9 +29,8 @@
 <area shape="rect" id="node17" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="1713,675,1914,731"/>
 <area shape="rect" id="node18" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="1692,779,1935,835"/>
 <area shape="rect" id="node21" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="655,571,903,627"/>
-<area shape="rect" id="node29" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1210,295,1473,322"/>
-<area shape="rect" id="node30" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1539,385,1813,411"/>
-<area shape="rect" id="node31" href="$CD__ItoKMCAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="1254,377,1514,419"/>
-<area shape="rect" id="node33" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1002,377,1230,419"/>
-<area shape="rect" id="node36" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="2904,288,3107,329"/>
+<area shape="rect" id="node29" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1197,295,1459,322"/>
+<area shape="rect" id="node30" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1191,385,1465,411"/>
+<area shape="rect" id="node31" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1490,377,1718,419"/>
+<area shape="rect" id="node34" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="2759,288,2961,329"/>
 </map>

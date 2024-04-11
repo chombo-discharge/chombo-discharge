@@ -193,9 +193,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a4a8115491280db3b71ab7a8110b1cad4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a4a8115491280db3b71ab7a8110b1cad4">applyOp</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, bool a_homogeneousPhysBc) override final</td></tr>
 <tr class="memdesc:a4a8115491280db3b71ab7a8110b1cad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator.  <a href="classMFHelmholtzOp.html#a4a8115491280db3b71ab7a8110b1cad4">More...</a><br /></td></tr>
 <tr class="separator:a4a8115491280db3b71ab7a8110b1cad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e253d2c93052c6b83d32e7e16725bfb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a7e253d2c93052c6b83d32e7e16725bfb">computeOperatorLoads</a> (LevelData&lt; MFCellFAB &gt; &amp;a_phi, TimedDataIterator &amp;a_iterator)</td></tr>
-<tr class="memdesc:a7e253d2c93052c6b83d32e7e16725bfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time the applyOp routine.  <a href="classMFHelmholtzOp.html#a7e253d2c93052c6b83d32e7e16725bfb">More...</a><br /></td></tr>
-<tr class="separator:a7e253d2c93052c6b83d32e7e16725bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8438bf1cb913b3c1597aaa620d917d5"><td class="memTemplParams" colspan="2">template&lt;typename Duration  = std::chrono::microseconds&gt; </td></tr>
+<tr class="memitem:ac8438bf1cb913b3c1597aaa620d917d5"><td class="memTemplItemLeft" align="right" valign="top">Vector&lt; long long &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#ac8438bf1cb913b3c1597aaa620d917d5">computeOperatorLoads</a> (LevelData&lt; MFCellFAB &gt; &amp;a_phi, const int a_numApply) noexcept</td></tr>
+<tr class="memdesc:ac8438bf1cb913b3c1597aaa620d917d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time the applyOp routine. Template parameter is std::chrono duration. E.g. std::chrono::microseconds.  <a href="classMFHelmholtzOp.html#ac8438bf1cb913b3c1597aaa620d917d5">More...</a><br /></td></tr>
+<tr class="separator:ac8438bf1cb913b3c1597aaa620d917d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40ac4a278f63894b8be55a2987ef610c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a40ac4a278f63894b8be55a2987ef610c">relax</a> (LevelData&lt; MFCellFAB &gt; &amp;a_correction, const LevelData&lt; MFCellFAB &gt; &amp;a_residual, int a_iterations) override final</td></tr>
 <tr class="memdesc:a40ac4a278f63894b8be55a2987ef610c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relaxation method. This does smoothing for the system L(correction) = residual.  <a href="classMFHelmholtzOp.html#a40ac4a278f63894b8be55a2987ef610c">More...</a><br /></td></tr>
 <tr class="separator:a40ac4a278f63894b8be55a2987ef610c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1615,14 +1616,19 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a7e253d2c93052c6b83d32e7e16725bfb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7e253d2c93052c6b83d32e7e16725bfb">&#9670;&nbsp;</a></span>computeOperatorLoads()</h2>
+<a id="ac8438bf1cb913b3c1597aaa620d917d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8438bf1cb913b3c1597aaa620d917d5">&#9670;&nbsp;</a></span>computeOperatorLoads()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Duration &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void MFHelmholtzOp::computeOperatorLoads </td>
+          <td class="memname">Vector&lt; long long &gt; MFHelmholtzOp::computeOperatorLoads </td>
           <td>(</td>
           <td class="paramtype">LevelData&lt; MFCellFAB &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
@@ -1630,8 +1636,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">TimedDataIterator &amp;&#160;</td>
-          <td class="paramname"><em>a_iterator</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_numApply</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1639,15 +1645,22 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Time the applyOp routine. </p>
+<p>Time the applyOp routine. Template parameter is std::chrono duration. E.g. std::chrono::microseconds. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_timeDit</td><td>Data iterator for computing the time of applyOp </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Dummy cell-centered data. must have the correct number of ghost cells </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_numApply</td><td>Number of times we apply the operator. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>List of execution times in microseconds, ordered along the input DBLs boxArray() </dd></dl>
 
 </div>
 </div>
@@ -2772,6 +2785,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>Source/Elliptic/<a class="el" href="CD__MFHelmholtzOp_8H_source.html">CD_MFHelmholtzOp.H</a></li>
 <li>Source/Elliptic/<a class="el" href="CD__MFHelmholtzOp_8cpp.html">CD_MFHelmholtzOp.cpp</a></li>
+<li>Source/Elliptic/<a class="el" href="CD__MFHelmholtzOpImplem_8H_source.html">CD_MFHelmholtzOpImplem.H</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

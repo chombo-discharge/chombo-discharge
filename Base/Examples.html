@@ -51,7 +51,10 @@
 <li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#positive-streamer-in-air">Positive streamer in air</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Testing.html">Code testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Acknowledgements.html">Acknowledgements</a></li>
 </ul>
@@ -146,8 +149,40 @@
              
   <section id="examples">
 <span id="chap-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> comes with many examples for running various types of simulations.
-These are organized by application type (e.g. purely electrostatic, inception model, plasma simulation etc) in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples</span></code>.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, applications are set up so that they use the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code and one <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module.
+These are normally set up through Python interfaces accompanying each module.
+Several example applications are given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples</span></code>, which are organized by example type (e.g., plasma simulation, electrostatics, radiative transfer, etc).
+If <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (<code class="file docutils literal notranslate"><span class="pre">program.cpp</span></code>) and compiling it:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>make -s -j4 program
+</pre></div>
+</div>
+<p>To see how these programs are run, see <a class="reference internal" href="Control.html#chap-control"><span class="std std-ref">Controlling chombo-discharge</span></a>.</p>
+<section id="positive-streamer-in-air">
+<h2>Positive streamer in air<a class="headerlink" href="#positive-streamer-in-air" title="Permalink to this heading"></a></h2>
+<p>To run one of the applications that use a particular <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module, we will run a simulation of a positive streamer (in air).</p>
+<p>The application code is located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir</span></code> and it uses the convection-diffusion-reaction plasma module (located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma</span></code>).</p>
+<p>First, compile the application by</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
+make -s -j4 DIM=2 program
+</pre></div>
+</div>
+<p>This will provide an executable named <code class="docutils literal notranslate"><span class="pre">program2d.&lt;bunch_of_options&gt;.ex</span></code>.
+If one compiles for 3D, i.e. <code class="docutils literal notranslate"><span class="pre">DIM=3</span></code>, the executable will be named <code class="docutils literal notranslate"><span class="pre">program3d.&lt;bunch_of_options&gt;.ex</span></code>.</p>
+<p>To run the application do:</p>
+<p><strong>Serial build</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>./program2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
+</pre></div>
+</div>
+<p><strong>Parallel build</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 program2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
+</pre></div>
+</div>
+<p>If the user also compiled with HDF5, plot files will appear in the subfolder <code class="docutils literal notranslate"><span class="pre">plt</span></code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>One can track the simulation progress through the <code class="file docutils literal notranslate"><span class="pre">pout.*</span></code> files, see <a class="reference internal" href="Control.html#chap-pout"><span class="std std-ref">Parallel processor verbosity</span></a>.</p>
+</div>
+</section>
 </section>
 
 

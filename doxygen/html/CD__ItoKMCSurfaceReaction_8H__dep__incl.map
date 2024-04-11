@@ -1,25 +1,23 @@
 <map id="Physics/ItoKMC/CD_ItoKMCSurfaceReaction.H" name="Physics/ItoKMC/CD_ItoKMCSurfaceReaction.H">
-<area shape="rect" id="node1" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="864,5,1112,47"/>
-<area shape="rect" id="node2" href="$CD__ItoKMCSurfaceReactionImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="864,95,1112,136"/>
-<area shape="rect" id="node3" href="$CD__ItoKMCSurfaceReactions_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="1136,95,1384,136"/>
-<area shape="rect" id="node4" href="$CD__ItoKMCSurfaceReactionSet_8H.html" title="Declaration of a class that encapsulates a set of secondary emission reactions." alt="" coords="864,184,1112,225"/>
-<area shape="rect" id="node23" href="$CD__ItoKMCSurfaceReactionsImplem_8H.html" title="Implementation of CD_ItoKMCSurfaceReactions.H." alt="" coords="1136,184,1384,225"/>
-<area shape="rect" id="node5" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="577,281,839,307"/>
-<area shape="rect" id="node22" href="$CD__ItoKMCSurfaceReactionSetImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="864,273,1112,315"/>
+<area shape="rect" id="node1" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="724,5,972,47"/>
+<area shape="rect" id="node2" href="$CD__ItoKMCSurfaceReactionImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="724,95,972,136"/>
+<area shape="rect" id="node3" href="$CD__ItoKMCSurfaceReactions_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="996,95,1244,136"/>
+<area shape="rect" id="node4" href="$CD__ItoKMCSurfaceReactionSet_8H.html" title="Declaration of a class that encapsulates a set of secondary emission reactions." alt="" coords="724,184,972,225"/>
+<area shape="rect" id="node21" href="$CD__ItoKMCSurfaceReactionsImplem_8H.html" title="Implementation of CD_ItoKMCSurfaceReactions.H." alt="" coords="996,184,1244,225"/>
+<area shape="rect" id="node5" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="437,281,699,307"/>
+<area shape="rect" id="node20" href="$CD__ItoKMCSurfaceReactionSetImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="724,273,972,315"/>
 <area shape="rect" id="node6" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="5,370,280,397"/>
 <area shape="rect" id="node7" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="304,363,552,404"/>
 <area shape="rect" id="node8" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="577,370,839,397"/>
-<area shape="rect" id="node10" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="750,467,1005,493"/>
-<area shape="rect" id="node18" href="$CD__ItoKMCAir3LFA_8H.html" title="Ito plasma three&#45;species model for air." alt="" coords="975,363,1235,404"/>
-<area shape="rect" id="node20" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1326,363,1554,404"/>
-<area shape="rect" id="node9" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="235,459,485,501"/>
-<area shape="rect" id="node16" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="509,452,725,508"/>
-<area shape="rect" id="node11" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1023,563,1254,605"/>
-<area shape="rect" id="node15" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="756,563,999,605"/>
-<area shape="rect" id="node12" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="1023,667,1254,709"/>
-<area shape="rect" id="node13" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="1278,660,1479,716"/>
-<area shape="rect" id="node14" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="1257,764,1500,820"/>
-<area shape="rect" id="node17" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="484,556,732,612"/>
-<area shape="rect" id="node19" href="$CD__ItoKMCAir3LFA_8cpp.html" title="Implementation of CD_ItoKMCAir3LFA.H." alt="" coords="1029,459,1302,501"/>
-<area shape="rect" id="node21" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1326,459,1567,501"/>
+<area shape="rect" id="node10" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="830,467,1085,493"/>
+<area shape="rect" id="node18" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1055,363,1283,404"/>
+<area shape="rect" id="node9" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="557,459,806,501"/>
+<area shape="rect" id="node16" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="316,452,532,508"/>
+<area shape="rect" id="node11" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1103,563,1334,605"/>
+<area shape="rect" id="node15" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="836,563,1079,605"/>
+<area shape="rect" id="node12" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="1103,667,1334,709"/>
+<area shape="rect" id="node13" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="1358,660,1559,716"/>
+<area shape="rect" id="node14" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="1337,764,1580,820"/>
+<area shape="rect" id="node17" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="300,556,548,612"/>
+<area shape="rect" id="node19" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1109,459,1350,501"/>
 </map>

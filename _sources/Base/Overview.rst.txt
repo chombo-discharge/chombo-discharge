@@ -33,7 +33,7 @@ Key functionalities are provided in :numref:`Tab:KeyCapabilities`.
    * - Grids
      - **Fundamentally Cartesian**.
    * - Parallelized?
-     - **Yes**, using flat MPI.
+     - **Yes**, using OpenMP, MPI, or MPI+OpenMP.
    * - Load balancing?
      - **Yes**, with support for individual particle and fluid load balancing. 
    * - Complex geometries?
@@ -60,3 +60,25 @@ This includes much faster grid generation, support for polygon surfaces, and man
 
 ``chombo-discharge`` supports both fluid and particle methods, and can use multiply parallel distributed grids (see :ref:`Chap:Realm`) for individually load balancing particle and fluid kernels. 
 Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into ``chombo-discharge`` and still use the embedded boundary formalism, ``chombo-discharge`` also provides several physics modules for describing various types of problems.
+
+Organization
+------------
+
+The ``chombo-discharge`` source files are organized as follows:
+
+.. list-table:: Code organization.
+   :widths: 10 50
+   :header-rows: 1
+
+   * - Folder
+     - Explanation
+   * - :file:`Source`
+     -  Source files for the AMR core, solvers, and various utilities.
+   * - :file:`Physics`
+     - Various implementations that can run the ``chombo-discharge`` source code.
+   * - :file:`Geometries`
+     - Various geometries.
+   * - :file:`Submodules`
+     - Git submodule dependencies.
+   * - :file:`Exec`
+     - Various executable applications. 

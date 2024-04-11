@@ -697,158 +697,164 @@ $(function() {
 <div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160; </div>
 <div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= m_amr-&gt;getFinestLevel(); lvl++) {</div>
 <div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl = m_amr-&gt;getGrids(m_realm)[lvl];</div>
-<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;    <span class="keyword">const</span> Real               dx  = m_amr-&gt;getDx()[lvl];</div>
-<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160; </div>
-<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = m_particles[lvl][dit()].listItems();</div>
+<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;    <span class="keyword">const</span> DataIterator&amp;      dit = dbl.dataIterator();</div>
+<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;    <span class="keyword">const</span> Real               dx  = m_amr-&gt;getDx()[lvl];</div>
+<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160; </div>
+<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
 <div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160; </div>
-<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
-<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;        <span class="keyword">const</span> RealVect&amp; v = lit().velocity();</div>
-<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160; </div>
-<div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
-<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;          dt = <a class="code" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">std::min</a>(dt, dx / std::abs(v[dir]));</div>
-<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;        }</div>
-<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;      }</div>
-<div class="line"><a name="l00640"></a><span class="lineno">  640</span>&#160;    }</div>
-<div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;  }</div>
-<div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160; </div>
-<div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;  <span class="comment">// Get the minimum of dt over all MPI ranks.</span></div>
-<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;  dt = <a class="code" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">ParallelOps::min</a>(dt);</div>
-<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160; </div>
-<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;  <span class="keywordflow">return</span> dt;</div>
-<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;}</div>
+<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime) reduction(min : dt)</span></div>
+<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
+<div class="line"><a name="l00636"></a><span class="lineno">  636</span>&#160; </div>
+<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;      <span class="keyword">const</span> List&lt;P&gt;&amp; particles = m_particles[lvl][din].listItems();</div>
+<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160; </div>
+<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;      <span class="keywordflow">for</span> (ListIterator&lt;P&gt; lit(particles); lit.ok(); ++lit) {</div>
+<div class="line"><a name="l00640"></a><span class="lineno">  640</span>&#160;        <span class="keyword">const</span> RealVect&amp; v = lit().velocity();</div>
+<div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160; </div>
+<div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dir = 0; dir &lt; SpaceDim; dir++) {</div>
+<div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;          dt = <a class="code" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">std::min</a>(dt, dx / std::abs(v[dir]));</div>
+<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;        }</div>
+<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;      }</div>
+<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;    }</div>
+<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;  }</div>
 <div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160; </div>
-<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;<span class="keyword">inline</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;</div>
-<div class="line"><a name="l00651"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">  651</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">TracerParticleSolver&lt;P&gt;::getParticles</a>()</div>
-<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;{</div>
-<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::getParticles()&quot;</span>);</div>
-<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::getParticles()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;  }</div>
-<div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160; </div>
-<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;  <span class="keywordflow">return</span> m_particles;</div>
-<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;}</div>
-<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160; </div>
-<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;</div>
-<div class="line"><a name="l00663"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#abd88d7967b1f73a770361ff52c3d7264">  663</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">TracerParticleSolver&lt;P&gt;::getParticles</a>()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::getParticles()&quot;</span>);</div>
-<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::getParticles()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;  }</div>
-<div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160; </div>
-<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;  <span class="keywordflow">return</span> m_particles;</div>
-<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160;}</div>
-<div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160; </div>
-<div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;</div>
-<div class="line"><a name="l00675"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#ada8f31859854caafa56fca108673a0b9">  675</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#ada8f31859854caafa56fca108673a0b9">TracerParticleSolver&lt;P&gt;::getVelocityField</a>()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::getVelocityField()&quot;</span>);</div>
-<div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::getVelocityField()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;  }</div>
-<div class="line"><a name="l00681"></a><span class="lineno">  681</span>&#160; </div>
-<div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160;  <span class="keywordflow">return</span> m_velocityField;</div>
-<div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;}</div>
-<div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160; </div>
-<div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
-<div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, const Real&amp; (T::*particleScalarFunction)() const&gt;</div>
-<div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;<span class="keywordtype">void</span></div>
-<div class="line"><a name="l00688"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">  688</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">TracerParticleSolver&lt;P&gt;::depositParticles</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;              a_phi,</div>
-<div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;                                          <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;T&gt;</a>&amp; a_particles,</div>
-<div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160;                                          <span class="keyword">const</span> <a class="code" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>        a_baseDeposition,</div>
-<div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;                                          <span class="keyword">const</span> <a class="code" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>  a_coarseFineDeposition) <span class="keyword">const</span> noexcept</div>
-<div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;{</div>
-<div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::depositParticles()&quot;</span>);</div>
-<div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
-<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::depositParticles()&quot;</span> &lt;&lt; endl;</div>
-<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;  }</div>
-<div class="line"><a name="l00697"></a><span class="lineno">  697</span>&#160; </div>
-<div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;  CH_assert(a_phi[0]-&gt;nComp() == 1);</div>
-<div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160; </div>
-<div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;  <span class="comment">// I HATE it when other people do this. Yet I keep doing it.</span></div>
-<div class="line"><a name="l00701"></a><span class="lineno">  701</span>&#160;  <a class="code" href="classParticleContainer.html">ParticleContainer&lt;T&gt;</a>&amp; mutableParticles = (<a class="code" href="classParticleContainer.html">ParticleContainer&lt;T&gt;</a>&amp;)a_particles;</div>
-<div class="line"><a name="l00702"></a><span class="lineno">  702</span>&#160; </div>
-<div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160;  <span class="keywordflow">switch</span> (a_coarseFineDeposition) {</div>
-<div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;  <span class="keywordflow">case</span> CoarseFineDeposition::Interp: {</div>
-<div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160;    m_amr-&gt;depositParticles&lt;T, particleScalarFunction&gt;(a_phi,</div>
-<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;                                                       m_realm,</div>
-<div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;                                                       m_phase,</div>
-<div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160;                                                       a_particles,</div>
-<div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160;                                                       a_baseDeposition,</div>
-<div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;                                                       CoarseFineDeposition::Interp,</div>
-<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160;                                                       <span class="keyword">false</span>);</div>
-<div class="line"><a name="l00712"></a><span class="lineno">  712</span>&#160; </div>
-<div class="line"><a name="l00713"></a><span class="lineno">  713</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00714"></a><span class="lineno">  714</span>&#160;  }</div>
-<div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;  <span class="keywordflow">case</span> CoarseFineDeposition::Halo: {</div>
-<div class="line"><a name="l00716"></a><span class="lineno">  716</span>&#160; </div>
-<div class="line"><a name="l00717"></a><span class="lineno">  717</span>&#160;    <span class="comment">// Copy particles living on the mask.</span></div>
-<div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160;    <span class="keyword">const</span> <a class="code" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a>&amp; mask = m_amr-&gt;getMask(s_particle_halo, m_haloBuffer, m_realm);</div>
-<div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160; </div>
-<div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#af1d405c0e5c41ddda1d2a56802e3a6bc">copyMaskParticles</a>(mask);</div>
-<div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160; </div>
-<div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160;    m_amr-&gt;depositParticles&lt;T, particleScalarFunction&gt;(a_phi,</div>
-<div class="line"><a name="l00723"></a><span class="lineno">  723</span>&#160;                                                       m_realm,</div>
-<div class="line"><a name="l00724"></a><span class="lineno">  724</span>&#160;                                                       m_phase,</div>
-<div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160;                                                       a_particles,</div>
-<div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160;                                                       a_baseDeposition,</div>
-<div class="line"><a name="l00727"></a><span class="lineno">  727</span>&#160;                                                       CoarseFineDeposition::Halo,</div>
-<div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160;                                                       <span class="keyword">false</span>);</div>
-<div class="line"><a name="l00729"></a><span class="lineno">  729</span>&#160; </div>
-<div class="line"><a name="l00730"></a><span class="lineno">  730</span>&#160;    <span class="comment">// Clear out the mask particles.</span></div>
-<div class="line"><a name="l00731"></a><span class="lineno">  731</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#a22c32a7002bc56f9236a194d4f22cded">clearMaskParticles</a>();</div>
-<div class="line"><a name="l00732"></a><span class="lineno">  732</span>&#160; </div>
-<div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;  }</div>
-<div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160;  <span class="keywordflow">case</span> CoarseFineDeposition::HaloNGP: {</div>
-<div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;    <span class="keyword">const</span> <a class="code" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a>&amp; mask = m_amr-&gt;getMask(s_particle_halo, m_haloBuffer, m_realm);</div>
-<div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160; </div>
-<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;    <span class="comment">// Transfer particles living on the mask.</span></div>
-<div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#a79a5475c8e406261b7800890915d91c0">transferMaskParticles</a>(mask);</div>
-<div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160; </div>
-<div class="line"><a name="l00741"></a><span class="lineno">  741</span>&#160;    m_amr-&gt;depositParticles&lt;T, particleScalarFunction&gt;(a_phi,</div>
-<div class="line"><a name="l00742"></a><span class="lineno">  742</span>&#160;                                                       m_realm,</div>
-<div class="line"><a name="l00743"></a><span class="lineno">  743</span>&#160;                                                       m_phase,</div>
-<div class="line"><a name="l00744"></a><span class="lineno">  744</span>&#160;                                                       a_particles,</div>
-<div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;                                                       a_baseDeposition,</div>
-<div class="line"><a name="l00746"></a><span class="lineno">  746</span>&#160;                                                       CoarseFineDeposition::HaloNGP,</div>
-<div class="line"><a name="l00747"></a><span class="lineno">  747</span>&#160;                                                       <span class="keyword">false</span>);</div>
-<div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160; </div>
-<div class="line"><a name="l00749"></a><span class="lineno">  749</span>&#160;    <span class="comment">// Transfer them back.</span></div>
-<div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#af4ce43efcc9e2de503811d62eb27cfe2">transferParticles</a>(mutableParticles.<a class="code" href="classParticleContainer.html#ac5123d297a88d0923d00e580a1fcc52b">getMaskParticles</a>());</div>
-<div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160; </div>
-<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;  }</div>
-<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;  <span class="keywordflow">default</span>: {</div>
-<div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;TracerParticleSolver::depositParticles -- logic bust due to unsupported coarse-fine deposition&quot;</span>);</div>
-<div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160;  }</div>
-<div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;  }</div>
-<div class="line"><a name="l00758"></a><span class="lineno">  758</span>&#160;}</div>
-<div class="line"><a name="l00759"></a><span class="lineno">  759</span>&#160; </div>
-<div class="line"><a name="l00760"></a><span class="lineno">  760</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160; </div>
-<div class="line"><a name="l00762"></a><span class="lineno">  762</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;  <span class="comment">// Get the minimum of dt over all MPI ranks.</span></div>
+<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;  dt = <a class="code" href="namespaceParallelOps.html#ac16673e77130f572bc01154b59829fd2">ParallelOps::min</a>(dt);</div>
+<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160; </div>
+<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;  <span class="keywordflow">return</span> dt;</div>
+<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;}</div>
+<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160; </div>
+<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;<span class="keyword">inline</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;</div>
+<div class="line"><a name="l00657"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">  657</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">TracerParticleSolver&lt;P&gt;::getParticles</a>()</div>
+<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;{</div>
+<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::getParticles()&quot;</span>);</div>
+<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::getParticles()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;  }</div>
+<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160; </div>
+<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;  <span class="keywordflow">return</span> m_particles;</div>
+<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;}</div>
+<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160; </div>
+<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp;</div>
+<div class="line"><a name="l00669"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#abd88d7967b1f73a770361ff52c3d7264">  669</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">TracerParticleSolver&lt;P&gt;::getParticles</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::getParticles()&quot;</span>);</div>
+<div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::getParticles()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;  }</div>
+<div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160; </div>
+<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;  <span class="keywordflow">return</span> m_particles;</div>
+<div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160;}</div>
+<div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160; </div>
+<div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> <a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;</div>
+<div class="line"><a name="l00681"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#ada8f31859854caafa56fca108673a0b9">  681</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#ada8f31859854caafa56fca108673a0b9">TracerParticleSolver&lt;P&gt;::getVelocityField</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::getVelocityField()&quot;</span>);</div>
+<div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::getVelocityField()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;  }</div>
+<div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160; </div>
+<div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;  <span class="keywordflow">return</span> m_velocityField;</div>
+<div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;}</div>
+<div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160; </div>
+<div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, const Real&amp; (T::*particleScalarFunction)() const&gt;</div>
+<div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;<span class="keywordtype">void</span></div>
+<div class="line"><a name="l00694"></a><span class="lineno"><a class="line" href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">  694</a></span>&#160;<a class="code" href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">TracerParticleSolver&lt;P&gt;::depositParticles</a>(<a class="code" href="classEBAMRData.html">EBAMRCellData</a>&amp;              a_phi,</div>
+<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;                                          <span class="keyword">const</span> <a class="code" href="classParticleContainer.html">ParticleContainer&lt;T&gt;</a>&amp; a_particles,</div>
+<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;                                          <span class="keyword">const</span> <a class="code" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>        a_baseDeposition,</div>
+<div class="line"><a name="l00697"></a><span class="lineno">  697</span>&#160;                                          <span class="keyword">const</span> <a class="code" href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a>  a_coarseFineDeposition) <span class="keyword">const</span> noexcept</div>
+<div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;{</div>
+<div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160;  CH_TIME(<span class="stringliteral">&quot;TracerParticleSolver::depositParticles()&quot;</span>);</div>
+<div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;  <span class="keywordflow">if</span> (m_verbosity &gt; 5) {</div>
+<div class="line"><a name="l00701"></a><span class="lineno">  701</span>&#160;    pout() &lt;&lt; m_name + <span class="stringliteral">&quot;::depositParticles()&quot;</span> &lt;&lt; endl;</div>
+<div class="line"><a name="l00702"></a><span class="lineno">  702</span>&#160;  }</div>
+<div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160; </div>
+<div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;  CH_assert(a_phi[0]-&gt;nComp() == 1);</div>
+<div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160; </div>
+<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;  <span class="comment">// I HATE it when other people do this. Yet I keep doing it.</span></div>
+<div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;  <a class="code" href="classParticleContainer.html">ParticleContainer&lt;T&gt;</a>&amp; mutableParticles = (<a class="code" href="classParticleContainer.html">ParticleContainer&lt;T&gt;</a>&amp;)a_particles;</div>
+<div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160; </div>
+<div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160;  <span class="keywordflow">switch</span> (a_coarseFineDeposition) {</div>
+<div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;  <span class="keywordflow">case</span> CoarseFineDeposition::Interp: {</div>
+<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160;    m_amr-&gt;depositParticles&lt;T, particleScalarFunction&gt;(a_phi,</div>
+<div class="line"><a name="l00712"></a><span class="lineno">  712</span>&#160;                                                       m_realm,</div>
+<div class="line"><a name="l00713"></a><span class="lineno">  713</span>&#160;                                                       m_phase,</div>
+<div class="line"><a name="l00714"></a><span class="lineno">  714</span>&#160;                                                       a_particles,</div>
+<div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;                                                       a_baseDeposition,</div>
+<div class="line"><a name="l00716"></a><span class="lineno">  716</span>&#160;                                                       CoarseFineDeposition::Interp,</div>
+<div class="line"><a name="l00717"></a><span class="lineno">  717</span>&#160;                                                       <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160; </div>
+<div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;  }</div>
+<div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160;  <span class="keywordflow">case</span> CoarseFineDeposition::Halo: {</div>
+<div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160; </div>
+<div class="line"><a name="l00723"></a><span class="lineno">  723</span>&#160;    <span class="comment">// Copy particles living on the mask.</span></div>
+<div class="line"><a name="l00724"></a><span class="lineno">  724</span>&#160;    <span class="keyword">const</span> <a class="code" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a>&amp; mask = m_amr-&gt;getMask(s_particle_halo, m_haloBuffer, m_realm);</div>
+<div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160; </div>
+<div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#af1d405c0e5c41ddda1d2a56802e3a6bc">copyMaskParticles</a>(mask);</div>
+<div class="line"><a name="l00727"></a><span class="lineno">  727</span>&#160; </div>
+<div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160;    m_amr-&gt;depositParticles&lt;T, particleScalarFunction&gt;(a_phi,</div>
+<div class="line"><a name="l00729"></a><span class="lineno">  729</span>&#160;                                                       m_realm,</div>
+<div class="line"><a name="l00730"></a><span class="lineno">  730</span>&#160;                                                       m_phase,</div>
+<div class="line"><a name="l00731"></a><span class="lineno">  731</span>&#160;                                                       a_particles,</div>
+<div class="line"><a name="l00732"></a><span class="lineno">  732</span>&#160;                                                       a_baseDeposition,</div>
+<div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;                                                       CoarseFineDeposition::Halo,</div>
+<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;                                                       <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160; </div>
+<div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;    <span class="comment">// Clear out the mask particles.</span></div>
+<div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#a22c32a7002bc56f9236a194d4f22cded">clearMaskParticles</a>();</div>
+<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160; </div>
+<div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160;  }</div>
+<div class="line"><a name="l00741"></a><span class="lineno">  741</span>&#160;  <span class="keywordflow">case</span> CoarseFineDeposition::HaloNGP: {</div>
+<div class="line"><a name="l00742"></a><span class="lineno">  742</span>&#160;    <span class="keyword">const</span> <a class="code" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a>&amp; mask = m_amr-&gt;getMask(s_particle_halo, m_haloBuffer, m_realm);</div>
+<div class="line"><a name="l00743"></a><span class="lineno">  743</span>&#160; </div>
+<div class="line"><a name="l00744"></a><span class="lineno">  744</span>&#160;    <span class="comment">// Transfer particles living on the mask.</span></div>
+<div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#a79a5475c8e406261b7800890915d91c0">transferMaskParticles</a>(mask);</div>
+<div class="line"><a name="l00746"></a><span class="lineno">  746</span>&#160; </div>
+<div class="line"><a name="l00747"></a><span class="lineno">  747</span>&#160;    m_amr-&gt;depositParticles&lt;T, particleScalarFunction&gt;(a_phi,</div>
+<div class="line"><a name="l00748"></a><span class="lineno">  748</span>&#160;                                                       m_realm,</div>
+<div class="line"><a name="l00749"></a><span class="lineno">  749</span>&#160;                                                       m_phase,</div>
+<div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;                                                       a_particles,</div>
+<div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160;                                                       a_baseDeposition,</div>
+<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;                                                       CoarseFineDeposition::HaloNGP,</div>
+<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;                                                       <span class="keyword">false</span>);</div>
+<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160; </div>
+<div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;    <span class="comment">// Transfer them back.</span></div>
+<div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160;    mutableParticles.<a class="code" href="classParticleContainer.html#af4ce43efcc9e2de503811d62eb27cfe2">transferParticles</a>(mutableParticles.<a class="code" href="classParticleContainer.html#ac5123d297a88d0923d00e580a1fcc52b">getMaskParticles</a>());</div>
+<div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160; </div>
+<div class="line"><a name="l00758"></a><span class="lineno">  758</span>&#160;    <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00759"></a><span class="lineno">  759</span>&#160;  }</div>
+<div class="line"><a name="l00760"></a><span class="lineno">  760</span>&#160;  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;TracerParticleSolver::depositParticles -- logic bust due to unsupported coarse-fine deposition&quot;</span>);</div>
+<div class="line"><a name="l00762"></a><span class="lineno">  762</span>&#160;  }</div>
+<div class="line"><a name="l00763"></a><span class="lineno">  763</span>&#160;  }</div>
+<div class="line"><a name="l00764"></a><span class="lineno">  764</span>&#160;}</div>
+<div class="line"><a name="l00765"></a><span class="lineno">  765</span>&#160; </div>
+<div class="line"><a name="l00766"></a><span class="lineno">  766</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00767"></a><span class="lineno">  767</span>&#160; </div>
+<div class="line"><a name="l00768"></a><span class="lineno">  768</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__CoarseFineDeposition_8H_html_a187d926e3e73dcdb6fe988f652cd3a0c"><div class="ttname"><a href="CD__CoarseFineDeposition_8H.html#a187d926e3e73dcdb6fe988f652cd3a0c">CoarseFineDeposition</a></div><div class="ttdeci">CoarseFineDeposition</div><div class="ttdoc">Coarse-fine deposition types (see CD_EBAMRParticleMesh for how these are handled).</div><div class="ttdef"><b>Definition:</b> CD_CoarseFineDeposition.H:26</div></div>
 <div class="ttc" id="aCD__DepositionType_8H_html_a3e0386e57e39a4ba4ec16c3d7734a486"><div class="ttname"><a href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a></div><div class="ttdeci">DepositionType</div><div class="ttdoc">Deposition types.</div><div class="ttdef"><b>Definition:</b> CD_DepositionType.H:23</div></div>
 <div class="ttc" id="aCD__DischargeIO_8H_html"><div class="ttname"><a href="CD__DischargeIO_8H.html">CD_DischargeIO.H</a></div><div class="ttdoc">Silly, but useful functions that override standard Chombo HDF5 IO.</div></div>
 <div class="ttc" id="aCD__ParallelOps_8H_html"><div class="ttname"><a href="CD__ParallelOps_8H.html">CD_ParallelOps.H</a></div><div class="ttdoc">Agglomeration of basic MPI reductions.</div></div>
 <div class="ttc" id="aCD__Realm_8H_html_a906b67939aa45e674c3a94d40c0e5e34"><div class="ttname"><a href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a></div><div class="ttdeci">Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt; &gt;&gt; &gt; AMRMask</div><div class="ttdoc">Alias for cutting down on the typic of booleans defined over AMR grids.</div><div class="ttdef"><b>Definition:</b> CD_Realm.H:35</div></div>
 <div class="ttc" id="aCD__TracerParticleSolver_8H_html"><div class="ttname"><a href="CD__TracerParticleSolver_8H.html">CD_TracerParticleSolver.H</a></div><div class="ttdoc">Declaration of a solver class that advances tracer particles.</div></div>
-<div class="ttc" id="aclassDataOps_html_a2b3e0e1adb30575c6a4342f5bb5931de"><div class="ttname"><a href="classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de">DataOps::volumeScale</a></div><div class="ttdeci">static void volumeScale(EBAMRCellData &amp;a_data, const Vector&lt; Real &gt; &amp;a_dx)</div><div class="ttdoc">Scale data by dx^SpaceDim.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1866</div></div>
+<div class="ttc" id="aclassDataOps_html_a2b3e0e1adb30575c6a4342f5bb5931de"><div class="ttname"><a href="classDataOps.html#a2b3e0e1adb30575c6a4342f5bb5931de">DataOps::volumeScale</a></div><div class="ttdeci">static void volumeScale(EBAMRCellData &amp;a_data, const Vector&lt; Real &gt; &amp;a_dx)</div><div class="ttdoc">Scale data by dx^SpaceDim.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:2132</div></div>
 <div class="ttc" id="aclassDataOps_html_a4429514331ff31eb2f7a0bfb896884e3"><div class="ttname"><a href="classDataOps.html#a4429514331ff31eb2f7a0bfb896884e3">DataOps::setValue</a></div><div class="ttdeci">static void setValue(LevelData&lt; MFInterfaceFAB&lt; T &gt;&gt; &amp;a_lhs, const T &amp;a_value)</div><div class="ttdoc">Set value in an MFInterfaceFAB data holder.</div><div class="ttdef"><b>Definition:</b> CD_DataOpsImplem.H:23</div></div>
-<div class="ttc" id="aclassDataOps_html_a987ece8d8671b9165e74c1e204889061"><div class="ttname"><a href="classDataOps.html#a987ece8d8671b9165e74c1e204889061">DataOps::setCoveredValue</a></div><div class="ttdeci">static void setCoveredValue(EBAMRCellData &amp;a_lhs, const int a_comp, const Real a_value)</div><div class="ttdoc">Set value in covered cells. Does specified component.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:2203</div></div>
-<div class="ttc" id="aclassDataOps_html_af9695c22d415df5658913bd9de3aade3"><div class="ttname"><a href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps::copy</a></div><div class="ttdeci">static void copy(MFAMRCellData &amp;a_dst, const MFAMRCellData &amp;a_src)</div><div class="ttdoc">Copy data from one data holder to another.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1006</div></div>
+<div class="ttc" id="aclassDataOps_html_a987ece8d8671b9165e74c1e204889061"><div class="ttname"><a href="classDataOps.html#a987ece8d8671b9165e74c1e204889061">DataOps::setCoveredValue</a></div><div class="ttdeci">static void setCoveredValue(EBAMRCellData &amp;a_lhs, const int a_comp, const Real a_value)</div><div class="ttdoc">Set value in covered cells. Does specified component.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:2538</div></div>
+<div class="ttc" id="aclassDataOps_html_af9695c22d415df5658913bd9de3aade3"><div class="ttname"><a href="classDataOps.html#af9695c22d415df5658913bd9de3aade3">DataOps::copy</a></div><div class="ttdeci">static void copy(MFAMRCellData &amp;a_dst, const MFAMRCellData &amp;a_src)</div><div class="ttdoc">Copy data from one data holder to another.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1118</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
-<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:48</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a22c32a7002bc56f9236a194d4f22cded"><div class="ttname"><a href="classParticleContainer.html#a22c32a7002bc56f9236a194d4f22cded">ParticleContainer::clearMaskParticles</a></div><div class="ttdeci">void clearMaskParticles() const</div><div class="ttdoc">Clear the &quot;mask&quot; particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1229</div></div>
-<div class="ttc" id="aclassParticleContainer_html_a79a5475c8e406261b7800890915d91c0"><div class="ttname"><a href="classParticleContainer.html#a79a5475c8e406261b7800890915d91c0">ParticleContainer::transferMaskParticles</a></div><div class="ttdeci">void transferMaskParticles(const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt;&gt;&gt;&gt; &amp;a_mask)</div><div class="ttdoc">Copy particles to the mask particle data holder.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1155</div></div>
-<div class="ttc" id="aclassParticleContainer_html_ac5123d297a88d0923d00e580a1fcc52b"><div class="ttname"><a href="classParticleContainer.html#ac5123d297a88d0923d00e580a1fcc52b">ParticleContainer::getMaskParticles</a></div><div class="ttdeci">AMRParticles&lt; P &gt; &amp; getMaskParticles()</div><div class="ttdoc">Get the mask particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:273</div></div>
-<div class="ttc" id="aclassParticleContainer_html_af1d405c0e5c41ddda1d2a56802e3a6bc"><div class="ttname"><a href="classParticleContainer.html#af1d405c0e5c41ddda1d2a56802e3a6bc">ParticleContainer::copyMaskParticles</a></div><div class="ttdeci">void copyMaskParticles(const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt;&gt;&gt;&gt; &amp;a_mask) const</div><div class="ttdoc">Copy particles to mask particle data holder.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1102</div></div>
-<div class="ttc" id="aclassParticleContainer_html_af4ce43efcc9e2de503811d62eb27cfe2"><div class="ttname"><a href="classParticleContainer.html#af4ce43efcc9e2de503811d62eb27cfe2">ParticleContainer::transferParticles</a></div><div class="ttdeci">void transferParticles(ParticleContainer&lt; P &gt; &amp;a_otherContainer)</div><div class="ttdoc">Move particles into this container.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:695</div></div>
+<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:49</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a22c32a7002bc56f9236a194d4f22cded"><div class="ttname"><a href="classParticleContainer.html#a22c32a7002bc56f9236a194d4f22cded">ParticleContainer::clearMaskParticles</a></div><div class="ttdeci">void clearMaskParticles() const</div><div class="ttdoc">Clear the &quot;mask&quot; particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1362</div></div>
+<div class="ttc" id="aclassParticleContainer_html_a79a5475c8e406261b7800890915d91c0"><div class="ttname"><a href="classParticleContainer.html#a79a5475c8e406261b7800890915d91c0">ParticleContainer::transferMaskParticles</a></div><div class="ttdeci">void transferMaskParticles(const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt;&gt;&gt;&gt; &amp;a_mask)</div><div class="ttdoc">Copy particles to the mask particle data holder.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1280</div></div>
+<div class="ttc" id="aclassParticleContainer_html_ac5123d297a88d0923d00e580a1fcc52b"><div class="ttname"><a href="classParticleContainer.html#ac5123d297a88d0923d00e580a1fcc52b">ParticleContainer::getMaskParticles</a></div><div class="ttdeci">AMRParticles&lt; P &gt; &amp; getMaskParticles()</div><div class="ttdoc">Get the mask particles.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:283</div></div>
+<div class="ttc" id="aclassParticleContainer_html_af1d405c0e5c41ddda1d2a56802e3a6bc"><div class="ttname"><a href="classParticleContainer.html#af1d405c0e5c41ddda1d2a56802e3a6bc">ParticleContainer::copyMaskParticles</a></div><div class="ttdeci">void copyMaskParticles(const Vector&lt; RefCountedPtr&lt; LevelData&lt; BaseFab&lt; bool &gt;&gt;&gt;&gt; &amp;a_mask) const</div><div class="ttdoc">Copy particles to mask particle data holder.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:1219</div></div>
+<div class="ttc" id="aclassParticleContainer_html_af4ce43efcc9e2de503811d62eb27cfe2"><div class="ttname"><a href="classParticleContainer.html#af4ce43efcc9e2de503811d62eb27cfe2">ParticleContainer::transferParticles</a></div><div class="ttdeci">void transferParticles(ParticleContainer&lt; P &gt; &amp;a_otherContainer)</div><div class="ttdoc">Move particles into this container.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainerImplem.H:743</div></div>
 <div class="ttc" id="aclassRealm_html_a1c30e25a30f74a8e27405dbd2261f4dd"><div class="ttname"><a href="classRealm.html#a1c30e25a30f74a8e27405dbd2261f4dd">Realm::primal</a></div><div class="ttdeci">static const std::string primal</div><div class="ttdoc">Identifier for perimal realm.</div><div class="ttdef"><b>Definition:</b> CD_Realm.H:51</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolver.H:37</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a2173dd281f00cc869d7ed513ddf46eb4"><div class="ttname"><a href="classTracerParticleSolver.html#a2173dd281f00cc869d7ed513ddf46eb4">TracerParticleSolver::remap</a></div><div class="ttdeci">virtual void remap()</div><div class="ttdoc">Remap particles.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:339</div></div>
@@ -859,11 +865,11 @@ $(function() {
 <div class="ttc" id="aclassTracerParticleSolver_html_a4fa2ba84feb2e79304ef1d8c0aafd77d"><div class="ttname"><a href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">TracerParticleSolver::TracerParticleSolver</a></div><div class="ttdeci">TracerParticleSolver()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:25</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a564a8e87c05b076a0ff26d3f208683db"><div class="ttname"><a href="classTracerParticleSolver.html#a564a8e87c05b076a0ff26d3f208683db">TracerParticleSolver::setTime</a></div><div class="ttdeci">virtual void setTime(const int a_step, const Real a_time, const Real a_dt)</div><div class="ttdoc">Set the time for this solver.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:257</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a5be376a0d90160ca293b5318914c8bdf"><div class="ttname"><a href="classTracerParticleSolver.html#a5be376a0d90160ca293b5318914c8bdf">TracerParticleSolver::deposit</a></div><div class="ttdeci">virtual void deposit(EBAMRCellData &amp;a_phi) const noexcept</div><div class="ttdoc">Deposit particle weight on mesh.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:363</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html_a5e6dd3cc19ca265da03daac6778c8a8c"><div class="ttname"><a href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">TracerParticleSolver::depositParticles</a></div><div class="ttdeci">void depositParticles(EBAMRCellData &amp;a_phi, const ParticleContainer&lt; T &gt; &amp;a_particles, const DepositionType a_baseDeposition, const CoarseFineDeposition a_coarseFineDeposition) const noexcept</div><div class="ttdoc">Generic particle deposition method for putting a scalar field onto the mesh.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:688</div></div>
+<div class="ttc" id="aclassTracerParticleSolver_html_a5e6dd3cc19ca265da03daac6778c8a8c"><div class="ttname"><a href="classTracerParticleSolver.html#a5e6dd3cc19ca265da03daac6778c8a8c">TracerParticleSolver::depositParticles</a></div><div class="ttdeci">void depositParticles(EBAMRCellData &amp;a_phi, const ParticleContainer&lt; T &gt; &amp;a_particles, const DepositionType a_baseDeposition, const CoarseFineDeposition a_coarseFineDeposition) const noexcept</div><div class="ttdoc">Generic particle deposition method for putting a scalar field onto the mesh.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:694</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a6776b7b6d44129e3b7d337eb322ad9eb"><div class="ttname"><a href="classTracerParticleSolver.html#a6776b7b6d44129e3b7d337eb322ad9eb">TracerParticleSolver::writeData</a></div><div class="ttdeci">virtual void writeData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const EBAMRCellData &amp;a_data, const std::string a_outputRealm, const int a_level, const bool a_interpToCentroids, const bool a_interpGhost) const noexcept</div><div class="ttdoc">Write data to output. Convenience function.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:533</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a6d13309aeb59fb4e1c4f7a2db008ffb8"><div class="ttname"><a href="classTracerParticleSolver.html#a6d13309aeb59fb4e1c4f7a2db008ffb8">TracerParticleSolver::~TracerParticleSolver</a></div><div class="ttdeci">virtual ~TracerParticleSolver()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:56</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a87305505381a0c3d37ec1cbb7c9928a4"><div class="ttname"><a href="classTracerParticleSolver.html#a87305505381a0c3d37ec1cbb7c9928a4">TracerParticleSolver::preRegrid</a></div><div class="ttdeci">virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel)</div><div class="ttdoc">Perform pre-regrid operations.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:307</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html_a8b705e618f776915e672f0174f53ae1b"><div class="ttname"><a href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">TracerParticleSolver::getParticles</a></div><div class="ttdeci">virtual ParticleContainer&lt; P &gt; &amp; getParticles()</div><div class="ttdoc">Get all particles.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:651</div></div>
+<div class="ttc" id="aclassTracerParticleSolver_html_a8b705e618f776915e672f0174f53ae1b"><div class="ttname"><a href="classTracerParticleSolver.html#a8b705e618f776915e672f0174f53ae1b">TracerParticleSolver::getParticles</a></div><div class="ttdeci">virtual ParticleContainer&lt; P &gt; &amp; getParticles()</div><div class="ttdoc">Get all particles.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:657</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a8c127c5e527e73f3314da23a6d3505a6"><div class="ttname"><a href="classTracerParticleSolver.html#a8c127c5e527e73f3314da23a6d3505a6">TracerParticleSolver::parseDeposition</a></div><div class="ttdeci">void parseDeposition()</div><div class="ttdoc">Parse deposition method.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:91</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a8e2f428b9bfa8057d08fed245d18c2d5"><div class="ttname"><a href="classTracerParticleSolver.html#a8e2f428b9bfa8057d08fed245d18c2d5">TracerParticleSolver::parseVerbosity</a></div><div class="ttdeci">void parseVerbosity()</div><div class="ttdoc">Parse solver verbosity.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:160</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a9736500e6a0e09cf5024e74131f47ebe"><div class="ttname"><a href="classTracerParticleSolver.html#a9736500e6a0e09cf5024e74131f47ebe">TracerParticleSolver::writePlotData</a></div><div class="ttdeci">virtual void writePlotData(LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_comp, const std::string a_outputRealm, const int a_level) const noexcept</div><div class="ttdoc">Write plot data.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:505</div></div>
@@ -877,7 +883,7 @@ $(function() {
 <div class="ttc" id="aclassTracerParticleSolver_html_acdd23de1ca19916167cb532cc1c44c15"><div class="ttname"><a href="classTracerParticleSolver.html#acdd23de1ca19916167cb532cc1c44c15">TracerParticleSolver::allocate</a></div><div class="ttdeci">virtual void allocate()</div><div class="ttdoc">Allocate storage for this solver.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:195</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_ad837327fc21a90c62f18180fd7444c2f"><div class="ttname"><a href="classTracerParticleSolver.html#ad837327fc21a90c62f18180fd7444c2f">TracerParticleSolver::setComputationalGeometry</a></div><div class="ttdeci">virtual void setComputationalGeometry(const RefCountedPtr&lt; ComputationalGeometry &gt; &amp;a_compGeom)</div><div class="ttdoc">Set the computational geometry.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:283</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_ad904030292233fb75c3b519ea4ad1be2"><div class="ttname"><a href="classTracerParticleSolver.html#ad904030292233fb75c3b519ea4ad1be2">TracerParticleSolver::interpolateVelocities</a></div><div class="ttdeci">virtual void interpolateVelocities()</div><div class="ttdoc">Interpolate particles velocities.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:392</div></div>
-<div class="ttc" id="aclassTracerParticleSolver_html_ada8f31859854caafa56fca108673a0b9"><div class="ttname"><a href="classTracerParticleSolver.html#ada8f31859854caafa56fca108673a0b9">TracerParticleSolver::getVelocityField</a></div><div class="ttdeci">const EBAMRCellData &amp; getVelocityField() const</div><div class="ttdoc">Return the velocity field.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:675</div></div>
+<div class="ttc" id="aclassTracerParticleSolver_html_ada8f31859854caafa56fca108673a0b9"><div class="ttname"><a href="classTracerParticleSolver.html#ada8f31859854caafa56fca108673a0b9">TracerParticleSolver::getVelocityField</a></div><div class="ttdeci">const EBAMRCellData &amp; getVelocityField() const</div><div class="ttdoc">Return the velocity field.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:681</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_add1cac43843a34b6e4a3113c2d22dfa1"><div class="ttname"><a href="classTracerParticleSolver.html#add1cac43843a34b6e4a3113c2d22dfa1">TracerParticleSolver::regrid</a></div><div class="ttdeci">virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)</div><div class="ttdoc">Regrid this solver.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:322</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_adf4af7c8c73a44acbae91e3e87f7c5d9"><div class="ttname"><a href="classTracerParticleSolver.html#adf4af7c8c73a44acbae91e3e87f7c5d9">TracerParticleSolver::parseOptions</a></div><div class="ttdeci">virtual void parseOptions()</div><div class="ttdoc">Parse solver options.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:63</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_ae0ed709393a085ed715e72b041725596"><div class="ttname"><a href="classTracerParticleSolver.html#ae0ed709393a085ed715e72b041725596">TracerParticleSolver::setVelocity</a></div><div class="ttdeci">virtual void setVelocity(const EBAMRCellData &amp;a_velocityField)</div><div class="ttdoc">Set the tracer particle velocity field.</div><div class="ttdef"><b>Definition:</b> CD_TracerParticleSolverImplem.H:295</div></div>

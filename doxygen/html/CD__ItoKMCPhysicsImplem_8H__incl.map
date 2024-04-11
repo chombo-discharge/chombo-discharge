@@ -1,52 +1,52 @@
 <map id="Physics/ItoKMC/CD_ItoKMCPhysicsImplem.H" name="Physics/ItoKMC/CD_ItoKMCPhysicsImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1773,5,2021,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="2595,497,2699,524"/>
-<area shape="rect" id="node3" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="2594,95,2753,121"/>
-<area shape="rect" id="node16" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3449,497,3634,524"/>
-<area shape="rect" id="node17" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1613,497,1792,524"/>
-<area shape="rect" id="node41" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="905,326,1021,353"/>
-<area shape="rect" id="node45" href="$CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="917,169,1113,196"/>
-<area shape="rect" id="node50" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="1501,326,1597,353"/>
-<area shape="rect" id="node4" title=" " alt="" coords="1043,415,1120,442"/>
-<area shape="rect" id="node5" title=" " alt="" coords="2955,415,3018,442"/>
-<area shape="rect" id="node6" title=" " alt="" coords="188,497,281,524"/>
-<area shape="rect" id="node7" title=" " alt="" coords="3881,169,4010,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="2660,326,2719,353"/>
-<area shape="rect" id="node9" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="3779,244,3909,271"/>
-<area shape="rect" id="node10" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="5025,326,5151,353"/>
-<area shape="rect" id="node19" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="2673,244,2807,271"/>
-<area shape="rect" id="node20" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="4297,326,4439,353"/>
-<area shape="rect" id="node22" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="363,415,490,442"/>
-<area shape="rect" id="node24" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="4724,326,4831,353"/>
-<area shape="rect" id="node26" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="2281,326,2484,353"/>
-<area shape="rect" id="node30" href="$CD__ItoKMCSurfaceReactionSet_8H.html" title="Declaration of a class that encapsulates a set of secondary emission reactions." alt="" coords="2055,319,2257,360"/>
-<area shape="rect" id="node34" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="2985,326,3141,353"/>
-<area shape="rect" id="node36" href="$CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="2951,244,3164,271"/>
-<area shape="rect" id="node39" href="$CD__KMCSolver_8H.html" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="1553,169,1685,196"/>
-<area shape="rect" id="node11" title=" " alt="" coords="4941,497,5000,524"/>
-<area shape="rect" id="node12" title=" " alt="" coords="5101,497,5177,524"/>
-<area shape="rect" id="node13" title=" " alt="" coords="5453,497,5515,524"/>
-<area shape="rect" id="node14" title=" " alt="" coords="5366,497,5429,524"/>
-<area shape="rect" id="node15" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="4891,415,5051,442"/>
-<area shape="rect" id="node18" href="$CD__ItoParticleImplem_8H.html" title="Implementation of CD_ItoParticle.H." alt="" coords="5177,415,5354,442"/>
-<area shape="rect" id="node21" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="4086,415,4279,442"/>
-<area shape="rect" id="node23" title=" " alt="" coords="383,497,470,524"/>
-<area shape="rect" id="node25" href="$CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="4456,415,4613,442"/>
-<area shape="rect" id="node27" title=" " alt="" coords="2888,415,2931,442"/>
-<area shape="rect" id="node28" title=" " alt="" coords="1448,415,1517,442"/>
-<area shape="rect" id="node29" href="$CD__ItoKMCPhotoReactionImplem_8H.html" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="2560,415,2813,442"/>
-<area shape="rect" id="node31" href="$CD__ItoKMCSurfaceReactions_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="1591,415,1814,442"/>
-<area shape="rect" id="node33" href="$CD__ItoKMCSurfaceReactionSetImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="2233,408,2434,449"/>
-<area shape="rect" id="node32" title=" " alt="" coords="1007,497,1079,524"/>
-<area shape="rect" id="node35" href="$CD__KMCDualStateImplem_8H.html" title="Implementation of CD_KMCDualState.H." alt="" coords="3094,415,3301,442"/>
-<area shape="rect" id="node37" title=" " alt="" coords="3656,326,3707,353"/>
-<area shape="rect" id="node38" href="$CD__KMCDualStateReactionImplem_8H.html" title="Implementation of CD_KMCDualStateReaction.H." alt="" coords="3369,326,3631,353"/>
-<area shape="rect" id="node40" href="$CD__KMCSolverImplem_8H.html" title="Implementation of CD_KMCSolver.H." alt="" coords="1451,244,1634,271"/>
-<area shape="rect" id="node42" title=" " alt="" coords="955,415,1019,442"/>
-<area shape="rect" id="node43" title=" " alt="" coords="195,415,287,442"/>
-<area shape="rect" id="node44" href="$CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="1838,415,2005,442"/>
-<area shape="rect" id="node46" href="$CD__KDNode_8H.html" title="Namespace containing various particle management utilities." alt="" coords="957,244,1072,271"/>
-<area shape="rect" id="node48" href="$CD__CellInfo_8H.html" title="Simple class for holding some quantities relevant in a grid cell." alt="" coords="565,415,677,442"/>
-<area shape="rect" id="node49" href="$CD__ParticleManagementImplem_8H.html" title="Implementation of CD_ParticleManagement.H." alt="" coords="686,244,933,271"/>
-<area shape="rect" id="node47" href="$CD__KDNodeImplem_8H.html" title="Implementation of CD_KDNode.H." alt="" coords="664,326,829,353"/>
+<area shape="rect" id="node1" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="3968,5,4216,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5557,497,5661,524"/>
+<area shape="rect" id="node3" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="3206,95,3364,121"/>
+<area shape="rect" id="node16" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="3127,497,3312,524"/>
+<area shape="rect" id="node17" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1997,497,2176,524"/>
+<area shape="rect" id="node41" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="5123,326,5239,353"/>
+<area shape="rect" id="node46" href="$CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="4367,169,4563,196"/>
+<area shape="rect" id="node50" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="3661,326,3757,353"/>
+<area shape="rect" id="node4" title=" " alt="" coords="4392,415,4469,442"/>
+<area shape="rect" id="node5" title=" " alt="" coords="3283,415,3346,442"/>
+<area shape="rect" id="node6" title=" " alt="" coords="4900,497,4993,524"/>
+<area shape="rect" id="node7" title=" " alt="" coords="1712,169,1842,196"/>
+<area shape="rect" id="node8" title=" " alt="" coords="3274,326,3333,353"/>
+<area shape="rect" id="node9" href="$CD__ItoSpecies_8H.html" title="Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers." alt="" coords="1763,244,1892,271"/>
+<area shape="rect" id="node10" href="$CD__ItoParticle_8H.html" title="Declaration of a particle class for Ito diffusion." alt="" coords="552,326,679,353"/>
+<area shape="rect" id="node19" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="3139,244,3274,271"/>
+<area shape="rect" id="node20" href="$CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="1214,326,1356,353"/>
+<area shape="rect" id="node22" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="4731,415,4858,442"/>
+<area shape="rect" id="node24" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="916,326,1022,353"/>
+<area shape="rect" id="node26" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="2538,326,2741,353"/>
+<area shape="rect" id="node30" href="$CD__ItoKMCSurfaceReactionSet_8H.html" title="Declaration of a class that encapsulates a set of secondary emission reactions." alt="" coords="3844,319,4046,360"/>
+<area shape="rect" id="node34" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="2840,326,2996,353"/>
+<area shape="rect" id="node36" href="$CD__KMCDualStateReaction_8H.html" title="Declaration of a simple plasma reaction type for Kinetic Monte Carlo." alt="" coords="2728,244,2941,271"/>
+<area shape="rect" id="node39" href="$CD__KMCSolver_8H.html" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="3483,169,3615,196"/>
+<area shape="rect" id="node11" title=" " alt="" coords="688,497,746,524"/>
+<area shape="rect" id="node12" title=" " alt="" coords="527,497,603,524"/>
+<area shape="rect" id="node13" title=" " alt="" coords="257,497,318,524"/>
+<area shape="rect" id="node14" title=" " alt="" coords="155,497,218,524"/>
+<area shape="rect" id="node15" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="805,415,965,442"/>
+<area shape="rect" id="node18" href="$CD__ItoParticleImplem_8H.html" title="Implementation of CD_ItoParticle.H." alt="" coords="326,415,503,442"/>
+<area shape="rect" id="node21" href="$CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="1323,415,1516,442"/>
+<area shape="rect" id="node23" title=" " alt="" coords="4692,497,4779,524"/>
+<area shape="rect" id="node25" href="$CD__PhotonImplem_8H.html" title="Implementation of CD_Photon.H." alt="" coords="1090,415,1248,442"/>
+<area shape="rect" id="node27" title=" " alt="" coords="2301,415,2344,442"/>
+<area shape="rect" id="node28" title=" " alt="" coords="3370,415,3440,442"/>
+<area shape="rect" id="node29" href="$CD__ItoKMCPhotoReactionImplem_8H.html" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="2418,415,2672,442"/>
+<area shape="rect" id="node31" href="$CD__ItoKMCSurfaceReactions_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="3994,415,4216,442"/>
+<area shape="rect" id="node33" href="$CD__ItoKMCSurfaceReactionSetImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="3667,408,3868,449"/>
+<area shape="rect" id="node32" title=" " alt="" coords="4804,497,4876,524"/>
+<area shape="rect" id="node35" href="$CD__KMCDualStateImplem_8H.html" title="Implementation of CD_KMCDualState.H." alt="" coords="2798,415,3004,442"/>
+<area shape="rect" id="node37" title=" " alt="" coords="2765,326,2816,353"/>
+<area shape="rect" id="node38" href="$CD__KMCDualStateReactionImplem_8H.html" title="Implementation of CD_KMCDualStateReaction.H." alt="" coords="1998,326,2260,353"/>
+<area shape="rect" id="node40" href="$CD__KMCSolverImplem_8H.html" title="Implementation of CD_KMCSolver.H." alt="" coords="3655,244,3838,271"/>
+<area shape="rect" id="node42" title=" " alt="" coords="5394,415,5458,442"/>
+<area shape="rect" id="node43" title=" " alt="" coords="4984,415,5076,442"/>
+<area shape="rect" id="node44" title=" " alt="" coords="5292,497,5355,524"/>
+<area shape="rect" id="node45" href="$CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="5152,415,5319,442"/>
+<area shape="rect" id="node47" href="$CD__KDNode_8H.html" title="Namespace containing various particle management utilities." alt="" coords="4212,244,4326,271"/>
+<area shape="rect" id="node48" href="$CD__CellInfo_8H.html" title="Simple class for holding some quantities relevant in a grid cell." alt="" coords="4544,415,4656,442"/>
+<area shape="rect" id="node49" href="$CD__ParticleManagementImplem_8H.html" title="Implementation of CD_ParticleManagement.H." alt="" coords="4603,244,4850,271"/>
 </map>

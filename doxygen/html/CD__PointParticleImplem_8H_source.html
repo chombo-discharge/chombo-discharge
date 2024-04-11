@@ -88,43 +88,45 @@ $(function() {
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__PointParticle_8H.html">CD_PointParticle.H</a>&gt;</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceHeader.H&gt;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
-<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">   19</a></span>&#160;<span class="keyword">inline</span> <a class="code" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle::PointParticle</a>() {}</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
-<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="classPointParticle.html#a5943d7d7e880db937b2d86cbde18eb0f">   21</a></span>&#160;<span class="keyword">inline</span> <a class="code" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle::PointParticle</a>(<span class="keyword">const</span> RealVect a_position, <span class="keyword">const</span> Real a_weight)</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;{</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  this-&gt;<a class="code" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">define</a>(a_position, a_weight);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;}</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
-<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">   26</a></span>&#160;<span class="keyword">inline</span> <a class="code" href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">PointParticle::~PointParticle</a>() {}</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">   29</a></span>&#160;<a class="code" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">PointParticle::define</a>(<span class="keyword">const</span> RealVect a_position, <span class="keyword">const</span> Real a_weight)</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;{</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;  this-&gt;<a class="code" href="classGenericParticle.html#a3665043add6728988d96e98e1b320753">position</a>() = a_position;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;  this-&gt;<a class="code" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">weight</a>()   = a_weight;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;}</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">inline</span> Real&amp;</div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">   36</a></span>&#160;<a class="code" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">PointParticle::weight</a>()</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;  <span class="keywordflow">return</span> this-&gt;real&lt;0&gt;();</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="classPointParticle.html#a93e455bcd01cc850c8dd7d581b49b12f">   42</a></span>&#160;<a class="code" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">PointParticle::weight</a>()<span class="keyword"> const</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword"></span>{</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;  <span class="keywordflow">return</span> this-&gt;real&lt;0&gt;();</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">   19</a></span>&#160;<span class="keyword">inline</span> <a class="code" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle::PointParticle</a>()</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;{}</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="classPointParticle.html#a5943d7d7e880db937b2d86cbde18eb0f">   22</a></span>&#160;<span class="keyword">inline</span> <a class="code" href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle::PointParticle</a>(<span class="keyword">const</span> RealVect a_position, <span class="keyword">const</span> Real a_weight)</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;{</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  this-&gt;<a class="code" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">define</a>(a_position, a_weight);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;}</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">   27</a></span>&#160;<span class="keyword">inline</span> <a class="code" href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">PointParticle::~PointParticle</a>()</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{}</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">   31</a></span>&#160;<a class="code" href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">PointParticle::define</a>(<span class="keyword">const</span> RealVect a_position, <span class="keyword">const</span> Real a_weight)</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;{</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;  this-&gt;<a class="code" href="classGenericParticle.html#a3665043add6728988d96e98e1b320753">position</a>() = a_position;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;  this-&gt;<a class="code" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">weight</a>()   = a_weight;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">inline</span> Real&amp;</div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">   38</a></span>&#160;<a class="code" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">PointParticle::weight</a>()</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;  <span class="keywordflow">return</span> this-&gt;real&lt;0&gt;();</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> Real&amp;</div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="classPointParticle.html#a93e455bcd01cc850c8dd7d581b49b12f">   44</a></span>&#160;<a class="code" href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">PointParticle::weight</a>()<span class="keyword"> const</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keyword"></span>{</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;  <span class="keywordflow">return</span> this-&gt;real&lt;0&gt;();</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;}</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__PointParticle_8H_html"><div class="ttname"><a href="CD__PointParticle_8H.html">CD_PointParticle.H</a></div><div class="ttdoc">Declaration of a computational point particle.</div></div>
 <div class="ttc" id="aclassGenericParticle_html_a3665043add6728988d96e98e1b320753"><div class="ttname"><a href="classGenericParticle.html#a3665043add6728988d96e98e1b320753">GenericParticle&lt; 1, 0 &gt;::position</a></div><div class="ttdeci">RealVect &amp; position()</div><div class="ttdoc">Get the particle position.</div><div class="ttdef"><b>Definition:</b> CD_GenericParticleImplem.H:47</div></div>
 <div class="ttc" id="aclassPointParticle_html_a7997b3b4d18368b4494da4261d8d7861"><div class="ttname"><a href="classPointParticle.html#a7997b3b4d18368b4494da4261d8d7861">PointParticle::PointParticle</a></div><div class="ttdeci">PointParticle()</div><div class="ttdoc">Default constructor. Sets weight and position to zero.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:19</div></div>
-<div class="ttc" id="aclassPointParticle_html_a8b2d0e48b6818fa173b2cff1d13c74b1"><div class="ttname"><a href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">PointParticle::~PointParticle</a></div><div class="ttdeci">virtual ~PointParticle()</div><div class="ttdoc">Dtor - does nothing.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:26</div></div>
-<div class="ttc" id="aclassPointParticle_html_ac5bbf384522526b5d3f03908c005237b"><div class="ttname"><a href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">PointParticle::define</a></div><div class="ttdeci">void define(const RealVect a_position, const Real a_weight)</div><div class="ttdoc">Full define function.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:29</div></div>
-<div class="ttc" id="aclassPointParticle_html_aea0f7ab64b8ec587802c828661bfe4e4"><div class="ttname"><a href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">PointParticle::weight</a></div><div class="ttdeci">Real &amp; weight()</div><div class="ttdoc">Get weight.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:36</div></div>
+<div class="ttc" id="aclassPointParticle_html_a8b2d0e48b6818fa173b2cff1d13c74b1"><div class="ttname"><a href="classPointParticle.html#a8b2d0e48b6818fa173b2cff1d13c74b1">PointParticle::~PointParticle</a></div><div class="ttdeci">virtual ~PointParticle()</div><div class="ttdoc">Dtor - does nothing.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:27</div></div>
+<div class="ttc" id="aclassPointParticle_html_ac5bbf384522526b5d3f03908c005237b"><div class="ttname"><a href="classPointParticle.html#ac5bbf384522526b5d3f03908c005237b">PointParticle::define</a></div><div class="ttdeci">void define(const RealVect a_position, const Real a_weight)</div><div class="ttdoc">Full define function.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:31</div></div>
+<div class="ttc" id="aclassPointParticle_html_aea0f7ab64b8ec587802c828661bfe4e4"><div class="ttname"><a href="classPointParticle.html#aea0f7ab64b8ec587802c828661bfe4e4">PointParticle::weight</a></div><div class="ttdeci">Real &amp; weight()</div><div class="ttdoc">Get weight.</div><div class="ttdef"><b>Definition:</b> CD_PointParticleImplem.H:38</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -122,12 +122,12 @@ $(function() {
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    }</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  }</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
-<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classKMCDualState.html#aa9789c36bdad5d42993752e54ce4e8a3">   53</a></span>&#160;  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : m_nonReactiveState) {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : m_nonReactiveState) {</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordflow">if</span> (p &lt; 0) {</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;      isValid = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;      <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a525f8d12dad942a975fd4f989d5cce88">   58</a></span>&#160;    }</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    }</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  }</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;  <span class="keywordflow">return</span> isValid;</div>
@@ -147,41 +147,41 @@ $(function() {
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  <span class="keywordflow">return</span> m_reactiveState;</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;}</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a2d58d535a6b2e4412225b2b45882db24">   78</a></span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keyword">inline</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
 <div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">   80</a></span>&#160;<a class="code" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState&lt;T&gt;::getNonReactiveState</a>() noexcept</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;{</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keywordflow">return</span> m_nonReactiveState;</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}</div>
-<div class="line"><a name="l00084"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">   84</a></span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
 <div class="line"><a name="l00087"></a><span class="lineno"><a class="line" href="classKMCDualState.html#aa62ed0b7c73316ec659dba28046d2816">   87</a></span>&#160;<a class="code" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState&lt;T&gt;::getNonReactiveState</a>() const noexcept</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;{</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="keywordflow">return</span> m_nonReactiveState;</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}</div>
-<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">   91</a></span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a name="l00093"></a><span class="lineno"><a class="line" href="CD__KMCDualState_8H.html#a9dd7bd75b57e68db839932360a8336b3">   93</a></span>&#160;<span class="keyword">inline</span> std::ostream&amp;</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<a class="code" href="CD__KMCDualStateImplem_8H.html#a9dd7bd75b57e68db839932360a8336b3">operator&lt;&lt;</a>(std::ostream&amp; ostr, <span class="keyword">const</span> <a class="code" href="classKMCDualState.html">KMCDualState&lt;T&gt;</a>&amp; a_state)</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;{</div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  ostr &lt;&lt; <span class="stringliteral">&quot;KMCDualState : \n&quot;</span>;</div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
-<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a8e78936cd4068d6df3b4b056ce4ac08d">   98</a></span>&#160;  <span class="comment">// Print position.</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;  <span class="comment">// Print position.</span></div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; reactiveState    = a_state.<a class="code" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">getReactiveState</a>();</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; nonReactiveState = a_state.<a class="code" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">getNonReactiveState</a>();</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  ostr &lt;&lt; <span class="stringliteral">&quot;\t Reactive     = (&quot;</span>;</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; reactiveState.size(); i++) {</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    ostr &lt;&lt; reactiveState[i];</div>
-<div class="line"><a name="l00105"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">  105</a></span>&#160;    <span class="keywordflow">if</span> (i &lt; reactiveState.size() - 1) {</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keywordflow">if</span> (i &lt; reactiveState.size() - 1) {</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;      ostr &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    }</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;  }</div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  ostr &lt;&lt; <span class="stringliteral">&quot;)\n&quot;</span>;</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  ostr &lt;&lt; <span class="stringliteral">&quot;\t Non-reactive = (&quot;</span>;</div>
-<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="classKMCDualState.html#aa62ed0b7c73316ec659dba28046d2816">  112</a></span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; nonReactiveState.size(); i++) {</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; nonReactiveState.size(); i++) {</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    ostr &lt;&lt; nonReactiveState[i];</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="keywordflow">if</span> (i &lt; nonReactiveState.size() - 1) {</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;      ostr &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>

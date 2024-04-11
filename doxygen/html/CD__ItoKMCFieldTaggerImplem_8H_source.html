@@ -187,89 +187,95 @@ $(function() {
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> lvl = 0; lvl &lt;= this-&gt;m_amr-&gt;getFinestLevel(); lvl++) {</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keyword">const</span> DisjointBoxLayout&amp; dbl   = this-&gt;m_amr-&gt;getGrids(this-&gt;m_realm)[lvl];</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="keyword">const</span> EBISLayout&amp;        ebisl = this-&gt;m_amr-&gt;getEBISLayout(this-&gt;m_realm, this-&gt;m_phase)[lvl];</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keyword">const</span> Real               dx    = this-&gt;m_amr-&gt;getDx()[lvl];</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160; </div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <span class="keywordflow">for</span> (DataIterator dit(dbl); dit.ok(); ++dit) {</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;      <span class="keyword">const</span> Box&amp;     box     = dbl[dit()];</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;      <span class="keyword">const</span> EBISBox&amp; ebisbox = ebisl[dit()];</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;      <span class="keyword">const</span> EBCellFAB&amp; electricField     = (*m_E[lvl])[dit()];</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;      <span class="keyword">const</span> EBCellFAB&amp; gradElectricField = (*m_gradE[lvl])[dit()];</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="keyword">const</span> DataIterator&amp;      dit   = dbl.dataIterator();</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keyword">const</span> EBISLayout&amp;        ebisl = this-&gt;m_amr-&gt;getEBISLayout(this-&gt;m_realm, this-&gt;m_phase)[lvl];</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="keyword">const</span> Real               dx    = this-&gt;m_amr-&gt;getDx()[lvl];</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> nbox = dit.size();</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#pragma omp parallel for schedule(runtime)</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> mybox = 0; mybox &lt; nbox; mybox++) {</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;      <span class="keyword">const</span> DataIndex&amp; din = dit[mybox];</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;      <span class="keyword">const</span> FArrayBox&amp; electricFieldReg     = electricField.getFArrayBox();</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;      <span class="keyword">const</span> FArrayBox&amp; gradElectricFieldReg = gradElectricField.getFArrayBox();</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;      <span class="keyword">const</span> Box&amp;     box     = dbl[din];</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;      <span class="keyword">const</span> EBISBox&amp; ebisbox = ebisl[din];</div>
 <div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;      Vector&lt;EBCellFAB*&gt; tagFields;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;      Vector&lt;FArrayBox*&gt; tagFieldsReg;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        tagFields.push_back(&amp;((*this-&gt;m_tagFields[i][lvl])[dit()]));</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        tagFieldsReg.push_back(&amp;(tagFields[i]-&gt;getFArrayBox()));</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;      }</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;      <span class="keyword">auto</span> regularKernel = [&amp;](<span class="keyword">const</span> IntVect&amp; iv) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        <span class="keywordflow">if</span> (ebisbox.isRegular(iv)) {</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;          <span class="keyword">const</span> RealVect pos = probLo + RealVect(iv) * dx;</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160; </div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;          <span class="keyword">const</span> RealVect E = RealVect(</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;          <span class="keyword">const</span> RealVect gradE = RealVect(</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;            D_DECL(gradElectricFieldReg(iv, 0), gradElectricFieldReg(iv, 1), gradElectricFieldReg(iv, 2)));</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;          <span class="keyword">const</span> Vector&lt;Real&gt; compTagFields =</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;            this-&gt;computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160; </div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            (*tagFieldsReg[i])(iv, 0) = compTagFields[i];</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;          }</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        }</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;      };</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;      <span class="keyword">const</span> EBCellFAB&amp; electricField     = (*m_E[lvl])[din];</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;      <span class="keyword">const</span> EBCellFAB&amp; gradElectricField = (*m_gradE[lvl])[din];</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;      <span class="keyword">const</span> FArrayBox&amp; electricFieldReg     = electricField.getFArrayBox();</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;      <span class="keyword">const</span> FArrayBox&amp; gradElectricFieldReg = gradElectricField.getFArrayBox();</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160; </div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;      Vector&lt;EBCellFAB*&gt; tagFields;</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;      Vector&lt;FArrayBox*&gt; tagFieldsReg;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;        tagFields.push_back(&amp;((*this-&gt;m_tagFields[i][lvl])[din]));</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;        tagFieldsReg.push_back(&amp;(tagFields[i]-&gt;getFArrayBox()));</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;      }</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160; </div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;      <span class="keyword">auto</span> regularKernel = [&amp;](<span class="keyword">const</span> IntVect&amp; iv) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="keywordflow">if</span> (ebisbox.isRegular(iv)) {</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;          <span class="keyword">const</span> RealVect pos = probLo + RealVect(iv) * dx;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160; </div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;          <span class="keyword">const</span> RealVect E = RealVect(</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;          <span class="keyword">const</span> RealVect gradE = RealVect(</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            D_DECL(gradElectricFieldReg(iv, 0), gradElectricFieldReg(iv, 1), gradElectricFieldReg(iv, 2)));</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;          <span class="keyword">const</span> Vector&lt;Real&gt;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;            compTagFields = this-&gt;computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);</div>
 <div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160; </div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;      <span class="comment">// Irregular box loop</span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;      <span class="keyword">auto</span> irregularKernel = [&amp;](<span class="keyword">const</span> VolIndex&amp; vof) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        <span class="keyword">const</span> RealVect pos = probLo + <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a>(Location::Cell::Center, vof, ebisbox, dx);</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160; </div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;        <span class="keyword">const</span> RealVect E     = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;        <span class="keyword">const</span> RealVect gradE = RealVect(</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;          D_DECL(gradElectricField(vof, 0), gradElectricField(vof, 1), gradElectricField(vof, 2)));</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keyword">const</span> Vector&lt;Real&gt; compTagFields =</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;          this-&gt;computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160; </div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;          (*tagFields[i])(vof, 0) = compTagFields[i];</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;        }</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;      };</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160; </div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;      <span class="comment">// Run the kernels</span></div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;      VoFIterator&amp; vofit = (*this-&gt;m_amr-&gt;getVofIterator(this-&gt;m_realm, this-&gt;m_phase)[lvl])[dit()];</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;      <a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(box, regularKernel);</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;      <a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(vofit, irregularKernel);</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    }</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;          <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;            (*tagFieldsReg[i])(iv, 0) = compTagFields[i];</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;          }</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;        }</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;      };</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;      <span class="comment">// Irregular box loop</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;      <span class="keyword">auto</span> irregularKernel = [&amp;](<span class="keyword">const</span> VolIndex&amp; vof) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keyword">const</span> RealVect pos = probLo + <a class="code" href="namespaceLocation.html#a303c39a31d7afb2dd5650a9117a7d710">Location::position</a>(Location::Cell::Center, vof, ebisbox, dx);</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        <span class="keyword">const</span> RealVect E     = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="keyword">const</span> RealVect gradE = RealVect(</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;          D_DECL(gradElectricField(vof, 0), gradElectricField(vof, 1), gradElectricField(vof, 2)));</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160; </div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;        <span class="keyword">const</span> Vector&lt;Real&gt;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;          compTagFields = this-&gt;computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160; </div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;          (*tagFields[i])(vof, 0) = compTagFields[i];</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        }</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;      };</div>
 <div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;      this-&gt;m_amr-&gt;conservativeAverage(this-&gt;m_tagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;      this-&gt;m_amr-&gt;interpGhost(this-&gt;m_tagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    }</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160; </div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="comment">// Compute gradient of tracers</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;      <span class="comment">// Run the kernels</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;      VoFIterator&amp; vofit = (*this-&gt;m_amr-&gt;getVofIterator(this-&gt;m_realm, this-&gt;m_phase)[lvl])[din];</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;      <a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(box, regularKernel);</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;      <a class="code" href="namespaceBoxLoops.html#a40314d94a5cf135ef38a52eb42424eaf">BoxLoops::loop</a>(vofit, irregularKernel);</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    }</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
 <div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      this-&gt;m_amr-&gt;computeGradient(this-&gt;m_gradTagFields[i], this-&gt;m_tagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;      this-&gt;m_amr-&gt;conservativeAverage(this-&gt;m_gradTagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;      this-&gt;m_amr-&gt;conservativeAverage(this-&gt;m_tagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;      this-&gt;m_amr-&gt;interpGhost(this-&gt;m_tagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
 <div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    }</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;  }</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  this-&gt;deallocateStorage();</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;}</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160; </div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="comment">// Compute gradient of tracers</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; this-&gt;m_numTagFields; i++) {</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;      this-&gt;m_amr-&gt;computeGradient(this-&gt;m_gradTagFields[i], this-&gt;m_tagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;      this-&gt;m_amr-&gt;conservativeAverage(this-&gt;m_gradTagFields[i], this-&gt;m_realm, this-&gt;m_phase);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    }</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  }</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160; </div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  this-&gt;deallocateStorage();</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;}</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160; </div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__DataOps_8H_html"><div class="ttname"><a href="CD__DataOps_8H.html">CD_DataOps.H</a></div><div class="ttdoc">Agglomeration of useful data operations.</div></div>
 <div class="ttc" id="aCD__ItoKMCFieldTagger_8H_html"><div class="ttname"><a href="CD__ItoKMCFieldTagger_8H.html">CD_ItoKMCFieldTagger.H</a></div><div class="ttdoc">Declaration of an abstract field-only tagging class for ito plasmas.</div></div>
 <div class="ttc" id="aCD__Location_8H_html"><div class="ttname"><a href="CD__Location_8H.html">CD_Location.H</a></div><div class="ttdoc">Declaration of cell positions.</div></div>
-<div class="ttc" id="aclassDataOps_html_a2db420704c57abcd062e11d4594b5acf"><div class="ttname"><a href="classDataOps.html#a2db420704c57abcd062e11d4594b5acf">DataOps::vectorLength</a></div><div class="ttdeci">static void vectorLength(EBAMRCellData &amp;a_lhs, const EBAMRCellData &amp;a_rhs)</div><div class="ttdoc">Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim compon...</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:2897</div></div>
-<div class="ttc" id="aclassDataOps_html_a323f11e992c657224003ab61e6680c11"><div class="ttname"><a href="classDataOps.html#a323f11e992c657224003ab61e6680c11">DataOps::getMaxMinNorm</a></div><div class="ttdeci">static void getMaxMinNorm(Real &amp;a_max, Real &amp;a_min, EBAMRCellData &amp;data)</div><div class="ttdoc">Get maximum and minimum value of normed data.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1551</div></div>
+<div class="ttc" id="aclassDataOps_html_a2db420704c57abcd062e11d4594b5acf"><div class="ttname"><a href="classDataOps.html#a2db420704c57abcd062e11d4594b5acf">DataOps::vectorLength</a></div><div class="ttdeci">static void vectorLength(EBAMRCellData &amp;a_lhs, const EBAMRCellData &amp;a_rhs)</div><div class="ttdoc">Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim compon...</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:3396</div></div>
+<div class="ttc" id="aclassDataOps_html_a323f11e992c657224003ab61e6680c11"><div class="ttname"><a href="classDataOps.html#a323f11e992c657224003ab61e6680c11">DataOps::getMaxMinNorm</a></div><div class="ttdeci">static void getMaxMinNorm(Real &amp;a_max, Real &amp;a_min, EBAMRCellData &amp;data)</div><div class="ttdoc">Get maximum and minimum value of normed data.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:1783</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger_html_a12a985ad350c5ddda1ba5f6541e3e620"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html#a12a985ad350c5ddda1ba5f6541e3e620">Physics::ItoKMC::ItoKMCFieldTagger::ItoKMCFieldTagger</a></div><div class="ttdeci">ItoKMCFieldTagger() noexcept</div><div class="ttdoc">Weak constructor. User MUST subsequently call define.</div><div class="ttdef"><b>Definition:</b> CD_ItoKMCFieldTaggerImplem.H:24</div></div>
 <div class="ttc" id="aclassPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger_html_a305947b98920afc54e0cd66463d4979a"><div class="ttname"><a href="classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html#a305947b98920afc54e0cd66463d4979a">Physics::ItoKMC::ItoKMCFieldTagger::computeElectricField</a></div><div class="ttdeci">virtual void computeElectricField(EBAMRCellData &amp;a_E, EBAMRCellData &amp;a_gradE) const noexcept</div><div class="ttdoc">Compute electric field.</div><div class="ttdef"><b>Definition:</b> CD_ItoKMCFieldTaggerImplem.H:70</div></div>

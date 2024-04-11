@@ -1,45 +1,46 @@
 <map id="Source/Elliptic/CD_MFHelmholtzJumpBC.H" name="Source/Elliptic/CD_MFHelmholtzJumpBC.H">
-<area shape="rect" id="node1" title="Declaration of class for computing &quot;jump interface&quot; boundary conditions for multifluid Helmholtz code..." alt="" coords="2891,5,3073,47"/>
-<area shape="rect" id="node2" href="$CD__MFHelmholtzSaturationChargeJumpBC_8H.html" title="Declaration of an MFHelmholtzJumpBC class which implements the saturation charge boundary condition." alt="" coords="309,95,561,151"/>
-<area shape="rect" id="node4" href="$CD__MFHelmholtzEBBC_8H.html" title="Declaration of an EB boundary condition class for MFHelmholtzOp." alt="" coords="1194,102,1359,143"/>
-<area shape="rect" id="node17" href="$CD__MFHelmholtzEBBCFactory_8H.html" title="Declaration of an EB boundary condition factory class for MFHelmholtzOp." alt="" coords="2389,102,2599,143"/>
-<area shape="rect" id="node22" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="3179,206,3327,247"/>
-<area shape="rect" id="node40" href="$CD__MFHelmholtzJumpBC_8cpp.html" title="Implementation of CD_MFHelmholtzJumpBC.H." alt="" coords="3002,102,3197,143"/>
-<area shape="rect" id="node41" href="$CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="2751,102,2978,143"/>
-<area shape="rect" id="node43" href="$CD__MFHelmholtzJumpBCImplem_8H_source.html" title=" " alt="" coords="3272,102,3503,143"/>
+<area shape="rect" id="node1" title="Declaration of class for computing &quot;jump interface&quot; boundary conditions for multifluid Helmholtz code..." alt="" coords="2890,5,3071,47"/>
+<area shape="rect" id="node2" href="$CD__MFHelmholtzSaturationChargeJumpBC_8H.html" title="Declaration of an MFHelmholtzJumpBC class which implements the saturation charge boundary condition." alt="" coords="365,95,617,151"/>
+<area shape="rect" id="node4" href="$CD__MFHelmholtzEBBC_8H.html" title="Declaration of an EB boundary condition class for MFHelmholtzOp." alt="" coords="1125,102,1290,143"/>
+<area shape="rect" id="node17" href="$CD__MFHelmholtzEBBCFactory_8H.html" title="Declaration of an EB boundary condition factory class for MFHelmholtzOp." alt="" coords="2382,102,2593,143"/>
+<area shape="rect" id="node22" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="3177,206,3325,247"/>
+<area shape="rect" id="node41" href="$CD__MFHelmholtzJumpBC_8cpp.html" title="Implementation of CD_MFHelmholtzJumpBC.H." alt="" coords="3001,102,3195,143"/>
+<area shape="rect" id="node42" href="$CD__MFHelmholtzJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmhol..." alt="" coords="2750,102,2977,143"/>
+<area shape="rect" id="node44" href="$CD__MFHelmholtzJumpBCImplem_8H_source.html" title=" " alt="" coords="3271,102,3501,143"/>
 <area shape="rect" id="node3" href="$CD__MFHelmholtzSaturationChargeJumpBC_8cpp.html" title="Implementation of CD_MFHelmholtzSaturationChargeJumpBC.H." alt="" coords="5,199,257,255"/>
 <area shape="rect" id="node5" href="$CD__MFHelmholtzElectrostaticEBBC_8H.html" title="Declaration of a Electrostatic boundary condition class for MFHelmholtzOp." alt="" coords="281,199,501,255"/>
-<area shape="rect" id="node9" href="$CD__MFHelmholtzDirichletEBBC_8H.html" title="Declaration of a Dirichlet boundary condition class for MFHelmholtzOp." alt="" coords="1471,206,1691,247"/>
+<area shape="rect" id="node9" href="$CD__MFHelmholtzDirichletEBBC_8H.html" title="Declaration of a Dirichlet boundary condition class for MFHelmholtzOp." alt="" coords="973,206,1193,247"/>
 <area shape="rect" id="node12" href="$CD__MFHelmholtzEBBC_8cpp.html" title="Implementation of CD_MFHelmholtzEBBC.H." alt="" coords="526,206,705,247"/>
-<area shape="rect" id="node13" href="$CD__MFHelmholtzNeumannEBBC_8H_source.html" title=" " alt="" coords="1715,206,1943,247"/>
-<area shape="rect" id="node15" href="$CD__MFHelmholtzRobinEBBC_8H_source.html" title=" " alt="" coords="729,206,931,247"/>
+<area shape="rect" id="node13" href="$CD__MFHelmholtzNeumannEBBC_8H_source.html" title=" " alt="" coords="1217,206,1445,247"/>
+<area shape="rect" id="node15" href="$CD__MFHelmholtzRobinEBBC_8H_source.html" title=" " alt="" coords="1759,206,1962,247"/>
 <area shape="rect" id="node6" href="$CD__MFHelmholtzElectrostaticEBBC_8cpp.html" title="Implementation of CD_MFHelmholtzElectrostaticEBBC.H." alt="" coords="37,303,257,359"/>
-<area shape="rect" id="node7" href="$CD__MFHelmholtzElectrostaticEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzElectrostaticEBBCFactory.H." alt="" coords="628,303,848,359"/>
+<area shape="rect" id="node7" href="$CD__MFHelmholtzElectrostaticEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzElectrostaticEBBCFactory.H." alt="" coords="624,303,844,359"/>
 <area shape="rect" id="node8" href="$CD__MFHelmholtzElectrostaticEBBCImplem_8H.html" title="Implementation of CD_MFHelmholtzElectrostaticEBBC.H." alt="" coords="281,303,501,359"/>
-<area shape="rect" id="node10" href="$CD__MFHelmholtzDirichletEBBC_8cpp.html" title="Implementation of CD_MFHelmholtzDirichletEBBC.H." alt="" coords="1464,310,1697,351"/>
-<area shape="rect" id="node11" href="$CD__MFHelmholtzDirichletEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzDirichletEBBCFactory.H." alt="" coords="1841,310,2120,351"/>
-<area shape="rect" id="node14" href="$CD__MFHelmholtzNeumannEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzNeumannEBBCFactory.H." alt="" coords="2301,310,2588,351"/>
-<area shape="rect" id="node16" href="$CD__MFHelmholtzRobinEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzRobinEBBCFactory.H." alt="" coords="1077,310,1337,351"/>
-<area shape="rect" id="node18" href="$CD__MFHelmholtzElectrostaticEBBCFactory_8H.html" title="Declaration of an electrostatic boundary condition factory class for MFHelmholtzOp." alt="" coords="956,199,1176,255"/>
-<area shape="rect" id="node19" href="$CD__MFHelmholtzDirichletEBBCFactory_8H.html" title="Declaration of a Dirichlet boundary condition factory class for MFHelmholtzOp." alt="" coords="1967,206,2232,247"/>
-<area shape="rect" id="node20" href="$CD__MFHelmholtzEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzEBBCFactory.H." alt="" coords="2256,206,2479,247"/>
-<area shape="rect" id="node21" href="$CD__MFHelmholtzNeumannEBBCFactory_8H.html" title="Declaration of a Neumann boundary condition factory class for MFHelmholtzOp." alt="" coords="2503,206,2776,247"/>
-<area shape="rect" id="node24" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="2768,310,2961,351"/>
-<area shape="rect" id="node39" href="$CD__MFHelmholtzRobinEBBCFactory_8H.html" title="Declaration of a Robin boundary condition factory class for MFHelmholtzOp." alt="" coords="1200,206,1447,247"/>
-<area shape="rect" id="node23" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="3172,310,3333,351"/>
-<area shape="rect" id="node25" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="2653,407,2849,448"/>
-<area shape="rect" id="node38" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="2873,407,3080,448"/>
-<area shape="rect" id="node26" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="2335,503,2597,530"/>
-<area shape="rect" id="node36" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2919,496,3154,537"/>
-<area shape="rect" id="node27" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="2341,593,2591,634"/>
-<area shape="rect" id="node28" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="2615,600,2869,627"/>
-<area shape="rect" id="node34" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="2101,585,2317,641"/>
-<area shape="rect" id="node29" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="2365,697,2596,738"/>
-<area shape="rect" id="node33" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="2621,697,2863,738"/>
-<area shape="rect" id="node30" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="2365,801,2596,842"/>
-<area shape="rect" id="node31" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="2620,793,2821,849"/>
-<area shape="rect" id="node32" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="2599,897,2842,953"/>
-<area shape="rect" id="node35" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="2085,689,2333,745"/>
-<area shape="rect" id="node37" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="2893,593,3180,634"/>
-<area shape="rect" id="node42" href="$CD__MFHelmholtzSaturationChargeJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzSaturationChargeJumpBC objects for multifluid He..." alt="" coords="2903,199,3155,255"/>
+<area shape="rect" id="node10" href="$CD__MFHelmholtzDirichletEBBC_8cpp.html" title="Implementation of CD_MFHelmholtzDirichletEBBC.H." alt="" coords="967,310,1200,351"/>
+<area shape="rect" id="node11" href="$CD__MFHelmholtzDirichletEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzDirichletEBBCFactory.H." alt="" coords="1343,310,1621,351"/>
+<area shape="rect" id="node14" href="$CD__MFHelmholtzNeumannEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzNeumannEBBCFactory.H." alt="" coords="1805,310,2092,351"/>
+<area shape="rect" id="node16" href="$CD__MFHelmholtzRobinEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzRobinEBBCFactory.H." alt="" coords="2196,310,2456,351"/>
+<area shape="rect" id="node18" href="$CD__MFHelmholtzElectrostaticEBBCFactory_8H.html" title="Declaration of an electrostatic boundary condition factory class for MFHelmholtzOp." alt="" coords="729,199,949,255"/>
+<area shape="rect" id="node19" href="$CD__MFHelmholtzDirichletEBBCFactory_8H.html" title="Declaration of a Dirichlet boundary condition factory class for MFHelmholtzOp." alt="" coords="1469,206,1735,247"/>
+<area shape="rect" id="node20" href="$CD__MFHelmholtzEBBCFactory_8cpp.html" title="Implementation of CD_MFHelmholtzEBBCFactory.H." alt="" coords="2604,206,2827,247"/>
+<area shape="rect" id="node21" href="$CD__MFHelmholtzNeumannEBBCFactory_8H.html" title="Declaration of a Neumann boundary condition factory class for MFHelmholtzOp." alt="" coords="1987,206,2260,247"/>
+<area shape="rect" id="node24" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="2767,310,2960,351"/>
+<area shape="rect" id="node40" href="$CD__MFHelmholtzRobinEBBCFactory_8H.html" title="Declaration of a Robin boundary condition factory class for MFHelmholtzOp." alt="" coords="2284,206,2531,247"/>
+<area shape="rect" id="node23" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="3375,310,3536,351"/>
+<area shape="rect" id="node39" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="3152,310,3351,351"/>
+<area shape="rect" id="node25" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="2652,407,2848,448"/>
+<area shape="rect" id="node38" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="2872,407,3079,448"/>
+<area shape="rect" id="node26" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="2473,503,2736,530"/>
+<area shape="rect" id="node36" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2779,496,3014,537"/>
+<area shape="rect" id="node27" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="2480,593,2729,634"/>
+<area shape="rect" id="node28" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="1825,600,2080,627"/>
+<area shape="rect" id="node34" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="2239,585,2455,641"/>
+<area shape="rect" id="node29" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1968,697,2199,738"/>
+<area shape="rect" id="node33" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="1701,697,1943,738"/>
+<area shape="rect" id="node30" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="1968,801,2199,842"/>
+<area shape="rect" id="node31" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="2223,793,2424,849"/>
+<area shape="rect" id="node32" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="2202,897,2445,953"/>
+<area shape="rect" id="node35" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="2223,689,2471,745"/>
+<area shape="rect" id="node37" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="2753,593,3040,634"/>
+<area shape="rect" id="node43" href="$CD__MFHelmholtzSaturationChargeJumpBCFactory_8H.html" title="Declaration of a factory class for making MFHelmholtzSaturationChargeJumpBC objects for multifluid He..." alt="" coords="2901,199,3153,255"/>
 </map>

@@ -92,9 +92,8 @@ Inheritance diagram for Physics::ItoKMC::ItoKMCPhysics:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics__inherit__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_inherit__map" alt="Inheritance graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_inherit__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_inherit__map">
-<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="127,5,358,32"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html" title="Hard&#45;coded implementation of ItoKMCPhysics for simplified discharges in STP air. @detail Transport da..." alt="" coords="5,80,235,107"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="259,80,472,107"/>
+<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="5,5,236,32"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="14,80,227,107"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -102,12 +101,10 @@ Collaboration diagram for Physics::ItoKMC::ItoKMCPhysics:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics__coll__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map">
-<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="843,65,1073,92"/>
-<area shape="rect" href="classKMCDualState.html" title=" " alt="" coords="457,7,627,33"/>
-<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="23,7,178,33"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="427,58,657,99"/>
-<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="443,123,641,165"/>
-<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="5,131,196,157"/>
+<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="107,213,337,240"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,109,236,151"/>
+<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="260,109,459,151"/>
+<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="264,5,455,32"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -247,9 +244,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6d94b62f1977ad53336bde29833a8228">parseAlgorithm</a> () noexcept</td></tr>
 <tr class="memdesc:a6d94b62f1977ad53336bde29833a8228"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse reaction algorithm. <br /></td></tr>
 <tr class="separator:a6d94b62f1977ad53336bde29833a8228"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27ccea903576f8a027ef2e69bdf8ca98"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a27ccea903576f8a027ef2e69bdf8ca98">updateReactionRates</a> (const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dx, const Real a_kappa) const noexcept=0</td></tr>
-<tr class="memdesc:a27ccea903576f8a027ef2e69bdf8ca98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a27ccea903576f8a027ef2e69bdf8ca98">More...</a><br /></td></tr>
-<tr class="separator:a27ccea903576f8a027ef2e69bdf8ca98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81ba0a3bbbd622cd4d00a9c370cacb5e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a81ba0a3bbbd622cd4d00a9c370cacb5e">updateReactionRates</a> (std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&gt; &amp;a_kmcReactions, const RealVect a_E, const RealVect a_pos, const Vector&lt; Real &gt; &amp;a_phi, const Vector&lt; RealVect &gt; &amp;a_gradPhi, const Real a_dx, const Real a_kappa) const noexcept=0</td></tr>
+<tr class="memdesc:a81ba0a3bbbd622cd4d00a9c370cacb5e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update reaction rates.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a81ba0a3bbbd622cd4d00a9c370cacb5e">More...</a><br /></td></tr>
+<tr class="separator:a81ba0a3bbbd622cd4d00a9c370cacb5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa897a5229b775d5ee1d2ff9b0adf2361"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa897a5229b775d5ee1d2ff9b0adf2361">removeParticles</a> (List&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;a_particles, const long long a_numToRemove) const</td></tr>
 <tr class="memdesc:aa897a5229b775d5ee1d2ff9b0adf2361"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove particles from the input list.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aa897a5229b775d5ee1d2ff9b0adf2361">More...</a><br /></td></tr>
 <tr class="separator:aa897a5229b775d5ee1d2ff9b0adf2361"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -280,10 +277,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aeb965c335c41dd5a92e8f76b73c1951f">m_isDefined</a></td></tr>
 <tr class="memdesc:aeb965c335c41dd5a92e8f76b73c1951f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:aeb965c335c41dd5a92e8f76b73c1951f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af720727d0e56eafa7e9350c6088862e3"><td class="memItemLeft" align="right" valign="top"><a id="af720727d0e56eafa7e9350c6088862e3"></a>
-<a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa1768b8abe941660e8a9a9">KMCState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af720727d0e56eafa7e9350c6088862e3">m_kmcState</a></td></tr>
-<tr class="memdesc:af720727d0e56eafa7e9350c6088862e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinetic Monte Carlo state. <br /></td></tr>
-<tr class="separator:af720727d0e56eafa7e9350c6088862e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae24def42b87eb15f8fa6e39ee9b71b87"><td class="memItemLeft" align="right" valign="top"><a id="ae24def42b87eb15f8fa6e39ee9b71b87"></a>
 <a class="el" href="CD__ItoKMCPhysics_8H.html#a3125af9aa2e74060b4fd0751a02c4a46">KMCSolverType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae24def42b87eb15f8fa6e39ee9b71b87">m_kmcSolver</a></td></tr>
 <tr class="memdesc:ae24def42b87eb15f8fa6e39ee9b71b87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinetic Monte Carlo solver. <br /></td></tr>
@@ -297,7 +290,7 @@ std::vector&lt; std::shared_ptr&lt; const <a class="el" href="classPhysics_1_1It
 <tr class="memdesc:ac0a8170481285c012f5e533a208fa330"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of photoionization reactions. <br /></td></tr>
 <tr class="separator:ac0a8170481285c012f5e533a208fa330"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f66156f4d8ec2366f17d65039d588f9"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; std::discrete_distribution&lt; int &gt;, std::map&lt; int, int &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">m_photoPathways</a></td></tr>
-<tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
+<tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation. This class is MPI and OpenMP safe.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
 <tr class="separator:a8f66156f4d8ec2366f17d65039d588f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab40ef30340dd1038995d29bf86ccd369"><td class="memItemLeft" align="right" valign="top"><a id="ab40ef30340dd1038995d29bf86ccd369"></a>
 <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html">ItoKMCSurfaceReactionSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ab40ef30340dd1038995d29bf86ccd369">m_surfaceReactions</a></td></tr>
@@ -504,7 +497,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Should return the Townsend ionization coefficient. </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a5b2a365daa586b337265140e16899d66">Physics::ItoKMC::ItoKMCAir3LFA</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#abd91a6b7d203c0902f4e34958a918e6a">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#abd91a6b7d203c0902f4e34958a918e6a">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -559,7 +552,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Must return a vector of non-negative diffusion coefficients for the plasma species </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a0f195b2cca0a24071d78abd95e0197c5">Physics::ItoKMC::ItoKMCJSON</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a0d3e3347137090347f0e25c1259e9a4b">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a0f195b2cca0a24071d78abd95e0197c5">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -614,7 +607,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Default returns infinity but user can implement a physics based time step. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab0526bb9164d47231ceae9dcc1fc073b">Physics::ItoKMC::ItoKMCJSON</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#ae0adae2fba678405d26fa7e69c0e1d7b">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
+<p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab0526bb9164d47231ceae9dcc1fc073b">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -662,7 +655,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Should return the Townsend attachment coefficient. </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#acb334124344aea58848f22b2610d0e07">Physics::ItoKMC::ItoKMCAir3LFA</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a504faed441abfa2f7222a9d238907622">Physics::ItoKMC::ItoKMCJSON</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a504faed441abfa2f7222a9d238907622">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -717,7 +710,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Must return a vector of non-negative mobility coefficients for the plasma species </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a633020d80e1e5fbb4398506fc74725a9">Physics::ItoKMC::ItoKMCJSON</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a50a903b9deaeaa31637678c2cc8cfd54">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a633020d80e1e5fbb4398506fc74725a9">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -1406,12 +1399,12 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a41a5fad954a1aedc39845fb72ce2401e">Physics::ItoKMC::ItoKMCJSON</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#ac562f8cf5581dfcd88ba9a35eff12daa">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a41a5fad954a1aedc39845fb72ce2401e">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
-<a id="a27ccea903576f8a027ef2e69bdf8ca98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27ccea903576f8a027ef2e69bdf8ca98">&#9670;&nbsp;</a></span>updateReactionRates()</h2>
+<a id="a81ba0a3bbbd622cd4d00a9c370cacb5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81ba0a3bbbd622cd4d00a9c370cacb5e">&#9670;&nbsp;</a></span>updateReactionRates()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1422,6 +1415,12 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
         <tr>
           <td class="memname">virtual void Physics::ItoKMC::ItoKMCPhysics::updateReactionRates </td>
           <td>(</td>
+          <td class="paramtype">std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_kmcReactions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const RealVect&#160;</td>
           <td class="paramname"><em>a_E</em>, </td>
         </tr>
@@ -1471,6 +1470,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <p>Update reaction rates. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_kmcReactions</td><td>Reaction rates to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_E</td><td>Electric field </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phi</td><td>Plasma species densities </td></tr>
@@ -1482,7 +1482,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </dl>
 <dl class="section note"><dt>Note</dt><dd>Must be implemented by the user. </dd></dl>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aed799670f17fe11a73652bc5e8badfa7">Physics::ItoKMC::ItoKMCJSON</a>, and <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA.html#a849a7271bffec5ded3b31c1ca2925482">Physics::ItoKMC::ItoKMCAir3LFA</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a203dcddde789dd39c5afb10e0c7ec2ef">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>
@@ -1582,7 +1582,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="classRandom.html" title="Class for encapsulating random number generation.">Random</a> number generators for photoionization pathways. </p>
+<p><a class="el" href="classRandom.html" title="Class for encapsulating random number generation. This class is MPI and OpenMP safe.">Random</a> number generators for photoionization pathways. </p>
 <p>The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the map is an RNG generator for selecting photo-reactions, and a map which associates the returned reaction from the RNG generator with an index in m_photoReactions. </p>
 
 </div>

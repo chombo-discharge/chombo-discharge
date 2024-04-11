@@ -493,7 +493,7 @@ $(function() {
 <div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160; </div>
 <div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;  m_solver-&gt;computeRHS(rhs, m_rhsFunction);</div>
 <div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160; </div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, rhs, a_dt);</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;  <a class="code" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(phi, rhs, a_dt);</div>
 <div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;}</div>
 <div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160; </div>
 <div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
@@ -514,11 +514,11 @@ $(function() {
 <div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;  m_amr-&gt;allocate(k2, m_realm, m_phase, N);</div>
 <div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160; </div>
 <div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;  m_solver-&gt;computeRHS(k1, m_rhsFunction);</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k1, a_dt);</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;  <a class="code" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(phi, k1, a_dt);</div>
 <div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160; </div>
 <div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;  m_solver-&gt;computeRHS(k2, m_rhsFunction);</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k2, 0.5 * a_dt);</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  <a class="code" href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a>(phi, k1, -0.5 * a_dt);</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;  <a class="code" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(phi, k2, 0.5 * a_dt);</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;  <a class="code" href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a>(phi, k1, -0.5 * a_dt);</div>
 <div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;}</div>
 <div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160; </div>
 <div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;<span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> N&gt;</div>
@@ -538,7 +538,7 @@ $(function() {
 <div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__MeshODESolver_8H_html"><div class="ttname"><a href="CD__MeshODESolver_8H.html">CD_MeshODESolver.H</a></div><div class="ttdoc">Encapsulation of an ODE solver on the mesh.</div></div>
 <div class="ttc" id="aCD__TimeStepper_8H_html"><div class="ttname"><a href="CD__TimeStepper_8H.html">CD_TimeStepper.H</a></div><div class="ttdoc">Declaration of main (abstract) time stepper class.</div></div>
-<div class="ttc" id="aclassDataOps_html_a77d3d9b487c6182b3941fcab221e727f"><div class="ttname"><a href="classDataOps.html#a77d3d9b487c6182b3941fcab221e727f">DataOps::incr</a></div><div class="ttdeci">static void incr(MFAMRCellData &amp;a_lhs, const MFAMRCellData &amp;a_rhs, const Real a_scale)</div><div class="ttdoc">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:721</div></div>
+<div class="ttc" id="aclassDataOps_html_a92454e47ebc4876caec80e40743d469c"><div class="ttname"><a href="classDataOps.html#a92454e47ebc4876caec80e40743d469c">DataOps::incr</a></div><div class="ttdeci">static void incr(MFAMRCellData &amp;a_lhs, const MFAMRCellData &amp;a_rhs, const Real a_scale) noexcept</div><div class="ttdoc">Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components.</div><div class="ttdef"><b>Definition:</b> CD_DataOps.cpp:787</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
 <div class="ttc" id="aclassMeshODESolver_html"><div class="ttname"><a href="classMeshODESolver.html">MeshODESolver</a></div><div class="ttdoc">Class for solving dy/dt = f on an AMR hierarchy.</div><div class="ttdef"><b>Definition:</b> CD_MeshODESolver.H:28</div></div>
 <div class="ttc" id="aclassPhysics_1_1MeshODE_1_1MeshODEStepper_html"><div class="ttname"><a href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html">Physics::MeshODE::MeshODEStepper</a></div><div class="ttdoc">Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables.</div><div class="ttdef"><b>Definition:</b> CD_MeshODEStepper.H:41</div></div>

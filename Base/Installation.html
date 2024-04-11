@@ -57,15 +57,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#main-settings">Main settings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mpi">MPI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hdf5">HDF5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openmp">OpenMP</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#compiler-flags">Compiler flags</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pre-defined-configuration-files">Pre-defined configuration files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gnu-configuration-for-workstations">GNU configuration for workstations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-on-clusters">Configuration on clusters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configuration-files-for-github">Configuration files for GitHub</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#running-example-applications">Running example applications</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#positive-streamer-in-air">Positive streamer in air</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
@@ -277,7 +274,7 @@ Users need to supply this file in order to compile <code class="docutils literal
 <li><p>Library paths (in particular for HDF5).</p></li>
 </ul>
 <section id="main-settings">
-<h3>Main settings<a class="headerlink" href="#main-settings" title="Permalink to this heading"></a></h3>
+<span id="chap-mainsettings"></span><h3>Main settings<a class="headerlink" href="#main-settings" title="Permalink to this heading"></a></h3>
 <p>The main variables that the user needs to set are</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">DIM</span> <span class="pre">=</span> <span class="pre">2/3</span></code> The dimensionality (must be 2 or 3).</p></li>
@@ -301,14 +298,23 @@ This is a requirement.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_MF=TRUE</span></code>
 Configures <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with multifluid functionality.
 This is a requirement.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">USE_MT=TRUE/FALSE</span></code>
+Configures <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with memory tracking functionality.
+Not supported with OpenMP.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_HDF5</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
 This enables and disables HDF5 code.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
+Turn on/off OpenMP threading.</p></li>
 </ul>
 </section>
 <section id="mpi">
 <h3>MPI<a class="headerlink" href="#mpi" title="Permalink to this heading"></a></h3>
 <p>To enable MPI, make sure that <code class="docutils literal notranslate"><span class="pre">MPI</span></code> is set to true and that the <code class="docutils literal notranslate"><span class="pre">MPICXX</span></code> compiler is set.
 For GNU installations, one will usually have <code class="docutils literal notranslate"><span class="pre">MPICXX</span> <span class="pre">=</span> <span class="pre">mpicxx</span></code> or <code class="docutils literal notranslate"><span class="pre">MPICXX</span> <span class="pre">=</span> <span class="pre">mpic++</span></code>, while for Intel builds one will usually have <code class="docutils literal notranslate"><span class="pre">MPICXX</span> <span class="pre">=</span> <span class="pre">mpiicpc</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The MPI layer distributes grid patches among processes, i.e. uses <em>domain decomposition</em>.</p>
+</div>
 </section>
 <section id="hdf5">
 <h3>HDF5<a class="headerlink" href="#hdf5" title="Permalink to this heading"></a></h3>
@@ -323,6 +329,22 @@ For GNU installations, one will usually have <code class="docutils literal notra
 <p class="admonition-title">Warning</p>
 <p><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> only supports HDF5 APIs at version 1.10 and below.
 To use a newer version of HDF5 together with the 1.10 API, add <code class="docutils literal notranslate"><span class="pre">-DH5_USE_110_API</span></code> to the HDFINC flags.</p>
+</div>
+</section>
+<section id="openmp">
+<h3>OpenMP<a class="headerlink" href="#openmp" title="Permalink to this heading"></a></h3>
+<p>To turn on OpenMP threading one can set the <code class="docutils literal notranslate"><span class="pre">OPENMPCC</span></code> to <code class="docutils literal notranslate"><span class="pre">TRUE</span></code>.
+When compiled with OpenMP all loops over grid patches uses threading in the form</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#pragma omp parallel for schedule(runtime)</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">mybox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">mybox</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nbox</span><span class="p">;</span><span class="w"> </span><span class="n">mybox</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Memory tracking is currently not supported together with threading.
+When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> make sure that memory tracking is turned off (see <span class="xref std std-ref">MainSettings</span>).</p>
 </div>
 </section>
 <section id="compiler-flags">
@@ -437,43 +459,6 @@ Alternatively, copy <code class="docutils literal notranslate"><span class="pre"
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses GitHub actions for continuous integration and testing.
 These tests run on Linux for a selection of GNU and Intel compilers.
 The configuration files are located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local/GitHub</span></code>.</p>
-</section>
-</section>
-<section id="running-example-applications">
-<h2>Running example applications<a class="headerlink" href="#running-example-applications" title="Permalink to this heading"></a></h2>
-<p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, applications are set up so that they use the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code and one <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module.
-These are normally set up through Python interfaces accompanying each module.
-Several example applications are given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec</span></code>, which are organized by example type (e.g., plasma simulation, electrostatics, radiative transfer, etc).
-If <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (<code class="file docutils literal notranslate"><span class="pre">program.cpp</span></code>) and compiling it:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>make -s -j4 program
-</pre></div>
-</div>
-<p>To see how these programs are run, see <a class="reference internal" href="Control.html#chap-control"><span class="std std-ref">Controlling chombo-discharge</span></a>.</p>
-<section id="positive-streamer-in-air">
-<h3>Positive streamer in air<a class="headerlink" href="#positive-streamer-in-air" title="Permalink to this heading"></a></h3>
-<p>To run one of the applications that use a particular <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module, we will run a simulation of a positive streamer (in air).</p>
-<p>The application code is located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir</span></code> and it uses the convection-diffusion-reaction plasma module (located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma</span></code>).</p>
-<p>First, compile the application by</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
-make -s -j4 DIM=2 program
-</pre></div>
-</div>
-<p>This will provide an executable named <code class="docutils literal notranslate"><span class="pre">program2d.&lt;bunch_of_options&gt;.ex</span></code>.
-If one compiles for 3D, i.e. <code class="docutils literal notranslate"><span class="pre">DIM=3</span></code>, the executable will be named <code class="docutils literal notranslate"><span class="pre">program3d.&lt;bunch_of_options&gt;.ex</span></code>.</p>
-<p>To run the application do:</p>
-<p><strong>Serial build</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>./program2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
-</pre></div>
-</div>
-<p><strong>Parallel build</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 program2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
-</pre></div>
-</div>
-<p>If the user also compiled with HDF5, plot files will appear in the subfolder <code class="docutils literal notranslate"><span class="pre">plt</span></code>.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>One can track the simulation progress through the <code class="file docutils literal notranslate"><span class="pre">pout.*</span></code> files, see <a class="reference internal" href="Control.html#chap-pout"><span class="std std-ref">Controlling parallel processor verbosity</span></a>.</p>
-</div>
 </section>
 </section>
 <section id="troubleshooting">

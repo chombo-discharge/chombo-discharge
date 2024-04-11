@@ -1,12 +1,13 @@
 <map id="Source/AmrMesh/CD_IrregStencil.H" name="Source/AmrMesh/CD_IrregStencil.H">
-<area shape="rect" id="node1" title="Abstract class for holding cut&#45;cell stencils on an AMR level." alt="" coords="519,5,769,32"/>
+<area shape="rect" id="node1" title="Abstract class for holding cut&#45;cell stencils on an AMR level." alt="" coords="579,5,829,32"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,80,160,107"/>
 <area shape="rect" id="node3" title=" " alt="" coords="184,80,293,107"/>
 <area shape="rect" id="node4" title=" " alt="" coords="318,80,423,107"/>
-<area shape="rect" id="node5" title=" " alt="" coords="447,80,577,107"/>
-<area shape="rect" id="node6" title=" " alt="" coords="601,80,687,107"/>
-<area shape="rect" id="node7" title=" " alt="" coords="711,80,822,107"/>
-<area shape="rect" id="node8" title=" " alt="" coords="847,80,953,107"/>
-<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="978,80,1163,107"/>
-<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1188,80,1367,107"/>
+<area shape="rect" id="node5" title=" " alt="" coords="447,80,550,107"/>
+<area shape="rect" id="node6" title=" " alt="" coords="574,80,703,107"/>
+<area shape="rect" id="node7" title=" " alt="" coords="727,80,814,107"/>
+<area shape="rect" id="node8" title=" " alt="" coords="838,80,949,107"/>
+<area shape="rect" id="node9" title=" " alt="" coords="973,80,1080,107"/>
+<area shape="rect" id="node10" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1105,80,1290,107"/>
+<area shape="rect" id="node11" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1315,80,1493,107"/>
 </map>

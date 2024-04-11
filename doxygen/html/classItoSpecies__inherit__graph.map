@@ -1,5 +1,4 @@
 <map id="ItoSpecies" name="ItoSpecies">
-<area shape="rect" id="node1" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol..." alt="" coords="5,46,95,73"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html" title="Species which is advected/diffused in Brownian walker code." alt="" coords="153,5,339,47"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCAir3LFA_1_1Electron.html" title="Electron species." alt="" coords="143,71,349,112"/>
+<area shape="rect" id="node1" title="Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSol..." alt="" coords="53,5,143,32"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerSpecies.html" title="Species which is advected/diffused in Brownian walker code." alt="" coords="5,80,191,121"/>
 </map>

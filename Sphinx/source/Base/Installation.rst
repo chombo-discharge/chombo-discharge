@@ -115,6 +115,8 @@ Typically, a full configuration consists of specifying
 * Specifying configurations. E.g., serial or parallel builds, and compiler flags. 
 * Library paths (in particular for HDF5).
 
+.. _Chap:MainSettings:
+
 Main settings
 _____________
 
@@ -141,14 +143,24 @@ The main variables that the user needs to set are
 * ``USE_MF=TRUE``
   Configures ``Chombo`` with multifluid functionality.
   This is a requirement.
+* ``USE_MT=TRUE/FALSE``
+  Configures ``Chombo`` with memory tracking functionality.
+  Not supported with OpenMP. 
 * ``USE_HDF5 = TRUE/FALSE``
   This enables and disables HDF5 code.
+* ``OPENMPCC = TRUE/FALSE``
+  Turn on/off OpenMP threading. 
+  
 
 MPI
 ___
 
 To enable MPI, make sure that ``MPI`` is set to true and that the ``MPICXX`` compiler is set.
 For GNU installations, one will usually have ``MPICXX = mpicxx`` or ``MPICXX = mpic++``, while for Intel builds one will usually have ``MPICXX = mpiicpc``.
+
+.. note::
+
+   The MPI layer distributes grid patches among processes, i.e. uses *domain decomposition*.
 
 HDF5
 ____
@@ -164,6 +176,26 @@ If using HDF5, one must also set the following flags:
 
    ``Chombo`` only supports HDF5 APIs at version 1.10 and below.
    To use a newer version of HDF5 together with the 1.10 API, add ``-DH5_USE_110_API`` to the HDFINC flags.
+
+OpenMP
+______
+
+To turn on OpenMP threading one can set the ``OPENMPCC`` to ``TRUE``.
+When compiled with OpenMP all loops over grid patches uses threading in the form
+
+.. code-block:: c++
+
+   #pragma omp parallel for schedule(runtime)
+   for (int mybox = 0; mybox < nbox; mybox++) {
+
+   }
+
+
+.. warning::
+
+   Memory tracking is currently not supported together with threading.
+   When compiling ``chombo-discharge`` make sure that memory tracking is turned off (see :ref:`MainSettings`).    
+
 
 Compiler flags
 ______________
@@ -283,58 +315,9 @@ ______________________________
 
 ``chombo-discharge`` uses GitHub actions for continuous integration and testing.
 These tests run on Linux for a selection of GNU and Intel compilers.
-The configuration files are located in :file:`$DISCHARGE_HOME/Lib/Local/GitHub`. 
+The configuration files are located in :file:`$DISCHARGE_HOME/Lib/Local/GitHub`.
 
-Running example applications
-----------------------------
 
-In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module.
-These are normally set up through Python interfaces accompanying each module. 
-Several example applications are given in :file:`$DISCHARGE_HOME/Exec`, which are organized by example type (e.g., plasma simulation, electrostatics, radiative transfer, etc).
-If ``chombo-discharge`` built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (:file:`program.cpp`) and compiling it:
-
-.. code-block:: text
-
-   make -s -j4 program
-
-To see how these programs are run, see :ref:`Chap:Control`.   
-
-Positive streamer in air
-________________________
-
-To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simulation of a positive streamer (in air). 
-
-The application code is located in ``$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir`` and it uses the convection-diffusion-reaction plasma module (located in ``$DISCHARGE_HOME/Physics/CdrPlasma``).
-
-First, compile the application by
-
-.. code-block:: text
-
-   cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
-   make -s -j4 DIM=2 program
-
-This will provide an executable named ``program2d.<bunch_of_options>.ex``.
-If one compiles for 3D, i.e. ``DIM=3``, the executable will be named ``program3d.<bunch_of_options>.ex``.
-
-To run the application do:
-
-**Serial build**
-
-.. code-block:: text
-
-   ./program2d.<bunch_of_options>.ex positive2d.inputs
-
-**Parallel build**
-  
-.. code-block:: text
-
-   mpirun -np 8 program2d.<bunch_of_options>.ex positive2d.inputs   
-
-If the user also compiled with HDF5, plot files will appear in the subfolder ``plt``.
-
-.. tip::
-
-   One can track the simulation progress through the :file:`pout.*` files, see :ref:`Chap:pout`.
 
 .. _Chap:TroubleShooting:
 
@@ -394,5 +377,3 @@ _______________
 
   ``Chombo`` may occasionally complain about incomplete perl modules.
   These error messages are unrelated to ``Chombo`` and ``chombo-discharge``, but the user may need to install additional perl modules before compiling ``chombo-discharge``.
-
-  
