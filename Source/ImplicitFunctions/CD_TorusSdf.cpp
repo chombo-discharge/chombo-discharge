@@ -32,7 +32,8 @@ TorusSdf::TorusSdf(const TorusSdf& a_inputIF)
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-TorusSdf::~TorusSdf() {}
+TorusSdf::~TorusSdf()
+{}
 
 Real
 TorusSdf::value(const RealVect& a_point) const

@@ -103,7 +103,10 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   this->setJump(0.0, 0.0);
 }
 
-MFHelmholtzOpFactory::~MFHelmholtzOpFactory() { CH_TIME("MFHelmholtzOpFactory::~MFHelmholtzOpFactory()"); }
+MFHelmholtzOpFactory::~MFHelmholtzOpFactory()
+{
+  CH_TIME("MFHelmholtzOpFactory::~MFHelmholtzOpFactory()");
+}
 
 void
 MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)
@@ -117,11 +120,17 @@ MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)
 
   for (int lvl = 0; lvl < m_numAmrLevels; lvl++) {
     const DisjointBoxLayout& dbl = a_sigma[lvl]->disjointBoxLayout();
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      box = dbl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box      box = dbl[din];
       const Interval interv(m_comp, m_comp);
-      (*m_amrJump[lvl])[dit()].copy(box, interv, box, (*a_sigma[lvl])[dit()], interv);
+
+      (*m_amrJump[lvl])[din].copy(box, interv, box, (*a_sigma[lvl])[din], interv);
     }
 
     DataOps::scale(*m_amrJump[lvl], a_scale);
@@ -194,13 +203,20 @@ MFHelmholtzOpFactory::defineJump()
     const DisjointBoxLayout& dbl   = m_amrLevelGrids[lvl].getGrids();
     const EBLevelGrid&       eblg  = m_amrLevelGrids[lvl].getEBLevelGrid(m_mainPhase);
     const EBISLayout&        ebisl = eblg.getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
+
+    const int nbox = dit.size();
 
     LayoutData<IntVectSet> irregCells(dbl);
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      box     = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
 
-      irregCells[dit()] = ebisbox.getIrregIVS(box);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box      box     = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      irregCells[din] = ebisbox.getIrregIVS(box);
     }
 
     BaseIVFactory<Real> fact(ebisl, irregCells);

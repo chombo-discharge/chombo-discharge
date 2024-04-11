@@ -65,7 +65,10 @@ EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const int                            
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC() { CH_TIME("EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC()"); }
+EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC()
+{
+  CH_TIME("EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC()");
+}
 
 void
 EBHelmholtzRobinEBBC::setOrder(const int a_order)
@@ -139,6 +142,9 @@ EBHelmholtzRobinEBBC::define()
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const DataIterator&      dit    = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -149,13 +155,16 @@ EBHelmholtzRobinEBBC::define()
 
   m_gradPhiStencils.define(dbl);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box         box     = dbl[dit()];
-    const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box         box     = dbl[din];
+    const EBISBox&    ebisbox = m_eblg.getEBISL()[din];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
     stencils.define(ivs, ebgraph, m_nComp);
 
@@ -174,24 +183,24 @@ EBHelmholtzRobinEBBC::define()
       // that fall within the quadrant that the cut-cell normal points into.
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Quadrant, order);
+        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(fluxStencil, dit());
+          foundStencil = this->isStencilValidCF(fluxStencil, din);
         }
       }
 
       // If the above failed we try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Radius, order);
+        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(fluxStencil, dit());
+          foundStencil = this->isStencilValidCF(fluxStencil, din);
         }
       }
 
@@ -205,7 +214,7 @@ EBHelmholtzRobinEBBC::define()
           B = m_constantB;
         }
         else if (m_useFunction) {
-          const RealVect pos = this->getBoundaryPosition(vof, dit());
+          const RealVect pos = this->getBoundaryPosition(vof, din);
           A                  = m_functionA(pos);
           B                  = m_functionB(pos);
         }
@@ -331,8 +340,12 @@ EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.
-  const Vector<RealVect> displacements =
-    LeastSquares::getDisplacements(Location::Cell::Boundary, m_dataLocation, a_vof, vofs, ebisbox, m_dx);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
+                                                                        m_dataLocation,
+                                                                        a_vof,
+                                                                        vofs,
+                                                                        ebisbox,
+                                                                        m_dx);
 
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)

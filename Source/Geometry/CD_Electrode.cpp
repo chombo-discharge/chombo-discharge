@@ -30,7 +30,8 @@ Electrode::Electrode(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, c
   this->define(a_baseIF, a_live, a_voltageFraction);
 }
 
-Electrode::~Electrode() {}
+Electrode::~Electrode()
+{}
 
 void
 Electrode::define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction)

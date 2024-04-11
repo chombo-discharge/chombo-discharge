@@ -39,7 +39,8 @@ namespace Physics {
       /*!
 	@brief Destructor. Does nothing
       */
-      virtual ~ItoKMCPhotonSpecies() noexcept {}
+      virtual ~ItoKMCPhotonSpecies() noexcept
+      {}
 
       /*!
 	@brief Initial data

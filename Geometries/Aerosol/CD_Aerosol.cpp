@@ -88,6 +88,7 @@ Aerosol::Aerosol()
   }
 }
 
-Aerosol::~Aerosol() {}
+Aerosol::~Aerosol()
+{}
 
 #include <CD_NamespaceFooter.H>

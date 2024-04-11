@@ -29,7 +29,8 @@ CdrPlasmaFieldTagger::CdrPlasmaFieldTagger()
   m_name = "CdrPlasmaFieldTagger";
 }
 
-CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger() {}
+CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger()
+{}
 
 void
 CdrPlasmaFieldTagger::allocateStorage() const
@@ -116,17 +117,23 @@ CdrPlasmaFieldTagger::computeTracers() const
   // Go through each AMR level and compute the tracer fields.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
     // Iterate through the grid patches.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&     box     = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&     box     = dbl.get(din);
+      const EBISBox& ebisbox = ebisl[din];
 
       // Expose the AMR data per patch, both full data and the single-valued data.
-      const EBCellFAB& electricField     = (*m_electricField[lvl])[dit()];
-      const EBCellFAB& gradElectricField = (*m_gradElectricField[lvl])[dit()];
+      const EBCellFAB& electricField     = (*m_electricField[lvl])[din];
+      const EBCellFAB& gradElectricField = (*m_gradElectricField[lvl])[din];
 
       const FArrayBox& electricFieldReg     = electricField.getFArrayBox();
       const FArrayBox& gradElectricFieldReg = gradElectricField.getFArrayBox();
@@ -137,7 +144,7 @@ CdrPlasmaFieldTagger::computeTracers() const
       Vector<FArrayBox*> trReg;
 
       for (int i = 0; i < m_numTracers; i++) {
-        tr.push_back(&((*m_tracers[i][lvl])[dit()]));
+        tr.push_back(&((*m_tracers[i][lvl])[din]));
         trReg.push_back(&(tr[i]->getFArrayBox()));
       }
 
@@ -194,7 +201,7 @@ CdrPlasmaFieldTagger::computeTracers() const
       };
 
       // Irregular kernel region
-      VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Execute the kernels
       BoxLoops::loop(box, regularKernel);

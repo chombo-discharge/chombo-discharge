@@ -30,7 +30,10 @@ BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr<ItoSolver>& a_solver, R
   m_verbosity = -1;
 }
 
-BrownianWalkerTagger::~BrownianWalkerTagger() { CH_TIME("BrownianWalkerTagger::~BrownianWalkerTagger"); }
+BrownianWalkerTagger::~BrownianWalkerTagger()
+{
+  CH_TIME("BrownianWalkerTagger::~BrownianWalkerTagger");
+}
 
 void
 BrownianWalkerTagger::regrid()

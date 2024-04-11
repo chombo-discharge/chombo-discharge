@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_Tile.H>
+#include <CD_ParallelOps.H>
 #include <CD_TiledMeshRefine.H>
 #include <CD_NamespaceHeader.H>
 
@@ -43,7 +44,10 @@ TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
   }
 }
 
-TiledMeshRefine::~TiledMeshRefine() noexcept { CH_TIME("TiledMeshRefine::~TiledMeshRefine"); }
+TiledMeshRefine::~TiledMeshRefine() noexcept
+{
+  CH_TIME("TiledMeshRefine::~TiledMeshRefine");
+}
 
 int
 TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) const noexcept
@@ -59,9 +63,7 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
     }
   }
 
-#ifdef CH_MPI
-  MPI_Allreduce(MPI_IN_PLACE, &topLevel, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-#endif
+  topLevel = ParallelOps::max(topLevel);
 
   int newFinestLevel = 0;
 

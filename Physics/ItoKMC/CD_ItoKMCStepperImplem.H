@@ -691,12 +691,18 @@ ItoKMCStepper<I, C, R, F>::initialSigma() noexcept
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_sigmaSolver->getRealm())[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_sigmaSolver->getRealm(), m_sigmaSolver->getPhase())[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      BaseIVFAB<Real>& phi     = (*sigma[lvl])[dit()];
-      const EBISBox&   ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseIVFAB<Real>& phi     = (*sigma[lvl])[din];
+      const EBISBox&   ebisbox = ebisl[din];
 
       CH_assert(phi.nComp() == 1);
 
@@ -706,7 +712,7 @@ ItoKMCStepper<I, C, R, F>::initialSigma() noexcept
         phi(vof, 0) = m_physics->initialSigma(m_time, pos);
       };
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_sigmaSolver->getRealm(), m_sigmaSolver->getPhase())[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_sigmaSolver->getRealm(), m_sigmaSolver->getPhase())[lvl])[din];
 
       BoxLoops::loop(vofit, kernel);
     }
@@ -1101,8 +1107,16 @@ ItoKMCStepper<I, C, R, F>::writeNumberOfParticlesPerPatch(LevelData<EBCellFAB>& 
     const ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_particleRealm)[lvl]); dit.ok(); ++dit) {
-        (*m_particleScratch1[lvl])[dit()] += particles[lvl][dit].numItems();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        (*m_particleScratch1[lvl])[din] += particles[lvl][din].numItems();
       }
     }
   }
@@ -2880,23 +2894,29 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<LevelData<EBCellFAB>*>& a_it
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const EBCellFAB& E       = a_electricField[dit()];
-    const Box        cellBox = dbl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const EBCellFAB& E       = a_electricField[din];
+    const Box        cellBox = dbl[din];
 
     Vector<EBCellFAB*> itoMobilities;
     Vector<EBCellFAB*> cdrMobilities;
 
     for (int i = 0; i < a_itoMobilities.size(); i++) {
-      itoMobilities.push_back(&((*a_itoMobilities[i])[dit()]));
+      itoMobilities.push_back(&((*a_itoMobilities[i])[din]));
     }
 
     for (int i = 0; i < a_cdrMobilities.size(); i++) {
-      cdrMobilities.push_back(&((*a_cdrMobilities[i])[dit()]));
+      cdrMobilities.push_back(&((*a_cdrMobilities[i])[din]));
     }
 
-    this->computeMobilities(itoMobilities, cdrMobilities, E, a_level, dit(), cellBox, a_time);
+    this->computeMobilities(itoMobilities, cdrMobilities, E, a_level, din, cellBox, a_time);
   }
 }
 
@@ -3115,8 +3135,14 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<LevelData<EBCellF
   CH_assert(a_cdrDiffusionCoefficients.size() == numCdrSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
     Vector<EBCellFAB*> itoDiffusionCoefficients(numItoSpecies);
     Vector<EBCellFAB*> cdrDiffusionCoefficients(numCdrSpecies);
 
@@ -3124,7 +3150,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<LevelData<EBCellF
       const int idx = solverIt.index();
 
       if (solverIt()->isDiffusive()) {
-        itoDiffusionCoefficients[idx] = &(*a_itoDiffusionCoefficients[idx])[dit()];
+        itoDiffusionCoefficients[idx] = &(*a_itoDiffusionCoefficients[idx])[din];
       }
       else {
         itoDiffusionCoefficients[idx] = nullptr;
@@ -3135,7 +3161,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<LevelData<EBCellF
       const int idx = solverIt.index();
 
       if (solverIt()->isDiffusive()) {
-        cdrDiffusionCoefficients[idx] = &(*a_cdrDiffusionCoefficients[idx])[dit()];
+        cdrDiffusionCoefficients[idx] = &(*a_cdrDiffusionCoefficients[idx])[din];
       }
       else {
         cdrDiffusionCoefficients[idx] = nullptr;
@@ -3144,10 +3170,10 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<LevelData<EBCellF
 
     this->computeDiffusionCoefficients(itoDiffusionCoefficients,
                                        cdrDiffusionCoefficients,
-                                       a_electricField[dit()],
+                                       a_electricField[din],
                                        a_level,
-                                       dit(),
-                                       dbl[dit()],
+                                       din,
+                                       dbl[din],
                                        a_time);
   }
 }
@@ -3382,12 +3408,18 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(LevelData<EBCellFA
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_particleRealm)[a_level];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level];
+  const DataIterator&      dit   = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      box     = dbl[dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
 
-    this->computeReactiveItoParticlesPerCell(a_ppc[dit()], a_level, dit(), box, ebisbox);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      box     = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
+
+    this->computeReactiveItoParticlesPerCell(a_ppc[din], a_level, din, box, ebisbox);
   }
 }
 
@@ -3497,12 +3529,18 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(LevelData<EBCellFA
   if (numCdrSpecies > 0) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[a_level];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level];
+    const DataIterator&      dit   = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      box     = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
 
-      this->computeReactiveCdrParticlesPerCell(a_ppc[dit()], a_level, dit(), box, ebisbox);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box      box     = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      this->computeReactiveCdrParticlesPerCell(a_ppc[din], a_level, din, box, ebisbox);
     }
   }
 }
@@ -3596,12 +3634,18 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFA
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_particleRealm)[a_level];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level];
+  const DataIterator&      dit   = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      box     = dbl[dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
 
-    this->computeReactiveMeanEnergiesPerCell(a_meanEnergies[dit()], a_level, dit(), box, ebisbox);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      box     = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
+
+    this->computeReactiveMeanEnergiesPerCell(a_meanEnergies[din], a_level, din, box, ebisbox);
   }
 }
 
@@ -3828,14 +3872,20 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
   CH_assert(a_electricField.nComp() == SpaceDim);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->advanceReactionNetwork(a_particlesPerCell[dit()],
-                                 a_newPhotonsPerCell[dit()],
-                                 a_electricField[dit()],
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this->advanceReactionNetwork(a_particlesPerCell[din],
+                                 a_newPhotonsPerCell[din],
+                                 a_electricField[din],
                                  a_level,
-                                 dit(),
-                                 dbl[dit()],
+                                 din,
+                                 dbl[din],
                                  m_amr->getDx()[a_level],
                                  a_dt);
   }
@@ -4059,14 +4109,20 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->reconcileParticles(a_newParticlesPerCell[dit()],
-                             a_oldParticlesPerCell[dit()],
-                             a_newPhotonsPerCell[dit()],
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this->reconcileParticles(a_newParticlesPerCell[din],
+                             a_oldParticlesPerCell[din],
+                             a_newPhotonsPerCell[din],
                              a_level,
-                             dit(),
-                             dbl[dit()],
+                             din,
+                             dbl[din],
                              m_amr->getDx()[a_level]);
   }
 }
@@ -4350,8 +4406,13 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
       Vector<List<ItoParticle>*>   itoParticles(numItoSpecies);
       Vector<List<PointParticle>*> cdrParticles(numCdrSpecies);
@@ -4360,19 +4421,19 @@ ItoKMCStepper<I, C, R, F>::reconcilePhotoionization() noexcept
       for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
         ParticleContainer<ItoParticle>& particles = solverIt()->getParticles(ItoSolver::WhichContainer::Bulk);
 
-        itoParticles[solverIt.index()] = &(particles[lvl][dit()].listItems());
+        itoParticles[solverIt.index()] = &(particles[lvl][din].listItems());
       }
 
       for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
         ParticleContainer<PointParticle>& particles = m_cdrPhotoiProducts[solverIt.index()];
 
-        cdrParticles[solverIt.index()] = &(particles[lvl][dit()].listItems());
+        cdrParticles[solverIt.index()] = &(particles[lvl][din].listItems());
       }
 
       for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
         ParticleContainer<Photon>& particles = solverIt()->getBulkPhotons();
 
-        photonParticles[solverIt.index()] = &(particles[lvl][dit()].listItems());
+        photonParticles[solverIt.index()] = &(particles[lvl][din].listItems());
       }
 
       m_physics->reconcilePhotoionization(itoParticles, cdrParticles, photonParticles);
@@ -4414,18 +4475,23 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
 
         for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
           const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+          const DataIterator&      dit   = dbl.dataIterator();
           const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
           const Real               dx    = m_amr->getDx()[lvl];
 
-          for (DataIterator dit(dbl); dit.ok(); ++dit) {
-            const EBISBox& ebisbox = ebisl[dit()];
+          const int nbox = dit.size();
 
-            BaseIVFAB<Real>& deltaMass = (*m_fluidScratchEB[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < nbox; mybox++) {
+            const DataIndex& din     = dit[mybox];
+            const EBISBox&   ebisbox = ebisl[din];
+
+            BaseIVFAB<Real>& deltaMass = (*m_fluidScratchEB[lvl])[din];
 
             deltaMass.setVal(0.0);
 
-            const EBCellFAB& newPPC = (*a_newParticlesPerCell[lvl])[dit()];
-            const EBCellFAB& oldPPC = (*a_oldParticlesPerCell[lvl])[dit()];
+            const EBCellFAB& newPPC = (*a_newParticlesPerCell[lvl])[din];
+            const EBCellFAB& oldPPC = (*a_oldParticlesPerCell[lvl])[din];
 
             auto kernel = [&](const VolIndex& vof) -> void {
               const Real kappa = ebisbox.volFrac(vof);
@@ -4433,7 +4499,7 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
               deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / std::pow(dx, SpaceDim);
             };
 
-            VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[dit()];
+            VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
 
             BoxLoops::loop(vofit, kernel);
           }
@@ -4467,16 +4533,17 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const LevelData<EBCellFAB>& a_n
   CH_assert(a_oldParticlesPerCell.nComp() == numCdrSpecies);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
   const Real               dx  = m_amr->getDx()[a_level];
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->reconcileCdrDensities(a_newParticlesPerCell[dit()],
-                                a_oldParticlesPerCell[dit()],
-                                a_level,
-                                dit(),
-                                dbl[dit()],
-                                dx,
-                                a_dt);
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this
+      ->reconcileCdrDensities(a_newParticlesPerCell[din], a_oldParticlesPerCell[din], a_level, din, dbl[din], dx, a_dt);
   }
 }
 
@@ -4668,19 +4735,25 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
   const Vector<Electrode>&  electrodes  = m_computationalGeometry->getElectrodes();
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
-  bool isDielectric = false;
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_particleRealm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox&       ebisbox       = ebisl[dit()];
-      const EBCellFAB&     electricField = (*a_electricField[lvl])[dit()];
-      const EBCellFAB&     oldPPC        = (*m_oldPPC[lvl])[dit()];
-      const EBCellFAB&     newPPC        = (*m_newPPC[lvl])[dit()];
-      const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox&       ebisbox       = ebisl[din];
+      const EBCellFAB&     electricField = (*a_electricField[lvl])[din];
+      const EBCellFAB&     oldPPC        = (*m_oldPPC[lvl])[din];
+      const EBCellFAB&     newPPC        = (*m_newPPC[lvl])[din];
+      const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
+
+      bool isDielectric = false;
 
       Vector<BinFab<ItoParticle>*> secondaryParticlesFAB;
       Vector<BinFab<ItoParticle>*> primaryParticlesFAB;
@@ -4692,18 +4765,18 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
       Vector<BaseIVFAB<Real>*> cdrFluxesExtrapFAB;
 
       for (auto it = m_ito->iterator(); it.ok(); ++it) {
-        secondaryParticlesFAB.push_back(&(a_secondaryParticles[it.index()].getCellParticles(lvl)[dit()]));
-        primaryParticlesFAB.push_back(&(a_primaryParticles[it.index()]->getCellParticles(lvl)[dit()]));
+        secondaryParticlesFAB.push_back(&(a_secondaryParticles[it.index()].getCellParticles(lvl)[din]));
+        primaryParticlesFAB.push_back(&(a_primaryParticles[it.index()]->getCellParticles(lvl)[din]));
       }
 
       for (auto it = m_cdr->iterator(); it.ok(); ++it) {
-        cdrFluxesFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[dit()]));
-        cdrFluxesExtrapFAB.push_back(&((*(a_cdrFluxesExtrap[it.index()])[lvl])[dit()]));
+        cdrFluxesFAB.push_back(&((*(a_cdrFluxes[it.index()])[lvl])[din]));
+        cdrFluxesExtrapFAB.push_back(&((*(a_cdrFluxesExtrap[it.index()])[lvl])[din]));
       }
 
       for (auto it = m_rte->iterator(); it.ok(); ++it) {
-        secondaryPhotonsFAB.push_back(&(a_secondaryPhotons[it.index()].getCellParticles(lvl)[dit()]));
-        primaryPhotonsFAB.push_back(&(a_primaryPhotons[it.index()]->getCellParticles(lvl)[dit()]));
+        secondaryPhotonsFAB.push_back(&(a_secondaryPhotons[it.index()].getCellParticles(lvl)[din]));
+        primaryPhotonsFAB.push_back(&(a_primaryPhotons[it.index()]->getCellParticles(lvl)[din]));
       }
 
       // Kernel definition.
@@ -4801,7 +4874,7 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
       };
 
       // Run the kernel.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[lvl])[din];
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5051,10 +5124,15 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt(const LevelData<EBCellFAB>& a_electr
   Real minDt = std::numeric_limits<Real>::max();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt =
-      this->computePhysicsDt(a_electricField[dit()], a_particlesPerCell[dit()], a_level, dit(), dbl[dit()]);
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Real patchDt = this->computePhysicsDt(a_electricField[din], a_particlesPerCell[din], a_level, din, dbl[din]);
 
     minDt = std::min(minDt, patchDt);
   }
@@ -5525,21 +5603,27 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
   Vector<Vector<long int>> loads(1 + a_finestLevel, 0L);
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     Vector<long int>& levelLoads = loads[lvl];
 
     levelLoads.resize(dbl.size());
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box            cellBox    = dbl[dit()];
-      const EBCellFAB&     PPC        = (*totalPPC[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box            cellBox    = dbl[din];
+      const EBCellFAB&     PPC        = (*totalPPC[lvl])[din];
       const EBISBox&       ebisbox    = PPC.getEBISBox();
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[lvl])[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
       const FArrayBox&     regPPC     = PPC.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-          levelLoads[dit().intCode()] += (long int)regPPC(iv, 0);
+          levelLoads[din.intCode()] += (long int)regPPC(iv, 0);
         }
       };
 
@@ -5715,11 +5799,16 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       // Copy the ItoParticles to the transient particles we use for computing these things.
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
 
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const int nbox = dit.size();
 
-          List<CompParticle>&      patchCompParticles = computationParticles[lvl][dit()].listItems();
-          const List<ItoParticle>& patchItoParticles  = particles[lvl][dit()].listItems();
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          List<CompParticle>&      patchCompParticles = computationParticles[lvl][din].listItems();
+          const List<ItoParticle>& patchItoParticles  = particles[lvl][din].listItems();
 
           for (ListIterator<ItoParticle> lit(patchItoParticles); lit.ok(); ++lit) {
             const ItoParticle& itoParticle = lit();
@@ -5750,9 +5839,15 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       // Move the particles back to their old positions and interpolate the potential there.
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
 
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          List<CompParticle>& particles = computationParticles[lvl][dit()].listItems();
+        const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          List<CompParticle>& particles = computationParticles[lvl][din].listItems();
 
           for (ListIterator<CompParticle> lit(particles); lit.ok(); ++lit) {
 
@@ -5778,9 +5873,15 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       // Move the particles back again and multiply the weight by Z * (V(A) - V(B))/a_dt
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
         const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
+        const DataIterator&      dit = dbl.dataIterator();
 
-        for (DataIterator dit(dbl); dit.ok(); ++dit) {
-          List<CompParticle>& particles = computationParticles[lvl][dit()].listItems();
+        const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
+
+          List<CompParticle>& particles = computationParticles[lvl][din].listItems();
 
           for (ListIterator<CompParticle> lit(particles); lit.ok(); ++lit) {
             lit().position() = lit().template vect<0>();
@@ -5838,15 +5939,21 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_fluidRealm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&     cellBox = dbl[dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&     cellBox = dbl[din];
+      const EBISBox& ebisBox = ebisl[din];
 
       // Handle to electric field
-      const EBCellFAB& electricField    = (*m_electricFieldFluid[lvl])[dit()];
+      const EBCellFAB& electricField    = (*m_electricFieldFluid[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
       // Handle to densities and density gradients for CDR and Ito species.
@@ -5865,9 +5972,9 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
 
         const int i = it.index();
 
-        densitiesIto[i]           = &(*(m_fluidPhiIto[i])[lvl])[dit()];
+        densitiesIto[i]           = &(*(m_fluidPhiIto[i])[lvl])[din];
         densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
-        densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][lvl])[dit()];
+        densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][lvl])[din];
         densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
       }
 
@@ -5877,17 +5984,17 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
 
         const int i = it.index();
 
-        densitiesCDR[i]           = &(*phi[lvl])[dit()];
+        densitiesCDR[i]           = &(*phi[lvl])[din];
         densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
-        densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][lvl])[dit()];
+        densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][lvl])[din];
         densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
       }
 
       // Handle to valid grid cells.
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[lvl])[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[lvl])[din];
 
       // Handle to output variables
-      EBCellFAB& physicsPlotVars    = (*a_physicsPlotVars[lvl])[dit()];
+      EBCellFAB& physicsPlotVars    = (*a_physicsPlotVars[lvl])[din];
       FArrayBox& physicsPlotVarsReg = physicsPlotVars.getFArrayBox();
 
       // Things that will be populated in the kernels.
@@ -5960,7 +6067,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
       };
 
       // Run the kernels.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);

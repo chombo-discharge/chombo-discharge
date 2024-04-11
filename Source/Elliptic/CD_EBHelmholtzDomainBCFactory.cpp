@@ -13,8 +13,10 @@
 #include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDomainBCFactory::EBHelmholtzDomainBCFactory() {}
+EBHelmholtzDomainBCFactory::EBHelmholtzDomainBCFactory()
+{}
 
-EBHelmholtzDomainBCFactory::~EBHelmholtzDomainBCFactory() {}
+EBHelmholtzDomainBCFactory::~EBHelmholtzDomainBCFactory()
+{}
 
 #include <CD_NamespaceFooter.H>

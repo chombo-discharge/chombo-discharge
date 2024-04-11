@@ -17,6 +17,7 @@
 #include <memory>
 #include <mutex>
 #include <type_traits>
+#include <omp.h>
 
 // Chombo includes
 #include <REAL.H>
@@ -26,7 +27,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for encapsulating random number generation. 
+  @brief Class for encapsulating random number generation. This class is MPI and OpenMP safe. 
   @details The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Note that unless the user specifies 
   Random.seed = <number> in the input script, the RNG will use a seed of '0 + procID()' for the various ranks. If the user specifies a <number> less than 0, 
   a random seed will be used.
@@ -195,22 +196,22 @@ private:
   /*!
     @brief Random number generator
   */
-  static std::mt19937_64 s_rng;
+  static thread_local std::mt19937_64 s_rng;
 
   /*!
     @brief For drawing random number on the interval [0,1]
   */
-  static std::uniform_real_distribution<Real> s_uniform01;
+  static thread_local std::uniform_real_distribution<Real> s_uniform01;
 
   /*!
     @brief For drawing random number on the interval [-1,1]
   */
-  static std::uniform_real_distribution<Real> s_uniform11;
+  static thread_local std::uniform_real_distribution<Real> s_uniform11;
 
   /*!
     @brief Normal distribution centered at zero with standard deviation of one
   */
-  static std::normal_distribution<Real> s_normal01;
+  static thread_local std::normal_distribution<Real> s_normal01;
 };
 
 #include <CD_NamespaceFooter.H>

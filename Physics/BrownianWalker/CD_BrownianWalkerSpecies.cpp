@@ -46,7 +46,10 @@ BrownianWalkerSpecies::BrownianWalkerSpecies()
   this->drawInitParticles();
 }
 
-BrownianWalkerSpecies::~BrownianWalkerSpecies() { CH_TIME("BrownianWalkerSpecies::~BrownianWalkerSpecies"); }
+BrownianWalkerSpecies::~BrownianWalkerSpecies()
+{
+  CH_TIME("BrownianWalkerSpecies::~BrownianWalkerSpecies");
+}
 
 void
 BrownianWalkerSpecies::drawInitParticles()

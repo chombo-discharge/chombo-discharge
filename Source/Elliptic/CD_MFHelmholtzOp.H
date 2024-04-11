@@ -14,6 +14,7 @@
 
 // Std includes
 #include <map>
+#include <chrono>
 
 // Chombo includes
 #include <MFCellFAB.H>
@@ -273,11 +274,14 @@ public:
   applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
 
   /*!
-    @brief Time the applyOp routine
-    @param[in] a_timeDit Data iterator for computing the time of applyOp
+    @brief Time the applyOp routine. Template parameter is std::chrono duration. E.g. std::chrono::microseconds
+    @param[in] a_phi Dummy cell-centered data. must have the correct number of ghost cells
+    @param[in] a_numApply Number of times we apply the operator. 
+    @return List of execution times in microseconds, ordered along the input DBLs boxArray()
   */
-  void
-  computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_iterator);
+  template <typename Duration = std::chrono::microseconds>
+  Vector<long long>
+  computeOperatorLoads(LevelData<MFCellFAB>& a_phi, const int a_numApply) noexcept;
 
   /*!
     @brief Relaxation method. This does smoothing for the system L(correction) = residual
@@ -765,5 +769,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_MFHelmholtzOpImplem.H>
 
 #endif

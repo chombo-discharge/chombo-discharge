@@ -193,7 +193,7 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
 
   CH_assert(m_isDefined);
 
-  bool gotNewTags = false;
+  int gotNewTags = 0;
 
   const RealVect probLo         = m_amr->getProbLo();
   const Real     curTime        = m_timeStepper->getTime();
@@ -206,15 +206,21 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
 
     for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box      box     = dbl.get(dit());
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(max : gotNewTags)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box      box     = dbl.get(din);
+        const EBISBox& ebisbox = ebisl[din];
 
         const IntVectSet irregCells = ebisbox.getIrregIVS(box);
-        const IntVectSet backupTags = IntVectSet((*a_tags[lvl])[dit()]);
+        const IntVectSet backupTags = IntVectSet((*a_tags[lvl])[din]);
 
         DenseIntVectSet coarsenCells(box, false);
         DenseIntVectSet refinedCells(box, false);
@@ -223,8 +229,8 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
         Vector<EBCellFAB*> gradTagFields;
 
         for (int i = 0; i < m_numTagFields; i++) {
-          tagFields.push_back(&((*m_tagFields[i][lvl])[dit()]));
-          gradTagFields.push_back(&((*m_gradTagFields[i][lvl])[dit()]));
+          tagFields.push_back(&((*m_tagFields[i][lvl])[din]));
+          gradTagFields.push_back(&((*m_gradTagFields[i][lvl])[din]));
         }
 
         this->tagCellsBox(refinedCells,
@@ -232,7 +238,7 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
                           tagFields,
                           gradTagFields,
                           lvl,
-                          dit(),
+                          din,
                           box,
                           ebisbox,
                           curTime,
@@ -241,7 +247,7 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
 
         // Check if we got any new tags, or we are just recycling old tags.
         // Basically we will check if (current_tags + refined_tags - coarsenCells) == current_tags
-        DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+        DenseIntVectSet& tags = (*a_tags[lvl])[din];
 
         DenseIntVectSet cpy1 = tags;
         tags -= coarsenCells;
@@ -251,17 +257,13 @@ ItoKMCTagger<S>::tagCells(EBAMRTags& a_tags) noexcept
         cpy2 -= cpy1; // = new tags minus old tags. If nonzero, we got some new tags.
         cpy1 -= tags; // = old_tags minus new tags. If nonzero, we got some new tags
         if (cpy1.numPts() != 0 || cpy2.numPts() != 0) {
-          gotNewTags = true;
+          gotNewTags = 1;
         }
       }
     }
   }
 
-  // Some ranks may have gotten new tags while others have not. This little code snippet
-  // sets gotNewTags = true for all ranks if any rank probLoally had gotNewTags = true
-  const int foundTags = gotNewTags ? 1 : 0;
-
-  return (ParallelOps::max(foundTags) > 0);
+  return (ParallelOps::max(gotNewTags) > 0);
 }
 
 template <typename S>

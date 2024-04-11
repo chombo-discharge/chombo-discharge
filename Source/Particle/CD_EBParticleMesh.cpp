@@ -16,7 +16,10 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
-EBParticleMesh::EBParticleMesh() { CH_TIME("EBParticleMesh::EBParticleMesh"); }
+EBParticleMesh::EBParticleMesh()
+{
+  CH_TIME("EBParticleMesh::EBParticleMesh");
+}
 
 EBParticleMesh::EBParticleMesh(const ProblemDomain& a_domain,
                                const Box&           a_region,

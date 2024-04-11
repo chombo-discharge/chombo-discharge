@@ -242,8 +242,9 @@ AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T>>>& a_particles, const std
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str =
-      "AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >, string) - could not find Realm '" + a_realm + "'";
+    const std::string
+      str = "AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >, string) - could not find Realm '" + a_realm +
+            "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -569,11 +570,16 @@ AmrMesh::removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
   // Go through all particles and remove them if they are less than dx*a_tolerance away from the EB.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = this->getDx()[lvl];
     const Real               tol = a_tolerance * dx;
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       // Check if particles are outside the implicit function.
       for (ListIterator<P> lit(particles); lit.ok();) {
@@ -610,19 +616,23 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
     const Real               dx    = this->getDx()[lvl];
     const Real               tol   = a_tolerance * dx;
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisBox = ebisl[dit()];
-      const Box      region  = ebisBox.getRegion();
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
 
       const bool isRegular   = ebisBox.isAllRegular();
       const bool isCovered   = ebisBox.isAllCovered();
       const bool isIrregular = !isRegular && !isCovered;
 
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       if (isCovered) {
         particles.clear();
@@ -694,18 +704,22 @@ AmrMesh::removeCoveredParticlesVoxels(ParticleContainer<P>& a_particles, const p
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
     const Real               dx    = this->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisBox = ebisl[dit()];
-      const Box      region  = ebisBox.getRegion();
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
 
       const bool isRegular   = ebisBox.isAllRegular();
       const bool isCovered   = ebisBox.isAllCovered();
       const bool isIrregular = !isRegular && !isCovered;
 
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+      List<P>& particles = a_particles[lvl][din].listItems();
 
       if (isCovered) {
         particles.clear();
@@ -778,13 +792,17 @@ AmrMesh::transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
   // Go through all particles and remove them if they are less than dx*a_tolerance away from the EB.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = this->getGrids(realmFrom)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = this->getDx()[lvl];
     const Real               tol = a_tolerance * dx;
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      List<P>& particlesFrom = a_particlesFrom[lvl][dit()].listItems();
-      List<P>& particlesTo   = a_particlesTo[lvl][dit()].listItems();
+      List<P>& particlesFrom = a_particlesFrom[lvl][din].listItems();
+      List<P>& particlesTo   = a_particlesTo[lvl][din].listItems();
 
       // Check if particles are outside the implicit function.
       for (ListIterator<P> lit(particlesFrom); lit.ok();) {
@@ -826,20 +844,24 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = this->getGrids(realmFrom)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = this->getEBISLayout(realmFrom, a_phase)[lvl];
     const Real               dx    = this->getDx()[lvl];
     const Real               tol   = a_tolerance * dx;
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisBox = ebisl[dit()];
-      const Box      region  = ebisBox.getRegion();
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
 
       const bool isRegular   = ebisBox.isAllRegular();
       const bool isCovered   = ebisBox.isAllCovered();
       const bool isIrregular = !isRegular && !isCovered;
 
-      List<P>& particlesFrom = a_particlesFrom[lvl][dit()].listItems();
-      List<P>& particlesTo   = a_particlesTo[lvl][dit()].listItems();
+      List<P>& particlesFrom = a_particlesFrom[lvl][din].listItems();
+      List<P>& particlesTo   = a_particlesTo[lvl][din].listItems();
 
       if (isCovered) {
         particlesTo.catenate(particlesFrom);
@@ -915,19 +937,23 @@ AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFro
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = this->getGrids(realmFrom)[lvl];
+    const DataIterator       dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = this->getEBISLayout(realmFrom, a_phase)[lvl];
     const Real               dx    = this->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisBox = ebisl[dit()];
-      const Box      region  = ebisBox.getRegion();
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const EBISBox&   ebisBox = ebisl[din];
+      const Box        region  = ebisBox.getRegion();
 
       const bool isRegular   = ebisBox.isAllRegular();
       const bool isCovered   = ebisBox.isAllCovered();
       const bool isIrregular = !isRegular && !isCovered;
 
-      List<P>& particlesFrom = a_particlesFrom[lvl][dit()].listItems();
-      List<P>& particlesTo   = a_particlesTo[lvl][dit()].listItems();
+      List<P>& particlesFrom = a_particlesFrom[lvl][din].listItems();
+      List<P>& particlesTo   = a_particlesTo[lvl][din].listItems();
 
       if (isCovered) {
         particlesTo.catenate(particlesFrom);
@@ -972,17 +998,22 @@ AmrMesh::transferIrregularParticles(ParticleContainer<P>&         a_dstParticles
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = this->getGrids(realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = this->getEBISLayout(realm, a_phase)[lvl];
     const ProblemDomain&     domain = this->getDomains()[lvl];
     const RealVect           probLo = this->getProbLo();
     const Real               dx     = this->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      List<P>& dstParticles = a_dstParticles[lvl][dit()].listItems();
-      List<P>& srcParticles = a_srcParticles[lvl][dit()].listItems();
+      const Box      cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      List<P>& dstParticles = a_dstParticles[lvl][din].listItems();
+      List<P>& srcParticles = a_srcParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(srcParticles); lit.ok();) {
         P& p = lit();
@@ -1085,12 +1116,16 @@ AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&         a_activeParti
 
     // Handle to various grid stuff.
     const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      List<P>& activeParticles = a_activeParticles[lvl][dit()].listItems();
-      List<P>& ebParticles     = a_ebParticles[lvl][dit()].listItems();
-      List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
+      List<P>& activeParticles = a_activeParticles[lvl][din].listItems();
+      List<P>& ebParticles     = a_ebParticles[lvl][din].listItems();
+      List<P>& domainParticles = a_domainParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(activeParticles); lit.ok();) {
         P& particle = lit();
@@ -1256,12 +1291,16 @@ AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&         a_activePartic
 
     // Handle to various grid stuff.
     const DisjointBoxLayout& dbl = this->getGrids(whichRealm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      List<P>& activeParticles = a_activeParticles[lvl][dit()].listItems();
-      List<P>& ebParticles     = a_ebParticles[lvl][dit()].listItems();
-      List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
+      List<P>& activeParticles = a_activeParticles[lvl][din].listItems();
+      List<P>& ebParticles     = a_ebParticles[lvl][din].listItems();
+      List<P>& domainParticles = a_domainParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(activeParticles); lit.ok();) {
         P& particle = lit();

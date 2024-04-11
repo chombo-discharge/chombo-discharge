@@ -45,7 +45,8 @@ FieldSolver::FieldSolver()
   this->setDefaultDomainBcFunctions();
 }
 
-FieldSolver::~FieldSolver() {}
+FieldSolver::~FieldSolver()
+{}
 
 void
 FieldSolver::setDataLocation(const Location::Cell a_dataLocation)
@@ -227,15 +228,20 @@ FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const 
       const RealVect           probLo = m_amr->getProbLo();
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, phase::solid)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box        cellBox = dbl[dit()];
-        const EBISBox&   ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box        cellBox = dbl[din];
+        const EBISBox&   ebisbox = ebisl[din];
         const EBGraph&   ebgraph = ebisbox.getEBGraph();
         const IntVectSet ivs     = ebisbox.getIrregIVS(cellBox);
 
         // Get handle to data on the solid phase
-        MFCellFAB& D    = (*a_displacementField[lvl])[dit()];
+        MFCellFAB& D    = (*a_displacementField[lvl])[din];
         EBCellFAB& Dsol = D.getPhase(phase::solid);
         FArrayBox& Dreg = Dsol.getFArrayBox();
 
@@ -870,6 +876,7 @@ FieldSolver::setPermittivities()
   if (dielectrics.size() > 0 && m_multifluidIndexSpace->numPhases() > 1) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
       const Real               dx     = m_amr->getDx()[lvl];
       const RealVect           probLo = m_amr->getProbLo();
 
@@ -881,11 +888,15 @@ FieldSolver::setPermittivities()
       MultifluidAlias::aliasMF(facePerm, phase::solid, *m_permittivityFace[lvl]);
       MultifluidAlias::aliasMF(ebPerm, phase::solid, *m_permittivityEB[lvl]);
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        EBCellFAB&       cellPermFAB = cellPerm[dit()];
-        EBFluxFAB&       facePermFAB = facePerm[dit()];
-        BaseIVFAB<Real>& ebPermFAB   = ebPerm[dit()];
-        const Box        cellBox     = dbl[dit()];
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        EBCellFAB&       cellPermFAB = cellPerm[din];
+        EBFluxFAB&       facePermFAB = facePerm[din];
+        BaseIVFAB<Real>& ebPermFAB   = ebPerm[din];
+        const Box        cellBox     = dbl[din];
         const EBISBox&   ebisbox     = cellPermFAB.getEBISBox();
 
         this->setCellPermittivities(cellPermFAB, cellBox, ebisbox, probLo, dx);
@@ -910,9 +921,6 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
 
   CH_assert(a_relPerm.nComp() == 1);
 
-  const EBGraph&   ebgraph = a_ebisbox.getEBGraph();
-  const IntVectSet irreg   = a_ebisbox.getIrregIVS(a_cellBox);
-
   BaseFab<Real>& relPermFAB = a_relPerm.getSingleValuedFAB();
 
   // Regular kernel
@@ -925,12 +933,15 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
 
   // Irregular kernel
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const RealVect pos     = Location::position(m_dataLocation, vof, a_ebisbox, a_dx);
+    const RealVect pos     = a_probLo + Location::position(m_dataLocation, vof, a_ebisbox, a_dx);
     a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
   };
 
   // Kernel regions.
-  VoFIterator irregRegion(irreg, ebgraph);
+  const Box        grownBox = grow(a_cellBox, 1);
+  const EBGraph&   ebgraph  = a_ebisbox.getEBGraph();
+  const IntVectSet irreg    = a_ebisbox.getIrregIVS(grownBox);
+  VoFIterator      irregRegion(irreg, ebgraph);
 
   // Launch kernels.
   BoxLoops::loop(a_cellBox, regularKernel);
@@ -1339,10 +1350,15 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
     const DisjointBoxLayout& dbl        = m_amr->getGrids(m_realm)[a_level];
     const EBISLayout&        ebislGas   = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     const EBISLayout&        ebislSolid = m_amr->getEBISLayout(m_realm, phase::solid)[a_level];
+    const DataIterator&      dit        = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisBoxGas   = ebislGas[dit()];
-      const EBISBox& ebisBoxSolid = ebislSolid[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBISBox& ebisBoxGas   = ebislGas[din];
+      const EBISBox& ebisBoxSolid = ebislSolid[din];
 
       const bool isGasRegular   = ebisBoxGas.isAllRegular();
       const bool isGasCovered   = ebisBoxGas.isAllCovered();
@@ -1352,8 +1368,8 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
       const bool isSolidCovered   = ebisBoxSolid.isAllCovered();
       const bool isSolidIrregular = !isSolidRegular && !isSolidCovered;
 
-      FArrayBox&       fabGas   = scratchGas[dit()].getFArrayBox();
-      const FArrayBox& fabSolid = scratchSolid[dit()].getFArrayBox();
+      FArrayBox&       fabGas   = scratchGas[din].getFArrayBox();
+      const FArrayBox& fabSolid = scratchSolid[din].getFArrayBox();
 
       // This is true if the current EBISBox covers a region that is either inside the gas phase
       // or inside the solid phase.
@@ -1399,7 +1415,6 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           // In this case we are looking at a grid patch that lies on the gas-solid boundary. We need to determine which cells
           // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
           // the solid-side data.
-
           for (comp = 0; comp < numComp; comp++) {
             BoxLoops::loop(fabGas.box() & domain, kernel);
           }
@@ -1562,23 +1577,22 @@ FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
     pout() << "FieldSolver::computeLoads(DisjointBoxLayout, int)" << endl;
   }
 
-  // Compute number of cells
-  Vector<int> numCells(a_dbl.size(), 0);
-  for (DataIterator dit = a_dbl.dataIterator(); dit.ok(); ++dit) {
-    numCells[dit().intCode()] = a_dbl[dit()].numPts();
+  // TLDR: Compute the number of cells in each grid patch and return the result.
+
+  Vector<long long> loads(a_dbl.size(), 0);
+
+  const DataIterator& dit = a_dbl.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din     = dit[mybox];
+    const int        intCode = din.intCode();
+
+    loads[intCode] = a_dbl[din].numPts();
   }
 
-#ifdef CH_MPI
-  int         count = numCells.size();
-  Vector<int> tmp(count);
-  MPI_Allreduce(&(numCells[0]), &(tmp[0]), count, MPI_INT, MPI_SUM, Chombo_MPI::comm);
-  numCells = tmp;
-#endif
-
-  Vector<long long> loads(numCells.size());
-  for (int i = 0; i < loads.size(); i++) {
-    loads[i] = (long long)numCells[i];
-  }
+  ParallelOps::vectorSum(loads);
 
   return loads;
 }

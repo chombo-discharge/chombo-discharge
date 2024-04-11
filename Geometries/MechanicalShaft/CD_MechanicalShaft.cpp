@@ -62,7 +62,10 @@ MechanicalShaft::MechanicalShaft() noexcept
   this->setGasPermittivity(eps0);
 }
 
-MechanicalShaft::~MechanicalShaft() noexcept { CH_TIME("MechanicalShaft::~MechanicalShaft"); }
+MechanicalShaft::~MechanicalShaft() noexcept
+{
+  CH_TIME("MechanicalShaft::~MechanicalShaft");
+}
 
 void
 MechanicalShaft::defineElectrode() noexcept

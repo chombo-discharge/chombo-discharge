@@ -10,7 +10,7 @@
 */
 
 // Chombo includes
-#include <EBArith.H>
+#include <NeighborIterator.H>
 
 // Our includes
 #include <CD_IrregStencil.H>
@@ -20,9 +20,11 @@
 constexpr int IrregStencil::m_defaultStenComp;
 constexpr int IrregStencil::m_defaultNumSten;
 
-IrregStencil::IrregStencil() {}
+IrregStencil::IrregStencil()
+{}
 
-IrregStencil::~IrregStencil() {}
+IrregStencil::~IrregStencil()
+{}
 
 IrregStencil::IrregStencil(const DisjointBoxLayout&        a_dbl,
                            const EBISLayout&               a_ebisl,
@@ -57,6 +59,7 @@ IrregStencil::define(const DisjointBoxLayout&        a_dbl,
                      const int                       a_radius,
                      const IrregStencil::StencilType a_type)
 {
+  CH_TIME("IrregStencil::define");
 
   m_dbl         = a_dbl;
   m_ebisl       = a_ebisl;
@@ -65,26 +68,36 @@ IrregStencil::define(const DisjointBoxLayout&        a_dbl,
   m_order       = a_order;
   m_stencilType = a_type;
 
-  LayoutData<IntVectSet> cfivs;
-  EBArith::defineCFIVS(cfivs, a_dbl, a_domain);
-
   m_stencils.define(m_dbl);
   m_vofIter.define(m_dbl);
 
-  for (DataIterator dit = m_dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box&        box     = m_dbl[dit()];
-    const EBISBox&    ebisbox = m_ebisl[dit()];
+  const DataIterator& dit  = m_dbl.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&        box     = m_dbl[din];
+    const EBISBox&    ebisbox = m_ebisl[din];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    m_stencils[dit()] = RefCountedPtr<BaseIVFAB<VoFStencil>>(new BaseIVFAB<VoFStencil>(ivs, ebgraph, m_defaultNumSten));
+    // Build the coarse-fine interface around this box
+    IntVectSet       cfivs = IntVectSet(grow(box, 1) & m_domain);
+    NeighborIterator nit(m_dbl);
+    for (nit.begin(din); nit.ok(); ++nit) {
+      cfivs -= m_dbl[nit()];
+    }
 
-    VoFIterator& vofit = m_vofIter[dit()];
+    m_stencils[din] = RefCountedPtr<BaseIVFAB<VoFStencil>>(new BaseIVFAB<VoFStencil>(ivs, ebgraph, m_defaultNumSten));
+
+    VoFIterator& vofit = m_vofIter[din];
     vofit.define(ivs, ebgraph);
 
     auto kernel = [&](const VolIndex& vof) -> void {
-      VoFStencil& stencil = (*m_stencils[dit()])(vof, 0);
-      this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);
+      VoFStencil& stencil = (*m_stencils[din])(vof, 0);
+      this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs);
 
 #if 0 // Safety test
       Real sum = 0.0;

@@ -16,14 +16,16 @@
 #include <CD_SimpleItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
-inline SimpleItoParticle::SimpleItoParticle() {}
+inline SimpleItoParticle::SimpleItoParticle()
+{}
 
 inline SimpleItoParticle::SimpleItoParticle(const Real a_weight, const RealVect a_position, const Real a_energy)
 {
   this->define(a_weight, a_position, a_energy);
 }
 
-inline SimpleItoParticle::~SimpleItoParticle() {}
+inline SimpleItoParticle::~SimpleItoParticle()
+{}
 
 inline void
 SimpleItoParticle::define(const Real a_weight, const RealVect a_position, const Real a_energy)

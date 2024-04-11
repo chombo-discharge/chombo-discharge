@@ -91,7 +91,7 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
 
   this->computeTracerField();
 
-  int foundTags = -1;
+  int foundTags = 0;
 
   const int finestLevel    = m_amr->getFinestLevel();
   const int maxLevel       = m_amr->getMaxAmrDepth();
@@ -99,14 +99,20 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
 
   for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
 
-      DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(max : foundTags)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
+      const EBISBox& ebisbox = ebisl[din];
+
+      DenseIntVectSet& tags = (*a_tags[lvl])[din];
+
+      const EBCellFAB& tracerField    = (*m_tracerField[lvl])[din];
       const FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -126,8 +132,8 @@ StreamerInceptionTagger::tagCells(EBAMRTags& a_tags)
       };
 
       // Run the kernels.
-      Box         cellBox = dbl[dit()];
-      VoFIterator vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box         cellBox = dbl[din];
+      VoFIterator vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Execute the kernels.
       BoxLoops::loop(cellBox, regularKernel);
@@ -185,13 +191,19 @@ StreamerInceptionTagger::computeTracerField() const noexcept
   // Compute alphaEff * dx on all grid levels.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBCellFAB& electricField    = (*(*m_electricField)[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBCellFAB& electricField    = (*(*m_electricField)[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
-      EBCellFAB& tracerField    = (*m_tracerField[lvl])[dit()];
+      EBCellFAB& tracerField    = (*m_tracerField[lvl])[din];
       FArrayBox& tracerFieldReg = tracerField.getFArrayBox();
 
       const EBISBox& ebisbox = electricField.getEBISBox();
@@ -212,8 +224,8 @@ StreamerInceptionTagger::computeTracerField() const noexcept
         tracerField(vof, 0) = m_alphaEff(m_maxVoltage * E, x) * dx;
       };
 
-      Box          cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      Box          cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);

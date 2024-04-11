@@ -62,6 +62,7 @@ DoubleRod::DoubleRod()
   }
 }
 
-DoubleRod::~DoubleRod() {}
+DoubleRod::~DoubleRod()
+{}
 
 #include <CD_NamespaceFooter.H>

@@ -96,6 +96,7 @@ NoisePlane::NoisePlane()
   }
 }
 
-NoisePlane::~NoisePlane() {}
+NoisePlane::~NoisePlane()
+{}
 
 #include <CD_NamespaceFooter.H>

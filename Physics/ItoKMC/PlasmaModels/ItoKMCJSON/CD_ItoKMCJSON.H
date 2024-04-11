@@ -703,6 +703,7 @@ namespace Physics {
 
       /*!
 	@brief Update reaction rates
+	@param[out] a_kmcReactions Reaction rates to be set. 
 	@param[in] a_E       Electric field
 	@param[in] a_pos     Physical position
 	@param[in] a_phi     Plasma species densities
@@ -711,12 +712,13 @@ namespace Physics {
 	@param[in] a_kappa   Cut-cell volume fraction
       */
       virtual void
-      updateReactionRates(const RealVect          a_E,
-                          const RealVect          a_pos,
-                          const Vector<Real>&     a_phi,
-                          const Vector<RealVect>& a_gradPhi,
-                          const Real              a_dx,
-                          const Real              a_kappa) const noexcept override;
+      updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>& a_kmcReactions,
+                          const RealVect                                   a_E,
+                          const RealVect                                   a_pos,
+                          const Vector<Real>&                              a_phi,
+                          const Vector<RealVect>&                          a_gradPhi,
+                          const Real                                       a_dx,
+                          const Real                                       a_kappa) const noexcept override;
 
       /*!
 	@brief Sample a multinomial distribution with N samples 

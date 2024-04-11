@@ -18,19 +18,20 @@ if sys.version_info < MIN_PYTHON:
 # --------------------------------------------------
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--compile',              help="Compile executables.",           action='store_true')
-parser.add_argument('--silent',               help="Turn off unnecessary output.",   action='store_true')
-parser.add_argument('--clean',                help="Do a clean compile.",            action='store_true')
-parser.add_argument('--benchmark',            help="Generate benchmark files only.", action='store_true')
-parser.add_argument('--no_exec',              help="Do not run executables.",        action='store_true')
-parser.add_argument('--compare',              help="Turn off HDF5 comparisons",      action='store_true')
-parser.add_argument('-mpi',                   help="Use MPI or not",  type=str, default="FALSE", required=False)
-parser.add_argument('-hdf',                   help="Use HDF5 or not", type=str, default="FALSE", required=False)
-parser.add_argument('-dim',                   help="Test dimensionality", type=int, default=-1, required=False)
-parser.add_argument('-cores',                 help="Number of cores to use", type=int, default=2)
-parser.add_argument('-exec_mpi',              help="MPI run command.", type=str, default="mpirun")
-parser.add_argument('-suites',                help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
-parser.add_argument('-tests',                 help="Individual tests in test suite.", nargs='+', required=False)
+parser.add_argument('--compile',   help="Compile executables.",           action='store_true')
+parser.add_argument('--silent',    help="Turn off unnecessary output.",   action='store_true')
+parser.add_argument('--clean',     help="Do a clean compile.",            action='store_true')
+parser.add_argument('--benchmark', help="Generate benchmark files only.", action='store_true')
+parser.add_argument('--no_exec',   help="Do not run executables.",        action='store_true')
+parser.add_argument('--compare',   help="Turn off HDF5 comparisons",      action='store_true')
+parser.add_argument('-mpi',        help="Use MPI or not",         type=str, default="FALSE",  required=False)
+parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default="FALSE",  required=False)
+parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default="FALSE",  required=False)
+parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=-1,       required=False)
+parser.add_argument('-cores',      help="Number of cores to use", type=int, default=2,        required=False)
+parser.add_argument('-exec_mpi',   help="MPI run command.",       type=str, default="mpirun", required=False)
+parser.add_argument('-suites',     help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
+parser.add_argument('-tests',      help="Individual tests in test suite.", nargs='+', required=False)
 
 
 args = parser.parse_args()
@@ -90,7 +91,7 @@ def pre_check(silent):
 # --------------------------------------------------
 # Function that compiles a test
 # --------------------------------------------------
-def compile_test(silent, build_procs, dim, mpi, hdf, clean, main):
+def compile_test(silent, build_procs, dim, mpi, omp, hdf, clean, main):
     """ Set up and run a compilation of the target test. """
 
     makeCommand = "make "
@@ -99,7 +100,10 @@ def compile_test(silent, build_procs, dim, mpi, hdf, clean, main):
     makeCommand += "-j" + str(build_procs) + " "
     makeCommand += "DIM=" + str(dim) + " "
     makeCommand += "MPI=" + str(mpi).upper() + " "
-    makeCommand += "USE_HDF=" + str(hdf).upper() + " "        
+    makeCommand += "OPENMPCC=" + str(omp).upper() + " "    
+    makeCommand += "USE_HDF=" + str(hdf).upper() + " "
+    makeCommand += "USE_MT=FALSE "
+    
     if clean:
         makeCommand += "clean "
     makeCommand += str(config[str(test)]['exec'])        
@@ -180,8 +184,8 @@ for test in config.sections():
         # --------------------------------------------------
         directory  = str(config[str(test)]['directory'])
         dim        = int(config[str(test)]['dim'])    
-        executable = str(config[str(test)]['exec']) + str(dim) + "d.*.ex"
-        input      = str(config[str(test)]['input'])
+        executable = str(config[str(test)]['exec']) + str(dim) + "d.*"
+        inputFile  = str(config[str(test)]['input'])
         nplot      = int(config[str(test)]['plot_interval'])
         nsteps     = int(config[str(test)]['nsteps'])
         restart    = int(config[str(test)]['restart'])
@@ -189,6 +193,13 @@ for test in config.sections():
             output     = str(config[str(test)]['benchmark'])
         else:
             output     = str(config[str(test)]['output'])
+
+        
+        if str(args.mpi).upper() == "TRUE":
+            executable += "MPI."
+        if str(args.openmp).upper() == "TRUE":
+            executable += "OPENMPCC."            
+        executable += "ex"
 
         start = time.time()        
         
@@ -201,7 +212,7 @@ for test in config.sections():
             print("\t Running benchmark!")
             
         print("\t Directory is     = " + directory)
-        print("\t Input file is    = " + input)
+        print("\t Input file is    = " + inputFile)
         print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
         # --------------------------------------------------
@@ -219,6 +230,7 @@ for test in config.sections():
                                         build_procs=args.cores,
                                         dim=dim,
                                         mpi=args.mpi,
+                                        omp=args.openmp,
                                         hdf=args.hdf,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
@@ -235,12 +247,24 @@ for test in config.sections():
                 print(f'\t Test completed   = {time.time() - start:.2f}s')                
             else:
                 # --------------------------------------------------
+                # Configure OpenMP
+                # --------------------------------------------------
+                if str(args.openmp).upper() == "TRUE":
+                    os.environ['OMP_NUM_THREADS'] = str(args.cores)
+                    os.environ['OMP_PLACES'] = "cores"
+                    os.environ['OMP_SCHEDULE'] = "dynamic"
+                    os.environ['OMP_PROC_BIND'] = "true"
+                    
+                # --------------------------------------------------
                 # Set up the run command
                 # --------------------------------------------------
                 if str(args.mpi).upper() == "TRUE":
-                    runCommand = args.exec_mpi   + " -np " + str(args.cores) + " ./" + executable + " " + input
+                    if str(args.openmp).upper() == "TRUE":
+                        runCommand = args.exec_mpi + " -np 1" + " ./" + executable + " " + inputFile                        
+                    else:
+                        runCommand = args.exec_mpi + " -np " + str(args.cores) + " ./" + executable + " " + inputFile
                 else:
-                    runCommand = "./" + executable + " " + input                
+                    runCommand = "./" + executable + " " + inputFile                
 
                 runCommand = runCommand + " Driver.output_names="  + str(output)
                 runCommand = runCommand + " Driver.plot_interval=" + str(nplot)

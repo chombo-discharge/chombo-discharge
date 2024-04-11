@@ -37,7 +37,10 @@ FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver()
   m_className     = "FieldSolverMultigrid";
 }
 
-FieldSolverMultigrid::~FieldSolverMultigrid() { CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()"); }
+FieldSolverMultigrid::~FieldSolverMultigrid()
+{
+  CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()");
+}
 
 void
 FieldSolverMultigrid::parseOptions()
@@ -778,37 +781,18 @@ FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_l
     this->setupSolver();
   }
 
-  // Reset time
-  TimedDataIterator dit = a_dbl.timedDataIterator();
-  dit.clearTime();
-  dit.enableTime();
-
   // Allocate a dummy storage that we can operate on.
   MFAMRCellData dummy;
   m_amr->allocate(dummy, m_realm, m_nComp);
 
   // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing kernels.
   auto oper = (MFHelmholtzOp*)m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
-  for (int k = 0; k < numApply; k++) {
-    oper->computeOperatorLoads(*dummy[a_level], dit);
-  }
 
-  // Merge times
-  dit.disableTime();
-  dit.mergeTime();
-
-  // Now do the load balancing. When we do this, the boxes do not follow AmrMesh sorting. I.e., the
-  // vector indices correspond to the indices in DisjointBoxLayout::getBoxArray().
-  Vector<unsigned long long> loads = dit.getTime();
-
-  Vector<long long> ret(loads.size());
-  for (int i = 0; i < loads.size(); i++) {
-    ret[i] = (long long)loads[i];
-  }
+  const Vector<long long> loads = oper->computeOperatorLoads(*dummy[a_level], numApply);
 
   delete oper;
 
-  return ret;
+  return loads;
 }
 
 void

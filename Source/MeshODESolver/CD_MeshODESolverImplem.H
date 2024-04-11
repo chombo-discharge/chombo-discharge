@@ -202,15 +202,21 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const Real&              dx     = m_amr->getDx()[lvl];
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const RealVect&          probLo = m_amr->getProbLo();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&           phi        = (*m_phi[lvl])[dit()];
-      const EBISBox&       ebisbox    = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&           phi        = (*m_phi[lvl])[din];
+      const EBISBox&       ebisbox    = ebisl[din];
       FArrayBox&           phiFAB     = phi.getFArrayBox();
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
       // Regular kernel. Only do cells that are not covered by a finer grid.
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -246,8 +252,8 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
       };
 
       // Kernel regions.
-      const Box    cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Run the kernels.
       BoxLoops::loop(cellBox, regularKernel);
@@ -294,16 +300,22 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&       rhs     = (*a_rhs[lvl])[dit()];
-      const EBCellFAB& phi     = (*m_phi[lvl])[dit()];
-      const EBISBox&   ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&       rhs     = (*a_rhs[lvl])[din];
+      const EBCellFAB& phi     = (*m_phi[lvl])[din];
+      const EBISBox&   ebisbox = ebisl[din];
 
       FArrayBox&       rhsFAB = rhs.getFArrayBox();
       const FArrayBox& phiFAB = phi.getFArrayBox();
 
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
       // Regular kernel. Only do cells that are not covered by a finer grid.
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -352,8 +364,8 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
       };
 
       // Kernel regions.
-      const Box    cellBox = dbl[dit()];
-      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      const Box    cellBox = dbl[din];
+      VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Run the kernels.
       BoxLoops::loop(cellBox, regularKernel);

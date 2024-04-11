@@ -119,7 +119,10 @@ EBAMRSurfaceDeposition::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGri
 void
 EBAMRSurfaceDeposition::defineBuffers() noexcept
 {
-  CH_TIME("EBAMRSurfaceDeposition::defineBuffers");
+  CH_TIMERS("EBAMRSurfaceDeposition::defineBuffers");
+  CH_TIMER("EBAMRSurfaceDeposition::defineBuffers::define_level", t1);
+  CH_TIMER("EBAMRSurfaceDeposition::defineBuffers::define_refined_coar", t2);
+  CH_TIMER("EBAMRSurfaceDeposition::defineBuffers::define_coarsened_fine", t3);
   if (m_verbose) {
     pout() << "EBAMRSurfaceDeposition::defineBuffers" << endl;
   }
@@ -131,6 +134,7 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
 
   constexpr int nComp = 1;
 
+  CH_START(t1);
   m_data.resize(1 + m_finestLevel);
   m_refinedCoarData.resize(1 + m_finestLevel);
   m_coarsenedFineData.resize(1 + m_finestLevel);
@@ -138,34 +142,46 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
   // Define data on this level
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = m_ebGrids[lvl]->getDBL();
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_ebGrids[lvl]->getEBISL();
     const ProblemDomain&     domain = m_ebGrids[lvl]->getDomain();
 
     LayoutData<IntVectSet> irregCells(dbl);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      box     = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      irregCells[dit()] = ebisbox.getIrregIVS(grow(box, m_radius) & domain);
+      const Box      box     = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      irregCells[din] = ebisbox.getIrregIVS(grow(box, m_radius) & domain);
     }
 
     m_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
       new LevelData<BaseIVFAB<Real>>(dbl, nComp, m_radius * IntVect::Unit, BaseIVFactory<Real>(ebisl, irregCells)));
   }
+  CH_STOP(t1);
 
   // Define refined coarse data
+  CH_START(t2);
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& refinedCoarDBL   = m_ebGridsRefinedCoar[lvl]->getDBL();
+    const DataIterator&      dit              = refinedCoarDBL.dataIterator();
     const EBISLayout&        refinedCoarEBISL = m_ebGridsRefinedCoar[lvl]->getEBISL();
 
     LayoutData<IntVectSet> irregCells(refinedCoarDBL);
 
-    for (DataIterator dit(refinedCoarDBL); dit.ok(); ++dit) {
-      const Box      box     = refinedCoarDBL[dit()];
-      const EBISBox& ebisbox = refinedCoarEBISL[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      irregCells[dit()] = ebisbox.getIrregIVS(box);
+      const Box      box     = refinedCoarDBL[din];
+      const EBISBox& ebisbox = refinedCoarEBISL[din];
+
+      irregCells[din] = ebisbox.getIrregIVS(box);
     }
 
     m_refinedCoarData[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
@@ -174,20 +190,27 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
                                      IntVect::Zero,
                                      BaseIVFactory<Real>(refinedCoarEBISL, irregCells)));
   }
+  CH_STOP(t2);
 
   // Define coarsened fine data
+  CH_START(t3);
   for (int lvl = 0; lvl <= m_finestLevel - 1; lvl++) {
     const DisjointBoxLayout& coarsenedFineDBL    = m_ebGridsCoarsenedFine[lvl]->getDBL();
     const EBISLayout&        coarsenedFineEBISL  = m_ebGridsCoarsenedFine[lvl]->getEBISL();
     const ProblemDomain&     coarsenedFineDomain = m_ebGridsCoarsenedFine[lvl]->getDomain();
+    const DataIterator&      dit                 = coarsenedFineDBL.dataIterator();
 
     LayoutData<IntVectSet> irregCells(coarsenedFineDBL);
 
-    for (DataIterator dit(coarsenedFineDBL); dit.ok(); ++dit) {
-      const Box      box     = coarsenedFineDBL[dit()];
-      const EBISBox& ebisbox = coarsenedFineEBISL[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      irregCells[dit()] = ebisbox.getIrregIVS(grow(box, m_radius) & coarsenedFineDomain);
+      const Box      box     = coarsenedFineDBL[din];
+      const EBISBox& ebisbox = coarsenedFineEBISL[din];
+
+      irregCells[din] = ebisbox.getIrregIVS(grow(box, m_radius) & coarsenedFineDomain);
     }
 
     m_coarsenedFineData[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real>>>(
@@ -196,6 +219,7 @@ EBAMRSurfaceDeposition::defineBuffers() noexcept
                                      m_radius * IntVect::Unit,
                                      BaseIVFactory<Real>(coarsenedFineEBISL, irregCells)));
   }
+  CH_STOP(t3);
 }
 
 void
@@ -250,47 +274,61 @@ EBAMRSurfaceDeposition::defineDataMotion() noexcept
 void
 EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
 {
-  CH_TIME("EBAMRSurfaceDeposition::defineDepositionStencils");
+  CH_TIMERS("EBAMRSurfaceDeposition::defineDepositionStencils");
+  CH_TIMER("EBAMRSurfaceDeposition::defineDepositionStencils::stencil_define", t1);
+  CH_TIMER("EBAMRSurfaceDeposition::defineDepositionStencils::calc_weights", t2);
   if (m_verbose) {
     pout() << "EBAMRSurfaceDeposition::defineDepositionStencils" << endl;
   }
 
   constexpr int nComp = 1;
 
+  CH_START(t1);
   m_depositionStencils.resize(1 + m_finestLevel);
 
   // Define over valid cut-cells (i.e., cut-cells not covered by a finer grid)
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_ebGrids[lvl]->getDBL();
     const EBISLayout&        ebisl = m_ebGrids[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     m_depositionStencils[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>(
       new LayoutData<BaseIVFAB<VoFStencil>>(dbl));
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box        box     = dbl[dit()];
-      const EBISBox&   ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box        box     = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
       const EBGraph&   ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs     = ebisbox.getIrregIVS(box);
 
-      (*m_depositionStencils[lvl])[dit()].define(ivs, ebgraph, 1);
+      (*m_depositionStencils[lvl])[din].define(ivs, ebgraph, 1);
     }
   }
+  CH_STOP(t1);
 
   // Compute deposition weights for current cells.
+  CH_START(t2);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl    = m_ebGrids[lvl]->getDBL();
     const EBISLayout&        ebisl  = m_ebGrids[lvl]->getEBISL();
     const ProblemDomain&     domain = m_ebGrids[lvl]->getDomain();
+    const DataIterator&      dit    = dbl.dataIterator();
+    const Real               dx     = m_dx[lvl];
+    const int                nbox   = dit.size();
 
-    const Real dx = m_dx[lvl];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      box     = dbl[dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
+      const Box      box     = dbl[din];
+      const EBISBox& ebisBox = ebisl[din];
       const EBGraph& ebGraph = ebisBox.getEBGraph();
 
-      BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[dit()];
+      BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[din];
 
       // Build stencils.
       const IntVectSet& ivs     = stencils.getIVS();
@@ -339,6 +377,7 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
       };
     }
   }
+  CH_START(t2);
 }
 
 void
@@ -365,19 +404,25 @@ EBAMRSurfaceDeposition::defineCoarseToFineStencils() noexcept
     m_coarseToFineStencils[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>(
       new LayoutData<BaseIVFAB<VoFStencil>>(dblCoar));
 
-    for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
-      const Box boxFine = dblFine[dit()];
-      const Box boxCoar = dblCoar[dit()];
+    const DataIterator& dit  = dblCoar.dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box boxFine = dblFine[din];
+      const Box boxCoar = dblCoar[din];
 
       CH_assert(refine(boxCoar, m_refRat[lvl - 1]) == boxFine);
 
-      const EBISBox& ebisBoxCoar = ebislCoar[dit()];
-      const EBISBox& ebisBoxFine = ebislFine[dit()];
+      const EBISBox& ebisBoxCoar = ebislCoar[din];
+      const EBISBox& ebisBoxFine = ebislFine[din];
 
       const EBGraph&   ebGraphCoar = ebisBoxCoar.getEBGraph();
-      const IntVectSet irregCoar   = ebisBoxCoar.getIrregIVS(dblCoar[dit()]);
+      const IntVectSet irregCoar   = ebisBoxCoar.getIrregIVS(dblCoar[din]);
 
-      BaseIVFAB<VoFStencil>& interpStencils = (*m_coarseToFineStencils[lvl])[dit()];
+      BaseIVFAB<VoFStencil>& interpStencils = (*m_coarseToFineStencils[lvl])[din];
 
       interpStencils.define(irregCoar, ebGraphCoar, 1);
 
@@ -387,7 +432,7 @@ EBAMRSurfaceDeposition::defineCoarseToFineStencils() noexcept
         VoFStencil& stencil = interpStencils(coarVoF, 0);
 
         // Figure out which cut-cells on the fine grid comes from refining the current one on the coarse grid
-        const Vector<VolIndex> refinedCoarVoFs = ebislCoar.refine(coarVoF, m_refRat[lvl - 1], dit());
+        const Vector<VolIndex> refinedCoarVoFs = ebislCoar.refine(coarVoF, m_refRat[lvl - 1], din);
 
         Vector<VolIndex> fineIrregVoFs;
         for (int i = 0; i < refinedCoarVoFs.size(); i++) {
@@ -445,12 +490,18 @@ EBAMRSurfaceDeposition::defineFineToCoarseStencils() noexcept
     m_fineToCoarseStencils[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil>>>(
       new LayoutData<BaseIVFAB<VoFStencil>>(dblFine));
 
-    for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-      const Box boxFine = dblFine[dit()];
-      const Box boxCoar = dblCoar[dit()];
+    const DataIterator& dit = dblFine.dataIterator();
 
-      const EBISBox& ebisBoxCoar = ebislCoar[dit()];
-      const EBISBox& ebisBoxFine = ebislFine[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box boxFine = dblFine[din];
+      const Box boxCoar = dblCoar[din];
+
+      const EBISBox& ebisBoxCoar = ebislCoar[din];
+      const EBISBox& ebisBoxFine = ebislFine[din];
       const EBGraph& ebGraphFine = ebisBoxFine.getEBGraph();
 
       CH_assert(refine(boxCoar, m_refRat[lvl - 1]) == boxFine);
@@ -459,20 +510,20 @@ EBAMRSurfaceDeposition::defineFineToCoarseStencils() noexcept
       IntVectSet irregCFIVS = ebisBoxFine.getIrregIVS((grow(boxFine, m_radius) & domainFine));
 
       NeighborIterator nit(dblFine);
-      for (nit.begin(dit()); nit.ok(); ++nit) {
+      for (nit.begin(din); nit.ok(); ++nit) {
         irregCFIVS -= dblFine[nit()];
       }
       irregCFIVS -= boxFine;
 
       // Define data holder over all cut-cells that are ghost cells on the coarse-fine interface.
-      BaseIVFAB<VoFStencil>& coarsenStencils = (*m_fineToCoarseStencils[lvl])[dit()];
+      BaseIVFAB<VoFStencil>& coarsenStencils = (*m_fineToCoarseStencils[lvl])[din];
 
       coarsenStencils.define(irregCFIVS, ebGraphFine, 1);
 
       // Define the stencils -- this ensures that we do conservative coarsening of the data.
       for (VoFIterator vofit(irregCFIVS, ebGraphFine); vofit.ok(); ++vofit) {
         const VolIndex& fineGhostVoF = vofit();
-        const VolIndex& coarVoF      = ebislFine.coarsen(fineGhostVoF, m_refRat[lvl - 1], dit());
+        const VolIndex& coarVoF      = ebislFine.coarsen(fineGhostVoF, m_refRat[lvl - 1], din);
 
         CH_assert(ebisBoxFine.isIrregular(fineGhostVoF.gridIndex()));
         CH_assert(ebisBoxCoar.isIrregular(coarVoF.gridIndex()));
@@ -507,13 +558,17 @@ EBAMRSurfaceDeposition::addInvalidCoarseDataToFineData() const noexcept
   for (int lvl = 1; lvl <= m_finestLevel; lvl++) {
 
     const DisjointBoxLayout& dblCoar = m_ebGrids[lvl - 1]->getDBL();
+    const DataIterator&      dit     = dblCoar.dataIterator();
+    const int                nbox    = dit.size();
 
-    for (DataIterator dit(dblCoar); dit.ok(); ++dit) {
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      BaseIVFAB<Real>&       fineData = (*m_refinedCoarData[lvl])[dit()];
-      const BaseIVFAB<Real>& coarData = (*m_data[lvl - 1])[dit()];
+      BaseIVFAB<Real>&       fineData = (*m_refinedCoarData[lvl])[din];
+      const BaseIVFAB<Real>& coarData = (*m_data[lvl - 1])[din];
 
-      const BaseIVFAB<VoFStencil>& stencils = (*m_coarseToFineStencils[lvl])[dit()];
+      const BaseIVFAB<VoFStencil>& stencils = (*m_coarseToFineStencils[lvl])[din];
 
       const IntVectSet irregCoar   = stencils.getIVS();
       const EBGraph&   ebGraphCoar = stencils.getEBGraph();
@@ -556,15 +611,20 @@ EBAMRSurfaceDeposition::addFineGhostDataToValidCoarData() const noexcept
 
   for (int lvl = 0; lvl < m_finestLevel; lvl++) {
     const DisjointBoxLayout& dblFine = m_ebGrids[lvl + 1]->getDBL();
+    const DataIterator&      dit     = dblFine.dataIterator();
+    const int                nbox    = dit.size();
 
-    for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-      const BaseIVFAB<VoFStencil>& stencils = (*m_fineToCoarseStencils[lvl + 1])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const BaseIVFAB<VoFStencil>& stencils = (*m_fineToCoarseStencils[lvl + 1])[din];
 
       const IntVectSet& ghostsFine = stencils.getIVS();
       const EBGraph&    graphFine  = stencils.getEBGraph();
 
-      BaseIVFAB<Real>&       coarData = (*m_coarsenedFineData[lvl])[dit()];
-      const BaseIVFAB<Real>& fineData = (*m_data[lvl + 1])[dit()];
+      BaseIVFAB<Real>&       coarData = (*m_coarsenedFineData[lvl])[din];
+      const BaseIVFAB<Real>& fineData = (*m_data[lvl + 1])[din];
 
       coarData.setVal(0.0);
 

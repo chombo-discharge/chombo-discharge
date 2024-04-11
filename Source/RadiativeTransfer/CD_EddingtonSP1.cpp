@@ -54,7 +54,8 @@ EddingtonSP1::EddingtonSP1() : RtSolver()
   this->setDefaultDomainBcFunctions();
 }
 
-EddingtonSP1::~EddingtonSP1() {}
+EddingtonSP1::~EddingtonSP1()
+{}
 
 void
 EddingtonSP1::parseOptions()
@@ -760,14 +761,20 @@ EddingtonSP1::setHelmholtzCoefficients()
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     LevelData<EBCellFAB>&       helmAco      = *m_helmAco[lvl];
     LevelData<EBFluxFAB>&       helmBco      = *m_helmBco[lvl];
     LevelData<BaseIVFAB<Real>>& helmBcoIrreg = *m_helmBcoIrreg[lvl];
 
     // Fill data in each grid patch.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      this->setHelmholtzCoefficientsBox(helmAco[dit()], helmBco[dit()], helmBcoIrreg[dit()], lvl, dit());
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->setHelmholtzCoefficientsBox(helmAco[din], helmBco[din], helmBcoIrreg[din], lvl, din);
     }
   }
 }
@@ -1073,16 +1080,22 @@ EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
 
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const EBCellFAB&     data     = (*a_data[lvl])[dit()];
-      const EBISBox&       ebisbox  = ebisl[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const EBCellFAB&     data     = (*a_data[lvl])[din];
+      const EBISBox&       ebisbox  = ebisl[din];
       const BaseFab<Real>& data_fab = data.getSingleValuedFAB();
 
       for (int dir = 0; dir < SpaceDim; dir++) {
         for (SideIterator sit; sit.ok(); ++sit) {
-          BaseIFFAB<Real>& extrap = (*a_domainflux[lvl])[dit()](dir, sit());
+          BaseIFFAB<Real>& extrap = (*a_domainflux[lvl])[din](dir, sit());
 
           const IntVectSet& ivs     = extrap.getIVS();
           const EBGraph&    ebgraph = extrap.getEBGraph();

@@ -65,8 +65,14 @@ EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_sten,
     break;
   }
   case IrregStencil::StencilType::LeastSquares: {
-    foundStencil =
-      this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
+    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten,
+                                                             a_vof,
+                                                             a_dbl,
+                                                             a_domain,
+                                                             a_ebisbox,
+                                                             a_box,
+                                                             a_dx,
+                                                             noCFIVS);
     break;
   }
   case IrregStencil::StencilType::PiecewiseLinear: {
@@ -88,8 +94,14 @@ EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_sten,
     foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
   }
   if (!foundStencil) {
-    foundStencil =
-      this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
+    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten,
+                                                             a_vof,
+                                                             a_dbl,
+                                                             a_domain,
+                                                             a_ebisbox,
+                                                             a_box,
+                                                             a_dx,
+                                                             noCFIVS);
   }
 
   if (!foundStencil) { // Drop to zeroth order.

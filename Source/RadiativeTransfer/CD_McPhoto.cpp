@@ -40,7 +40,8 @@ McPhoto::McPhoto()
   m_dirtySampling = false;
 }
 
-McPhoto::~McPhoto() {}
+McPhoto::~McPhoto()
+{}
 
 bool
 McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi)
@@ -737,8 +738,8 @@ McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
     pout() << m_name + "::computeFlux" << endl;
   }
 
-  const std::string str =
-    "McPhoto::computeFlux - Fluid flux can't be computed with discrete photons. Calling this is an error";
+  const std::string
+    str = "McPhoto::computeFlux - Fluid flux can't be computed with discrete photons. Calling this is an error";
 
   MayDay::Error(str.c_str());
 }
@@ -907,22 +908,28 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real               dx    = m_amr->getDx()[lvl];
     const Real               vol   = pow(dx, SpaceDim);
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const Box            cellBox    = dbl[dit()];
-      const EBISBox&       ebisbox    = ebisl[dit()];
-      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB& source    = (*a_source[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box            cellBox    = dbl[din];
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+
+      const EBCellFAB& source    = (*a_source[lvl])[din];
       const FArrayBox& sourceReg = source.getFArrayBox();
 
-      EBCellFAB& numPhysPhotonsTotal    = (*a_numPhysPhotonsTotal[lvl])[dit()];
+      EBCellFAB& numPhysPhotonsTotal    = (*a_numPhysPhotonsTotal[lvl])[din];
       FArrayBox& numPhysPhotonsTotalReg = numPhysPhotonsTotal.getFArrayBox();
 
-      EBCellFAB& numPhysPhotonsPacket    = (*a_numPhysPhotonsPacket[lvl])[dit()];
+      EBCellFAB& numPhysPhotonsPacket    = (*a_numPhysPhotonsPacket[lvl])[din];
       FArrayBox& numPhysPhotonsPacketReg = numPhysPhotonsPacket.getFArrayBox();
 
       auto regularKernel = [&](const IntVect& iv) -> void {
@@ -958,7 +965,7 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
         }
       };
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -1025,19 +1032,25 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const RealVect           probLo = m_amr->getProbLo();
     const Real               dx     = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB&     numPhysPhotons    = (*a_numPhysPhotons[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box      cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      const EBCellFAB&     numPhysPhotons    = (*a_numPhysPhotons[lvl])[din];
       const FArrayBox&     numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
-      const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+      const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
-      List<Photon>& photons = a_photons[lvl][dit()].listItems();
+      List<Photon>& photons = a_photons[lvl][din].listItems();
 
       // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
       // grids that are covered by finer grids don't draw photons.
@@ -1108,7 +1121,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       };
 
       // Run the kernels.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -1131,19 +1144,25 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
     const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const RealVect           probLo = m_amr->getProbLo();
     const Real               dx     = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box      cellBox = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB&     numPhysPhotons    = (*a_numPhysicalPhotons[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box      cellBox = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      const EBCellFAB&     numPhysPhotons    = (*a_numPhysicalPhotons[lvl])[din];
       const FArrayBox&     numPhysPhotonsReg = numPhysPhotons.getFArrayBox();
-      const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[dit()];
+      const BaseFab<bool>& validCells        = (*m_amr->getValidCells(m_realm)[lvl])[din];
 
-      List<PointParticle>& photons = a_photons[lvl][dit()].listItems();
+      List<PointParticle>& photons = a_photons[lvl][din].listItems();
 
       // Regular cells. Note that we make superphotons if we have to. Also, only draw photons in valid cells,
       // grids that are covered by finer grids don't draw photons.
@@ -1218,7 +1237,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       };
 
       // Run the kernels.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       BoxLoops::loop(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
@@ -1233,18 +1252,24 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const ProblemDomain&     domain = m_amr->getDomains()[lvl];
       const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx     = m_amr->getDx()[lvl];
       const RealVect           probLo = m_amr->getProbLo();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box      cellBox = dbl[dit()];
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box      cellBox = dbl[din];
+        const EBISBox& ebisbox = ebisl[din];
 
         EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-        EBCellFAB&                 output  = (*a_phi[lvl])[dit()];
-        const List<PointParticle>& photons = a_photons[lvl][dit()].listItems();
+        EBCellFAB&                 output  = (*a_phi[lvl])[din];
+        const List<PointParticle>& photons = a_photons[lvl][din].listItems();
 
         particleMesh.deposit<PointParticle, &PointParticle::weight>(photons, output, DepositionType::NGP, true);
       }
@@ -1277,8 +1302,9 @@ McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData
   }
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils =
-      m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
+      m_realm,
+      m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else {
@@ -1298,18 +1324,24 @@ McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      EBCellFAB&             divH   = (*a_depositionH[lvl])[dit()]; // On input, this contains kappa*depositionWeights
-      BaseIVFAB<Real>&       deltaM = (*a_massDifference[lvl])[dit()];
-      const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()];
+    const int nbox = dit.size();
 
-      const Box      box     = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&             divH   = (*a_depositionH[lvl])[din]; // On input, this contains kappa*depositionWeights
+      BaseIVFAB<Real>&       deltaM = (*a_massDifference[lvl])[din];
+      const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[din];
+
+      const Box      box     = dbl.get(din);
+      const EBISBox& ebisbox = ebisl[din];
 
       // Iteration space for kernel.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Kernel
       auto kernel = [&](const VolIndex& vof) -> void {
@@ -1344,20 +1376,26 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
 
   const ProblemDomain&     domain = m_amr->getDomains()[a_level];
   const DisjointBoxLayout& dbl    = m_amr->getGrids(a_photons.getRealm())[a_level];
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_photons.getRealm(), m_phase)[a_level];
   const Real               dx     = m_amr->getDx()[a_level];
   const RealVect           probLo = m_amr->getProbLo();
 
   CH_assert(a_output.disjointBoxLayout() == dbl);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      cellBox = dbl[dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box      cellBox = dbl[din];
+    const EBISBox& ebisbox = ebisl[din];
 
     EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
 
-    EBCellFAB&          output  = a_output[dit()];
-    const List<Photon>& photons = a_photons[a_level][dit()].listItems();
+    EBCellFAB&          output  = a_output[din];
+    const List<Photon>& photons = a_photons[a_level][din].listItems();
 
     output.setVal(0.0);
 
@@ -1408,13 +1446,19 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = m_amr->getDx()[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][dit()].listItems();
-      List<Photon>& ebPhotons   = a_ebPhotons[lvl][dit()].listItems();
-      List<Photon>& domPhotons  = a_domainPhotons[lvl][dit()].listItems();
-      List<Photon>& allPhotons  = a_photons[lvl][dit()].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][din].listItems();
+      List<Photon>& ebPhotons   = a_ebPhotons[lvl][din].listItems();
+      List<Photon>& domPhotons  = a_domainPhotons[lvl][din].listItems();
+      List<Photon>& allPhotons  = a_photons[lvl][din].listItems();
 
       // Iterate over the Photons that will be moved.
       for (ListIterator<Photon> lit(allPhotons); lit.ok(); ++lit) {
@@ -1560,13 +1604,19 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = m_amr->getDx()[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][dit()].listItems();
-      List<Photon>& ebPhotons   = a_ebPhotons[lvl][dit()].listItems();
-      List<Photon>& domPhotons  = a_domainPhotons[lvl][dit()].listItems();
-      List<Photon>& allPhotons  = a_photons[lvl][dit()].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][din].listItems();
+      List<Photon>& ebPhotons   = a_ebPhotons[lvl][din].listItems();
+      List<Photon>& domPhotons  = a_domainPhotons[lvl][din].listItems();
+      List<Photon>& allPhotons  = a_photons[lvl][din].listItems();
 
       // Iterate over the photons that will be moved.
       for (ListIterator<Photon> lit(allPhotons); lit.ok(); ++lit) {
@@ -1943,8 +1993,15 @@ McPhoto::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl
 
   a_loads.resize(a_dbl.size(), 0LL);
 
-  for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-    a_loads[dit().intCode()] += m_bulkPhotons[a_level][dit()].listItems().length();
+  const DataIterator& dit = a_dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_loads[din.intCode()] += m_bulkPhotons[a_level][din].listItems().length();
   }
 }
 

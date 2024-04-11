@@ -58,6 +58,7 @@ ElectrodeArray::ElectrodeArray()
   }
 }
 
-ElectrodeArray::~ElectrodeArray() {}
+ElectrodeArray::~ElectrodeArray()
+{}
 
 #include <CD_NamespaceFooter.H>

@@ -195,13 +195,18 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
     const bool               hasCoar = lvl > 0;
+    const DataIterator&      dit     = dbl.dataIterator();
+    const int                nbox    = dit.size();
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -244,17 +249,21 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
-    const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
-
-    const bool hasCoar = lvl > 0;
+    const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl   = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit     = dbl.dataIterator();
+    const bool               hasCoar = lvl > 0;
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -298,18 +307,22 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
-    const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
-
-    const bool hasCoar = (lvl > 0);
+    const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl   = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit     = dbl.dataIterator();
+    const bool               hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
 
       // Note: EBParticleMesh construction is cheap.
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -333,17 +346,22 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
+      const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
 
-      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
-        EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
-        const ListBox<P>& haloParticles = coarHaloParticles[dit()];
+      const int nboxFiCo = ditFiCo.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB&        dataFiCo      = bufferFiCo[din];
+        const ListBox<P>& haloParticles = coarHaloParticles[din];
 
         dataFiCo.setVal(0.0);
 
-        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
         switch (refRat) {
         case 2: {
@@ -399,17 +417,21 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
-    const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
-
-    const bool hasCoar = (lvl > 0);
+    const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl   = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit     = dbl.dataIterator();
+    const bool               hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -433,17 +455,22 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
+      const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
 
-      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
-        EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
-        const ListBox<P>& haloParticles = coarHaloParticles[dit()];
+      const int nboxFiCo = ditFiCo.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB&        dataFiCo      = bufferFiCo[din];
+        const ListBox<P>& haloParticles = coarHaloParticles[din];
 
         dataFiCo.setVal(0.0);
 
-        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
         switch (refRat) {
         case 2: {
@@ -498,16 +525,21 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData       = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
-      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
+      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[din];
+      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleScalarField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
       interp.deposit<P, particleScalarField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
@@ -545,16 +577,21 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData       = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
-      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
+      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[din];
+      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleScalarField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
       interp.deposit<P, particleScalarField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
@@ -584,19 +621,22 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
   // TLDR: Run through each patch and interpolate to the particle positions.
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const EBLevelGrid&       eblg = *m_eblgs[lvl];
-    const DisjointBoxLayout& dbl  = eblg.getDBL();
-
-    const EBISLayout& ebisl = eblg.getEBISL();
+    const EBLevelGrid&       eblg  = *m_eblgs[lvl];
+    const DisjointBoxLayout& dbl   = eblg.getDBL();
+    const EBISLayout&        ebisl = eblg.getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     CH_assert(a_meshScalarField[lvl]->nComp() == 1);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBCellFAB& data = (*a_meshScalarField[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+      List<P>& particles = a_particles[lvl][din].listItems();
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      const EBCellFAB&      data   = (*a_meshScalarField[lvl])[din];
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.interpolate<P, particleScalarField>(particles, data, a_interpType, a_forceIrregNGP);
     }
@@ -622,15 +662,19 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     const ProblemDomain&     domain = eblg.getDomain();
     const EBISLayout&        ebisl  = eblg.getEBISL();
     const Real&              dx     = m_dx[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
 
     CH_assert(a_meshVectorField[lvl]->nComp() == SpaceDim);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const EBCellFAB& data = (*a_meshVectorField[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      List<P>& particles = a_particles[lvl][dit()].listItems();
+      List<P>& particles = a_particles[lvl][din].listItems();
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
+      const EBCellFAB&      data   = (*a_meshVectorField[lvl])[din];
 
       interp.interpolate<P, particleVectorField>(particles, data, a_interpType, a_forceIrregNGP);
     }
@@ -654,14 +698,19 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const DataIterator&      dit     = dbl.dataIterator();
     const bool               hasCoar = lvl > 0;
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -709,14 +758,18 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
+    const DataIterator&      dit     = dbl.dataIterator();
     const bool               hasCoar = lvl > 0;
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&            meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>&     boxParticles = a_particles[lvl][din];
+      const EBParticleMesh& interp       = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -765,16 +818,21 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
 
       // Note: EBParticleMesh construction is cheap.
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -798,17 +856,22 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
+      const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
 
-      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
-        EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
-        const ListBox<P>& haloParticles = coarHaloParticles[dit()];
+      const int nboxFiCo = ditFiCo.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB&        dataFiCo      = bufferFiCo[din];
+        const ListBox<P>& haloParticles = coarHaloParticles[din];
 
         dataFiCo.setVal(0.0);
 
-        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
         switch (refRat) {
         case 2: {
@@ -868,16 +931,21 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& boxParticles = a_particles[lvl][dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
+      const ListBox<P>& boxParticles = a_particles[lvl][din];
 
       // Note: EBParticleMesh construction is cheap.
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -901,17 +969,22 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBLevelGrid&       eblgFiCo  = m_coarseFinePM[lvl]->getEblgFiCo();
       const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
+      const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
 
-      for (DataIterator dit(dblFiCo); dit.ok(); ++dit) {
-        EBCellFAB&        dataFiCo      = bufferFiCo[dit()];
-        const ListBox<P>& haloParticles = coarHaloParticles[dit()];
+      const int nboxFiCo = ditFiCo.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB&        dataFiCo      = bufferFiCo[din];
+        const ListBox<P>& haloParticles = coarHaloParticles[din];
 
         dataFiCo.setVal(0.0);
 
-        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];
+        const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
         switch (refRat) {
         case 2: {
@@ -982,16 +1055,21 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData       = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
-      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
+      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[din];
+      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleVectorField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
       interp.deposit<P, particleVectorField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
@@ -1049,16 +1127,21 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit   = dbl.dataIterator();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBCellFAB&        meshData       = (*a_meshData[lvl])[dit()];
-      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
-      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
+      EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
+      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[din];
+      const ListBox<P>& particlesNGP   = (*haloParticles[lvl])[din];
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
       interp.deposit<P, particleVectorField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
       interp.deposit<P, particleVectorField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);

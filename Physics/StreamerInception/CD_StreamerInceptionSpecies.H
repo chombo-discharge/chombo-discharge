@@ -46,7 +46,8 @@ namespace Physics {
       /*!
 	@brief Destructor
       */
-      virtual ~StreamerInceptionSpecies() {}
+      virtual ~StreamerInceptionSpecies()
+      {}
 
       /*!
 	@brief Initial data. 

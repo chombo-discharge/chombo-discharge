@@ -28,7 +28,10 @@ MFHelmholtzEBBC::MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<MFHelmho
   m_phase  = a_phase;
 }
 
-MFHelmholtzEBBC::~MFHelmholtzEBBC() { CH_TIME("MFHelmholtzEBBC::~MFHelmholtzEBBC()"); }
+MFHelmholtzEBBC::~MFHelmholtzEBBC()
+{
+  CH_TIME("MFHelmholtzEBBC::~MFHelmholtzEBBC()");
+}
 
 void
 MFHelmholtzEBBC::define()
@@ -52,22 +55,28 @@ MFHelmholtzEBBC::defineMultiPhase()
   //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for that flux, using the value on the boundary as
   //       a known term in the expansion.
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   m_boundaryWeights.define(dbl);
   m_gradPhiStencils.define(dbl);
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box         box     = dbl[dit()];
-    const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box         box     = dbl[din];
+    const EBISBox&    ebisbox = m_eblg.getEBISL()[din];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
     // These are used to reconstruct gradients at the EB. They are left undefined for single-phase cells.
-    m_boundaryWeights[dit()].define(ivs, ebgraph, m_nComp);
-    m_gradPhiStencils[dit()].define(ivs, ebgraph, m_nComp);
+    m_boundaryWeights[din].define(ivs, ebgraph, m_nComp);
+    m_gradPhiStencils[din].define(ivs, ebgraph, m_nComp);
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
     // Define over the full ivs but only fill on multi-phase cells.
     weights.define(ivs, ebgraph, m_nComp);
@@ -76,10 +85,10 @@ MFHelmholtzEBBC::defineMultiPhase()
     // Safety hook becase jumpBC might not have defined the data holders if we're not doing multiphase.
     if (m_jumpBC->isMultiPhase()) {
 
-      VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, dit());
+      VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, din);
 
-      const BaseIVFAB<VoFStencil>& jumpStencils = (m_jumpBC->getGradPhiStencils())[dit()].getIVFAB(m_phase);
-      const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[dit()].getIVFAB(m_phase);
+      const BaseIVFAB<VoFStencil>& jumpStencils = (m_jumpBC->getGradPhiStencils())[din].getIVFAB(m_phase);
+      const BaseIVFAB<Real>&       jumpWeights  = (m_jumpBC->getGradPhiWeights())[din].getIVFAB(m_phase);
 
       // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think.
       auto kernel = [&](const VolIndex& vof) -> void {

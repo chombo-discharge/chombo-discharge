@@ -16,9 +16,11 @@
 #include <CD_Photon.H>
 #include <CD_NamespaceHeader.H>
 
-inline Photon::Photon() {}
+inline Photon::Photon()
+{}
 
-inline Photon::~Photon() {}
+inline Photon::~Photon()
+{}
 
 inline Photon::Photon(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_weight)
 {

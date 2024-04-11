@@ -16,7 +16,6 @@
 #include <CH_Timer.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
-#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_SimpleItoParticle.H>
@@ -57,7 +56,10 @@ ItoSolver::ItoSolver()
   };
 }
 
-ItoSolver::~ItoSolver() { CH_TIME("ItoSolver::~ItoSolver"); }
+ItoSolver::~ItoSolver()
+{
+  CH_TIME("ItoSolver::~ItoSolver");
+}
 
 std::string
 ItoSolver::getName() const
@@ -580,8 +582,16 @@ ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_db
   const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   a_loads.resize(a_dbl.size(), 0L);
-  for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-    a_loads[dit().intCode()] = particles[a_level][dit()].numItems();
+
+  const DataIterator& dit = a_dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_loads[din.intCode()] = particles[a_level][din].numItems();
   }
 
   ParallelOps::vectorSum(a_loads);
@@ -971,15 +981,23 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
 
   // Make ItoParticle into SimpleItoParticle. This saves a ton of disk space.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
     // Handle to list of particles low-memory particles in the current grid patch.
-    List<SimpleItoParticle>& simpleParticles = (lowMemoryParticles[a_level])[dit()].listItems();
+    List<SimpleItoParticle>& simpleParticles = (lowMemoryParticles[a_level])[din].listItems();
 
     // Make the ItoParticle into a SimpleItoParticle for checkpointing purposes -- we only need weight, position, and energy.
     simpleParticles.clear();
-    for (ListIterator<ItoParticle> lit(myParticles[a_level][dit()].listItems()); lit.ok(); ++lit) {
+
+    for (ListIterator<ItoParticle> lit(myParticles[a_level][din].listItems()); lit.ok(); ++lit) {
       const ItoParticle& p = lit();
+
       simpleParticles.append(SimpleItoParticle(p.weight(), p.position(), p.energy()));
     }
   }
@@ -1008,6 +1026,7 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
 
   // Handles to relevant grid information
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
   const RealVect           dx     = m_amr->getDx()[a_level] * RealVect::Unit;
   const RealVect           probLo = m_amr->getProbLo();
@@ -1017,18 +1036,23 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
 
   // Create transient storage that holds the particle numbers.
   LevelData<EBCellFAB> particleNumbers(dbl, m_nComp, IntVect::Zero, EBCellFactory(ebisl));
-  EBLevelDataOps::setVal(particleNumbers, 0.0);
+  DataOps::setValue(particleNumbers, 0.0);
 
   // Now go through the grid and add the number of particles in each cell
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box cellBox = dbl[dit()];
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box cellBox = dbl[din];
 
     // For multi-valued cells all the particles go onto the first vof.
-    BaseFab<Real>& particleNumbersFAB = particleNumbers[dit()].getSingleValuedFAB();
+    BaseFab<Real>& particleNumbersFAB = particleNumbers[din].getSingleValuedFAB();
 
     // Add the patch particles into cell-sorted particles.
     BinFab<ItoParticle> cellSortedParticles(cellBox, dx, probLo);
-    cellSortedParticles.addItems(particles[a_level][dit()].listItems());
+    cellSortedParticles.addItems(particles[a_level][din].listItems());
 
     // Kernel - go through the patch and get the number of particles per cell.
     auto kernel = [&](const IntVect& iv) -> void {
@@ -1113,9 +1137,17 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
   readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
 
   // Go through the particles we read from the file and make them into true ItoParticles.
-  for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit) {
-    List<ItoParticle>&             itoParticles       = particles[a_level][dit()].listItems();
-    const List<SimpleItoParticle>& simpleItoParticles = (*simpleParticles[a_level])[dit()].listItems();
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    List<ItoParticle>&             itoParticles       = particles[a_level][din].listItems();
+    const List<SimpleItoParticle>& simpleItoParticles = (*simpleParticles[a_level])[din].listItems();
 
     for (ListIterator<SimpleItoParticle> lit(simpleItoParticles); lit.ok(); ++lit) {
       const SimpleItoParticle& simpleParticle = lit();
@@ -1173,23 +1205,29 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
   const RealVect           probLo = m_amr->getProbLo();
   const Real               dx     = m_amr->getDx()[a_level];
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit    = dbl.dataIterator();
   const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
 
   // Particle container that we will fill.
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   // Go through each patch and instantiate new particles.
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box&           cellBox = dbl[dit()];
-    const EBISBox&       ebisbox = ebisl[dit()];
-    const BaseFab<Real>& ppc     = a_particlesPerCell[dit()].getSingleValuedFAB();
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&           cellBox = dbl[din];
+    const EBISBox&       ebisbox = ebisl[din];
+    const BaseFab<Real>& ppc     = a_particlesPerCell[din].getSingleValuedFAB();
 
     // This should draw new particles rather than append -- so clear out any old particles.
-    List<ItoParticle>& myParticles = particles[a_level][dit()].listItems();
+    List<ItoParticle>& myParticles = particles[a_level][din].listItems();
     myParticles.clear();
 
     // Kernel region for cut-cells.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[din];
 
     // Regular kernel
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -1786,8 +1824,9 @@ ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellDa
   }
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils =
-      m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
+      m_realm,
+      m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else {
@@ -1809,18 +1848,23 @@ ItoSolver::depositHybrid(EBAMRCellData&     a_depositionH,
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
       // On input, divH contains kappa*depositionWeights
-      EBCellFAB&             divH    = (*a_depositionH[lvl])[dit()];
-      BaseIVFAB<Real>&       deltaM  = (*a_massDifference[lvl])[dit()];
-      const BaseIVFAB<Real>& divNC   = (*a_depositionNC[lvl])[dit()];
-      const EBISBox&         ebisbox = ebisl[dit()];
+      EBCellFAB&             divH    = (*a_depositionH[lvl])[din];
+      BaseIVFAB<Real>&       deltaM  = (*a_massDifference[lvl])[din];
+      const BaseIVFAB<Real>& divNC   = (*a_depositionNC[lvl])[din];
+      const EBISBox&         ebisbox = ebisl[din];
 
       // Iteration space.
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       auto kernel = [&](const VolIndex& vof) -> void {
         const Real kappa = ebisbox.volFrac(vof);
@@ -2039,9 +2083,15 @@ ItoSolver::interpolateVelocities()
   if (m_isMobile) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        this->interpolateVelocities(lvl, dit());
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->interpolateVelocities(lvl, din);
       }
     }
   }
@@ -2113,9 +2163,15 @@ ItoSolver::interpolateMobilities()
     // Call the level version and interpolate the mobilities from the mesh data.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        this->interpolateMobilities(lvl, dit(), (*velocityMagnitude[lvl])[dit()]);
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->interpolateMobilities(lvl, din, (*velocityMagnitude[lvl])[din]);
       }
     }
   }
@@ -2247,9 +2303,15 @@ ItoSolver::updateMobilities()
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      this->updateMobilities(lvl, dit());
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->updateMobilities(lvl, din);
     }
   }
 }
@@ -2286,9 +2348,15 @@ ItoSolver::interpolateDiffusion()
   if (m_isDiffusive) {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        this->interpolateDiffusion(lvl, dit());
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        this->interpolateDiffusion(lvl, din);
       }
     }
   }
@@ -2337,9 +2405,15 @@ ItoSolver::updateDiffusion()
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      this->updateDiffusion(lvl, dit());
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->updateDiffusion(lvl, din);
     }
   }
 }
@@ -2398,8 +2472,15 @@ ItoSolver::computeDt(const int a_lvl) const
 
   // Compute largest permitted time step on each patch.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt = this->computeDt(a_lvl, dit());
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Real patchDt = this->computeDt(a_lvl, din);
 
     dt = std::min(dt, patchDt);
   }
@@ -2526,8 +2607,15 @@ ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const
 
   // Compute time steps for each grid patch.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt = this->computeHopDt(a_maxCellsToMove, a_lvl, dit());
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Real patchDt = this->computeHopDt(a_maxCellsToMove, a_lvl, din);
 
     dt = std::min(dt, patchDt);
   }
@@ -2673,8 +2761,15 @@ ItoSolver::computeAdvectiveDt(const int a_lvl) const
 
   // Iterate over patches.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt = this->computeAdvectiveDt(a_lvl, dit());
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Real patchDt = this->computeAdvectiveDt(a_lvl, din);
 
     dt = std::min(dt, patchDt);
   }
@@ -2753,8 +2848,15 @@ ItoSolver::computeDiffusiveDt(const int a_lvl) const
   Real dt = std::numeric_limits<Real>::max();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt = this->computeDiffusiveDt(a_lvl, dit());
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Real patchDt = this->computeDiffusiveDt(a_lvl, din);
 
     dt = std::min(dt, patchDt);
   }
@@ -2926,9 +3028,15 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_part
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    this->makeSuperparticles(a_container, a_particlesPerCell, a_level, dit());
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    this->makeSuperparticles(a_container, a_particlesPerCell, a_level, din);
   }
 }
 
@@ -3031,12 +3139,11 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const
   };
 
   // 2. Build KD-tree.
-  const std::vector<std::shared_ptr<Node>> leaves =
-    ParticleManagement::recursivePartitionAndSplitEqualWeightKD<PType,
-                                                                &PType::template real<0>,
-                                                                &PType::template vect<0>>(particles,
-                                                                                          a_ppc,
-                                                                                          particleReconcile);
+  const std::vector<std::shared_ptr<Node>> leaves = ParticleManagement::
+    recursivePartitionAndSplitEqualWeightKD<PType, &PType::template real<0>, &PType::template vect<0>>(
+      particles,
+      a_ppc,
+      particleReconcile);
 
   // Merge leaves into new particles.
   CH_START(t3);

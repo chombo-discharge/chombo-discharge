@@ -488,9 +488,15 @@ TracerParticleStepper<P>::advanceParticlesEuler(const Real a_dt)
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = amrParticles[lvl][dit].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = amrParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
@@ -522,9 +528,15 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
   // First step. Store old position and velocity and do the Euler advance.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = amrParticles[lvl][dit].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = amrParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
@@ -545,9 +557,15 @@ TracerParticleStepper<P>::advanceParticlesRK2(const Real a_dt)
   // Do the second RK2 stage.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& particles = amrParticles[lvl][dit].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = amrParticles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         P& p = lit();
@@ -584,8 +602,16 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
   // k1 step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
           P& p = lit();
 
           // Store old position.
@@ -605,8 +631,16 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
   // k2 step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
           P& p = lit();
 
           p.template vect<2>() = p.velocity();                                 // k2 = v(x^k + 0.5 * k1 * dt)
@@ -623,8 +657,16 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
   // k3 step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
           P& p = lit();
 
           p.template vect<3>() = p.velocity();                               // k3 = v(x^k + 0.5 * k2 * dt)
@@ -641,8 +683,16 @@ TracerParticleStepper<P>::advanceParticlesRK4(const Real a_dt)
   // Final step.
   {
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      for (DataIterator dit(m_amr->getGrids(m_realm)[lvl]); dit.ok(); ++dit) {
-        for (ListIterator<P> lit(amrParticles[lvl][dit].listItems()); lit.ok(); ++lit) {
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        for (ListIterator<P> lit(amrParticles[lvl][din].listItems()); lit.ok(); ++lit) {
           P& p = lit();
 
           p.position() = p.template vect<0>() + dtSixth * p.template vect<1>() + dtHalf * p.template vect<2>() +

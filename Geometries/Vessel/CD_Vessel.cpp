@@ -53,6 +53,7 @@ Vessel::Vessel()
   }
 }
 
-Vessel::~Vessel() {}
+Vessel::~Vessel()
+{}
 
 #include <CD_NamespaceFooter.H>

@@ -43,8 +43,8 @@ PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
       const RealVect p = n * 0.5 * a_xyz[dir];
 
       if (dir == up && sit() == Side::Hi) {
-        BaseIF* baseif =
-          (BaseIF*)new PerlinPlaneSdf(n, p, true, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
+        BaseIF*
+          baseif = (BaseIF*)new PerlinPlaneSdf(n, p, true, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
         parts.push_back(baseif);
       }
       else {
@@ -79,7 +79,8 @@ PerlinSlabSdf::PerlinSlabSdf(const PerlinSlabSdf& a_inputIF)
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-PerlinSlabSdf::~PerlinSlabSdf() {}
+PerlinSlabSdf::~PerlinSlabSdf()
+{}
 
 Real
 PerlinSlabSdf::value(const RealVect& a_pos) const

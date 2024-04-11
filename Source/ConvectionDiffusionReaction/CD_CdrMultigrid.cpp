@@ -31,7 +31,8 @@ CdrMultigrid::CdrMultigrid() : CdrSolver()
   m_hasMultigridSolver = false;
 }
 
-CdrMultigrid::~CdrMultigrid() {}
+CdrMultigrid::~CdrMultigrid()
+{}
 
 void
 CdrMultigrid::registerOperators()

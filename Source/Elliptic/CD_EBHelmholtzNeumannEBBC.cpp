@@ -26,7 +26,10 @@ EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()
   m_useFunction = false;
 }
 
-EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC() { CH_TIME("EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()"); }
+EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()
+{
+  CH_TIME("EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()");
+}
 
 void
 EBHelmholtzNeumannEBBC::setDphiDn(const Real a_DphiDn)
@@ -87,16 +90,23 @@ EBHelmholtzNeumannEBBC::define()
   }
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+  m_gradPhiStencils.define(dbl);
 
   // Reset the stencil everywhere.
-  m_gradPhiStencils.define(dbl);
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box         box     = dbl[dit()];
-    const EBISBox&    ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box         box     = dbl[din];
+    const EBISBox&    ebisbox = m_eblg.getEBISL()[din];
     const EBGraph&    ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
     stencils.define(ivs, ebgraph, m_nComp);
 

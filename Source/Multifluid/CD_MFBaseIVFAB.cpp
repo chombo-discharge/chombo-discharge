@@ -13,7 +13,8 @@
 #include <CD_MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
 
-MFBaseIVFAB::MFBaseIVFAB() {}
+MFBaseIVFAB::MFBaseIVFAB()
+{}
 
 MFBaseIVFAB::MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
                          const Vector<EBGraph>&    a_phaseGraphs,
@@ -139,7 +140,10 @@ MFBaseIVFABFactory::MFBaseIVFABFactory(Vector<EBISLayout>& a_ebisl, const Vector
   this->define(a_ebisl, a_nComp);
 }
 
-MFBaseIVFABFactory::~MFBaseIVFABFactory() { CH_TIME("MFBaseIVFABFactory::~MFBaseIVFABFactory"); }
+MFBaseIVFABFactory::~MFBaseIVFABFactory()
+{
+  CH_TIME("MFBaseIVFABFactory::~MFBaseIVFABFactory");
+}
 
 void
 MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nComp)

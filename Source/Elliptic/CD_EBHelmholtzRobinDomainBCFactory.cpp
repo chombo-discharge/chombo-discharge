@@ -41,7 +41,8 @@ EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory(const std::func
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-EBHelmholtzRobinDomainBCFactory::~EBHelmholtzRobinDomainBCFactory() {}
+EBHelmholtzRobinDomainBCFactory::~EBHelmholtzRobinDomainBCFactory()
+{}
 
 void
 EBHelmholtzRobinDomainBCFactory::setCoefficients(const Real a_A, const Real a_B, const Real a_C)

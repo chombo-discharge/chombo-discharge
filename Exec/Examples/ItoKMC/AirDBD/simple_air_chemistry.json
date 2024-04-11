@@ -318,7 +318,7 @@
 	},
 	{
 	    // Tabulated reaction rate for e + O2 -> O + O-
-	    "reaction": "e + O2 -> O + O-",         // Reaction. Must contain the '->'
+	    "reaction": "e + O2 -> (O) + O-",         // Reaction. Must contain the '->'
 	    "description": "Rate/O2 attachment", // Optional description of the reaction. Used when plotting the rate
 	    "type": "table vs E/N",              // Specification of reaction rate type
 	    "file" : "bolsig_air.dat",           // File containing the data
