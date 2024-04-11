@@ -3876,7 +3876,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 
   const int nbox = dit.size();
 
-  //#pragma omp parallel for schedule(runtime)
+#pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 

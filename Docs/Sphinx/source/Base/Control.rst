@@ -5,58 +5,8 @@ Controlling ``chombo-discharge``
 
 In this chapter we give a brief overview of how to run a ``chombo-discharge`` simulation and control its behavior through input scripts or command line options.
 
-Organization
-------------
-
-The ``chombo-discharge`` source files are organized as follows:
-
-.. list-table:: Code organization.
-   :widths: 10 50
-   :header-rows: 1
-
-   * - Folder
-     - Explanation
-   * - :file:`Source`
-     -  Source files for the AMR core, solvers, and various utilities.
-   * - :file:`Physics`
-     - Various implementations that can run the ``chombo-discharge`` source code.
-   * - :file:`Geometries`
-     - Various geometries.
-   * - :file:`Submodules`
-     - Git submodule dependencies.
-   * - :file:`Exec`
-     - Various executable applications. 
-
-Compiling and running
----------------------
-
-To run simulations, the user must first compile his application.
-Once the application has been setup, the user can compile by
-
-.. code-block:: bash
-
-   make -s -j 32 DIM=N <application_name>
-
-where *N* may be 2 or 3, and <application_name> is the name of the file that holds the ``main()`` function.
-This will compile an executable whose name depends on your application name and compiler settings.
-Please refer to the ``Chombo`` manual for explanation of the executable name. You may, of course, rename your application.
-	  
-Compilation options
-___________________
-
-``chombo-discharge`` can compile with various code guards enabled, to spot bugs or potential errors in the code.
-To compile with these guards turned on, compile with ``DEBUG=TRUE``, e.g. ``make -s -j32 DIM=2 DEBUG=TRUE <application_name>``.
-
-To compile for production runs, ``chombo-discharge`` should generally speaking be compiled with ``DEBUG=FALSE`` and ``OPT=HIGH``, for example
-
-.. code-block:: bash
-
-   make -s -j32 DIM=2 OPT=HIGH DEBUG=FALSE <application_name>
-
-Recall also that default settings for the dimension (``DIM``), optimization level (``OPT``), and debug mode (``DEBUG``) can be set in :file:`Make.defs.local`, see :ref:`Chap:Installation`. 
-
-Running applications
---------------------
+Running ``chombo-discharge``
+----------------------------
 
 How one runs ``chombo-discharge`` depends on the type of parallelism one compiled with.
 Below, we consider basic examples for serial and parallel execution.
@@ -85,7 +35,9 @@ For example
    export OMP_PLACES=cores
    export OMP_PROC_BIND=true
    export OMP_SCHEDULE="dynamic, 4"
+   
    ./<application_executable> <input_file>
+
 
 Parallel with MPI
 _________________
@@ -108,24 +60,32 @@ When running with both MPI and OpenMP the user must
 #. Bind each MPI rank to a specified resource (e.g., a node, socket, or list of CPUs)
 #. Bind OpenMP threads to resources available to each MPI rank.
 
-For example, the following is likely to fail:
+For example, the following may not work as expected:
 
 .. code-block:: bash
 
    export OMP_NUM_THREADS=4
    mpiexec -n 2 ./<application_executable> <input_file>
 
-Each MPI rank is quite likely to spawn threads on the same physical cores.
+Each MPI rank may spawn threads on the same physical cores.
 With e.g. OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
 For example, on a local workstation one might do
 
 .. code-block:: bash
 
-   export NPROCS=2		
+   export NRANKS=2		
    export OMP_NUM_THREADS=4
    export OMP_PLACES=cores
    export OMP_PROC_BIND=true
-   mpiexec --map-by slot:PE=$OMP_NUM_THREADS -n $NRANKS ./<application_executable> <input_file>
+   
+   mpiexec --bind-to core --map-by slot:PE=$OMP_NUM_THREADS -n $NRANKS ./<application_executable> <input_file>
+
+MPI bindings are here bound to cores and will spawn threads only on the cores they are associated with.
+It is often useful to verify this by reporting the bindings as follows:
+
+.. code-block:: bash
+
+   mpiexec --report-bindings --bind-to core --map-by slot:PE=$OMP_NUM_THREADS -n $NRANKS ./<application_executable> <input_file>
 
 
 .. important::
@@ -133,9 +93,11 @@ For example, on a local workstation one might do
    More sophisticated architectures (e.g., clusters with NUMA nodes) require careful specification of MPI and thread placement (e.g. binding of MPI ranks to sockets).
 
 
+Simulation I/O
+--------------
 
 Simulation inputs
------------------
+_________________
 
 ``chombo-discharge`` simulations take their input from a single simulation input file (possibly appended with overriding options on the command line).
 Simulations may consist of several hundred possible switches for altering the behavior of a simulation, and all physics models in ``chombo-discharge`` are therefore equipped with Python setup tools that collect all such options into a single file when setting up a new application.
@@ -165,7 +127,7 @@ Moreover, parameters parsed through the command line become static parameters, i
 Also note that if you define a parameter multiple times in the input file, the last definition is canon. 		
 
 Simulation outputs
-------------------
+__________________
 
 Mesh data from ``chombo-discharge`` simulations is by default written to HDF5 files, and if HDF5 is disabled ``chombo-discharge`` will not write any plot or checkpoint files. 
 In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.
@@ -220,8 +182,8 @@ An empty entry like ``CdrGodunov.plt_vars =`` may lead to run-time errors, so if
 
 .. _Chap:pout:
 
-Controlling parallel processor verbosity
-----------------------------------------
+Parallel processor verbosity
+____________________________
 
 By default, ``Chombo`` will write a process output file *per MPI process* and this file will be named :file:`pout.n` where ``n`` is the MPI rank.
 These files are written in the directory where you executed your application, and are *not* related to plot files or checkpoint files.
@@ -247,7 +209,7 @@ For example, if you only want the master MPI rank to write :file:`pout.0`, you w
 .. _Chap:RestartingSimulations:
 
 Restarting simulations
-----------------------
+______________________
 
 Restarting simulations is done in exactly the same way as running simulations, although the user must set the ``Driver.restart`` parameter.
 For example,
@@ -273,7 +235,7 @@ This also implies that you cannot change the ``Driver.output_names`` or ``Driver
 .. _Chap:RuntimeConfig:
 
 Run-time configurations
------------------------
+_______________________
 
 ``chombo-discharge`` reads input parameters before the simulation starts, but also during run-time. 
 This is useful when your simulation waited 5 days in the queue on a cluster before starting, but you forgot to tweak one parameter and don't want to wait another 5 days.

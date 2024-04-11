@@ -1961,6 +1961,7 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real               dx    = m_amr->getDx()[a_lvl];
 
+  // Grid patch loop.
   const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
@@ -1974,6 +1975,9 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
 
     // Electric field in this grid patch.
     const BaseIVFAB<Real>& electricFieldPatchEB = a_electricFieldEB[din];
+
+    // This is passed into the plasma kinetics framework.
+    Vector<Real> cdrDensitiesEB(numCdrSpecies, 0.0);
 
     // Irregular kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2468,6 +2472,13 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
 
     // Electric field in this patch.
     const BaseIVFAB<Real>& electricField = a_electricField[din];
+
+    // Things that will be passed into our nifty little plasma physics framework.
+    Vector<Real> extrapCdrFluxes(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrDensities(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
+    Vector<Real> extrapCdrGradients(numCdrSpecies, 0.0);
+    Vector<Real> extrapRteFluxes(numRteSpecies, 0.0);
 
     // Kernel for generating boundary conditions on an electrode cut-cell. This kernel will call the CdrPlasmaPhysics routine
     // which computes the electrode EB boundary fluxes.
@@ -4872,6 +4883,12 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
 
         const Box&     cellBox = dbl[din]; // <--- regular region.
         const EBISBox& ebisBox = ebisl[din];
+
+        // This is stuff that is on a per-cell basis. We visit each cell and populate these fields and then pass them to our
+        // nifty plasma physics object.
+        Vector<Real>     localCdrDensities(cdrDensities.size(), 0.0);
+        Vector<RealVect> localCdrGradients(cdrDensities.size(), RealVect::Zero);
+        Vector<Real>     localRteDensities(rteDensities.size(), 0.0);
 
         // Irregular region.
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];

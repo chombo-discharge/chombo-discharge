@@ -96,10 +96,7 @@ ItoKMCPhysics::defineKMC() noexcept
 {
   CH_TIME("ItoKMCPhysics::defineKMC");
 
-  m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
   m_kmcSolver.define(m_kmcReactions);
-
-  // Define solver parameters in case they've been changed since last time.
   m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 
   // Safety hook -- make sure no one defines reactions using an out-of-range species index.
@@ -325,9 +322,14 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   CH_assert(m_isDefined);
 
-  // Populate the KMC solver state.
-  std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
-  std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
+  KMCState      kmcState;
+  KMCSolverType kmcSolver;
+
+  // Define and populate the KMC solver state.
+  kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+
+  std::vector<FPR>& kmcParticles = kmcState.getReactiveState();
+  std::vector<FPR>& kmcPhotons   = kmcState.getNonReactiveState();
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
@@ -337,33 +339,43 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     p = 0LL;
   }
 
-  // Update the reaction rates and run the KMC solver.
-  this->updateReactionRates(a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
+  // Deep copy of reaction rates
+  std::vector<std::shared_ptr<const KMCReaction>> kmcReactions;
+  for (const auto& r : m_kmcReactions) {
+    kmcReactions.emplace_back(std::make_shared<const KMCReaction>(*r));
+  }
 
-  // // Which algorithm?
+  // Define the KMC solver
+  kmcSolver.define(kmcReactions);
+  kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+
+  // Update the reaction rates to be used by the KMC solver.
+  this->updateReactionRates(kmcReactions, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
+
+  // Run the KMC solver.
   switch (m_algorithm) {
   case Algorithm::SSA: {
-    m_kmcSolver.advanceSSA(m_kmcState, a_dt);
+    kmcSolver.advanceSSA(kmcState, a_dt);
 
     break;
   }
   case Algorithm::TauPlain: {
-    m_kmcSolver.advanceTauPlain(m_kmcState, a_dt);
+    kmcSolver.advanceTauPlain(kmcState, a_dt);
 
     break;
   }
   case Algorithm::TauMidpoint: {
-    m_kmcSolver.advanceTauMidpoint(m_kmcState, a_dt);
+    kmcSolver.advanceTauMidpoint(kmcState, a_dt);
 
     break;
   }
   case Algorithm::HybridPlain: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
+    kmcSolver.advanceHybrid(kmcState, a_dt, KMCLeapPropagator::TauPlain);
 
     break;
   }
   case Algorithm::HybridMidpoint: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
+    kmcSolver.advanceHybrid(kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
 
     break;
   }

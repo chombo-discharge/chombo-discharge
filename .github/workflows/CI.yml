@@ -21,7 +21,7 @@ jobs:
         directory: [Source, Physics, Geometries, Exec]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.10.1
         with:
@@ -40,6 +40,7 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
+        omp: ["TRUE", "FALSE"]
         
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -47,7 +48,7 @@ jobs:
       CORES: 2
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Install dependencies
@@ -63,32 +64,32 @@ jobs:
 
       - name: Build Chombo
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
 
       - name: Build chombo-discharge/source
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
 
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()        
         run: |
-          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }}
+          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()        
         run: |
-          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
+          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
   Linux-Intel:
@@ -102,6 +103,7 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["FALSE"]
+        omp: ["TRUE", "FALSE"]        
         
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -109,7 +111,7 @@ jobs:
       CORES: 2
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -138,29 +140,29 @@ jobs:
       - name: Build Chombo
         run: |
           source /opt/intel/oneapi/setvars.sh                    
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} chombo
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
 
       - name: Build chombo-discharge/source
         run: |
           source /opt/intel/oneapi/setvars.sh                    
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-source
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-source
 
       - name: Build chombo-discharge/geometries
         run: |
           source /opt/intel/oneapi/setvars.sh                    
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-geometries
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
         run: |
           source /opt/intel/oneapi/setvars.sh                    
-          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} discharge-physics
+          make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
 
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()        
         run: |
           source /opt/intel/oneapi/setvars.sh                              
-          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }}
+          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
@@ -168,14 +170,14 @@ jobs:
         if: always()        
         run: |
           source /opt/intel/oneapi/setvars.sh                              
-          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }}
+          python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi                                                  
 
   Build-documentation:
     needs: Formatting
     runs-on : ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install depdencies
         run: |
           sudo apt-get update

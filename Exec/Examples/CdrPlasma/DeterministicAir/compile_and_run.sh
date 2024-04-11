@@ -9,8 +9,8 @@ export OMP_SCHEDULE="dynamic"
 
 COMPILE=true
 RUN=true
-PROFILE=true
-INPUT="positive2d.inputs Driver.max_steps=1 Driver.initial_regrids=1 AmrMesh.max_amr_depth=6 Driver.write_memory=true Driver.write_loads=true"
+PROFILE=false
+INPUT="positive2d.inputs Driver.max_steps=10"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
 if $COMPILE
@@ -28,15 +28,15 @@ then
     cp time.table time.table.serial
 
     # Run OpenMP version
-    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT
+    ./program${DIM}d.Linux.64.g++.gfortran.OPTHIGH.OPENMPCC.ex $INPUT Driver.output_names=omp
     cp time.table time.table.omp
 
     # Run MPI version
-    mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT
+    mpiexec --report-bindings -n $NCORES --bind-to core ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex $INPUT Driver.output_names=mpi
     cp time.table.0 time.table.mpi
 
     # Run MPI+OpenMP version
-    mpiexec --report-bindings --bind-to none --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
+    mpiexec --report-bindings --bind-to core --map-by slot:PE=$OMP_NUM_THREADS -n $NPROCS ./program${DIM}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.OPENMPCC.ex $INPUT
     cp time.table.0 time.table.hybrid
 fi
 
