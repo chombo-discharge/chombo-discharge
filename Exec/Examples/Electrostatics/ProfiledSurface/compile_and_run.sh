@@ -8,8 +8,8 @@ export OMP_PROC_BIND=true
 export OMP_SCHEDULE="dynamic"
 
 COMPILE=true
-RUN=true
-PROFILE=true
+RUN=false
+PROFILE=false
 INPUT="example2d.inputs Driver.max_steps=0"
 # Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
