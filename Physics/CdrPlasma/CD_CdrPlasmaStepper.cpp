@@ -1976,9 +1976,6 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real>>*>&    
     // Electric field in this grid patch.
     const BaseIVFAB<Real>& electricFieldPatchEB = a_electricFieldEB[din];
 
-    // This is passed into the plasma kinetics framework.
-    Vector<Real> cdrDensitiesEB(numCdrSpecies, 0.0);
-
     // Irregular kernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       // Physical coordinates and electric field.
@@ -2457,13 +2454,6 @@ CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_
     const Box&     cellBox = dbl[din];
     const EBISBox& ebisBox = ebisl[din];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
-
-    // Things that will be passed into our nifty little plasma physics framework.
-    Vector<Real> extrapCdrFluxes(numCdrSpecies, 0.0);
-    Vector<Real> extrapCdrDensities(numCdrSpecies, 0.0);
-    Vector<Real> extrapCdrVelocities(numCdrSpecies, 0.0);
-    Vector<Real> extrapCdrGradients(numCdrSpecies, 0.0);
-    Vector<Real> extrapRteFluxes(numRteSpecies, 0.0);
 
     // These are the dielectric and electrode cells in the current grid patch. They form a complete set of
     // cut-cells.
@@ -4875,11 +4865,6 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        // This is stuff that is on a per-cell basis. We visit each cell and populate these fields and then pass them to our
-        // nifty plasma physics object.
-        Vector<Real>     localCdrDensities(cdrDensities.size(), 0.0);
-        Vector<RealVect> localCdrGradients(cdrDensities.size(), RealVect::Zero);
-        Vector<Real>     localRteDensities(rteDensities.size(), 0.0);
 
         const Box&     cellBox = dbl[din]; // <--- regular region.
         const EBISBox& ebisBox = ebisl[din];
