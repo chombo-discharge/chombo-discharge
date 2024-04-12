@@ -28,6 +28,15 @@ Gallery
    <img src="./Docs/Sphinx/source/_static/figures/README/VoidPD.gif" width="45%">   
 </p align="center">
 
+<p align="center">
+   <img src="./Docs/Sphinx/source/_static/figures/README/OtherBead.png" width="45%">
+   <img src="./Docs/Sphinx/source/_static/figures/README/35kv_66ns.png" width="45%">   
+</p align="center">
+
+<p align="center">
+   <img src="./Docs/Sphinx/source/_static/figures/README/3DSimulation.png" width="45%">
+</p align="center">
+
 
 Installation
 ------------
