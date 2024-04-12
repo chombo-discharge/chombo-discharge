@@ -1,5 +1,4 @@
-export CH_TIMER=1
-export DIM=2
+export DIM=3
 export NCORES=8
 export NPROCS=1
 export OMP_NUM_THREADS=8
@@ -7,10 +6,10 @@ export OMP_PLACES=cores
 export OMP_PROC_BIND=true
 export OMP_SCHEDULE="dynamic"
 
-COMPILE=false
+COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example2d.inputs Driver.max_steps=0"
+INPUT="example3d.inputs Driver.max_steps=0"
 # Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
@@ -104,6 +103,7 @@ then
 		       'AMRMultiGrid::solveNo-InitResid' \
 		       'FieldSolverMultigrid::setupSolver()' \
 		       'AMRMultiGrid::computeAMRResidual' \
+		       'FieldSolverMultigrid::solve' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial
