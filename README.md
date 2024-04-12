@@ -6,7 +6,7 @@ chombo-discharge
 
 This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for discharge simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
 ``chombo-discharge`` is aimed at performant electric discharge simulations (e.g., Townsend discharges, streamer discharges, sprites, etc.), and scales to tens of thousands of CPU cores.
-The code 
+The code supports both fluid and particle methods, and is parallelized using OpenMP, MPI, and MPI+OpenMP.
 
 A modified version of ``Chombo`` is distributed together with this code.
 
