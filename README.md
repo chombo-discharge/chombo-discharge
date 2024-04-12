@@ -20,13 +20,13 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 
 A modified version of ``Chombo`` is distributed together with this code.
 
+Gallery
+-------
+
 <p align="center">
-   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="45%">
-   <img src="./Docs/Sphinx/source/_static/figures/VoidPD.mp4" width="45%">   
-
+   <img src="./Docs/Sphinx/source/_static/figures/README/BranchingAir.gif" width="45%">
+   <img src="./Docs/Sphinx/source/_static/figures/README/VoidPD.gif" width="45%">   
 </p align="center">
-
-# <img src="./Exec/Examples/CdrPlasma/Sprite/sprite3d.png" width="55%">
 
 
 Installation
