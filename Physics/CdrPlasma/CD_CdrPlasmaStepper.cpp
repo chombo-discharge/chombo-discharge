@@ -4865,7 +4865,6 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-
         const Box&     cellBox = dbl[din]; // <--- regular region.
         const EBISBox& ebisBox = ebisl[din];
 
