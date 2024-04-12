@@ -11,6 +11,7 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for disc
 
 * Fully written in C++.
 * Parallelized with OpenMP, MPI, or MPI+OpenMP.
+* Scales to tens of thousands of CPUs.
 * Supports complex geometries (electrodes/dielectrics).
 * Parallel I/O with HDF5.
 * Efficient geometric multigrid solvers.
@@ -25,13 +26,12 @@ A modified version of ``Chombo`` is distributed together with this code.
 </p align="center">
 
 
-
 Installation
 ------------
 
-A serial build quickstart is given below. 
-For complete installation instructions, see https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html
-
+Installation of ``chombo-discharge`` depends on the level of parallelism that is desired (if any). 
+The code supports OpenMP, MPI, and MPI+OpenMP types of parallelism.
+For complete installation instructions for serial or parallel execution, see https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html. 
 
 Documentation
 -------------
@@ -44,64 +44,6 @@ License
 
 See LICENSE and Copyright.txt for redistribution rights.
 
-
-Serial build quickstart
------------------------
-
-For doing a quick clone and test build of ``chombo-discharge`` without HDF5 or MPI capabilities, execute the following steps:
-
-1. Install the LAPACK, BLAS, and GCC dependencies:
-
-   ```
-   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
-   ```
-   
-2. Choose an installation directory and clone ``chombo-discharge`` there:
-
-   ```
-   export DISCHARGE_HOME=/home/foo/chombo-discharge		
-   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
-		
-   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
-   ```
-
-   Alternatively, if cloning over https:
-
-   ```
-   export DISCHARGE_HOME=/home/foo/chombo-discharge		
-   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
-		
-   git clone --recursive https://github.com/chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
-   ```
-
-3. Copy the GNU compiler makefile to it's appropriate location
-
-   ```
-   cp $DISCHARGE_HOME/Lib/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
-   ```
-
-4. Build ``chombo-discharge``
-
-   ```
-   cd $DISCHARGE_HOME
-   make -s -j4
-   ```
-
-5. Run a simple example program
-
-   ```
-   cd $DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB
-   make -s -j4
-   ./*.ex example.inputs
-   ```
-
-6. Run an advanced example program
-
-   ```
-   cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/StochasticAir
-   make -s -j4
-   ./*.ex positive2d.inputs
-   ```		
 
 Contributing
 ------------
