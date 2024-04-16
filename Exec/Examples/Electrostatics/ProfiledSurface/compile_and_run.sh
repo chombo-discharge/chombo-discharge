@@ -1,3 +1,4 @@
+export CH_TIMER=1
 export DIM=3
 export NCORES=8
 export NPROCS=1
@@ -9,7 +10,7 @@ export OMP_SCHEDULE="dynamic"
 COMPILE=true
 RUN=true
 PROFILE=true
-INPUT="example3d.inputs Driver.max_steps=0"
+INPUT="example3d.inputs Driver.max_steps=0 Driver.geometry_only=true"
 # Driver.initial_regrids=1 Driver.write_memory=true Driver.write_loads=true FieldStepper.load_balance=true"
 
 # Compile for serial, OpenMP, flat MPI, and MPI+OpenMP
@@ -20,8 +21,6 @@ then
     make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=FALSE MPI=TRUE  DIM=$DIM
     make -s -j$NCORES OPT=HIGH DEBUG=FALSE OPENMPCC=TRUE  MPI=TRUE  DIM=$DIM
 fi
-
-rm *.0
 
 if $RUN
 then
@@ -104,6 +103,10 @@ then
 		       'FieldSolverMultigrid::setupSolver()' \
 		       'AMRMultiGrid::computeAMRResidual' \
 		       'FieldSolverMultigrid::solve' \
+		       'EBISLevel::EBISLevel_geoserver_domain' \
+		       'EBISLevel::coarsenVoFs' \
+		       'ComputationalGeometry::buildGeometries' \
+		       'PhaseRealm::defineEBLevelGrid' \
 		   ; do
 
 	if grep -q "${PATTERN}" time.table.serial
