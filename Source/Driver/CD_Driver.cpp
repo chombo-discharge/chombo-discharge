@@ -285,7 +285,7 @@ Driver::getGeometryTags()
     ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
 
     const RealVect      probLo = m_amr->getProbLo();
-    const DataIterator& dit    = irregGrids.dataIterator();
+    const DataIterator dit    = irregGrids.dataIterator();
 
     const int nbox = dit.size();
 
@@ -334,7 +334,7 @@ Driver::getGeometryTags()
       BoxLoops::loop(vofit, kernel);
 
       // Always refine multi-valued cells.
-      m_geomTags[lvl] |= ebisbox.getMultiCells(box);
+      geomTags |= ebisbox.getMultiCells(box);
     }
 
     // Things from depth specifications
