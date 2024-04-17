@@ -44,7 +44,6 @@ then
     cp pout.0 hybrid.0
 fi
 
-rm pout.*
 
 # Kernel comparison for Source/AmrMesh
 if $PROFILE
