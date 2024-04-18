@@ -144,7 +144,7 @@ Multi-physics applications
    :hidden:	     
 
    Applications/CdrPlasmaModel
-   Applications/StreamerInceptionModel
+   Applications/DischargeInceptionModel
    Applications/ItoKMC
 
 Single-solver applications

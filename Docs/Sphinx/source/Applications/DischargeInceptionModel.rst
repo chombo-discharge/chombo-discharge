@@ -1,4 +1,4 @@
-.. _Chap:StreamerInceptionModel:
+.. _Chap:DischargeInceptionModel:
 
 Streamer inception model
 ========================
@@ -48,12 +48,12 @@ These are discussed below.
 Implementation
 ______________
 
-The streamer inception model is implemented in :file:`$DISCHARGE_HOME/Physics/StreamerInception` as
+The streamer inception model is implemented in :file:`$DISCHARGE_HOME/Physics/DischargeInception` as
 
 .. code-block:: c++
 
    template <typename P, typename F, typename C>
-   class StreamerInceptionStepper : public TimeStepper
+   class DischargeInceptionStepper : public TimeStepper
 
 The template complexity is due to flexibility in what solver implementations we use.
 The following solvers are used within the model:
@@ -119,7 +119,7 @@ where :math:`\lambda(t)` is a placeholder for the electron generation rate, give
 Inserting the expression for :math:`\lambda` and integrating for :math:`P(t)` yields
 
 .. math::
-   :label: StreamerInceptionProbability
+   :label: DischargeInceptionProbability
 	   
    P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].
 
@@ -136,11 +136,11 @@ Note that, internally, we always ensure that :math:`j_{\text{e}} dA` evaluates t
 We also compute the probability of a first electron appearing in the time interval :math:`[t, t+\Delta t]`, given by
 
 .. math::
-   :label: StreamerInceptionProbability2
+   :label: DischargeInceptionProbability2
    
    \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t
 
-When running in transient mode the user must set the voltage curve (see :ref:`Chap:StreamerInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
+When running in transient mode the user must set the voltage curve (see :ref:`Chap:DischargeInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
 
 The statistical time lag, or average waiting time for the first electron, is available from the computed data, and is given by integrating :math:`t \text{d}P`, which yields
 
@@ -151,7 +151,7 @@ The statistical time lag, or average waiting time for the first electron, is ava
 Other derived values (such as the standard deviation of the waiting time) is also available, and can be calculated from the :math:`P(t)` and :math:`\lambda(t)` similar to the procedure above.
 Numerically, this is calculated using the trapezoidal rule. 
 
-.. _Chap:StreamerInceptionInputData:
+.. _Chap:DischargeInceptionInputData:
 
 Input data
 ----------
@@ -206,7 +206,7 @@ Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used as follows,
 Free charges
 ____________
 
-By default, ``StreamerInceptionStepper`` assume that the simulation region is charge-free, i.e. :math:`\rho = \sigma= 0`.
+By default, ``DischargeInceptionStepper`` assume that the simulation region is charge-free, i.e. :math:`\rho = \sigma= 0`.
 Nonetheless, the class has member functions for specifying these, which are given by
 
 .. code-block:: c++
@@ -222,19 +222,19 @@ Nonetheless, the class has member functions for specifying these, which are give
    This feature is currently a work-in-progress and relies on the superposition of a homogeneous solution :math:`\Phi_1` (one without charges) and an inhomogeneous solution :math:`\Phi_2` (one with charges), i.e. :math:`\Phi = U\Phi_1 + \Phi_2` where :math:`U` is the applied potential.
 
    As this feature has not (yet) been sufficiently hardened, it is recommend to run with debugging enabled.
-   This can be done by adding ``StreamerInceptionStepper.debug=true`` to the input script of command line, which should catch cases where the superposition is not properly taken care of (typically due to conflicting BCs). 
+   This can be done by adding ``DischargeInceptionStepper.debug=true`` to the input script of command line, which should catch cases where the superposition is not properly taken care of (typically due to conflicting BCs). 
    
 
 Inception threshold
 ___________________
 
-Use in class input value ``StreamerInceptionStepper.K_inception`` for setting the inception threshold.
+Use in class input value ``DischargeInceptionStepper.K_inception`` for setting the inception threshold.
 
 For example:
 
 .. code-block:: text
 
-   StreamerInceptionStepper.K_inception   = 12.0
+   DischargeInceptionStepper.K_inception   = 12.0
 
 Townsend ionization coefficient
 _______________________________
@@ -243,7 +243,7 @@ To set the Townsend ionization coefficient, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setAlpha(const std::function<Real(const RealVect& E, const RealVect& x)>& a_alpha) noexcept;
+   DischargeInceptionStepper::setAlpha(const std::function<Real(const RealVect& E, const RealVect& x)>& a_alpha) noexcept;
 
 
 Townsend attachment coefficient
@@ -253,7 +253,7 @@ To set the Townsend attachment coefficient, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setEta(const std::function<Real(const Real& E, const RealVect& x)>& a_eta) noexcept;
+   DischargeInceptionStepper::setEta(const std::function<Real(const Real& E, const RealVect& x)>& a_eta) noexcept;
    
 
 Negative ion mobility
@@ -263,7 +263,7 @@ To set the negative ion mobility, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
+   DischargeInceptionStepper::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
    
 
 Negative ion diffusion coefficient
@@ -273,7 +273,7 @@ To set the negative ion diffusion coefficient, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setIonDiffusion(const std::function<Real(const Real& E)>& a_diffCo) noexcept;   
+   DischargeInceptionStepper::setIonDiffusion(const std::function<Real(const Real& E)>& a_diffCo) noexcept;   
 
 
 Negative ion density
@@ -283,7 +283,7 @@ To set the negative ion density, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
+   DischargeInceptionStepper::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
 
 Secondary emission
 __________________
@@ -292,7 +292,7 @@ To set the secondary emission efficiency at cathodes, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setSecondaryEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_coeff) noexcept;
+   DischargeInceptionStepper::setSecondaryEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_coeff) noexcept;
 
 This efficiency is position-dependent so that the user can set different efficiencies for different materials (or different positions in a single material).
 
@@ -306,7 +306,7 @@ To set the background ionization rate, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setBackgroundRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
+   DischargeInceptionStepper::setBackgroundRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
 Detachment rate
 _______________
@@ -322,7 +322,7 @@ This is used when calculating the inception probability, and the user sets the d
 
 .. code-block:: c++
 		
-   StreamerInceptionStepper::setDetachmentRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
+   DischargeInceptionStepper::setDetachmentRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
 Field emission
 ______________
@@ -331,7 +331,7 @@ To set the field emission current, use the function
 
 .. code-block:: c++
 
-   StreamerInceptionStepper::setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
+   DischargeInceptionStepper::setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
 
 This will set a field-dependent emission rate from cathodes given by the input function.
 Note that, under the hood, the function indicates a general cathode emission current which can be the sum of several contributions (field emission, photoelectric effect etc.).
@@ -348,13 +348,13 @@ These are in the format
 
 .. code-block:: text
 
-   StreamerInceptionStepper.voltage_lo    = 1.0   # Low voltage multiplier
-   StreamerInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
-   StreamerInceptionStepper.voltage_steps = 3     # Number of voltage steps
+   DischargeInceptionStepper.voltage_lo    = 1.0   # Low voltage multiplier
+   DischargeInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
+   DischargeInceptionStepper.voltage_steps = 3     # Number of voltage steps
 
 
 
-.. _Chap:StreamerInceptionVoltageCurve:
+.. _Chap:DischargeInceptionVoltageCurve:
 
 Voltage curve
 _____________
@@ -363,7 +363,7 @@ To set the voltage curve, use the member function
 
 .. code-block:: c++
 
-   StreamerInceptionSteppersetVoltageCurve(const std::function<Real(const Real& time)>& a_voltageCurve) noexcept;
+   DischargeInceptionSteppersetVoltageCurve(const std::function<Real(const Real& time)>& a_voltageCurve) noexcept;
 
 This is relevant only when running a transient simulation. 
 
@@ -518,7 +518,7 @@ which is the position of the first electron that enables a critical avalanche at
 Inception probability
 _____________________
 
-The inception probability is given by :eq:`StreamerInceptionProbability` and is computed using straightforward numerical quadrature:
+The inception probability is given by :eq:`DischargeInceptionProbability` and is computed using straightforward numerical quadrature:
 
 .. math::
 
@@ -540,7 +540,7 @@ Simulation control
 ------------------
 
 Here, we discuss simulation controls that are available for the streamer inception model.
-These all appear in the form ``StreamerInceptionStepper.<option>``.
+These all appear in the form ``DischargeInceptionStepper.<option>``.
 
 verbosity
 _________
@@ -550,7 +550,7 @@ Usually we have
 
 .. code-block:: text
 
-   StreamerInceptionStepper.verbosity = -1
+   DischargeInceptionStepper.verbosity = -1
 
 mode
 ____
@@ -560,7 +560,7 @@ Accepted values are ``stationary`` and ``transient``, e.g.,
 
 .. code-block:: text
 
-   StreamerInceptionStepper.mode = stationary
+   DischargeInceptionStepper.mode = stationary
 
 .. important::
 
@@ -575,7 +575,7 @@ This should be specified in the form
 
 .. code-block:: text
 
-   StreamerInceptionStepper.inception_alg = <algorithm> <mode> <value>
+   DischargeInceptionStepper.inception_alg = <algorithm> <mode> <value>
 
 These indicate the following:
 
@@ -600,7 +600,7 @@ For example, the following will set an Euler integration with an adaptive step s
 
 .. code-block:: text
 
-   StreamerInceptionStepper.inception_alg = euler alpha 0.5
+   DischargeInceptionStepper.inception_alg = euler alpha 0.5
 
    
 full_integration
@@ -630,7 +630,7 @@ For example:
 
 .. code-block:: text
 
-   StreamerInceptionStepper.output_file = report.txt
+   DischargeInceptionStepper.output_file = report.txt
 
 K_inception
 ___________
@@ -640,7 +640,7 @@ E.g.,
 
 .. code-block:: text
 
-   StreamerInceptionStepper.K_inception = 12
+   DischargeInceptionStepper.K_inception = 12
 
 eval_townsend
 _____________
@@ -651,7 +651,7 @@ E.g.,
 
 .. code-block:: text
 
-   StreamerInceptionStepper.eval_townsend = true
+   DischargeInceptionStepper.eval_townsend = true
 
 Will turn on the Townsend criterion. 
 
@@ -678,7 +678,7 @@ For example:
 
 .. code-block:: text
 
-   StreamerInceptionStepper.plt_vars = K Uinc bg_rate emission ions
+   DischargeInceptionStepper.plt_vars = K Uinc bg_rate emission ions
 
 For stationary mode
 ____________________
@@ -694,9 +694,9 @@ For example:
 
 .. code-block:: text
 
-   StreamerInceptionStepper.voltage_lo    = 10E3
-   StreamerInceptionStepper.voltage_hi    = 30E3
-   StreamerInceptionStepper.voltage_steps = 5
+   DischargeInceptionStepper.voltage_lo    = 10E3
+   DischargeInceptionStepper.voltage_hi    = 30E3
+   DischargeInceptionStepper.voltage_steps = 5
 
 For transient mode
 __________________
@@ -714,16 +714,16 @@ For example,
 
 .. code-block:: text
 		
-   StreamerInceptionStepper.ion_transport = true 
-   StreamerInceptionStepper.transport_alg = imex  
-   StreamerInceptionStepper.cfl           = 0.8  
-   StreamerInceptionStepper.min_dt        = 0.0  
-   StreamerInceptionStepper.max_dt        = 1E99 
+   DischargeInceptionStepper.ion_transport = true 
+   DischargeInceptionStepper.transport_alg = imex  
+   DischargeInceptionStepper.cfl           = 0.8  
+   DischargeInceptionStepper.min_dt        = 0.0  
+   DischargeInceptionStepper.max_dt        = 1E99 
 
 .. warning::
 
    The ``ctu`` option exists because the default advection solver for the streamer inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
-   Ensure that ``CdrCTU.use_ctu = true`` if using ``StreamerInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
+   Ensure that ``CdrCTU.use_ctu = true`` if using ``DischargeInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
 
   
 Caveats
@@ -751,43 +751,43 @@ This is implemented in a class
 
 .. code-block:: c++
 
-   class StreamerInceptionTagger : public CellTagger
+   class DischargeInceptionTagger : public CellTagger
 
-and is automatically included in simulations when setting up the application through the Python setup tools (see :ref:`Chap:StreamerInceptionSetup`).
+and is automatically included in simulations when setting up the application through the Python setup tools (see :ref:`Chap:DischargeInceptionSetup`).
 The user can control refinement buffers and criterion through the following input options:
 
-* ``StreamerInceptionTagger.buffer`` Adds a buffer region around tagged cells.
-* ``StreamerInceptionTagger.max_voltage`` Maximum voltage that will be simulated.
-* ``StreamerInceptionTagger.ref_alpha`` Sets the refinement criterion :math:`\lambda` as above.
+* ``DischargeInceptionTagger.buffer`` Adds a buffer region around tagged cells.
+* ``DischargeInceptionTagger.max_voltage`` Maximum voltage that will be simulated.
+* ``DischargeInceptionTagger.ref_alpha`` Sets the refinement criterion :math:`\lambda` as above.
 
 For example:
 
 .. code-block:: text
 		
-   StreamerInceptionTagger.buffer      = 4  
-   StreamerInceptionTagger.max_voltage = 30E3
-   StreamerInceptionTagger.ref_alpha   = 2.0
+   DischargeInceptionTagger.buffer      = 4  
+   DischargeInceptionTagger.max_voltage = 30E3
+   DischargeInceptionTagger.ref_alpha   = 2.0
 
-.. _Chap:StreamerInceptionSetup:
+.. _Chap:DischargeInceptionSetup:
 
 Setting up a new problem
 ------------------------
 
-To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/StreamerInception` is the simplest way.
+To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/DischargeInception` is the simplest way.
 To see available setup options, run
 
 .. code-block:: text
 
    python3 setup.py --help
 
-For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/MyStreamerInception` for a cylinder geometry, run
+For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/MyDischargeInception` for a cylinder geometry, run
 
 .. code-block:: text
 
-   python3 setup.py -base_dir=MyApplications -app_name=MyStreamerInception -geometry=Cylinder
+   python3 setup.py -base_dir=MyApplications -app_name=MyDischargeInception -geometry=Cylinder
 
 This will set up a new problem in a cylinder geometry (defined in :file:`Geometries/Cylinder`).
-The main file is named :file:`program.cpp`` and contains default implementations for the required input data (see :ref:`Chap:StreamerInceptionInputData`).
+The main file is named :file:`program.cpp`` and contains default implementations for the required input data (see :ref:`Chap:DischargeInceptionInputData`).
 
 
 Example programs
@@ -798,19 +798,19 @@ Example programs that use the streamer inception model are given in
 High-voltage vessel
 ___________________
 
-* :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/Vessel`.
+* :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/Vessel`.
   This program is set up in 2D (stationary) and 3D (transient) for streamer inception in atmospheric air.
   The input data is computed using BOLSIG+.
 
 Electrode with surface roughness
 ________________________________
 
-* :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
+* :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness`.
   This program is set up in 2D (stationary) and 3D (transient) for streamer inception on an irregular electrode surface. 
   We use SF6 transport data as input data, computed using BOLSIG+.
 
 Electrode with surface roughness
 ________________________________
 
-* :file:`$DISCHARGE_HOME/Exec/Examples/StreamerInception/ElectrodeRoughness`.
+* :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness`.
   This program is set up in 2D and 3D (stationary) mode, and includes the influence of the Townsend criterion.
