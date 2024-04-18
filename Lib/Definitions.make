@@ -14,7 +14,7 @@ GEOMETRYONLY_LIB       = GeometryPhysics
 ITOKMC_LIB             = ItoKMCPhysics
 MESHODE_LIB            = MeshODEPhysics
 RADTRANSFER_LIB        = RadiativeTransferPhysics
-DISCHARGEINCEPTION_LIB = DischargeinceptionPhysics
+DISCHARGEINCEPTION_LIB = DischargeInceptionPhysics
 TRACERPARTICLE_LIB     = TracerParticlePhysics
 
 # Headers where the chombo-discharge source code is located. This should all folders

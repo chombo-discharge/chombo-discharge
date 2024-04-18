@@ -14,5 +14,5 @@ dependencies:
 	$(MAKE) --directory=$(DISCHARGE_HOME) dischargeinception
 
 # Make advection-diffusion headers and library visible. 
-XTRACPPFLAGS += $(STREAMERINCEPTION_INCLUDE)
-XTRALIBFLAGS += $(addprefix -l, $(STREAMERINCEPTION_LIB))$(config)
+XTRACPPFLAGS += $(DISCHARGEINCEPTION_INCLUDE)
+XTRALIBFLAGS += $(addprefix -l, $(DISCHARGEINCEPTION_LIB))$(config)
