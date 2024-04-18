@@ -1,12 +1,12 @@
 .. _Chap:DischargeInceptionModel:
 
-Streamer inception model
-========================
+Discharge inception model
+=========================
 
 Overview
 --------
 
-The streamer inception model computes the inception voltage and probability of streamer inception for arbitrary geometries and voltage forms.
+The discharge inception model computes the inception voltage and probability of discharge inception for arbitrary geometries and voltage forms.
 
 For estimating the streamer inception, the module solves the electron avalanche integral
 
@@ -17,7 +17,7 @@ For estimating the streamer inception, the module solves the electron avalanche 
 where :math:`E = |\mathbf{E}|` and where :math:`\alpha_{\text{eff}}(E,\mathbf{x}) = \alpha(E,\mathbf{x}) - \eta(E,\mathbf{x})` is the effective ionization coefficient.
 The integration runs along electric field lines.
 
-The streamer inception model solves for :math:`K = K\left(\mathbf{x}\right)` for all :math:`\mathbf{x}`, i.e., the inception integral is evaluated for all starting positions of the first electron.
+The discharge inception model solves for :math:`K = K\left(\mathbf{x}\right)` for all :math:`\mathbf{x}`, i.e., the inception integral is evaluated for all starting positions of the first electron.
 This differs from the conventional approach where the user will first extract electric field lines for post-processing.
 
 In addition to the above, the user can specify a critical threshold value for :math:`K_c` which is used for computing
@@ -38,7 +38,7 @@ In addition to this, one may also track positive ions and solve for the Townsend
 The interpretation of this criterion is that each starting electron grows into :math:`\exp\left[K\left(\mathbf{x}\right)\right]` electron-ion pairs.
 The residual ions will drift towards cathode surfaces and generate secondary ionization with a user-supplied efficiency :math:`\gamma=\gamma\left(E,\mathbf{x}\right)`.
 
-The streamer inception model can be run in two modes:
+The discharge inception model can be run in two modes:
 
 * :ref:`Chap:StationaryMode`.
 * :ref:`Chap:TransientMode`.
@@ -48,7 +48,7 @@ These are discussed below.
 Implementation
 ______________
 
-The streamer inception model is implemented in :file:`$DISCHARGE_HOME/Physics/DischargeInception` as
+The discharge inception model is implemented in :file:`$DISCHARGE_HOME/Physics/DischargeInception` as
 
 .. code-block:: c++
 
@@ -105,7 +105,7 @@ However, we are interested in the average ion distribution over many experiments
 
 This equation is sensible only when :math:`\langle n_-\rangle` is interpreted as an ion density distribution (over many identical experiments). 
 
-The above quantities are then used for computing the probability of streamer inception in a time interval :math:`[t,t+\text{d}t]`, which is
+The above quantities are then used for computing the probability of discharge inception in a time interval :math:`[t,t+\text{d}t]`, which is
 
 .. math::
    \text{d}P(t) = \left[1-P\left(t\right)\right]\lambda(t) \text{d}t,
@@ -156,7 +156,7 @@ Numerically, this is calculated using the trapezoidal rule.
 Input data
 ----------
 
-The input to the streamer inception model are:
+The input to the discharge inception model are:
 
 #. Space and surface charge. 
 #. Streamer inception threshold.
@@ -170,7 +170,7 @@ The input to the streamer inception model are:
 #. Secondary emission coefficients.
 #. Voltage curve (for transient simulations).
 
-The input data to the streamer inception model is mostly done by passing in C++-functions to the class.
+The input data to the discharge inception model is mostly done by passing in C++-functions to the class.
 These functions are mainly in the forms
 
 .. code-block:: c++
@@ -370,7 +370,7 @@ This is relevant only when running a transient simulation.
 Algorithms
 ----------
 
-The streamer inception model uses a combination of electrostatic field solves, Particle-In-Cell, and fluid advection for resolving the necessary dynamics.
+The discharge inception model uses a combination of electrostatic field solves, Particle-In-Cell, and fluid advection for resolving the necessary dynamics.
 The various algorithms involved are discussed below.
 
 Field solve
@@ -539,7 +539,7 @@ The advection algorithm for the negative ion distribution follows the time stepp
 Simulation control
 ------------------
 
-Here, we discuss simulation controls that are available for the streamer inception model.
+Here, we discuss simulation controls that are available for the discharge inception model.
 These all appear in the form ``DischargeInceptionStepper.<option>``.
 
 verbosity
@@ -570,7 +570,7 @@ Accepted values are ``stationary`` and ``transient``, e.g.,
 inception_alg
 _____________
 
-Controls the streamer inception algorithm (for computing the :math:`K` integral).
+Controls the discharge inception algorithm (for computing the :math:`K` integral).
 This should be specified in the form
 
 .. code-block:: text
@@ -722,7 +722,7 @@ For example,
 
 .. warning::
 
-   The ``ctu`` option exists because the default advection solver for the streamer inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
+   The ``ctu`` option exists because the default advection solver for the discharge inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
    Ensure that ``CdrCTU.use_ctu = true`` if using ``DischargeInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
 
   
@@ -739,7 +739,7 @@ When running the model, ensure that the :ref:`Chap:TracerParticleSolver` flag is
 Adaptive mesh refinement
 ------------------------
 
-The streamer inception model runs its own mesh refinement routine, which refines the mesh if
+The discharge inception model runs its own mesh refinement routine, which refines the mesh if
 
 .. math::
 
@@ -793,20 +793,20 @@ The main file is named :file:`program.cpp`` and contains default implementations
 Example programs
 ----------------
 
-Example programs that use the streamer inception model are given in
+Example programs that use the discharge inception model are given in
 
 High-voltage vessel
 ___________________
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/Vessel`.
-  This program is set up in 2D (stationary) and 3D (transient) for streamer inception in atmospheric air.
+  This program is set up in 2D (stationary) and 3D (transient) for discharge inception in atmospheric air.
   The input data is computed using BOLSIG+.
 
 Electrode with surface roughness
 ________________________________
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness`.
-  This program is set up in 2D (stationary) and 3D (transient) for streamer inception on an irregular electrode surface. 
+  This program is set up in 2D (stationary) and 3D (transient) for discharge inception on an irregular electrode surface. 
   We use SF6 transport data as input data, computed using BOLSIG+.
 
 Electrode with surface roughness

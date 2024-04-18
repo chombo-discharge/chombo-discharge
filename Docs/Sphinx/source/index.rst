@@ -77,7 +77,7 @@ Introduction
    :caption: Introduction
    :hidden:
 
-   Base/Documetnation
+   Base/Documentation
    Base/Overview
    Base/Installation
    Base/Control
