@@ -206,3 +206,8 @@ lightning_impulse.peak       = 50E3
 lightning_impulse.start      = 1.E-9
 lightning_impulse.front_time = 1.2E-6
 lightning_impulse.tail_time  = 50E-6
+
+# ====================================================================================================
+# Other physics adjustable physics data
+# ====================================================================================================
+DischargeInception.second_townsend = 1.E-3

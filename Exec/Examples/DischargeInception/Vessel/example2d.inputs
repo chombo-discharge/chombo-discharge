@@ -167,7 +167,7 @@ DischargeInceptionStepper.verbosity        = -1                      ## Chattine
 DischargeInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
 DischargeInceptionStepper.full_integration = true                    ## Turn on/off full integration
 DischargeInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
-DischargeInceptionStepper.eval_townsend    = false                   ## Evaluate Townsend criterion or not (only for stationary)
+DischargeInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
 DischargeInceptionStepper.inception_alg    = euler alpha 0.25        ## Integration algorithm for inception integral.
 DischargeInceptionStepper.output_file      = report.txt              ## Output file
 DischargeInceptionStepper.K_inception      = 12                      ## User-specified inception value
@@ -205,5 +205,8 @@ lightning_impulse.start      = 50E-9
 lightning_impulse.front_time = 1.2E-6
 lightning_impulse.tail_time  = 50E-6
 
-
+# ====================================================================================================
+# Other physics adjustable physics data
+# ====================================================================================================
+DischargeInception.second_townsend = 1.E-3
 

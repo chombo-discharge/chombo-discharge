@@ -47,16 +47,20 @@ main(int argc, char* argv[])
   attachmentData.prepareTable(0, 500, LookupTable::Spacing::Exponential);
 
   // Read data for the voltage curve.
-  Real peak = 0.0;
-  Real t0   = 0.0;
-  Real t1   = 0.0;
-  Real t2   = 0.0;
+  Real peak           = 0.0;
+  Real t0             = 0.0;
+  Real t1             = 0.0;
+  Real t2             = 0.0;
+  Real secondTownsend = 0.0;
 
   ParmParse li("lightning_impulse");
+  ParmParse di("DischargeInception");
   li.get("peak", peak);
   li.get("start", t0);
   li.get("tail_time", t1);
   li.get("front_time", t2);
+
+  di.get("second_townsend", secondTownsend);
 
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Vessel());
@@ -99,6 +103,9 @@ main(int argc, char* argv[])
 
     return C1 * (E * E) * exp(-C2 / (beta * E));
   };
+  auto secondaryEmission = [&](const Real& E, const RealVect& x) -> Real {
+    return secondTownsend;
+  };
 
   // Set up time stepper
   auto timestepper = RefCountedPtr<DischargeInceptionStepper<>>(new DischargeInceptionStepper<>());
@@ -115,6 +122,7 @@ main(int argc, char* argv[])
   timestepper->setIonDiffusion(ionDiffusion);
   timestepper->setIonDensity(ionDensity);
   timestepper->setVoltageCurve(voltageCurve);
+  timestepper->setSecondaryEmission(secondaryEmission);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
