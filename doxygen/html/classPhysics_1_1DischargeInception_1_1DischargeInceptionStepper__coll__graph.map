@@ -1,0 +1,7 @@
+<map id="Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;" name="Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;">
+<area shape="rect" id="node1" title="Class for streamer inception integral evaluations." alt="" coords="131,331,337,387"/>
+<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="135,95,333,121"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="274,5,413,32"/>
+<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="357,95,553,121"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;" name="Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;">
+<area shape="rect" id="node1" title="Class for streamer inception integral evaluations." alt="" coords="5,80,211,136"/>
+<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="55,5,161,32"/>
+</map>

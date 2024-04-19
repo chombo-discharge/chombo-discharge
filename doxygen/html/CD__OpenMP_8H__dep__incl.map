@@ -3,7 +3,7 @@
 <area shape="rect" id="node2" href="$CD__Realm_8cpp.html" title="Implementation of CD_Realm.H." alt="" coords="1244,445,1475,471"/>
 <area shape="rect" id="node3" href="$CD__Driver_8cpp.html" title="Implementation of CD_Driver.H." alt="" coords="1513,720,1720,747"/>
 <area shape="rect" id="node4" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="2784,95,2937,136"/>
-<area shape="rect" id="node14" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="577,713,864,754"/>
+<area shape="rect" id="node14" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="578,713,869,754"/>
 <area shape="rect" id="node47" href="$CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="3604,184,3808,225"/>
 <area shape="rect" id="node5" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="1499,445,1737,471"/>
 <area shape="rect" id="node26" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="2813,527,2959,568"/>
@@ -25,13 +25,13 @@
 <area shape="rect" id="node17" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="690,616,858,657"/>
 <area shape="rect" id="node18" href="$CD__CdrPlasmaGodunovStepper_8H.html" title="Declaration of the Godunov time stepper method." alt="" coords="71,705,309,761"/>
 <area shape="rect" id="node19" href="$CD__CdrPlasmaGodunovStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaGodunovStepper." alt="" coords="5,809,244,865"/>
-<area shape="rect" id="node20" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="888,705,1127,761"/>
+<area shape="rect" id="node20" href="$CD__CdrPlasmaImExSdcStepper_8H.html" title="Declaration of a semi&#45;implicit spectral deferred correction class for Physics/CdrPlasma." alt="" coords="893,705,1132,761"/>
 <area shape="rect" id="node21" href="$CD__CdrPlasmaImExSdcStorage_8H.html" title="Declaration of scratch storage for CdrPlasmaImExSdcStepper." alt="" coords="293,809,532,865"/>
 <area shape="rect" id="node25" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="711,527,869,568"/>
 <area shape="rect" id="node30" href="$CD__MeshODESolver_8H.html" title="Encapsulation of an ODE solver on the mesh." alt="" coords="1405,527,1580,568"/>
 <area shape="rect" id="node31" href="$CD__RtSolver_8H.html" title="Abstract parent class for various radiative transfer solvers." alt="" coords="2983,527,3167,568"/>
 <area shape="rect" id="node35" href="$CD__SurfaceODESolver_8H.html" title="Declaration of a cut&#45;cell ODE solver." alt="" coords="1656,527,1844,568"/>
-<area shape="rect" id="node13" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="882,616,1117,657"/>
+<area shape="rect" id="node13" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="882,616,1122,657"/>
 <area shape="rect" id="node16" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="2500,713,2720,754"/>
 <area shape="rect" id="node22" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="2744,720,3007,747"/>
 <area shape="rect" id="node24" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="1890,616,2093,657"/>

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discharge inception model &mdash; chombo-discharge  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/my_theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Îto-KMC plasma model" href="ItoKMC.html" />
+    <link rel="prev" title="CDR plasma model" href="CdrPlasmaModel.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            chombo-discharge
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Documentation.html">Using this documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Control.html">Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Testing.html">Code testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Base/Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Design</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/DesignOverview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Driver.html">Driver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ComputationalGeometry.html">ComputationalGeometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Source/SpatialDiscretization.html">Spatial discretization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Solvers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="CdrPlasmaModel.html">CDR plasma model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Discharge inception model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stationary-mode">Stationary mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transient-mode">Transient mode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#input-data">Input data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#free-charges">Free charges</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inception-threshold">Inception threshold</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#townsend-ionization-coefficient">Townsend ionization coefficient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#townsend-attachment-coefficient">Townsend attachment coefficient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#negative-ion-mobility">Negative ion mobility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#negative-ion-diffusion-coefficient">Negative ion diffusion coefficient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#negative-ion-density">Negative ion density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#background-ionization-rate">Background ionization rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detachment-rate">Detachment rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-voltages">Input voltages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#voltage-curve">Voltage curve</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#field-solve">Field solve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inception-integral">Inception integral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#euler">Euler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trapezoidal">Trapezoidal</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#critical-volume">Critical volume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#critical-surface">Critical surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inception-voltage">Inception voltage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#arbitrary-starting-electron">Arbitrary starting electron</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#minimum-inception-voltage">Minimum inception voltage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#inception-probability">Inception probability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#advection-algorithm">Advection algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#simulation-control">Simulation control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#verbosity">verbosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mode">mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inception-alg">inception_alg</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#full-integration">full_integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output-file">output_file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#k-inception">K_inception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#eval-townsend">eval_townsend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plt-vars">plt_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#for-stationary-mode">For stationary mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#for-transient-mode">For transient mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caveats">Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#adaptive-mesh-refinement">Adaptive mesh refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#high-voltage-vessel">High-voltage vessel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#electrode-with-surface-roughness">Electrode with surface roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Electrode with surface roughness</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ItoKMC.html">Îto-KMC plasma model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MeshODEModel.html">Mesh ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TracerParticleModel.html">Tracer particle model</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/Contributions.html">Contributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contrib/CodeStandard.html">Code standard</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Bibliography</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ZZReferences.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">chombo-discharge</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Discharge inception model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Applications/DischargeInceptionModel.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="discharge-inception-model">
+<span id="chap-dischargeinceptionmodel"></span><h1>Discharge inception model<a class="headerlink" href="#discharge-inception-model" title="Permalink to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
+<p>The discharge inception model computes the inception voltage and probability of discharge inception for arbitrary geometries and voltage forms.</p>
+<p>For estimating the streamer inception, the module solves the electron avalanche integral</p>
+<div class="math notranslate nohighlight">
+\[K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E,\mathbf{x}^\prime)\text{d}l\]</div>
+<p>where <span class="math notranslate nohighlight">\(E = |\mathbf{E}|\)</span> and where <span class="math notranslate nohighlight">\(\alpha_{\text{eff}}(E,\mathbf{x}) = \alpha(E,\mathbf{x}) - \eta(E,\mathbf{x})\)</span> is the effective ionization coefficient.
+The integration runs along electric field lines.</p>
+<p>The discharge inception model solves for <span class="math notranslate nohighlight">\(K = K\left(\mathbf{x}\right)\)</span> for all <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, i.e., the inception integral is evaluated for all starting positions of the first electron.
+This differs from the conventional approach where the user will first extract electric field lines for post-processing.</p>
+<p>In addition to the above, the user can specify a critical threshold value for <span class="math notranslate nohighlight">\(K_c\)</span> which is used for computing</p>
+<ul class="simple">
+<li><p>The critical volume <span class="math notranslate nohighlight">\(V_c = \int_{K&gt;K_c} \textrm{d}V\)</span>.</p></li>
+<li><p>The inception voltage <span class="math notranslate nohighlight">\(U_c\)</span>.</p></li>
+<li><p>The probability of having the first electron in the critical volume, <span class="math notranslate nohighlight">\(dP(t,t+\Delta t)\)</span>.</p></li>
+</ul>
+<p>Note that since the <span class="math notranslate nohighlight">\(K\left(\mathbf{x}\right) = K(\mathbf{x}; U)\)</span> where <span class="math notranslate nohighlight">\(U\)</span> is the applied voltage, these values are computed for a user-specified range of voltages.
+This “range of voltages” can be a series of discrete values, or a voltage curve (e.g., lightning impulse).</p>
+<p>In addition to this, one may also track positive ions and solve for the Townsend inception criterion, which is formulated as</p>
+<div class="math notranslate nohighlight">
+\[T\left(\mathbf{x}\right) = \gamma \exp\left[K\left(\mathbf{x}\right)\right] \geq 1.\]</div>
+<p>The interpretation of this criterion is that each starting electron grows into <span class="math notranslate nohighlight">\(\exp\left[K\left(\mathbf{x}\right)\right]\)</span> electron-ion pairs.
+The residual ions will drift towards cathode surfaces and generate secondary ionization with a user-supplied efficiency <span class="math notranslate nohighlight">\(\gamma=\gamma\left(E,\mathbf{x}\right)\)</span>.</p>
+<p>The discharge inception model can be run in two modes:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#chap-stationarymode"><span class="std std-ref">Stationary mode</span></a>.</p></li>
+<li><p><a class="reference internal" href="#chap-transientmode"><span class="std std-ref">Transient mode</span></a>.</p></li>
+</ul>
+<p>These are discussed below.</p>
+<section id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h3>
+<p>The discharge inception model is implemented in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/DischargeInception</span></code> as</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">F</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">C</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DischargeInceptionStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The template complexity is due to flexibility in what solver implementations we use.
+The following solvers are used within the model:</p>
+<ul class="simple">
+<li><p>The tracer particle solver (<a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a>) for reconstructing the inception integral.</p></li>
+<li><p>The <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> for computing the electric field.</p></li>
+<li><p>The convection diffusion reaction module (<a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>) for modeling negative ion transport.</p></li>
+</ul>
+</section>
+<section id="stationary-mode">
+<span id="chap-stationarymode"></span><h3>Stationary mode<a class="headerlink" href="#stationary-mode" title="Permalink to this heading"></a></h3>
+<p>The stationary mode solves the <span class="math notranslate nohighlight">\(K\)</span> integral for a range of input voltages.
+The computation is done for both polarities so that the user obtains:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(K\)</span> values for positive and negative voltages, as well as the Townsend criterion.</p></li>
+<li><p>Critical volumes <span class="math notranslate nohighlight">\(V_c\)</span> for positive and negative voltages.</p></li>
+<li><p>Inception voltage, using a combined Townsend-streamer criterion.</p></li>
+</ul>
+</section>
+<section id="transient-mode">
+<span id="chap-transientmode"></span><h3>Transient mode<a class="headerlink" href="#transient-mode" title="Permalink to this heading"></a></h3>
+<p>In the transient mode we apply a voltage curve <span class="math notranslate nohighlight">\(U = U(t)\)</span> reconstruct the <span class="math notranslate nohighlight">\(K\)</span> value at each time step and recompute the critical volume so that we obtain</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}K = K(t) \\
+T = T(t) \\
+V_c = V_c(t)\end{split}\]</div>
+<p>We also assume that ions move as drifting Brownian walkers in the electric field (see <a class="reference internal" href="../Solvers/Ito.html#chap-itodiffusion"><span class="std std-ref">Îto diffusion</span></a>).
+This can be written in the fluctuating hydrodynamics limit as an evolution equation for the ion distribution (not density!) as</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right) + \sqrt{2D\langle n_-\rangle}\mathbf{Z},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{Z}\)</span> represents uncorrelated Gaussian white noise.
+Note that the above equation is a mere rewrite of the Ito process for a collection of particles; it is not really useful per se since it is a tautology for the original Ito process.</p>
+<p>However, we are interested in the average ion distribution over many experiments, so by taking the ensemble average we obtain a regular advection-diffusion equation for the evolution of the negative ion distribution (note that we redefine <span class="math notranslate nohighlight">\(\langle n_-\rangle\)</span> to be the ensemble average).</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right).\]</div>
+<p>This equation is sensible only when <span class="math notranslate nohighlight">\(\langle n_-\rangle\)</span> is interpreted as an ion density distribution (over many identical experiments).</p>
+<p>The above quantities are then used for computing the probability of discharge inception in a time interval <span class="math notranslate nohighlight">\([t,t+\text{d}t]\)</span>, which is</p>
+<div class="math notranslate nohighlight">
+\[\text{d}P(t) = \left[1-P\left(t\right)\right]\lambda(t) \text{d}t,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda(t)\)</span> is a placeholder for the electron generation rate, given by</p>
+<div class="math notranslate nohighlight">
+\[\lambda(t) = \int_{V_c(t)}\left\langle\frac{\partial n_e}{\partial t}\right\rangle\left(1 - \frac{\eta}{\alpha}\right)\text{d}V + \int_{A_c(t)}\frac{\left\langle j_e\right\rangle}{e}\left(1-\frac{\eta}{\alpha}\right)\text{d} A,\]</div>
+<p>Inserting the expression for <span class="math notranslate nohighlight">\(\lambda\)</span> and integrating for <span class="math notranslate nohighlight">\(P(t)\)</span> yields</p>
+<div class="math notranslate nohighlight" id="equation-dischargeinceptionprobability">
+<span class="eqno">(9)<a class="headerlink" href="#equation-dischargeinceptionprobability" title="Permalink to this equation"></a></span>\[P(t) = 1  - \exp\left[-\int_0^t\left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\text{d}t^\prime\right].\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\left\langle\frac{d n_{\text{e}}}{dt}\right\rangle\)</span> is the electron production rate from both background ionization and electron detachment, i.e.</p>
+<div class="math notranslate nohighlight">
+\[\left\langle\frac{d n_{\text{e}}}{dt}\right\rangle = S_{\text{bg}} + k_d \left\langle n_-\right\rangle,\]</div>
+<p>where <span class="math notranslate nohighlight">\(S_{\text{bg}}\)</span> is the background ionization rate set by the user, <span class="math notranslate nohighlight">\(k_d\)</span> is the negative ion detachment rate, and <span class="math notranslate nohighlight">\(\left\langle n_-\right\rangle\)</span> is the negative ion distribution.
+The second integral is due to electron emission from the cathode and into the critical volume.
+Note that, internally, we always ensure that <span class="math notranslate nohighlight">\(j_{\text{e}} dA\)</span> evaluates to zero on anode surfaces.</p>
+<p>We also compute the probability of a first electron appearing in the time interval <span class="math notranslate nohighlight">\([t, t+\Delta t]\)</span>, given by</p>
+<div class="math notranslate nohighlight" id="equation-dischargeinceptionprobability2">
+<span class="eqno">(10)<a class="headerlink" href="#equation-dischargeinceptionprobability2" title="Permalink to this equation"></a></span>\[\Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t\]</div>
+<p>When running in transient mode the user must set the voltage curve (see <a class="reference internal" href="#chap-dischargeinceptionvoltagecurve"><span class="std std-ref">Voltage curve</span></a>) and pay particular caution to setting the initial ion density, mobility, and detachment rates.</p>
+<p>The statistical time lag, or average waiting time for the first electron, is available from the computed data, and is given by integrating <span class="math notranslate nohighlight">\(t \text{d}P\)</span>, which yields</p>
+<div class="math notranslate nohighlight">
+\[\tau = \frac{1}{P(t)}\int_0^\infty t\left[1-P(t)\right]\lambda(t)\text{d}t.\]</div>
+<p>Other derived values (such as the standard deviation of the waiting time) is also available, and can be calculated from the <span class="math notranslate nohighlight">\(P(t)\)</span> and <span class="math notranslate nohighlight">\(\lambda(t)\)</span> similar to the procedure above.
+Numerically, this is calculated using the trapezoidal rule.</p>
+</section>
+</section>
+<section id="input-data">
+<span id="chap-dischargeinceptioninputdata"></span><h2>Input data<a class="headerlink" href="#input-data" title="Permalink to this heading"></a></h2>
+<p>The input to the discharge inception model are:</p>
+<ol class="arabic simple">
+<li><p>Space and surface charge.</p></li>
+<li><p>Streamer inception threshold.</p></li>
+<li><p>Townsend ionization coefficient.</p></li>
+<li><p>Townsend attachment coefficients.</p></li>
+<li><p>Background ionization rate (e.g., from cosmic radiation).</p></li>
+<li><p>Electron detachment rate (from negative ions).</p></li>
+<li><p>Negative ion mobility.</p></li>
+<li><p>Negative ion diffusion coefficient.</p></li>
+<li><p>Initial negative ion density.</p></li>
+<li><p>Secondary emission coefficients.</p></li>
+<li><p>Voltage curve (for transient simulations).</p></li>
+</ol>
+<p>The input data to the discharge inception model is mostly done by passing in C++-functions to the class.
+These functions are mainly in the forms</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>The user can specify analytic fields or use tabulated data, and pass these in through a C++ lambda function.
+An example of defining an analytic input function is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="o">/</span><span class="n">E</span><span class="p">.</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Tabulated data (see <span class="xref std std-ref">Chap:LookupTable1D</span>) can also be used as follows,</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LookupTable1D</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tableData</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">alphaCoeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">tableData</span><span class="p">](</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">tableData</span><span class="p">.</span><span class="n">getEntry</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">E</span><span class="p">);</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <span class="math notranslate nohighlight">\(K\)</span> integral is determined only by the Townsend ionization and attachment coefficients.
+The Townsend criterion is then a derived value of <span class="math notranslate nohighlight">\(K\)</span> and the secondary electron emission coefficient <span class="math notranslate nohighlight">\(\gamma\)</span> .
+The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume).</p>
+</div>
+<section id="free-charges">
+<h3>Free charges<a class="headerlink" href="#free-charges" title="Permalink to this heading"></a></h3>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper</span></code> assume that the simulation region is charge-free, i.e. <span class="math notranslate nohighlight">\(\rho = \sigma= 0\)</span>.
+Nonetheless, the class has member functions for specifying these, which are given by</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Set the space charge</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// Set the surface charge</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This feature is currently a work-in-progress and relies on the superposition of a homogeneous solution <span class="math notranslate nohighlight">\(\Phi_1\)</span> (one without charges) and an inhomogeneous solution <span class="math notranslate nohighlight">\(\Phi_2\)</span> (one with charges), i.e. <span class="math notranslate nohighlight">\(\Phi = U\Phi_1 + \Phi_2\)</span> where <span class="math notranslate nohighlight">\(U\)</span> is the applied potential.</p>
+<p>As this feature has not (yet) been sufficiently hardened, it is recommend to run with debugging enabled.
+This can be done by adding <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper.debug=true</span></code> to the input script of command line, which should catch cases where the superposition is not properly taken care of (typically due to conflicting BCs).</p>
+</div>
+</section>
+<section id="inception-threshold">
+<h3>Inception threshold<a class="headerlink" href="#inception-threshold" title="Permalink to this heading"></a></h3>
+<p>Use in class input value <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper.K_inception</span></code> for setting the inception threshold.</p>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.K_inception   = 12.0
+</pre></div>
+</div>
+</section>
+<section id="townsend-ionization-coefficient">
+<h3>Townsend ionization coefficient<a class="headerlink" href="#townsend-ionization-coefficient" title="Permalink to this heading"></a></h3>
+<p>To set the Townsend ionization coefficient, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_alpha</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="townsend-attachment-coefficient">
+<h3>Townsend attachment coefficient<a class="headerlink" href="#townsend-attachment-coefficient" title="Permalink to this heading"></a></h3>
+<p>To set the Townsend attachment coefficient, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_eta</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="negative-ion-mobility">
+<h3>Negative ion mobility<a class="headerlink" href="#negative-ion-mobility" title="Permalink to this heading"></a></h3>
+<p>To set the negative ion mobility, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setIonMobility</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_mobility</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="negative-ion-diffusion-coefficient">
+<h3>Negative ion diffusion coefficient<a class="headerlink" href="#negative-ion-diffusion-coefficient" title="Permalink to this heading"></a></h3>
+<p>To set the negative ion diffusion coefficient, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setIonDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffCo</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="negative-ion-density">
+<h3>Negative ion density<a class="headerlink" href="#negative-ion-density" title="Permalink to this heading"></a></h3>
+<p>To set the negative ion density, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setIonDensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_density</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="secondary-emission">
+<h3>Secondary emission<a class="headerlink" href="#secondary-emission" title="Permalink to this heading"></a></h3>
+<p>To set the secondary emission efficiency at cathodes, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setSecondaryEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_coeff</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This efficiency is position-dependent so that the user can set different efficiencies for different materials (or different positions in a single material).</p>
+</section>
+<section id="background-ionization-rate">
+<h3>Background ionization rate<a class="headerlink" href="#background-ionization-rate" title="Permalink to this heading"></a></h3>
+<p>The background ionization rate describes the appearance of a first electron from a background contribution, e.g. through cosmic radiation, decay of radioactive isotopes, etc.</p>
+<p>To set the background ionization rate, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setBackgroundRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_backgroundRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="detachment-rate">
+<h3>Detachment rate<a class="headerlink" href="#detachment-rate" title="Permalink to this heading"></a></h3>
+<p>The detachment rate from negative describes the apperance of electrons through the equation</p>
+<div class="math notranslate nohighlight">
+\[\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle = k_d \left\langle n_-\right\rangle\]</div>
+<p>where <span class="math notranslate nohighlight">\(\left\langle n_-\right\rangle\)</span> is the negative ion density in units of <span class="math notranslate nohighlight">\(m^{-3}\)</span> (or strictly speaking the negative ion probability density).
+This is used when calculating the inception probability, and the user sets the detachment rate <span class="math notranslate nohighlight">\(k_d\)</span> through</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setDetachmentRate</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_backgroundRate</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="field-emission">
+<h3>Field emission<a class="headerlink" href="#field-emission" title="Permalink to this heading"></a></h3>
+<p>To set the field emission current, use the function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionStepper</span><span class="o">::</span><span class="n">setFieldEmission</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_currentDensity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This will set a field-dependent emission rate from cathodes given by the input function.
+Note that, under the hood, the function indicates a general cathode emission current which can be the sum of several contributions (field emission, photoelectric effect etc.).</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The input function should provide the surface current density <span class="math notranslate nohighlight">\(j_e\)</span> (in units of <span class="math notranslate nohighlight">\(\text{C}\cdot\text{m}^{-2}\cdot \text{s}^{-1}\)</span>).</p>
+</div>
+</section>
+<section id="input-voltages">
+<h3>Input voltages<a class="headerlink" href="#input-voltages" title="Permalink to this heading"></a></h3>
+<p>By default, the model will always read voltage levels from the input script.
+These are in the format</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.voltage_lo    = 1.0   # Low voltage multiplier
+DischargeInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
+DischargeInceptionStepper.voltage_steps = 3     # Number of voltage steps
+</pre></div>
+</div>
+</section>
+<section id="voltage-curve">
+<span id="chap-dischargeinceptionvoltagecurve"></span><h3>Voltage curve<a class="headerlink" href="#voltage-curve" title="Permalink to this heading"></a></h3>
+<p>To set the voltage curve, use the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DischargeInceptionSteppersetVoltageCurve</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">time</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_voltageCurve</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+<p>This is relevant only when running a transient simulation.</p>
+</section>
+</section>
+<section id="algorithms">
+<h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h2>
+<p>The discharge inception model uses a combination of electrostatic field solves, Particle-In-Cell, and fluid advection for resolving the necessary dynamics.
+The various algorithms involved are discussed below.</p>
+<section id="field-solve">
+<h3>Field solve<a class="headerlink" href="#field-solve" title="Permalink to this heading"></a></h3>
+<p>Since the background field scales linearly with applied voltage, we require only a single field solve at the beginning of the simulation.
+This field solve is done with an applied voltage of <span class="math notranslate nohighlight">\(U = 1\,\text{V}\)</span> and the electric field is then simply later scaled by the actual voltage.</p>
+</section>
+<section id="inception-integral">
+<h3>Inception integral<a class="headerlink" href="#inception-integral" title="Permalink to this heading"></a></h3>
+<p>We use a Particle-In-Cell method for computing the inception integral <span class="math notranslate nohighlight">\(K\left(\mathbf{x}\right)\)</span> for an arbitrary electron starting position.
+All grid cells where <span class="math notranslate nohighlight">\(\alpha_{\textrm{eff}} &gt; 0\)</span> are seeded with one particle on the cell centroid and the particles are then tracked through the grid.
+The particles move a user-specified distance along field lines <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> and the particle weights are updated using first or second order integration.
+If a particle leaves through a boundary (EB or domain boundary), or enters a region <span class="math notranslate nohighlight">\(\alpha_{\text{eff}} \leq 0\)</span>, the integration is stopped.
+Once the particle integration halts, we rewind the particles back to their starting position and deposit their weight on the mesh, which provides us with <span class="math notranslate nohighlight">\(K = K\left(\mathbf{x}\right)\)</span>.</p>
+<section id="euler">
+<h4>Euler<a class="headerlink" href="#euler" title="Permalink to this heading"></a></h4>
+<p>For the Euler rule the particle weight for a particle <span class="math notranslate nohighlight">\(p\)</span> the update rule is</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x\\w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right)\Delta x,\end{aligned}\end{align} \]</div>
+<p>where <span class="math notranslate nohighlight">\(\Delta x\)</span> is a user-specified integration length.</p>
+</section>
+<section id="trapezoidal">
+<h4>Trapezoidal<a class="headerlink" href="#trapezoidal" title="Permalink to this heading"></a></h4>
+<p>With the trapezoidal rule the update is first</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}_p^\prime = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x\]</div>
+<p>followed by</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\mathbf{x}_p^{k+1} = \mathbf{x}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{x}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{x}_p^\prime\right)\right].\\w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|,\mathbf{x}_p^\prime\right)\right]\end{aligned}\end{align} \]</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When tracking positive ions for evaluation of the Townsend criterion, the same algorithms are used.
+The exception is that the positive ions are simply tracked along field lines until they strike a cathode, so that there is no integration with respect to <span class="math notranslate nohighlight">\(\alpha_{\text{eff}}\)</span>.</p>
+</div>
+</section>
+</section>
+<section id="critical-volume">
+<h3>Critical volume<a class="headerlink" href="#critical-volume" title="Permalink to this heading"></a></h3>
+<p>The critical volume is computed as</p>
+<div class="math notranslate nohighlight">
+\[V_c = \int_{K\left(\mathbf{x}\right) &gt; K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}V.\]</div>
+<p>Note that the critical volume is both voltage and polarity dependent.</p>
+</section>
+<section id="critical-surface">
+<h3>Critical surface<a class="headerlink" href="#critical-surface" title="Permalink to this heading"></a></h3>
+<p>The critical surface is computed as</p>
+<div class="math notranslate nohighlight">
+\[A_c = \int_{K\left(\mathbf{x}\right) &gt; K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}A.\]</div>
+<p>Note that the critical surface is both voltage and polarity dependent, and is non-zero only on cathode surfaces.</p>
+</section>
+<section id="inception-voltage">
+<h3>Inception voltage<a class="headerlink" href="#inception-voltage" title="Permalink to this heading"></a></h3>
+<section id="arbitrary-starting-electron">
+<h4>Arbitrary starting electron<a class="headerlink" href="#arbitrary-starting-electron" title="Permalink to this heading"></a></h4>
+<p>The inception voltage for starting a critical avalanche can be computed in the stationary solver mode.
+In this case we compute <span class="math notranslate nohighlight">\(K\left(\mathbf{x}; U\right)\)</span> for a range of voltages <span class="math notranslate nohighlight">\(U \in U_1, U_2, \ldots\)</span>.</p>
+<p>If two values of the <span class="math notranslate nohighlight">\(K\)</span> integral bracket <span class="math notranslate nohighlight">\(K_c\)</span>, i.e.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}K_a = K\left(\mathbf{x}; U_a\right) \leq K_c\\K_b = K\left(\mathbf{x}; U_b\right) \geq K_c\end{aligned}\end{align} \]</div>
+<p>then we can estimate the inception voltage for a starting electron at position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> through linear interpolation as</p>
+<div class="math notranslate nohighlight">
+\[U_{\text{inc, streamer}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)\]</div>
+<p>A similar method is used for the Townsend criterion, using e.g. <span class="math notranslate nohighlight">\(T\left(\mathbf{x}; U\right) = \gamma\exp\left[K\left(\mathbf{x}; U\right)\right]\)</span>, then if</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}T_a = T\left(\mathbf{x}; U_a\right) \leq 1\\T_b = T\left(\mathbf{x}; U_b\right) \ge 1\end{aligned}\end{align} \]</div>
+<p>then we can estimate the inception voltage for a starting electron at position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> through linear interpolation as</p>
+<div class="math notranslate nohighlight">
+\[U_{\text{inc, Townsend}}\left(\mathbf{x}\right) = U_a + \frac{1 - T_a}{T_b - T_a}\left(U_b - U_a\right)\]</div>
+<p>The inception voltage for position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> is then</p>
+<div class="math notranslate nohighlight">
+\[U_{\text{inc}} = \min\left[U_{\text{inc, streamer}}\left(\mathbf{x}\right), U_{\text{inc, Townsend}}\left(\mathbf{x}\right)\right]\]</div>
+</section>
+<section id="minimum-inception-voltage">
+<h4>Minimum inception voltage<a class="headerlink" href="#minimum-inception-voltage" title="Permalink to this heading"></a></h4>
+<p>The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
+From the above, this is simply</p>
+<div class="math notranslate nohighlight">
+\[U_{\text{inc}}^{\text{min}} = \min_{\forall \mathbf{x}} \left[U_{\text{inc}}\left(\mathbf{x}\right)\right].\]</div>
+<p>From the above we also determine</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}_{\text{inc}}^{\text{min}} \leftarrow \mathbf{x}\text{ that minimizes } U_{\text{inc}}\left(\mathbf{x}\right) \forall \mathbf{x},\]</div>
+<p>which is the position of the first electron that enables a critical avalanche at the minimum inception voltage.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The minimum inception voltage is the minimum voltage required for starting a critical avalanche.
+However, as <span class="math notranslate nohighlight">\(U \rightarrow U_{\text{inc}}^{\text{min}}\)</span> we also have <span class="math notranslate nohighlight">\(V_c \rightarrow 0\)</span>, requires the a starting electron <em>precisely</em> in <span class="math notranslate nohighlight">\(\mathbf{x}_{\text{inc}}^{\text{min}}\)</span>.</p>
+</div>
+</section>
+</section>
+<section id="inception-probability">
+<h3>Inception probability<a class="headerlink" href="#inception-probability" title="Permalink to this heading"></a></h3>
+<p>The inception probability is given by <a class="reference internal" href="#equation-dischargeinceptionprobability">Eq. 9</a> and is computed using straightforward numerical quadrature:</p>
+<div class="math notranslate nohighlight">
+\[\int_{V_c}\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V \approx \sum_{\mathbf{i}\in K_\mathbf{i} &gt; K_c} \left(\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\right)_{\mathbf{i}}\left(1 - \frac{\eta_{\mathbf{i}}}{\alpha_{\mathbf{i}}}\right)\kappa_{\mathbf{i}}\Delta V_{\mathbf{i}},\]</div>
+<p>and similarly for the surface integral.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The integration runs over <em>valid cells</em>, i.e. grid cells that are not covered by a finer grid.</p>
+</div>
+</section>
+<section id="advection-algorithm">
+<h3>Advection algorithm<a class="headerlink" href="#advection-algorithm" title="Permalink to this heading"></a></h3>
+<p>The advection algorithm for the negative ion distribution follows the time stepping algorithms described in the advection-diffusion model, see <a class="reference internal" href="AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>.</p>
+</section>
+</section>
+<section id="simulation-control">
+<h2>Simulation control<a class="headerlink" href="#simulation-control" title="Permalink to this heading"></a></h2>
+<p>Here, we discuss simulation controls that are available for the discharge inception model.
+These all appear in the form <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper.&lt;option&gt;</span></code>.</p>
+<section id="verbosity">
+<h3>verbosity<a class="headerlink" href="#verbosity" title="Permalink to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> input option controls the model chattiness (to the <code class="docutils literal notranslate"><span class="pre">pout.*</span></code> files).
+Usually we have</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.verbosity = -1
+</pre></div>
+</div>
+</section>
+<section id="mode">
+<h3>mode<a class="headerlink" href="#mode" title="Permalink to this heading"></a></h3>
+<p>The mode flag switches between stationary and transient solves.
+Accepted values are <code class="docutils literal notranslate"><span class="pre">stationary</span></code> and <code class="docutils literal notranslate"><span class="pre">transient</span></code>, e.g.,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.mode = stationary
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>When running in stationary mode, set <code class="docutils literal notranslate"><span class="pre">Driver.max_steps=0</span></code>.</p>
+</div>
+</section>
+<section id="inception-alg">
+<h3>inception_alg<a class="headerlink" href="#inception-alg" title="Permalink to this heading"></a></h3>
+<p>Controls the discharge inception algorithm (for computing the <span class="math notranslate nohighlight">\(K\)</span> integral).
+This should be specified in the form</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.inception_alg = &lt;algorithm&gt; &lt;mode&gt; &lt;value&gt;
+</pre></div>
+</div>
+<p>These indicate the following:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;algorithm&gt;</span></code> indicates the integration algorithm.
+Currently supported is <code class="docutils literal notranslate"><span class="pre">trapz</span></code> (trapezoidal rule) and <code class="docutils literal notranslate"><span class="pre">euler</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code> indicates the integration step size selection.
+This can be the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fixed</span></code> for a spatially fixed step size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dx</span></code> for step sizes relative to the grid resolution <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> For setting the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>, and mode is either <code class="docutils literal notranslate"><span class="pre">fixed</span></code> or <code class="docutils literal notranslate"><span class="pre">dx</span></code>.</p></li>
+</ul>
+<p>Normally, <code class="docutils literal notranslate"><span class="pre">alpha</span></code> will yield the best integration results since the step size is adaptively selected, taking large steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is small and smaller steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is large.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value</span></code> indicates a step size, and has a different interpretation for the various modes.
+* If using <code class="docutils literal notranslate"><span class="pre">fixed</span></code> integration, <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the physical length of the step size.
+* If using <code class="docutils literal notranslate"><span class="pre">dx</span></code> integration,  <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the step size relative to the grid cell resolution.
+* If using <code class="docutils literal notranslate"><span class="pre">alpha</span></code> integration, <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>.</p></li>
+</ul>
+<p>For example, the following will set an Euler integration with an adaptive step size:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.inception_alg = euler alpha 0.5
+</pre></div>
+</div>
+</section>
+<section id="full-integration">
+<h3>full_integration<a class="headerlink" href="#full-integration" title="Permalink to this heading"></a></h3>
+<p>Normally, it will not necessary to integrate the particles beyond <span class="math notranslate nohighlight">\(w &gt; K_c\)</span> since this already implies inception.
+The flag <code class="docutils literal notranslate"><span class="pre">full_integration</span></code> can be used to turn on/off integration beyond <span class="math notranslate nohighlight">\(K_c\)</span>.
+If the flag is set to false, the particle integration routine will terminate once a particle weight reaches <span class="math notranslate nohighlight">\(K_c\)</span>.
+If the flag is set to true, the particle integration routine will proceed until the particles leave the domain or ionization volumes.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">full_integration</span></code> to false can lead to large computational savings when the ionization volumes are large.</p>
+</div>
+</section>
+<section id="output-file">
+<h3>output_file<a class="headerlink" href="#output-file" title="Permalink to this heading"></a></h3>
+<p>Controls the overall report file for stationary and transient solves.
+The user specifies a filename for a file which will be created (in the same directory as the application is running), containing a summary of the most important simulation output variables.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Running a new simulation will overwrite the specified <code class="docutils literal notranslate"><span class="pre">output_file</span></code>.</p>
+</div>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.output_file = report.txt
+</pre></div>
+</div>
+</section>
+<section id="k-inception">
+<h3>K_inception<a class="headerlink" href="#k-inception" title="Permalink to this heading"></a></h3>
+<p>Controls the critical value of the <span class="math notranslate nohighlight">\(K\)</span> integral.
+E.g.,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.K_inception = 12
+</pre></div>
+</div>
+</section>
+<section id="eval-townsend">
+<h3>eval_townsend<a class="headerlink" href="#eval-townsend" title="Permalink to this heading"></a></h3>
+<p>Controls whether or not the Townsend criterion is also evaluated.</p>
+<p>E.g.,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.eval_townsend = true
+</pre></div>
+</div>
+<p>Will turn on the Townsend criterion.</p>
+</section>
+<section id="plt-vars">
+<h3>plt_vars<a class="headerlink" href="#plt-vars" title="Permalink to this heading"></a></h3>
+<p>Controls plot variables that will be written to HDF5 outputs in the <code class="file docutils literal notranslate"><span class="pre">plt</span></code> folder.
+Valid options are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">field</span></code>    - Potential, field, and charge distributions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">K</span></code>        - Inception integral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T</span></code>        - Townsend criterion.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Uinc</span></code>     - Inception voltage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code>    - Effective ionization coefficient.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eta</span></code>      - Eta coefficient.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bg_rate</span></code>  - Background ionization rate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">emission</span></code> - Field emission.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poisson</span></code>  - Poisson solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tracer</span></code>   - Tracer particle solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cdr</span></code>      - CDR solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ions</span></code>     - Ion solver.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.plt_vars = K Uinc bg_rate emission ions
+</pre></div>
+</div>
+</section>
+<section id="for-stationary-mode">
+<h3>For stationary mode<a class="headerlink" href="#for-stationary-mode" title="Permalink to this heading"></a></h3>
+<p>For the stationary mode the following input flags are required:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">voltage_lo</span></code> Lowest simulated voltage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">voltage_hi</span></code> High simulated voltage.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">voltage_steps</span></code> Extra voltage steps between <code class="docutils literal notranslate"><span class="pre">voltage_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">voltage_hi</span></code>.</p></li>
+</ul>
+<p>These voltages levels are used when running a stationary solve.
+For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.voltage_lo    = 10E3
+DischargeInceptionStepper.voltage_hi    = 30E3
+DischargeInceptionStepper.voltage_steps = 5
+</pre></div>
+</div>
+</section>
+<section id="for-transient-mode">
+<h3>For transient mode<a class="headerlink" href="#for-transient-mode" title="Permalink to this heading"></a></h3>
+<p>For the transient mode the following input options must be set:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ion_transport</span></code> For turning on/off ion transport.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transport_alg</span></code> For controlling the transport algorithm.
+Valid options are <code class="docutils literal notranslate"><span class="pre">euler</span></code>, <code class="docutils literal notranslate"><span class="pre">heun</span></code>, or <code class="docutils literal notranslate"><span class="pre">imex</span></code> (for semi-implicit with corner transport upwind).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cfl</span></code> Which controls the ion advection time step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min_dt</span></code> For setting the minimum time step used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_dt</span></code> For setting the maximum time step used.</p></li>
+</ul>
+<p>For example,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.ion_transport = true
+DischargeInceptionStepper.transport_alg = imex
+DischargeInceptionStepper.cfl           = 0.8
+DischargeInceptionStepper.min_dt        = 0.0
+DischargeInceptionStepper.max_dt        = 1E99
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ctu</span></code> option exists because the default advection solver for the discharge inception model is the corner transport upwind solver (see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a>).
+Ensure that <code class="docutils literal notranslate"><span class="pre">CdrCTU.use_ctu</span> <span class="pre">=</span> <span class="pre">true</span></code> if using <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper.transport_alg</span> <span class="pre">=</span> <span class="pre">ctu</span></code> algorithm and set <code class="docutils literal notranslate"><span class="pre">CdrCTU.use_ctu</span> <span class="pre">=</span> <span class="pre">false</span></code> otherwise.</p>
+</div>
+</section>
+<section id="caveats">
+<h3>Caveats<a class="headerlink" href="#caveats" title="Permalink to this heading"></a></h3>
+<p>The model is intended to be used with a nearest-grid-point deposition scheme (which is also volume-weighted).
+When running the model, ensure that the <a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a> flag is set as follows:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TracerParticleSolver.deposition   = ngp
+</pre></div>
+</div>
+</section>
+</section>
+<section id="adaptive-mesh-refinement">
+<h2>Adaptive mesh refinement<a class="headerlink" href="#adaptive-mesh-refinement" title="Permalink to this heading"></a></h2>
+<p>The discharge inception model runs its own mesh refinement routine, which refines the mesh if</p>
+<div class="math notranslate nohighlight">
+\[\alpha_{\text{eff}}\left(\left|\mathbf{E}\right|, \mathbf{x}\right)\Delta x &gt; \lambda,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda\)</span> is a user-specified refinement criterion.</p>
+<p>This is implemented in a class</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DischargeInceptionTagger</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">CellTagger</span><span class="w"></span>
+</pre></div>
+</div>
+<p>and is automatically included in simulations when setting up the application through the Python setup tools (see <a class="reference internal" href="#chap-dischargeinceptionsetup"><span class="std std-ref">Setting up a new problem</span></a>).
+The user can control refinement buffers and criterion through the following input options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DischargeInceptionTagger.buffer</span></code> Adds a buffer region around tagged cells.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DischargeInceptionTagger.max_voltage</span></code> Maximum voltage that will be simulated.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DischargeInceptionTagger.ref_alpha</span></code> Sets the refinement criterion <span class="math notranslate nohighlight">\(\lambda\)</span> as above.</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionTagger.buffer      = 4
+DischargeInceptionTagger.max_voltage = 30E3
+DischargeInceptionTagger.ref_alpha   = 2.0
+</pre></div>
+</div>
+</section>
+<section id="setting-up-a-new-problem">
+<span id="chap-dischargeinceptionsetup"></span><h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/DischargeInception</span></code> is the simplest way.
+To see available setup options, run</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 setup.py --help
+</pre></div>
+</div>
+<p>For example, to set up a new problem in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications/MyDischargeInception</span></code> for a cylinder geometry, run</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>python3 setup.py -base_dir=MyApplications -app_name=MyDischargeInception -geometry=Cylinder
+</pre></div>
+</div>
+<p>This will set up a new problem in a cylinder geometry (defined in <code class="file docutils literal notranslate"><span class="pre">Geometries/Cylinder</span></code>).
+The main file is named <code class="file docutils literal notranslate"><span class="pre">program.cpp`</span></code> and contains default implementations for the required input data (see <a class="reference internal" href="#chap-dischargeinceptioninputdata"><span class="std std-ref">Input data</span></a>).</p>
+</section>
+<section id="example-programs">
+<h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading"></a></h2>
+<p>Example programs that use the discharge inception model are given in</p>
+<section id="high-voltage-vessel">
+<h3>High-voltage vessel<a class="headerlink" href="#high-voltage-vessel" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/DischargeInception/Vessel</span></code>.
+This program is set up in 2D (stationary) and 3D (transient) for discharge inception in atmospheric air.
+The input data is computed using BOLSIG+.</p></li>
+</ul>
+</section>
+<section id="electrode-with-surface-roughness">
+<h3>Electrode with surface roughness<a class="headerlink" href="#electrode-with-surface-roughness" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness</span></code>.
+This program is set up in 2D (stationary) and 3D (transient) for discharge inception on an irregular electrode surface.
+We use SF6 transport data as input data, computed using BOLSIG+.</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>Electrode with surface roughness<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness</span></code>.
+This program is set up in 2D and 3D (stationary) mode, and includes the influence of the Townsend criterion.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="CdrPlasmaModel.html" class="btn btn-neutral float-left" title="CDR plasma model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ItoKMC.html" class="btn btn-neutral float-right" title="Îto-KMC plasma model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, SINTEF Energy Research.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+<map id="Physics::DischargeInception::DischargeInceptionTagger" name="Physics::DischargeInception::DischargeInceptionTagger">
+<area shape="rect" id="node1" title="Class for tagging cells in the DischargeInception module." alt="" coords="42,184,246,225"/>
+<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,95,96,121"/>
+<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="96,5,235,32"/>
+<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="273,95,469,121"/>
+</map>

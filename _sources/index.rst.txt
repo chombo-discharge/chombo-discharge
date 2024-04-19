@@ -77,7 +77,7 @@ Introduction
    :caption: Introduction
    :hidden:
 
-   Base/Documetnation
+   Base/Documentation
    Base/Overview
    Base/Installation
    Base/Control
@@ -144,7 +144,7 @@ Multi-physics applications
    :hidden:	     
 
    Applications/CdrPlasmaModel
-   Applications/StreamerInceptionModel
+   Applications/DischargeInceptionModel
    Applications/ItoKMC
 
 Single-solver applications

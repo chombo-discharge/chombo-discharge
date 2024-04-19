@@ -43,8 +43,8 @@
 <area shape="rect" id="node36" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="887,571,1088,627"/>
 <area shape="rect" id="node37" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="866,675,1109,731"/>
 <area shape="rect" id="node42" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="2420,184,2613,225"/>
-<area shape="rect" id="node43" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2925,273,3159,315"/>
+<area shape="rect" id="node43" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2923,273,3163,315"/>
 <area shape="rect" id="node45" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="2646,273,2849,315"/>
-<area shape="rect" id="node44" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="2899,370,3185,411"/>
+<area shape="rect" id="node44" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="2898,370,3189,411"/>
 <area shape="rect" id="node46" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="2621,370,2874,411"/>
 </map>

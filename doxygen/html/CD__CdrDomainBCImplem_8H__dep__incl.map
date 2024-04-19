@@ -4,7 +4,7 @@
 <area shape="rect" id="node3" href="$CD__CdrSolver_8H.html" title="Declaration of an abstract class for solving scalar convection&#45;diffusion&#45;reaction problems." alt="" coords="2409,184,2611,225"/>
 <area shape="rect" id="node4" href="$CD__CdrLayout_8H.html" title="Declaration of a class that holds a set of CdrSolvers (to cut down on typing)." alt="" coords="1577,273,1779,315"/>
 <area shape="rect" id="node34" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="2171,273,2374,315"/>
-<area shape="rect" id="node37" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2434,563,2669,605"/>
+<area shape="rect" id="node37" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="2434,563,2674,605"/>
 <area shape="rect" id="node42" href="$CD__CdrSolver_8cpp.html" title="Implementation of CD_CdrSolver.H." alt="" coords="2479,273,2680,315"/>
 <area shape="rect" id="node43" href="$CD__AdvectionDiffusionStepper_8H.html" title="TimeStepper class for only solving the the advection&#45;diffusion equation." alt="" coords="2704,273,2943,315"/>
 <area shape="rect" id="node45" href="$CD__AdvectionDiffusionTagger_8H.html" title="Declaration of a cell tagger class for AdvectionDiffusion physics." alt="" coords="2973,273,3204,315"/>
@@ -41,7 +41,7 @@
 <area shape="rect" id="node39" href="$CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="1910,363,2113,404"/>
 <area shape="rect" id="node41" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="2137,363,2353,404"/>
 <area shape="rect" id="node36" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="2177,563,2379,605"/>
-<area shape="rect" id="node38" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="2439,667,2725,709"/>
+<area shape="rect" id="node38" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="2439,667,2730,709"/>
 <area shape="rect" id="node40" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="1924,459,2139,501"/>
 <area shape="rect" id="node44" href="$CD__AdvectionDiffusionStepper_8cpp.html" title="Implementation of CD_AdvectionDiffusionStepper.H." alt="" coords="2695,363,2946,404"/>
 <area shape="rect" id="node46" href="$CD__AdvectionDiffusionTagger_8cpp.html" title="Implementation of CD_AdvectionDiffusionTagger.H." alt="" coords="2971,363,3215,404"/>

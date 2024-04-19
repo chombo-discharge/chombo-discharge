@@ -2,9 +2,9 @@
 <area shape="rect" id="node1" title="Implementation of CD_TracerParticle.H." alt="" coords="341,5,543,47"/>
 <area shape="rect" id="node2" href="$CD__TracerParticle_8H.html" title="Declaration of a tracer particle class." alt="" coords="360,95,524,136"/>
 <area shape="rect" id="node3" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="279,184,472,225"/>
-<area shape="rect" id="node5" href="$CD__StreamerInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="526,273,761,315"/>
+<area shape="rect" id="node5" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="526,273,766,315"/>
 <area shape="rect" id="node4" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="5,273,249,315"/>
 <area shape="rect" id="node7" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="274,273,477,315"/>
-<area shape="rect" id="node6" href="$CD__StreamerInceptionStepperImplem_8H.html" title="Implementation of CD_StreamerInceptionStepper.H." alt="" coords="513,363,800,404"/>
-<area shape="rect" id="node8" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="235,363,489,404"/>
+<area shape="rect" id="node6" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="514,363,805,404"/>
+<area shape="rect" id="node8" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="237,363,490,404"/>
 </map>
