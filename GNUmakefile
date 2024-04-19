@@ -11,7 +11,7 @@ discharge-source: chombo
 discharge-geometries: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries
 
-discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry ito-kmc meshode radiativetransfer streamerinception tracerparticle
+discharge-physics: discharge-source advectiondiffusion brownianwalker cdrplasma electrostatics geometry ito-kmc meshode radiativetransfer dischargeinception tracerparticle
 
 advectiondiffusion: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/AdvectionDiffusion
@@ -37,8 +37,8 @@ meshode: discharge-source
 radiativetransfer: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer
 
-streamerinception: discharge-source
-	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/StreamerInception
+dischargeinception: discharge-source
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/DischargeInception
 
 tracerparticle: discharge-source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticle
@@ -56,7 +56,7 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/ItoKMC             pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/MeshODE            pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer  pristine
-	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/StreamerInception  pristine
+	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/DischargeInception pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/TracerParticle     pristine
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
 
@@ -66,4 +66,4 @@ pristine: allclean
 	find . -type f -name "*.d" -delete
 	find . -type f -name "*.o" -delete
 
-.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry ito-kmc meshode radiativetransfer streamerinception tracerparticle libclean allclean pristine
+.PHONY: all chombo discharge-lib discharge-physics discharge-source discharge-geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry ito-kmc meshode radiativetransfer dischargeinception tracerparticle libclean allclean pristine
