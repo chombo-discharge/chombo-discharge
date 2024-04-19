@@ -284,7 +284,7 @@ Driver::getGeometryTags()
     EBISLayout        ebisl;
     ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
 
-    const RealVect      probLo = m_amr->getProbLo();
+    const RealVect     probLo = m_amr->getProbLo();
     const DataIterator dit    = irregGrids.dataIterator();
 
     const int nbox = dit.size();
