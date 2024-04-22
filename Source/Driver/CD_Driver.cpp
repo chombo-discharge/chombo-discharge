@@ -574,7 +574,7 @@ Driver::gridReport()
   long long localPeakMemory    = 0LL;
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
-  pout() << "\t**************" << endl;
+
   pout() << "\tUnfreed memory        = " << std::ceil(localUnfreedMemory / BytesPerMB) << " (MB)" << endl
          << "\tPeak memory usage     = " << std::ceil(localPeakMemory / BytesPerMB) << " (MB)" << endl;
 #ifdef CH_MPI
