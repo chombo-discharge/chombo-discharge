@@ -6,16 +6,16 @@ SOURCE_LIB     = Source
 GEOMETRIES_LIB = Geometries
 
 # Physics libraries
-ADVDIFF_LIB           = AdvectionDiffusionPhysics
-BROWNIAN_LIB          = BrownianWalkerPhysics
-CDRPLASMA_LIB         = CdrPlasmaPhysics
-ELECTROSTATICS_LIB    = ElectrostaticPhysics
-GEOMETRYONLY_LIB      = GeometryPhysics
-ITOKMC_LIB            = ItoKMCPhysics
-MESHODE_LIB           = MeshODEPhysics
-RADTRANSFER_LIB       = RadiativeTransferPhysics
-STREAMERINCEPTION_LIB = StreamerInceptionPhysics
-TRACERPARTICLE_LIB    = TracerParticlePhysics
+ADVDIFF_LIB            = AdvectionDiffusionPhysics
+BROWNIAN_LIB           = BrownianWalkerPhysics
+CDRPLASMA_LIB          = CdrPlasmaPhysics
+ELECTROSTATICS_LIB     = ElectrostaticPhysics
+GEOMETRYONLY_LIB       = GeometryPhysics
+ITOKMC_LIB             = ItoKMCPhysics
+MESHODE_LIB            = MeshODEPhysics
+RADTRANSFER_LIB        = RadiativeTransferPhysics
+DISCHARGEINCEPTION_LIB = DischargeInceptionPhysics
+TRACERPARTICLE_LIB     = TracerParticlePhysics
 
 # Headers where the chombo-discharge source code is located. This should all folders
 # under $DISCHARGE_HOME/Source
@@ -26,27 +26,27 @@ SOURCE_INCLUDE          := $(foreach dir, $(SOURCE_DIRS),          $(addprefix -
 GEOMETRIES_INCLUDE      := $(foreach dir, $(GEOMETRIES_DIRS),      $(addprefix -I, $(dir)))
 
 # Same as for source and geometries dirs/includes, but for the physics modules. 
-ADVDIFF_DIRS           := $(shell find $(DISCHARGE_HOME)/Physics/AdvectionDiffusion -type d -print)
-BROWNIAN_DIRS          := $(shell find $(DISCHARGE_HOME)/Physics/BrownianWalker     -type d -print)
-CDRPLASMA_DIRS         := $(shell find $(DISCHARGE_HOME)/Physics/CdrPlasma          -type d -print)
-ELECTROSTATICS_DIRS    := $(shell find $(DISCHARGE_HOME)/Physics/Electrostatics     -type d -print)
-GEOMETRYONLY_DIRS      := $(shell find $(DISCHARGE_HOME)/Physics/Geometry           -type d -print)
-ITOKMC_DIRS            := $(shell find $(DISCHARGE_HOME)/Physics/ItoKMC             -type d -print)
-MESHODE_DIRS           := $(shell find $(DISCHARGE_HOME)/Physics/MeshODE            -type d -print)
-RADTRANSFER_DIRS       := $(shell find $(DISCHARGE_HOME)/Physics/RadiativeTransfer  -type d -print)
-STREAMERINCEPTION_DIRS := $(shell find $(DISCHARGE_HOME)/Physics/StreamerInception  -type d -print)
-TRACERPARTICLE_DIRS    := $(shell find $(DISCHARGE_HOME)/Physics/TracerParticle     -type d -print)
+ADVDIFF_DIRS            := $(shell find $(DISCHARGE_HOME)/Physics/AdvectionDiffusion -type d -print)
+BROWNIAN_DIRS           := $(shell find $(DISCHARGE_HOME)/Physics/BrownianWalker     -type d -print)
+CDRPLASMA_DIRS          := $(shell find $(DISCHARGE_HOME)/Physics/CdrPlasma          -type d -print)
+ELECTROSTATICS_DIRS     := $(shell find $(DISCHARGE_HOME)/Physics/Electrostatics     -type d -print)
+GEOMETRYONLY_DIRS       := $(shell find $(DISCHARGE_HOME)/Physics/Geometry           -type d -print)
+ITOKMC_DIRS             := $(shell find $(DISCHARGE_HOME)/Physics/ItoKMC             -type d -print)
+MESHODE_DIRS            := $(shell find $(DISCHARGE_HOME)/Physics/MeshODE            -type d -print)
+RADTRANSFER_DIRS        := $(shell find $(DISCHARGE_HOME)/Physics/RadiativeTransfer  -type d -print)
+DISCHARGEINCEPTION_DIRS := $(shell find $(DISCHARGE_HOME)/Physics/DischargeInception -type d -print)
+TRACERPARTICLE_DIRS     := $(shell find $(DISCHARGE_HOME)/Physics/TracerParticle     -type d -print)
 
-ADVDIFF_INCLUDE           := $(foreach dir, $(ADVDIFF_DIRS),           $(addprefix -I, $(dir)))
-BROWNIAN_INCLUDE          := $(foreach dir, $(BROWNIAN_DIRS),          $(addprefix -I, $(dir)))
-CDRPLASMA_INCLUDE         := $(foreach dir, $(CDRPLASMA_DIRS),         $(addprefix -I, $(dir)))
-ELECTROSTATICS_INCLUDE    := $(foreach dir, $(ELECTROSTATICS_DIRS),    $(addprefix -I, $(dir)))
-GEOMETRYONLY_INCLUDE      := $(foreach dir, $(GEOMETRYONLY_DIRS),      $(addprefix -I, $(dir)))
-ITOKMC_INCLUDE            := $(foreach dir, $(ITOKMC_DIRS),            $(addprefix -I, $(dir)))
-MESHODE_INCLUDE           := $(foreach dir, $(MESHODE_DIRS),           $(addprefix -I, $(dir)))
-RADTRANSFER_INCLUDE       := $(foreach dir, $(RADTRANSFER_DIRS),       $(addprefix -I, $(dir)))
-STREAMERINCEPTION_INCLUDE := $(foreach dir, $(STREAMERINCEPTION_DIRS), $(addprefix -I, $(dir)))
-TRACERPARTICLE_INCLUDE    := $(foreach dir, $(TRACERPARTICLE_DIRS),    $(addprefix -I, $(dir)))
+ADVDIFF_INCLUDE            := $(foreach dir, $(ADVDIFF_DIRS),           $(addprefix -I, $(dir)))
+BROWNIAN_INCLUDE           := $(foreach dir, $(BROWNIAN_DIRS),          $(addprefix -I, $(dir)))
+CDRPLASMA_INCLUDE          := $(foreach dir, $(CDRPLASMA_DIRS),         $(addprefix -I, $(dir)))
+ELECTROSTATICS_INCLUDE     := $(foreach dir, $(ELECTROSTATICS_DIRS),    $(addprefix -I, $(dir)))
+GEOMETRYONLY_INCLUDE       := $(foreach dir, $(GEOMETRYONLY_DIRS),      $(addprefix -I, $(dir)))
+ITOKMC_INCLUDE             := $(foreach dir, $(ITOKMC_DIRS),            $(addprefix -I, $(dir)))
+MESHODE_INCLUDE            := $(foreach dir, $(MESHODE_DIRS),           $(addprefix -I, $(dir)))
+RADTRANSFER_INCLUDE        := $(foreach dir, $(RADTRANSFER_DIRS),       $(addprefix -I, $(dir)))
+DISCHARGEINCEPTION_INCLUDE := $(foreach dir, $(DISCHARGEINCEPTION_DIRS), $(addprefix -I, $(dir)))
+TRACERPARTICLE_INCLUDE     := $(foreach dir, $(TRACERPARTICLE_DIRS),    $(addprefix -I, $(dir)))
 
 # Source and Geometries headers should always be visible. 
 XTRACPPFLAGS += $(SOURCE_INCLUDE) 

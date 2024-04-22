@@ -1,0 +1,27 @@
+# ====================================================================================================
+# DischargeInceptionStepper class options
+# ====================================================================================================
+DischargeInceptionStepper.verbosity        = -1                      ## Chattiness.
+DischargeInceptionStepper.profile          = false                   ## Turn on/off run-time profiling
+DischargeInceptionStepper.full_integration = true                    ## Use full reconstruction of K-region or not
+DischargeInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
+DischargeInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not
+DischargeInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
+DischargeInceptionStepper.output_file      = report.txt              ## Output file
+DischargeInceptionStepper.K_inception      = 12                      ## User-specified inception value
+DischargeInceptionStepper.plt_vars         = K T Uinc field          ## Plot variables
+
+# Static mode
+DischargeInceptionStepper.voltage_lo       = 1.0                     ## Low voltage multiplier
+DischargeInceptionStepper.voltage_hi       = 10.0                    ## Highest voltage multiplier
+DischargeInceptionStepper.voltage_steps    = 3                       ## Number of voltage steps
+
+# Dynamic mode
+DischargeInceptionStepper.ion_transport = true                       ## Turn on/off ion transport
+DischargeInceptionStepper.transport_alg = heun                       ## Transport algorithm. 'euler', 'heun', or 'imex'
+DischargeInceptionStepper.cfl           = 0.8                        ## CFL time step for dynamic mode
+DischargeInceptionStepper.first_dt      = 1.E-9                      ## First time step to be used. 
+DischargeInceptionStepper.min_dt        = 1.E-9                      ## Minimum permitted time step
+DischargeInceptionStepper.max_dt        = 1.E99                      ## Maximum permitted time step
+DischargeInceptionStepper.voltage_eps   = 0.02                       ## Permitted relative change in V(t) when computing dt
+DischargeInceptionStepper.max_dt_growth = 0.05                       ## Maximum relative change in dt when computing dt
