@@ -14,7 +14,8 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
 
-MFLevelGrid::MFLevelGrid() {}
+MFLevelGrid::MFLevelGrid()
+{}
 
 void
 MFLevelGrid::setMaxRefinementRatio(const int a_refRat)
@@ -44,7 +45,8 @@ MFLevelGrid::MFLevelGrid(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluid
   this->define(a_multiFluidIndexSpace, a_eblg);
 }
 
-MFLevelGrid::~MFLevelGrid() {}
+MFLevelGrid::~MFLevelGrid()
+{}
 
 int
 MFLevelGrid::numPhases() const

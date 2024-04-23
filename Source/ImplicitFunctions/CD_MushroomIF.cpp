@@ -52,7 +52,8 @@ MushroomIF::MushroomIF(const MushroomIF& a_inputIF)
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-MushroomIF::~MushroomIF() {}
+MushroomIF::~MushroomIF()
+{}
 
 Real
 MushroomIF::value(const RealVect& a_pos) const

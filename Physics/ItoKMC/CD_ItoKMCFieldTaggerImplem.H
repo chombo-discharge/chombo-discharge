@@ -115,15 +115,21 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
 
   for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = this->m_amr->getGrids(this->m_realm)[lvl];
+    const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = this->m_amr->getEBISLayout(this->m_realm, this->m_phase)[lvl];
     const Real               dx    = this->m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box&     box     = dbl[dit()];
-      const EBISBox& ebisbox = ebisl[dit()];
+    const int nbox = dit.size();
 
-      const EBCellFAB& electricField     = (*m_E[lvl])[dit()];
-      const EBCellFAB& gradElectricField = (*m_gradE[lvl])[dit()];
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box&     box     = dbl[din];
+      const EBISBox& ebisbox = ebisl[din];
+
+      const EBCellFAB& electricField     = (*m_E[lvl])[din];
+      const EBCellFAB& gradElectricField = (*m_gradE[lvl])[din];
 
       const FArrayBox& electricFieldReg     = electricField.getFArrayBox();
       const FArrayBox& gradElectricFieldReg = gradElectricField.getFArrayBox();
@@ -131,7 +137,7 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
       Vector<EBCellFAB*> tagFields;
       Vector<FArrayBox*> tagFieldsReg;
       for (int i = 0; i < this->m_numTagFields; i++) {
-        tagFields.push_back(&((*this->m_tagFields[i][lvl])[dit()]));
+        tagFields.push_back(&((*this->m_tagFields[i][lvl])[din]));
         tagFieldsReg.push_back(&(tagFields[i]->getFArrayBox()));
       }
 
@@ -144,8 +150,8 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
           const RealVect gradE = RealVect(
             D_DECL(gradElectricFieldReg(iv, 0), gradElectricFieldReg(iv, 1), gradElectricFieldReg(iv, 2)));
 
-          const Vector<Real> compTagFields =
-            this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
+          const Vector<Real>
+            compTagFields = this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
 
           for (int i = 0; i < this->m_numTagFields; i++) {
             (*tagFieldsReg[i])(iv, 0) = compTagFields[i];
@@ -161,8 +167,8 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
         const RealVect gradE = RealVect(
           D_DECL(gradElectricField(vof, 0), gradElectricField(vof, 1), gradElectricField(vof, 2)));
 
-        const Vector<Real> compTagFields =
-          this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
+        const Vector<Real>
+          compTagFields = this->computeTagFields(pos, time, dx, E, minE, maxE, gradE, minGradE, maxGradE);
 
         for (int i = 0; i < this->m_numTagFields; i++) {
           (*tagFields[i])(vof, 0) = compTagFields[i];
@@ -170,7 +176,7 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
       };
 
       // Run the kernels
-      VoFIterator& vofit = (*this->m_amr->getVofIterator(this->m_realm, this->m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*this->m_amr->getVofIterator(this->m_realm, this->m_phase)[lvl])[din];
       BoxLoops::loop(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }

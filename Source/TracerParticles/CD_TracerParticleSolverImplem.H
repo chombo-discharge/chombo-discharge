@@ -625,10 +625,16 @@ TracerParticleSolver<P>::computeDt() const
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
     const Real               dx  = m_amr->getDx()[lvl];
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const List<P>& particles = m_particles[lvl][dit()].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(min : dt)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& particles = m_particles[lvl][din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
         const RealVect& v = lit().velocity();

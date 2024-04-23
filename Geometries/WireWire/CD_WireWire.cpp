@@ -73,7 +73,10 @@ WireWire::WireWire()
   }
 }
 
-WireWire::~WireWire() { CH_TIME("WireWire::~WireWire"); }
+WireWire::~WireWire()
+{
+  CH_TIME("WireWire::~WireWire");
+}
 
 std::pair<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>, Real>
 WireWire::addElectrode(ParmParse& a_pp)

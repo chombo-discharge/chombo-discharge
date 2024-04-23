@@ -38,7 +38,8 @@ PerlinSphereSdf::PerlinSphereSdf(const PerlinSphereSdf& a_inputIF)
   m_perlinIF = a_inputIF.m_perlinIF;
 }
 
-PerlinSphereSdf::~PerlinSphereSdf() {}
+PerlinSphereSdf::~PerlinSphereSdf()
+{}
 
 Real
 PerlinSphereSdf::value(const RealVect& a_pos) const

@@ -44,7 +44,8 @@ CdrSpecies::CdrSpecies(const std::string a_name,
   m_initialParticles.clear();
 }
 
-CdrSpecies::~CdrSpecies() {}
+CdrSpecies::~CdrSpecies()
+{}
 
 Real
 CdrSpecies::initialData(const RealVect a_pos, const Real a_time) const

@@ -85,17 +85,23 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
   const ProblemDomain& domainFine = m_eblgFine.getDomain();
   const ProblemDomain& domainCoar = m_eblgCoFi.getDomain();
 
+  const DataIterator dit = dblFine.dataIterator();
+
   m_regularGhostRegions.define(dblFine);
   m_fineIrregCells.define(dblFine);
   m_coarIrregCells.define(dblCoar);
   m_coarIrregSlopes.define(dblCoar);
   m_coarsenedFineGhosts.define(dblCoar);
 
-  for (DataIterator dit(dblFine); dit.ok(); ++dit) {
-    const Box fineCellBox = dblFine[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    const EBISBox& fineEBISBox = ebislFine[dit()];
-    const EBISBox& coarEBISBox = ebislCoar[dit()];
+    const Box fineCellBox = dblFine[din];
+
+    const EBISBox& fineEBISBox = ebislFine[din];
+    const EBISBox& coarEBISBox = ebislCoar[din];
 
     const EBGraph& fineGraph = fineEBISBox.getEBGraph();
     const EBGraph& coarGraph = coarEBISBox.getEBGraph();
@@ -118,7 +124,7 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
         cfivs &= domainFine;
 
         NeighborIterator nit(dblFine);
-        for (nit.begin(dit()); nit.ok(); ++nit) {
+        for (nit.begin(din); nit.ok(); ++nit) {
           cfivs -= dblFine[nit()];
         }
         cfivs.recalcMinBox();
@@ -132,21 +138,21 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
         coarIrregIVS |= coarIVS;
         fineIrregIVS |= fineIVS;
 
-        m_regularGhostRegions[dit()].emplace(std::make_pair(dir, sit()), fineGhostBox);
+        m_regularGhostRegions[din].emplace(std::make_pair(dir, sit()), fineGhostBox);
       }
     }
 
-    m_fineIrregCells[dit()].define(fineIrregIVS, fineGraph);
-    m_coarIrregCells[dit()].define(coarIrregIVS, coarGraph);
-    m_coarIrregSlopes[dit()].define(coarIrregIVS, coarGraph, SpaceDim);
-    m_coarsenedFineGhosts[dit()].define(fineIrregIVS, fineGraph, 1);
+    m_fineIrregCells[din].define(fineIrregIVS, fineGraph);
+    m_coarIrregCells[din].define(coarIrregIVS, coarGraph);
+    m_coarIrregSlopes[din].define(coarIrregIVS, coarGraph, SpaceDim);
+    m_coarsenedFineGhosts[din].define(fineIrregIVS, fineGraph, 1);
 
     // Go through the cut-cell ghost cells and coarsen them.
-    for (VoFIterator vofit(m_fineIrregCells[dit()]); vofit.ok(); ++vofit) {
+    for (VoFIterator vofit(m_fineIrregCells[din]); vofit.ok(); ++vofit) {
       const VolIndex& fineVoF = vofit();
-      const VolIndex& coarVoF = ebislFine.coarsen(fineVoF, m_refRat, dit());
+      const VolIndex& coarVoF = ebislFine.coarsen(fineVoF, m_refRat, din);
 
-      m_coarsenedFineGhosts[dit()](fineVoF, 0) = coarVoF;
+      m_coarsenedFineGhosts[din](fineVoF, 0) = coarVoF;
     }
   }
 }
@@ -184,15 +190,21 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
     a_phiCoar.copyTo(srcInterv, phiCoFi, dstInterv, m_copier);
 
     // Fill invalid regions.
-    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit) {
-      EBCellFAB&       phiFine = a_phiFine[dit()];
-      const EBCellFAB& phiCoar = phiCoFi[dit()];
+    const DataIterator dit = m_eblgFine.getDBL().dataIterator();
+
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&       phiFine = a_phiFine[din];
+      const EBCellFAB& phiCoar = phiCoFi[din];
 
       FArrayBox&       phiFineReg = phiFine.getFArrayBox();
       const FArrayBox& phiCoarReg = phiCoar.getFArrayBox();
 
-      this->interpolateRegular(phiFineReg, phiCoarReg, dit(), icomp, 0, a_interpType);
-      this->interpolateIrregular(phiFine, phiCoar, dit(), icomp, 0, a_interpType);
+      this->interpolateRegular(phiFineReg, phiCoarReg, din, icomp, 0, a_interpType);
+      this->interpolateIrregular(phiFine, phiCoar, din, icomp, 0, a_interpType);
     }
   }
 

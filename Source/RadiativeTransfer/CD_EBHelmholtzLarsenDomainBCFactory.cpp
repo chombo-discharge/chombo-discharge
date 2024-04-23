@@ -38,7 +38,8 @@ EBHelmholtzLarsenDomainBCFactory::EBHelmholtzLarsenDomainBCFactory(const RefCoun
   };
 }
 
-EBHelmholtzLarsenDomainBCFactory::~EBHelmholtzLarsenDomainBCFactory() {}
+EBHelmholtzLarsenDomainBCFactory::~EBHelmholtzLarsenDomainBCFactory()
+{}
 
 RefCountedPtr<EBHelmholtzDomainBC>
 EBHelmholtzLarsenDomainBCFactory::create() const

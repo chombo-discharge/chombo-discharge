@@ -38,8 +38,8 @@ EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const Electro
       auto func = [domainSide, &BC = this->m_electrostaticBCs](const RealVect& a_position) -> Real {
         constexpr Real dummyDt = 0.0;
 
-        const ElectrostaticDomainBc::BcFunction& bcFunction =
-          BC.getBc(domainSide).second; // This is a function Real(const RealVect, const Real)
+        const ElectrostaticDomainBc::BcFunction&
+          bcFunction = BC.getBc(domainSide).second; // This is a function Real(const RealVect, const Real)
 
         return bcFunction(a_position, dummyDt);
       };

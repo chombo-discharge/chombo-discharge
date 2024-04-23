@@ -31,7 +31,10 @@ RtSolver::RtSolver()
   m_className = "RtSolver";
 }
 
-RtSolver::~RtSolver() { CH_TIME("RtSolver::~RtSolver"); }
+RtSolver::~RtSolver()
+{
+  CH_TIME("RtSolver::~RtSolver");
+}
 
 std::string
 RtSolver::getName()
@@ -460,8 +463,15 @@ RtSolver::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_db
 
   a_loads.resize(a_dbl.size(), 0LL);
 
-  for (DataIterator dit(a_dbl); dit.ok(); ++dit) {
-    a_loads[dit().intCode()] = a_dbl[dit()].numPts();
+  const DataIterator& dit = a_dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    a_loads[din.intCode()] = a_dbl[din].numPts();
   }
 }
 

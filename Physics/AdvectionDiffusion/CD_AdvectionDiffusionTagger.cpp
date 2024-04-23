@@ -82,7 +82,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
   DataOps::vectorLength(sca, vec);                       // sca = |grad(phi)|
   DataOps::setCoveredValue(sca, 0, 0.0);                 // Set covered cell values to zero.
 
-  bool foundTags = false;
+  int foundTags = 0;
 
   // Never tag on finest possible AMR level.
   const int finestLevel    = m_amr->getFinestLevel();
@@ -96,16 +96,21 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
 
     // Get this on this level
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    // Iterate through grids
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      const Box        cellBox = dbl[dit()];
-      const EBCellFAB& gradPhi = (*sca[lvl])[dit()];   // |grad(phi)|
-      const EBCellFAB& phi     = (*state[lvl])[dit()]; //  phi
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : foundTags)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box        cellBox = dbl[din];
+      const EBCellFAB& gradPhi = (*sca[lvl])[din];   // |grad(phi)|
+      const EBCellFAB& phi     = (*state[lvl])[din]; //  phi
       const EBISBox&   ebisBox = phi.getEBISBox();
 
       // Clear all previous cell tags.
-      DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+      DenseIntVectSet& tags = (*a_tags[lvl])[din];
       tags.makeEmptyBits();
 
       // Go through regular grid cells.
@@ -119,7 +124,8 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
           const Real curv = std::abs(gradReg(iv, 0)) / (SAFETY + std::abs(phiReg(iv, 0)));
           if (curv > m_refCurv && std::abs(phiReg(iv, 0)) > m_refMagn) {
             tags |= iv;
-            foundTags = true;
+
+            foundTags = 1;
           }
         }
       };
@@ -129,18 +135,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
     }
   }
 
-  // Some ranks may have gotten new tags while others have not. This little code snippet
-  // makes sure they are all on the same page.
-#ifdef CH_MPI
-  int globalFoundTags = 0;
-  int localFoundTags  = foundTags ? 1 : 0;
-
-  MPI_Allreduce(&localFoundTags, &globalFoundTags, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-
-  foundTags = (globalFoundTags == 1) ? true : false;
-#endif
-
-  return foundTags;
+  return (ParallelOps::max(foundTags) > 0) ? true : false;
 }
 
 #include <CD_NamespaceFooter.H>

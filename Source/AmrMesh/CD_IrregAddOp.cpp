@@ -17,9 +17,15 @@
 #include <CD_IrregAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-IrregAddOp::IrregAddOp() noexcept { CH_TIME("IrregAddOp::IrregAddOp"); }
+IrregAddOp::IrregAddOp() noexcept
+{
+  CH_TIME("IrregAddOp::IrregAddOp");
+}
 
-IrregAddOp::~IrregAddOp() noexcept { CH_TIME("IrregAddOp::~IrregAddOp"); }
+IrregAddOp::~IrregAddOp() noexcept
+{
+  CH_TIME("IrregAddOp::~IrregAddOp");
+}
 
 void
 IrregAddOp::linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const

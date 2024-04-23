@@ -21,6 +21,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_Timer.H>
 #include <CD_BoxLoops.H>
+#include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
 
 template <class P>
@@ -170,8 +171,17 @@ ParticleContainer<P>::sortParticles() noexcept
   CH_TIME("ParticleContainer<P>::sortParticles()");
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      List<P>& particles = (*m_particles[lvl])[dit()].listItems();
+
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = (*m_particles[lvl])[din].listItems();
 
       particles.sort();
     }
@@ -432,7 +442,7 @@ template <class P>
 void
 ParticleContainer<P>::organizeParticlesByCell()
 {
-  CH_TIME("ParticleContainer<P>::organizeParticlesByPatch");
+  CH_TIME("ParticleContainer<P>::organizeParticlesByCell");
 
   CH_assert(m_isDefined);
 
@@ -440,12 +450,18 @@ ParticleContainer<P>::organizeParticlesByCell()
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        BinFab<P>& cellParticles = (*m_cellSortedParticles[lvl])[dit()];
+      const int nbox = dit.size();
 
-        cellParticles.define(dbl[dit()], m_dx[lvl], m_probLo);
-        cellParticles.addItemsDestructive((*m_particles[lvl])[dit()].listItems());
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        BinFab<P>& cellParticles = (*m_cellSortedParticles[lvl])[din];
+
+        cellParticles.define(dbl[din], m_dx[lvl], m_probLo);
+        cellParticles.addItemsDestructive((*m_particles[lvl])[din].listItems());
       }
     }
 
@@ -467,17 +483,23 @@ ParticleContainer<P>::organizeParticlesByPatch()
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        ListBox<P>& patchParticles = (*m_particles[lvl])[dit()];
-        BinFab<P>&  cellParticles  = (*m_cellSortedParticles[lvl])[dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        ListBox<P>& patchParticles = (*m_particles[lvl])[din];
+        BinFab<P>&  cellParticles  = (*m_cellSortedParticles[lvl])[din];
 
         // Kernel which adds moves particles from the cell container to the patch container.
         auto kernel = [&](const IntVect& iv) -> void {
           patchParticles.addItemsDestructive(cellParticles(iv, comp));
         };
 
-        BoxLoops::loop(dbl[dit()], kernel);
+        BoxLoops::loop(dbl[din], kernel);
 
         cellParticles.clear();
       }
@@ -613,10 +635,16 @@ ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer)
   if (m_realm == a_otherContainer.getRealm()) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        ListBox<P>&       myParticles    = (*m_particles[lvl])[dit()];
-        const ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        ListBox<P>&       myParticles    = (*m_particles[lvl])[din];
+        const ListBox<P>& otherParticles = a_otherContainer[lvl][din];
 
         myParticles.addItems(otherParticles.listItems());
       }
@@ -625,12 +653,20 @@ ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer)
   else {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       List<P>& outcast = m_particles[lvl]->outcast();
+
       outcast.clear();
 
       // Iterate through the other container and add its particles to this container's outcast lists.
       const DisjointBoxLayout& dbl = a_otherContainer.getGrids()[lvl];
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const List<P>& otherParticles = a_otherContainer[lvl][dit()].listItems();
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(join : outcast)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const List<P>& otherParticles = a_otherContainer[lvl][din].listItems();
 
         outcast.join(otherParticles);
       }
@@ -659,11 +695,16 @@ ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherConta
   if (m_realm == a_otherContainer.getRealm()) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIterator&      dit = dbl.dataIterator();
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      const int nbox = dit.size();
 
-        ListBox<P>& myParticles    = (*m_particles[lvl])[dit()];
-        ListBox<P>& otherParticles = a_otherContainer[lvl][dit()];
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        ListBox<P>& myParticles    = (*m_particles[lvl])[din];
+        ListBox<P>& otherParticles = a_otherContainer[lvl][din];
 
         myParticles.addItemsDestructive(otherParticles.listItems());
       }
@@ -676,8 +717,15 @@ ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherConta
 
       // Iterate through the other container and add its particles to this container's outcast lists.
       const DisjointBoxLayout& dbl = a_otherContainer.getGrids()[lvl];
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        List<P>& otherParticles = a_otherContainer[lvl][dit()].listItems();
+      const DataIterator&      dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(catenate : outcast)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& otherParticles = a_otherContainer[lvl][din].listItems();
 
         outcast.catenate(otherParticles);
 
@@ -730,9 +778,17 @@ ParticleContainer<P>::transferParticles(AMRParticles<P>& a_particles)
 
   // Ok, transfer the particles.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      List<P>& myParticles    = (*m_particles[lvl])[dit()].listItems();
-      List<P>& otherParticles = (*a_particles[lvl])[dit()].listItems();
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& myParticles    = (*m_particles[lvl])[din].listItems();
+      List<P>& otherParticles = (*a_particles[lvl])[din].listItems();
 
       myParticles.catenate(otherParticles);
     }
@@ -749,11 +805,17 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
 
   const DisjointBoxLayout& dbl = m_grids[a_level];
   const RealVect           dx  = m_dx[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const BaseFab<bool>& mask = (*m_validRegion[a_level])[dit()];
+  const int nbox = dit.size();
 
-    for (ListIterator<P> lit(a_particles[dit()].listItems()); lit.ok();) {
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const BaseFab<bool>& mask = (*m_validRegion[a_level])[din];
+
+    for (ListIterator<P> lit(a_particles[din].listItems()); lit.ok();) {
 
       const RealVect x = lit().position();
       const IntVect  iv(D_DECL((int)std::floor((x[0] - m_probLo[0]) / dx[0]),
@@ -783,8 +845,17 @@ ParticleContainer<P>::remap()
   CH_START(t1);
   List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      outcastFinest.catenate((*m_particles[lvl])[dit()].listItems());
+
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(catenate : outcastFinest)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      outcastFinest.catenate((*m_particles[lvl])[din].listItems());
     }
   }
   CH_STOP(t1);
@@ -848,7 +919,6 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
   //       we can safely destruct the ParticleData on each level without losing the particles.
 
   CH_assert(m_isDefined);
-
   if (m_isOrganizedByCell) {
     MayDay::Error("ParticleContainer<P>::preRegrid - particles are sorted by cell!");
   }
@@ -856,12 +926,23 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
   // Fill cache particles on each level
   m_cacheParticles.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    m_cacheParticles[lvl].clear();
 
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      List<P>& p = (*m_particles[lvl])[dit()].listItems();
+    List<P>& cacheParticles = m_cacheParticles[lvl];
 
-      m_cacheParticles[lvl].catenate(p);
+    cacheParticles.clear();
+
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(catenate : cacheParticles)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& p = (*m_particles[lvl])[din].listItems();
+
+      cacheParticles.catenate(p);
 
       p.clear();
     }
@@ -960,9 +1041,15 @@ ParticleContainer<P>::setValue(const Real a_value)
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& patchParticles = (*m_particles[lvl])[dit()].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& patchParticles = (*m_particles[lvl])[din].listItems();
 
       for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit) {
         P& p = lit();
@@ -982,9 +1069,15 @@ ParticleContainer<P>::setValue(const RealVect a_value)
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<P>& patchParticles = (*m_particles[lvl])[dit()].listItems();
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& patchParticles = (*m_particles[lvl])[din].listItems();
 
       for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit) {
         P& p = lit();
@@ -1006,8 +1099,16 @@ ParticleContainer<P>::getNumberOfValidParticlesLocal() const
   unsigned long long n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      const List<P>& particles = (*m_particles[lvl])[dit()].listItems();
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : n)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& particles = (*m_particles[lvl])[din].listItems();
 
       n += (unsigned long long)particles.length();
     }
@@ -1040,7 +1141,15 @@ ParticleContainer<P>::getNumberOfOutcastParticlesLocal() const
   unsigned long long n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : n)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
       const List<P>& outcast = m_particles[lvl]->outcast();
 
       n += (unsigned long long)outcast.length();
@@ -1067,15 +1176,23 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfMaskParticlesLocal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfMaskparticlesLocal");
+  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticlesLocal");
 
   CH_assert(m_isDefined);
 
   unsigned long long n = 0;
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit) {
-      const List<P>& maskParticles = (*m_maskParticles[lvl])[dit()].listItems();
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(+ : n)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const List<P>& maskParticles = (*m_maskParticles[lvl])[din].listItems();
 
       n += (unsigned long long)maskParticles.length();
     }
@@ -1124,16 +1241,24 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
 
   const RealVect dx = m_dx[a_level];
 
-  // 1. Copy particles from m_particles to m_maskParticles if they lie in the input mask.
-  for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit) {
-    const BaseFab<bool>& mask    = a_mask[dit()];
-    const Box            gridBox = m_grids[a_level][dit()];
+  // Copy particles from m_particles to m_maskParticles if they lie in the input mask.
+  const DisjointBoxLayout& dbl = m_grids[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const BaseFab<bool>& mask    = a_mask[din];
+    const Box            gridBox = m_grids[a_level][din];
     const Box            maskBox = mask.box();
 
     CH_assert(gridBox == maskBox);
 
-    List<P>&       maskParticles = (*m_maskParticles[a_level])[dit()].listItems();
-    const List<P>& particles     = (*m_particles[a_level])[dit()].listItems();
+    List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
+    const List<P>& particles     = (*m_particles[a_level])[din].listItems();
 
     for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
       const RealVect x  = lit().position();
@@ -1175,16 +1300,24 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
 
   const RealVect dx = m_dx[a_level];
 
-  // 1. Copy particles from m_particles to m_maskParticles if they lie in the input mask.
-  for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit) {
-    const BaseFab<bool>& mask    = a_mask[dit()];
-    const Box            gridBox = m_grids[a_level][dit()];
+  // Copy particles from m_particles to m_maskParticles if they lie in the input mask.
+  const DisjointBoxLayout& dbl = m_grids[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const BaseFab<bool>& mask    = a_mask[din];
+    const Box            gridBox = m_grids[a_level][din];
     const Box            maskBox = mask.box();
 
     CH_assert(gridBox == maskBox);
 
-    List<P>&       maskParticles = (*m_maskParticles[a_level])[dit()].listItems();
-    const List<P>& particles     = (*m_particles[a_level])[dit()].listItems();
+    List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
+    const List<P>& particles     = (*m_particles[a_level])[din].listItems();
 
     for (ListIterator<P> lit(particles); lit.ok();) {
       const RealVect x  = lit().position();

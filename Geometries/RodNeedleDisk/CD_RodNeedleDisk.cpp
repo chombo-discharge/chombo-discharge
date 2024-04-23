@@ -38,7 +38,10 @@ RodNeedleDisk::RodNeedleDisk() noexcept
   this->defineDisk();
 }
 
-RodNeedleDisk::~RodNeedleDisk() noexcept { CH_TIME("RodNeedleDisk::~RodNeedleDisk"); }
+RodNeedleDisk::~RodNeedleDisk() noexcept
+{
+  CH_TIME("RodNeedleDisk::~RodNeedleDisk");
+}
 
 void
 RodNeedleDisk::defineRodNeedle() noexcept

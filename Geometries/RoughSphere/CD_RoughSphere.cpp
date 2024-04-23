@@ -67,6 +67,7 @@ RoughSphere::RoughSphere()
   }
 }
 
-RoughSphere::~RoughSphere() {}
+RoughSphere::~RoughSphere()
+{}
 
 #include <CD_NamespaceFooter.H>

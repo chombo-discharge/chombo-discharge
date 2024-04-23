@@ -18,6 +18,7 @@ Welcome to ``chombo-discharge``'s user documentation
 ``chombo-discharge`` features include:
 
 * Fully written in C++.
+* Parallelized with OpenMP, MPI, or MPI+OpenMP.
 * Support for complex geometries.
 * Scalar advection-diffusion-reaction processes.
 * Electrostatics with support for electrodes and dielectrics.
@@ -76,7 +77,7 @@ Introduction
    :caption: Introduction
    :hidden:
 
-   Base/Documetnation
+   Base/Documentation
    Base/Overview
    Base/Installation
    Base/Control
@@ -143,7 +144,7 @@ Multi-physics applications
    :hidden:	     
 
    Applications/CdrPlasmaModel
-   Applications/StreamerInceptionModel
+   Applications/DischargeInceptionModel
    Applications/ItoKMC
 
 Single-solver applications

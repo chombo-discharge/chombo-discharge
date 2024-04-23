@@ -36,6 +36,7 @@
 #include <CD_Timer.H>
 #include <CD_ParallelOps.H>
 #include <CD_DischargeIO.H>
+#include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -80,7 +81,10 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   Random::seed();
 }
 
-Driver::~Driver() { CH_TIME("Driver::~Driver()"); }
+Driver::~Driver()
+{
+  CH_TIME("Driver::~Driver()");
+}
 
 int
 Driver::getNumberOfPlotVariables() const
@@ -168,13 +172,18 @@ Driver::allocateInternals()
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     m_tags[lvl] = RefCountedPtr<LayoutData<DenseIntVectSet>>(new LayoutData<DenseIntVectSet>(dbl));
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      ivs = DenseIntVectSet(dbl.get(dit()), false);
+      DenseIntVectSet& ivs = (*m_tags[lvl])[din];
+
+      ivs = DenseIntVectSet(dbl[din], false);
     }
   }
 }
@@ -199,16 +208,21 @@ Driver::cacheTags(const EBAMRTags& a_tags)
 
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     // Copy tags onto boolean mask. Unlike DenseIntVectSet, BaseFab<bool> can be put in LevelData<BaseFab<bool> > so
     // we can copy it to the new grid after regridding.
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      BaseFab<bool>& cachedTags = (*m_cachedTags[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseFab<bool>& cachedTags = (*m_cachedTags[lvl])[din];
 
       // Default is false, but we set cells to true if they were tagged earlier.
       cachedTags.setVal(false);
 
-      const IntVectSet ivs = IntVectSet((*m_tags[lvl])[dit()]);
+      const IntVectSet ivs = IntVectSet((*m_tags[lvl])[din]);
       for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt) {
         cachedTags(ivsIt(), comp) = true;
       }
@@ -261,11 +275,8 @@ Driver::getGeometryTags()
       }
     }
 
-    m_geomTags[lvl].makeEmpty();
-
-    // Things from depth specifications
-    m_geomTags[lvl] |= dielTags;
-    m_geomTags[lvl] |= condTags;
+    IntVectSet& geomTags = m_geomTags[lvl];
+    geomTags.makeEmpty();
 
     // Evaluate angles between cut-cells and refine based on that.
     // Need one ghost cell because we fetch normal vectors from neighboring cut-cells.
@@ -273,12 +284,17 @@ Driver::getGeometryTags()
     EBISLayout        ebisl;
     ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
 
-    const RealVect probLo = m_amr->getProbLo();
+    const RealVect     probLo = m_amr->getProbLo();
+    const DataIterator dit    = irregGrids.dataIterator();
 
-    for (DataIterator dit(irregGrids); dit.ok(); ++dit) {
-      const Box box = irregGrids[dit()];
+    const int nbox = dit.size();
 
-      const EBISBox&   ebisbox = ebisl[dit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : geomTags)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const Box        box     = irregGrids[din];
+      const EBISBox&   ebisbox = ebisl[din];
       const EBGraph&   ebgraph = ebisbox.getEBGraph();
       const IntVectSet irreg   = ebisbox.getIrregIVS(box);
 
@@ -290,21 +306,26 @@ Driver::getGeometryTags()
 
         // Check the angle between the normal vector in this irregular cell and neighboring irregular cells. If the
         // angle exceeds a specified threshold the cell is refined.
-        const Vector<VolIndex> otherVofs =
-          VofUtils::getVofsInRadius(vof, ebisbox, 1, VofUtils::Connectivity::MonotonePath, false);
+        const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof,
+                                                                     ebisbox,
+                                                                     1,
+                                                                     VofUtils::Connectivity::MonotonePath,
+                                                                     false);
 
         for (int i = 0; i < otherVofs.size(); i++) {
           const VolIndex& curVof = otherVofs[i];
 
-          if (ebisbox.isIrregular(curVof.gridIndex())) { // Only check irregular cells
-            constexpr Real degreesPerRadian = 180.0 / Units::pi;
+          if (ebisbox.isIrregular(curVof.gridIndex())) {
             const RealVect curNormal        = ebisbox.normal(curVof);
-            const Real cosAngle = PolyGeom::dot(normal, curNormal) / (normal.vectorLength() * curNormal.vectorLength());
-            const Real theta    = acos(cosAngle) * degreesPerRadian;
+            const Real     degreesPerRadian = 180.0 / Units::pi;
+            const Real     normLength       = normal.vectorLength();
+            const Real     curNormLength    = curNormal.vectorLength();
+            const Real     cosAngle         = PolyGeom::dot(normal, curNormal) / (normLength * curNormLength);
+            const Real     theta            = acos(cosAngle) * degreesPerRadian;
 
             // Refine if angle exceeds threshold
             if (std::abs(theta) > m_refineAngle) {
-              m_geomTags[lvl] |= iv;
+              geomTags |= iv;
             }
           }
         }
@@ -313,8 +334,12 @@ Driver::getGeometryTags()
       BoxLoops::loop(vofit, kernel);
 
       // Always refine multi-valued cells.
-      m_geomTags[lvl] |= ebisbox.getMultiCells(box);
+      geomTags |= ebisbox.getMultiCells(box);
     }
+
+    // Things from depth specifications
+    geomTags |= dielTags;
+    geomTags |= condTags;
   }
 
   // Grow tags with specified factor.
@@ -359,6 +384,7 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
   a_numLocalCells       = 0;
   a_numLocalCellsGhosts = 0;
   a_numLocalBoxes       = 0;
+
   a_numTotalCells       = 0;
   a_numTotalCellsGhosts = 0;
   a_numTotalBoxes       = 0;
@@ -371,56 +397,44 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
   const int ghost = m_amr->getNumberOfGhostCells();
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl   = a_grids[lvl];
-    const Vector<Box>        boxes = dbl.boxArray();
-    const Vector<int>        procs = dbl.procIDs();
+    const DisjointBoxLayout& dbl  = a_grids[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
 
-    // Find the total number of points and boxes for this level
-    long long pointsThisLevel       = 0;
-    long long pointsThisLevelGhosts = 0;
-    long long boxesThisLevel        = 0;
+    // Number of cells/boxes -- local to each MPI rank.
+    long long numCellsNoGhosts   = 0;
+    long long numCellsWithGhosts = 0;
+    long long numBoxes           = 0;
 
-    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-      Box box      = dbl[lit()];
-      Box grownBox = dbl[lit()];
+#pragma omp parallel for schedule(runtime) reduction(+ : numCellsNoGhosts, numCellsWithGhosts, numBoxes)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      grownBox.grow(ghost);
+      const Box box      = dbl[din];
+      const Box grownBox = grow(dbl[din], ghost);
 
-      pointsThisLevel += box.numPts();
-      pointsThisLevelGhosts += grownBox.numPts();
-      boxesThisLevel += 1;
+      numCellsNoGhosts += box.numPts();
+      numCellsWithGhosts += grownBox.numPts();
+      numBoxes += 1;
     }
 
-    a_numTotalLevelCells[lvl] = pointsThisLevel;
-    a_numTotalLevelBoxes[lvl] = boxesThisLevel;
-
-    // Find the total number of points and boxes that this processor owns
-    long long myPointsLevel       = 0;
-    long long myPointsLevelGhosts = 0;
-    long long myBoxesLevel        = 0;
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      Box box      = dbl[dit()];
-      Box grownBox = dbl[dit()];
-
-      grownBox.grow(ghost);
-
-      myPointsLevel += box.numPts();
-      myPointsLevelGhosts += grownBox.numPts();
-      myBoxesLevel += 1;
-    }
+    const long long cellsThisLevel       = ParallelOps::sum(numCellsNoGhosts);
+    const long long cellsThisLevelGhosts = ParallelOps::sum(numCellsWithGhosts);
+    const long long boxesThisLevel       = ParallelOps::sum(numBoxes);
 
     // Total for this level
-    a_numTotalCells += pointsThisLevel;
-    a_numTotalCellsGhosts += pointsThisLevelGhosts;
+    a_numLocalCells += numCellsNoGhosts;
+    a_numLocalCellsGhosts += numCellsWithGhosts;
+    a_numLocalBoxes += numBoxes;
+
+    a_numTotalCells += cellsThisLevel;
+    a_numTotalCellsGhosts += cellsThisLevelGhosts;
     a_numTotalBoxes += boxesThisLevel;
-    a_numLocalCells += myPointsLevel;
-    a_numLocalCellsGhosts += myPointsLevelGhosts;
-    a_numLocalBoxes += myBoxesLevel;
-    a_numLocalLevelBoxes[lvl] = myBoxesLevel;
-    a_numTotalLevelBoxes[lvl] = boxesThisLevel;
-    a_numLocalLevelCells[lvl] = myPointsLevel;
-    a_numLocalLevelBoxes[lvl] = myBoxesLevel;
+
+    a_numLocalLevelBoxes[lvl] = numBoxes;
+    a_numTotalLevelBoxes[lvl] += boxesThisLevel;
+    a_numLocalLevelCells[lvl] = numCellsNoGhosts;
+    a_numTotalLevelCells[lvl] += numCellsNoGhosts;
   }
 }
 
@@ -466,7 +480,67 @@ Driver::gridReport()
     ref_rat[lvl] = refRat[lvl];
   }
 
-  // Get boxes for each Realm
+  this->getCellsAndBoxes(localCells,
+                         localCellsGhosts,
+                         localBoxes,
+                         totalCells,
+                         totalCellsGhosts,
+                         totalBoxes,
+                         localLevelBoxes,
+                         totalLevelBoxes,
+                         localLevelCells,
+                         totalLevelCells,
+                         finestLevel,
+                         m_amr->getGrids(m_realm));
+
+  long long totalValidCells = totalLevelCells[finestLevel];
+
+  validLevelCells = totalLevelCells;
+
+  for (int lvl = 0; lvl < finestLevel; lvl++) {
+    validLevelCells[lvl] -= totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim);
+
+    totalValidCells += validLevelCells[lvl];
+  }
+
+  int numThreads = 0;
+#pragma omp parallel reduction(+ : numThreads)
+  {
+    numThreads += 1;
+  }
+
+  // Begin writing a report.
+  pout() << "=======================================================================" << endl
+         << "Driver::Grid report - timestep = " << m_timeStep << endl
+         << "---------------------------------------------------------" << endl
+#ifdef CH_MPI
+         << "\tMPI ranks................ = " << numProc() << endl
+#endif
+#if _OPENMP
+         << "\tOpenMP threads........... = " << numThreads << endl
+#endif
+         << "\tFinest level............. = " << finestLevel << endl
+#if CH_SPACEDIM == 2
+         << "\tFinest AMR domain........ = " << finestBox.size()[0] << " x " << finestBox.size()[1] << endl
+         << "\tCoarsest AMR domain...... = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << endl
+#elif CH_SPACEDIM == 3
+         << "\tFinest AMR domain........ = " << finestBox.size()[0] << " x " << finestBox.size()[1] << " x "
+         << finestBox.size()[2] << endl
+         << "\tCoarsest AMR domain...... = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << " x "
+         << coarsestBox.size()[2] << endl
+#endif
+         << "\tRefinement ratios........ = " << ref_rat << endl
+         << "\tGrid sparsity............ = " << 1.0 * totalCells / uniformPoints << endl
+         << "\tFinest dx................ = " << dx[finestLevel] << endl
+         << "\tTotal number boxes....... = " << DischargeIO::numberFmt(totalBoxes) << endl
+         << "\tNumber of cells.......... = " << DischargeIO::numberFmt(totalCells) << endl
+         << "\tIncluding ghost cells.... = " << DischargeIO::numberFmt(totalCellsGhosts) << endl
+         << "\tValid # of cells......... = " << DischargeIO::numberFmt(totalValidCells) << endl
+         << "\tTotal # of boxes (lvl)... = " << DischargeIO::numberFmt(totalLevelBoxes) << endl
+         << "\tTotal # of cells (lvl)... = " << DischargeIO::numberFmt(totalLevelCells) << endl
+         << "\tValid # of cells (lvl)... = " << DischargeIO::numberFmt(validLevelCells) << endl;
+
+  // Do a local report for each Realm
   const std::vector<std::string> realms = m_amr->getRealms();
 
   for (const auto& str : realms) {
@@ -482,91 +556,43 @@ Driver::gridReport()
                            totalLevelCells,
                            finestLevel,
                            m_amr->getGrids(str));
-  }
 
-  validLevelCells = totalLevelCells;
-  for (int lvl = 0; lvl < finestLevel; lvl++) {
-    validLevelCells[lvl] -= totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim);
-  }
-
-  // Begin writing a report.
-  pout() << "-----------------------------------------------------------------------" << endl
-         << "Driver::Grid report - timestep = " << m_timeStep << endl
-         << "\t\t\t        Finest level           = " << finestLevel << endl
-#if CH_SPACEDIM == 2
-         << "\t\t\t        Finest AMR domain      = " << finestBox.size()[0] << " x " << finestBox.size()[1] << endl
-         << "\t\t\t        Coarsest AMR domain    = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << endl
-#elif CH_SPACEDIM == 3
-         << "\t\t\t        Finest AMR domain      = " << finestBox.size()[0] << " x " << finestBox.size()[1] << " x "
-         << finestBox.size()[2] << endl
-         << "\t\t\t        Coarsest AMR domain    = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1]
-         << " x " << coarsestBox.size()[2] << endl
-#endif
-         << "\t\t\t        Refinement ratios      = " << ref_rat << endl
-         << "\t\t\t        Grid sparsity          = " << 1.0 * totalCells / uniformPoints << endl
-         << "\t\t\t        Finest dx              = " << dx[finestLevel] << endl
-         << "\t\t\t        Total number boxes     = " << DischargeIO::numberFmt(totalBoxes) << endl
-         << "\t\t\t        Number of valid cells  = " << DischargeIO::numberFmt(totalCells) << endl
-         << "\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(totalCellsGhosts) << endl
-         << "\t\t\t        Total # of boxes (lvl) = " << DischargeIO::numberFmt(totalLevelBoxes) << endl
-         << "\t\t\t        Total # of cells (lvl) = " << DischargeIO::numberFmt(totalLevelCells) << endl
-         << "\t\t\t        Valid # of cells (lvl) = " << DischargeIO::numberFmt(validLevelCells) << endl;
-
-  // Do a local report for each Realm
-  for (const auto& str : realms) {
-    this->getCellsAndBoxes(localCells,
-                           localCellsGhosts,
-                           localBoxes,
-                           totalCells,
-                           totalCellsGhosts,
-                           totalBoxes,
-                           localLevelBoxes,
-                           totalLevelBoxes,
-                           localLevelCells,
-                           totalLevelCells,
-                           finestLevel,
-                           m_amr->getGrids(str));
-
-    pout() << "\t\t\t        Realm = " << str << endl
-           << "\t\t\t\t        Proc. # of valid cells = " << DischargeIO::numberFmt(localCells) << endl
-           << "\t\t\t\t        Including ghost cells  = " << DischargeIO::numberFmt(localCellsGhosts) << endl
-           << "\t\t\t\t        Proc. # of boxes       = " << DischargeIO::numberFmt(localBoxes) << endl
-           << "\t\t\t\t        Proc. # of boxes (lvl) = " << DischargeIO::numberFmt(localLevelBoxes) << endl
-           << "\t\t\t\t        Proc. # of cells (lvl) = " << DischargeIO::numberFmt(localLevelCells) << endl;
+    pout() << "\t**************" << endl
+           << "\tRealm = " << str << endl
+           << "\t...Proc. # of valid cells... = " << DischargeIO::numberFmt(localCells) << endl
+           << "\t...Including ghost cells.... = " << DischargeIO::numberFmt(localCellsGhosts) << endl
+           << "\t...Proc. # of boxes......... = " << DischargeIO::numberFmt(localBoxes) << endl
+           << "\t...Proc. # of boxes (lvl)... = " << DischargeIO::numberFmt(localLevelBoxes) << endl
+           << "\t...Proc. # of cells (lvl)... = " << DischargeIO::numberFmt(localLevelCells) << endl;
   }
 
   // Write a memory report if Chombo was to compiled to use memory tracking.
 #ifdef CH_USE_MEMORY_TRACKING
-  constexpr int BytesPerMB = 1024 * 1024;
+  constexpr Real BytesPerMB = 1024.0 * 1024.0;
 
-  long long localUnfreedMemory;
-  long long localPeakMemory;
+  long long localUnfreedMemory = 0LL;
+  long long localPeakMemory    = 0LL;
 
   overallMemoryUsage(localUnfreedMemory, localPeakMemory);
 
-  pout() << "\t\t\t        Unfreed memory        = " << localUnfreedMemory / BytesPerMB << " (MB)" << endl
-         << "\t\t\t        Peak memory usage     = " << localPeakMemory / BytesPerMB << " (MB)" << endl;
+  pout() << "\tUnfreed memory        = " << std::ceil(localUnfreedMemory / BytesPerMB) << " (MB)" << endl
+         << "\tPeak memory usage     = " << std::ceil(localPeakMemory / BytesPerMB) << " (MB)" << endl;
 #ifdef CH_MPI
 
   // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
   // smallest/largest memory consumptions.
-  int minUnfreedMemory;
-  int minPeakMemory;
-  int maxUnfreedMemory;
-  int maxPeakMemory;
+  const long long minUnfreedMemory = ParallelOps::min(localUnfreedMemory);
+  const long long minPeakMemory    = ParallelOps::min(localPeakMemory);
+  const long long maxUnfreedMemory = ParallelOps::max(localUnfreedMemory);
+  const long long maxPeakMemory    = ParallelOps::max(localPeakMemory);
 
-  MPI_Allreduce(&localUnfreedMemory, &minUnfreedMemory, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
-  MPI_Allreduce(&localPeakMemory, &minPeakMemory, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
-  MPI_Allreduce(&localUnfreedMemory, &maxUnfreedMemory, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  MPI_Allreduce(&localPeakMemory, &maxPeakMemory, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-
-  pout() << "\t\t\t        Min unfreed memory    = " << minUnfreedMemory / BytesPerMB << " (MB)" << endl
-         << "\t\t\t        Min peak memory       = " << minPeakMemory / BytesPerMB << " (MB)" << endl
-         << "\t\t\t        Max unfreed memory    = " << maxUnfreedMemory / BytesPerMB << " (MB)" << endl
-         << "\t\t\t        Max peak memory       = " << maxPeakMemory / BytesPerMB << " (MB)" << endl;
+  pout() << "\tMin unfreed memory    = " << std::ceil(minUnfreedMemory / BytesPerMB) << " (MB)" << endl
+         << "\tMin peak memory       = " << std::ceil(minPeakMemory / BytesPerMB) << " (MB)" << endl
+         << "\tMax unfreed memory    = " << std::ceil(maxUnfreedMemory / BytesPerMB) << " (MB)" << endl
+         << "\tMax peak memory       = " << std::ceil(maxPeakMemory / BytesPerMB) << " (MB)" << endl;
 #endif
-  pout() << "-----------------------------------------------------------------------" << endl;
 #endif
+  pout() << "=======================================================================" << endl;
 
   pout() << endl;
 }
@@ -698,13 +724,18 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
 
   // Copy cached tags back over to m_tags
   for (int lvl = 0; lvl <= std::min(a_oldFinestLevel, a_newFinestLevel); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
 
-    // Copy mask
     LevelData<BaseFab<bool>> tmp;
     tmp.define(dbl, nComp, IntVect::Zero);
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      tmp[dit()].setVal(false);
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      tmp[din].setVal(false);
     }
 
     // Ideally we'd use a pre-defined Copier here. But since this is only called once per regrid it should be fine.
@@ -712,11 +743,14 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
 
     // m_cachedTags was allocated on the grids while tmp is allocated on the new. Look through
     // the bools in tmp and reconstruct the tags.
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const BaseFab<bool>& tmpFab = tmp[dit()];
-      const Box&           box    = dbl.get(dit());
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
 
-      DenseIntVectSet& tags = (*m_tags[lvl])[dit()];
+      const BaseFab<bool>& tmpFab = tmp[din];
+      const Box&           box    = dbl[din];
+
+      DenseIntVectSet& tags = (*m_tags[lvl])[din];
 
       auto kernel = [&](const IntVect& iv) -> void {
         if (tmpFab(iv, comp)) {
@@ -1301,9 +1335,7 @@ Driver::createOutputDirectories()
     }
   }
 
-#ifdef CH_MPI
-  MPI_Barrier(Chombo_MPI::comm);
-#endif
+  ParallelOps::barrier();
 }
 
 void
@@ -1734,19 +1766,6 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   m_timeStepper->printStepReport();
 
-  // Get the total number of poitns across all levels
-  const int                        finestLevel = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids       = m_amr->getGrids(m_realm);
-  long long                        totalPoints = 0;
-
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    long long pointsThisLevel = 0;
-    for (LayoutIterator lit = grids[lvl].layoutIterator(); lit.ok(); ++lit) {
-      pointsThisLevel += grids[lvl][lit()].numPts();
-    }
-    totalPoints += pointsThisLevel;
-  }
-
   char metrics[300];
 
   // Percentage completed of time steps
@@ -1818,27 +1837,26 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
 
   // Write memory usage
 #ifdef CH_USE_MEMORY_TRACKING
-  const int BytesPerMB = 1024 * 1024;
-  long long curMem;
-  long long peakMem;
-  overallMemoryUsage(curMem, peakMem);
+  const Real bytesPerMB = 1024. * 1024.;
 
-  pout() << "                                -- Unfreed memory        : " << curMem / BytesPerMB << "(MB)" << endl;
-  pout() << "                                -- Peak memory usage     : " << peakMem / BytesPerMB << "(MB)" << endl;
+  long long unfreedMem = 0LL;
+  long long peakMem    = 0LL;
+
+  //  overallMemoryUsage(unfreedMem, peakMem);
+
+  pout() << "                                -- Unfreed memory        : " << std::ceil(unfreedMem / bytesPerMB)
+         << "(MB)" << endl;
+  pout() << "                                -- Peak memory usage     : " << std::ceil(peakMem / bytesPerMB) << "(MB)"
+         << endl;
 
 #ifdef CH_MPI
-  int unfreed_mem = curMem;
-  int peak_mem    = peakMem;
+  const long long maxUnfreedMem = ParallelOps::max(unfreedMem);
+  const long long maxPeakMem    = ParallelOps::max(peakMem);
 
-  int max_unfreed_mem;
-  int max_peak_mem;
-
-  MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  MPI_Allreduce(&peak_mem, &max_peak_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  pout() << "                                -- Max unfreed memory    : " << max_unfreed_mem / BytesPerMB << "(MB)"
-         << endl;
-  pout() << "                                -- Max peak memory usage : " << max_peak_mem / BytesPerMB << "(MB)"
-         << endl;
+  pout() << "                                -- Max unfreed memory    : " << std::ceil(maxUnfreedMem / bytesPerMB)
+         << "(MB)" << endl;
+  pout() << "                                -- Max peak memory usage : " << std::ceil(maxPeakMem / bytesPerMB)
+         << "(MB)" << endl;
 #endif
 #endif
 }
@@ -1851,27 +1869,25 @@ Driver::getFinestTagLevel(const EBAMRTags& a_cellTags) const
     pout() << "Driver::getFinestTagLevel" << endl;
   }
 
-  int finest_tag_level = -1;
+  int finestTagLevel = -1;
   for (int lvl = 0; lvl < a_cellTags.size(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      const DenseIntVectSet& tags = (*a_cellTags[lvl])[dit()];
+    const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime) reduction(max : finestTagLevel)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      const DenseIntVectSet& tags = (*a_cellTags[lvl])[din];
 
       if (!tags.isEmpty()) {
-        finest_tag_level = Max(finest_tag_level, lvl);
+        finestTagLevel = std::max(finestTagLevel, lvl);
       }
     }
   }
 
-#ifdef CH_MPI
-  int finest;
-  MPI_Allreduce(&finest_tag_level, &finest, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-
-  finest_tag_level = finest;
-#endif
-
-  return finest_tag_level;
+  return ParallelOps::max(finestTagLevel);
 }
 
 bool
@@ -1882,7 +1898,10 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
     pout() << "Driver::tagCells" << endl;
   }
 
-  bool got_new_tags = false;
+  // TLDR: This routine collects tags from both the cell tagger (which is user-provided) and from geometric tags in
+  //       the Driver class. These are aggregated on an IntVectSet on each level.
+
+  bool gotNewTags = false;
 
   // Note that when we regrid we add at most one level at a time. This means that if we have a
   // simulation with AMR depth l and we want to add a level l+1, we need tags on levels 0 through l.
@@ -1890,27 +1909,38 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
   a_allTags.resize(1 + finestLevel, IntVectSet());
 
   if (!m_cellTagger.isNull()) {
-    got_new_tags = m_cellTagger->tagCells(a_cellTags);
+    gotNewTags = m_cellTagger->tagCells(a_cellTags);
   }
 
-  // Gather tags from a_tags
+  // Gather tags from the cell tagger.
   for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    for (DataIterator dit = a_cellTags[lvl]->dataIterator(); dit.ok(); ++dit) {
-      a_allTags[lvl] |= IntVectSet((*a_cellTags[lvl])[dit()]); // This should become a TreeIntVectSet
+    const DataIterator& dit  = a_cellTags[lvl]->dataIterator();
+    const int           nbox = dit.size();
+
+    IntVectSet& tags = a_allTags[lvl];
+
+#pragma omp parallel for schedule(runtime) reduction(+ : tags)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      // Implicity converts to TreeIntVecSet
+      tags |= IntVectSet((*a_cellTags[lvl])[din]);
     }
 
     // Grow tags with cell taggers buffer
     if (!m_cellTagger.isNull()) {
       const int buf = m_cellTagger->getBuffer();
-      a_allTags[lvl].grow(buf);
+
+      tags.grow(buf);
     }
   }
 
   // Add geometric tags.
-  int tag_level = this->getFinestTagLevel(a_cellTags);
   if (m_allowCoarsening) {
+    const int finestTagLevel = this->getFinestTagLevel(a_cellTags);
+
     for (int lvl = 0; lvl <= finestLevel; lvl++) {
-      if (lvl <= tag_level) {
+      if (lvl <= finestTagLevel) {
         a_allTags[lvl] |= m_geomTags[lvl];
       }
     }
@@ -1924,22 +1954,7 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
     }
   }
 
-#if 0 // Debug - if this fails, you have tags on m_amr->m_maxAmrDepth and something has gone wrong. 
-  if(finestLevel == m_amr->getMaxAmrDepth()){
-    for (int lvl = 0; lvl <= finestLevel; lvl++){
-      pout() << "level = " << lvl << "\t num_pts = " << a_allTags[lvl].numPts() << endl;
-    }
-    CH_assert(a_allTags[finestLevel].isEmpty());
-  }
-#endif
-
-  // Get the total number of tags
-  Vector<int> num_local_tags(1 + finestLevel);
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    num_local_tags[lvl] = a_allTags[lvl].numPts();
-  }
-
-  return got_new_tags;
+  return gotNewTags;
 }
 
 void
@@ -1950,8 +1965,7 @@ Driver::writeMemoryUsage()
     pout() << "Driver::writeMemoryUsage()" << endl;
   }
 
-  // TLDR: This
-
+#ifdef CH_USE_MEMORY_TRACKING
   char              file_char[1000];
   const std::string prefix = m_outputDirectory + "/mpi/memory/" + m_outputFileNames;
   sprintf(file_char, "%s.memory.step%07d.%dd.dat", prefix.c_str(), m_timeStep, SpaceDim);
@@ -1980,6 +1994,7 @@ Driver::writeMemoryUsage()
         << std::left << std::setw(width) << unfreedMemory[i] << "\t" << endl;
     }
   }
+#endif
 }
 
 void
@@ -2010,29 +2025,35 @@ Driver::writeComputationalLoads()
 
     // Compute total loads on each rank. This does a call to m_timeStepper to fetch the loads
     // on each realm, which we put in sumLoads, the loads for realm 'r'. Note that each rank
-    // only fills the sum of the loads for the patches the it own.
+    // only fills the sum of the loads for the patches the it own, so we need to accumulate the result.
     Vector<long int> sumLoads(nProc, 0L);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Vector<long int> boxLoads = m_timeStepper->getCheckpointLoads(r, lvl);
 
-      const DisjointBoxLayout& dbl = m_amr->getGrids(r)[lvl];
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-        sumLoads[procID()] += boxLoads[dit().intCode()];
+      const DisjointBoxLayout& dbl  = m_amr->getGrids(r)[lvl];
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      long int& load = sumLoads[procID()];
+
+#pragma omp parallel for schedule(runtime) reduction(+ : load)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const int        intCode = din.intCode();
+
+        load += boxLoads[intCode];
       }
     }
 
-    // Reduce onto output rank.
-#ifdef CH_MPI
-    Vector<long int> tmp(nProc, 0L);
-    MPI_Allreduce(&(sumLoads[0]), &(tmp[0]), nProc, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-    sumLoads = tmp;
-#endif
+    ParallelOps::vectorSum(sumLoads);
 
     realmLoads.emplace(r, sumLoads);
   }
 
   // When we're here we have a global view of all the loads for all the realms.
+#ifdef CH_MPI
   if (procID() == 0) {
+#endif
     const int width = 12;
 
     std::ofstream f;
@@ -2058,7 +2079,9 @@ Driver::writeComputationalLoads()
     }
 
     f.close();
+#ifdef CH_MPI
   }
+#endif
 }
 
 void
@@ -2359,13 +2382,16 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
   DataOps::setValue(scratch, 0.0);
 
   // Set tagged cells = 1
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const DenseIntVectSet& ivs     = (*m_tags[a_level])[dit()];
-    const Box              cellBox = dbl[dit()];
+  const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit  = dbl.dataIterator();
+  const int                nbox = dit.size();
 
-    // Do regular cells only.
-    FArrayBox& regTags = scratch[dit()].getFArrayBox();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    FArrayBox&             regTags = scratch[din].getFArrayBox();
+    const DenseIntVectSet& ivs     = (*m_tags[a_level])[din];
 
     auto kernel = [&](const IntVect& iv) -> void {
       if (ivs[iv]) {
@@ -2373,7 +2399,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
       }
     };
 
-    BoxLoops::loop(dbl[dit()], kernel);
+    BoxLoops::loop(dbl[din], kernel);
   }
 
   // Copy 'tags' over to 'a_output', starting on component a_comp.
@@ -2431,9 +2457,14 @@ Driver::writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
   const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
   const Real               dx     = m_amr->getDx()[a_level];
   const RealVect           probLo = m_amr->getProbLo();
+  const DataIterator&      dit    = dbl.dataIterator();
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    FArrayBox& fab = a_output[dit()].getFArrayBox();
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    FArrayBox& fab = a_output[din].getFArrayBox();
 
     fab.setVal(std::numeric_limits<Real>::max(), a_comp);
     fab.setVal(std::numeric_limits<Real>::max(), a_comp + 1);
@@ -2475,8 +2506,15 @@ Driver::writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_leve
     const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
     const DisjointBoxLayout& dbl = m_amr->getGrids(r)[a_level];
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      scratch[dit()].setVal(loads[dit().intCode()]);
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      scratch[din].setVal(loads[din.intCode()]);
     }
 
     const Interval srcInterv(0, 0);
@@ -2596,13 +2634,15 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
 
   // Set tags = 1
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box box = dbl[dit()];
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    const DenseIntVectSet& tags = (*m_tags[a_level])[dit()];
-
-    BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
+    FArrayBox&             fab  = scratch[din].getFArrayBox();
+    const DenseIntVectSet& tags = (*m_tags[a_level])[din];
 
     auto kernel = [&](const IntVect& iv) -> void {
       if (tags[iv]) {
@@ -2610,7 +2650,7 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
       }
     };
 
-    BoxLoops::loop(box, kernel);
+    BoxLoops::loop(dbl[din], kernel);
 
     DataOps::setCoveredValue(scratch, 0, 0.0);
   }
@@ -2630,6 +2670,9 @@ Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level)
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const DataIterator&      dit = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Make some storage and set the computational load to be the same in every patch. Later when
   // we read the file we can just fetch the computational load from one of the cells.
@@ -2639,9 +2682,11 @@ Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level)
   for (auto r : m_amr->getRealms()) {
     const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
-    // Set loads on an FArrayBox
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      scratch[dit()].setVal(loads[dit().intCode()]);
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      scratch[din].setVal(loads[din.intCode()]);
     }
 
     // String identifier in HDF file.
@@ -2805,6 +2850,8 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
 
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_level];
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
+  const DataIterator&      dit   = dbl.dataIterator();
+  const int                nbox  = dit.size();
 
   // Some scratch data we can use
   LevelData<EBCellFAB> scratch(dbl, 1, IntVect::Zero, EBCellFactory(ebisl));
@@ -2815,21 +2862,20 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
 
   // Instantiate m_tags. When we wrote the tags we put a floating point value of 0 where we didn't have tags
   // and a floating point value of 1 where we had.
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box        box = dbl.get(dit());
-    const IntVectSet ivs(box);
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];
-
-    BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
+    DenseIntVectSet& taggedCells = (*m_tags[a_level])[din];
+    FArrayBox&       scratchFAB  = scratch[din].getFArrayBox();
 
     auto kernel = [&](const IntVect& iv) -> void {
-      if (fab(iv, 0) > 0.9999) {
+      if (scratchFAB(iv, 0) > 0.9999) {
         taggedCells |= iv;
       }
     };
 
-    BoxLoops::loop(box, kernel);
+    BoxLoops::loop(dbl[din], kernel);
   }
 }
 #endif

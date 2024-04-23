@@ -35,8 +35,12 @@ LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
 
   // Get all Vofs in a radius, and then compute the displacement vectors.
   Vector<VolIndex> vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, a_addStartingVof);
-  const Vector<RealVect> displacements =
-    LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_startVof, vofs, a_ebisbox, a_dx);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos,
+                                                                        a_otherCellsPos,
+                                                                        a_startVof,
+                                                                        vofs,
+                                                                        a_ebisbox,
+                                                                        a_dx);
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
   const int K = displacements.size();
@@ -63,8 +67,11 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
 
   VoFStencil gradSten;
 
-  const Vector<VolIndex> allVofs =
-    VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+  const Vector<VolIndex> allVofs = VofUtils::getVofsInRadius(a_vof,
+                                                             a_ebisbox,
+                                                             a_radius,
+                                                             VofUtils::Connectivity::MonotonePath,
+                                                             true);
 
   // Can be smaller than order if you've eliminated some equations.
   const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
@@ -72,8 +79,12 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
   // Build the stencil if we can.
   if (allVofs.size() > numUnknowns) {
 
-    const Vector<RealVect> displacements =
-      LeastSquares::getDisplacements(a_gradLocation, a_cellLocation, a_vof, allVofs, a_ebisbox, a_dx);
+    const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_gradLocation,
+                                                                          a_cellLocation,
+                                                                          a_vof,
+                                                                          allVofs,
+                                                                          a_ebisbox,
+                                                                          a_dx);
 
     gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, a_knownTerms);
   }
@@ -101,10 +112,16 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
     // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
     // using std::set below. After that, just get the distances and solve the least squares system.
     Vector<VolIndex> allVofs;
-    Vector<VolIndex> loVofs =
-      VofUtils::getVofsInRadius(vofLo, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
-    Vector<VolIndex> hiVofs =
-      VofUtils::getVofsInRadius(vofHi, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+    Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo,
+                                                        a_ebisbox,
+                                                        a_radius,
+                                                        VofUtils::Connectivity::MonotonePath,
+                                                        true);
+    Vector<VolIndex> hiVofs = VofUtils::getVofsInRadius(vofHi,
+                                                        a_ebisbox,
+                                                        a_radius,
+                                                        VofUtils::Connectivity::MonotonePath,
+                                                        true);
 
     std::set<VolIndex> setVofs;
     for (const auto& v : loVofs.stdVector())
@@ -118,8 +135,12 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
     const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
 
     if (allVofs.size() > numUnknowns) {
-      const Vector<RealVect> displacements =
-        LeastSquares::getDisplacements(a_gradLocation, a_cellLocation, a_face, allVofs, a_ebisbox, a_dx);
+      const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_gradLocation,
+                                                                            a_cellLocation,
+                                                                            a_face,
+                                                                            allVofs,
+                                                                            a_ebisbox,
+                                                                            a_dx);
 
       gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, a_knownTerms);
     }
@@ -159,8 +180,11 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
       break;
     }
     case Neighborhood::Radius: {
-      allVofs =
-        VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, a_addStartingVof);
+      allVofs = VofUtils::getVofsInRadius(a_vof,
+                                          a_ebisbox,
+                                          a_radius,
+                                          VofUtils::Connectivity::MonotonePath,
+                                          a_addStartingVof);
       break;
     }
     case Neighborhood::SemiCircle: {
@@ -186,8 +210,12 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
     // Now build the stencil.
     if (allVofs.size() > numUnknowns) {
 
-      Vector<RealVect> displacements =
-        LeastSquares::getDisplacements(Location::Cell::Boundary, a_cellPositions, a_vof, allVofs, a_ebisbox, a_dx);
+      Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
+                                                                      a_cellPositions,
+                                                                      a_vof,
+                                                                      allVofs,
+                                                                      a_ebisbox,
+                                                                      a_dx);
 
       // This routine eliminates a_vof from the system of equations!
       IntVectSet knownTerms;
@@ -311,8 +339,12 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
     derivs |= BASISV(dir);
   }
 
-  std::map<IntVect, VoFStencil> taylorTerms =
-    LeastSquares::computeSingleLevelStencils(derivs, a_knownTerms, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeSingleLevelStencils(derivs,
+                                                                                       a_knownTerms,
+                                                                                       a_allVofs,
+                                                                                       a_displacements,
+                                                                                       a_weights,
+                                                                                       a_order);
 
   VoFStencil sten;
   for (const auto& m : taylorTerms) {
@@ -415,8 +447,12 @@ LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
 
   const IntVectSet knownTerms = IntVectSet();
 
-  std::map<IntVect, VoFStencil> allStens =
-    LeastSquares::computeSingleLevelStencils(derivs, knownTerms, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> allStens = LeastSquares::computeSingleLevelStencils(derivs,
+                                                                                    knownTerms,
+                                                                                    a_allVofs,
+                                                                                    a_displacements,
+                                                                                    a_weights,
+                                                                                    a_order);
 
   ret = allStens.at(deriv);
 

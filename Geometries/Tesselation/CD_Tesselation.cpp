@@ -45,6 +45,7 @@ Tesselation::Tesselation()
   m_electrodes.push_back(Electrode(baseIF, true));
 }
 
-Tesselation::~Tesselation() {}
+Tesselation::~Tesselation()
+{}
 
 #include <CD_NamespaceFooter.H>

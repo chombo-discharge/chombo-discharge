@@ -14,9 +14,11 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-TimeStepper::TimeStepper() {}
+TimeStepper::TimeStepper()
+{}
 
-TimeStepper::~TimeStepper() {}
+TimeStepper::~TimeStepper()
+{}
 
 void
 TimeStepper::setAmr(const RefCountedPtr<AmrMesh>& a_amr)

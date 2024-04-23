@@ -6,6 +6,7 @@
 **/Make.defs.local
 *.log
 *.aux
+*.0
 LB.txt
 
 
@@ -31,10 +32,10 @@ LB.txt
 **/*.a
 **/*.o
 
-Exec/Examples/StreamerInception/**/report.txt
-Exec/Examples/StreamerInception/**/report.txt
-Exec/Examples/StreamerInception/**/report.txt
-Exec/Tests/StreamerInception/**/report.txt
+Exec/Examples/DischargeInception/**/report.txt
+Exec/Examples/DischargeInception/**/report.txt
+Exec/Examples/DischargeInception/**/report.txt
+Exec/Tests/DischargeInception/**/report.txt
 
 pout.*
 time.table*

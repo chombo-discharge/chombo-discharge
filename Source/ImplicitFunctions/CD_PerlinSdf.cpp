@@ -55,7 +55,8 @@ PerlinSdf::PerlinSdf(const PerlinSdf& a_inputIF)
   }
 }
 
-PerlinSdf::~PerlinSdf() {}
+PerlinSdf::~PerlinSdf()
+{}
 
 Real
 PerlinSdf::value(const RealVect& a_pos) const

@@ -18,7 +18,8 @@
 
 using namespace Physics::ItoKMC;
 
-inline ItoKMCSurfaceReactionSet::~ItoKMCSurfaceReactionSet() noexcept {}
+inline ItoKMCSurfaceReactionSet::~ItoKMCSurfaceReactionSet() noexcept
+{}
 
 inline void
 ItoKMCSurfaceReactionSet::add(const size_t                            a_speciesIndex,

@@ -189,7 +189,7 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
     pout() << m_name + "::tagCells(EBAMRTags)" << endl;
   }
 
-  bool gotNewTags = false;
+  int gotNewTags = 0;
 
   // Lower left corner and current time.
   const RealVect probLo = m_amr->getProbLo();
@@ -208,13 +208,19 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
     // Go through the AMR levels, being careful not to add cell tags on the maximum possible AMR depth (because grid level l+1 is generated from tags on level l).
     for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
 
       // Go through the grid patches.
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box      box     = dbl[dit()];
-        const EBISBox& ebisbox = ebisl[dit()];
+      const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime) reduction(max : gotNewTags)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const Box      box     = dbl[din];
+        const EBISBox& ebisbox = ebisl[din];
 
         // Create data holders that hold which cells were coarsened and which cells were refined
         DenseIntVectSet coarsenTags(box, false); // Cells that will be coarsened
@@ -225,16 +231,16 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
         Vector<EBCellFAB*> gtracers;
 
         for (int i = 0; i < m_numTracers; i++) {
-          tracers.push_back(&((*m_tracers[i][lvl])[dit()]));
-          gtracers.push_back(&((*m_gradTracers[i][lvl])[dit()]));
+          tracers.push_back(&((*m_tracers[i][lvl])[din]));
+          gtracers.push_back(&((*m_gradTracers[i][lvl])[din]));
         }
 
         // Current cell flags. If we add a tag, the cell will be refined. Remove one, and it will be coarsened.
-        DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
+        DenseIntVectSet& tags = (*a_tags[lvl])[din];
 
         // Calls the patch versions which figure out which tags will be refined in each grid patch.
-        this->refineCellsBox(refineTags, tracers, gtracers, lvl, dit(), box, ebisbox, time, dx, probLo);
-        this->coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, dit(), box, ebisbox, time, dx, probLo);
+        this->refineCellsBox(refineTags, tracers, gtracers, lvl, din, box, ebisbox, time, dx, probLo);
+        this->coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, din, box, ebisbox, time, dx, probLo);
 
         // Check if we got any new tags, or we are just recycling old tags. If we did not get new tags then
         // we will ask the Driver to skip the regrid completely. Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
@@ -246,7 +252,7 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
         cpy2 -= cpy1; // = new tags minus old tags. If nonzero, we got some new tags.
         cpy1 -= tags; // = old_tags minus new tags. If nonzero, we got some new tags
         if (cpy1.numPts() != 0 || cpy2.numPts() != 0) {
-          gotNewTags = true;
+          gotNewTags = 1;
         }
 
         // No tags allowed outside the current grid patch.
@@ -255,16 +261,7 @@ CdrPlasmaTagger::tagCells(EBAMRTags& a_tags)
     }
   }
 
-  // Some ranks may have gotten new tags while others have not. This little code snippet
-  // sets gotNewTags = true for all ranks if any rank probLoally had gotNewTags = true
-  int hasTags = gotNewTags ? 1 : 0;
-  hasTags     = ParallelOps::max(hasTags);
-
-  if (hasTags > 0) {
-    gotNewTags = true;
-  }
-
-  return gotNewTags;
+  return ParallelOps::max(gotNewTags) > 0;
 }
 
 void

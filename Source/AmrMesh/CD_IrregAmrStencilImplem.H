@@ -95,12 +95,18 @@ template <class IrregSten>
 void
 IrregAmrStencil<IrregSten>::apply(LevelData<EBCellFAB>& a_dst, const LevelData<EBCellFAB>& a_src, const int a_lvl) const
 {
-  CH_TIME("IrregAmrStencil::apply");
+  CH_TIME("IrregAmrStencil::apply(LD<EBCellFABx2, int)");
 
   CH_assert(m_isDefined);
 
-  for (DataIterator dit(m_grids[a_lvl]); dit.ok(); ++dit) {
-    m_stencils[a_lvl]->apply(a_dst[dit()], a_src[dit()], dit());
+  const DataIterator& dit = m_grids[a_lvl].dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    m_stencils[a_lvl]->apply(a_dst[din], a_src[din], din);
   }
 }
 
@@ -108,12 +114,18 @@ template <class IrregSten>
 void
 IrregAmrStencil<IrregSten>::apply(LevelData<EBCellFAB>& a_data, const int a_lvl) const
 {
-  CH_TIME("IrregAmrStencil::apply");
+  CH_TIME("IrregAmrStencil::apply(LD<EBCellFAB, int)");
 
   CH_assert(m_isDefined);
 
-  for (DataIterator dit(m_grids[a_lvl]); dit.ok(); ++dit) {
-    EBCellFAB& data = a_data[dit()];
+  const DataIterator& dit = m_grids[a_lvl].dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB& data = a_data[din];
     EBCellFAB  cpy;
 
     // Need a clone to avoid race condition.
@@ -121,7 +133,7 @@ IrregAmrStencil<IrregSten>::apply(LevelData<EBCellFAB>& a_data, const int a_lvl)
     cpy.setVal(0.0);
     cpy += data;
 
-    m_stencils[a_lvl]->apply(data, cpy, dit());
+    m_stencils[a_lvl]->apply(data, cpy, din);
   }
 }
 
@@ -131,12 +143,18 @@ IrregAmrStencil<IrregSten>::apply(LevelData<BaseIVFAB<Real>>& a_dst,
                                   const LevelData<EBCellFAB>& a_src,
                                   const int                   a_lvl) const
 {
-  CH_TIME("IrregAmrStencil::apply");
+  CH_TIME("IrregAmrStencil::apply(LD<BaseIVFAB>, LD<EBCellFAB>, int)");
 
   CH_assert(m_isDefined);
 
-  for (DataIterator dit(m_grids[a_lvl]); dit.ok(); ++dit) {
-    m_stencils[a_lvl]->apply(a_dst[dit()], a_src[dit()], dit());
+  const DataIterator& dit = m_grids[a_lvl].dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    m_stencils[a_lvl]->apply(a_dst[din], a_src[din], din);
   }
 }
 

@@ -35,7 +35,10 @@ EBMGRestrict::EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_e
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
 
-EBMGRestrict::~EBMGRestrict() noexcept { CH_TIME("EBMGRestrict::~EBMGRestrict"); }
+EBMGRestrict::~EBMGRestrict() noexcept
+{
+  CH_TIME("EBMGRestrict::~EBMGRestrict");
+}
 
 void
 EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
@@ -71,21 +74,27 @@ EBMGRestrict::define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoa
   // Note: MUST have the same number of ghost cells as the buffer being defined in the restriction function.
   m_copier.define(dblCoFi, m_eblgCoar.getDBL(), IntVect::Zero);
 
-  for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-    const Box&       cellBox = dblCoFi[dit()];
-    const EBISBox&   ebisBox = ebislCoFi[dit()];
+  const DataIterator& dit  = dblCoFi.dataIterator();
+  const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    const Box&       cellBox = dblCoFi[din];
+    const EBISBox&   ebisBox = ebislCoFi[din];
     const EBGraph&   ebgraph = ebisBox.getEBGraph();
     const IntVectSet irreg   = ebisBox.getIrregIVS(cellBox);
 
-    BaseIVFAB<VoFStencil>& restrictStencils = m_restrictStencils[dit()];
-    VoFIterator&           vofit            = m_vofitCoar[dit()];
+    BaseIVFAB<VoFStencil>& restrictStencils = m_restrictStencils[din];
+    VoFIterator&           vofit            = m_vofitCoar[din];
 
     vofit.define(irreg, ebgraph);
     restrictStencils.define(irreg, ebgraph, 1);
 
     for (vofit.reset(); vofit.ok(); ++vofit) {
       const VolIndex&        coarVoF     = vofit();
-      const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, dit());
+      const Vector<VolIndex> fineVoFs    = ebislCoFi.refine(coarVoF, m_refRat, din);
       const int              numFineVoFs = fineVoFs.size();
 
       VoFStencil& restrictSten = restrictStencils(coarVoF, 0);
@@ -122,15 +131,21 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
 
   LevelData<EBCellFAB> coFiData(dblCoFi, 1, IntVect::Zero, EBCellFactory(ebislCoFi));
 
+  const DataIterator& dit  = dblCoFi.dataIterator();
+  const int           nbox = dit.size();
+
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++) {
-    for (DataIterator dit(dblCoFi); dit.ok(); ++dit) {
-      EBCellFAB&       coarData = coFiData[dit()];
-      const EBCellFAB& fineData = a_fineData[dit()];
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din      = dit[mybox];
+      EBCellFAB&       coarData = coFiData[din];
+      const EBCellFAB& fineData = a_fineData[din];
 
       FArrayBox&       coarDataReg = coarData.getFArrayBox();
       const FArrayBox& fineDataReg = fineData.getFArrayBox();
 
-      const BaseIVFAB<VoFStencil>& restrictStencils = m_restrictStencils[dit()];
+      const BaseIVFAB<VoFStencil>& restrictStencils = m_restrictStencils[din];
 
       // Regular kernel.
       auto regularKernel = [&](const IntVect& ivCoar) -> void {
@@ -157,8 +172,8 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
       // Run kernels
       coarData.setVal(0.0);
 
-      const Box    coarBox  = dblCoFi[dit()];
-      VoFIterator& coarVoFs = m_vofitCoar[dit()];
+      const Box    coarBox  = dblCoFi[din];
+      VoFIterator& coarVoFs = m_vofitCoar[din];
 
       CH_START(t2);
       BoxLoops::loop(coarBox, regularKernel);

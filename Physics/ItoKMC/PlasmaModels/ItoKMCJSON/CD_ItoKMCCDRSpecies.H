@@ -48,7 +48,8 @@ namespace Physics {
       /*!
 	@brief Destructor. Does nothing
       */
-      virtual ~ItoKMCCDRSpecies() noexcept {}
+      virtual ~ItoKMCCDRSpecies() noexcept
+      {}
 
       /*!
 	@brief Initial data

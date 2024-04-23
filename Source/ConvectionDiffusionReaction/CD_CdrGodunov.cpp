@@ -29,7 +29,10 @@ CdrGodunov::CdrGodunov() : CdrMultigrid()
   m_name      = "CdrGodunov";
 }
 
-CdrGodunov::~CdrGodunov() { CH_TIME("CdrGodunov::~CdrGodunov()"); }
+CdrGodunov::~CdrGodunov()
+{
+  CH_TIME("CdrGodunov::~CdrGodunov()");
+}
 
 void
 CdrGodunov::parseOptions()
@@ -87,13 +90,18 @@ CdrGodunov::computeAdvectionDt()
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real               dx    = m_amr->getDx()[lvl];
+      const DataIterator&      dit   = dbl.dataIterator();
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const Box        cellBox = dbl[dit()];
-        const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
-        const EBISBox&   ebisBox = ebisl[dit()];
+      const int nbox = dit.size();
 
-        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+#pragma omp parallel for schedule(runtime) reduction(min : minDt)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const Box        cellBox = dbl[din];
+        const EBCellFAB& velo    = (*m_cellVelocity[lvl])[din];
+        const EBISBox&   ebisBox = ebisl[din];
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
         // Regular grid data.
         const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
@@ -129,12 +137,9 @@ CdrGodunov::computeAdvectionDt()
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
-
-    // If we are using MPI then ranks need to know of each other's time steps.
-    minDt = ParallelOps::min(minDt);
   }
 
-  return minDt;
+  return ParallelOps::min(minDt);
 }
 
 void
@@ -249,16 +254,22 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      EBFluxFAB&       facePhi = (*a_facePhi[lvl])[dit()];
-      const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[dit()];
-      const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
-      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
-      const EBCellFAB& source  = (*scratch[lvl])[dit()];
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBFluxFAB&       facePhi = (*a_facePhi[lvl])[din];
+      const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[din];
+      const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[din];
+      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[din];
+      const EBCellFAB& source  = (*scratch[lvl])[din];
       const Real       time    = 0.0;
 
-      EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(dit());
+      EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(din);
 
       // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
       // that permits it to run advection code (through setDoingVel(0)).
@@ -268,7 +279,7 @@ CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellP
       ebAdvectPatch.setEBPhysIBC(ExtrapAdvectBCFactory());
 
       // Extrapolate to face-centers. The face-centered states are Godunov-style extrapolated in time to a_extrapDt.
-      ebAdvectPatch.extrapolateBCG(facePhi, cellPhi, source, dit(), time, a_extrapDt);
+      ebAdvectPatch.extrapolateBCG(facePhi, cellPhi, source, din, time, a_extrapDt);
     }
   }
 }

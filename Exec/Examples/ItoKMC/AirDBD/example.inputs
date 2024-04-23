@@ -43,7 +43,7 @@ Driver.output_dt                       = -1.0             # Output interval (val
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
-Driver.write_regrid_files              = true             # Write regrid files or not.
+Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
@@ -222,7 +222,7 @@ DiskProfiledPlane.box_translate         = 0 5.0123E-3 0           # Box translat
 DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 300E-6                  # Corner curvatures
 
-DiskProfiledPlane.profile_type          = sphere                    # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_type          = none                    # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
 DiskProfiledPlane.profile_translate     = 0 0 0                   # Profile translation
 DiskProfiledPlane.profile_repetition_lo = 36 0 0                  # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 36 0 0                  # Repetition pattern in high coordinate direction
@@ -284,7 +284,7 @@ ItoKMCJSON.Ncrit              = 5                       ## How many firings away
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSAlim             = 1.0                     ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = hybrid_midpoint         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.algorithm          = tau_plain         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS

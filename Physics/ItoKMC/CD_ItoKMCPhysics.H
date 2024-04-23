@@ -413,11 +413,6 @@ namespace Physics {
       bool m_isDefined;
 
       /*!
-	@brief Kinetic Monte Carlo state
-      */
-      mutable KMCState m_kmcState;
-
-      /*!
 	@brief Kinetic Monte Carlo solver. 
       */
       mutable KMCSolverType m_kmcSolver;
@@ -539,6 +534,7 @@ namespace Physics {
 
       /*!
 	@brief Update reaction rates
+	@param[out] a_kmcReactions Reaction rates to be set. 
 	@param[in] a_E       Electric field
 	@param[in] a_pos     Physical position
 	@param[in] a_phi     Plasma species densities
@@ -548,12 +544,13 @@ namespace Physics {
 	@note Must be implemented by the user.
       */
       virtual void
-      updateReactionRates(const RealVect          a_E,
-                          const RealVect          a_pos,
-                          const Vector<Real>&     a_phi,
-                          const Vector<RealVect>& a_gradPhi,
-                          const Real              a_dx,
-                          const Real              a_kappa) const noexcept = 0;
+      updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>& a_kmcReactions,
+                          const RealVect                                   a_E,
+                          const RealVect                                   a_pos,
+                          const Vector<Real>&                              a_phi,
+                          const Vector<RealVect>&                          a_gradPhi,
+                          const Real                                       a_dx,
+                          const Real                                       a_kappa) const noexcept = 0;
 
       /*!
 	@brief Remove particles from the input list.

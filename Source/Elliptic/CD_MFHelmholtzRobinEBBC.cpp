@@ -31,7 +31,10 @@ MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPt
   m_useFunction = false;
 }
 
-MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC() { CH_TIME("MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()"); }
+MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()
+{
+  CH_TIME("MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()");
+}
 
 void
 MFHelmholtzRobinEBBC::setOrder(const int a_order)
@@ -111,6 +114,9 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const DataIterator&      dit    = dbl.dataIterator();
+
+  const int nbox = dit.size();
 
   // Drop order if we must
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -119,15 +125,18 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
     }
   }
 
-  for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Box      box     = dbl[dit()];
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights[dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[dit()];
+    const Box      box     = dbl[din];
+    const EBISBox& ebisbox = m_eblg.getEBISL()[din];
+
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
+    BaseIVFAB<VoFStencil>& stencils = m_gradPhiStencils[din];
 
     // Build interpolation stencils.
-    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
+    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, din);
 
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
@@ -143,24 +152,24 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
       // that fall within the quadrant that the cut-cell normal points into.
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Quadrant, order);
+        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Quadrant, order);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(fluxStencil, dit());
+          foundStencil = this->isStencilValidCF(fluxStencil, din);
         }
       }
 
       // If the above failed we try a larger neighborhood
       order = m_order;
       while (!foundStencil && order > 0) {
-        fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Radius, order);
+        fluxStencil = this->getInterpolationStencil(vof, din, VofUtils::Neighborhood::Radius, order);
         order--;
 
         // Check that the stencil doesn't reach into ghost cells it shouldn't!
         if (foundStencil) {
-          foundStencil = this->isStencilValidCF(fluxStencil, dit());
+          foundStencil = this->isStencilValidCF(fluxStencil, din);
         }
       }
 
@@ -174,7 +183,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
           B = m_constantB;
         }
         else if (m_useFunction) {
-          const RealVect pos = this->getBoundaryPosition(vof, dit());
+          const RealVect pos = this->getBoundaryPosition(vof, din);
           A                  = m_functionA(pos);
           B                  = m_functionB(pos);
         }
@@ -306,8 +315,12 @@ MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex&              a_vof
   }
 
   // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid.
-  const Vector<RealVect> displacements =
-    LeastSquares::getDisplacements(Location::Cell::Boundary, m_dataLocation, a_vof, vofs, ebisbox, m_dx);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
+                                                                        m_dataLocation,
+                                                                        a_vof,
+                                                                        vofs,
+                                                                        ebisbox,
+                                                                        m_dx);
 
   // M = Number of unknowns in Taylor expansion of order a_order.
   // K = Number of equations (displacements)

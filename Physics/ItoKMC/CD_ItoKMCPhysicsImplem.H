@@ -56,7 +56,10 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
 #endif
 }
 
-inline ItoKMCPhysics::~ItoKMCPhysics() noexcept { CH_TIME("ItoKMCPhysics::~ItoKMCPhysics"); }
+inline ItoKMCPhysics::~ItoKMCPhysics() noexcept
+{
+  CH_TIME("ItoKMCPhysics::~ItoKMCPhysics");
+}
 
 inline void
 ItoKMCPhysics::define() noexcept
@@ -93,10 +96,7 @@ ItoKMCPhysics::defineKMC() noexcept
 {
   CH_TIME("ItoKMCPhysics::defineKMC");
 
-  m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
   m_kmcSolver.define(m_kmcReactions);
-
-  // Define solver parameters in case they've been changed since last time.
   m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 
   // Safety hook -- make sure no one defines reactions using an out-of-range species index.
@@ -322,9 +322,14 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   CH_assert(m_isDefined);
 
-  // Populate the KMC solver state.
-  std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
-  std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
+  KMCState      kmcState;
+  KMCSolverType kmcSolver;
+
+  // Define and populate the KMC solver state.
+  kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+
+  std::vector<FPR>& kmcParticles = kmcState.getReactiveState();
+  std::vector<FPR>& kmcPhotons   = kmcState.getNonReactiveState();
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
@@ -334,33 +339,43 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     p = 0LL;
   }
 
-  // Update the reaction rates and run the KMC solver.
-  this->updateReactionRates(a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
+  // Deep copy of reaction rates
+  std::vector<std::shared_ptr<const KMCReaction>> kmcReactions;
+  for (const auto& r : m_kmcReactions) {
+    kmcReactions.emplace_back(std::make_shared<const KMCReaction>(*r));
+  }
 
-  // // Which algorithm?
+  // Define the KMC solver
+  kmcSolver.define(kmcReactions);
+  kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+
+  // Update the reaction rates to be used by the KMC solver.
+  this->updateReactionRates(kmcReactions, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
+
+  // Run the KMC solver.
   switch (m_algorithm) {
   case Algorithm::SSA: {
-    m_kmcSolver.advanceSSA(m_kmcState, a_dt);
+    kmcSolver.advanceSSA(kmcState, a_dt);
 
     break;
   }
   case Algorithm::TauPlain: {
-    m_kmcSolver.advanceTauPlain(m_kmcState, a_dt);
+    kmcSolver.advanceTauPlain(kmcState, a_dt);
 
     break;
   }
   case Algorithm::TauMidpoint: {
-    m_kmcSolver.advanceTauMidpoint(m_kmcState, a_dt);
+    kmcSolver.advanceTauMidpoint(kmcState, a_dt);
 
     break;
   }
   case Algorithm::HybridPlain: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
+    kmcSolver.advanceHybrid(kmcState, a_dt, KMCLeapPropagator::TauPlain);
 
     break;
   }
   case Algorithm::HybridMidpoint: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
+    kmcSolver.advanceHybrid(kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
 
     break;
   }
@@ -423,8 +438,9 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
     if (diff > 0LL) {
       // Adding particles, which is fairly simple. Just choose weights for the particles and go.
-      const std::vector<long long> particleWeights =
-        ParticleManagement::partitionParticleWeights(diff, (long long)m_maxNewParticles);
+      const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(
+        diff,
+        (long long)m_maxNewParticles);
 
       for (const auto& w : particleWeights) {
         RealVect x = RealVect::Zero;
@@ -542,8 +558,9 @@ ItoKMCPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
   for (int i = 0; i < a_newPhotons.size(); i++) {
     if (a_numNewPhotons[i] > 0LL) {
 
-      const std::vector<long long> photonWeights =
-        ParticleManagement::partitionParticleWeights((long long)a_numNewPhotons[i], (long long)m_maxNewPhotons);
+      const std::vector<long long> photonWeights = ParticleManagement::partitionParticleWeights(
+        (long long)a_numNewPhotons[i],
+        (long long)m_maxNewPhotons);
 
       for (const auto& w : photonWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);

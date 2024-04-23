@@ -5,19 +5,45 @@ chombo-discharge
 ----------------
 
 This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for discharge simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
+``chombo-discharge`` is aimed at performant electric discharge simulations (e.g., Townsend discharges, streamer discharges, sprites, etc.), and scales to tens of thousands of CPU cores.
+
+``chombo-discharge`` features include:
+
+* Fully written in C++.
+* Parallelized with OpenMP, MPI, or MPI+OpenMP.
+* Scales to tens of thousands of CPUs.
+* Supports complex geometries (electrodes/dielectrics).
+* Parallel I/O with HDF5.
+* Efficient geometric multigrid solvers.
+* Support for dual-grid operations with individual load-balancing of particle and fluid solvers.
+* Support for both particle and fluids, including particle-mesh operations (e.g., Particle-In-Cell).
+
 A modified version of ``Chombo`` is distributed together with this code.
 
+Gallery
+-------
+
 <p align="center">
-   <img src="./Docs/Sphinx/source/_static/figures/BranchingAir.gif" width="36%">
-   <img src="./Exec/Examples/CdrPlasma/Sprite/sprite3d.png" width="55%">
+   <img src="./Docs/Sphinx/source/_static/figures/README/BranchingAir.gif" width="45%">
+   <img src="./Docs/Sphinx/source/_static/figures/README/VoidPD.gif" width="45%">   
 </p align="center">
+
+<p align="center">
+   <img src="./Docs/Sphinx/source/_static/figures/README/OtherBead.png" width="45%">
+   <img src="./Docs/Sphinx/source/_static/figures/README/35kv_66ns.png" width="45%">   
+</p align="center">
+
+<p align="center">
+   <img src="./Docs/Sphinx/source/_static/figures/README/3DSimulation.png" width="45%">
+</p align="center">
+
 
 Installation
 ------------
 
-A serial build quickstart is given below. 
-For complete installation instructions, see https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html
-
+Installation of ``chombo-discharge`` depends on the level of parallelism that is desired (if any). 
+The code supports OpenMP, MPI, and MPI+OpenMP types of parallelism.
+For complete installation instructions for serial or parallel execution, see https://chombo-discharge.github.io/chombo-discharge/Base/Installation.html. 
 
 Documentation
 -------------
@@ -30,64 +56,6 @@ License
 
 See LICENSE and Copyright.txt for redistribution rights.
 
-
-Serial build quickstart
------------------------
-
-For doing a quick clone and test build of ``chombo-discharge`` without HDF5 or MPI capabilities, execute the following steps:
-
-1. Install the LAPACK, BLAS, and GCC dependencies:
-
-   ```
-   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
-   ```
-   
-2. Choose an installation directory and clone ``chombo-discharge`` there:
-
-   ```
-   export DISCHARGE_HOME=/home/foo/chombo-discharge		
-   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
-		
-   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
-   ```
-
-   Alternatively, if cloning over https:
-
-   ```
-   export DISCHARGE_HOME=/home/foo/chombo-discharge		
-   export CHOMBO_HOME=$DISCHARGE_HOME/Submodules/Chombo-3.3/lib
-		
-   git clone --recursive https://github.com/chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}   
-   ```
-
-3. Copy the GNU compiler makefile to it's appropriate location
-
-   ```
-   cp $DISCHARGE_HOME/Lib/Local/Make.defs.GNU $CHOMBO_HOME/mk/Make.defs.local
-   ```
-
-4. Build ``chombo-discharge``
-
-   ```
-   cd $DISCHARGE_HOME
-   make -s -j4
-   ```
-
-5. Run a simple example program
-
-   ```
-   cd $DISCHARGE_HOME/Exec/Examples/AdvectionDiffusion/DiagonalFlowNoEB
-   make -s -j4
-   ./*.ex example.inputs
-   ```
-
-6. Run an advanced example program
-
-   ```
-   cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/StochasticAir
-   make -s -j4
-   ./*.ex positive2d.inputs
-   ```		
 
 Contributing
 ------------
