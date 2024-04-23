@@ -115,6 +115,8 @@ DiskProfiledPlane::defineDielectric() noexcept
   Real permittivity   = 1.0;
   Real sphereRadius   = 0.0;
   Real cylinderRadius = 0.0;
+  Real cylinderLength = 0.0;
+  
 
   Vector<Real> boxDimensions(3, std::numeric_limits<Real>::max());
   Vector<Real> boxTranslation(3, 0.0);
@@ -136,6 +138,7 @@ DiskProfiledPlane::defineDielectric() noexcept
   pp.get("box_curvature", boxCurvature);
   pp.get("sphere_radius", sphereRadius);
   pp.get("cylinder_radius", cylinderRadius);
+  pp.get("cylinder_length", cylinderLength);
 
   pp.getarr("box_dimensions", boxDimensions, 0, 3);
   pp.getarr("box_translate", boxTranslation, 0, 3);
@@ -209,6 +212,16 @@ DiskProfiledPlane::defineDielectric() noexcept
 
     profile2 = SmoothDifference<Real>(profile2, plane, boxCurvature);
   }
+  
+  else if (str == "golfpeg") {
+    profile = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+	// profile2 = std::make_shared<SphereSDF<Real>>(Vec3::zero(), cylinderRadius);
+    // profile2 = Elongate<Real>(profile2, cylinderLength * Vec3::unit(2));
+	profile2 = std::make_shared<CylinderSDF<Real>>(Vec3::zero(), Vec3(0.0, -cylinderLength, 0.0), cylinderRadius);
+	
+    profile = SmoothUnion<Real>(profile, profile2, boxCurvature);
+
+  }
   else if (str == "none") {
   }
   else {
@@ -216,20 +229,32 @@ DiskProfiledPlane::defineDielectric() noexcept
   }
 
   // Translate and repeat the profiles. Then do a smooth union
-  // if (str != "none") {
-  // profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
-  // profile    = Translate<Real>(profile, profileTra);
+  if (str != "none" && str != "l_shape" && str != "golfpeg") {
+  profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
+  profile    = Translate<Real>(profile, profileTra);
   // roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
-  // }
-  if (str == "l_shape") {
-    profile2 = FiniteRepetition<Real>(profile2, profilePer, profileRepLo, profileRepHi);
-    profile2 = Translate<Real>(profile2, profileTra2);
+  roundedBox = SmoothUnion<Real>(roundedBox, profile, sphereRadius);
+  }
+  
+  else if (str == "l_shape") {
+    profile = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
+    profile = Translate<Real>(profile, profileTra2);
 	
 
     roundedBox = SmoothUnion<Real>(roundedBox, profile2, boxCurvature);
 	profile3 = Reflect<Real>(profile2, 0);
 	roundedBox = SmoothUnion<Real>(roundedBox, profile3, boxCurvature);
   }
+  
+  else if (str == "golfpeg") {
+  profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
+  profile    = Translate<Real>(profile, profileTra);
+  // roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+  roundedBox = SmoothUnion<Real>(roundedBox, profile, sphereRadius);
+  profile3 = Reflect<Real>(profile, 0);
+  roundedBox = SmoothUnion<Real>(roundedBox, profile3, boxCurvature);
+  }
+  
   // Translate box into place.
   roundedBox = Translate<Real>(roundedBox, Vec3(boxTranslation[0], boxTranslation[1], boxTranslation[2]));
 
