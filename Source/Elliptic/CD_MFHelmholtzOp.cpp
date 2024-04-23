@@ -90,6 +90,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   }
 
   m_interpolator = a_interpolator;
+  m_exchangeCopier.exchangeDefine(m_mflg.getGrids(), a_ghostPhi);
 
   if (m_hasMGObjects) {
     m_mflgCoarMG = a_mflgCoarMG;
@@ -698,9 +699,13 @@ MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
 {
   CH_TIME("MFHelmholtzOp::exchangeGhost");
 
+  if (!(a_phi.disjointBoxLayout() == m_mflg.getGrids())) {
+    MayDay::Abort("MFHelmholtzOp::exchangeGhost -- a_phi.disjointBoxLayout() != m_mflg.getGrids");
+  }
+
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&)a_phi;
 
-  phi.exchange();
+  phi.exchange(m_exchangeCopier);
 }
 
 void

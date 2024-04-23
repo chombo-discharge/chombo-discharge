@@ -664,6 +664,11 @@ protected:
   RefCountedPtr<LevelData<MFBaseIVFAB>> m_BcoefIrreg;
 
   /*!
+    @brief Copier for exchange operation
+  */
+  Copier m_exchangeCopier;
+
+  /*!
     @brief Multifluid operator or not. 
   */
   bool m_multifluid;

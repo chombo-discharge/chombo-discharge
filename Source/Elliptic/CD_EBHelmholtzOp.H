@@ -923,6 +923,16 @@ protected:
   RealVect m_probLo;
 
   /*!
+    @brief Pre-built exchange copier
+  */
+  Copier m_exchangeCopier;
+
+  /*!
+    @brief Pre-built exchange copier
+  */
+  Copier m_exchangeCopierFine;
+
+  /*!
     @brief Fine level grid (if the operator has a fine level)
   */
   EBLevelGrid m_eblgFine;

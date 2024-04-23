@@ -112,7 +112,10 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   if (m_hasFine) {
     m_eblgFine = a_eblgFine;
+    m_exchangeCopierFine.exchangeDefine(m_eblgFine.getDBL(), a_ghostPhi);
   }
+
+  m_exchangeCopier.exchangeDefine(m_eblg.getDBL(), a_ghostPhi);
 
   // If we are using a centroid discretization we must interpolate three ghost cells in the general case. Issue a warning if the
   // interpolator doesn't fill enough ghost cells.
@@ -800,8 +803,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
 
   // TLDR: This is the "reflux-free" version of the AMROperator which gets rid of the refluxing step and
   //       rather replaces the whole coarse-fine choreopgraphy by conservative flux coarsening. This routine is
-  //       a bit more complex and more expensive than the other version, but it also replaces the operator
-  //       by a coarsening of the fine-grid operator so it should be more accurate also.
+  //       a bit more complex and more expensive than the other version.
 
   // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
@@ -819,7 +821,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   if (m_doExchange) {
     LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
 
-    phi.exchange();
+    phi.exchange(m_exchangeCopier);
   }
   if (m_hasCoar && m_doInterpCF) {
     this->inhomogeneousCFInterp((LevelData<EBCellFAB>&)a_phi, a_phiCoar);
@@ -838,7 +840,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
 
     LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
 
-    phiFine.exchange();
+    phiFine.exchange(m_exchangeCopierFine);
     fineOp->inhomogeneousCFInterp(phiFine, a_phi);
 
     fineOp->computeFlux(a_phiFine);
@@ -1116,7 +1118,7 @@ EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
 
   if (m_doExchange) {
-    phi.exchange();
+    phi.exchange(m_exchangeCopier);
   }
 
   if (m_hasCoar && m_doInterpCF) {
@@ -1592,7 +1594,7 @@ EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>&       a_correction,
 
   for (int iter = 0; iter < a_iterations; iter++) {
     if (m_doExchange) {
-      a_correction.exchange();
+      a_correction.exchange(m_exchangeCopier);
     }
 
     this->homogeneousCFInterp(a_correction);
@@ -1652,7 +1654,7 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
     // First do "red" cells, then "black" cells. Note that ghost cell interpolation and exchanges are required between the colors.
     for (int redBlack = 0; redBlack <= 1; redBlack++) {
       if (m_doExchange) {
-        a_correction.exchange();
+        a_correction.exchange(m_exchangeCopier);
       }
 
       this->homogeneousCFInterp(a_correction);
@@ -1748,7 +1750,7 @@ EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>&       a_correction,
   for (int iter = 0; iter < a_iterations; iter++) {
     for (int icolor = 0; icolor < m_colors.size(); icolor++) {
       if (m_doExchange) {
-        a_correction.exchange();
+        a_correction.exchange(m_exchangeCopier);
       }
 
       this->homogeneousCFInterp(a_correction);
@@ -2209,7 +2211,7 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
 
   EBHelmholtzOp&        finerOp = (EBHelmholtzOp&)(a_finerOp);
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
-  phiFine.exchange();
+  phiFine.exchange(m_exchangeCopierFine);
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
 
   this->allocateFlux();
