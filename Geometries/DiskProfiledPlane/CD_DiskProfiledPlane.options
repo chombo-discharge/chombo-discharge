@@ -17,7 +17,7 @@ DiskProfiledPlane.box_translate         = 0 0           # Box translation
 DiskProfiledPlane.box_permittivity      = 4.0           # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 1E-4          # Corner curvatures
 
-DiskProfiledPlane.profile_type          = square        # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z', 'l_shape', 'golfpeg'
+DiskProfiledPlane.profile_type          = square        # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z', 'lshape', 'golfpeg'
 DiskProfiledPlane.profile_translate     = 0 0           # Profile translation
 DiskProfiledPlane.profile_translate2     = 0 0           # Profile translation for l_shape second box
 DiskProfiledPlane.profile_repetition_lo = 3 0           # Repetition pattern in low coordinate direction
