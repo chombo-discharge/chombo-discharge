@@ -1163,7 +1163,15 @@ EBHelmholtzOp::applyOp(EBCellFAB&             a_Lphi,
 
   if (!ebisbox.isAllCovered()) {
     this->applyOpRegular(a_Lphi, a_phi, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, a_homogeneousPhysBC);
-    this->applyOpIrregular(a_Lphi, a_phi, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, a_homogeneousPhysBC);
+    this->applyOpIrregular(a_Lphi,
+                           a_phi,
+                           a_Acoef,
+                           a_Bcoef,
+                           a_BcoefIrreg,
+                           m_alphaDiagWeight[a_dit],
+                           a_cellBox,
+                           a_dit,
+                           a_homogeneousPhysBC);
   }
 }
 
@@ -1364,6 +1372,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&             a_Lphi,
                                 const EBCellFAB&       a_Acoef,
                                 const EBFluxFAB&       a_Bcoef,
                                 const BaseIVFAB<Real>& a_BcoefIrreg,
+                                const BaseIVFAB<Real>& a_alphaDiagWeight,
                                 const Box&             a_cellBox,
                                 const DataIndex&       a_dit,
                                 const bool             a_homogeneousPhysBC)
@@ -1387,7 +1396,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&             a_Lphi,
     const VoFStencil& stenc = m_relaxStencils[a_dit](vof, m_comp);
 
     // kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
-    const Real& alphaDiag = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp);
+    const Real& alphaDiag = m_alpha * a_alphaDiagWeight(vof, m_comp);
 
     a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
 
@@ -1399,12 +1408,12 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&             a_Lphi,
       a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight.
     }
   }
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, (*m_BcoefIrreg)[a_dit], a_dit, m_beta, a_homogeneousPhysBC);
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_BcoefIrreg, a_dit, m_beta, a_homogeneousPhysBC);
 #else // New code that uses AggStencil.
   CH_START(t1);
   constexpr bool incrementOnly = false;
 
-  m_aggRelaxStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
+  m_aggRelaxStencil[a_dit]->apply(a_Lphi, a_phi, a_alphaDiagWeight, m_alpha, m_beta, m_comp, incrementOnly);
   CH_STOP(t1);
   CH_START(t2);
   m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_BcoefIrreg, a_dit, m_beta, a_homogeneousPhysBC);
@@ -1419,7 +1428,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&             a_Lphi,
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];
     VoFIterator& vofitHi = m_vofIterDomHi[dir][a_dit];
 
-    const EBFaceFAB& Bcoef = (*m_Bcoef)[a_dit][dir];
+    const EBFaceFAB& Bcoef = a_Bcoef[dir];
 
     // Kernels for high and low sides.
     auto kernelLo = [&](const VolIndex& vof) -> void {

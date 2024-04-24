@@ -465,6 +465,7 @@ public:
                    const EBCellFAB&       a_Acoef,
                    const EBFluxFAB&       a_Bcoef,
                    const BaseIVFAB<Real>& a_BcoefIrreg,
+                   const BaseIVFAB<Real>& a_alphaDiagWeight,
                    const Box&             a_cellBox,
                    const DataIndex&       a_dit,
                    const bool             a_homogeneousPhysBC);
