@@ -146,7 +146,6 @@ MFHelmholtzJumpBC::defineStencils()
     const DataIterator&      dit = dbl.dataIterator();
 
     const int nbox = dit.size();
-    ParallelOps::barrier();
     CH_START(t1);
     m_gradPhiStencils.define(dbl);
     m_gradPhiWeights.define(dbl);
@@ -171,7 +170,7 @@ MFHelmholtzJumpBC::defineStencils()
       m_avgVoFs[din].define(m_mflg, din);
     }
     CH_STOP(t1);
-    ParallelOps::barrier();
+
     // Build stencils and weights for each phase.
     CH_START(t2);
     for (int iphase = 0; iphase < m_numPhases; iphase++) {
@@ -271,11 +270,8 @@ MFHelmholtzJumpBC::defineStencils()
     CH_START(t2);
 
     // Build the average stencils.
-    ParallelOps::barrier();
     this->buildAverageStencils();
-    ParallelOps::barrier();
     this->resetBC();
-    ParallelOps::barrier();
   }
 }
 
