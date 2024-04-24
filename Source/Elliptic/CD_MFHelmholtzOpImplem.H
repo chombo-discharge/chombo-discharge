@@ -72,7 +72,11 @@ MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, const int a_num
         EBCellFAB& Lph = Lphi[din].getPhase(iphase);
         EBCellFAB& phi = a_phi[din].getPhase(iphase);
 
-	//        op.second->applyOp(Lph, phi, cellBox, din, true);
+        const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+        const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+        const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+        op.second->applyOp(Lph, phi, Acoef, Bcoef, BcoefIrreg, cellBox, din, true);
       }
     }
 

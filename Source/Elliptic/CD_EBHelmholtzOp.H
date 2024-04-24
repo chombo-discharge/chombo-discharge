@@ -237,18 +237,24 @@ public:
 
   /*!
     @brief Point Jacobi kernel. 
-    @param[inout] a_Lcorr Storage for computing L(a_corr)
-    @param[inout] a_corr    Correction
-    @param[in]    a_resid   Residual
-    @param[in]    a_cellBox Grid box
-    @param[in]    a_dit     Data index
+    @param[inout] a_Lcorr      Storage for computing L(a_corr)
+    @param[inout] a_corr       Correction
+    @param[in]    a_resid      Residual
+    @param[in]    a_Acoef      A-coefficient
+    @param[in]    a_Bcoef      B-coefficient
+    @param[in]    a_BcoefIrreg B-coefficient on EB faces
+    @param[in]    a_cellBox    Grid box
+    @param[in]    a_dit        Data index
   */
   void
-  pointJacobiKernel(EBCellFAB&       a_Lcorr,
-                    EBCellFAB&       a_corr,
-                    const EBCellFAB& a_resid,
-                    const Box&       a_cellBox,
-                    const DataIndex& a_dit);
+  pointJacobiKernel(EBCellFAB&             a_Lcorr,
+                    EBCellFAB&             a_corr,
+                    const EBCellFAB&       a_resid,
+                    const EBCellFAB&       a_Acoef,
+                    const EBFluxFAB&       a_Bcoef,
+                    const BaseIVFAB<Real>& a_BcoefIrreg,
+                    const Box&             a_cellBox,
+                    const DataIndex&       a_dit);
 
   /*!
     @brief Red-black Gauss-Seidel kernel
@@ -275,18 +281,26 @@ public:
 
   /*!
     @brief Multi-color Gauss-Seidel kernel
-    @param[inout] a_Lcorr    Storage for computing L(a_corr)
-    @param[inout] a_corr     Correction
-    @param[in]    a_resid    Residual
-    @param[in]    a_color    Color
+    @param[inout] a_Lcorr      Storage for computing L(a_corr)
+    @param[inout] a_corr       Correction
+    @param[in]    a_resid      Residual
+    @param[in]    a_Acoef      A-coefficient
+    @param[in]    a_Bcoef      B-coefficient
+    @param[in]    a_BcoefIrreg B-coefficient on EB faces
+    @param[in]    a_cellBox    Grid box
+    @param[in]    a_dit        Data index
+    @param[in]    a_color      Color
   */
   void
-  gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
-                         EBCellFAB&       a_corr,
-                         const EBCellFAB& a_resid,
-                         const Box&       a_cellBox,
-                         const DataIndex& a_dit,
-                         const IntVect&   a_color);
+  gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
+                         EBCellFAB&             a_corr,
+                         const EBCellFAB&       a_resid,
+                         const EBCellFAB&       a_Acoef,
+                         const EBFluxFAB&       a_Bcoef,
+                         const BaseIVFAB<Real>& a_BcoefIrreg,
+                         const Box&             a_cellBox,
+                         const DataIndex&       a_dit,
+                         const IntVect&         a_color);
 
   /*!
     @brief Compute residual on this level. 
@@ -412,6 +426,7 @@ public:
   /*!
     @brief Apply domain flux. 
     @param[inout] a_phi               Cell data
+    @param[in]    a_Bcoef             Helmholtz B-coefficient
     @param[in]    a_cellBox           Computation box
     @param[in]    a_dit               Data index
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not
@@ -419,7 +434,11 @@ public:
     -bco*(phi(i) - phi(i-1))/dx = F. 
   */
   void
-  applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+  applyDomainFlux(EBCellFAB&       a_phi,
+                  const EBFluxFAB& a_Bcoef,
+                  const Box&       a_cellBox,
+                  const DataIndex& a_dit,
+                  const bool       a_homogeneousPhysBc);
 
   /*!
     @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux

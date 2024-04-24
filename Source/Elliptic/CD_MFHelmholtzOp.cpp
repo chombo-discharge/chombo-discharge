@@ -785,7 +785,11 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
         EBCellFAB&       phi = a_correction[din].getPhase(iphase);
         const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-        op.second->pointJacobiKernel(Lph, phi, res, cellBox, din);
+        const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+        const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+        const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+        op.second->pointJacobiKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din);
       }
     }
   }
@@ -835,11 +839,11 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
           EBCellFAB&       phi = a_correction[din].getPhase(iphase);
           const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          const EBCellFAB&       aCoef      = (*m_Acoef)[din].getPhase(iphase);
-          const EBFluxFAB&       bCoef      = (*m_Bcoef)[din].getPhase(iphase);
-          const BaseIVFAB<Real>& bCoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
 
-          op.second->gauSaiRedBlackKernel(Lph, phi, res, aCoef, bCoef, bCoefIrreg, cellBox, din, redBlack);
+          op.second->gauSaiRedBlackKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, redBlack);
         }
       }
     }
@@ -893,7 +897,11 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
           EBCellFAB&       phi = a_correction[din].getPhase(iphase);
           const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          op.second->gauSaiMultiColorKernel(Lph, phi, res, cellBox, din, m_colors[icolor]);
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->gauSaiMultiColorKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, m_colors[icolor]);
         }
       }
     }
