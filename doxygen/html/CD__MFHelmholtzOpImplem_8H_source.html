@@ -144,22 +144,26 @@ $(function() {
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        EBCellFAB&amp; Lph = Lphi[din].getPhase(iphase);</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        EBCellFAB&amp; phi = a_phi[din].getPhase(iphase);</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        op.second-&gt;applyOp(Lph, phi, cellBox, din, <span class="keyword">true</span>);</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;      }</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    }</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keyword">const</span> EBCellFAB&amp;       Acoef      = (*m_Acoef)[din].getPhase(iphase);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <span class="keyword">const</span> EBFluxFAB&amp;       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        <span class="keyword">const</span> BaseIVFAB&lt;Real&gt;&amp; BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> t1       = std::chrono::steady_clock::now();</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> duration = (std::chrono::duration_cast&lt;Duration&gt;(t1 - t0));</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    loads[intCode] = (<span class="keywordtype">long</span> long)duration.count();</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  }</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <a class="code" href="namespaceParallelOps.html#abd808581dd0fcde1214daf90736f70de">ParallelOps::vectorSum</a>(loads);</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  <span class="keywordflow">return</span> loads;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;}</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        op.second-&gt;applyOp(Lph, phi, Acoef, Bcoef, BcoefIrreg, cellBox, din, <span class="keyword">true</span>);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;      }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    }</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> t1       = std::chrono::steady_clock::now();</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> duration = (std::chrono::duration_cast&lt;Duration&gt;(t1 - t0));</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    loads[intCode] = (<span class="keywordtype">long</span> long)duration.count();</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  }</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <a class="code" href="namespaceParallelOps.html#abd808581dd0fcde1214daf90736f70de">ParallelOps::vectorSum</a>(loads);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keywordflow">return</span> loads;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
 <div class="ttc" id="aCD__MFHelmholtzOp_8H_html"><div class="ttname"><a href="CD__MFHelmholtzOp_8H.html">CD_MFHelmholtzOp.H</a></div><div class="ttdoc">Declaration of a class for solving multiphase Helmholtz equations.</div></div>
 <div class="ttc" id="aCD__ParallelOps_8H_html"><div class="ttname"><a href="CD__ParallelOps_8H.html">CD_ParallelOps.H</a></div><div class="ttdoc">Agglomeration of basic MPI reductions.</div></div>
 <div class="ttc" id="aclassMFHelmholtzOp_html_ac8438bf1cb913b3c1597aaa620d917d5"><div class="ttname"><a href="classMFHelmholtzOp.html#ac8438bf1cb913b3c1597aaa620d917d5">MFHelmholtzOp::computeOperatorLoads</a></div><div class="ttdeci">Vector&lt; long long &gt; computeOperatorLoads(LevelData&lt; MFCellFAB &gt; &amp;a_phi, const int a_numApply) noexcept</div><div class="ttdoc">Time the applyOp routine. Template parameter is std::chrono duration. E.g. std::chrono::microseconds.</div><div class="ttdef"><b>Definition:</b> CD_MFHelmholtzOpImplem.H:19</div></div>

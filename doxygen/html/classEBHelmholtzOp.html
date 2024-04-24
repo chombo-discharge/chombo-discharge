@@ -179,15 +179,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:abaaff4de56416eb3a3c1cd7fbe1574da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#abaaff4de56416eb3a3c1cd7fbe1574da">coarsenFlux</a> (LevelData&lt; EBFluxFAB &gt; &amp;a_flux, const LevelData&lt; EBFluxFAB &gt; &amp;a_fineFlux)</td></tr>
 <tr class="memdesc:abaaff4de56416eb3a3c1cd7fbe1574da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen fluxes on the fine level onto this level.  <a href="classEBHelmholtzOp.html#abaaff4de56416eb3a3c1cd7fbe1574da">More...</a><br /></td></tr>
 <tr class="separator:abaaff4de56416eb3a3c1cd7fbe1574da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55a11630804c46a822948f522c9fd0dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a55a11630804c46a822948f522c9fd0dc">pointJacobiKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const Box &amp;a_cellBox, const DataIndex &amp;a_dit)</td></tr>
-<tr class="memdesc:a55a11630804c46a822948f522c9fd0dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point Jacobi kernel.  <a href="classEBHelmholtzOp.html#a55a11630804c46a822948f522c9fd0dc">More...</a><br /></td></tr>
-<tr class="separator:a55a11630804c46a822948f522c9fd0dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95a50faa5bc2d89188c726b4ee6e6f57"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a95a50faa5bc2d89188c726b4ee6e6f57">gauSaiRedBlackKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const int &amp;a_redBlack)</td></tr>
-<tr class="memdesc:a95a50faa5bc2d89188c726b4ee6e6f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Red-black Gauss-Seidel kernel.  <a href="classEBHelmholtzOp.html#a95a50faa5bc2d89188c726b4ee6e6f57">More...</a><br /></td></tr>
-<tr class="separator:a95a50faa5bc2d89188c726b4ee6e6f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54a2a3d66da7cb7859bdeadc14a33ed0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a54a2a3d66da7cb7859bdeadc14a33ed0">gauSaiMultiColorKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const IntVect &amp;a_color)</td></tr>
-<tr class="memdesc:a54a2a3d66da7cb7859bdeadc14a33ed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multi-color Gauss-Seidel kernel.  <a href="classEBHelmholtzOp.html#a54a2a3d66da7cb7859bdeadc14a33ed0">More...</a><br /></td></tr>
-<tr class="separator:a54a2a3d66da7cb7859bdeadc14a33ed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42e84fd428fbaa6764c06ccf7111c37a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a42e84fd428fbaa6764c06ccf7111c37a">pointJacobiKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit) const noexcept</td></tr>
+<tr class="memdesc:a42e84fd428fbaa6764c06ccf7111c37a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point Jacobi kernel.  <a href="classEBHelmholtzOp.html#a42e84fd428fbaa6764c06ccf7111c37a">More...</a><br /></td></tr>
+<tr class="separator:a42e84fd428fbaa6764c06ccf7111c37a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5d70cb28b0d0ada764a0d7efac3ed02"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ab5d70cb28b0d0ada764a0d7efac3ed02">gauSaiRedBlackKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const int &amp;a_redBlack) const noexcept</td></tr>
+<tr class="memdesc:ab5d70cb28b0d0ada764a0d7efac3ed02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Red-black Gauss-Seidel kernel.  <a href="classEBHelmholtzOp.html#ab5d70cb28b0d0ada764a0d7efac3ed02">More...</a><br /></td></tr>
+<tr class="separator:ab5d70cb28b0d0ada764a0d7efac3ed02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac09f17d4aa7641526c040948e572dd84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ac09f17d4aa7641526c040948e572dd84">gauSaiMultiColorKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const IntVect &amp;a_color) const noexcept</td></tr>
+<tr class="memdesc:ac09f17d4aa7641526c040948e572dd84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multi-color Gauss-Seidel kernel.  <a href="classEBHelmholtzOp.html#ac09f17d4aa7641526c040948e572dd84">More...</a><br /></td></tr>
+<tr class="separator:ac09f17d4aa7641526c040948e572dd84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09449a46e618a393b236096bd5374af4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a09449a46e618a393b236096bd5374af4">residual</a> (LevelData&lt; EBCellFAB &gt; &amp;a_residual, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const bool a_homogeneousPhysBc)</td></tr>
 <tr class="memdesc:a09449a46e618a393b236096bd5374af4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level.  <a href="classEBHelmholtzOp.html#a09449a46e618a393b236096bd5374af4">More...</a><br /></td></tr>
 <tr class="separator:a09449a46e618a393b236096bd5374af4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,21 +212,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:abc685d503be92f7fdc4c2abf0f9ff7a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#abc685d503be92f7fdc4c2abf0f9ff7a9">applyOp</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, bool a_homogeneousPhysBc) override final</td></tr>
 <tr class="memdesc:abc685d503be92f7fdc4c2abf0f9ff7a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator.  <a href="classEBHelmholtzOp.html#abc685d503be92f7fdc4c2abf0f9ff7a9">More...</a><br /></td></tr>
 <tr class="separator:abc685d503be92f7fdc4c2abf0f9ff7a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d69b63b2071bcdaa8cad2fc210e5917"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1d69b63b2071bcdaa8cad2fc210e5917">applyOp</a> (EBCellFAB &amp;a_Lphi, EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC)</td></tr>
-<tr class="memdesc:a1d69b63b2071bcdaa8cad2fc210e5917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in a grid box.  <a href="classEBHelmholtzOp.html#a1d69b63b2071bcdaa8cad2fc210e5917">More...</a><br /></td></tr>
-<tr class="separator:a1d69b63b2071bcdaa8cad2fc210e5917"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99c190a7fbae1686926c1247c9b5b29b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a99c190a7fbae1686926c1247c9b5b29b">applyOpRegular</a> (EBCellFAB &amp;a_Lphi, EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC)</td></tr>
-<tr class="memdesc:a99c190a7fbae1686926c1247c9b5b29b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in regular cells.  <a href="classEBHelmholtzOp.html#a99c190a7fbae1686926c1247c9b5b29b">More...</a><br /></td></tr>
-<tr class="separator:a99c190a7fbae1686926c1247c9b5b29b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c84d18c5437d9bd530fe8e5a58378a0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a9c84d18c5437d9bd530fe8e5a58378a0">applyDomainFlux</a> (EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBc)</td></tr>
-<tr class="memdesc:a9c84d18c5437d9bd530fe8e5a58378a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply domain flux.  <a href="classEBHelmholtzOp.html#a9c84d18c5437d9bd530fe8e5a58378a0">More...</a><br /></td></tr>
-<tr class="separator:a9c84d18c5437d9bd530fe8e5a58378a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63848513b9b3b304f37b39f5f2dc9bc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a63848513b9b3b304f37b39f5f2dc9bc4">applyOp</a> (EBCellFAB &amp;a_Lphi, EBCellFAB &amp;a_phi, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC) const noexcept</td></tr>
+<tr class="memdesc:a63848513b9b3b304f37b39f5f2dc9bc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in a grid box.  <a href="classEBHelmholtzOp.html#a63848513b9b3b304f37b39f5f2dc9bc4">More...</a><br /></td></tr>
+<tr class="separator:a63848513b9b3b304f37b39f5f2dc9bc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19c44789cbe55b1861bc766b8572f1ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a19c44789cbe55b1861bc766b8572f1ec">applyOpRegular</a> (EBCellFAB &amp;a_Lphi, EBCellFAB &amp;a_phi, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC) const noexcept</td></tr>
+<tr class="memdesc:a19c44789cbe55b1861bc766b8572f1ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in regular cells.  <a href="classEBHelmholtzOp.html#a19c44789cbe55b1861bc766b8572f1ec">More...</a><br /></td></tr>
+<tr class="separator:a19c44789cbe55b1861bc766b8572f1ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fdfeeb58c4a2bc867cf8cb6680869ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a1fdfeeb58c4a2bc867cf8cb6680869ab">applyDomainFlux</a> (EBCellFAB &amp;a_phi, const EBFluxFAB &amp;a_Bcoef, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBc) const noexcept</td></tr>
+<tr class="memdesc:a1fdfeeb58c4a2bc867cf8cb6680869ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply domain flux.  <a href="classEBHelmholtzOp.html#a1fdfeeb58c4a2bc867cf8cb6680869ab">More...</a><br /></td></tr>
+<tr class="separator:a1fdfeeb58c4a2bc867cf8cb6680869ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8dd96a0878237551c9896f32aefa8b59"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8dd96a0878237551c9896f32aefa8b59">fillDomainFlux</a> (EBFluxFAB &amp;a_flux, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit)</td></tr>
 <tr class="memdesc:a8dd96a0878237551c9896f32aefa8b59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux.  <a href="classEBHelmholtzOp.html#a8dd96a0878237551c9896f32aefa8b59">More...</a><br /></td></tr>
 <tr class="separator:a8dd96a0878237551c9896f32aefa8b59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6aee6d047d1f9dec4e4d3642175a01b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a6aee6d047d1f9dec4e4d3642175a01b3">applyOpIrregular</a> (EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC)</td></tr>
-<tr class="memdesc:a6aee6d047d1f9dec4e4d3642175a01b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in irregular cells.  <a href="classEBHelmholtzOp.html#a6aee6d047d1f9dec4e4d3642175a01b3">More...</a><br /></td></tr>
-<tr class="separator:a6aee6d047d1f9dec4e4d3642175a01b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb9bae07673b5ddfa13806558cc42ff0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aeb9bae07673b5ddfa13806558cc42ff0">applyOpIrregular</a> (EBCellFAB &amp;a_Lphi, const EBCellFAB &amp;a_phi, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const BaseIVFAB&lt; Real &gt; &amp;a_alphaDiagWeight, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const bool a_homogeneousPhysBC) const noexcept</td></tr>
+<tr class="memdesc:aeb9bae07673b5ddfa13806558cc42ff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator in irregular cells.  <a href="classEBHelmholtzOp.html#aeb9bae07673b5ddfa13806558cc42ff0">More...</a><br /></td></tr>
+<tr class="separator:aeb9bae07673b5ddfa13806558cc42ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d5f92a5e0e4c04d53848174f8a595e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a0d5f92a5e0e4c04d53848174f8a595e5">create</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs) override final</td></tr>
 <tr class="memdesc:a0d5f92a5e0e4c04d53848174f8a595e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create data which clones the layout of the other.  <a href="classEBHelmholtzOp.html#a0d5f92a5e0e4c04d53848174f8a595e5">More...</a><br /></td></tr>
 <tr class="separator:a0d5f92a5e0e4c04d53848174f8a595e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -474,6 +474,14 @@ RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a668a7e8c64b616d4083334086b38fbb8">m_probLo</a></td></tr>
 <tr class="memdesc:a668a7e8c64b616d4083334086b38fbb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-left corner of domain. <br /></td></tr>
 <tr class="separator:a668a7e8c64b616d4083334086b38fbb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2d8a67004f10da18fa0e28a646a2ce9"><td class="memItemLeft" align="right" valign="top"><a id="ab2d8a67004f10da18fa0e28a646a2ce9"></a>
+Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ab2d8a67004f10da18fa0e28a646a2ce9">m_exchangeCopier</a></td></tr>
+<tr class="memdesc:ab2d8a67004f10da18fa0e28a646a2ce9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-built exchange copier. <br /></td></tr>
+<tr class="separator:ab2d8a67004f10da18fa0e28a646a2ce9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d86a09c84124100d10e505e537dbfac"><td class="memItemLeft" align="right" valign="top"><a id="a2d86a09c84124100d10e505e537dbfac"></a>
+Copier&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a2d86a09c84124100d10e505e537dbfac">m_exchangeCopierFine</a></td></tr>
+<tr class="memdesc:a2d86a09c84124100d10e505e537dbfac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-built exchange copier. <br /></td></tr>
+<tr class="separator:a2d86a09c84124100d10e505e537dbfac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0dceeaf762d6783aac0c8640c8d9553"><td class="memItemLeft" align="right" valign="top"><a id="aa0dceeaf762d6783aac0c8640c8d9553"></a>
 EBLevelGrid&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aa0dceeaf762d6783aac0c8640c8d9553">m_eblgFine</a></td></tr>
 <tr class="memdesc:aa0dceeaf762d6783aac0c8640c8d9553"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fine level grid (if the operator has a fine level) <br /></td></tr>
@@ -1468,17 +1476,26 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a9c84d18c5437d9bd530fe8e5a58378a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9c84d18c5437d9bd530fe8e5a58378a0">&#9670;&nbsp;</a></span>applyDomainFlux()</h2>
+<a id="a1fdfeeb58c4a2bc867cf8cb6680869ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fdfeeb58c4a2bc867cf8cb6680869ab">&#9670;&nbsp;</a></span>applyDomainFlux()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::applyDomainFlux </td>
           <td>(</td>
           <td class="paramtype">EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1501,15 +1518,21 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Apply domain flux. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Cell data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>Helmholtz B-coefficient </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Computation box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_homogeneousPhysBC</td><td>Homogeneous BC or not </td></tr>
@@ -1520,11 +1543,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a1d69b63b2071bcdaa8cad2fc210e5917"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d69b63b2071bcdaa8cad2fc210e5917">&#9670;&nbsp;</a></span>applyOp() <span class="overload">[1/3]</span></h2>
+<a id="a63848513b9b3b304f37b39f5f2dc9bc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63848513b9b3b304f37b39f5f2dc9bc4">&#9670;&nbsp;</a></span>applyOp() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::applyOp </td>
@@ -1537,6 +1563,24 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1559,9 +1603,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Apply operator in a grid box. </p>
@@ -1690,11 +1739,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a6aee6d047d1f9dec4e4d3642175a01b3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6aee6d047d1f9dec4e4d3642175a01b3">&#9670;&nbsp;</a></span>applyOpIrregular()</h2>
+<a id="aeb9bae07673b5ddfa13806558cc42ff0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb9bae07673b5ddfa13806558cc42ff0">&#9670;&nbsp;</a></span>applyOpIrregular()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::applyOpIrregular </td>
@@ -1711,6 +1763,30 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_alphaDiagWeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_cellBox</em>, </td>
         </tr>
@@ -1729,9 +1805,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Apply operator in irregular cells. </p>
@@ -1748,11 +1829,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a99c190a7fbae1686926c1247c9b5b29b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a99c190a7fbae1686926c1247c9b5b29b">&#9670;&nbsp;</a></span>applyOpRegular()</h2>
+<a id="a19c44789cbe55b1861bc766b8572f1ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19c44789cbe55b1861bc766b8572f1ec">&#9670;&nbsp;</a></span>applyOpRegular()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::applyOpRegular </td>
@@ -1765,6 +1849,24 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td>
           <td class="paramtype">EBCellFAB &amp;&#160;</td>
           <td class="paramname"><em>a_phi</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1787,9 +1889,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Apply operator in regular cells. </p>
@@ -2725,11 +2832,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a54a2a3d66da7cb7859bdeadc14a33ed0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a54a2a3d66da7cb7859bdeadc14a33ed0">&#9670;&nbsp;</a></span>gauSaiMultiColorKernel()</h2>
+<a id="ac09f17d4aa7641526c040948e572dd84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac09f17d4aa7641526c040948e572dd84">&#9670;&nbsp;</a></span>gauSaiMultiColorKernel()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::gauSaiMultiColorKernel </td>
@@ -2752,6 +2862,24 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_cellBox</em>, </td>
         </tr>
@@ -2770,9 +2898,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Multi-color Gauss-Seidel kernel. </p>
@@ -2781,6 +2914,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_Lcorr</td><td>Storage for computing L(a_corr) </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_corr</td><td>Correction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_resid</td><td>Residual </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Acoef</td><td>A-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>B-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_BcoefIrreg</td><td>B-coefficient on EB faces </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Grid box </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_color</td><td>Color </td></tr>
   </table>
   </dd>
@@ -2788,11 +2926,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a95a50faa5bc2d89188c726b4ee6e6f57"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a95a50faa5bc2d89188c726b4ee6e6f57">&#9670;&nbsp;</a></span>gauSaiRedBlackKernel()</h2>
+<a id="ab5d70cb28b0d0ada764a0d7efac3ed02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5d70cb28b0d0ada764a0d7efac3ed02">&#9670;&nbsp;</a></span>gauSaiRedBlackKernel()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::gauSaiRedBlackKernel </td>
@@ -2815,6 +2956,24 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_cellBox</em>, </td>
         </tr>
@@ -2833,9 +2992,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Red-black Gauss-Seidel kernel. </p>
@@ -2844,6 +3008,9 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_Lcorr</td><td>Storage for computing L(a_corr) </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_corr</td><td>Correction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_resid</td><td>Residual </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Acoef</td><td>A-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>B-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_BcoefIrreg</td><td>B-coefficient on EB faces </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_redBlack</td><td>Red or black </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Grid box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
@@ -3344,11 +3511,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a55a11630804c46a822948f522c9fd0dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55a11630804c46a822948f522c9fd0dc">&#9670;&nbsp;</a></span>pointJacobiKernel()</h2>
+<a id="a42e84fd428fbaa6764c06ccf7111c37a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42e84fd428fbaa6764c06ccf7111c37a">&#9670;&nbsp;</a></span>pointJacobiKernel()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::pointJacobiKernel </td>
@@ -3371,6 +3541,24 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const EBCellFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Acoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const EBFluxFAB &amp;&#160;</td>
+          <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const BaseIVFAB&lt; Real &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_BcoefIrreg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const Box &amp;&#160;</td>
           <td class="paramname"><em>a_cellBox</em>, </td>
         </tr>
@@ -3383,9 +3571,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Point Jacobi kernel. </p>
@@ -3394,6 +3587,9 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_Lcorr</td><td>Storage for computing L(a_corr) </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_corr</td><td>Correction </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_resid</td><td>Residual </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Acoef</td><td>A-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>B-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_BcoefIrreg</td><td>B-coefficient on EB faces </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_cellBox</td><td>Grid box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
   </table>
