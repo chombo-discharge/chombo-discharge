@@ -1185,14 +1185,18 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&             a_Lphi,
                               const DataIndex&       a_dit,
                               const bool             a_homogeneousPhysBC)
 {
-  CH_TIME("EBHelmholtzOp::applyOpRegular(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
+  CH_TIMERS("EBHelmholtzOp::applyOpRegular");
+  CH_TIMER("EBHelmholtzOp::applyOpRegular::domain_flux", t1);
+  CH_TIMER("EBHelmholtzOp::applyOpRegular::kernel", t2);
 
   // TLDR: This is the regular kernel which computes L(phi) using the standard 5/7 point stencil. Since we want a simple kernel,
   //       we first fill the ghost cells on the domain boundary so that the flux through the boundary is consistent with the flux
   //       from the BC object.
 
   // Fill a_phi such that centered differences pushes in the domain flux.
+  CH_START(t1);
   this->applyDomainFlux(a_phi, a_Bcoef, a_cellBox, a_dit, a_homogeneousPhysBC);
+  CH_STOP(t1);
 
   FArrayBox&       Lphi = a_Lphi.getFArrayBox();
   const FArrayBox& phi  = a_phi.getFArrayBox();
@@ -1222,7 +1226,9 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&             a_Lphi,
   };
 
   // Launch the kernel.
+  CH_START(t2);
   BoxLoops::loop(a_cellBox, kernel);
+  CH_STOP(t2);
 }
 
 void
