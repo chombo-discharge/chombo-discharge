@@ -1201,26 +1201,24 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&             a_Lphi,
   FArrayBox&       Lphi = a_Lphi.getFArrayBox();
   const FArrayBox& phi  = a_phi.getFArrayBox();
   const FArrayBox& aco  = a_Acoef.getFArrayBox();
-
-  // Need a handle to the regular b-coefficient which also exposes it in the kernel. This is
-  // the best that I came up with.
-  const FArrayBox* bco[SpaceDim];
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    bco[dir] = &(a_Bcoef[dir].getFArrayBox());
-  }
+  const FArrayBox& bcoX = a_Bcoef[0].getFArrayBox();
+  const FArrayBox& bcoY = a_Bcoef[1].getFArrayBox();
+#if CH_SPACEDIM == 3
+  const FArrayBox& bcoZ = a_Bcoef[2].getFArrayBox();
+#endif
 
   // This is the C++ kernel. It adds the diagonal and the Laplacian part.
   const Real factor = m_beta / (m_dx * m_dx);
 
   auto kernel = [&](const IntVect& iv) -> void {
     Lphi(iv, m_comp) = m_alpha * aco(iv, m_comp) * phi(iv, m_comp) +
-                       factor * (+(*bco[0])(iv + BASISV(0), m_comp) * (phi(iv + BASISV(0), m_comp) - phi(iv, m_comp)) -
-                                 (*bco[0])(iv, m_comp) * (phi(iv, m_comp) - phi(iv - BASISV(0), m_comp)) +
-                                 (*bco[1])(iv + BASISV(1), m_comp) * (phi(iv + BASISV(1), m_comp) - phi(iv, m_comp)) -
-                                 (*bco[1])(iv, m_comp) * (phi(iv, m_comp) - phi(iv - BASISV(1), m_comp))
+                       factor * (bcoX(iv + BASISV(0), m_comp) * (phi(iv + BASISV(0), m_comp) - phi(iv, m_comp)) -
+                                 bcoX(iv, m_comp) * (phi(iv, m_comp) - phi(iv - BASISV(0), m_comp)) +
+                                 bcoY(iv + BASISV(1), m_comp) * (phi(iv + BASISV(1), m_comp) - phi(iv, m_comp)) -
+                                 bcoY(iv, m_comp) * (phi(iv, m_comp) - phi(iv - BASISV(1), m_comp))
 #if CH_SPACEDIM == 3
-                                 + (*bco[2])(iv + BASISV(2), m_comp) * (phi(iv + BASISV(2), m_comp) - phi(iv, m_comp)) -
-                                 (*bco[2])(iv, m_comp) * (phi(iv, m_comp) - phi(iv - BASISV(2), m_comp))
+                                 + bcoZ(iv + BASISV(2), m_comp) * (phi(iv + BASISV(2), m_comp) - phi(iv, m_comp)) -
+                                 bcoZ(iv, m_comp) * (phi(iv, m_comp) - phi(iv - BASISV(2), m_comp))
 #endif
                                 );
   };
@@ -1731,7 +1729,7 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
                                     const DataIndex&       a_dit,
                                     const int&             a_redBlack) const noexcept
 {
-  CH_TIMERS("EBHelmholtzOp::gauSaiRedBlackkernel");
+  CH_TIMERS("EBHelmholtzOp::gauSaiRedBlackKernel");
   CH_TIMER("EBHelmholtzOp::regular_cells", t1);
   CH_TIMER("EBHelmholtzOp::irregular_cells", t2);
 

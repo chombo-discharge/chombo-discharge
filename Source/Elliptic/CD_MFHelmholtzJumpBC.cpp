@@ -267,7 +267,7 @@ MFHelmholtzJumpBC::defineStencils()
         BoxLoops::loop(vofit, kernel);
       }
     }
-    CH_START(t2);
+    CH_STOP(t2);
 
     // Build the average stencils.
     this->buildAverageStencils();
