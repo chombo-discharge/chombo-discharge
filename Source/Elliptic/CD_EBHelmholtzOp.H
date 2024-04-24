@@ -254,7 +254,7 @@ public:
                     const EBFluxFAB&       a_Bcoef,
                     const BaseIVFAB<Real>& a_BcoefIrreg,
                     const Box&             a_cellBox,
-                    const DataIndex&       a_dit);
+                    const DataIndex&       a_dit) const noexcept;
 
   /*!
     @brief Red-black Gauss-Seidel kernel
@@ -277,7 +277,7 @@ public:
                        const BaseIVFAB<Real>& a_BcoefIrreg,
                        const Box&             a_cellBox,
                        const DataIndex&       a_dit,
-                       const int&             a_redBlack);
+                       const int&             a_redBlack) const noexcept;
 
   /*!
     @brief Multi-color Gauss-Seidel kernel
@@ -300,7 +300,7 @@ public:
                          const BaseIVFAB<Real>& a_BcoefIrreg,
                          const Box&             a_cellBox,
                          const DataIndex&       a_dit,
-                         const IntVect&         a_color);
+                         const IntVect&         a_color) const noexcept;
 
   /*!
     @brief Compute residual on this level. 
@@ -403,7 +403,7 @@ public:
           const BaseIVFAB<Real>& a_BcoefIrreg,
           const Box&             a_cellBox,
           const DataIndex&       a_dit,
-          const bool             a_homogeneousPhysBC);
+          const bool             a_homogeneousPhysBC) const noexcept;
 
   /*!
     @brief Apply operator in regular cells.
@@ -421,7 +421,7 @@ public:
                  const BaseIVFAB<Real>& a_BcoefIrreg,
                  const Box&             a_cellBox,
                  const DataIndex&       a_dit,
-                 const bool             a_homogeneousPhysBC);
+                 const bool             a_homogeneousPhysBC) const noexcept;
 
   /*!
     @brief Apply domain flux. 
@@ -438,7 +438,7 @@ public:
                   const EBFluxFAB& a_Bcoef,
                   const Box&       a_cellBox,
                   const DataIndex& a_dit,
-                  const bool       a_homogeneousPhysBc);
+                  const bool       a_homogeneousPhysBc) const noexcept;
 
   /*!
     @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux
@@ -468,7 +468,7 @@ public:
                    const BaseIVFAB<Real>& a_alphaDiagWeight,
                    const Box&             a_cellBox,
                    const DataIndex&       a_dit,
-                   const bool             a_homogeneousPhysBC);
+                   const bool             a_homogeneousPhysBC) const noexcept;
 
   /*!
     @brief Create data which clones the layout of the other

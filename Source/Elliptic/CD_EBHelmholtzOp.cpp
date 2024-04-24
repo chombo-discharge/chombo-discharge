@@ -1153,7 +1153,7 @@ EBHelmholtzOp::applyOp(EBCellFAB&             a_Lphi,
                        const BaseIVFAB<Real>& a_BcoefIrreg,
                        const Box&             a_cellBox,
                        const DataIndex&       a_dit,
-                       const bool             a_homogeneousPhysBC)
+                       const bool             a_homogeneousPhysBC) const noexcept
 {
   CH_TIME("EBHelmholtzOp::applyOp(patch)");
 
@@ -1183,7 +1183,7 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&             a_Lphi,
                               const BaseIVFAB<Real>& a_BcoefIrreg,
                               const Box&             a_cellBox,
                               const DataIndex&       a_dit,
-                              const bool             a_homogeneousPhysBC)
+                              const bool             a_homogeneousPhysBC) const noexcept
 {
   CH_TIMERS("EBHelmholtzOp::applyOpRegular");
   CH_TIMER("EBHelmholtzOp::applyOpRegular::domain_flux", t1);
@@ -1236,7 +1236,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
                                const EBFluxFAB& a_Bcoef,
                                const Box&       a_cellBox,
                                const DataIndex& a_dit,
-                               const bool       a_homogeneousPhysBC)
+                               const bool       a_homogeneousPhysBC) const noexcept
 {
   CH_TIME("EBHelmholtzOp::applyDomainFlux(EBCellFAB, Box, DataIndex, bool)");
 
@@ -1381,7 +1381,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&             a_Lphi,
                                 const BaseIVFAB<Real>& a_alphaDiagWeight,
                                 const Box&             a_cellBox,
                                 const DataIndex&       a_dit,
-                                const bool             a_homogeneousPhysBC)
+                                const bool             a_homogeneousPhysBC) const noexcept
 {
   CH_TIMERS("EBHelmholtzOp::applyOpIrregular");
   CH_TIMER("AggStencil", t1);
@@ -1655,7 +1655,7 @@ EBHelmholtzOp::pointJacobiKernel(EBCellFAB&             a_Lcorr,
                                  const EBFluxFAB&       a_Bcoef,
                                  const BaseIVFAB<Real>& a_BcoefIrreg,
                                  const Box&             a_cellBox,
-                                 const DataIndex&       a_dit)
+                                 const DataIndex&       a_dit) const noexcept
 {
   CH_TIME("EBHelmholtzOp::pointJacobiKernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex)");
 
@@ -1729,7 +1729,7 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
                                     const BaseIVFAB<Real>& a_BcoefIrreg,
                                     const Box&             a_cellBox,
                                     const DataIndex&       a_dit,
-                                    const int&             a_redBlack)
+                                    const int&             a_redBlack) const noexcept
 {
   CH_TIMERS("EBHelmholtzOp::gauSaiRedBlackkernel");
   CH_TIMER("EBHelmholtzOp::regular_cells", t1);
@@ -1836,7 +1836,7 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
                                       const BaseIVFAB<Real>& a_BcoefIrreg,
                                       const Box&             a_cellBox,
                                       const DataIndex&       a_dit,
-                                      const IntVect&         a_color)
+                                      const IntVect&         a_color) const noexcept
 {
   CH_TIME("EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex, int)");
 
