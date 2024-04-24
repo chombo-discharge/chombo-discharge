@@ -642,7 +642,7 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       }
     }
   }
-  CH_START(t3);
+  CH_STOP(t3);
 }
 
 #include <CD_NamespaceFooter.H>
