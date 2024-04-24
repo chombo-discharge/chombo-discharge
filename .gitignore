@@ -7,6 +7,8 @@
 *.log
 *.aux
 *.0
+*.out
+compile_and_run.sh
 LB.txt
 
 

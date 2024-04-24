@@ -90,6 +90,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   }
 
   m_interpolator = a_interpolator;
+  m_exchangeCopier.exchangeDefine(m_mflg.getGrids(), a_ghostPhi);
 
   if (m_hasMGObjects) {
     m_mflgCoarMG = a_mflgCoarMG;
@@ -593,7 +594,11 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
       EBCellFAB& Lph = (EBCellFAB&)a_Lphi[din].getPhase(iphase);
       EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
-      op.second->applyOp(Lph, phi, cellBox, din, a_homogeneousPhysBC);
+      const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+      const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+      const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+      op.second->applyOp(Lph, phi, Acoef, Bcoef, BcoefIrreg, cellBox, din, a_homogeneousPhysBC);
     }
   }
 }
@@ -698,9 +703,13 @@ MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
 {
   CH_TIME("MFHelmholtzOp::exchangeGhost");
 
+  if (!(a_phi.disjointBoxLayout() == m_mflg.getGrids())) {
+    MayDay::Abort("MFHelmholtzOp::exchangeGhost -- a_phi.disjointBoxLayout() != m_mflg.getGrids");
+  }
+
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&)a_phi;
 
-  phi.exchange();
+  phi.exchange(m_exchangeCopier);
 }
 
 void
@@ -776,7 +785,11 @@ MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>&       a_correction,
         EBCellFAB&       phi = a_correction[din].getPhase(iphase);
         const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-        op.second->pointJacobiKernel(Lph, phi, res, cellBox, din);
+        const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+        const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+        const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+        op.second->pointJacobiKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din);
       }
     }
   }
@@ -826,7 +839,11 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
           EBCellFAB&       phi = a_correction[din].getPhase(iphase);
           const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          op.second->gauSaiRedBlackKernel(Lph, phi, res, cellBox, din, redBlack);
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->gauSaiRedBlackKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, redBlack);
         }
       }
     }
@@ -880,7 +897,11 @@ MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>&       a_correction,
           EBCellFAB&       phi = a_correction[din].getPhase(iphase);
           const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          op.second->gauSaiMultiColorKernel(Lph, phi, res, cellBox, din, m_colors[icolor]);
+          const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->gauSaiMultiColorKernel(Lph, phi, res, Acoef, Bcoef, BcoefIrreg, cellBox, din, m_colors[icolor]);
         }
       }
     }
