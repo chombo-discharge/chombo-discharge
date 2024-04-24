@@ -594,7 +594,11 @@ MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
       EBCellFAB& Lph = (EBCellFAB&)a_Lphi[din].getPhase(iphase);
       EBCellFAB& phi = (EBCellFAB&)a_phi[din].getPhase(iphase);
 
-      op.second->applyOp(Lph, phi, cellBox, din, a_homogeneousPhysBC);
+      const EBCellFAB&       Acoef      = (*m_Acoef)[din].getPhase(iphase);
+      const EBFluxFAB&       Bcoef      = (*m_Bcoef)[din].getPhase(iphase);
+      const BaseIVFAB<Real>& BcoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+      op.second->applyOp(Lph, phi, Acoef, Bcoef, BcoefIrreg, cellBox, din, a_homogeneousPhysBC);
     }
   }
 }
@@ -831,7 +835,11 @@ MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>&       a_correction,
           EBCellFAB&       phi = a_correction[din].getPhase(iphase);
           const EBCellFAB& res = a_residual[din].getPhase(iphase);
 
-          op.second->gauSaiRedBlackKernel(Lph, phi, res, cellBox, din, redBlack);
+          const EBCellFAB&       aCoef      = (*m_Acoef)[din].getPhase(iphase);
+          const EBFluxFAB&       bCoef      = (*m_Bcoef)[din].getPhase(iphase);
+          const BaseIVFAB<Real>& bCoefIrreg = *(*m_BcoefIrreg)[din].getPhasePtr(iphase);
+
+          op.second->gauSaiRedBlackKernel(Lph, phi, res, aCoef, bCoef, bCoefIrreg, cellBox, din, redBlack);
         }
       }
     }

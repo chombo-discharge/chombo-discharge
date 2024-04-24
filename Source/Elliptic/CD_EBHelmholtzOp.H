@@ -252,20 +252,26 @@ public:
 
   /*!
     @brief Red-black Gauss-Seidel kernel
-    @param[inout] a_Lcorr    Storage for computing L(a_corr)
-    @param[inout] a_corr     Correction
-    @param[in]    a_resid    Residual
-    @param[in]    a_redBlack Red or black
-    @param[in]    a_cellBox  Grid box
-    @param[in]    a_dit      Data index
+    @param[inout] a_Lcorr      Storage for computing L(a_corr)
+    @param[inout] a_corr       Correction
+    @param[in]    a_resid      Residual
+    @param[in]    a_Acoef      A-coefficient
+    @param[in]    a_Bcoef      B-coefficient
+    @param[in]    a_BcoefIrreg B-coefficient on EB faces
+    @param[in]    a_redBlack   Red or black
+    @param[in]    a_cellBox    Grid box
+    @param[in]    a_dit        Data index
   */
   void
-  gauSaiRedBlackKernel(EBCellFAB&       a_Lcorr,
-                       EBCellFAB&       a_corr,
-                       const EBCellFAB& a_resid,
-                       const Box&       a_cellBox,
-                       const DataIndex& a_dit,
-                       const int&       a_redBlack);
+  gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
+                       EBCellFAB&             a_corr,
+                       const EBCellFAB&       a_resid,
+                       const EBCellFAB&       a_Acoef,
+                       const EBFluxFAB&       a_Bcoef,
+                       const BaseIVFAB<Real>& a_BcoefIrreg,
+                       const Box&             a_cellBox,
+                       const DataIndex&       a_dit,
+                       const int&             a_redBlack);
 
   /*!
     @brief Multi-color Gauss-Seidel kernel
@@ -376,11 +382,14 @@ public:
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void
-  applyOp(EBCellFAB&       a_Lphi,
-          EBCellFAB&       a_phi,
-          const Box&       a_cellBox,
-          const DataIndex& a_dit,
-          const bool       a_homogeneousPhysBC);
+  applyOp(EBCellFAB&             a_Lphi,
+          EBCellFAB&             a_phi,
+          const EBCellFAB&       a_Acoef,
+          const EBFluxFAB&       a_Bcoef,
+          const BaseIVFAB<Real>& a_BcoefIrreg,
+          const Box&             a_cellBox,
+          const DataIndex&       a_dit,
+          const bool             a_homogeneousPhysBC);
 
   /*!
     @brief Apply operator in regular cells.
@@ -391,11 +400,14 @@ public:
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void
-  applyOpRegular(EBCellFAB&       a_Lphi,
-                 EBCellFAB&       a_phi,
-                 const Box&       a_cellBox,
-                 const DataIndex& a_dit,
-                 const bool       a_homogeneousPhysBC);
+  applyOpRegular(EBCellFAB&             a_Lphi,
+                 EBCellFAB&             a_phi,
+                 const EBCellFAB&       a_Acoef,
+                 const EBFluxFAB&       a_Bcoef,
+                 const BaseIVFAB<Real>& a_BcoefIrreg,
+                 const Box&             a_cellBox,
+                 const DataIndex&       a_dit,
+                 const bool             a_homogeneousPhysBC);
 
   /*!
     @brief Apply domain flux. 
@@ -429,11 +441,14 @@ public:
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void
-  applyOpIrregular(EBCellFAB&       a_Lphi,
-                   const EBCellFAB& a_phi,
-                   const Box&       a_cellBox,
-                   const DataIndex& a_dit,
-                   const bool       a_homogeneousPhysBC);
+  applyOpIrregular(EBCellFAB&             a_Lphi,
+                   const EBCellFAB&       a_phi,
+                   const EBCellFAB&       a_Acoef,
+                   const EBFluxFAB&       a_Bcoef,
+                   const BaseIVFAB<Real>& a_BcoefIrreg,
+                   const Box&             a_cellBox,
+                   const DataIndex&       a_dit,
+                   const bool             a_homogeneousPhysBC);
 
   /*!
     @brief Create data which clones the layout of the other
