@@ -268,12 +268,15 @@ EBHelmholtzOp::getFlux() const
 void
 EBHelmholtzOp::defineStencils()
 {
-  CH_TIME("EBHelmholtzOp::defineStencils()");
+  CH_TIMERS("EBHelmholtzOp::defineStencils");
+  CH_TIMER("EBHelmholtzOp::defineStencils::basic_define", t1);
+  CH_TIMER("EBHelmholtzOp::defineStencils::calc_stencils", t2);
 
   const DisjointBoxLayout& dbl   = m_eblg.getDBL();
   const EBISLayout&        ebisl = m_eblg.getEBISL();
 
   // Basic defines.
+  CH_START(t1);
   EBCellFactory cellFact(ebisl);
   EBFluxFactory fluxFact(ebisl);
 
@@ -304,11 +307,13 @@ EBHelmholtzOp::defineStencils()
       m_sideBox.emplace(std::make_pair(dir, sit()), sidebox);
     }
   }
+  CH_STOP(t1);
 
   // This contains the part of the eb flux that contains interior cells.
   const LayoutData<BaseIVFAB<VoFStencil>>& ebFluxStencil = m_ebBc->getGradPhiStencils();
 
-  // Define everything
+  // Define stencils
+  CH_START(t2);
   const DataIterator& dit = dbl.dataIterator();
 
   const int nbox = dit.size();
@@ -466,6 +471,7 @@ EBHelmholtzOp::defineStencils()
       opStencil(vof, m_comp) += ebSten;
     });
   }
+  CH_STOP(t2);
 
   // Compute relaxation weights.
   this->computeDiagWeight();
