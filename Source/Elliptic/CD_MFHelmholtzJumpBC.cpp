@@ -130,7 +130,9 @@ MFHelmholtzJumpBC::isMultiPhase() const noexcept
 void
 MFHelmholtzJumpBC::defineStencils()
 {
-  CH_TIME("MFHelmholtzJumpBC::defineStencils()");
+  CH_TIMERS("MFHelmholtzJumpBC::defineStencils");
+  CH_TIMER("MFHelmholtzJumpBC::defineStencils::define", t1);
+  CH_TIMER("MFHelmholtzJumpBC::defineStencils::compute_stencils", t2);
 
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
@@ -145,6 +147,7 @@ MFHelmholtzJumpBC::defineStencils()
 
     const int nbox = dit.size();
 
+    CH_START(t1);
     m_gradPhiStencils.define(dbl);
     m_gradPhiWeights.define(dbl);
     m_boundaryPhi.define(dbl);
@@ -167,8 +170,10 @@ MFHelmholtzJumpBC::defineStencils()
       m_denom[din].define(m_mflg, din);
       m_avgVoFs[din].define(m_mflg, din);
     }
+    CH_STOP(t1);
 
     // Build stencils and weights for each phase.
+    CH_START(t2);
     for (int iphase = 0; iphase < m_numPhases; iphase++) {
       const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
       const EBISLayout&  ebisl = eblg.getEBISL();
@@ -263,6 +268,7 @@ MFHelmholtzJumpBC::defineStencils()
         BoxLoops::loop(vofit, kernel);
       }
     }
+    CH_START(t2);
 
     // Build the average stencils.
     this->buildAverageStencils();
