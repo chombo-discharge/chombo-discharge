@@ -166,7 +166,6 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
@@ -222,7 +221,6 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 
       const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
@@ -270,7 +268,6 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 
         const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
           const DataIndex& din = dit[mybox];
 
