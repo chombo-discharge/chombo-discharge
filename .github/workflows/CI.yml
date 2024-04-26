@@ -123,10 +123,7 @@ jobs:
       - name: Install Intel compilers/MPI
         working-directory: /tmp        
         run: |
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
-          sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
+          sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic          
       
       - name: Setup compilers
         run: |
@@ -139,7 +136,9 @@ jobs:
 
       - name: Build Chombo
         run: |
-          source /opt/intel/oneapi/setvars.sh                    
+          set +e
+          source /opt/intel/oneapi/setvars.sh
+          set -e
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
 
       - name: Build chombo-discharge/source
