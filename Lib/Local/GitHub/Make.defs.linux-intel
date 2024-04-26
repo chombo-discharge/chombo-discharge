@@ -5,10 +5,10 @@ DEBUG           = TRUE
 OPT             = FALSE
 PRECISION       = DOUBLE
 PROFILE         = FALSE
-CXX             = icx
+CXX             = icpx
 FC              = ifx
 MPI             = TRUE
-MPICXX          = mpiicx
+MPICXX          = mpiicpx
 CXXSTD          = 14
 USE_EB          = TRUE
 USE_MF          = TRUE
@@ -23,6 +23,6 @@ cxxoptflags     = -O3 -march=native
 cxxdbgflags     = -O0
 foptflags       = -O3 -march=native
 fdbgflags       = -O0
-syslibflags     = -mkl=sequential
+syslibflags     = -qmkl=sequential -lstdc++ -lifcore
 
 #end  -- dont change this line
