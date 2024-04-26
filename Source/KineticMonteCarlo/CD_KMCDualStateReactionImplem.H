@@ -157,7 +157,7 @@ KMCDualStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_
   this->sanityCheck(a_state);
 #endif
 
-  T Lj = std::numeric_limits<long long>::max();
+  T Lj = std::numeric_limits<T>::max();
 
   const auto& reactiveState = a_state.getReactiveState();
 
