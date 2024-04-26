@@ -432,9 +432,9 @@ Driver::getCellsAndBoxes(long long&                       a_numLocalCells,
     a_numTotalBoxes += boxesThisLevel;
 
     a_numLocalLevelBoxes[lvl] = numBoxes;
-    a_numTotalLevelBoxes[lvl] += boxesThisLevel;
+    a_numTotalLevelBoxes[lvl] = boxesThisLevel;
     a_numLocalLevelCells[lvl] = numCellsNoGhosts;
-    a_numTotalLevelCells[lvl] += numCellsNoGhosts;
+    a_numTotalLevelCells[lvl] = cellsThisLevel;
   }
 }
 

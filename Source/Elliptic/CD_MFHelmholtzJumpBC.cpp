@@ -130,7 +130,9 @@ MFHelmholtzJumpBC::isMultiPhase() const noexcept
 void
 MFHelmholtzJumpBC::defineStencils()
 {
-  CH_TIME("MFHelmholtzJumpBC::defineStencils()");
+  CH_TIMERS("MFHelmholtzJumpBC::defineStencils");
+  CH_TIMER("MFHelmholtzJumpBC::defineStencils::define", t1);
+  CH_TIMER("MFHelmholtzJumpBC::defineStencils::compute_stencils", t2);
 
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
@@ -144,7 +146,7 @@ MFHelmholtzJumpBC::defineStencils()
     const DataIterator&      dit = dbl.dataIterator();
 
     const int nbox = dit.size();
-
+    CH_START(t1);
     m_gradPhiStencils.define(dbl);
     m_gradPhiWeights.define(dbl);
     m_boundaryPhi.define(dbl);
@@ -167,8 +169,10 @@ MFHelmholtzJumpBC::defineStencils()
       m_denom[din].define(m_mflg, din);
       m_avgVoFs[din].define(m_mflg, din);
     }
+    CH_STOP(t1);
 
     // Build stencils and weights for each phase.
+    CH_START(t2);
     for (int iphase = 0; iphase < m_numPhases; iphase++) {
       const EBLevelGrid& eblg  = m_mflg.getEBLevelGrid(iphase);
       const EBISLayout&  ebisl = eblg.getEBISL();
@@ -263,6 +267,7 @@ MFHelmholtzJumpBC::defineStencils()
         BoxLoops::loop(vofit, kernel);
       }
     }
+    CH_STOP(t2);
 
     // Build the average stencils.
     this->buildAverageStencils();
@@ -555,11 +560,9 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   CH_assert(m_multiPhase);
 
   CH_TIMERS("MFHelmholtzJumpBC::matchBC(patch)");
-  CH_TIMER("Setup", t1);
-  CH_TIMER("Apply stencils", t2);
-  CH_TIMER("Get vofs", t3);
-  CH_TIMER("Compute jump", t4);
-  CH_TIMER("Compute phiBndry", t5);
+  CH_TIMER("setup", t1);
+  CH_TIMER("aggsten", t2);
+  CH_TIMER("compute_phi_bndry", t3);
 
   // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where dphi/dn can be represented as
   //
@@ -605,17 +608,14 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   aggSten1.apply(bndryPhiPhase1, phiPhase1, 0, false);
   CH_STOP(t2);
 
+  CH_START(t3);
   for (IVSIterator ivsIt(m_ivs[a_dit]); ivsIt.ok(); ++ivsIt) {
-    CH_START(t3);
     const IntVect  iv   = ivsIt();
     const VolIndex vof0 = VolIndex(iv, vofComp);
 
-    const Vector<VolIndex>& vofsPhase0 = avgVoFsPhase0(vof0, vofComp);
-    const Vector<VolIndex>& vofsPhase1 = avgVoFsPhase1(vof0, vofComp);
-    CH_STOP(t3);
-
-    CH_START(t4);
-    const Real& denomPhase0 = denomFactorPhase0(vof0, vofComp);
+    const Vector<VolIndex>& vofsPhase0  = avgVoFsPhase0(vof0, vofComp);
+    const Vector<VolIndex>& vofsPhase1  = avgVoFsPhase1(vof0, vofComp);
+    const Real&             denomPhase0 = denomFactorPhase0(vof0, vofComp);
 
     Real jump = 0.0;
     if (!a_homogeneousPhysBC) {
@@ -624,9 +624,7 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
       }
       jump *= 1. / vofsPhase0.size();
     }
-    CH_STOP(t4);
 
-    CH_START(t5);
     for (int i = 0; i < vofsPhase0.size(); i++) {
       bndryPhiPhase0(vofsPhase0[i], m_comp) += bndryPhiPhase1(vof0, m_comp);
       bndryPhiPhase0(vofsPhase0[i], m_comp) *= -1.0;
@@ -643,9 +641,8 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
         bndryPhiPhase1(vofsPhase1[i], m_comp) += denomPhase0 * jump;
       }
     }
-
-    CH_STOP(t5);
   }
+  CH_STOP(t3);
 }
 
 #include <CD_NamespaceFooter.H>
