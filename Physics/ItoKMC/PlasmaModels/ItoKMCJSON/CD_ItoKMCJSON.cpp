@@ -32,6 +32,7 @@ ItoKMCJSON::ItoKMCJSON()
   m_verbose      = false;
   m_previewRates = false;
   m_className    = "ItoKMCJSON";
+  m_hasKMCSolver = false;
 
   this->parseVerbose();
   this->parsePPC();
