@@ -1390,7 +1390,8 @@ ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
       if (levelParticles.isDefined()) {
 
         // Clear patch particles
-        const DataIterator& dit = levelParticles.dataIterator();
+        const BoxLayout&    grids = levelParticles.getBoxes();
+        const DataIterator& dit   = grids.dataIterator();
 
         const int nbox = dit.size();
 
