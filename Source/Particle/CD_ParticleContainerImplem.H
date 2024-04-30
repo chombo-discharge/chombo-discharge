@@ -1374,26 +1374,39 @@ ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
 {
   CH_assert(m_isDefined);
 
+  ParmParse pp;
+
+  bool useNewClear = false;
+  pp.query("new_clear", useNewClear);
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
     ParticleData<P>& levelParticles = *a_particles[lvl];
 
-    // Clear outcast
-    List<P>& outcast = levelParticles.outcast();
-    outcast.clear();
+    if (!useNewClear) {
+      levelParticles.clear();
+    }
+    else {
+      if (levelParticles.isDefined()) {
 
-    // Clear patch particles
-    const DataIterator& dit = m_grids[lvl].dataIterator();
+        // Clear patch particles
+        const DataIterator& dit = levelParticles.dataIterator();
 
-    const int nbox = dit.size();
+        const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex din = dit[mybox];
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex din = dit[mybox];
 
-      List<P>& patchParticles = levelParticles[din].listItems();
+          List<P>& patchParticles = levelParticles[din].listItems();
 
-      patchParticles.clear();
+          patchParticles.clear();
+        }
+
+        // Clear outcast
+        List<P>& outcast = levelParticles.outcast();
+        outcast.clear();
+      }
     }
   }
 }
@@ -1406,27 +1419,29 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 
   ParmParse pp;
 
-  bool useNewRemap = false;
-  pp.query("new_remap", useNewRemap);
+  bool useNewGather = false;
+  pp.query("new_gather", useNewGather);
 
-  if (!useNewRemap) {
-    a_particles.gatherOutcast();
-  }
-  else {
-    List<P>& outcasts = a_particles.outcast();
+  if (a_particles.isDefined()) {
+    if (!useNewGather) {
+      a_particles.gatherOutcast();
+    }
+    else {
+      List<P>& outcasts = a_particles.outcast();
 
-    const BoxLayout&   bl  = a_particles.getBoxes();
-    const DataIterator dit = bl.dataIterator();
+      const BoxLayout&   grids = a_particles.getBoxes();
+      const DataIterator dit   = grids.dataIterator();
 
-    const int nbox = dit.size();
+      const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime) reduction(catenate : outcasts)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
 
-      ListBox<P>& particles = a_particles[din];
+        ListBox<P>& particles = a_particles[din];
 
-      particles.getInvalidDestructive(outcasts, bl[din]);
+        particles.getInvalidDestructive(outcasts, grids[din]);
+      }
     }
   }
 }
