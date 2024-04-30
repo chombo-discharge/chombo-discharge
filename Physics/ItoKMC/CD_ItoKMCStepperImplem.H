@@ -3878,7 +3878,6 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 
 #pragma omp parallel
   {
-
     m_physics->defineKMC();
 
 #pragma omp for schedule(runtime)

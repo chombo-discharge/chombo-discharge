@@ -18,6 +18,7 @@
 
 using namespace Physics::ItoKMC;
 
+thread_local bool                                            ItoKMCPhysics::m_hasKMCSolver;
 thread_local KMCSolverType                                   ItoKMCPhysics::m_kmcSolver;
 thread_local KMCState                                        ItoKMCPhysics::m_kmcState;
 thread_local std::vector<std::shared_ptr<const KMCReaction>> ItoKMCPhysics::m_kmcReactionsThreadLocal;

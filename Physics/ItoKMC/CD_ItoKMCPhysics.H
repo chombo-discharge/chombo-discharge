@@ -427,7 +427,7 @@ namespace Physics {
       /*!
 	@brief Is the KMC solver defined or not.
       */
-      mutable bool m_hasKMCSolver;
+      static thread_local bool m_hasKMCSolver;
 
       /*!
 	@brief Kinetic Monte Carlo solver used in advanceReactionNetwork.
