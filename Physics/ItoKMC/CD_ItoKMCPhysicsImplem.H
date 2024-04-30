@@ -67,8 +67,26 @@ ItoKMCPhysics::define() noexcept
   CH_TIME("ItoKMCPhysics::define");
 
   this->defineSpeciesMap();
-  this->defineKMC();
   this->definePhotoPathways();
+
+  // Safety hook -- make sure no one defines reactions using an out-of-range species index.
+#ifndef NDEBUG
+  for (const auto& R : m_kmcReactions) {
+    const auto& lhsReactants = R->getReactants();
+    const auto& rhsReactants = R->getReactiveProducts();
+    const auto& rhsPhotons   = R->getNonReactiveProducts();
+
+    for (const auto& r : lhsReactants) {
+      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
+    }
+    for (const auto& r : rhsReactants) {
+      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
+    }
+    for (const auto& r : rhsPhotons) {
+      CH_assert(r < m_rtSpecies.size());
+    }
+  }
+#endif
 
   m_isDefined = true;
 }
@@ -92,31 +110,28 @@ ItoKMCPhysics::defineSpeciesMap() noexcept
 }
 
 inline void
-ItoKMCPhysics::defineKMC() noexcept
+ItoKMCPhysics::defineKMC() const noexcept
 {
   CH_TIME("ItoKMCPhysics::defineKMC");
 
-  m_kmcSolver.define(m_kmcReactions);
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
-
-  // Safety hook -- make sure no one defines reactions using an out-of-range species index.
-#ifndef NDEBUG
-  for (const auto& R : m_kmcReactions) {
-    const auto& lhsReactants = R->getReactants();
-    const auto& rhsReactants = R->getReactiveProducts();
-    const auto& rhsPhotons   = R->getNonReactiveProducts();
-
-    for (const auto& r : lhsReactants) {
-      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
-    }
-    for (const auto& r : rhsReactants) {
-      CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
-    }
-    for (const auto& r : rhsPhotons) {
-      CH_assert(r < m_rtSpecies.size());
-    }
+  // Deep copy of reaction rates
+  m_kmcReactionsThreadLocal.resize(0);
+  for (const auto& r : m_kmcReactions) {
+    m_kmcReactionsThreadLocal.emplace_back(std::make_shared<const KMCReaction>(*r));
   }
-#endif
+
+  m_kmcSolver.define(m_kmcReactionsThreadLocal);
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+  m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+}
+
+inline void
+ItoKMCPhysics::killKMC() const noexcept
+{
+  CH_TIME("ItoKMCPhysics::defineKMC");
+
+  // Deep copy of reaction rates
+  m_kmcReactionsThreadLocal.resize(0);
 }
 
 inline void
@@ -198,9 +213,6 @@ ItoKMCPhysics::parseRuntimeOptions() noexcept
   this->parsePPC();
   this->parseDebug();
   this->parseAlgorithm();
-
-  // Define solver parameters in case they've been changed since last time.
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
 }
 
 inline void
@@ -322,14 +334,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   CH_assert(m_isDefined);
 
-  KMCState      kmcState;
-  KMCSolverType kmcSolver;
-
-  // Define and populate the KMC solver state.
-  kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
-
-  std::vector<FPR>& kmcParticles = kmcState.getReactiveState();
-  std::vector<FPR>& kmcPhotons   = kmcState.getNonReactiveState();
+  std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
+  std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
@@ -339,43 +345,33 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     p = 0LL;
   }
 
-  // Deep copy of reaction rates
-  std::vector<std::shared_ptr<const KMCReaction>> kmcReactions;
-  for (const auto& r : m_kmcReactions) {
-    kmcReactions.emplace_back(std::make_shared<const KMCReaction>(*r));
-  }
-
-  // Define the KMC solver
-  kmcSolver.define(kmcReactions);
-  kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
-
   // Update the reaction rates to be used by the KMC solver.
-  this->updateReactionRates(kmcReactions, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
+  this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
 
   // Run the KMC solver.
   switch (m_algorithm) {
   case Algorithm::SSA: {
-    kmcSolver.advanceSSA(kmcState, a_dt);
+    m_kmcSolver.advanceSSA(m_kmcState, a_dt);
 
     break;
   }
   case Algorithm::TauPlain: {
-    kmcSolver.advanceTauPlain(kmcState, a_dt);
+    m_kmcSolver.advanceTauPlain(m_kmcState, a_dt);
 
     break;
   }
   case Algorithm::TauMidpoint: {
-    kmcSolver.advanceTauMidpoint(kmcState, a_dt);
+    m_kmcSolver.advanceTauMidpoint(m_kmcState, a_dt);
 
     break;
   }
   case Algorithm::HybridPlain: {
-    kmcSolver.advanceHybrid(kmcState, a_dt, KMCLeapPropagator::TauPlain);
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
 
     break;
   }
   case Algorithm::HybridMidpoint: {
-    kmcSolver.advanceHybrid(kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
 
     break;
   }

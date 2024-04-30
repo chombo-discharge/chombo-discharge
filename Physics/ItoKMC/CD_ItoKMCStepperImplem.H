@@ -3876,18 +3876,26 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
+#pragma omp parallel
+  {
 
-    this->advanceReactionNetwork(a_particlesPerCell[din],
-                                 a_newPhotonsPerCell[din],
-                                 a_electricField[din],
-                                 a_level,
-                                 din,
-                                 dbl[din],
-                                 m_amr->getDx()[a_level],
-                                 a_dt);
+    m_physics->defineKMC();
+
+#pragma omp for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->advanceReactionNetwork(a_particlesPerCell[din],
+                                   a_newPhotonsPerCell[din],
+                                   a_electricField[din],
+                                   a_level,
+                                   din,
+                                   dbl[din],
+                                   m_amr->getDx()[a_level],
+                                   a_dt);
+    }
+
+    m_physics->killKMC();
   }
 }
 
