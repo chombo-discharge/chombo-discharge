@@ -654,6 +654,20 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
+
+  /*!
+    @brief Remap the outcast particles in the particle data
+    @param[inout] Particles where outcast particles are gathered.
+  */
+  void
+  gatherOutcast(ParticleData<P>& a_particles) noexcept;
+
+  /*!
+    @brief Remap the outcast particles in the particle data
+    @param[inout] Particles where outcast particles are gathered.
+  */
+  void
+  remapOutcast(ParticleData<P>& a_particles) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
