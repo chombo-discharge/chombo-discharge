@@ -72,9 +72,9 @@ ItoKMCPhysics::define() noexcept
   // Safety hook -- make sure no one defines reactions using an out-of-range species index.
 #ifndef NDEBUG
   for (const auto& R : m_kmcReactions) {
-    const auto& lhsReactants = R->getReactants();
-    const auto& rhsReactants = R->getReactiveProducts();
-    const auto& rhsPhotons   = R->getNonReactiveProducts();
+    const auto& lhsReactants = R.getReactants();
+    const auto& rhsReactants = R.getReactiveProducts();
+    const auto& rhsPhotons   = R.getNonReactiveProducts();
 
     for (const auto& r : lhsReactants) {
       CH_assert(r < m_itoSpecies.size() + m_cdrSpecies.size());
@@ -114,10 +114,12 @@ ItoKMCPhysics::defineKMC() const noexcept
 {
   CH_TIME("ItoKMCPhysics::defineKMC");
 
+  CH_assert(!m_hasKMCSolver);
+
   // Deep copy of reaction rates
   m_kmcReactionsThreadLocal.resize(0);
   for (const auto& r : m_kmcReactions) {
-    m_kmcReactionsThreadLocal.emplace_back(std::make_shared<const KMCReaction>(*r));
+    m_kmcReactionsThreadLocal.emplace_back(std::make_shared<const KMCReaction>(r));
   }
 
   m_kmcSolver.define(m_kmcReactionsThreadLocal);
@@ -130,8 +132,13 @@ ItoKMCPhysics::killKMC() const noexcept
 {
   CH_TIME("ItoKMCPhysics::defineKMC");
 
-  // Deep copy of reaction rates
+  CH_assert(m_hasKMCSolver);
+
   m_kmcReactionsThreadLocal.resize(0);
+  m_kmcSolver.define(m_kmcReactionsThreadLocal);
+  m_kmcState.define(0, 0);
+
+  m_hasKMCSolver = false;
 }
 
 inline void
@@ -151,7 +158,7 @@ ItoKMCPhysics::definePhotoPathways() noexcept
   std::map<int, std::vector<std::pair<int, Real>>> pathways;
 
   for (int i = 0; i < m_photoReactions.size(); i++) {
-    const ItoKMCPhotoReaction& r = *m_photoReactions[i];
+    const ItoKMCPhotoReaction& r = m_photoReactions[i];
 
     const size_t& src        = r.getSourcePhoton();
     const Real    efficiency = r.getEfficiency();
@@ -332,7 +339,10 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 {
   CH_TIME("ItoKMCPhysics::advanceKMC");
 
+  // Note: This is called PER GRID CELL, i.e. within OpenMP parallel regions. For this reason the KMC solver
+  //       must be defined through defineKMC() (which must be later killed).
   CH_assert(m_isDefined);
+  CH_assert(m_hasKMCSolver);
 
   std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
   std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
@@ -592,7 +602,7 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
         const int localReaction  = Random::get(d);
         const int globalReaction = localToGlobalMap.at(localReaction);
 
-        const ItoKMCPhotoReaction& photoReaction = *m_photoReactions[globalReaction];
+        const ItoKMCPhotoReaction& photoReaction = m_photoReactions[globalReaction];
         const std::list<size_t>&   plasmaTargets = photoReaction.getTargetSpecies();
 
         for (const auto& t : plasmaTargets) {

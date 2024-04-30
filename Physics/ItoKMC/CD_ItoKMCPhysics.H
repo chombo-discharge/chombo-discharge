@@ -425,6 +425,11 @@ namespace Physics {
       bool m_isDefined;
 
       /*!
+	@brief Is the KMC solver defined or not.
+      */
+      mutable bool m_hasKMCSolver;
+
+      /*!
 	@brief Kinetic Monte Carlo solver used in advanceReactionNetwork.
       */
       static thread_local KMCSolverType m_kmcSolver;
@@ -444,12 +449,12 @@ namespace Physics {
       /*!
 	@brief List of reactions for the KMC solver
       */
-      std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactions;
+      std::vector<KMCReaction> m_kmcReactions;
 
       /*!
 	@brief List of photoionization reactions
       */
-      std::vector<std::shared_ptr<const ItoKMCPhotoReaction>> m_photoReactions;
+      std::vector<ItoKMCPhotoReaction> m_photoReactions;
 
       /*!
 	@brief Random number generators for photoionization pathways. 

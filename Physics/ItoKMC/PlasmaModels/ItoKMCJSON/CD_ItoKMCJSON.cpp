@@ -780,7 +780,7 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
       const std::list<size_t>& plasmaProducts  = m_plasmaReactionPlasmaProducts[i];
 
       if (plasmaReactants.size() == 1 && plasmaReactants.front() == speciesIdx) {
-        const FPR stateChange = m_kmcReactions[i]->getStateChange(speciesIdx);
+        const FPR stateChange = m_kmcReactions[i].getStateChange(speciesIdx);
 
         if (sign * stateChange > (FPR)0) {
           const FunctionEX& fluidRate = m_fluidRates[i];
@@ -1720,7 +1720,7 @@ ItoKMCJSON::initializePlasmaReactions()
       const auto reactionPlot       = this->parsePlasmaReactionPlot(reactionJSON);
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
 
-      m_kmcReactions.emplace_back(std::make_shared<KMCReaction>(plasmaReactants, plasmaProducts, photonProducts));
+      m_kmcReactions.emplace_back(KMCReaction(plasmaReactants, plasmaProducts, photonProducts));
       m_kmcReactionRates.emplace_back(reactionRates.first);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
@@ -1811,8 +1811,7 @@ ItoKMCJSON::initializePhotoReactions()
                                trimmedProducts);
 
       // Add the reaction
-      m_photoReactions.emplace_back(
-        std::make_shared<ItoKMCPhotoReaction>(photonReactants.front(), plasmaProducts, photoiEfficiency));
+      m_photoReactions.emplace_back(ItoKMCPhotoReaction(photonReactants.front(), plasmaProducts, photoiEfficiency));
     }
   }
 }
