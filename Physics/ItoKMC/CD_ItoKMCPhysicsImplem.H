@@ -36,6 +36,7 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   // Some default settings in case user forgets to call the parsing algorithms.
   m_isDefined         = false;
   m_debug             = true;
+  m_hasKMCSolver      = false;
   m_maxNewParticles   = 32;
   m_maxNewPhotons     = 32;
   m_Ncrit             = 5;
@@ -125,6 +126,8 @@ ItoKMCPhysics::defineKMC() const noexcept
   m_kmcSolver.define(m_kmcReactionsThreadLocal);
   m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
+
+  m_hasKMCSolver = true;
 }
 
 inline void
