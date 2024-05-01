@@ -1,7 +1,7 @@
 <map id="Physics::ItoKMC::ItoKMCJSON" name="Physics::ItoKMC::ItoKMCJSON">
-<area shape="rect" id="node1" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="115,289,329,316"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="107,213,337,240"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,109,236,151"/>
-<area shape="rect" id="node4" href="$classKMCSolver.html" title=" " alt="" coords="260,109,459,151"/>
-<area shape="rect" id="node5" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="264,5,455,32"/>
+<area shape="rect" id="node1" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="701,64,915,91"/>
+<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="421,64,652,91"/>
+<area shape="rect" id="node3" href="$classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="43,5,198,32"/>
+<area shape="rect" id="node4" href="$classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,57,236,98"/>
+<area shape="rect" id="node5" href="$classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="25,123,216,149"/>
 </map>

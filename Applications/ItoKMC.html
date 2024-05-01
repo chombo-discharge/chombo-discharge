@@ -368,6 +368,18 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">ItoKMCPhysics</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Define the KMC solver and state</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">defineKMC</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Kill the KMC solver</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
+<span class="w">      </span><span class="nf">killKMC</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Compute a time step to use. </span>
 <span class="cm">	@param[in] a_E            Electric field. </span>
 <span class="cm">	@param[in] a_pos          Position</span>
@@ -694,19 +706,36 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_isDefined</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Kinetic Monte Carlo solver. </span>
+<span class="cm">	@brief Is the KMC solver defined or not.</span>
 <span class="cm">      */</span><span class="w"></span>
-<span class="w">      </span><span class="k">mutable</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="n">m_kmcSolver</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_hasKMCSolver</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Kinetic Monte Carlo solver used in advanceReactionNetwork.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="n">m_kmcSolver</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief KMC state used in advanceReactionNetwork.</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">KMCState</span><span class="w"> </span><span class="n">m_kmcState</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief KMC reactions used in advanceReactionNetowkr</span>
+<span class="cm">	@note This is set up via setupKMC in order toi ensure OpenMP thread safety when calling advanceReactionNetwork. The vector</span>
+<span class="cm">	is later depopulated in killKMC().</span>
+<span class="cm">      */</span><span class="w"></span>
+<span class="w">      </span><span class="k">static</span><span class="w"> </span><span class="k">thread_local</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_kmcReactionsThreadLocal</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief List of reactions for the KMC solver</span>
 <span class="cm">      */</span><span class="w"></span>
-<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">KMCReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_kmcReactions</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">KMCReaction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_kmcReactions</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief List of photoionization reactions</span>
 <span class="cm">      */</span><span class="w"></span>
-<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">ItoKMCPhotoReaction</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_photoReactions</span><span class="p">;</span><span class="w"></span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">ItoKMCPhotoReaction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_photoReactions</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Random number generators for photoionization pathways. </span>
@@ -782,12 +811,6 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">      */</span><span class="w"></span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
 <span class="w">      </span><span class="nf">defineSpeciesMap</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Define the KMC solver and state</span>
-<span class="cm">      */</span><span class="w"></span>
-<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">      </span><span class="nf">defineKMC</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Define pathways for photo-reactions</span>

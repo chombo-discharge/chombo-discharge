@@ -77,6 +77,7 @@ $(function() {
 <a href="#pro-types">Protected Types</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Physics::ItoKMC::ItoKMCPhysics Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
@@ -101,10 +102,10 @@ Collaboration diagram for Physics::ItoKMC::ItoKMCPhysics:</div>
 <div class="dyncontent">
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics__coll__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map" alt="Collaboration graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCPhysics_coll__map">
-<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="107,213,337,240"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,109,236,151"/>
-<area shape="rect" href="classKMCSolver.html" title=" " alt="" coords="260,109,459,151"/>
-<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="264,5,455,32"/>
+<area shape="rect" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="421,64,652,91"/>
+<area shape="rect" href="classKMCDualState.html" title="Declaration of a &quot;dual state&quot; for advancing with the Kinetic Monte Carlo module." alt="" coords="43,5,198,32"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html" title="Class for holding a set of surface reactions." alt="" coords="5,57,236,98"/>
+<area shape="rect" href="classKMCSolver.html" title="Class for running Kinetic Monte&#45;Carlo simulations." alt="" coords="25,123,216,149"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -118,6 +119,14 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a5fe2da75498ee8b636ea00a646d2e4d9">~ItoKMCPhysics</a> () noexcept</td></tr>
 <tr class="memdesc:a5fe2da75498ee8b636ea00a646d2e4d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Does nothing. <br /></td></tr>
 <tr class="separator:a5fe2da75498ee8b636ea00a646d2e4d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cfc673476893a4ad398e52509fbef3c"><td class="memItemLeft" align="right" valign="top"><a id="a3cfc673476893a4ad398e52509fbef3c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a3cfc673476893a4ad398e52509fbef3c">defineKMC</a> () const noexcept</td></tr>
+<tr class="memdesc:a3cfc673476893a4ad398e52509fbef3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the KMC solver and state. <br /></td></tr>
+<tr class="separator:a3cfc673476893a4ad398e52509fbef3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9f3a89c6c7be3cd3e7f078da8dc817b"><td class="memItemLeft" align="right" valign="top"><a id="ad9f3a89c6c7be3cd3e7f078da8dc817b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad9f3a89c6c7be3cd3e7f078da8dc817b">killKMC</a> () const noexcept</td></tr>
+<tr class="memdesc:ad9f3a89c6c7be3cd3e7f078da8dc817b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kill the KMC solver. <br /></td></tr>
+<tr class="separator:ad9f3a89c6c7be3cd3e7f078da8dc817b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e2dcd8a6ff5383a612681c90f649dd3"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a1e2dcd8a6ff5383a612681c90f649dd3">computeDt</a> (const RealVect a_E, const RealVect a_pos, const Vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a9d925e020399fbcb9b67cc8a8c751694">FPR</a> &gt; a_numParticles) const noexcept</td></tr>
 <tr class="memdesc:a1e2dcd8a6ff5383a612681c90f649dd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to use.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a1e2dcd8a6ff5383a612681c90f649dd3">More...</a><br /></td></tr>
 <tr class="separator:a1e2dcd8a6ff5383a612681c90f649dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -224,10 +233,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a65c372cadba68f3c56b7a98e6250d090"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a65c372cadba68f3c56b7a98e6250d090">defineSpeciesMap</a> () noexcept</td></tr>
 <tr class="memdesc:a65c372cadba68f3c56b7a98e6250d090"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build internal representation of how we distinguish the Ito and CDR solvers.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a65c372cadba68f3c56b7a98e6250d090">More...</a><br /></td></tr>
 <tr class="separator:a65c372cadba68f3c56b7a98e6250d090"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01539c9d8e0b1a52ed03e61b497289d2"><td class="memItemLeft" align="right" valign="top"><a id="a01539c9d8e0b1a52ed03e61b497289d2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a01539c9d8e0b1a52ed03e61b497289d2">defineKMC</a> () noexcept</td></tr>
-<tr class="memdesc:a01539c9d8e0b1a52ed03e61b497289d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the KMC solver and state. <br /></td></tr>
-<tr class="separator:a01539c9d8e0b1a52ed03e61b497289d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addba798abc3066352c7792500464f566"><td class="memItemLeft" align="right" valign="top"><a id="addba798abc3066352c7792500464f566"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#addba798abc3066352c7792500464f566">definePhotoPathways</a> () noexcept</td></tr>
 <tr class="memdesc:addba798abc3066352c7792500464f566"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define pathways for photo-reactions. <br /></td></tr>
@@ -277,18 +282,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aeb965c335c41dd5a92e8f76b73c1951f">m_isDefined</a></td></tr>
 <tr class="memdesc:aeb965c335c41dd5a92e8f76b73c1951f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:aeb965c335c41dd5a92e8f76b73c1951f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae24def42b87eb15f8fa6e39ee9b71b87"><td class="memItemLeft" align="right" valign="top"><a id="ae24def42b87eb15f8fa6e39ee9b71b87"></a>
-<a class="el" href="CD__ItoKMCPhysics_8H.html#a3125af9aa2e74060b4fd0751a02c4a46">KMCSolverType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae24def42b87eb15f8fa6e39ee9b71b87">m_kmcSolver</a></td></tr>
-<tr class="memdesc:ae24def42b87eb15f8fa6e39ee9b71b87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinetic Monte Carlo solver. <br /></td></tr>
-<tr class="separator:ae24def42b87eb15f8fa6e39ee9b71b87"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7648c33e761b813629351d15fc88b691"><td class="memItemLeft" align="right" valign="top"><a id="a7648c33e761b813629351d15fc88b691"></a>
-std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a7648c33e761b813629351d15fc88b691">m_kmcReactions</a></td></tr>
-<tr class="memdesc:a7648c33e761b813629351d15fc88b691"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of reactions for the KMC solver. <br /></td></tr>
-<tr class="separator:a7648c33e761b813629351d15fc88b691"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0a8170481285c012f5e533a208fa330"><td class="memItemLeft" align="right" valign="top"><a id="ac0a8170481285c012f5e533a208fa330"></a>
-std::vector&lt; std::shared_ptr&lt; const <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhotoReaction.html">ItoKMCPhotoReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ac0a8170481285c012f5e533a208fa330">m_photoReactions</a></td></tr>
-<tr class="memdesc:ac0a8170481285c012f5e533a208fa330"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of photoionization reactions. <br /></td></tr>
-<tr class="separator:ac0a8170481285c012f5e533a208fa330"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf93dd374d062265d09611aa5ea6677e"><td class="memItemLeft" align="right" valign="top"><a id="aaf93dd374d062265d09611aa5ea6677e"></a>
+std::vector&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf93dd374d062265d09611aa5ea6677e">m_kmcReactions</a></td></tr>
+<tr class="memdesc:aaf93dd374d062265d09611aa5ea6677e"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of reactions for the KMC solver. <br /></td></tr>
+<tr class="separator:aaf93dd374d062265d09611aa5ea6677e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50274f528c0ad5aa85a7161b8d67892e"><td class="memItemLeft" align="right" valign="top"><a id="a50274f528c0ad5aa85a7161b8d67892e"></a>
+std::vector&lt; <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhotoReaction.html">ItoKMCPhotoReaction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a50274f528c0ad5aa85a7161b8d67892e">m_photoReactions</a></td></tr>
+<tr class="memdesc:a50274f528c0ad5aa85a7161b8d67892e"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of photoionization reactions. <br /></td></tr>
+<tr class="separator:a50274f528c0ad5aa85a7161b8d67892e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f66156f4d8ec2366f17d65039d588f9"><td class="memItemLeft" align="right" valign="top">std::map&lt; int, std::pair&lt; std::discrete_distribution&lt; int &gt;, std::map&lt; int, int &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">m_photoPathways</a></td></tr>
 <tr class="memdesc:a8f66156f4d8ec2366f17d65039d588f9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classRandom.html" title="Class for encapsulating random number generation. This class is MPI and OpenMP safe.">Random</a> number generators for photoionization pathways.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a8f66156f4d8ec2366f17d65039d588f9">More...</a><br /></td></tr>
 <tr class="separator:a8f66156f4d8ec2366f17d65039d588f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -328,6 +329,24 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <tr class="memitem:a2561afabc953eea1235231e154325cde"><td class="memItemLeft" align="right" valign="top">Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a2561afabc953eea1235231e154325cde">m_eps</a></td></tr>
 <tr class="memdesc:a2561afabc953eea1235231e154325cde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver setting for the Cao et. al. algorithm.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a2561afabc953eea1235231e154325cde">More...</a><br /></td></tr>
 <tr class="separator:a2561afabc953eea1235231e154325cde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-static-attribs"></a>
+Static Protected Attributes</h2></td></tr>
+<tr class="memitem:ae5409a5d7fcf9a68ec3726d4cce8f97b"><td class="memItemLeft" align="right" valign="top"><a id="ae5409a5d7fcf9a68ec3726d4cce8f97b"></a>
+static thread_local bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ae5409a5d7fcf9a68ec3726d4cce8f97b">m_hasKMCSolver</a></td></tr>
+<tr class="memdesc:ae5409a5d7fcf9a68ec3726d4cce8f97b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is the KMC solver defined or not. <br /></td></tr>
+<tr class="separator:ae5409a5d7fcf9a68ec3726d4cce8f97b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a628aff65d729f54806d0450e3133ac25"><td class="memItemLeft" align="right" valign="top"><a id="a628aff65d729f54806d0450e3133ac25"></a>
+static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a3125af9aa2e74060b4fd0751a02c4a46">KMCSolverType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a628aff65d729f54806d0450e3133ac25">m_kmcSolver</a></td></tr>
+<tr class="memdesc:a628aff65d729f54806d0450e3133ac25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kinetic Monte Carlo solver used in advanceReactionNetwork. <br /></td></tr>
+<tr class="separator:a628aff65d729f54806d0450e3133ac25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af771ab203558b3226f6ccfd7e5e315e4"><td class="memItemLeft" align="right" valign="top"><a id="af771ab203558b3226f6ccfd7e5e315e4"></a>
+static thread_local <a class="el" href="CD__ItoKMCPhysics_8H.html#a0ebb7009dfa1768b8abe941660e8a9a9">KMCState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af771ab203558b3226f6ccfd7e5e315e4">m_kmcState</a></td></tr>
+<tr class="memdesc:af771ab203558b3226f6ccfd7e5e315e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">KMC state used in advanceReactionNetwork. <br /></td></tr>
+<tr class="separator:af771ab203558b3226f6ccfd7e5e315e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf57f007555b5e427f5b542359f0e5c2"><td class="memItemLeft" align="right" valign="top">static thread_local std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf57f007555b5e427f5b542359f0e5c2">m_kmcReactionsThreadLocal</a></td></tr>
+<tr class="memdesc:aaf57f007555b5e427f5b542359f0e5c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">KMC reactions used in advanceReactionNetowkr.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf57f007555b5e427f5b542359f0e5c2">More...</a><br /></td></tr>
+<tr class="separator:aaf57f007555b5e427f5b542359f0e5c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. </p>
@@ -1509,6 +1528,31 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 
 <p>Solver setting for the Cao et. al. algorithm. </p>
 <p>Equal to the maximum permitted change in the relative propensity for non-critical reactions </p>
+
+</div>
+</div>
+<a id="aaf57f007555b5e427f5b542359f0e5c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf57f007555b5e427f5b542359f0e5c2">&#9670;&nbsp;</a></span>m_kmcReactionsThreadLocal</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">thread_local std::vector&lt; std::shared_ptr&lt; const <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt; &gt; ItoKMCPhysics::m_kmcReactionsThreadLocal</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>KMC reactions used in advanceReactionNetowkr. </p>
+<dl class="section note"><dt>Note</dt><dd>This is set up via setupKMC in order toi ensure OpenMP thread safety when calling advanceReactionNetwork. The vector is later depopulated in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#ad9f3a89c6c7be3cd3e7f078da8dc817b" title="Kill the KMC solver.">killKMC()</a>. </dd></dl>
 
 </div>
 </div>
