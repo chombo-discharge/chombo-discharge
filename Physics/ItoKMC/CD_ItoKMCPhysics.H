@@ -87,6 +87,18 @@ namespace Physics {
       inline virtual ~ItoKMCPhysics() noexcept;
 
       /*!
+	@brief Define the KMC solver and state
+      */
+      inline void
+      defineKMC() const noexcept;
+
+      /*!
+	@brief Kill the KMC solver
+      */
+      inline void
+      killKMC() const noexcept;
+
+      /*!
 	@brief Compute a time step to use. 
 	@param[in] a_E            Electric field. 
 	@param[in] a_pos          Position
@@ -413,19 +425,36 @@ namespace Physics {
       bool m_isDefined;
 
       /*!
-	@brief Kinetic Monte Carlo solver. 
+	@brief Is the KMC solver defined or not.
       */
-      mutable KMCSolverType m_kmcSolver;
+      static thread_local bool m_hasKMCSolver;
+
+      /*!
+	@brief Kinetic Monte Carlo solver used in advanceReactionNetwork.
+      */
+      static thread_local KMCSolverType m_kmcSolver;
+
+      /*!
+	@brief KMC state used in advanceReactionNetwork.
+      */
+      static thread_local KMCState m_kmcState;
+
+      /*!
+	@brief KMC reactions used in advanceReactionNetowkr
+	@note This is set up via setupKMC in order toi ensure OpenMP thread safety when calling advanceReactionNetwork. The vector
+	is later depopulated in killKMC().
+      */
+      static thread_local std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactionsThreadLocal;
 
       /*!
 	@brief List of reactions for the KMC solver
       */
-      std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactions;
+      std::vector<KMCReaction> m_kmcReactions;
 
       /*!
 	@brief List of photoionization reactions
       */
-      std::vector<std::shared_ptr<const ItoKMCPhotoReaction>> m_photoReactions;
+      std::vector<ItoKMCPhotoReaction> m_photoReactions;
 
       /*!
 	@brief Random number generators for photoionization pathways. 
@@ -501,12 +530,6 @@ namespace Physics {
       */
       inline void
       defineSpeciesMap() noexcept;
-
-      /*!
-	@brief Define the KMC solver and state
-      */
-      inline void
-      defineKMC() noexcept;
 
       /*!
 	@brief Define pathways for photo-reactions

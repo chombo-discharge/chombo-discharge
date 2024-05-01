@@ -239,11 +239,11 @@ ItoKMCGodunovStepper.checkpoint_particles                  = true           # If
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.profile                               = true          # Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
-ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
+ItoKMCGodunovStepper.dual_grid                             = false          # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
-ItoKMCGodunovStepper.load_balance_particles                = true           # Turn on/off particle load balancing
+ItoKMCGodunovStepper.load_balance_particles                = false          # Turn on/off particle load balancing
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
