@@ -1268,6 +1268,8 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
                                         std::floor((x[1] - m_probLo[1]) / dx[1]),
                                         std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
+        //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+
         MayDay::Warning("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
       }
       else if (mask(iv)) {
@@ -1327,7 +1329,11 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
                                         std::floor((x[1] - m_probLo[1]) / dx[1]),
                                         std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
-        MayDay::Warning("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
+        //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+
+        MayDay::Warning("ParticleContainer<P>::transferMaskParticles -- logic bust. Particle has fallen off grid");
+
+        ++lit;
       }
       else {
         if (mask(iv)) {
