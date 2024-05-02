@@ -333,7 +333,7 @@ namespace Physics {
       void
       computeCdrVelo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
       Real
-      computeDt();
+      computeDt() override;
       void
       computeSigmaFlux();
 

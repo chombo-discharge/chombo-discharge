@@ -65,13 +65,13 @@ namespace Physics {
 	@return Returns number of plot variables that Driver will write to plot files. 
       */
       virtual int
-      getNumberOfPlotVariables() const noexcept;
+      getNumberOfPlotVariables() const noexcept override;
 
       /*!
 	@brief Get plot variable names. 
       */
       virtual Vector<std::string>
-      getPlotVariableNames() const noexcept;
+      getPlotVariableNames() const noexcept override;
 
       /*!
 	@brief Write plot data.
@@ -83,7 +83,7 @@ namespace Physics {
       writePlotData(LevelData<EBCellFAB>& a_output,
                     int&                  a_icomp,
                     const std::string     a_outputRealm,
-                    const int             a_level) const noexcept;
+                    const int             a_level) const noexcept override;
 
       /*!
 	@brief Compute tagging fields.
@@ -95,13 +95,13 @@ namespace Physics {
 	@brief Parse class options
       */
       virtual void
-      parseOptions() = 0;
+      parseOptions() override = 0;
 
       /*!
 	@brief Parse run-time configurable class options
       */
       virtual void
-      parseRuntimeOptions() = 0;
+      parseRuntimeOptions() override = 0;
 
       /*!
 	@brief Regrid this class. Note that there is no preRegrid method.

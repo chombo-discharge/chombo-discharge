@@ -84,7 +84,7 @@ namespace Physics {
 	@return Returns number of plot variables that Driver will write to plot files. 
       */
       virtual int
-      getNumberOfPlotVariables() const;
+      getNumberOfPlotVariables() const override;
 
       /*!
 	@brief Write plot data.

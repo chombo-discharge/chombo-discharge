@@ -204,7 +204,7 @@ namespace Physics {
 	@return    Returns the time step that was used. 
       */
       virtual Real
-      advance(const Real a_dt) = 0;
+      advance(const Real a_dt) override = 0;
 
       /*!
 	@brief Compute a time step used for the advance method

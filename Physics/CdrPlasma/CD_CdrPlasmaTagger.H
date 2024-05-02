@@ -80,7 +80,7 @@ namespace Physics {
 	@brief Parse class options -- must be implemented by user. 
       */
       virtual void
-      parseOptions() = 0;
+      parseOptions() override = 0;
 
       /*!
 	@brief Pre-plot magic for Driver
