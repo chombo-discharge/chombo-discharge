@@ -21,6 +21,9 @@
 #elif defined(__INTEL_COMPILER)
 #define CD_PRAGMA_SIMD _Pragma("ivdep")
 
+#elif defined(__INTEL_LLVM_COMPILER)
+#define CD_PRAGMA_SIMD _Pragma("SIMD")
+
 #elif defined(__clang__)
 #define CD_PRAGMA_SIMD _Pragma("clang loop vectorize(enable)")
 
@@ -30,7 +33,7 @@
 #else
 #define CD_PRAGMA_SIMD
 
-#endif /* simd */
+#endif
 
 // Force inline.
 #if defined(__GNUC__)

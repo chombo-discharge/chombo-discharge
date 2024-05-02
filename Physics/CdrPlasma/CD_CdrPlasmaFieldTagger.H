@@ -48,7 +48,7 @@ namespace Physics {
 	@brief Parse options. Must be implemented by users. 
       */
       virtual void
-      parseOptions() = 0;
+      parseOptions() override = 0;
 
     protected:
       /*!
@@ -125,7 +125,7 @@ namespace Physics {
                   const Real             a_dx,
                   const int              a_lvl,
                   const Vector<Real>     a_tracers,
-                  const Vector<RealVect> a_gradTracers) const = 0;
+                  const Vector<RealVect> a_gradTracers) const override = 0;
 
       /*!
 	@brief Refine a cell based on a tracer field
@@ -143,7 +143,7 @@ namespace Physics {
                  const Real             a_dx,
                  const int              a_lvl,
                  const Vector<Real>     a_tracers,
-                 const Vector<RealVect> a_gradTracers) const = 0;
+                 const Vector<RealVect> a_gradTracers) const override = 0;
     };
   } // namespace CdrPlasma
 } // namespace Physics

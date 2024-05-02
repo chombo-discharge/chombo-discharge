@@ -124,7 +124,7 @@ public:
     contain enough ghost cells. 
   */
   virtual void
-  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const noexcept;
+  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const noexcept override;
 
 protected:
   /*!

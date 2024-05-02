@@ -587,13 +587,13 @@ DischargeInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
   CH_assert(m_firstDt > 0.0);
 
   if (str == "euler") {
-    m_transportAlgorithm == TransportAlgorithm::Euler;
+    m_transportAlgorithm = TransportAlgorithm::Euler;
   }
   else if (str == "heun") {
-    m_transportAlgorithm == TransportAlgorithm::Heun;
+    m_transportAlgorithm = TransportAlgorithm::Heun;
   }
   else if (str == "imex") {
-    m_transportAlgorithm == TransportAlgorithm::ImExCTU;
+    m_transportAlgorithm = TransportAlgorithm::ImExCTU;
   }
   else {
     MayDay::Error("Expected 'euler', 'heun', or 'imex' for 'DischargeInceptionStepper.transport_alg'");

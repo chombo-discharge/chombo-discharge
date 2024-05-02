@@ -49,13 +49,13 @@ namespace Physics {
 	@brief Parse options
       */
       virtual void
-      parseOptions() = 0;
+      parseOptions() override = 0;
 
       /*!
 	@brief Parse run-time configurable options
       */
       virtual void
-      parseRuntimeOptions() = 0;
+      parseRuntimeOptions() override = 0;
 
     protected:
       /*!
@@ -131,7 +131,7 @@ namespace Physics {
                   const Real             a_dx,
                   const int              a_lvl,
                   const Vector<Real>     a_tagFields,
-                  const Vector<RealVect> a_gradTagFields) const noexcept = 0;
+                  const Vector<RealVect> a_gradTagFields) const noexcept override = 0;
 
       /*!
 	@brief Determine if a particular cell should be refined or not. 
@@ -148,7 +148,7 @@ namespace Physics {
                  const Real             a_dx,
                  const int              a_lvl,
                  const Vector<Real>     a_tagFields,
-                 const Vector<RealVect> a_gradTagFields) const noexcept = 0;
+                 const Vector<RealVect> a_gradTagFields) const noexcept override = 0;
     };
   } // namespace ItoKMC
 } // namespace Physics
