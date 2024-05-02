@@ -188,6 +188,11 @@ public:
   clearMaskParticles() const;
 
   /*!
+    @brief Clear outcast particles
+  */
+  void clearOutcast() noexcept;
+
+  /*!
     @brief Clear particles on input data holder
     @param[inout] a_particles
   */

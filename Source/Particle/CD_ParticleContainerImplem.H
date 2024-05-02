@@ -537,10 +537,6 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
       outcastCoar.catenate(outcast);
     }
   }
-
-  // Clear the particles not on the mesh.
-  List<P>& outcastCoarsest = m_particles[0]->outcast();
-  outcastCoarsest.clear();
 }
 
 template <class P>
@@ -568,10 +564,6 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
       outcastCoar.catenate(outcast);
     }
   }
-
-  // Clear the particles not on the mesh.
-  List<P>& outcastCoarsest = m_particles[0]->outcast();
-  outcastCoarsest.clear();
 }
 
 template <class P>
@@ -886,9 +878,8 @@ ParticleContainer<P>::remap()
     CH_STOP(t2);
   }
 
-  // Clear the particles that fell off the grid.
-  List<P>& outcastCoarsest = m_particles[0]->outcast();
-  outcastCoarsest.clear();
+  // Claer outcast
+  this->clearOutcast();
 }
 
 template <class P>
@@ -1385,6 +1376,21 @@ ParticleContainer<P>::clearMaskParticles() const
   CH_assert(m_isDefined);
 
   this->clear(m_maskParticles);
+}
+
+template <class P>
+void
+ParticleContainer<P>::clearOutcast() noexcept
+{
+  CH_assert(m_isDefined);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    ParticleData<P>& particleData = *m_particles[lvl];
+
+    List<P>& outcast = particleData.outcast();
+
+    outcast.clear();
+  }
 }
 
 template <class P>
