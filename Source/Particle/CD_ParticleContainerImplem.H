@@ -1459,24 +1459,23 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t5);
   CH_TIMER("ParticleContainer::remapOutcast::assign", t6);
 
-  ParmParse pp;
+  ParmParse parmParse;
 
   bool useNewRemap = false;
-  pp.query("new_remap", useNewRemap);
+  parmParse.query("new_remap", useNewRemap);
 
   if (!useNewRemap) {
     a_particles.remapOutcast();
   }
   else {
-    // this proc id
-    const unsigned nProc = numProc();
-    const unsigned myPID = procID();
+    const unsigned   numRanks = numProc();
+    const unsigned   myPID    = procID();
+    const BoxLayout& grids    = a_particles.getBoxes();
 
-    // storage for particles to be delivered to each box/proc
-    std::vector<std::map<unsigned, List<P>>> pp(nProc);
-    CompCounts<P>                            compCounts(pp);
-
-    const BoxLayout& grids = a_particles.getBoxes();
+    // Storage for particles to be delivered to each box/proc. The vector holds a map of particles to be sent to
+    // the indicated rank. The map itself indicates the box id and the list of particles to go into that box.
+    std::vector<std::map<unsigned, List<P>>> particlesToSend(numRanks);
+    CompCounts<P>                            compCounts(particlesToSend);
 
     List<P>& p = a_particles.outcast();
 
@@ -1487,27 +1486,38 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
       const RealVect origin       = a_particles.origin();
       const RealVect dx           = a_particles.meshSpacing() * fixedBoxSize;
 
-      std::set<IntVect, CompIntVect>              bivs;
-      std::map<IntVect, unsigned, CompIntVect>    mil;
-      std::multimap<IntVect, boxids, CompIntVect> mip;
+      // tileSet = List of all boxes in a "tiled" space.
+      // myTiles = List of this ranks boxes
+      // otherTiles = List of other ranks' boxes. boxids contain the local global box index AND the rank
+      std::set<IntVect, CompIntVect>              tileSet;
+      std::map<IntVect, unsigned, CompIntVect>    myTiles;
+      std::multimap<IntVect, boxids, CompIntVect> otherTiles;
 
+      // Build local mapping of the grids -- this figures out which box is owned by which
+      // processor.
+      //
+      // Note: If this becomes expensive we can probably store this structure somewhere.
       CH_START(t1);
-      for (LayoutIterator li = grids.layoutIterator(); li.ok(); ++li) {
-        // shrink box to get valid region
-        const Box     sbox = coarsen(grids[li], fixedBoxSize);
-        const IntVect biv  = sbox.smallEnd();
+      for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
+        const LayoutIndex lin  = lit();
+        const IntVect     tile = coarsen(grids[lin], fixedBoxSize).smallEnd();
+
+        // If using MPI, need to figure out who owns which tiles.
 #ifdef CH_MPI
-        const unsigned pid = grids.procID(li());
-        const unsigned idx = grids.index(li());
-        if (pid == myPID) {
-          mil[biv] = idx;
+        // Rank ID and tileID for the current box.
+        const unsigned rankID = grids.procID(lin);
+        const unsigned tileID = grids.index(lin);
+
+        if (rankID == myPID) {
+          myTiles[tile] = tileID;
         }
         else {
-          mip.insert(pair<IntVect, boxids>(biv, boxids(idx, pid)));
+          otherTiles.insert(std::pair<IntVect, boxids>(tile, boxids(tileID, rankID)));
         }
-        bivs.insert(biv);
+
+        tileSet.insert(tile);
 #else
-        mil[biv] = grids.index(li());
+        myTiles[tile] = grids.index(lin);
 #endif
       }
       CH_STOP(t1);
@@ -1516,12 +1526,12 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
       {
         // Rotate
         CH_START(t2);
-        set<IntVect, CompIntVect>::iterator it;
-        for (it = bivs.begin(); it != bivs.end(); ++it) {
-          const int count = mip.count(*it);
+        std::set<IntVect, CompIntVect>::iterator it;
+        for (it = tileSet.begin(); it != tileSet.end(); ++it) {
+          const int count = otherTiles.count(*it);
           if (count > 1) {
             unsigned              midn = myPID % count;
-            std::pair<RmIt, RmIt> rit  = mip.equal_range(*it);
+            std::pair<RmIt, RmIt> rit  = otherTiles.equal_range(*it);
             RmIt                  mid  = rit.first;
 
             while (midn-- > 0) {
@@ -1537,35 +1547,36 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
       CH_START(t3);
       // map particles to local boxes
-      std::map<IntVect, unsigned, CompIntVect>::iterator lit = mil.begin();
+      std::map<IntVect, unsigned, CompIntVect>::iterator lit = myTiles.begin();
       // map particles to pid-boxes
       std::map<IntVect, boxids, CompIntVect>::iterator pit;
 
-      std::pair<RmIt, RmIt> rit = mip.equal_range(mip.begin()->first);
+      std::pair<RmIt, RmIt> rit = otherTiles.equal_range(otherTiles.begin()->first);
 
       CH_START(t3);
+#if 1 // Original code
       for (ListIterator<P> pi(p); pi.ok();) {
         const IntVect ip = locateBin(pi().position(), dx, origin);
         if (ip == lit->first) {
-          pp[myPID][lit->second].transfer(pi);
+          particlesToSend[myPID][lit->second].transfer(pi);
         }
         else {
-          lit = mil.find(ip);
-          if (lit != mil.end()) {
-            pp[myPID][lit->second].transfer(pi);
+          lit = myTiles.find(ip);
+          if (lit != myTiles.end()) {
+            particlesToSend[myPID][lit->second].transfer(pi);
           }
 #ifdef CH_MPI
-          else if (ip == rit.first->first && nProc > 1) {
+          else if (ip == rit.first->first && numRanks > 1) {
             pit = min_element(rit.first, rit.second, compCounts);
-            pp[pit->second.pid][pit->second.idx].transfer(pi);
-            lit = mil.begin();
+            particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
+            lit = myTiles.begin();
           }
           else {
-            if (mip.count(ip) > 0 && nProc > 1) {
-              rit = mip.equal_range(ip);
+            if (otherTiles.count(ip) > 0 && numRanks > 1) {
+              rit = otherTiles.equal_range(ip);
               pit = min_element(rit.first, rit.second, compCounts);
-              pp[pit->second.pid][pit->second.idx].transfer(pi);
-              lit = mil.begin();
+              particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
+              lit = myTiles.begin();
             }
             else
               ++pi;
@@ -1575,24 +1586,27 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
             ++pi;
 #endif
         }
+#else // New code
+
+#endif
       }
       CH_STOP(t3);
     }
 
     // collect local mapping
     CH_START(t4);
-    map<unsigned, List<P>>                    lp;
-    typename map<unsigned, List<P>>::iterator mi;
-    for (mi = pp[myPID].begin(); mi != pp[myPID].end(); ++mi) {
-      lp[mi->first].catenate(mi->second);
+    std::map<unsigned, List<P>>                    receivedParticles;
+    typename std::map<unsigned, List<P>>::iterator mi;
+    for (mi = particlesToSend[myPID].begin(); mi != particlesToSend[myPID].end(); ++mi) {
+      receivedParticles[mi->first].catenate(mi->second);
     }
-    pp[myPID].clear();
+    particlesToSend[myPID].clear();
     CH_STOP(t4);
 
 #ifdef CH_MPI
     // Distribute particles in parallel.
     CH_START(t5);
-    mpi_scatter_part(lp, pp);
+    mpi_scatter_part(receivedParticles, particlesToSend);
     CH_STOP(t5);
 #endif
 
@@ -1608,10 +1622,10 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
       const unsigned idx = grids.index(din);
 
-      if (lp.find(idx) != lp.end()) {
+      if (receivedParticles.find(idx) != receivedParticles.end()) {
         List<P>& particles = a_particles[din].listItems();
 
-        particles.catenate(lp[idx]);
+        particles.catenate(receivedParticles[idx]);
       }
     }
     CH_STOP(t6);
