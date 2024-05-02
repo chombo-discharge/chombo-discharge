@@ -33,6 +33,7 @@ ParticleContainer<P>::ParticleContainer()
   m_isDefined         = false;
   m_isOrganizedByCell = false;
   m_profile           = false;
+  m_debug             = false;
 }
 
 template <class P>
@@ -97,6 +98,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
 
   ParmParse pp("ParticleContainer");
   pp.query("profile", m_profile);
+  pp.query("debug", m_debug);
 }
 
 template <class P>
@@ -528,7 +530,11 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
   outcastFinest.join(a_particles);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+#if 1
     this->remapOutcast(*m_particles[lvl]);
+#else
+    m_particles[lvl]->remapOutcast();
+#endif
 
     if (lvl > 0) {
       List<P>& outcast     = m_particles[lvl]->outcast();
@@ -555,7 +561,11 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
   outcastFinest.join(a_particles);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+#if 1
     this->remapOutcast(*m_particles[lvl]);
+#else
+    m_particles[lvl]->remapOutcast();
+#endif
 
     if (lvl > 0) {
       List<P>& outcast     = m_particles[lvl]->outcast();
@@ -864,8 +874,14 @@ ParticleContainer<P>::remap()
   CH_STOP(t1);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+#if 1
     this->gatherOutcast(*m_particles[lvl]);
     this->remapOutcast(*m_particles[lvl]);
+#else
+    //    m_particles[lvl]->gatherOutcast();
+    this->gatherOutcast(*m_particles[lvl]);
+    m_particles[lvl]->remapOutcast();
+#endif
 
     CH_START(t2);
     if (lvl > 0) {
@@ -878,7 +894,7 @@ ParticleContainer<P>::remap()
     CH_STOP(t2);
   }
 
-  // Claer outcast
+  // Clear rest of particles -- these are no longer on the grid.
   this->clearOutcast();
 }
 
@@ -911,8 +927,13 @@ ParticleContainer<P>::levelRemap(const int a_lvl)
     MayDay::Error("ParticleContainer<P>::levelRemap - particles are sorted by cell!");
   }
 
+#if 1
   this->gatherOutcast(*m_particles[a_lvl]);
   this->remapOutcast(*m_particles[a_lvl]);
+#else
+  m_particles[a_lvl]->gatherOutcast();
+  m_particles[a_lvl]->remapOutcast();
+#endif
 }
 
 template <class P>
@@ -1015,7 +1036,11 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
       m_cacheParticles[lvl].clear();
     }
 
+#if 1
     this->remapOutcast(*m_particles[lvl]);
+#else
+    m_particles[lvl]->remapOutcast();
+#endif
   }
 
   // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
@@ -1028,7 +1053,11 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     coarParticles.catenate(fineParticles);
     fineParticles.clear();
 
+#if 1
     this->remapOutcast(*m_particles[lvl - 1]);
+#else
+    m_particles[lvl - 1]->remapOutcast();
+#endif
   }
 
   // At this point all the particles have been moved to their correct patches, but the PVR is so far not respected. We call ::remap to ensure that
@@ -1399,41 +1428,28 @@ ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
 {
   CH_assert(m_isDefined);
 
-  ParmParse pp;
-
-  bool useNewClear = false;
-  pp.query("new_clear", useNewClear);
-
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
     ParticleData<P>& levelParticles = *a_particles[lvl];
 
-    if (!useNewClear) {
-      levelParticles.clear();
-    }
-    else {
-      if (levelParticles.isDefined()) {
+    // Clear patch particles
+    const BoxLayout&    grids = levelParticles.getBoxes();
+    const DataIterator& dit   = grids.dataIterator();
 
-        // Clear patch particles
-        const BoxLayout&    grids = levelParticles.getBoxes();
-        const DataIterator& dit   = grids.dataIterator();
-
-        const int nbox = dit.size();
+    const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
-        for (int mybox = 0; mybox < nbox; mybox++) {
-          const DataIndex din = dit[mybox];
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex din = dit[mybox];
 
-          List<P>& patchParticles = levelParticles[din].listItems();
+      List<P>& patchParticles = levelParticles[din].listItems();
 
-          patchParticles.clear();
-        }
-
-        // Clear outcast
-        List<P>& outcast = levelParticles.outcast();
-        outcast.clear();
-      }
+      patchParticles.clear();
     }
+
+    // Clear outcast
+    List<P>& outcast = levelParticles.outcast();
+    outcast.clear();
   }
 }
 
@@ -1443,44 +1459,21 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 {
   CH_TIME("ParticleContainer<P>::gatherOutcast");
 
-  ParmParse pp;
+  List<P>& outcasts = a_particles.outcast();
 
-  bool useNewGather = false;
-  pp.query("new_gather", useNewGather);
+  const BoxLayout&   grids = a_particles.getBoxes();
+  const DataIterator dit   = grids.dataIterator();
+  const RealVect&    dx    = a_particles.meshSpacing();
 
-  if (a_particles.isDefined()) {
-    if (!useNewGather) {
-      a_particles.gatherOutcast();
-    }
-    else {
-      List<P>& outcasts = a_particles.outcast();
-
-      const BoxLayout&   grids = a_particles.getBoxes();
-      const DataIterator dit   = grids.dataIterator();
-      const RealVect&    dx    = a_particles.meshSpacing();
-
-      const int nbox = dit.size();
+  const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime) reduction(catenate : outcasts)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
 
-        List<P>&   particles = a_particles[din].listItems();
-        const Box& box       = a_particles[din].box();
+    ListBox<P>& particles = a_particles[din];
 
-        for (ListIterator<P> lit(particles); lit.ok();) {
-          const RealVect& position  = lit().position();
-          const IntVect&  cellIndex = ParticleOps::getParticleCellIndex(position, m_probLo, dx);
-
-          if (!(box.contains(cellIndex))) {
-            outcasts.transfer(lit);
-          }
-          else {
-            ++lit;
-          }
-        }
-      }
-    }
+    particles.getInvalidDestructive(outcasts, grids[din]);
   }
 }
 
@@ -1496,176 +1489,166 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t5);
   CH_TIMER("ParticleContainer::remapOutcast::assign", t6);
 
-  ParmParse parmParse;
+  // a_particles.remapOutcast();
+  // return;
 
-  bool useNewRemap = false;
-  parmParse.query("new_remap", useNewRemap);
+  const unsigned   numRanks = numProc();
+  const unsigned   myPID    = procID();
+  const BoxLayout& grids    = a_particles.getBoxes();
 
-  if (!useNewRemap) {
-    a_particles.remapOutcast();
-  }
-  else {
-    const unsigned   numRanks = numProc();
-    const unsigned   myPID    = procID();
-    const BoxLayout& grids    = a_particles.getBoxes();
+  // Storage for particles to be delivered to each box/proc. The vector holds a map of particles to be sent to
+  // the indicated rank. The map itself indicates the box id and the list of particles to go into that box.
+  std::vector<std::map<unsigned, List<P>>> particlesToSend(numRanks);
+  CompCounts<P>                            compCounts(particlesToSend);
 
-    // Storage for particles to be delivered to each box/proc. The vector holds a map of particles to be sent to
-    // the indicated rank. The map itself indicates the box id and the list of particles to go into that box.
-    std::vector<std::map<unsigned, List<P>>> particlesToSend(numRanks);
-    CompCounts<P>                            compCounts(particlesToSend);
+  List<P>& p = a_particles.outcast();
 
-    List<P>& p = a_particles.outcast();
+  if (!p.isEmpty()) {
 
-    if (!p.isEmpty()) {
+    // Note, dx is a pseudo-grid spacing.
+    const int      fixedBoxSize = a_particles.fixedBoxSize();
+    const RealVect origin       = a_particles.origin();
+    const RealVect dx           = a_particles.meshSpacing() * fixedBoxSize;
 
-      // Note, dx is a pseudo-grid spacing.
-      const int      fixedBoxSize = a_particles.fixedBoxSize();
-      const RealVect origin       = a_particles.origin();
-      const RealVect dx           = a_particles.meshSpacing() * fixedBoxSize;
+    // tileSet = List of all boxes in a "tiled" space.
+    // myTiles = List of this ranks boxes
+    // otherTiles = List of other ranks' boxes. boxids contain the local global box index AND the rank
+    std::set<IntVect, CompIntVect>              tileSet;
+    std::map<IntVect, unsigned, CompIntVect>    myTiles;
+    std::multimap<IntVect, boxids, CompIntVect> otherTiles;
 
-      // tileSet = List of all boxes in a "tiled" space.
-      // myTiles = List of this ranks boxes
-      // otherTiles = List of other ranks' boxes. boxids contain the local global box index AND the rank
-      std::set<IntVect, CompIntVect>              tileSet;
-      std::map<IntVect, unsigned, CompIntVect>    myTiles;
-      std::multimap<IntVect, boxids, CompIntVect> otherTiles;
+    // Build local mapping of the grids -- this figures out which box is owned by which
+    // processor.
+    //
+    // Note: If this becomes expensive we can probably store this structure somewhere.
+    CH_START(t1);
+    for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
+      const LayoutIndex lin  = lit();
+      const IntVect     tile = coarsen(grids[lin], fixedBoxSize).smallEnd();
 
-      // Build local mapping of the grids -- this figures out which box is owned by which
-      // processor.
-      //
-      // Note: If this becomes expensive we can probably store this structure somewhere.
-      CH_START(t1);
-      for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
-        const LayoutIndex lin  = lit();
-        const IntVect     tile = coarsen(grids[lin], fixedBoxSize).smallEnd();
-
-        // If using MPI, need to figure out who owns which tiles.
+      // If using MPI, need to figure out who owns which tiles.
 #ifdef CH_MPI
-        // Rank ID and tileID for the current box.
-        const unsigned rankID = grids.procID(lin);
-        const unsigned tileID = grids.index(lin);
+      // Rank ID and tileID for the current box.
+      const unsigned rankID = grids.procID(lin);
+      const unsigned tileID = grids.index(lin);
 
-        if (rankID == myPID) {
-          myTiles[tile] = tileID;
-        }
-        else {
-          otherTiles.insert(std::pair<IntVect, boxids>(tile, boxids(tileID, rankID)));
-        }
+      if (rankID == myPID) {
+        myTiles[tile] = tileID;
+      }
+      else {
+        otherTiles.insert(std::pair<IntVect, boxids>(tile, boxids(tileID, rankID)));
+      }
 
-        tileSet.insert(tile);
+      tileSet.insert(tile);
 #else
-        myTiles[tile] = grids.index(lin);
+      myTiles[tile] = grids.index(lin);
 #endif
-      }
-      CH_STOP(t1);
+    }
+    CH_STOP(t1);
 
 #ifdef CH_MPI
-      {
-        // Rotate
-        CH_START(t2);
-        std::set<IntVect, CompIntVect>::iterator it;
-        for (it = tileSet.begin(); it != tileSet.end(); ++it) {
-          const int count = otherTiles.count(*it);
-          if (count > 1) {
-            unsigned              midn = myPID % count;
-            std::pair<RmIt, RmIt> rit  = otherTiles.equal_range(*it);
-            RmIt                  mid  = rit.first;
+    {
+      // Rotate
+      CH_START(t2);
+      std::set<IntVect, CompIntVect>::iterator it;
+      for (it = tileSet.begin(); it != tileSet.end(); ++it) {
+        const int count = otherTiles.count(*it);
+        if (count > 1) {
+          unsigned              midn = myPID % count;
+          std::pair<RmIt, RmIt> rit  = otherTiles.equal_range(*it);
+          RmIt                  mid  = rit.first;
 
-            while (midn-- > 0) {
-              mid++;
-            }
-
-            myrotate(rit.first, mid, rit.second);
+          while (midn-- > 0) {
+            mid++;
           }
+
+          myrotate(rit.first, mid, rit.second);
         }
-        CH_STOP(t2);
       }
+      CH_STOP(t2);
+    }
 #endif
 
-      CH_START(t3);
-      // map particles to local boxes
-      std::map<IntVect, unsigned, CompIntVect>::iterator lit = myTiles.begin();
-      // map particles to pid-boxes
-      std::map<IntVect, boxids, CompIntVect>::iterator pit;
+    CH_START(t3);
+    // map particles to local boxes
+    std::map<IntVect, unsigned, CompIntVect>::iterator lit = myTiles.begin();
+    // map particles to pid-boxes
+    std::map<IntVect, boxids, CompIntVect>::iterator pit;
 
-      std::pair<RmIt, RmIt> rit = otherTiles.equal_range(otherTiles.begin()->first);
+    std::pair<RmIt, RmIt> rit = otherTiles.equal_range(otherTiles.begin()->first);
 
-      CH_START(t3);
-#if 1 // Original code
-      for (ListIterator<P> pi(p); pi.ok();) {
-        const IntVect ip = locateBin(pi().position(), dx, origin);
-        if (ip == lit->first) {
+    CH_START(t3);
+    for (ListIterator<P> pi(p); pi.ok();) {
+      const IntVect ip = locateBin(pi().position(), dx, origin);
+      if (ip == lit->first) {
+        particlesToSend[myPID][lit->second].transfer(pi);
+      }
+      else {
+        lit = myTiles.find(ip);
+        if (lit != myTiles.end()) {
           particlesToSend[myPID][lit->second].transfer(pi);
         }
-        else {
-          lit = myTiles.find(ip);
-          if (lit != myTiles.end()) {
-            particlesToSend[myPID][lit->second].transfer(pi);
-          }
 #ifdef CH_MPI
-          else if (ip == rit.first->first && numRanks > 1) {
+        else if (ip == rit.first->first && numRanks > 1) {
+          pit = min_element(rit.first, rit.second, compCounts);
+          particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
+          lit = myTiles.begin();
+        }
+        else {
+          if (otherTiles.count(ip) > 0 && numRanks > 1) {
+            rit = otherTiles.equal_range(ip);
             pit = min_element(rit.first, rit.second, compCounts);
             particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
             lit = myTiles.begin();
           }
-          else {
-            if (otherTiles.count(ip) > 0 && numRanks > 1) {
-              rit = otherTiles.equal_range(ip);
-              pit = min_element(rit.first, rit.second, compCounts);
-              particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
-              lit = myTiles.begin();
-            }
-            else
-              ++pi;
-          }
-#else
           else
             ++pi;
-#endif
         }
-#else // New code
-
+#else
+        else
+          ++pi;
 #endif
       }
-      CH_STOP(t3);
     }
+    CH_STOP(t3);
+  }
 
-    // collect local mapping
-    CH_START(t4);
-    std::map<unsigned, List<P>>                    receivedParticles;
-    typename std::map<unsigned, List<P>>::iterator mi;
-    for (mi = particlesToSend[myPID].begin(); mi != particlesToSend[myPID].end(); ++mi) {
-      receivedParticles[mi->first].catenate(mi->second);
-    }
-    particlesToSend[myPID].clear();
-    CH_STOP(t4);
+  // collect local mapping
+  CH_START(t4);
+  std::map<unsigned, List<P>>                    receivedParticles;
+  typename std::map<unsigned, List<P>>::iterator mi;
+  for (mi = particlesToSend[myPID].begin(); mi != particlesToSend[myPID].end(); ++mi) {
+    receivedParticles[mi->first].catenate(mi->second);
+  }
+  particlesToSend[myPID].clear();
+  CH_STOP(t4);
 
 #ifdef CH_MPI
-    // Distribute particles in parallel.
-    CH_START(t5);
-    mpi_scatter_part(receivedParticles, particlesToSend);
-    CH_STOP(t5);
+  // Distribute particles in parallel.
+  CH_START(t5);
+  mpi_scatter_part(receivedParticles, particlesToSend);
+  CH_STOP(t5);
 #endif
 
-    // Assign particles to boxes
-    CH_START(t6);
-    const DataIterator dit = grids.dataIterator();
+  // Assign particles to boxes
+  CH_START(t6);
+  const DataIterator dit = grids.dataIterator();
 
-    const int nbox = dit.size();
+  const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex din = dit[mybox];
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex din = dit[mybox];
 
-      const unsigned idx = grids.index(din);
+    const unsigned idx = grids.index(din);
 
-      if (receivedParticles.find(idx) != receivedParticles.end()) {
-        List<P>& particles = a_particles[din].listItems();
+    if (receivedParticles.find(idx) != receivedParticles.end()) {
+      List<P>& particles = a_particles[din].listItems();
 
-        particles.catenate(receivedParticles[idx]);
-      }
+      particles.catenate(receivedParticles[idx]);
+    }
 
-#if 1 // Debug code
+    if (m_debug) {
       const Box      box       = grids[din];
       const List<P>& particles = a_particles[din].listItems();
 
@@ -1673,13 +1656,12 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
         const RealVect position = lit().position();
 
         if (!(box.contains(ParticleOps::getParticleCellIndex(lit().position(), m_probLo, a_particles.meshSpacing())))) {
-          MayDay::Error("ParticleContainer::logic bust -- particle not contained in box!");
+          MayDay::Error("ParticleContainer::remapOutcast -- particle is not contained in grid box!");
         }
       }
-#endif
     }
-    CH_STOP(t6);
   }
+  CH_STOP(t6);
 }
 
 #include <CD_NamespaceFooter.H>

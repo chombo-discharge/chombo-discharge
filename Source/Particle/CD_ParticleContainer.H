@@ -573,6 +573,11 @@ protected:
   bool m_profile;
 
   /*!
+    @brief Debug or not
+  */
+  bool m_debug;
+
+  /*!
     @brief AMR grids
   */
   Vector<DisjointBoxLayout> m_grids;
