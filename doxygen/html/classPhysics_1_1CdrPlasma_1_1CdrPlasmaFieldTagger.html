@@ -123,10 +123,10 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:a5f1b320d80501059a4531168b2025e1c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a5f1b320d80501059a4531168b2025e1c">computeTracers</a> () const override final</td></tr>
 <tr class="memdesc:a5f1b320d80501059a4531168b2025e1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute tracer fields.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a5f1b320d80501059a4531168b2025e1c">More...</a><br /></td></tr>
 <tr class="separator:a5f1b320d80501059a4531168b2025e1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82aaa7b6ec77338ef6b97c63a7cba018"><td class="memItemLeft" align="right" valign="top"><a id="a82aaa7b6ec77338ef6b97c63a7cba018"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a82aaa7b6ec77338ef6b97c63a7cba018">parseOptions</a> ()=0</td></tr>
-<tr class="memdesc:a82aaa7b6ec77338ef6b97c63a7cba018"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse options. Must be implemented by users. <br /></td></tr>
-<tr class="separator:a82aaa7b6ec77338ef6b97c63a7cba018"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac995f948c492ca252aeadab4d6da451b"><td class="memItemLeft" align="right" valign="top"><a id="ac995f948c492ca252aeadab4d6da451b"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#ac995f948c492ca252aeadab4d6da451b">parseOptions</a> () override=0</td></tr>
+<tr class="memdesc:ac995f948c492ca252aeadab4d6da451b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse options. Must be implemented by users. <br /></td></tr>
+<tr class="separator:ac995f948c492ca252aeadab4d6da451b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html">Physics::CdrPlasma::CdrPlasmaTagger</a></td></tr>
 <tr class="memitem:ac8914ea3f6e8a8aca125461bd4c53d18 inherit pub_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger"><td class="memItemLeft" align="right" valign="top"><a id="ac8914ea3f6e8a8aca125461bd4c53d18"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ac8914ea3f6e8a8aca125461bd4c53d18">CdrPlasmaTagger</a> ()</td></tr>
@@ -200,12 +200,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6c4950cecbffa8abe4b43c21896431ba"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; Real &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a6c4950cecbffa8abe4b43c21896431ba">tracer</a> (const RealVect a_pos, const Real a_time, const Real a_dx, const RealVect a_electricField, const Real a_minElectricField, const Real a_maxElectricField, const RealVect a_gradElectricField, const Real a_minGradElectricField, const Real a_maxGradElectricField) const =0</td></tr>
 <tr class="memdesc:a6c4950cecbffa8abe4b43c21896431ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute tracer field.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a6c4950cecbffa8abe4b43c21896431ba">More...</a><br /></td></tr>
 <tr class="separator:a6c4950cecbffa8abe4b43c21896431ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aabbca9c9e131b245ab77105e57125147"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#aabbca9c9e131b245ab77105e57125147">coarsenCell</a> (const RealVect a_pos, const Real a_time, const Real a_dx, const int a_lvl, const Vector&lt; Real &gt; a_tracers, const Vector&lt; RealVect &gt; a_gradTracers) const =0</td></tr>
-<tr class="memdesc:aabbca9c9e131b245ab77105e57125147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen a cell based on a tracer field.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#aabbca9c9e131b245ab77105e57125147">More...</a><br /></td></tr>
-<tr class="separator:aabbca9c9e131b245ab77105e57125147"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a700a4fffe6edcde64fb4832f7cb7a1"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a4a700a4fffe6edcde64fb4832f7cb7a1">refineCell</a> (const RealVect a_pos, const Real a_time, const Real a_dx, const int a_lvl, const Vector&lt; Real &gt; a_tracers, const Vector&lt; RealVect &gt; a_gradTracers) const =0</td></tr>
-<tr class="memdesc:a4a700a4fffe6edcde64fb4832f7cb7a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refine a cell based on a tracer field.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a4a700a4fffe6edcde64fb4832f7cb7a1">More...</a><br /></td></tr>
-<tr class="separator:a4a700a4fffe6edcde64fb4832f7cb7a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa381c58baba1518f047e79ebbbc2aef8"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#aa381c58baba1518f047e79ebbbc2aef8">coarsenCell</a> (const RealVect a_pos, const Real a_time, const Real a_dx, const int a_lvl, const Vector&lt; Real &gt; a_tracers, const Vector&lt; RealVect &gt; a_gradTracers) const override=0</td></tr>
+<tr class="memdesc:aa381c58baba1518f047e79ebbbc2aef8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsen a cell based on a tracer field.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#aa381c58baba1518f047e79ebbbc2aef8">More...</a><br /></td></tr>
+<tr class="separator:aa381c58baba1518f047e79ebbbc2aef8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13c9f5413f35aafec13caac860abdd91"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a13c9f5413f35aafec13caac860abdd91">refineCell</a> (const RealVect a_pos, const Real a_time, const Real a_dx, const int a_lvl, const Vector&lt; Real &gt; a_tracers, const Vector&lt; RealVect &gt; a_gradTracers) const override=0</td></tr>
+<tr class="memdesc:a13c9f5413f35aafec13caac860abdd91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refine a cell based on a tracer field.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html#a13c9f5413f35aafec13caac860abdd91">More...</a><br /></td></tr>
+<tr class="separator:a13c9f5413f35aafec13caac860abdd91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html">Physics::CdrPlasma::CdrPlasmaTagger</a></td></tr>
 <tr class="memitem:ae11876e42960b1fb8532098427130fbf inherit pro_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ae11876e42960b1fb8532098427130fbf">refineCellsBox</a> (DenseIntVectSet &amp;a_refinedCells, const Vector&lt; EBCellFAB * &gt; &amp;a_tracers, const Vector&lt; EBCellFAB * &gt; &amp;a_gradTracers, const int a_lvl, const DataIndex a_dit, const Box a_box, const EBISBox &amp;a_ebisbox, const Real a_time, const Real a_dx, const RealVect a_probLo)</td></tr>
 <tr class="memdesc:ae11876e42960b1fb8532098427130fbf inherit pro_methods_classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-box refinement method.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#ae11876e42960b1fb8532098427130fbf">More...</a><br /></td></tr>
@@ -312,8 +312,8 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 <div class="textblock"><p>Lightweight tagging class which flags cells for refinement/coarsening using the electric field only. </p>
 <p>This class fetches the point-wise electric field. The class is pure, so users must implement the actual tagging criterion themselves. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="aabbca9c9e131b245ab77105e57125147"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aabbca9c9e131b245ab77105e57125147">&#9670;&nbsp;</a></span>coarsenCell()</h2>
+<a id="aa381c58baba1518f047e79ebbbc2aef8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa381c58baba1518f047e79ebbbc2aef8">&#9670;&nbsp;</a></span>coarsenCell()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -365,7 +365,7 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -465,8 +465,8 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
 
 </div>
 </div>
-<a id="a4a700a4fffe6edcde64fb4832f7cb7a1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a700a4fffe6edcde64fb4832f7cb7a1">&#9670;&nbsp;</a></span>refineCell()</h2>
+<a id="a13c9f5413f35aafec13caac860abdd91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13c9f5413f35aafec13caac860abdd91">&#9670;&nbsp;</a></span>refineCell()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -518,7 +518,7 @@ std::vector&lt; std::pair&lt; <a class="el" href="classRealBox.html">RealBox</a>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

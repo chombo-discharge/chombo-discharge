@@ -112,9 +112,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:aa8da21a5b1de6523e62f722401c70a4d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAddOp.html#aa8da21a5b1de6523e62f722401c70a4d">linearIn</a> (EBCellFAB &amp;a_data, void *a_buffer, const Box &amp;a_region, const Interval &amp;a_comps) const override</td></tr>
 <tr class="memdesc:aa8da21a5b1de6523e62f722401c70a4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.  <a href="classEBAddOp.html#aa8da21a5b1de6523e62f722401c70a4d">More...</a><br /></td></tr>
 <tr class="separator:aa8da21a5b1de6523e62f722401c70a4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80de61dab50223431f0e059de34d8366"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAddOp.html#a80de61dab50223431f0e059de34d8366">op</a> (EBCellFAB &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const EBCellFAB &amp;a_src, const Interval &amp;a_srcVars) const</td></tr>
-<tr class="memdesc:a80de61dab50223431f0e059de34d8366"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator function. Increments data with source.  <a href="classEBAddOp.html#a80de61dab50223431f0e059de34d8366">More...</a><br /></td></tr>
-<tr class="separator:a80de61dab50223431f0e059de34d8366"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ba448668f2b4d3dae9fa754bdbe356f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBAddOp.html#a6ba448668f2b4d3dae9fa754bdbe356f">op</a> (EBCellFAB &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const EBCellFAB &amp;a_src, const Interval &amp;a_srcVars) const override</td></tr>
+<tr class="memdesc:a6ba448668f2b4d3dae9fa754bdbe356f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator function. Increments data with source.  <a href="classEBAddOp.html#a6ba448668f2b4d3dae9fa754bdbe356f">More...</a><br /></td></tr>
+<tr class="separator:a6ba448668f2b4d3dae9fa754bdbe356f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A Copier class for making copying between BoxLayoutData&lt;EBCellFAB&gt; easier. This increments EBCellFABs when calling copyTo (with the correct Copier). </p>
@@ -178,8 +178,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 
 </div>
 </div>
-<a id="a80de61dab50223431f0e059de34d8366"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80de61dab50223431f0e059de34d8366">&#9670;&nbsp;</a></span>op()</h2>
+<a id="a6ba448668f2b4d3dae9fa754bdbe356f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ba448668f2b4d3dae9fa754bdbe356f">&#9670;&nbsp;</a></span>op()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +231,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

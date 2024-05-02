@@ -184,9 +184,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a28471752b1036c1a0a095e47e114b5b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a28471752b1036c1a0a095e47e114b5b5">getFlux</a> (MFFluxFAB &amp;a_flux, const LevelData&lt; MFCellFAB &gt; &amp;a_data, const Box &amp;a_grid, const DataIndex &amp;a_dit, Real a_scale) override final</td></tr>
 <tr class="memdesc:a28471752b1036c1a0a095e47e114b5b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill flux.  <a href="classMFHelmholtzOp.html#a28471752b1036c1a0a095e47e114b5b5">More...</a><br /></td></tr>
 <tr class="separator:a28471752b1036c1a0a095e47e114b5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a9baf1102909aec0a4110ba7f0f1453"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a4a9baf1102909aec0a4110ba7f0f1453">residual</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, const bool a_homogeneousPhysBc)</td></tr>
-<tr class="memdesc:a4a9baf1102909aec0a4110ba7f0f1453"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level.  <a href="classMFHelmholtzOp.html#a4a9baf1102909aec0a4110ba7f0f1453">More...</a><br /></td></tr>
-<tr class="separator:a4a9baf1102909aec0a4110ba7f0f1453"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77d1aebc56ac9491b51ba5637cff24f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a77d1aebc56ac9491b51ba5637cff24f1">residual</a> (LevelData&lt; MFCellFAB &gt; &amp;a_residual, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_rhs, const bool a_homogeneousPhysBc) override final</td></tr>
+<tr class="memdesc:a77d1aebc56ac9491b51ba5637cff24f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level.  <a href="classMFHelmholtzOp.html#a77d1aebc56ac9491b51ba5637cff24f1">More...</a><br /></td></tr>
+<tr class="separator:a77d1aebc56ac9491b51ba5637cff24f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22c2c4e60d2c5d24877c3f84649c65ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a22c2c4e60d2c5d24877c3f84649c65ab">preCond</a> (LevelData&lt; MFCellFAB &gt; &amp;a_corr, const LevelData&lt; MFCellFAB &gt; &amp;a_residual) override final</td></tr>
 <tr class="memdesc:a22c2c4e60d2c5d24877c3f84649c65ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Precondition system before bottom solve.  <a href="classMFHelmholtzOp.html#a22c2c4e60d2c5d24877c3f84649c65ab">More...</a><br /></td></tr>
 <tr class="separator:a22c2c4e60d2c5d24877c3f84649c65ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -294,9 +294,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a77defde9dc79221f5b7295a6469cbe49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a77defde9dc79221f5b7295a6469cbe49">applyOp</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; *const a_phiCoar, const bool a_homogeneousPhysBC, const bool a_homogeneousCFBC)</td></tr>
 <tr class="memdesc:a77defde9dc79221f5b7295a6469cbe49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.  <a href="classMFHelmholtzOp.html#a77defde9dc79221f5b7295a6469cbe49">More...</a><br /></td></tr>
 <tr class="separator:a77defde9dc79221f5b7295a6469cbe49"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26766f7e95b409db0480944b0b587db6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a26766f7e95b409db0480944b0b587db6">AMROperator</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *a_finerOp)</td></tr>
-<tr class="memdesc:a26766f7e95b409db0480944b0b587db6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classMFHelmholtzOp.html#a26766f7e95b409db0480944b0b587db6">More...</a><br /></td></tr>
-<tr class="separator:a26766f7e95b409db0480944b0b587db6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42889752d37cfbd654f09f2077359ee1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzOp.html#a42889752d37cfbd654f09f2077359ee1">AMROperator</a> (LevelData&lt; MFCellFAB &gt; &amp;a_Lphi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiFine, const LevelData&lt; MFCellFAB &gt; &amp;a_phi, const LevelData&lt; MFCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; MFCellFAB &gt;&gt; *a_finerOp) override</td></tr>
+<tr class="memdesc:a42889752d37cfbd654f09f2077359ee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classMFHelmholtzOp.html#a42889752d37cfbd654f09f2077359ee1">More...</a><br /></td></tr>
+<tr class="separator:a42889752d37cfbd654f09f2077359ee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -658,8 +658,8 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a26766f7e95b409db0480944b0b587db6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a26766f7e95b409db0480944b0b587db6">&#9670;&nbsp;</a></span>AMROperator()</h2>
+<a id="a42889752d37cfbd654f09f2077359ee1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42889752d37cfbd654f09f2077359ee1">&#9670;&nbsp;</a></span>AMROperator()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -711,7 +711,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2470,11 +2470,14 @@ template&lt;typename Duration &gt; </div>
 
 </div>
 </div>
-<a id="a4a9baf1102909aec0a4110ba7f0f1453"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a9baf1102909aec0a4110ba7f0f1453">&#9670;&nbsp;</a></span>residual()</h2>
+<a id="a77d1aebc56ac9491b51ba5637cff24f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77d1aebc56ac9491b51ba5637cff24f1">&#9670;&nbsp;</a></span>residual()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void MFHelmholtzOp::residual </td>
@@ -2506,6 +2509,11 @@ template&lt;typename Duration &gt; </div>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Compute residual on this level. </p>

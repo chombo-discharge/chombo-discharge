@@ -151,10 +151,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ac8b9d3dd7452351329828e577fe376f8">registerOperators</a> () override</td></tr>
 <tr class="memdesc:ac8b9d3dd7452351329828e577fe376f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operators to be used for the simulation. <br /></td></tr>
 <tr class="separator:ac8b9d3dd7452351329828e577fe376f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f461c7cc9fa5767ab25555508a43f09"><td class="memItemLeft" align="right" valign="top"><a id="a5f461c7cc9fa5767ab25555508a43f09"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a5f461c7cc9fa5767ab25555508a43f09">parseRuntimeOptions</a> ()=0</td></tr>
-<tr class="memdesc:a5f461c7cc9fa5767ab25555508a43f09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options. Subclasses must implement this. <br /></td></tr>
-<tr class="separator:a5f461c7cc9fa5767ab25555508a43f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d0a451399e8589e1b04b35240169b3"><td class="memItemLeft" align="right" valign="top"><a id="a36d0a451399e8589e1b04b35240169b3"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a36d0a451399e8589e1b04b35240169b3">parseRuntimeOptions</a> () override=0</td></tr>
+<tr class="memdesc:a36d0a451399e8589e1b04b35240169b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse runtime options. Subclasses must implement this. <br /></td></tr>
+<tr class="separator:a36d0a451399e8589e1b04b35240169b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad930e4f040981b805591c9bfc6e7f8f3"><td class="memItemLeft" align="right" valign="top"><a id="ad930e4f040981b805591c9bfc6e7f8f3"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ad930e4f040981b805591c9bfc6e7f8f3">prePlot</a> () override</td></tr>
 <tr class="memdesc:ad930e4f040981b805591c9bfc6e7f8f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute some thing that go into plot files. <br /></td></tr>
@@ -169,12 +169,12 @@ virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="b
 <tr class="memitem:aeeed6f9f1a177c0a849a2197e0c95483"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aeeed6f9f1a177c0a849a2197e0c95483">writePlotData</a> (LevelData&lt; EBCellFAB &gt; &amp;a_output, int &amp;a_icomp, const std::string a_outputRealm, const int a_level) const override</td></tr>
 <tr class="memdesc:aeeed6f9f1a177c0a849a2197e0c95483"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write plot data to output holder.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aeeed6f9f1a177c0a849a2197e0c95483">More...</a><br /></td></tr>
 <tr class="separator:aeeed6f9f1a177c0a849a2197e0c95483"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8fb79765ae0355d13eedbe16c72693f"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab8fb79765ae0355d13eedbe16c72693f">computeDt</a> ()=0</td></tr>
-<tr class="memdesc:ab8fb79765ae0355d13eedbe16c72693f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the time step.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ab8fb79765ae0355d13eedbe16c72693f">More...</a><br /></td></tr>
-<tr class="separator:ab8fb79765ae0355d13eedbe16c72693f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af78c0374aed9bf00440f5c0ff2841d00"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#af78c0374aed9bf00440f5c0ff2841d00">advance</a> (const Real a_dt)=0</td></tr>
-<tr class="memdesc:af78c0374aed9bf00440f5c0ff2841d00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance method, advances equations.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#af78c0374aed9bf00440f5c0ff2841d00">More...</a><br /></td></tr>
-<tr class="separator:af78c0374aed9bf00440f5c0ff2841d00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bb53a870abaf9de007cb54e0393eadb"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a6bb53a870abaf9de007cb54e0393eadb">computeDt</a> () override=0</td></tr>
+<tr class="memdesc:a6bb53a870abaf9de007cb54e0393eadb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the time step.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a6bb53a870abaf9de007cb54e0393eadb">More...</a><br /></td></tr>
+<tr class="separator:a6bb53a870abaf9de007cb54e0393eadb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a434861e30ea6b3aaee32e61c444c876d"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a434861e30ea6b3aaee32e61c444c876d">advance</a> (const Real a_dt) override=0</td></tr>
+<tr class="memdesc:a434861e30ea6b3aaee32e61c444c876d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance method, advances equations.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a434861e30ea6b3aaee32e61c444c876d">More...</a><br /></td></tr>
+<tr class="separator:a434861e30ea6b3aaee32e61c444c876d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4fe3385d76eb43fc15a60a5cbaf3dbd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ac4fe3385d76eb43fc15a60a5cbaf3dbd">synchronizeSolverTimes</a> (const int a_step, const Real a_time, const Real a_dt) override</td></tr>
 <tr class="memdesc:ac4fe3385d76eb43fc15a60a5cbaf3dbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronize solver times.  <a href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#ac4fe3385d76eb43fc15a60a5cbaf3dbd">More...</a><br /></td></tr>
 <tr class="separator:ac4fe3385d76eb43fc15a60a5cbaf3dbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -731,8 +731,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="af78c0374aed9bf00440f5c0ff2841d00"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af78c0374aed9bf00440f5c0ff2841d00">&#9670;&nbsp;</a></span>advance()</h2>
+<a id="a434861e30ea6b3aaee32e61c444c876d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a434861e30ea6b3aaee32e61c444c876d">&#9670;&nbsp;</a></span>advance()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -750,7 +750,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -2979,8 +2979,8 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 </div>
 </div>
-<a id="ab8fb79765ae0355d13eedbe16c72693f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8fb79765ae0355d13eedbe16c72693f">&#9670;&nbsp;</a></span>computeDt()</h2>
+<a id="a6bb53a870abaf9de007cb54e0393eadb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bb53a870abaf9de007cb54e0393eadb">&#9670;&nbsp;</a></span>computeDt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2997,7 +2997,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -3007,7 +3007,7 @@ RefCountedPtr&lt; <a class="el" href="classComputationalGeometry.html">Computati
 
 <p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
 
-<p>Implemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a287049cf4a27bbc4f1508103fc92a048">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>, and <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#adc23093c3226df7f2b9745e917d0ee30">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>.</p>
+<p>Implemented in <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html#a3ff2381bbe7bf92e9e3263ffc034fe01">Physics::CdrPlasma::CdrPlasmaImExSdcStepper</a>, and <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a287049cf4a27bbc4f1508103fc92a048">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>.</p>
 
 </div>
 </div>

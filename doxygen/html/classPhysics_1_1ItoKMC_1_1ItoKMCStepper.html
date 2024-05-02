@@ -166,9 +166,9 @@ virtual Vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="b
 <tr class="memitem:a9ff31e5708607f0714b5aa594324318d"><td class="memItemLeft" align="right" valign="top">virtual Vector&lt; long int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9ff31e5708607f0714b5aa594324318d">getCheckpointLoads</a> (const std::string a_realm, const int a_level) const override</td></tr>
 <tr class="memdesc:a9ff31e5708607f0714b5aa594324318d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get computational loads to be checkpointed.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a9ff31e5708607f0714b5aa594324318d">More...</a><br /></td></tr>
 <tr class="separator:a9ff31e5708607f0714b5aa594324318d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad12f0eb6ee61b6d102747368a0b75667"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad12f0eb6ee61b6d102747368a0b75667">advance</a> (const Real a_dt)=0</td></tr>
-<tr class="memdesc:ad12f0eb6ee61b6d102747368a0b75667"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advancement method. Needs to be implemented by subclasses.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ad12f0eb6ee61b6d102747368a0b75667">More...</a><br /></td></tr>
-<tr class="separator:ad12f0eb6ee61b6d102747368a0b75667"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab325e43a12236bb4530d32d0ce5bbab5"><td class="memItemLeft" align="right" valign="top">virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab325e43a12236bb4530d32d0ce5bbab5">advance</a> (const Real a_dt) override=0</td></tr>
+<tr class="memdesc:ab325e43a12236bb4530d32d0ce5bbab5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advancement method. Needs to be implemented by subclasses.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab325e43a12236bb4530d32d0ce5bbab5">More...</a><br /></td></tr>
+<tr class="separator:ab325e43a12236bb4530d32d0ce5bbab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f66b0000634cd528a208e33a9726ccf"><td class="memItemLeft" align="right" valign="top"><a id="a8f66b0000634cd528a208e33a9726ccf"></a>
 virtual Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a8f66b0000634cd528a208e33a9726ccf">computeDt</a> () override</td></tr>
 <tr class="memdesc:a8f66b0000634cd528a208e33a9726ccf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step used for the advance method. <br /></td></tr>
@@ -939,8 +939,8 @@ template&lt;typename I , typename C , typename R , typename F &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad12f0eb6ee61b6d102747368a0b75667"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad12f0eb6ee61b6d102747368a0b75667">&#9670;&nbsp;</a></span>advance()</h2>
+<a id="ab325e43a12236bb4530d32d0ce5bbab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab325e43a12236bb4530d32d0ce5bbab5">&#9670;&nbsp;</a></span>advance()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -960,7 +960,7 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

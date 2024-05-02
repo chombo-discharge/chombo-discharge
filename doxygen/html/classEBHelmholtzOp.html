@@ -188,9 +188,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:ac09f17d4aa7641526c040948e572dd84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ac09f17d4aa7641526c040948e572dd84">gauSaiMultiColorKernel</a> (EBCellFAB &amp;a_Lcorr, EBCellFAB &amp;a_corr, const EBCellFAB &amp;a_resid, const EBCellFAB &amp;a_Acoef, const EBFluxFAB &amp;a_Bcoef, const BaseIVFAB&lt; Real &gt; &amp;a_BcoefIrreg, const Box &amp;a_cellBox, const DataIndex &amp;a_dit, const IntVect &amp;a_color) const noexcept</td></tr>
 <tr class="memdesc:ac09f17d4aa7641526c040948e572dd84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multi-color Gauss-Seidel kernel.  <a href="classEBHelmholtzOp.html#ac09f17d4aa7641526c040948e572dd84">More...</a><br /></td></tr>
 <tr class="separator:ac09f17d4aa7641526c040948e572dd84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09449a46e618a393b236096bd5374af4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a09449a46e618a393b236096bd5374af4">residual</a> (LevelData&lt; EBCellFAB &gt; &amp;a_residual, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const bool a_homogeneousPhysBc)</td></tr>
-<tr class="memdesc:a09449a46e618a393b236096bd5374af4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level.  <a href="classEBHelmholtzOp.html#a09449a46e618a393b236096bd5374af4">More...</a><br /></td></tr>
-<tr class="separator:a09449a46e618a393b236096bd5374af4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c312b9128f855686497b8f607e815ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a8c312b9128f855686497b8f607e815ea">residual</a> (LevelData&lt; EBCellFAB &gt; &amp;a_residual, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const bool a_homogeneousPhysBc) override</td></tr>
+<tr class="memdesc:a8c312b9128f855686497b8f607e815ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute residual on this level.  <a href="classEBHelmholtzOp.html#a8c312b9128f855686497b8f607e815ea">More...</a><br /></td></tr>
+<tr class="separator:a8c312b9128f855686497b8f607e815ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4556e17727b8b07237e3e8ace95aad9a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a4556e17727b8b07237e3e8ace95aad9a">preCond</a> (LevelData&lt; EBCellFAB &gt; &amp;a_corr, const LevelData&lt; EBCellFAB &gt; &amp;a_residual) override final</td></tr>
 <tr class="memdesc:a4556e17727b8b07237e3e8ace95aad9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Precondition system before bottom solve.  <a href="classEBHelmholtzOp.html#a4556e17727b8b07237e3e8ace95aad9a">More...</a><br /></td></tr>
 <tr class="separator:a4556e17727b8b07237e3e8ace95aad9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,9 +277,9 @@ Real&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a7876823880aee493be5e54bb956eda6e">refToCoarser</a> () override final</td></tr>
 <tr class="memdesc:a7876823880aee493be5e54bb956eda6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return coarsening factor to coarser level (1 if there is no coarser level);. <br /></td></tr>
 <tr class="separator:a7876823880aee493be5e54bb956eda6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a735497e11967e45bbdb87e166675b572"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a735497e11967e45bbdb87e166675b572">AMROperator</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *a_finerOp)</td></tr>
-<tr class="memdesc:a735497e11967e45bbdb87e166675b572"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classEBHelmholtzOp.html#a735497e11967e45bbdb87e166675b572">More...</a><br /></td></tr>
-<tr class="separator:a735497e11967e45bbdb87e166675b572"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e777b3aca7927d02683349fa9913654"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a7e777b3aca7927d02683349fa9913654">AMROperator</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *a_finerOp) override final</td></tr>
+<tr class="memdesc:a7e777b3aca7927d02683349fa9913654"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classEBHelmholtzOp.html#a7e777b3aca7927d02683349fa9913654">More...</a><br /></td></tr>
+<tr class="separator:a7e777b3aca7927d02683349fa9913654"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42bd80f7129900c761f5400613ffbd53"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a42bd80f7129900c761f5400613ffbd53">refluxFreeAMROperator</a> (LevelData&lt; EBCellFAB &gt; &amp;a_Lphi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiFine, const LevelData&lt; EBCellFAB &gt; &amp;a_phi, const LevelData&lt; EBCellFAB &gt; &amp;a_phiCoar, const bool a_homogeneousPhysBC, AMRLevelOp&lt; LevelData&lt; EBCellFAB &gt;&gt; *a_finerOp)</td></tr>
 <tr class="memdesc:a42bd80f7129900c761f5400613ffbd53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the AMR operator, i.e. compute L(phi) in an AMR context.  <a href="classEBHelmholtzOp.html#a42bd80f7129900c761f5400613ffbd53">More...</a><br /></td></tr>
 <tr class="separator:a42bd80f7129900c761f5400613ffbd53"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -313,9 +313,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 <tr class="memitem:ae3d067e1d8b54e213aef086df56076b0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#ae3d067e1d8b54e213aef086df56076b0">createCoarsened</a> (LevelData&lt; EBCellFAB &gt; &amp;a_lhs, const LevelData&lt; EBCellFAB &gt; &amp;a_rhs, const int &amp;a_refRat) override final</td></tr>
 <tr class="memdesc:ae3d067e1d8b54e213aef086df56076b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create coarsening of data holder.  <a href="classEBHelmholtzOp.html#ae3d067e1d8b54e213aef086df56076b0">More...</a><br /></td></tr>
 <tr class="separator:ae3d067e1d8b54e213aef086df56076b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2e618302f9056c8888e24dc0c65a5c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aa2e618302f9056c8888e24dc0c65a5c6">diagonalScale</a> (LevelData&lt; EBCellFAB &gt; &amp;a_rhs, bool a_kappaWeighted)</td></tr>
-<tr class="memdesc:aa2e618302f9056c8888e24dc0c65a5c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do diagonal scaling.  <a href="classEBHelmholtzOp.html#aa2e618302f9056c8888e24dc0c65a5c6">More...</a><br /></td></tr>
-<tr class="separator:aa2e618302f9056c8888e24dc0c65a5c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae6eb477b836a263b0fab3401057a825"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#aae6eb477b836a263b0fab3401057a825">diagonalScale</a> (LevelData&lt; EBCellFAB &gt; &amp;a_rhs, bool a_kappaWeighted) override final</td></tr>
+<tr class="memdesc:aae6eb477b836a263b0fab3401057a825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do diagonal scaling.  <a href="classEBHelmholtzOp.html#aae6eb477b836a263b0fab3401057a825">More...</a><br /></td></tr>
+<tr class="separator:aae6eb477b836a263b0fab3401057a825"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a647f29b8543314c4c3234399a7b9fa99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBHelmholtzOp.html#a647f29b8543314c4c3234399a7b9fa99">divideByIdentityCoef</a> (LevelData&lt; EBCellFAB &gt; &amp;a_rhs) override final</td></tr>
 <tr class="memdesc:a647f29b8543314c4c3234399a7b9fa99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Divide by the a-coefficient.  <a href="classEBHelmholtzOp.html#a647f29b8543314c4c3234399a7b9fa99">More...</a><br /></td></tr>
 <tr class="separator:a647f29b8543314c4c3234399a7b9fa99"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -902,11 +902,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a735497e11967e45bbdb87e166675b572"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a735497e11967e45bbdb87e166675b572">&#9670;&nbsp;</a></span>AMROperator()</h2>
+<a id="a7e777b3aca7927d02683349fa9913654"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e777b3aca7927d02683349fa9913654">&#9670;&nbsp;</a></span>AMROperator()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::AMROperator </td>
@@ -950,6 +953,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Apply the AMR operator, i.e. compute L(phi) in an AMR context. </p>
@@ -2625,11 +2633,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="aa2e618302f9056c8888e24dc0c65a5c6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa2e618302f9056c8888e24dc0c65a5c6">&#9670;&nbsp;</a></span>diagonalScale()</h2>
+<a id="aae6eb477b836a263b0fab3401057a825"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae6eb477b836a263b0fab3401057a825">&#9670;&nbsp;</a></span>diagonalScale()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::diagonalScale </td>
@@ -2649,6 +2660,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">final</span><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Do diagonal scaling. </p>
@@ -4022,11 +4038,14 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a09449a46e618a393b236096bd5374af4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09449a46e618a393b236096bd5374af4">&#9670;&nbsp;</a></span>residual()</h2>
+<a id="a8c312b9128f855686497b8f607e815ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c312b9128f855686497b8f607e815ea">&#9670;&nbsp;</a></span>residual()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void EBHelmholtzOp::residual </td>
@@ -4058,6 +4077,11 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Compute residual on this level. </p>

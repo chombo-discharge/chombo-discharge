@@ -657,13 +657,13 @@ $(function() {
 <div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;  CH_assert(m_firstDt &gt; 0.0);</div>
 <div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160; </div>
 <div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;  <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;euler&quot;</span>) {</div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;    m_transportAlgorithm == TransportAlgorithm::Euler;</div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;    m_transportAlgorithm = TransportAlgorithm::Euler;</div>
 <div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;  }</div>
 <div class="line"><a name="l00592"></a><span class="lineno">  592</span>&#160;  <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;heun&quot;</span>) {</div>
-<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;    m_transportAlgorithm == TransportAlgorithm::Heun;</div>
+<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;    m_transportAlgorithm = TransportAlgorithm::Heun;</div>
 <div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;  }</div>
 <div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;  <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str == <span class="stringliteral">&quot;imex&quot;</span>) {</div>
-<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;    m_transportAlgorithm == TransportAlgorithm::ImExCTU;</div>
+<div class="line"><a name="l00596"></a><span class="lineno">  596</span>&#160;    m_transportAlgorithm = TransportAlgorithm::ImExCTU;</div>
 <div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;  }</div>
 <div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;  <span class="keywordflow">else</span> {</div>
 <div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;    MayDay::Error(<span class="stringliteral">&quot;Expected &#39;euler&#39;, &#39;heun&#39;, or &#39;imex&#39; for &#39;DischargeInceptionStepper.transport_alg&#39;&quot;</span>);</div>

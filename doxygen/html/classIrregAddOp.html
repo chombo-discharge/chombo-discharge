@@ -112,9 +112,9 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <tr class="memitem:ac078e53da121ed9b9822cdbeab9c7caf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#ac078e53da121ed9b9822cdbeab9c7caf">linearIn</a> (BaseIVFAB&lt; Real &gt; &amp;a_data, void *a_buffer, const Box &amp;a_region, const Interval &amp;a_comps) const override</td></tr>
 <tr class="memdesc:ac078e53da121ed9b9822cdbeab9c7caf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.  <a href="classIrregAddOp.html#ac078e53da121ed9b9822cdbeab9c7caf">More...</a><br /></td></tr>
 <tr class="separator:ac078e53da121ed9b9822cdbeab9c7caf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a762f0cba6c4224e5f64d3034ec59d4fa"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#a762f0cba6c4224e5f64d3034ec59d4fa">op</a> (BaseIVFAB&lt; Real &gt; &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const BaseIVFAB&lt; Real &gt; &amp;a_src, const Interval &amp;a_srcVars) const</td></tr>
-<tr class="memdesc:a762f0cba6c4224e5f64d3034ec59d4fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator function. Increments data with source.  <a href="classIrregAddOp.html#a762f0cba6c4224e5f64d3034ec59d4fa">More...</a><br /></td></tr>
-<tr class="separator:a762f0cba6c4224e5f64d3034ec59d4fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classIrregAddOp.html#a74b8d314cc7b399a6eb0e93639d7ebf0">op</a> (BaseIVFAB&lt; Real &gt; &amp;a_dst, const Box &amp;a_regionFrom, const Interval &amp;a_dstVars, const Box &amp;a_regionTo, const BaseIVFAB&lt; Real &gt; &amp;a_src, const Interval &amp;a_srcVars) const override</td></tr>
+<tr class="memdesc:a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operator function. Increments data with source.  <a href="classIrregAddOp.html#a74b8d314cc7b399a6eb0e93639d7ebf0">More...</a><br /></td></tr>
+<tr class="separator:a74b8d314cc7b399a6eb0e93639d7ebf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A Copier class for making copying between LevelData&lt;BaseIVFAB&lt;Real&gt;&gt; easier. This is an incrementation operator. </p>
@@ -178,8 +178,8 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 
 </div>
 </div>
-<a id="a762f0cba6c4224e5f64d3034ec59d4fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a762f0cba6c4224e5f64d3034ec59d4fa">&#9670;&nbsp;</a></span>op()</h2>
+<a id="a74b8d314cc7b399a6eb0e93639d7ebf0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74b8d314cc7b399a6eb0e93639d7ebf0">&#9670;&nbsp;</a></span>op()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +231,7 @@ virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

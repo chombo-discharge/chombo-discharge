@@ -154,9 +154,9 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memitem:a6d1b52f36ccb73d28d18756f12085716"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">computeElectricField</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_E, const phase::which_phase a_phase, const <a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;a_potential) const override</td></tr>
 <tr class="memdesc:a6d1b52f36ccb73d28d18756f12085716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the face-centered electric field on a specific phase.  <a href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">More...</a><br /></td></tr>
 <tr class="separator:a6d1b52f36ccb73d28d18756f12085716"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5527b37ad1f660d7e22c42f543377ac9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a5527b37ad1f660d7e22c42f543377ac9">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel)</td></tr>
-<tr class="memdesc:a5527b37ad1f660d7e22c42f543377ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache state before regridding.  <a href="classFieldSolverMultigrid.html#a5527b37ad1f660d7e22c42f543377ac9">More...</a><br /></td></tr>
-<tr class="separator:a5527b37ad1f660d7e22c42f543377ac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49cbd8a4d52a324ebb87dcf6c02a1b7b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#a49cbd8a4d52a324ebb87dcf6c02a1b7b">preRegrid</a> (const int a_lbase, const int a_oldFinestLevel) override</td></tr>
+<tr class="memdesc:a49cbd8a4d52a324ebb87dcf6c02a1b7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache state before regridding.  <a href="classFieldSolverMultigrid.html#a49cbd8a4d52a324ebb87dcf6c02a1b7b">More...</a><br /></td></tr>
+<tr class="separator:a49cbd8a4d52a324ebb87dcf6c02a1b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2ff25c7cdf35abd6d7c210d3e98fa05"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolverMultigrid.html#ad2ff25c7cdf35abd6d7c210d3e98fa05">regrid</a> (const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override</td></tr>
 <tr class="memdesc:ad2ff25c7cdf35abd6d7c210d3e98fa05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid method.  <a href="classFieldSolverMultigrid.html#ad2ff25c7cdf35abd6d7c210d3e98fa05">More...</a><br /></td></tr>
 <tr class="separator:ad2ff25c7cdf35abd6d7c210d3e98fa05"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1094,8 +1094,8 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
 
 </div>
 </div>
-<a id="a5527b37ad1f660d7e22c42f543377ac9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5527b37ad1f660d7e22c42f543377ac9">&#9670;&nbsp;</a></span>preRegrid()</h2>
+<a id="a49cbd8a4d52a324ebb87dcf6c02a1b7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49cbd8a4d52a324ebb87dcf6c02a1b7b">&#9670;&nbsp;</a></span>preRegrid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1123,7 +1123,7 @@ constexpr static int&#160;</td><td class="memItemRight" valign="bottom"><a class
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

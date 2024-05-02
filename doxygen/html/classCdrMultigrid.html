@@ -120,14 +120,14 @@ Public Member Functions</h2></td></tr>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#af48b87304c719a985ba2b5e62a7cc9f4">~CdrMultigrid</a> ()</td></tr>
 <tr class="memdesc:af48b87304c719a985ba2b5e62a7cc9f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:af48b87304c719a985ba2b5e62a7cc9f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6dec0dccf001a7d629c8debcea5cf723"><td class="memItemLeft" align="right" valign="top"><a id="a6dec0dccf001a7d629c8debcea5cf723"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a6dec0dccf001a7d629c8debcea5cf723">parseOptions</a> ()=0</td></tr>
-<tr class="memdesc:a6dec0dccf001a7d629c8debcea5cf723"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options. <br /></td></tr>
-<tr class="separator:a6dec0dccf001a7d629c8debcea5cf723"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad59e0728516a220b09c7f20b2e5b562c"><td class="memItemLeft" align="right" valign="top"><a id="ad59e0728516a220b09c7f20b2e5b562c"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad59e0728516a220b09c7f20b2e5b562c">parseRuntimeOptions</a> ()=0</td></tr>
-<tr class="memdesc:ad59e0728516a220b09c7f20b2e5b562c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options. <br /></td></tr>
-<tr class="separator:ad59e0728516a220b09c7f20b2e5b562c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add96e67d5f549083774f65a20786a5d3"><td class="memItemLeft" align="right" valign="top"><a id="add96e67d5f549083774f65a20786a5d3"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#add96e67d5f549083774f65a20786a5d3">parseOptions</a> () override=0</td></tr>
+<tr class="memdesc:add96e67d5f549083774f65a20786a5d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options. <br /></td></tr>
+<tr class="separator:add96e67d5f549083774f65a20786a5d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81c1fd85fe89af5d32b239acdead5feb"><td class="memItemLeft" align="right" valign="top"><a id="a81c1fd85fe89af5d32b239acdead5feb"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a81c1fd85fe89af5d32b239acdead5feb">parseRuntimeOptions</a> () override=0</td></tr>
+<tr class="memdesc:a81c1fd85fe89af5d32b239acdead5feb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse class options. <br /></td></tr>
+<tr class="separator:a81c1fd85fe89af5d32b239acdead5feb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0034a5ef2613e6f829834db1376f2685"><td class="memItemLeft" align="right" valign="top"><a id="a0034a5ef2613e6f829834db1376f2685"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a0034a5ef2613e6f829834db1376f2685">registerOperators</a> () override</td></tr>
 <tr class="memdesc:a0034a5ef2613e6f829834db1376f2685"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register operator. <br /></td></tr>
@@ -382,10 +382,10 @@ Protected Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a80c584c1c8c83a3c662f61285a764f8e"><td class="memItemLeft" align="right" valign="top"><a id="a80c584c1c8c83a3c662f61285a764f8e"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#a80c584c1c8c83a3c662f61285a764f8e">advectToFaces</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_facePhi, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const Real a_extrapDt)=0</td></tr>
-<tr class="memdesc:a80c584c1c8c83a3c662f61285a764f8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advection-only extrapolation to faces. <br /></td></tr>
-<tr class="separator:a80c584c1c8c83a3c662f61285a764f8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8a65937e06b355f1dcf40c24eb2ccd0"><td class="memItemLeft" align="right" valign="top"><a id="ad8a65937e06b355f1dcf40c24eb2ccd0"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ad8a65937e06b355f1dcf40c24eb2ccd0">advectToFaces</a> (<a class="el" href="classEBAMRData.html">EBAMRFluxData</a> &amp;a_facePhi, const <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;a_phi, const Real a_extrapDt) override=0</td></tr>
+<tr class="memdesc:ad8a65937e06b355f1dcf40c24eb2ccd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advection-only extrapolation to faces. <br /></td></tr>
+<tr class="separator:ad8a65937e06b355f1dcf40c24eb2ccd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac775f2f88fcbc0375a0447d5f768d919"><td class="memItemLeft" align="right" valign="top"><a id="ac775f2f88fcbc0375a0447d5f768d919"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCdrMultigrid.html#ac775f2f88fcbc0375a0447d5f768d919">setupDiffusionSolver</a> ()</td></tr>
 <tr class="memdesc:ac775f2f88fcbc0375a0447d5f768d919"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up diffusion solver. <br /></td></tr>
