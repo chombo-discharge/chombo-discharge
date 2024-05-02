@@ -21,6 +21,7 @@
 // Our includes
 #include <CD_ParticleContainer.H>
 #include <CD_ParallelOps.H>
+#include <CD_ParticleOps.H>
 #include <CD_Timer.H>
 #include <CD_BoxLoops.H>
 #include <CD_OpenMP.H>
@@ -536,6 +537,10 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
       outcastCoar.catenate(outcast);
     }
   }
+
+  // Clear the particles not on the mesh.
+  List<P>& outcastCoarsest = m_particles[0]->outcast();
+  outcastCoarsest.clear();
 }
 
 template <class P>
@@ -563,6 +568,10 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
       outcastCoar.catenate(outcast);
     }
   }
+
+  // Clear the particles not on the mesh.
+  List<P>& outcastCoarsest = m_particles[0]->outcast();
+  outcastCoarsest.clear();
 }
 
 template <class P>
@@ -876,6 +885,10 @@ ParticleContainer<P>::remap()
     }
     CH_STOP(t2);
   }
+
+  // Clear the particles that fell off the grid.
+  List<P>& outcastCoarsest = m_particles[0]->outcast();
+  outcastCoarsest.clear();
 }
 
 template <class P>
@@ -1268,9 +1281,9 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
                                         std::floor((x[1] - m_probLo[1]) / dx[1]),
                                         std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
-        //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+	std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
 
-        MayDay::Warning("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
+        MayDay::Error("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
       }
       else if (mask(iv)) {
         maskParticles.add(lit());
@@ -1438,6 +1451,7 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 
       const BoxLayout&   grids = a_particles.getBoxes();
       const DataIterator dit   = grids.dataIterator();
+      const RealVect&    dx    = a_particles.meshSpacing();
 
       const int nbox = dit.size();
 
@@ -1445,9 +1459,20 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        ListBox<P>& particles = a_particles[din];
+        List<P>&   particles = a_particles[din].listItems();
+        const Box& box       = a_particles[din].box();
 
-        particles.getInvalidDestructive(outcasts, grids[din]);
+        for (ListIterator<P> lit(particles); lit.ok();) {
+          const RealVect& position  = lit().position();
+          const IntVect&  cellIndex = ParticleOps::getParticleCellIndex(position, m_probLo, dx);
+
+          if (!(box.contains(cellIndex))) {
+            outcasts.transfer(lit);
+          }
+          else {
+            ++lit;
+          }
+        }
       }
     }
   }
@@ -1633,6 +1658,19 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
         particles.catenate(receivedParticles[idx]);
       }
+
+#if 1 // Debug code
+      const Box      box       = grids[din];
+      const List<P>& particles = a_particles[din].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const RealVect position = lit().position();
+
+        if (!(box.contains(ParticleOps::getParticleCellIndex(lit().position(), m_probLo, a_particles.meshSpacing())))) {
+          MayDay::Error("ParticleContainer::logic bust -- particle not contained in box!");
+        }
+      }
+#endif
     }
     CH_STOP(t6);
   }
