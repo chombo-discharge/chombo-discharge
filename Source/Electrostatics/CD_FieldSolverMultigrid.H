@@ -140,7 +140,7 @@ public:
     @param[in] a_oldFinestLevel Finest AMR level before regrid. 
   */
   virtual void
-  preRegrid(const int a_lbase, const int a_oldFinestLevel);
+  preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
 
   /*!
     @brief Regrid method. 

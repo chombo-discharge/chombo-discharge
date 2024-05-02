@@ -60,7 +60,7 @@ public:
      const Interval&  a_dstVars,
      const Box&       a_regionTo,
      const EBCellFAB& a_src,
-     const Interval&  a_srcVars) const;
+     const Interval&  a_srcVars) const override;
 };
 
 #include <CD_NamespaceFooter.H>

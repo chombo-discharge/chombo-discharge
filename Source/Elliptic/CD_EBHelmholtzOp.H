@@ -313,7 +313,7 @@ public:
   residual(LevelData<EBCellFAB>&       a_residual,
            const LevelData<EBCellFAB>& a_phi,
            const LevelData<EBCellFAB>& a_rhs,
-           const bool                  a_homogeneousPhysBc);
+           const bool                  a_homogeneousPhysBc) override;
 
   /*!
     @brief Precondition system before bottom solve
@@ -625,7 +625,7 @@ public:
               const LevelData<EBCellFAB>&       a_phi,
               const LevelData<EBCellFAB>&       a_phiCoar,
               const bool                        a_homogeneousPhysBC,
-              AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp);
+              AMRLevelOp<LevelData<EBCellFAB>>* a_finerOp) override final;
 
   /*!
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
@@ -783,7 +783,7 @@ public:
     @param[in]    a_kappaWeighted Use kappa-weighted scaling or not
   */
   void
-  diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted);
+  diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted) override final;
 
   /*!
     @brief Divide by the a-coefficient

@@ -252,7 +252,7 @@ public:
   residual(LevelData<MFCellFAB>&       a_residual,
            const LevelData<MFCellFAB>& a_phi,
            const LevelData<MFCellFAB>& a_rhs,
-           const bool                  a_homogeneousPhysBc);
+           const bool                  a_homogeneousPhysBc) override final;
 
   /*!
     @brief Precondition system before bottom solve
@@ -770,7 +770,7 @@ protected:
               const LevelData<MFCellFAB>&       a_phi,
               const LevelData<MFCellFAB>&       a_phiCoar,
               const bool                        a_homogeneousPhysBC,
-              AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp);
+              AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp) override;
 };
 
 #include <CD_NamespaceFooter.H>

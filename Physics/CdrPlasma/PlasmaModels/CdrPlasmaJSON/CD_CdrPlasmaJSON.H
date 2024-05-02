@@ -103,7 +103,7 @@ namespace Physics {
 	@brief Parse run-time class options.
       */
       virtual void
-      parseRuntimeOptions();
+      parseRuntimeOptions() override;
 
       /*!
 	@brief Get number of plot variables for this physics class. 

@@ -100,7 +100,7 @@ namespace Physics {
 	@brief Parse runtime options. Subclasses must implement this.
       */
       virtual void
-      parseRuntimeOptions() = 0;
+      parseRuntimeOptions() override = 0;
 
       /*!
 	@brief Compute some thing that go into plot files
@@ -160,7 +160,7 @@ namespace Physics {
 	@details Subclasses must implement this one. 
       */
       virtual Real
-      computeDt() = 0;
+      computeDt() override = 0;
 
       /*!
 	@brief Advance method, advances equations.
@@ -168,7 +168,7 @@ namespace Physics {
 	@returns Actual time step used (can be different from a_dt for adaptive methods)
       */
       virtual Real
-      advance(const Real a_dt) = 0;
+      advance(const Real a_dt) override = 0;
 
       /*!
 	@brief Synchronize solver times
