@@ -1489,17 +1489,20 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t5);
   CH_TIMER("ParticleContainer::remapOutcast::assign", t6);
 
-  // a_particles.remapOutcast();
-  // return;
+  // Uncomment this if you want to default back to Chombo's native remapping routine
+#if 0
+  a_particles.remapOutcast();
+  
+  return;
+#endif
 
-  const unsigned   numRanks = numProc();
-  const unsigned   myPID    = procID();
-  const BoxLayout& grids    = a_particles.getBoxes();
+  const unsigned int numRanks = numProc();
+  const unsigned int myRank   = procID();
+  const BoxLayout&   grids    = a_particles.getBoxes();
 
   // Storage for particles to be delivered to each box/proc. The vector holds a map of particles to be sent to
   // the indicated rank. The map itself indicates the box id and the list of particles to go into that box.
-  std::vector<std::map<unsigned, List<P>>> particlesToSend(numRanks);
-  CompCounts<P>                            compCounts(particlesToSend);
+  std::vector<std::map<unsigned int, List<P>>> particlesToSend(numRanks);
 
   List<P>& p = a_particles.outcast();
 
@@ -1513,9 +1516,9 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     // tileSet = List of all boxes in a "tiled" space.
     // myTiles = List of this ranks boxes
     // otherTiles = List of other ranks' boxes. boxids contain the local global box index AND the rank
-    std::set<IntVect, CompIntVect>              tileSet;
-    std::map<IntVect, unsigned, CompIntVect>    myTiles;
-    std::multimap<IntVect, boxids, CompIntVect> otherTiles;
+    std::set<IntVect, CompIntVect>               tileSet;
+    std::map<IntVect, unsigned int, CompIntVect> myTiles;
+    std::map<IntVect, boxids, CompIntVect>       otherTiles;
 
     // Build local mapping of the grids -- this figures out which box is owned by which
     // processor.
@@ -1528,15 +1531,14 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
       // If using MPI, need to figure out who owns which tiles.
 #ifdef CH_MPI
-      // Rank ID and tileID for the current box.
-      const unsigned rankID = grids.procID(lin);
-      const unsigned tileID = grids.index(lin);
+      const unsigned int rankID = grids.procID(lin);
+      const unsigned int tileID = grids.index(lin);
 
-      if (rankID == myPID) {
+      if (rankID == myRank) {
         myTiles[tile] = tileID;
       }
       else {
-        otherTiles.insert(std::pair<IntVect, boxids>(tile, boxids(tileID, rankID)));
+        otherTiles[tile] = boxids(tileID, rankID);
       }
 
       tileSet.insert(tile);
@@ -1546,87 +1548,51 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     }
     CH_STOP(t1);
 
-#ifdef CH_MPI
-    {
-      // Rotate
-      CH_START(t2);
-      std::set<IntVect, CompIntVect>::iterator it;
-      for (it = tileSet.begin(); it != tileSet.end(); ++it) {
-        const int count = otherTiles.count(*it);
-        if (count > 1) {
-          unsigned              midn = myPID % count;
-          std::pair<RmIt, RmIt> rit  = otherTiles.equal_range(*it);
-          RmIt                  mid  = rit.first;
-
-          while (midn-- > 0) {
-            mid++;
-          }
-
-          myrotate(rit.first, mid, rit.second);
-        }
-      }
-      CH_STOP(t2);
-    }
-#endif
-
+    // Figure out which particles will go where.
     CH_START(t3);
+    for (ListIterator<P> lit(p); lit.ok();) {
+      const IntVect tile = locateBin(lit().position(), dx, origin);
 
-    // Iterators for going through the tiles owned by this rank and the ones for
-    // the other rank. 
-    std::map<IntVect, unsigned, CompIntVect>::iterator localTilesIter = myTiles.begin();
-    std::map<IntVect, boxids, CompIntVect>::iterator otherTilesIter;
+      if (myTiles.find(tile) != myTiles.end()) {
+        // This particle goes from this rank to this rank.
+        const auto& gridIndex = myTiles[tile];
+        const auto& toRank    = myRank;
 
-    std::pair<RmIt, RmIt> rit = otherTiles.equal_range(otherTiles.begin()->first);
-
-    CH_START(t3);
-    for (ListIterator<P> pi(p); pi.ok();) {
-      const IntVect tile = locateBin(pi().position(), dx, origin);
-      
-      if (tile == localTilesIter->first) {
-        particlesToSend[myPID][localTilesIter->second].transfer(pi);
+        particlesToSend[toRank][gridIndex].transfer(lit);
       }
       else {
-        localTilesIter = myTiles.find(tile);
-        if (localTilesIter != myTiles.end()) {
-          particlesToSend[myPID][localTilesIter->second].transfer(pi);
-        }
 #ifdef CH_MPI
-        else if (tile == rit.first->first && numRanks > 1) {
-          otherTilesIter = min_element(rit.first, rit.second, compCounts);
-          particlesToSend[otherTilesIter->second.pid][otherTilesIter->second.idx].transfer(pi);
-          localTilesIter = myTiles.begin();
+        if (otherTiles.find(tile) != otherTiles.end()) {
+          // Particle goes from this rank to another rank.
+          const auto& gridIndex = otherTiles[tile].idx;
+          const auto& toRank    = otherTiles[tile].pid;
+
+          particlesToSend[toRank][gridIndex].transfer(lit);
         }
         else {
-          if (otherTiles.count(tile) > 0 && numRanks > 1) {
-            rit = otherTiles.equal_range(tile);
-            otherTilesIter = min_element(rit.first, rit.second, compCounts);
-            particlesToSend[otherTilesIter->second.pid][otherTilesIter->second.idx].transfer(pi);
-            localTilesIter = myTiles.begin();
-          }
-          else
-            ++pi;
+          ++lit;
         }
 #else
-        else
-          ++pi;
+        ++lit;
 #endif
       }
     }
     CH_STOP(t3);
   }
 
-  // collect local mapping
+  // Particles received onto this rank from all ranks.
+  std::map<unsigned int, List<P>> receivedParticles;
+
+  // Collect local particles that didn't change rank ownership.
   CH_START(t4);
-  std::map<unsigned, List<P>>                    receivedParticles;
-  typename std::map<unsigned, List<P>>::iterator mi;
-  for (mi = particlesToSend[myPID].begin(); mi != particlesToSend[myPID].end(); ++mi) {
-    receivedParticles[mi->first].catenate(mi->second);
+  for (auto& localParticles : particlesToSend[myRank]) {
+    receivedParticles[localParticles.first].catenate(localParticles.second);
   }
-  particlesToSend[myPID].clear();
+  particlesToSend[myRank].clear();
   CH_STOP(t4);
 
+  // Distribute remnant particles.
 #ifdef CH_MPI
-  // Distribute particles in parallel.
   CH_START(t5);
   mpi_scatter_part(receivedParticles, particlesToSend);
   CH_STOP(t5);
@@ -1640,16 +1606,16 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex din = dit[mybox];
+    const DataIndex    din       = dit[mybox];
+    const unsigned int gridIndex = grids.index(din);
 
-    const unsigned idx = grids.index(din);
-
-    if (receivedParticles.find(idx) != receivedParticles.end()) {
+    if (receivedParticles.find(gridIndex) != receivedParticles.end()) {
       List<P>& particles = a_particles[din].listItems();
 
-      particles.catenate(receivedParticles[idx]);
+      particles.catenate(receivedParticles[gridIndex]);
     }
 
+    // Debug hook which double-checks that all particles are in the correct box.
     if (m_debug) {
       const Box      box       = grids[din];
       const List<P>& particles = a_particles[din].listItems();
