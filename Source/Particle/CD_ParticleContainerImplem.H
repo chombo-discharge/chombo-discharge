@@ -1489,6 +1489,18 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t5);
   CH_TIMER("ParticleContainer::remapOutcast::assign", t6);
 
+  // TODO:
+  // 1. Thread properly with OpenMP and create local lists
+  // 2. Use unordered_map instead? Insertion should be faster.
+  // 3. Think about adding another routine which does the full grid at once.
+
+  // Uncomment this if you want to default back to Chombo's native remapping routine
+#if 0
+  a_particles.remapOutcast();
+  
+  return;
+#endif  
+
   // Uncomment this if you want to default back to Chombo's native remapping routine
 #if 0
   a_particles.remapOutcast();
@@ -1504,9 +1516,9 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   // the indicated rank. The map itself indicates the box id and the list of particles to go into that box.
   std::vector<std::map<unsigned int, List<P>>> particlesToSend(numRanks);
 
-  List<P>& p = a_particles.outcast();
+  List<P>& outcasts = a_particles.outcast();
 
-  if (!p.isEmpty()) {
+  if (!outcasts.isEmpty()) {
 
     // Note, dx is a pseudo-grid spacing.
     const int      fixedBoxSize = a_particles.fixedBoxSize();
@@ -1550,7 +1562,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
     // Figure out which particles will go where.
     CH_START(t3);
-    for (ListIterator<P> lit(p); lit.ok();) {
+    for (ListIterator<P> lit(outcasts); lit.ok();) {
       const IntVect tile = locateBin(lit().position(), dx, origin);
 
       if (myTiles.find(tile) != myTiles.end()) {
