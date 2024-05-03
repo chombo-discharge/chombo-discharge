@@ -1570,36 +1570,38 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 #endif
 
     CH_START(t3);
-    // map particles to local boxes
-    std::map<IntVect, unsigned, CompIntVect>::iterator lit = myTiles.begin();
-    // map particles to pid-boxes
-    std::map<IntVect, boxids, CompIntVect>::iterator pit;
+
+    // Iterators for going through the tiles owned by this rank and the ones for
+    // the other rank. 
+    std::map<IntVect, unsigned, CompIntVect>::iterator localTilesIter = myTiles.begin();
+    std::map<IntVect, boxids, CompIntVect>::iterator otherTilesIter;
 
     std::pair<RmIt, RmIt> rit = otherTiles.equal_range(otherTiles.begin()->first);
 
     CH_START(t3);
     for (ListIterator<P> pi(p); pi.ok();) {
-      const IntVect ip = locateBin(pi().position(), dx, origin);
-      if (ip == lit->first) {
-        particlesToSend[myPID][lit->second].transfer(pi);
+      const IntVect tile = locateBin(pi().position(), dx, origin);
+      
+      if (tile == localTilesIter->first) {
+        particlesToSend[myPID][localTilesIter->second].transfer(pi);
       }
       else {
-        lit = myTiles.find(ip);
-        if (lit != myTiles.end()) {
-          particlesToSend[myPID][lit->second].transfer(pi);
+        localTilesIter = myTiles.find(tile);
+        if (localTilesIter != myTiles.end()) {
+          particlesToSend[myPID][localTilesIter->second].transfer(pi);
         }
 #ifdef CH_MPI
-        else if (ip == rit.first->first && numRanks > 1) {
-          pit = min_element(rit.first, rit.second, compCounts);
-          particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
-          lit = myTiles.begin();
+        else if (tile == rit.first->first && numRanks > 1) {
+          otherTilesIter = min_element(rit.first, rit.second, compCounts);
+          particlesToSend[otherTilesIter->second.pid][otherTilesIter->second.idx].transfer(pi);
+          localTilesIter = myTiles.begin();
         }
         else {
-          if (otherTiles.count(ip) > 0 && numRanks > 1) {
-            rit = otherTiles.equal_range(ip);
-            pit = min_element(rit.first, rit.second, compCounts);
-            particlesToSend[pit->second.pid][pit->second.idx].transfer(pi);
-            lit = myTiles.begin();
+          if (otherTiles.count(tile) > 0 && numRanks > 1) {
+            rit = otherTiles.equal_range(tile);
+            otherTilesIter = min_element(rit.first, rit.second, compCounts);
+            particlesToSend[otherTilesIter->second.pid][otherTilesIter->second.idx].transfer(pi);
+            localTilesIter = myTiles.begin();
           }
           else
             ++pi;
