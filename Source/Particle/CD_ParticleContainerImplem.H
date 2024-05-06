@@ -1432,7 +1432,7 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 {
   CH_TIME("ParticleContainer<P>::gatherOutcast");
 
-#if 1
+#if 0
   a_particles.gatherOutcast();
 
   return;
@@ -1462,11 +1462,13 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 {
   CH_TIMERS("ParticleContainer::remapOutcast");
   CH_TIMER("ParticleContainer::remapOutcast::build_map", t1);
-  CH_TIMER("ParticleContainer::remapOutcast::rotate", t2);
-  CH_TIMER("ParticleContainer::remapOutcast::particle_loop", t3);
-  CH_TIMER("ParticleContainer::remapOutcast::local_map", t4);
-  CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t5);
-  CH_TIMER("ParticleContainer::remapOutcast::assign", t6);
+  CH_TIMER("ParticleContainer::remapOutcast::mpi_particle_loop", t3);
+  CH_TIMER("ParticleContainer::remapOutcast::omp_copy_particles", t4);
+  CH_TIMER("ParticleContainer::remapOutcast::omp_particle_loop", t5);
+  CH_TIMER("ParticleContainer::remapOutcast::omp_catenate", t6);    
+  CH_TIMER("ParticleContainer::remapOutcast::local_map", t7);
+  CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t8);
+  CH_TIMER("ParticleContainer::remapOutcast::assign", t9);
 
   // TODO:
   // 1. Thread properly with OpenMP and create local lists
@@ -1474,7 +1476,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   // 3. Think about adding another routine which does the full grid at once.
 
   // Uncomment this if you want to default back to Chombo's native remapping routine
-#if 1
+#if 0
   a_particles.remapOutcast();
   
   return;
@@ -1533,11 +1535,11 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     CH_STOP(t1);
 
     // Figure out which particles will go where. This switches between non-OpenMP and OpenMP versions.
-    CH_START(t3);
 #ifndef _OPENMP
+    CH_START(t3);    
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       const IntVect tile = locateBin(lit().position(), dx, origin);
-
+      
       if (myTiles.find(tile) != myTiles.end()) {
         // This particle goes from this rank to this rank.
         const auto& gridIndex = myTiles[tile];
@@ -1562,14 +1564,18 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 #endif
       }
     }
+    CH_STOP(t3);
 #else
     // Copy particles and clear outcast list.
+    CH_START(t4);
     std::vector<P> allOutcasts;
+    allOutcasts.reserve(outcasts.length());
     for (ListIterator<P> lit(outcasts); lit.ok(); ++lit) {
       allOutcasts.emplace_back(lit());
     }
 
     outcasts.clear();
+    CH_STOP(t4);    
 
     const int numOutcasts = allOutcasts.size();
 
@@ -1577,6 +1583,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     {
       std::vector<std::map<unsigned int, List<P>>> particlesToSendPerThread(numRanks);
 
+      CH_START(t5);
 #pragma omp for schedule(runtime) reduction(catenate : outcasts)
       for (int ipart = 0; ipart < numOutcasts; ipart++) {
         const P& particle = allOutcasts[ipart];
@@ -1606,9 +1613,11 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 #endif
         }
       }
+      CH_STOP(t5);      
 
 #pragma omp critical
       {
+	CH_START(t6);
         // Append the thread-local particle to the global particles -- this is a bit more complicated than I
         // like because we can't just append the vectors.
         for (int irank = 0; irank < numRanks; irank++) {
@@ -1624,9 +1633,9 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
 	particlesToSendPerThread.resize(0);	
       }
+      CH_STOP(t6);
     }
 #endif
-    CH_STOP(t3);
   }
 
   // Particles received onto this rank from all ranks.
@@ -1634,22 +1643,22 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
   // Collect local particles that didn't change rank ownership so we don't have to
   // communicate them.
-  CH_START(t4);
+  CH_START(t7);
   for (auto& localParticles : particlesToSend[myRank]) {
     receivedParticles[localParticles.first].catenate(localParticles.second);
   }
   particlesToSend[myRank].clear();
-  CH_STOP(t4);
+  CH_STOP(t7);
 
   // Distribute remnant particles.
 #ifdef CH_MPI
-  CH_START(t5);
+  CH_START(t8);
   mpi_scatter_part(receivedParticles, particlesToSend);
-  CH_STOP(t5);
+  CH_STOP(t8);
 #endif
 
   // Assign particles to boxes
-  CH_START(t6);
+  CH_START(t9);
   const DataIterator dit = grids.dataIterator();
 
   const int nbox = dit.size();
@@ -1679,7 +1688,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
       }
     }
   }
-  CH_STOP(t6);
+  CH_STOP(t9);
 }
 
 #include <CD_NamespaceFooter.H>
