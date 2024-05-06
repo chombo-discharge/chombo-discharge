@@ -92,10 +92,10 @@ jobs:
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
-  Linux-Intel:
+  Linux-oneAPI:
     if: github.event.pull_request.draft == false    
     needs: Formatting
-    name: Linux-Intel
+    name: Linux-oneAPI
     runs-on: ubuntu-latest
     timeout-minutes: 150
     strategy:
@@ -135,7 +135,7 @@ jobs:
       - name: Copy makefile
         run: |
           source /opt/intel/oneapi/setvars.sh                    
-          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-oneAPI $CHOMBO_HOME/mk/Make.defs.local
 
       - name: Build Chombo
         run: |
@@ -216,7 +216,7 @@ jobs:
           rm -rf Sphinx/build          
         
   CI-passed:
-    needs: [Linux-GNU, Linux-Intel, Build-documentation]
+    needs: [Linux-GNU, Linux-oneAPI, Build-documentation]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing
