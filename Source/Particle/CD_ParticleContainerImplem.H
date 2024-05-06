@@ -530,11 +530,7 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
   outcastFinest.join(a_particles);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-#if 1
     this->remapOutcast(*m_particles[lvl]);
-#else
-    m_particles[lvl]->remapOutcast();
-#endif
 
     if (lvl > 0) {
       List<P>& outcast     = m_particles[lvl]->outcast();
@@ -561,11 +557,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
   outcastFinest.join(a_particles);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-#if 1
     this->remapOutcast(*m_particles[lvl]);
-#else
-    m_particles[lvl]->remapOutcast();
-#endif
 
     if (lvl > 0) {
       List<P>& outcast     = m_particles[lvl]->outcast();
@@ -874,13 +866,8 @@ ParticleContainer<P>::remap()
   CH_STOP(t1);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-#if 1
     this->gatherOutcast(*m_particles[lvl]);
     this->remapOutcast(*m_particles[lvl]);
-#else
-    m_particles[lvl]->gatherOutcast();
-    m_particles[lvl]->remapOutcast();
-#endif
 
     CH_START(t2);
     if (lvl > 0) {
@@ -926,13 +913,8 @@ ParticleContainer<P>::levelRemap(const int a_lvl)
     MayDay::Error("ParticleContainer<P>::levelRemap - particles are sorted by cell!");
   }
 
-#if 1
   this->gatherOutcast(*m_particles[a_lvl]);
   this->remapOutcast(*m_particles[a_lvl]);
-#else
-  m_particles[a_lvl]->gatherOutcast();
-  m_particles[a_lvl]->remapOutcast();
-#endif
 }
 
 template <class P>
@@ -1035,11 +1017,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
       m_cacheParticles[lvl].clear();
     }
 
-#if 1
     this->remapOutcast(*m_particles[lvl]);
-#else
-    m_particles[lvl]->remapOutcast();
-#endif
   }
 
   // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
@@ -1052,11 +1030,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
     coarParticles.catenate(fineParticles);
     fineParticles.clear();
 
-#if 1
     this->remapOutcast(*m_particles[lvl - 1]);
-#else
-    m_particles[lvl - 1]->remapOutcast();
-#endif
   }
 
   // At this point all the particles have been moved to their correct patches, but the PVR is so far not respected. We call ::remap to ensure that
