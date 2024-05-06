@@ -1,10 +1,10 @@
-## Background
+# Background
 
-## Solution
+# Solution
 
-# Side-effects
+## Side-effects
 
-# Alternative solutions 
+## Alternative solutions 
 
 ## Checklist
 
