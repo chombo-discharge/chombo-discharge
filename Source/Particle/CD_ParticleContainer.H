@@ -80,7 +80,7 @@ public:
   /*!
     @brief Destructor ( does nothing)
   */
-  ~ParticleContainer();
+  virtual ~ParticleContainer();
 
   /*!
     @brief Define the container. This will do a clear-out of all particles. 

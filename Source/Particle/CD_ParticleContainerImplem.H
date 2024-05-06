@@ -1301,7 +1301,7 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
                                         std::floor((x[1] - m_probLo[1]) / dx[1]),
                                         std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
-	std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+        std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
 
         MayDay::Error("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
       }
@@ -1499,7 +1499,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   a_particles.remapOutcast();
   
   return;
-#endif  
+#endif
 
   // Uncomment this if you want to default back to Chombo's native remapping routine
 #if 0
@@ -1560,8 +1560,9 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     }
     CH_STOP(t1);
 
-    // Figure out which particles will go where.
+    // Figure out which particles will go where. This switches between non-OpenMP and OpenMP versions.
     CH_START(t3);
+#ifndef _OPENMP
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       const IntVect tile = locateBin(lit().position(), dx, origin);
 
@@ -1589,13 +1590,78 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 #endif
       }
     }
+#else
+    // Copy particles and clear outcast list.
+    std::vector<P> allOutcasts;
+    for (ListIterator<P> lit(outcasts); lit.ok(); ++lit) {
+      allOutcasts.emplace_back((lit()));
+    }
+
+    outcasts.clear();
+
+    const int numOutcasts = allOutcasts.size();
+
+#pragma omp parallel
+    {
+      std::vector<std::map<unsigned int, List<P>>> particlesToSendPerThread(numRanks);
+
+#pragma omp for schedule(runtime) reduction(catenate : outcasts)
+      for (int ipart = 0; ipart < numOutcasts; ipart++) {
+        const P& particle = allOutcasts[ipart];
+        const IntVect tile = locateBin(particle.position(), dx, origin);
+
+        if (myTiles.find(tile) != myTiles.end()) {
+          // This particle goes from this rank to this rank.
+          const auto& gridIndex = myTiles[tile];
+          const auto& toRank = myRank;
+
+          particlesToSendPerThread[toRank][gridIndex].add(particle);
+        }
+        else {
+#ifdef CH_MPI
+          if (otherTiles.find(tile) != otherTiles.end()) {
+            // Particle goes from this rank to another rank.
+            const auto& gridIndex = otherTiles[tile].idx;
+            const auto& toRank = otherTiles[tile].pid;
+
+            particlesToSendPerThread[toRank][gridIndex].add(particle);
+          }
+          else {
+            outcasts.add(particle);
+          }
+#else
+          outcasts.add(particle);
+#endif
+        }
+      }
+
+#pragma omp critical
+      {
+        // Append the thread-local particle to the global particles -- this is a bit more complicated than I
+        // like because we can't just append the vectors.
+        for (int irank = 0; irank < numRanks; irank++) {
+          std::map<unsigned int, List<P>>& particlesToRank = particlesToSend[irank];
+
+          for (auto& m : particlesToSendPerThread[irank]) {
+            const unsigned int gridIndex = m.first;
+            List<P>& threadParticles = m.second;
+
+            particlesToRank[gridIndex].catenate(threadParticles);
+          }
+        }
+      }
+
+      particlesToSendPerThread.resize(0);
+    }
+#endif
     CH_STOP(t3);
   }
 
   // Particles received onto this rank from all ranks.
   std::map<unsigned int, List<P>> receivedParticles;
 
-  // Collect local particles that didn't change rank ownership.
+  // Collect local particles that didn't change rank ownership so we don't have to
+  // communicate them.
   CH_START(t4);
   for (auto& localParticles : particlesToSend[myRank]) {
     receivedParticles[localParticles.first].catenate(localParticles.second);
