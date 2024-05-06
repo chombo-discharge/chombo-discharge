@@ -2,11 +2,11 @@
 
 # Solution
 
-## Side-effects
+### Side-effects
 
-## Alternative solutions 
+### Alternative solutions 
 
-## Checklist
+# Checklist
 
 - [ ] I have run the test suite and made it passed.
 - [ ] I have made sure that this PR does not change benchmark files (unless it is intended to do so).

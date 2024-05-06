@@ -878,8 +878,7 @@ ParticleContainer<P>::remap()
     this->gatherOutcast(*m_particles[lvl]);
     this->remapOutcast(*m_particles[lvl]);
 #else
-    //    m_particles[lvl]->gatherOutcast();
-    this->gatherOutcast(*m_particles[lvl]);
+    m_particles[lvl]->gatherOutcast();
     m_particles[lvl]->remapOutcast();
 #endif
 
@@ -1459,6 +1458,12 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 {
   CH_TIME("ParticleContainer<P>::gatherOutcast");
 
+#if 1
+  a_particles.gatherOutcast();
+
+  return;
+#endif
+
   List<P>& outcasts = a_particles.outcast();
 
   const BoxLayout&   grids = a_particles.getBoxes();
@@ -1495,14 +1500,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   // 3. Think about adding another routine which does the full grid at once.
 
   // Uncomment this if you want to default back to Chombo's native remapping routine
-#if 0
-  a_particles.remapOutcast();
-  
-  return;
-#endif
-
-  // Uncomment this if you want to default back to Chombo's native remapping routine
-#if 0
+#if 1
   a_particles.remapOutcast();
   
   return;
@@ -1538,13 +1536,13 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     // Note: If this becomes expensive we can probably store this structure somewhere.
     CH_START(t1);
     for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
-      const LayoutIndex lin  = lit();
-      const IntVect     tile = coarsen(grids[lin], fixedBoxSize).smallEnd();
+      const LayoutIndex lidx  = lit();
+      const IntVect     tile = coarsen(grids[lidx], fixedBoxSize).smallEnd();
 
       // If using MPI, need to figure out who owns which tiles.
 #ifdef CH_MPI
-      const unsigned int rankID = grids.procID(lin);
-      const unsigned int tileID = grids.index(lin);
+      const unsigned int rankID = grids.procID(lidx);
+      const unsigned int tileID = grids.index(lidx);
 
       if (rankID == myRank) {
         myTiles[tile] = tileID;
@@ -1555,7 +1553,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 
       tileSet.insert(tile);
 #else
-      myTiles[tile] = grids.index(lin);
+      myTiles[tile] = grids.index(lidx);
 #endif
     }
     CH_STOP(t1);
@@ -1594,7 +1592,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     // Copy particles and clear outcast list.
     std::vector<P> allOutcasts;
     for (ListIterator<P> lit(outcasts); lit.ok(); ++lit) {
-      allOutcasts.emplace_back((lit()));
+      allOutcasts.emplace_back(lit());
     }
 
     outcasts.clear();
@@ -1649,9 +1647,9 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
             particlesToRank[gridIndex].catenate(threadParticles);
           }
         }
-      }
 
-      particlesToSendPerThread.resize(0);
+	particlesToSendPerThread.resize(0);	
+      }
     }
 #endif
     CH_STOP(t3);
