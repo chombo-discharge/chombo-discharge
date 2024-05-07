@@ -887,7 +887,7 @@ ParticleContainer<P>::remap()
   // Clear rest of particles -- these are no longer on the grid.
   this->clearOutcast();
 
-  // The new way
+  // Here starts the new way.
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
 
@@ -895,9 +895,11 @@ ParticleContainer<P>::remap()
   //
   // tileSet => Grids, viewed as a collection of tiles (one box = one tile)
   // myTiles => Tiles on each level owned by this rank. Maps a tile (an IntVect) to a grid index.
+  // myGridIndices => Maps a global grid index to a local DataIndex
   // othertiles => Tiles on each level owned by another rank.
   std::vector<std::set<IntVect, CompIntVect>>               tileSet(1 + m_finestLevel);
   std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
+  std::vector<std::map<unsigned int, DataIndex>>            myGridIndices(1 + m_finestLevel);
   std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -922,6 +924,10 @@ ParticleContainer<P>::remap()
 #endif
 
       tileSet[lvl].insert(tile);
+    }
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      myGridIndices[lvl][dit().intCode()] = dit();
     }
   }
 
@@ -961,17 +967,21 @@ ParticleContainer<P>::remap()
   // which we do by using the first six bits to decode the level and the remaining 26 bits to hold the grid index.
   std::vector<std::map<unsigned long, List<P>>> particlesToSend(numRanks);
 
+  // Particles received on this rank - we use the same indexing/decoding as for the sent particles
+  std::map<unsigned long, List<P>> receivedParticles;
+
   // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
 #pragma omp parallel
   {
     std::vector<std::map<unsigned long, List<P>>> threadLocalParticlesToSend(numRanks);
 
+    // Collect the outcast list for each rank.
     List<P> outcasts;
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
-      const DataIndex&         dit = dbl.dataIterator();
+      const DataIterator&      dit = dbl.dataIterator();
 
       const int nbox = dit.size();
 
@@ -979,21 +989,127 @@ ParticleContainer<P>::remap()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        List<P>& particles = (*m_particles[lvl])[din];
+        ListBox<P>& particles = (*m_particles[lvl])[din];
 
-        // Go through the particles -- if they've fallen off their patch we figure out where they wound up.
-        for (ListIterator<P> lit(particles); lit.ok();) {
-          const IntVect tile = locateBin(lit().position(), m_dx[lvl], m_probLo);
+        particles.getInvalidDestructive(outcasts, dbl[din]);
+      }
+    }
 
-          if (myTiles[lvl].find(tile) != myTiles[lvl].end()) {
+    // Starting on the finest level -- figure out where the particles wound up. We are going from finest to coarsest here because we want
+    // the particle to end up on the finest grid level that contains them.
+    for (ListIterator<P> lit(outcasts); lit.ok();) {
+      bool foundTile = false;
+
+      for (unsigned long lvl = m_finestLevel; lvl >= 0; lvl++) {
+        const IntVect particleTile = locateBin(lit().position(), m_dx[lvl], m_probLo);
+
+        const auto& myLevelTiles    = myTiles[lvl];
+        const auto& otherLevelTiles = otherTiles[lvl];
+
+        if (myLevelTiles.find(particleTile) != myLevelTiles.end()) {
+          // Found the particle on this level and this rank is the one who owns it.
+          const unsigned long gridIndex = myLevelTiles.at(particleTile);
+          const unsigned long gridCode  = encode(lvl, gridIndex);
+          const auto&         toRank    = myRank;
+
+          threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
+
+          foundTile = true;
+
+          break;
+        }
+#ifdef CH_MPI
+        else {
+          if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
+            // Particle was found on this level but no on this rank.
+            const unsigned long  gridIndex = otherLevelTiles.at(particleTile).idx;
+            const unsigned long  gridCode  = encode(lvl, gridIndex);
+            const unsigned long& toRank    = otherLevelTiles.at(particleTile).pid;
+
+            threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
+
+            foundTile = true;
+
+            break;
           }
+        }
+#endif
+      }
+
+      // If this triggers the particle fell off the domain.
+      if (!foundTile) {
+        ++lit;
+      }
+    }
+
+#pragma omp critical
+    {
+      // Collect the particles to be sent to each rank.
+      for (int irank = 0; irank < numRanks; irank++) {
+        std::map<unsigned long, List<P>>& particlesToRank = particlesToSend[irank];
+
+        for (auto& m : threadLocalParticlesToSend[irank]) {
+          const unsigned long& gridCode  = m.first;
+          List<P>&             particles = m.second;
+
+          particlesToRank[gridCode].catenate(particles);
         }
       }
     }
 
-    // Collect thread-local stuff
-#pragma omp critical
-    {
+    // Rest of the particles fell of the domain and have to go.
+    outcasts.clear();
+  }
+
+  // Iterator for gonig through the particle lists.
+  typename std::map<unsigned long, List<P>>::iterator mapIter;
+
+  // Particles that go from this rank to this rank (only change patch) don't need to be communicated we can place them directly on the correct patch.
+  std::map<unsigned long, List<P>>& particlesFromMeToMe = particlesToSend[myRank];
+#pragma omp        parallel
+#pragma omp single nowait
+  {
+    for (mapIter = particlesFromMeToMe.begin(); mapIter != particlesFromMeToMe.end(); mapIter++) {
+#pragma omp task firstprivate(mapIter)
+      {
+        const unsigned long gridCode  = mapIter->first;
+        List<P>&            particles = mapIter->second;
+
+        const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
+        const unsigned int                          gridLevel  = gridDecode.first;
+        const unsigned int                          gridIndex  = gridDecode.second;
+
+        const DataIndex din = myGridIndices[gridLevel][gridIndex];
+
+        (*m_particles[gridLevel])[din].listItems().catenate(particles);
+      }
+    }
+  }
+
+#ifdef CH_MPI
+  // Must write this fucker later.
+  //  mpi_scatter_part(receivedParticles, particlesToSend);
+#endif
+
+  // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
+  // we got from there.
+#pragma omp        parallel
+#pragma omp single nowait
+  {
+    for (mapIter = receivedParticles.begin(); mapIter != receivedParticles.end(); mapIter++) {
+#pragma omp task firstprivate(mapIter)
+      {
+        const unsigned long gridCode  = mapIter->first;
+        List<P>&            particles = mapIter->second;
+
+        const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
+        const unsigned int                          gridLevel  = gridDecode.first;
+        const unsigned int                          gridIndex  = gridDecode.second;
+
+        const DataIndex din = myGridIndices[gridLevel][gridIndex];
+
+        (*m_particles[gridLevel])[din].listItems().catenate(particles);
+      }
     }
   }
 }
