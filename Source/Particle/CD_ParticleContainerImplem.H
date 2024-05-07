@@ -995,9 +995,14 @@ ParticleContainer<P>::remap()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        ListBox<P>& particles = (*m_particles[lvl])[din];
+#if 0 // This was the original code but I don't think it's correct -- we should just iterate through all particles
+        ListBox<P>&      particles = (*m_particles[lvl])[din];
 
         particles.getInvalidDestructive(outcasts, dbl[din]);
+#else
+        List<P>& particles = (*m_particles[lvl])[din].listItems();
+        outcasts.catenate(particles);
+#endif
       }
     }
 #if 1
