@@ -12,6 +12,9 @@
 #ifndef CD_ParticleContainerImplem_H
 #define CD_ParticleContainerImplem_H
 
+// Std includes
+#include <bitset>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <CH_Timer.H>
@@ -847,6 +850,7 @@ ParticleContainer<P>::remap()
   CH_TIMER("ParticleContainer<P>::remap::catenate_to_finest", t1);
   CH_TIMER("ParticleContainer<P>::remap::catenate_to_coarser", t2);
 
+  // This is old code.
   CH_START(t1);
   List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -882,6 +886,116 @@ ParticleContainer<P>::remap()
 
   // Clear rest of particles -- these are no longer on the grid.
   this->clearOutcast();
+
+  // The new way
+  const unsigned int numRanks = numProc();
+  const unsigned int myRank   = procID();
+
+  // Build the tile-space. This is something that should probably be stored somewhere else.
+  //
+  // tileSet => Grids, viewed as a collection of tiles (one box = one tile)
+  // myTiles => Tiles on each level owned by this rank. Maps a tile (an IntVect) to a grid index.
+  // othertiles => Tiles on each level owned by another rank.
+  std::vector<std::set<IntVect, CompIntVect>>               tileSet(1 + m_finestLevel);
+  std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
+  std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const LayoutIndex  lidx   = lit();
+      const IntVect      tile   = coarsen(dbl[lidx], m_blockingFactor).smallEnd();
+      const unsigned int rankID = dbl.procID(lidx);
+      const unsigned int tileID = dbl.index(lidx);
+
+      // If using MPI we need to figure out who owns this tile.
+#if CH_MPI
+      if (myRank == rankID) {
+        myTiles[lvl][tile] = tileID;
+      }
+      else {
+        otherTiles[lvl][tile] = boxids(tileID, rankID);
+      }
+#else
+      myTiles[lvl][tile] = tileID;
+#endif
+
+      tileSet[lvl].insert(tile);
+    }
+  }
+
+  // These routines are used for encoding a grid level and a grid index onto an unsigned long. The level is encoded onto an 8-bit representation (max 256 levels)
+  // onto the left-most bits. The grid index is encoded by the remaining (hopefully 56) bits, which should be enough for anyone.
+  constexpr size_t numBitsLong  = sizeof(unsigned long) * 8;
+  constexpr size_t numBitsLevel = 8;
+  constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
+
+  auto encode = [](const unsigned long a_level, const unsigned long a_index) -> unsigned long {
+    std::bitset<numBitsLevel> levelBits(a_level);
+    std::bitset<numBitsLong>  codeBits(a_index);
+
+    for (size_t pos = 0; pos < numBitsLevel; pos++) {
+      codeBits.set(numBitsIndex + pos, levelBits[pos]);
+    }
+
+    return codeBits.to_ulong();
+  };
+
+  auto decode = [](const unsigned long a_code) -> std::pair<unsigned long, unsigned long> {
+    std::bitset<numBitsLevel> levelBits;
+    std::bitset<numBitsLong>  indexBits(a_code);
+
+    for (size_t pos = 0; pos < numBitsLevel; pos++) {
+      levelBits.set(pos, indexBits[numBitsIndex + pos]);
+      indexBits.set(numBitsIndex + pos, false);
+    }
+
+    const unsigned long lvl = levelBits.to_ulong();
+    const unsigned long idx = indexBits.to_ulong();
+
+    return std::make_pair(lvl, idx);
+  };
+
+  // These are the particles that get sent to each MPI rank. The unsigned integer in the map holds both the grid index AND the level index,
+  // which we do by using the first six bits to decode the level and the remaining 26 bits to hold the grid index.
+  std::vector<std::map<unsigned long, List<P>>> particlesToSend(numRanks);
+
+  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
+  // then the particles are moved onto appropriate lists that will get sent to each rank.
+#pragma omp parallel
+  {
+    std::vector<std::map<unsigned long, List<P>>> threadLocalParticlesToSend(numRanks);
+
+    List<P> outcasts;
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const DataIndex&         dit = dbl.dataIterator();
+
+      const int nbox = dit.size();
+
+#pragma omp for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        List<P>& particles = (*m_particles[lvl])[din];
+
+        // Go through the particles -- if they've fallen off their patch we figure out where they wound up.
+        for (ListIterator<P> lit(particles); lit.ok();) {
+          const IntVect tile = locateBin(lit().position(), m_dx[lvl], m_probLo);
+
+          if (myTiles[lvl].find(tile) != myTiles[lvl].end()) {
+          }
+        }
+      }
+    }
+
+    // Collect thread-local stuff
+#pragma omp critical
+    {
+    }
+  }
 }
 
 template <class P>
@@ -1465,7 +1579,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   CH_TIMER("ParticleContainer::remapOutcast::mpi_particle_loop", t3);
   CH_TIMER("ParticleContainer::remapOutcast::omp_copy_particles", t4);
   CH_TIMER("ParticleContainer::remapOutcast::omp_particle_loop", t5);
-  CH_TIMER("ParticleContainer::remapOutcast::omp_catenate", t6);    
+  CH_TIMER("ParticleContainer::remapOutcast::omp_catenate", t6);
   CH_TIMER("ParticleContainer::remapOutcast::local_map", t7);
   CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t8);
   CH_TIMER("ParticleContainer::remapOutcast::assign", t9);
@@ -1476,9 +1590,9 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
   // 3. Think about adding another routine which does the full grid at once.
 
   // Uncomment this if you want to default back to Chombo's native remapping routine
-#if 0
+#if 1
   a_particles.remapOutcast();
-  
+
   return;
 #endif
 
@@ -1512,7 +1626,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     // Note: If this becomes expensive we can probably store this structure somewhere.
     CH_START(t1);
     for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
-      const LayoutIndex lidx  = lit();
+      const LayoutIndex lidx = lit();
       const IntVect     tile = coarsen(grids[lidx], fixedBoxSize).smallEnd();
 
       // If using MPI, need to figure out who owns which tiles.
@@ -1526,20 +1640,20 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
       else {
         otherTiles[tile] = boxids(tileID, rankID);
       }
+#else
+      myTiles[tile]      = grids.index(lidx);
+#endif
 
       tileSet.insert(tile);
-#else
-      myTiles[tile] = grids.index(lidx);
-#endif
     }
     CH_STOP(t1);
 
     // Figure out which particles will go where. This switches between non-OpenMP and OpenMP versions.
 #ifndef _OPENMP
-    CH_START(t3);    
+    CH_START(t3);
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       const IntVect tile = locateBin(lit().position(), dx, origin);
-      
+
       if (myTiles.find(tile) != myTiles.end()) {
         // This particle goes from this rank to this rank.
         const auto& gridIndex = myTiles[tile];
@@ -1575,7 +1689,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
     }
 
     outcasts.clear();
-    CH_STOP(t4);    
+    CH_STOP(t4);
 
     const int numOutcasts = allOutcasts.size();
 
@@ -1613,11 +1727,11 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 #endif
         }
       }
-      CH_STOP(t5);      
+      CH_STOP(t5);
 
 #pragma omp critical
       {
-	CH_START(t6);
+        CH_START(t6);
         // Append the thread-local particle to the global particles -- this is a bit more complicated than I
         // like because we can't just append the vectors.
         for (int irank = 0; irank < numRanks; irank++) {
@@ -1631,7 +1745,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
           }
         }
 
-	particlesToSendPerThread.resize(0);	
+        particlesToSendPerThread.resize(0);
       }
       CH_STOP(t6);
     }
