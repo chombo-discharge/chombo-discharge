@@ -903,6 +903,7 @@ ParticleContainer<P>::remap()
   std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
   std::vector<std::map<unsigned int, DataIndex>>            myGridIndices(1 + m_finestLevel);
   std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
+  std::vector<RealVect>                                     quasiDx(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -931,6 +932,8 @@ ParticleContainer<P>::remap()
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       myGridIndices[lvl][dit().intCode()] = dit();
     }
+
+    quasiDx[lvl] = m_blockingFactor * m_dx[lvl];
   }
 
   // These routines are used for encoding a grid level and a grid index onto an unsigned long. The level is encoded onto an 8-bit representation (max 256 levels)
@@ -982,9 +985,6 @@ ParticleContainer<P>::remap()
     // Collect the outcast list for each rank.
     List<P> outcasts;
 
-#if 1 // Remove later
-    pout() << "collecting outcasts" << endl;
-#endif
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -995,19 +995,10 @@ ParticleContainer<P>::remap()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-#if 0 // This was the original code but I don't think it's correct -- we should just iterate through all particles
-        ListBox<P>&      particles = (*m_particles[lvl])[din];
-
-        particles.getInvalidDestructive(outcasts, dbl[din]);
-#else
         List<P>& particles = (*m_particles[lvl])[din].listItems();
         outcasts.catenate(particles);
-#endif
       }
     }
-#if 1
-    pout() << "done collecting outcasts" << endl;
-#endif
 
     // Starting on the finest level -- figure out where the particles wound up. We are going from finest to coarsest here because we want
     // the particle to end up on the finest grid level that contains them.
@@ -1019,36 +1010,36 @@ ParticleContainer<P>::remap()
       bool foundTile = false;
 
       for (IntType lvl = m_finestLevel; lvl >= 0; lvl--) {
-        const IntVect particleTile = locateBin(lit().position(), m_dx[lvl], m_probLo);
+        const IntVect particleTile = locateBin(lit().position(), quasiDx[lvl], m_probLo);
 
-        const auto& myLevelTiles    = myTiles[lvl];
-        const auto& otherLevelTiles = otherTiles[lvl];
+        const std::map<IntVect, unsigned int, CompIntVect>& myLevelTiles    = myTiles[lvl];
+        const std::map<IntVect, boxids, CompIntVect>&       otherLevelTiles = otherTiles[lvl];
 
         if (myLevelTiles.find(particleTile) != myLevelTiles.end()) {
           // Found the particle on this level and this rank is the one who owns it.
           const IntType gridIndex = myLevelTiles.at(particleTile);
           const IntType gridCode  = encode(lvl, gridIndex);
 
-          // threadLocalParticlesToSend[myRank][gridCode].transfer(lit);
+          threadLocalParticlesToSend[myRank][gridCode].transfer(lit);
 
-          // foundTile = true;
+          foundTile = true;
 
-          // break;
+          break;
         }
-        // #ifdef CH_MPI
-        //         else if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
-        //           // Particle was found on this level but no on this rank.
-        //           const IntType  gridIndex = otherLevelTiles.at(particleTile).idx;
-        //           const IntType  gridCode  = encode(lvl, gridIndex);
-        //           const IntType& toRank    = otherLevelTiles.at(particleTile).pid;
+#ifdef CH_MPI
+        else if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
+          // Particle was found on this level but no on this rank.
+          const IntType  gridIndex = otherLevelTiles.at(particleTile).idx;
+          const IntType  gridCode  = encode(lvl, gridIndex);
+          const IntType& toRank    = otherLevelTiles.at(particleTile).pid;
 
-        //           threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
+          threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
 
-        //           foundTile = true;
+          foundTile = true;
 
-        //           break;
-        //         }
-        // #endif
+          break;
+        }
+#endif
       }
 
       // If this triggers the particle fell off the domain.
@@ -1131,6 +1122,9 @@ ParticleContainer<P>::remap()
 
   // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
   // we got from there.
+#if 1 // Remove later
+  pout() << "starting particle after scatter" << endl;
+#endif
 #pragma omp        parallel
 #pragma omp single nowait
   {
@@ -1150,6 +1144,9 @@ ParticleContainer<P>::remap()
       }
     }
   }
+#if 1 // Remove later
+  pout() << "done!" << endl;
+#endif
 #endif
 }
 
