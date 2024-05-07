@@ -851,6 +851,7 @@ ParticleContainer<P>::remap()
   CH_TIMER("ParticleContainer<P>::remap::catenate_to_coarser", t2);
 
   // This is old code.
+#if 0
   CH_START(t1);
   List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -887,6 +888,7 @@ ParticleContainer<P>::remap()
   // Clear rest of particles -- these are no longer on the grid.
   this->clearOutcast();
 
+#else
   // Here starts the new way.
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
@@ -933,11 +935,12 @@ ParticleContainer<P>::remap()
 
   // These routines are used for encoding a grid level and a grid index onto an unsigned long. The level is encoded onto an 8-bit representation (max 256 levels)
   // onto the left-most bits. The grid index is encoded by the remaining (hopefully 56) bits, which should be enough for anyone.
-  constexpr size_t numBitsLong  = sizeof(unsigned long) * 8;
+  using IntType                 = unsigned int;
+  constexpr size_t numBitsLong  = sizeof(IntType) * 8;
   constexpr size_t numBitsLevel = 8;
   constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
 
-  auto encode = [](const unsigned long a_level, const unsigned long a_index) -> unsigned long {
+  auto encode = [](const IntType a_level, const IntType a_index) -> IntType {
     std::bitset<numBitsLevel> levelBits(a_level);
     std::bitset<numBitsLong>  codeBits(a_index);
 
@@ -945,10 +948,10 @@ ParticleContainer<P>::remap()
       codeBits.set(numBitsIndex + pos, levelBits[pos]);
     }
 
-    return codeBits.to_ulong();
+    return (IntType)codeBits.to_ulong();
   };
 
-  auto decode = [](const unsigned long a_code) -> std::pair<unsigned long, unsigned long> {
+  auto decode = [](const IntType a_code) -> std::pair<IntType, IntType> {
     std::bitset<numBitsLevel> levelBits;
     std::bitset<numBitsLong>  indexBits(a_code);
 
@@ -957,28 +960,31 @@ ParticleContainer<P>::remap()
       indexBits.set(numBitsIndex + pos, false);
     }
 
-    const unsigned long lvl = levelBits.to_ulong();
-    const unsigned long idx = indexBits.to_ulong();
+    const IntType lvl = (IntType)levelBits.to_ulong();
+    const IntType idx = (IntType)indexBits.to_ulong();
 
     return std::make_pair(lvl, idx);
   };
 
   // These are the particles that get sent to each MPI rank. The unsigned integer in the map holds both the grid index AND the level index,
   // which we do by using the first six bits to decode the level and the remaining 26 bits to hold the grid index.
-  std::vector<std::map<unsigned long, List<P>>> particlesToSend(numRanks);
+  std::vector<std::map<IntType, List<P>>> particlesToSend(numRanks);
 
   // Particles received on this rank - we use the same indexing/decoding as for the sent particles
-  std::map<unsigned long, List<P>> receivedParticles;
+  std::map<IntType, List<P>> receivedParticles;
 
   // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
 #pragma omp parallel
   {
-    std::vector<std::map<unsigned long, List<P>>> threadLocalParticlesToSend(numRanks);
+    std::vector<std::map<IntType, List<P>>> threadLocalParticlesToSend(numRanks);
 
     // Collect the outcast list for each rank.
     List<P> outcasts;
 
+#if 1 // Remove later
+    pout() << "collecting outcasts" << endl;
+#endif
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -994,13 +1000,20 @@ ParticleContainer<P>::remap()
         particles.getInvalidDestructive(outcasts, dbl[din]);
       }
     }
+#if 1
+    pout() << "done collecting outcasts" << endl;
+#endif
 
     // Starting on the finest level -- figure out where the particles wound up. We are going from finest to coarsest here because we want
     // the particle to end up on the finest grid level that contains them.
+#if 1 // Remove later
+#pragma omp barrier
+    pout() << "start outcast analysis" << endl;
+#endif
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       bool foundTile = false;
 
-      for (unsigned long lvl = m_finestLevel; lvl >= 0; lvl++) {
+      for (IntType lvl = m_finestLevel; lvl >= 0; lvl++) {
         const IntVect particleTile = locateBin(lit().position(), m_dx[lvl], m_probLo);
 
         const auto& myLevelTiles    = myTiles[lvl];
@@ -1008,9 +1021,9 @@ ParticleContainer<P>::remap()
 
         if (myLevelTiles.find(particleTile) != myLevelTiles.end()) {
           // Found the particle on this level and this rank is the one who owns it.
-          const unsigned long gridIndex = myLevelTiles.at(particleTile);
-          const unsigned long gridCode  = encode(lvl, gridIndex);
-          const auto&         toRank    = myRank;
+          const IntType gridIndex = myLevelTiles.at(particleTile);
+          const IntType gridCode  = encode(lvl, gridIndex);
+          const auto&   toRank    = myRank;
 
           threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
 
@@ -1022,9 +1035,9 @@ ParticleContainer<P>::remap()
         else {
           if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
             // Particle was found on this level but no on this rank.
-            const unsigned long  gridIndex = otherLevelTiles.at(particleTile).idx;
-            const unsigned long  gridCode  = encode(lvl, gridIndex);
-            const unsigned long& toRank    = otherLevelTiles.at(particleTile).pid;
+            const IntType  gridIndex = otherLevelTiles.at(particleTile).idx;
+            const IntType  gridCode  = encode(lvl, gridIndex);
+            const IntType& toRank    = otherLevelTiles.at(particleTile).pid;
 
             threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
 
@@ -1041,16 +1054,21 @@ ParticleContainer<P>::remap()
         ++lit;
       }
     }
+#if 1 // Remove later
+#pragma omp barrier
+    pout() << "done collecting outcasts" << endl;
+    pout() << "starting outcast collection" << endl;
+#endif
 
 #pragma omp critical
     {
       // Collect the particles to be sent to each rank.
       for (int irank = 0; irank < numRanks; irank++) {
-        std::map<unsigned long, List<P>>& particlesToRank = particlesToSend[irank];
+        std::map<IntType, List<P>>& particlesToRank = particlesToSend[irank];
 
         for (auto& m : threadLocalParticlesToSend[irank]) {
-          const unsigned long& gridCode  = m.first;
-          List<P>&             particles = m.second;
+          const IntType& gridCode  = m.first;
+          List<P>&       particles = m.second;
 
           particlesToRank[gridCode].catenate(particles);
         }
@@ -1059,21 +1077,30 @@ ParticleContainer<P>::remap()
 
     // Rest of the particles fell of the domain and have to go.
     outcasts.clear();
+
+#if 1 // Remove later
+#pragma omp barrier
+    pout() << "done with omp outcast loop" << endl;
+#endif
   }
 
   // Iterator for gonig through the particle lists.
-  typename std::map<unsigned long, List<P>>::iterator mapIter;
+  typename std::map<IntType, List<P>>::iterator mapIter;
 
   // Particles that go from this rank to this rank (only change patch) don't need to be communicated we can place them directly on the correct patch.
-  std::map<unsigned long, List<P>>& particlesFromMeToMe = particlesToSend[myRank];
+  std::map<IntType, List<P>>& particlesFromMeToMe = particlesToSend[myRank];
+
+#if 1 // Remove later
+  pout() << "starting to collect particles to send" << endl;
+#endif
 #pragma omp        parallel
 #pragma omp single nowait
   {
     for (mapIter = particlesFromMeToMe.begin(); mapIter != particlesFromMeToMe.end(); mapIter++) {
-#pragma omp task firstprivate(mapIter)
+#pragma omp task   firstprivate(mapIter)
       {
-        const unsigned long gridCode  = mapIter->first;
-        List<P>&            particles = mapIter->second;
+        const IntType gridCode  = mapIter->first;
+        List<P>&      particles = mapIter->second;
 
         const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
         const unsigned int                          gridLevel  = gridDecode.first;
@@ -1085,10 +1112,19 @@ ParticleContainer<P>::remap()
       }
     }
   }
+#if 1 // Remove later
+  ParallelOps::barrier();
+  pout() << "done collecting particles" << endl;
+  pout() << "starting particle scatter " << endl;
+#endif
 
 #ifdef CH_MPI
-  // Must write this fucker later.
-  //  mpi_scatter_part(receivedParticles, particlesToSend);
+  // TODO: This one should be rewritten to use unsigned long rather than unsigned int
+  mpi_scatter_part(receivedParticles, particlesToSend);
+#endif
+#if 1 // Remove later
+  ParallelOps::barrier();
+  pout() << "done with particle scatter" << endl;
 #endif
 
   // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
@@ -1097,10 +1133,10 @@ ParticleContainer<P>::remap()
 #pragma omp single nowait
   {
     for (mapIter = receivedParticles.begin(); mapIter != receivedParticles.end(); mapIter++) {
-#pragma omp task firstprivate(mapIter)
+#pragma omp task   firstprivate(mapIter)
       {
-        const unsigned long gridCode  = mapIter->first;
-        List<P>&            particles = mapIter->second;
+        const IntType gridCode  = mapIter->first;
+        List<P>&      particles = mapIter->second;
 
         const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
         const unsigned int                          gridLevel  = gridDecode.first;
@@ -1112,6 +1148,7 @@ ParticleContainer<P>::remap()
       }
     }
   }
+#endif
 }
 
 template <class P>
