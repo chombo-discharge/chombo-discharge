@@ -251,7 +251,28 @@
 		"type": "constant", // Diffusion coefficient is constant
 		"value": 0.0        // Diffusion coefficient is 0.0
 	    }				
+	},
+	
+	
+
+	{
+	    // Definition of 1PN2 plasma species (light emission).
+            "id": "1PN2",            // Species ID
+	    "Z" : 0,                // Charge number
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : false,       // Mobile or not
+	    "diffusive" : false,    // Diffusive or not
+	    "mobility": {           // Specification of the mobility
+		"type": "constant", // Mobility is constant 
+		"value": 2E-4       // Mobility value is 2E-4
+	    },
+	    "diffusion": {          // Specification of diffusion coefficient
+		"type": "constant", // Diffusion coefficient is constant
+		"value": 0.0        // Diffusion coefficient is 0.0
+	    }		
 	}
+	
+
     ],
     "photon species":
     [
@@ -355,7 +376,30 @@
 	    "plot": true,                                    // Optional. If true, the reaction rate will be plotted.
 	    "efficiency": 0.06,                              // Reaction efficiency, assuming the number of photoionization events per ionization event
 	    "quenching pressure": 4000.0                     // Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
+	},
+	
+	{
+	    // Tabulated reaction rate for e + N2 -> e + Y + N2
+	    "reaction": "e + N2 -> e + 1PN2",            // Reaction. Must contain the '->'
+	    "description": "Rate/Photon generation",         // Optional description of the reaction. Used when plotting the rate
+	    "type": "table vs E/N",                          // Specification of reaction rate type
+	    "file" : "bolsig_air.dat",                       // File containing the data
+	    "header" : "C14   N2    Excitation    7.35 eV", // Header line preceding data
+	    "E/N column" : 0,                                // Optional specification of column containing E/N (defaults to 0)
+	    "rate/N column" : 1,                             // Optional specification of column containing alpha/N (defaults to 1)
+	    "min E/N" : 1.0,                                 // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "max E/N" : 1000.0,                              // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	    "num points" : 1000,                             // Optional number of points kept when resamplnig the table (defaults to 1000)
+	    "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
+	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
+	    //"dump" : "debug_r4.dat",                       // Optional dump of internalized table to file. Useful for debugging.
+            "gradient correction": "e",                      // Use gradient correction to rate
+	    "plot": true,                                    // Optional. If true, the reaction rate will be plotted.
+	    "efficiency": 0.06,                              // Reaction efficiency, assuming the number of photoionization events per ionization event
+	    "quenching pressure": 4000.0                     // Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
 	}
+	
 
     ],
     "photoionization":

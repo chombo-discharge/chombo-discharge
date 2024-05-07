@@ -120,6 +120,7 @@ DiskProfiledPlane::defineDielectric() noexcept
   Real golfpegWidth = 0.0;
   Real golfpegCurvature1 = 0.0;
   Real golfpegCurvature2 = 0.0;
+  bool mirrorProfile = false;
   
 
   Vector<Real> boxDimensions(3, std::numeric_limits<Real>::max());
@@ -147,6 +148,7 @@ DiskProfiledPlane::defineDielectric() noexcept
   pp.get("golfpeg_width", golfpegWidth);
   pp.get("golfpeg_curvature1", golfpegCurvature1);
   pp.get("golfpeg_curvature2", golfpegCurvature2);
+  pp.get("mirror_profile", mirrorProfile);
 
   pp.getarr("box_dimensions", boxDimensions, 0, 3);
   pp.getarr("box_translate", boxTranslation, 0, 3);
@@ -158,6 +160,7 @@ DiskProfiledPlane::defineDielectric() noexcept
   pp.getarr("square_dimensions", squareDimensions, 0, 3);
   pp.getarr("lshape_dimensions", lshapeDimensions, 0, 3);
   pp.get("lshape_cut_angle", lshapeCutAngle);
+  
 
   if (boxCurvature <= 0.0) {
     MayDay::Error("DiskProfiledPlane::defineDielectric - must have 'box_curvature' > 0.0");
@@ -236,6 +239,10 @@ DiskProfiledPlane::defineDielectric() noexcept
   profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
   profile    = Translate<Real>(profile, profileTra);
   roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+  if (mirrorProfile) {
+  profile = Reflect<Real>(profile, 0);
+  roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+  }
   // roundedBox = SmoothUnion<Real>(roundedBox, profile, sphereRadius);
   }
   
@@ -245,16 +252,21 @@ DiskProfiledPlane::defineDielectric() noexcept
 	
 
     roundedBox = SmoothUnion<Real>(roundedBox, profile, boxCurvature);
+	
+	if (mirrorProfile) {
 	profile = Reflect<Real>(profile, 0);
 	roundedBox = SmoothUnion<Real>(roundedBox, profile, boxCurvature);
+	}
   }
   
   else if (str == "golfpeg") {
   profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
   profile    = Translate<Real>(profile, profileTra);
   roundedBox = SmoothUnion<Real>(roundedBox, profile, golfpegCurvature2);
+  if (mirrorProfile) {
   profile = Reflect<Real>(profile, 0);
   roundedBox = SmoothUnion<Real>(roundedBox, profile, golfpegCurvature2);
+  }
   }
   
   // Translate box into place.

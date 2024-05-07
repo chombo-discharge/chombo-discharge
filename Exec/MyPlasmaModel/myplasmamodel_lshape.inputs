@@ -1,7 +1,8 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-MyPlasmaModel.potential = 20E3
+#MyPlasmaModel.potential = 31.2E3
+MyPlasmaModel.potential = -33.3E3
 MyPlasmaModel.basename  = pout
 
 # ====================================================================================================
@@ -140,7 +141,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
-ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
+ItoSolver.merge_algorithm     = equal_weight_kd  # Particle merging algorithm (see documentation), 'equal_weight_kd' or 'reinitialize'
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
@@ -222,7 +223,7 @@ DiskProfiledPlane.wheel_extra_thickness = 0.0                     # Extra wheel 
 
 DiskProfiledPlane.box_dimensions        = 7.2000123E-2 0.020012 1 # Box dimensions
 DiskProfiledPlane.box_translate         = 0.00E-3 4.0123E-3 0           # Box translation
-DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
+DiskProfiledPlane.box_permittivity      = 3.3                     # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 100E-6                   # Corner curvatures
 
 
@@ -236,11 +237,12 @@ DiskProfiledPlane.profile_repetition_hi = 26 0 0                  # Repetition p
 DiskProfiledPlane.profile_period        = 1.32E-3 1 1                # Repetition period
 #DiskProfiledPlane.profile_period        = 1.0425E-3 1 1                # Repetition period
 
-DiskProfiledPlane.square_dimensions     = 799E-6 999E-6 10       # Dimensions for squares/square channels
+DiskProfiledPlane.square_dimensions     = 749E-6 1999E-6 10       # Dimensions for squares/square channels
 DiskProfiledPlane.lshape_dimensions     = 799E-6 999E-6 10     # Main dimensions for l_shape channels
 DiskProfiledPlane.lshape_cut_angle    	= 0.185353              # in radians (cut plane from upper corner)
 DiskProfiledPlane.sphere_radius         = 300E-6                    # Radius for sphere profiles
 DiskProfiledPlane.cylinder_radius       = 1E-3                    # Radius for cylinder profiles
+DiskProfiledPlane.mirror_profile        = true 	            # mirror profile about y axis at x = 0
 
 DiskProfiledPlane.golfpeg_radius        = 299E-6                    # Golfpeg top ball radius
 DiskProfiledPlane.golfpeg_length	    = 999E-6                    # golfpeg length

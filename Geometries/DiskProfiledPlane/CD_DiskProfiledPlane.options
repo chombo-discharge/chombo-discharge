@@ -19,10 +19,11 @@ DiskProfiledPlane.box_curvature         = 1E-4          # Corner curvatures
 
 DiskProfiledPlane.profile_type          = square        # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z', 'lshape', 'golfpeg'
 DiskProfiledPlane.profile_translate     = 0 0           # Profile translation
-DiskProfiledPlane.profile_translate2     = 0 0           # Profile translation for l_shape second box
+DiskProfiledPlane.profile_translate2    = 0 0           # Profile translation for l_shape second box
 DiskProfiledPlane.profile_repetition_lo = 3 0           # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 3 0           # Repetition pattern in high coordinate direction
 DiskProfiledPlane.profile_period        = 1E-2 0        # Repetition period
+DiskProfiledPlane.mirror_profile        = true          # mirror profile about y axis at x = 0
 
 DiskProfiledPlane.square_dimensions     = 5E-4 5E-4     # Dimensions for squares/square channels
 DiskProfiledPlane.lshape_dimensions     = 1E-3 5E-4     # Dimensions for squares/square channels
