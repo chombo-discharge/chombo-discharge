@@ -1018,7 +1018,7 @@ ParticleContainer<P>::remap()
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       bool foundTile = false;
 
-      for (IntType lvl = m_finestLevel; lvl >= 0; lvl++) {
+      for (IntType lvl = m_finestLevel; lvl >= 0; lvl--) {
         const IntVect particleTile = locateBin(lit().position(), m_dx[lvl], m_probLo);
 
         const auto& myLevelTiles    = myTiles[lvl];
@@ -1028,30 +1028,27 @@ ParticleContainer<P>::remap()
           // Found the particle on this level and this rank is the one who owns it.
           const IntType gridIndex = myLevelTiles.at(particleTile);
           const IntType gridCode  = encode(lvl, gridIndex);
-          const auto&   toRank    = myRank;
 
-          threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
+          // threadLocalParticlesToSend[myRank][gridCode].transfer(lit);
 
-          foundTile = true;
+          // foundTile = true;
 
-          break;
+          // break;
         }
-#ifdef CH_MPI
-        else {
-          if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
-            // Particle was found on this level but no on this rank.
-            const IntType  gridIndex = otherLevelTiles.at(particleTile).idx;
-            const IntType  gridCode  = encode(lvl, gridIndex);
-            const IntType& toRank    = otherLevelTiles.at(particleTile).pid;
+        // #ifdef CH_MPI
+        //         else if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
+        //           // Particle was found on this level but no on this rank.
+        //           const IntType  gridIndex = otherLevelTiles.at(particleTile).idx;
+        //           const IntType  gridCode  = encode(lvl, gridIndex);
+        //           const IntType& toRank    = otherLevelTiles.at(particleTile).pid;
 
-            threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
+        //           threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
 
-            foundTile = true;
+        //           foundTile = true;
 
-            break;
-          }
-        }
-#endif
+        //           break;
+        //         }
+        // #endif
       }
 
       // If this triggers the particle fell off the domain.
