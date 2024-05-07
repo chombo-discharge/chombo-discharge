@@ -899,6 +899,7 @@ ParticleContainer<P>::remap()
   // myTiles => Tiles on each level owned by this rank. Maps a tile (an IntVect) to a grid index.
   // myGridIndices => Maps a global grid index to a local DataIndex
   // othertiles => Tiles on each level owned by another rank.
+  // quasiDx => Spacing on the "tiled" mesh
   std::vector<std::set<IntVect, CompIntVect>>               tileSet(1 + m_finestLevel);
   std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
   std::vector<std::map<unsigned int, DataIndex>>            myGridIndices(1 + m_finestLevel);
@@ -1123,8 +1124,11 @@ ParticleContainer<P>::remap()
   // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
   // we got from there.
 #if 1 // Remove later
-  pout() << "starting particle after scatter" << endl;
+  pout() << "starting particle collection after scatter" << endl;
 #endif
+
+// Something breaks within this piece of code - don't know what. Could be that index() and intCode() do not do what I expect. Need to double-check
+// that we are encoding/decoding to the correct grid patch
 #pragma omp        parallel
 #pragma omp single nowait
   {
@@ -1144,9 +1148,32 @@ ParticleContainer<P>::remap()
       }
     }
   }
+
 #if 1 // Remove later
+  ParallelOps::barrier();
   pout() << "done!" << endl;
 #endif
+
+  if (m_debug) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl = m_grids[lvl];
+      const RealVect           dx  = m_dx[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const List<P>& particles = (*m_particles[lvl])[dit()].listItems();
+        const Box      box       = dbl[dit()];
+
+        for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+          const RealVect particlePosition = lit().position();
+          const IntVect  particleCell     = ParticleOps::getParticleCellIndex(particlePosition, m_probLo, dx);
+
+          if (!(box.contains(particleCell))) {
+            MayDay::Error("ParticleContainer::remap -- particle is not contained in grid box!");
+          }
+        }
+      }
+    }
+  }
 #endif
 }
 
