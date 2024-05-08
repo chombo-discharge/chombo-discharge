@@ -160,13 +160,13 @@ ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLeve
 
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++) {
     m_particles[lvl] = RefCountedPtr<ParticleData<P>>(
-      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+						      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_bufferParticles[lvl] = RefCountedPtr<ParticleData<P>>(
-      new ParticleData<P>(m_grownGrids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+							    new ParticleData<P>(m_grownGrids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_maskParticles[lvl] = RefCountedPtr<ParticleData<P>>(
-      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+							  new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_cellSortedParticles[lvl] = RefCountedPtr<LayoutData<BinFab<P>>>(new LayoutData<BinFab<P>>(m_grids[lvl]));
   }
@@ -504,8 +504,8 @@ ParticleContainer<P>::organizeParticlesByPatch()
 
         // Kernel which adds moves particles from the cell container to the patch container.
         auto kernel = [&](const IntVect& iv) -> void {
-          patchParticles.addItemsDestructive(cellParticles(iv, comp));
-        };
+			patchParticles.addItemsDestructive(cellParticles(iv, comp));
+		      };
 
         BoxLoops::loop(dbl[din], kernel);
 
@@ -589,11 +589,11 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
   BinFab<P>& boxParticles = (*m_cellSortedParticles[a_lvl])[a_dit];
 
   auto kernel = [&](const IntVect& iv) -> void {
-    List<P>&       myParticles    = boxParticles(iv, comp);
-    const List<P>& inputParticles = a_particles(iv, comp);
+		  List<P>&       myParticles    = boxParticles(iv, comp);
+		  const List<P>& inputParticles = a_particles(iv, comp);
 
-    myParticles.join(inputParticles);
-  };
+		  myParticles.join(inputParticles);
+		};
 
   BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
 }
@@ -616,11 +616,11 @@ ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int 
   BinFab<P>& boxParticles = (*m_cellSortedParticles[a_lvl])[a_dit];
 
   auto kernel = [&](const IntVect& iv) -> void {
-    List<P>&       myParticles    = boxParticles(iv, comp);
-    const List<P>& inputParticles = a_particles(iv, comp);
+		  List<P>&       myParticles    = boxParticles(iv, comp);
+		  const List<P>& inputParticles = a_particles(iv, comp);
 
-    myParticles.catenate(inputParticles);
-  };
+		  myParticles.catenate(inputParticles);
+		};
 
   BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
 }
@@ -761,12 +761,12 @@ ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
 
   if (a_otherContainer.isOrganizedByCell()) {
     MayDay::Error(
-      "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other particles are sorted by cell!");
+		  "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other particles are sorted by cell!");
   }
 
   if (a_otherContainer.getRealm() != m_realm) {
     MayDay::Error(
-      "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other container defined over a different realm");
+		  "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other container defined over a different realm");
   }
 
   this->transferParticles(a_otherContainer.getParticles());
@@ -827,8 +827,8 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
 
       const RealVect x = lit().position();
       const IntVect  iv(D_DECL((int)std::floor((x[0] - m_probLo[0]) / dx[0]),
-                              (int)std::floor((x[1] - m_probLo[1]) / dx[1]),
-                              (int)std::floor((x[2] - m_probLo[2]) / dx[2])));
+			       (int)std::floor((x[1] - m_probLo[1]) / dx[1]),
+			       (int)std::floor((x[2] - m_probLo[2]) / dx[2])));
 
       CH_assert(mask.box().contains(iv));
 
@@ -847,101 +847,32 @@ void
 ParticleContainer<P>::remap()
 {
   CH_TIMERS("ParticleContainer<P>::remap");
-  CH_TIMER("ParticleContainer<P>::remap::catenate_to_finest", t1);
-  CH_TIMER("ParticleContainer<P>::remap::catenate_to_coarser", t2);
+  CH_TIMER("ParticleContainer<P>::remap::build_structures", t1);
+  CH_TIMER("ParticleContainer<P>::remap::collect_outcasts", t2);
+  CH_TIMER("ParticleContainer<P>::remap::loop_outcasts", t3);
+  CH_TIMER("ParticleContainer<P>::remap::catenate_list", t4);
+  CH_TIMER("ParticleContainer<P>::remap::gather_local", t5);
+  CH_TIMER("ParticleContainer<P>::remap::scatter_particles", t6);
+  CH_TIMER("ParticleContainer<P>::remap::assign_scattered_particles", t7);
 
-  // This is old code.
-#if 0
-  CH_START(t1);
-  List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+  // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
+  //
+  // This is done in the following steps:
+  //    1) Collect all particles from this rank onto thread-local variables
+  //    2) Iterate through those particles and figure out where they end up up the AMR hierarchy (level, grid index, and ownership, i.e. the MPI rank)
+  //    3) Collect those particles onto a rank-only (no thread loacl) variable
+  //    4) Assign particles _locally_, i.e. assign particles sent from this rank to this rank directly onto m_particles
+  //    5) If using MPI, scatter the particles to the appropriate ranks.
+  //    6) Assign particles locally from the particles that were scattered to this rank.
 
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-    const DataIterator&      dit = dbl.dataIterator();
-
-    const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(catenate : outcastFinest)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      outcastFinest.catenate((*m_particles[lvl])[din].listItems());
-    }
-  }
-  CH_STOP(t1);
-
-  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    this->gatherOutcast(*m_particles[lvl]);
-    this->remapOutcast(*m_particles[lvl]);
-
-    CH_START(t2);
-    if (lvl > 0) {
-
-      List<P>& outcast     = m_particles[lvl]->outcast();
-      List<P>& outcastCoar = m_particles[lvl - 1]->outcast();
-
-      outcastCoar.catenate(outcast);
-    }
-    CH_STOP(t2);
-  }
-
-  // Clear rest of particles -- these are no longer on the grid.
-  this->clearOutcast();
-
-#else
-  // Here starts the new way.
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
-
-  // Build the tile-space. This is something that should probably be stored somewhere else.
-  //
-  // tileSet => Grids, viewed as a collection of tiles (one box = one tile)
-  // myTiles => Tiles on each level owned by this rank. Maps a tile (an IntVect) to a grid index.
-  // myGridIndices => Maps a global grid index to a local DataIndex
-  // othertiles => Tiles on each level owned by another rank.
-  // quasiDx => Spacing on the "tiled" mesh
-  std::vector<std::set<IntVect, CompIntVect>>               tileSet(1 + m_finestLevel);
-  std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
-  std::vector<std::map<unsigned int, DataIndex>>            myGridIndices(1 + m_finestLevel);
-  std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
-  std::vector<RealVect>                                     quasiDx(1 + m_finestLevel);
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-
-    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-      const LayoutIndex  lidx   = lit();
-      const IntVect      tile   = coarsen(dbl[lidx], m_blockingFactor).smallEnd();
-      const unsigned int rankID = dbl.procID(lidx);
-      const unsigned int tileID = dbl.index(lidx);
-
-      // If using MPI we need to figure out who owns this tile.
-#if CH_MPI
-      if (myRank == rankID) {
-        myTiles[lvl][tile] = tileID;
-      }
-      else {
-        otherTiles[lvl][tile] = boxids(tileID, rankID);
-      }
-#else
-      myTiles[lvl][tile] = tileID;
-#endif
-
-      tileSet[lvl].insert(tile);
-    }
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      myGridIndices[lvl][dit().intCode()] = dit();
-    }
-
-    quasiDx[lvl] = m_blockingFactor * m_dx[lvl];
-  }
 
   // These routines are used for encoding a grid level and a grid index onto an unsigned long. The level is encoded onto an 8-bit representation (max 256 levels)
   // onto the left-most bits. The grid index is encoded by the remaining (hopefully 56) bits, which should be enough for anyone.
   using IntType                 = unsigned int;
   constexpr size_t numBitsLong  = sizeof(IntType) * 8;
-  constexpr size_t numBitsLevel = 8;
+  constexpr size_t numBitsLevel = 6;
   constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
 
   auto encode = [](const IntType a_level, const IntType a_index) -> IntType {
@@ -970,12 +901,53 @@ ParticleContainer<P>::remap()
     return std::make_pair(lvl, idx);
   };
 
+  // Build the tile-space. This is something that should probably be stored somewhere else.
+  //
+  // myTiles => Tiles on each level owned by this rank. Maps a tile (an IntVect) to a grid index.
+  // myGridIndices => Maps a global grid index to a local DataIndex
+  // othertiles => Tiles on each level owned by another rank.
+  // quasiDx => Spacing on the "tiled" mesh
+  CH_START(t1);
+  std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
+  std::vector<std::map<unsigned int, DataIndex>>            myGridIndices(1 + m_finestLevel);
+  std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
+  std::vector<RealVect>                                     quasiDx(1 + m_finestLevel);
+
+  pout() << "build structures" << endl;
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
+      const LayoutIndex  lidx   = lit();
+      const IntVect      tile   = coarsen(dbl[lidx], m_blockingFactor).smallEnd();
+      const unsigned int rankID = dbl.procID(lidx);
+      const unsigned int tileID = dbl.index(lidx);
+
+      // If using MPI we need to figure out who owns this tile.
+#if CH_MPI
+      if (myRank == rankID) {
+        myTiles[lvl][tile] = tileID;
+      }
+      else {
+        otherTiles[lvl][tile] = boxids(tileID, rankID);
+      }
+#else
+      myTiles[lvl][tile] = tileID;
+#endif
+    }
+
+    // Figure out which global indices correspond to which local indices.
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      myGridIndices[lvl][dbl.index(dit())] = dit();
+    }
+
+    quasiDx[lvl] = m_blockingFactor * m_dx[lvl];
+  }
+  CH_STOP(t1);
+
   // These are the particles that get sent to each MPI rank. The unsigned integer in the map holds both the grid index AND the level index,
   // which we do by using the first six bits to decode the level and the remaining 26 bits to hold the grid index.
   std::vector<std::map<IntType, List<P>>> particlesToSend(numRanks);
-
-  // Particles received on this rank - we use the same indexing/decoding as for the sent particles
-  std::map<IntType, List<P>> receivedParticles;
 
   // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
   // then the particles are moved onto appropriate lists that will get sent to each rank.
@@ -983,9 +955,11 @@ ParticleContainer<P>::remap()
   {
     std::vector<std::map<IntType, List<P>>> threadLocalParticlesToSend(numRanks);
 
-    // Collect the outcast list for each rank.
+    // Particles own by this rank and this thread.
     List<P> outcasts;
 
+    pout() << "outcast collect" << endl;
+    CH_START(t2);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -997,16 +971,16 @@ ParticleContainer<P>::remap()
         const DataIndex& din = dit[mybox];
 
         List<P>& particles = (*m_particles[lvl])[din].listItems();
+
         outcasts.catenate(particles);
       }
     }
+    CH_STOP(t2);
 
     // Starting on the finest level -- figure out where the particles wound up. We are going from finest to coarsest here because we want
     // the particle to end up on the finest grid level that contains them.
-#if 1 // Remove later
-#pragma omp barrier
-    pout() << "start outcast analysis" << endl;
-#endif
+    pout() << "iterate through outcasts" << endl;
+    CH_START(t3);
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       bool foundTile = false;
 
@@ -1042,22 +1016,22 @@ ParticleContainer<P>::remap()
         }
 #endif
       }
-
       // If this triggers the particle fell off the domain.
       if (!foundTile) {
         ++lit;
       }
     }
-#if 1 // Remove later
-#pragma omp barrier
-    pout() << "done collecting outcasts" << endl;
-    pout() << "starting outcast collection" << endl;
-#endif
+    CH_STOP(t3);
 
+    // Rest of the particles fell of the domain and have to go.
+    outcasts.clear();
+
+    pout() << "catenate particles" << endl;
+    CH_START(t4);
 #pragma omp critical
     {
-      // Collect the particles to be sent to each rank.
-      for (int irank = 0; irank < numRanks; irank++) {
+      // Catenate the thread-local particle lists onto particlesToSend
+      for (unsigned int irank = 0; irank < numRanks; irank++) {
         std::map<IntType, List<P>>& particlesToRank = particlesToSend[irank];
 
         for (auto& m : threadLocalParticlesToSend[irank]) {
@@ -1068,72 +1042,78 @@ ParticleContainer<P>::remap()
         }
       }
     }
-
-    // Rest of the particles fell of the domain and have to go.
-    outcasts.clear();
-
-#if 1 // Remove later
-#pragma omp barrier
-    pout() << "done with omp outcast loop" << endl;
-#endif
+    CH_STOP(t4);
   }
-
-  // Iterator for gonig through the particle lists.
-  typename std::map<IntType, List<P>>::iterator mapIter;
 
   // Particles that go from this rank to this rank (only change patch) don't need to be communicated we can place them directly on the correct patch.
   std::map<IntType, List<P>>& particlesFromMeToMe = particlesToSend[myRank];
 
-#if 1 // Remove later
-  pout() << "starting to collect particles to send" << endl;
-#endif
-#pragma omp        parallel
-#pragma omp single nowait
+  CH_START(t5);
+#pragma omp parallel
   {
-    for (mapIter = particlesFromMeToMe.begin(); mapIter != particlesFromMeToMe.end(); mapIter++) {
-#pragma omp task   firstprivate(mapIter)
-      {
-        const IntType gridCode  = mapIter->first;
-        List<P>&      particles = mapIter->second;
+#pragma omp single
+    {
+      for (auto mapIter = particlesFromMeToMe.begin(); mapIter != particlesFromMeToMe.end(); mapIter++) {
+#pragma omp task firstprivate(mapIter)
+        {
+          const IntType gridCode  = mapIter->first;
+          List<P>&      particles = mapIter->second;
 
-        const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
-        const unsigned int                          gridLevel  = gridDecode.first;
-        const unsigned int                          gridIndex  = gridDecode.second;
+          const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
+          const unsigned int                          gridLevel  = gridDecode.first;
+          const unsigned int                          gridIndex  = gridDecode.second;
 
-        const DataIndex din = myGridIndices[gridLevel][gridIndex];
+          const DataIndex din = myGridIndices[gridLevel][gridIndex];
 
-        (*m_particles[gridLevel])[din].listItems().catenate(particles);
+          List<P>& myParticles = (*m_particles[gridLevel])[din].listItems();
+
+          myParticles.catenate(particles);
+
+          if (m_debug) {
+            const Box      box = m_grids[gridLevel][din];
+            const RealVect dx  = m_dx[gridLevel];
+
+            for (ListIterator<P> lit(myParticles); lit.ok(); ++lit) {
+              const RealVect particlePosition = lit().position();
+              const IntVect  particleCell     = ParticleOps::getParticleCellIndex(particlePosition, m_probLo, dx);
+
+              if (!(box.contains(particleCell))) {
+                MayDay::Error("ParticleContainer::remap -- error1: particle is not contained in grid box!");
+              }
+            }
+          }
+        }
       }
     }
   }
-#if 1 // Remove later
-  ParallelOps::barrier();
-  pout() << "done collecting particles" << endl;
-  pout() << "starting particle scatter " << endl;
+  CH_STOP(t5);
+
+  particlesFromMeToMe.clear();
+
+#if 1 // Debug code to remove later
+  // This code should look through all particles in particlesToSend and check that they are indeed falling onto the correct level/box/rank
 #endif
 
+  // Particles received on this rank - we use the same indexing/decoding as for the sent particles
+  std::map<IntType, List<P>> receivedParticles;
+
+  // Scatter particles across MPI ranks.
 #ifdef CH_MPI
-  // TODO: This one should be rewritten to use unsigned long rather than unsigned int
+  pout() << "starting particle scatter" << endl;
+  // TODO: mpi_scatter_part should be rewritten to use unsigned long rather than unsigned int
+  CH_START(t6);
   mpi_scatter_part(receivedParticles, particlesToSend);
-#endif
-#if 1 // Remove later
-  ParallelOps::barrier();
+  CH_STOP(t6);
   pout() << "done with particle scatter" << endl;
-#endif
 
   // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
   // we got from there.
-#if 1 // Remove later
-  pout() << "starting particle collection after scatter" << endl;
-#endif
-
-// Something breaks within this piece of code - don't know what. Could be that index() and intCode() do not do what I expect. Need to double-check
-// that we are encoding/decoding to the correct grid patch
-#pragma omp        parallel
-#pragma omp single nowait
+  CH_START(t7);
+#pragma omp parallel
   {
-    for (mapIter = receivedParticles.begin(); mapIter != receivedParticles.end(); mapIter++) {
-#pragma omp task   firstprivate(mapIter)
+#pragma omp single
+    for (auto mapIter = receivedParticles.begin(); mapIter != receivedParticles.end(); ++mapIter) {
+#pragma omp task firstprivate(mapIter)
       {
         const IntType gridCode  = mapIter->first;
         List<P>&      particles = mapIter->second;
@@ -1148,12 +1128,11 @@ ParticleContainer<P>::remap()
       }
     }
   }
-
-#if 1 // Remove later
-  ParallelOps::barrier();
-  pout() << "done!" << endl;
+  CH_STOP(t7);
 #endif
+  pout() << "done assign" << endl;
 
+  // Debug hook which makes sure all particles wound up in the correct place.
   if (m_debug) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -1168,18 +1147,20 @@ ParticleContainer<P>::remap()
           const IntVect  particleCell     = ParticleOps::getParticleCellIndex(particlePosition, m_probLo, dx);
 
           if (!(box.contains(particleCell))) {
-            MayDay::Error("ParticleContainer::remap -- particle is not contained in grid box!");
+            MayDay::Error("ParticleContainer::remap -- error2: particle is not contained in grid box!");
           }
         }
       }
     }
   }
+
+#if 1
+  pout() << "done!" << endl;
 #endif
 }
 
 template <class P>
-void
-ParticleContainer<P>::levelRemap()
+void ParticleContainer<P>::levelRemap()
 {
   CH_TIME("ParticleContainer<P>::levelRemap");
 
@@ -1195,8 +1176,7 @@ ParticleContainer<P>::levelRemap()
 }
 
 template <class P>
-void
-ParticleContainer<P>::levelRemap(const int a_lvl)
+void ParticleContainer<P>::levelRemap(const int a_lvl)
 {
   CH_TIME("ParticleContainer<P>::levelRemap(int)");
 
@@ -1211,8 +1191,7 @@ ParticleContainer<P>::levelRemap(const int a_lvl)
 }
 
 template <class P>
-void
-ParticleContainer<P>::preRegrid(const int a_lmin)
+void ParticleContainer<P>::preRegrid(const int a_lmin)
 {
   CH_TIME("ParticleContainer<P>::preRegrid");
 
@@ -1564,8 +1543,8 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
     for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
       const RealVect x  = lit().position();
       const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
-                                        std::floor((x[1] - m_probLo[1]) / dx[1]),
-                                        std::floor((x[2] - m_probLo[2]) / dx[2])));
+					 std::floor((x[1] - m_probLo[1]) / dx[1]),
+					 std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
         std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
 
@@ -1625,8 +1604,8 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
     for (ListIterator<P> lit(particles); lit.ok();) {
       const RealVect x  = lit().position();
       const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
-                                        std::floor((x[1] - m_probLo[1]) / dx[1]),
-                                        std::floor((x[2] - m_probLo[2]) / dx[2])));
+					 std::floor((x[1] - m_probLo[1]) / dx[1]),
+					 std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
         //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
 
@@ -1689,8 +1668,7 @@ ParticleContainer<P>::clearOutcast() noexcept
 }
 
 template <class P>
-void
-ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
+void ParticleContainer<P>::clear(AMRParticles<P> & a_particles) const
 {
   CH_assert(m_isDefined);
 
@@ -1720,8 +1698,7 @@ ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
 }
 
 template <class P>
-void
-ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
+void ParticleContainer<P>::gatherOutcast(ParticleData<P> & a_particles) noexcept
 {
   CH_TIME("ParticleContainer<P>::gatherOutcast");
 
@@ -1750,8 +1727,7 @@ ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 }
 
 template <class P>
-void
-ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
+void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
 {
   CH_TIMERS("ParticleContainer::remapOutcast");
   CH_TIMER("ParticleContainer::remapOutcast::build_map", t1);
@@ -1820,7 +1796,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
         otherTiles[tile] = boxids(tileID, rankID);
       }
 #else
-      myTiles[tile]      = grids.index(lidx);
+      myTiles[tile] = grids.index(lidx);
 #endif
 
       tileSet.insert(tile);
@@ -1879,13 +1855,13 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
       CH_START(t5);
 #pragma omp for schedule(runtime) reduction(catenate : outcasts)
       for (int ipart = 0; ipart < numOutcasts; ipart++) {
-        const P& particle = allOutcasts[ipart];
-        const IntVect tile = locateBin(particle.position(), dx, origin);
+        const P&      particle = allOutcasts[ipart];
+        const IntVect tile     = locateBin(particle.position(), dx, origin);
 
         if (myTiles.find(tile) != myTiles.end()) {
           // This particle goes from this rank to this rank.
           const auto& gridIndex = myTiles[tile];
-          const auto& toRank = myRank;
+          const auto& toRank    = myRank;
 
           particlesToSendPerThread[toRank][gridIndex].add(particle);
         }
@@ -1894,7 +1870,7 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
           if (otherTiles.find(tile) != otherTiles.end()) {
             // Particle goes from this rank to another rank.
             const auto& gridIndex = otherTiles[tile].idx;
-            const auto& toRank = otherTiles[tile].pid;
+            const auto& toRank    = otherTiles[tile].pid;
 
             particlesToSendPerThread[toRank][gridIndex].add(particle);
           }
@@ -1917,8 +1893,8 @@ ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
           std::map<unsigned int, List<P>>& particlesToRank = particlesToSend[irank];
 
           for (auto& m : particlesToSendPerThread[irank]) {
-            const unsigned int gridIndex = m.first;
-            List<P>& threadParticles = m.second;
+            const unsigned int gridIndex       = m.first;
+            List<P>&           threadParticles = m.second;
 
             particlesToRank[gridIndex].catenate(threadParticles);
           }
