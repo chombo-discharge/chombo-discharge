@@ -190,7 +190,8 @@ public:
   /*!
     @brief Clear outcast particles
   */
-  void clearOutcast() noexcept;
+  void
+  clearOutcast() noexcept;
 
   /*!
     @brief Clear particles on input data holder
@@ -576,6 +577,11 @@ protected:
     @brief Debug or not
   */
   bool m_debug;
+
+  /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
 
   /*!
     @brief AMR grids

@@ -37,6 +37,7 @@ ParticleContainer<P>::ParticleContainer()
   m_isOrganizedByCell = false;
   m_profile           = false;
   m_debug             = false;
+  m_verbose           = false;
 }
 
 template <class P>
@@ -50,7 +51,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
                                         const int                        a_finestLevel,
                                         const std::string                a_realm)
 {
-  CH_TIME("ParticleContainer<P>::ParticleContainer");
+  CH_TIME("ParticleContainer::ParticleContainer");
 
   this->define(a_grids, a_domains, a_dx, a_refRat, a_validMask, a_probLo, a_blockingFactor, a_finestLevel, a_realm);
 }
@@ -58,7 +59,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
 template <class P>
 ParticleContainer<P>::~ParticleContainer()
 {
-  CH_TIME("ParticleContainer<P>::~ParticleContainer");
+  CH_TIME("ParticleContainer::~ParticleContainer");
 }
 
 template <class P>
@@ -73,7 +74,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
                              const int                        a_finestLevel,
                              const std::string                a_realm)
 {
-  CH_TIME("ParticleContainer<P>::~ParticleContainer");
+  CH_TIME("ParticleContainer::~ParticleContainer");
 
   m_grids          = a_grids;
   m_domains        = a_domains;
@@ -102,13 +103,17 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   ParmParse pp("ParticleContainer");
   pp.query("profile", m_profile);
   pp.query("debug", m_debug);
+  pp.query("verbose", m_verbose);
 }
 
 template <class P>
 void
 ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
 {
-  CH_TIME("ParticleContainer<P>::setupGrownGrids");
+  CH_TIME("ParticleContainer::setupGrownGrids");
+  if (m_verbose) {
+    pout() << "ParticleContainer::setupGrownGrids" << endl;
+  }
 
   // TLDR: This routine sets up the buffer grids which can be used when we need to fetch particles that fall off each levels' grid. This is very useful
   //       when we want to fetch particles that lie on the coarse grid of a refinement boundary.
@@ -136,7 +141,10 @@ template <class P>
 void
 ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLevel)
 {
-  CH_TIME("ParticleContainer<P>::setupParticleData");
+  CH_TIME("ParticleContainer::setupParticleData");
+  if (m_verbose) {
+    pout() << "ParticleContainer::setupParticleData" << endl;
+  }
 
   // TLDR: This sets up the most commonly used particle data holders for this particle AMR container. This means that
   //       we allocate:
@@ -160,13 +168,13 @@ ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLeve
 
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++) {
     m_particles[lvl] = RefCountedPtr<ParticleData<P>>(
-						      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_bufferParticles[lvl] = RefCountedPtr<ParticleData<P>>(
-							    new ParticleData<P>(m_grownGrids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+      new ParticleData<P>(m_grownGrids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_maskParticles[lvl] = RefCountedPtr<ParticleData<P>>(
-							  new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
+      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     m_cellSortedParticles[lvl] = RefCountedPtr<LayoutData<BinFab<P>>>(new LayoutData<BinFab<P>>(m_grids[lvl]));
   }
@@ -176,7 +184,10 @@ template <class P>
 void
 ParticleContainer<P>::sortParticles() noexcept
 {
-  CH_TIME("ParticleContainer<P>::sortParticles()");
+  CH_TIME("ParticleContainer::sortParticles");
+  if (m_verbose) {
+    pout() << "ParticleContainer::sortParticles" << endl;
+  }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
@@ -249,7 +260,7 @@ ParticleContainer<P>::getParticles()
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getParticles - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::getParticles - particles are sorted by cell!");
   }
 
   return m_particles;
@@ -262,7 +273,7 @@ ParticleContainer<P>::getParticles() const
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Abort("ParticleContainer<P>::getParticles - particles are sorted by cell!");
+    MayDay::Abort("ParticleContainer::getParticles - particles are sorted by cell!");
   }
 
   return m_particles;
@@ -311,7 +322,7 @@ ParticleContainer<P>::operator[](const int a_lvl)
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::operator[](a_lvl) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::operator[](a_lvl) - particles are sorted by cell!");
   }
 
   return *m_particles[a_lvl];
@@ -324,7 +335,7 @@ ParticleContainer<P>::operator[](const int a_level) const
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::operator[](a_lvl) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::operator[](a_lvl) - particles are sorted by cell!");
   }
 
   return *m_particles[a_level];
@@ -337,7 +348,7 @@ ParticleContainer<P>::getCellParticles()
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles()- particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles()- particles are not sorted by cell!");
   }
 
   return m_cellSortedParticles;
@@ -350,7 +361,7 @@ ParticleContainer<P>::getCellParticles() const
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles()- particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles()- particles are not sorted by cell!");
   }
 
   return m_cellSortedParticles;
@@ -363,7 +374,7 @@ ParticleContainer<P>::getCellParticles(const int a_level)
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles(level)- particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles(level)- particles are not sorted by cell!");
   }
 
   return *m_cellSortedParticles[a_level];
@@ -373,12 +384,12 @@ template <class P>
 const LayoutData<BinFab<P>>&
 ParticleContainer<P>::getCellParticles(const int a_level) const
 {
-  CH_TIME("ParticleContainer<P>::getCellParticles(int)");
+  CH_TIME("ParticleContainer::getCellParticles(int)");
 
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles(level)- particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles(level)- particles are not sorted by cell!");
   }
 
   return *m_cellSortedParticles[a_level];
@@ -388,12 +399,12 @@ template <class P>
 void
 ParticleContainer<P>::getCellParticles(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit) const
 {
-  CH_TIME("ParticleContainer<P>::getCellParticles(BinFab)");
+  CH_TIME("ParticleContainer::getCellParticles(BinFab)");
 
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles - particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles - particles are not sorted by cell!");
   }
 
   cellParticles.define(m_grids[a_lvl][a_dit], m_dx[a_lvl], m_probLo);
@@ -404,12 +415,12 @@ template <class P>
 void
 ParticleContainer<P>::getCellParticlesDestructive(BinFab<P>& cellParticles, const int a_lvl, const DataIndex a_dit)
 {
-  CH_TIME("ParticleContainer<P>::getCellParticlesDestructive");
+  CH_TIME("ParticleContainer::getCellParticlesDestructive");
 
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticlesDestructive - particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticlesDestructive - particles are not sorted by cell!");
   }
 
   cellParticles.define(m_grids[a_lvl].get(a_dit), m_dx[a_lvl], m_probLo);
@@ -420,12 +431,12 @@ template <class P>
 BinFab<P>&
 ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit)
 {
-  CH_TIME("ParticleContainer<P>::getCellParticles(int, DataIndex)");
+  CH_TIME("ParticleContainer::getCellParticles(int, DataIndex)");
 
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles(int, dit) - particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles(int, dit) - particles are not sorted by cell!");
   }
 
   return (*m_cellSortedParticles[a_level])[a_dit];
@@ -435,12 +446,12 @@ template <class P>
 const BinFab<P>&
 ParticleContainer<P>::getCellParticles(const int a_level, const DataIndex a_dit) const
 {
-  CH_TIME("ParticleContainer<P>::getCellParticles(int, DataIndex)");
+  CH_TIME("ParticleContainer::getCellParticles(int, DataIndex)");
 
   CH_assert(m_isDefined);
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::getCellParticles(int, dit) - particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::getCellParticles(int, dit) - particles are not sorted by cell!");
   }
 
   return (*m_cellSortedParticles[a_level])[a_dit];
@@ -450,7 +461,10 @@ template <class P>
 void
 ParticleContainer<P>::organizeParticlesByCell()
 {
-  CH_TIME("ParticleContainer<P>::organizeParticlesByCell");
+  CH_TIME("ParticleContainer::organizeParticlesByCell");
+  if (m_verbose) {
+    pout() << "ParticleContainer::organizeParticlesByCell" << endl;
+  }
 
   CH_assert(m_isDefined);
 
@@ -481,7 +495,10 @@ template <class P>
 void
 ParticleContainer<P>::organizeParticlesByPatch()
 {
-  CH_TIME("ParticleContainer<P>::organizeParticlesByPatch");
+  CH_TIME("ParticleContainer::organizeParticlesByPatch");
+  if (m_verbose) {
+    pout() << "ParticleContainer::organizeParticlesByPatch" << endl;
+  }
 
   CH_assert(m_isDefined);
 
@@ -504,8 +521,8 @@ ParticleContainer<P>::organizeParticlesByPatch()
 
         // Kernel which adds moves particles from the cell container to the patch container.
         auto kernel = [&](const IntVect& iv) -> void {
-			patchParticles.addItemsDestructive(cellParticles(iv, comp));
-		      };
+          patchParticles.addItemsDestructive(cellParticles(iv, comp));
+        };
 
         BoxLoops::loop(dbl[din], kernel);
 
@@ -521,12 +538,15 @@ template <class P>
 void
 ParticleContainer<P>::addParticles(const List<P>& a_particles)
 {
-  CH_TIME("ParticleContainer<P>::addParticles");
+  CH_TIME("ParticleContainer::addParticles");
+  if (m_verbose) {
+    pout() << "ParticleContainer::addParticles" << endl;
+  }
 
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::addParticles(List<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::addParticles(List<P>) - particles are sorted by cell!");
   }
 
   List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
@@ -548,12 +568,15 @@ template <class P>
 void
 ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
 {
-  CH_TIME("ParticleContainer<P>::addParticlesDestructive");
+  CH_TIME("ParticleContainer::addParticlesDestructive");
+  if (m_verbose) {
+    pout() << "ParticleContainer::addParticlesDestructive" << endl;
+  }
 
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::addParticlesDestructive(List<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::addParticlesDestructive(List<P>) - particles are sorted by cell!");
   }
 
   List<P>& outcastFinest = m_particles[m_finestLevel]->outcast();
@@ -575,13 +598,16 @@ template <class P>
 void
 ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit)
 {
-  CH_TIME("ParticleContainer<P>::addParticles(BinFab)");
+  CH_TIME("ParticleContainer::addParticles(BinFab)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::addParticles(BinFab)" << endl;
+  }
 
   CH_assert(m_isDefined);
   CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
 
   if (!m_isOrganizedByCell) {
-    MayDay::Abort("ParticleContainer<P>::addParticles(BinFab<P>) - particles are not sorted by cell!");
+    MayDay::Abort("ParticleContainer::addParticles(BinFab<P>) - particles are not sorted by cell!");
   }
 
   constexpr int comp = 0;
@@ -589,11 +615,11 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
   BinFab<P>& boxParticles = (*m_cellSortedParticles[a_lvl])[a_dit];
 
   auto kernel = [&](const IntVect& iv) -> void {
-		  List<P>&       myParticles    = boxParticles(iv, comp);
-		  const List<P>& inputParticles = a_particles(iv, comp);
+    List<P>&       myParticles    = boxParticles(iv, comp);
+    const List<P>& inputParticles = a_particles(iv, comp);
 
-		  myParticles.join(inputParticles);
-		};
+    myParticles.join(inputParticles);
+  };
 
   BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
 }
@@ -602,13 +628,16 @@ template <class P>
 void
 ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit)
 {
-  CH_TIME("ParticleContainer<P>::addParticlesDestructive(BinFab)");
+  CH_TIME("ParticleContainer::addParticlesDestructive(BinFab)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::addParticlesDestructive(BinFab)" << endl;
+  }
 
   CH_assert(m_isDefined);
   CH_assert(m_grids[a_lvl].get(a_dit) == a_particles.getRegion());
 
   if (!m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::addParticles(BinFab<P>) - particles are not sorted by cell!");
+    MayDay::Error("ParticleContainer::addParticles(BinFab<P>) - particles are not sorted by cell!");
   }
 
   constexpr int comp = 0;
@@ -616,11 +645,11 @@ ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int 
   BinFab<P>& boxParticles = (*m_cellSortedParticles[a_lvl])[a_dit];
 
   auto kernel = [&](const IntVect& iv) -> void {
-		  List<P>&       myParticles    = boxParticles(iv, comp);
-		  const List<P>& inputParticles = a_particles(iv, comp);
+    List<P>&       myParticles    = boxParticles(iv, comp);
+    const List<P>& inputParticles = a_particles(iv, comp);
 
-		  myParticles.catenate(inputParticles);
-		};
+    myParticles.catenate(inputParticles);
+  };
 
   BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
 }
@@ -629,12 +658,15 @@ template <class P>
 void
 ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer)
 {
-  CH_TIME("ParticleContainer<P>::addParticles(ParticleContainer)");
+  CH_TIME("ParticleContainer::addParticles(ParticleContainer)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::addParticles(ParticleContainer)" << endl;
+  }
 
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
   // TLDR: This routine adds particles from a different container to this container. If the containers live on the same realm
@@ -689,7 +721,10 @@ template <class P>
 void
 ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherContainer)
 {
-  CH_TIME("ParticleContainer<P>::addParticlesDestructive(ParticleContainer)");
+  CH_TIME("ParticleContainer::addParticlesDestructive(ParticleContainer)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::addParticlesDestructive(ParticleContainer)" << endl;
+  }
 
   // TLDR: This routine adds particles from a different container to this container. If the containers live on the same realm
   //       we just add the particles directly. Otherwise, we have to add to the outcast list and remap.
@@ -697,7 +732,7 @@ ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherConta
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
   if (m_realm == a_otherContainer.getRealm()) {
@@ -750,23 +785,22 @@ template <class P>
 void
 ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContainer)
 {
-  CH_TIME("ParticleContainer<P>::transferParticles");
+  CH_TIME("ParticleContainer::transferParticles");
 
   CH_assert(m_isDefined);
   CH_assert(this->getRealm() == a_otherContainer.getRealm());
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
   if (a_otherContainer.isOrganizedByCell()) {
-    MayDay::Error(
-		  "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::transferParticles(ParticleContainer<P>) - other particles are sorted by cell!");
   }
 
   if (a_otherContainer.getRealm() != m_realm) {
     MayDay::Error(
-		  "ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other container defined over a different realm");
+      "ParticleContainer::transferParticles(ParticleContainer<P>) - other container defined over a different realm");
   }
 
   this->transferParticles(a_otherContainer.getParticles());
@@ -776,12 +810,15 @@ template <class P>
 void
 ParticleContainer<P>::transferParticles(AMRParticles<P>& a_particles)
 {
-  CH_TIME("ParticleContainer<P>::transferParticles(AMRParticles)");
+  CH_TIME("ParticleContainer::transferParticles(AMRParticles)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::transferParticle(AMRParticles)" << endl;
+  }
 
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
   // Ok, transfer the particles.
@@ -810,6 +847,9 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
                                             const int        a_level)
 {
   CH_TIME("ParticleContainer::evictInvalidParticles");
+  if (m_verbose) {
+    pout() << "ParticleContainer::evictInvalidParticles" << endl;
+  }
 
   const DisjointBoxLayout& dbl = m_grids[a_level];
   const RealVect           dx  = m_dx[a_level];
@@ -827,8 +867,8 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
 
       const RealVect x = lit().position();
       const IntVect  iv(D_DECL((int)std::floor((x[0] - m_probLo[0]) / dx[0]),
-			       (int)std::floor((x[1] - m_probLo[1]) / dx[1]),
-			       (int)std::floor((x[2] - m_probLo[2]) / dx[2])));
+                              (int)std::floor((x[1] - m_probLo[1]) / dx[1]),
+                              (int)std::floor((x[2] - m_probLo[2]) / dx[2])));
 
       CH_assert(mask.box().contains(iv));
 
@@ -846,14 +886,17 @@ template <class P>
 void
 ParticleContainer<P>::remap()
 {
-  CH_TIMERS("ParticleContainer<P>::remap");
-  CH_TIMER("ParticleContainer<P>::remap::build_structures", t1);
-  CH_TIMER("ParticleContainer<P>::remap::collect_outcasts", t2);
-  CH_TIMER("ParticleContainer<P>::remap::loop_outcasts", t3);
-  CH_TIMER("ParticleContainer<P>::remap::catenate_list", t4);
-  CH_TIMER("ParticleContainer<P>::remap::gather_local", t5);
-  CH_TIMER("ParticleContainer<P>::remap::scatter_particles", t6);
-  CH_TIMER("ParticleContainer<P>::remap::assign_scattered_particles", t7);
+  CH_TIMERS("ParticleContainer::remap");
+  CH_TIMER("ParticleContainer::remap::build_structures", t1);
+  CH_TIMER("ParticleContainer::remap::collect_outcasts", t2);
+  CH_TIMER("ParticleContainer::remap::loop_outcasts", t3);
+  CH_TIMER("ParticleContainer::remap::catenate_list", t4);
+  CH_TIMER("ParticleContainer::remap::gather_local", t5);
+  CH_TIMER("ParticleContainer::remap::scatter_particles", t6);
+  CH_TIMER("ParticleContainer::remap::assign_scattered_particles", t7);
+  if (m_verbose) {
+    pout() << "ParticleContainer::remap" << endl;
+  }
 
   // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
   //
@@ -1160,14 +1203,18 @@ ParticleContainer<P>::remap()
 }
 
 template <class P>
-void ParticleContainer<P>::levelRemap()
+void
+ParticleContainer<P>::levelRemap()
 {
-  CH_TIME("ParticleContainer<P>::levelRemap");
+  CH_TIME("ParticleContainer::levelRemap");
+  if (m_verbose) {
+    pout() << "ParticleContainer::levelRemap" << endl;
+  }
 
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::addParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -1176,14 +1223,18 @@ void ParticleContainer<P>::levelRemap()
 }
 
 template <class P>
-void ParticleContainer<P>::levelRemap(const int a_lvl)
+void
+ParticleContainer<P>::levelRemap(const int a_lvl)
 {
-  CH_TIME("ParticleContainer<P>::levelRemap(int)");
+  CH_TIME("ParticleContainer::levelRemap(int)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::levelRemap(int)" << endl;
+  }
 
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::levelRemap - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::levelRemap - particles are sorted by cell!");
   }
 
   this->gatherOutcast(*m_particles[a_lvl]);
@@ -1191,16 +1242,20 @@ void ParticleContainer<P>::levelRemap(const int a_lvl)
 }
 
 template <class P>
-void ParticleContainer<P>::preRegrid(const int a_lmin)
+void
+ParticleContainer<P>::preRegrid(const int a_lmin)
 {
-  CH_TIME("ParticleContainer<P>::preRegrid");
+  CH_TIME("ParticleContainer::preRegrid");
+  if (m_verbose) {
+    pout() << "ParticleContainer::preRegrid" << endl;
+  }
 
   // TLDR: This routine takes all the particles on each level and puts them in a single list (per processor). After than
   //       we can safely destruct the ParticleData on each level without losing the particles.
 
   CH_assert(m_isDefined);
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::preRegrid - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::preRegrid - particles are sorted by cell!");
   }
 
   // Fill cache particles on each level
@@ -1239,13 +1294,16 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
                              const int                        a_lmin,
                              const int                        a_newFinestLevel)
 {
-  CH_TIME("ParticleContainer<P>::regrid");
+  CH_TIME("ParticleContainer::regrid");
+  if (m_verbose) {
+    pout() << "ParticleContainer::regrid" << endl;
+  }
 
   // TLDR: This is the main regrid routine for particle container. This is essentially a ::define() followed by several types of remapping steps
   CH_assert(m_isDefined);
 
   if (m_isOrganizedByCell) {
-    MayDay::Error("ParticleContainer<P>::regrid(...) - particles are sorted by cell!");
+    MayDay::Error("ParticleContainer::regrid(...) - particles are sorted by cell!");
   }
 
   // Update this stuff
@@ -1317,7 +1375,7 @@ template <Real& (P::*particleScalarField)()>
 void
 ParticleContainer<P>::setValue(const Real a_value)
 {
-  CH_TIME("ParticleContainer<P>::setValue");
+  CH_TIME("ParticleContainer::setValue");
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -1345,7 +1403,7 @@ template <RealVect& (P::*particleVectorField)()>
 void
 ParticleContainer<P>::setValue(const RealVect a_value)
 {
-  CH_TIME("ParticleContainer<P>::setValue");
+  CH_TIME("ParticleContainer::setValue");
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -1372,7 +1430,7 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfValidParticlesLocal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesLocal");
+  CH_TIME("ParticleContainer::getNumberOfValidParticlesLocal");
 
   CH_assert(m_isDefined);
 
@@ -1401,7 +1459,7 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfValidParticlesGlobal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesGlobal");
+  CH_TIME("ParticleContainer::getNumberOfValidParticlesGlobal");
 
   CH_assert(m_isDefined);
 
@@ -1414,7 +1472,7 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfOutcastParticlesLocal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesLocal");
+  CH_TIME("ParticleContainer::getNumberOfOutcastParticlesLocal");
 
   CH_assert(m_isDefined);
 
@@ -1443,7 +1501,7 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfOutcastParticlesGlobal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfOutcastParticlesGlobal");
+  CH_TIME("ParticleContainer::getNumberOfOutcastParticlesGlobal");
 
   CH_assert(m_isDefined);
 
@@ -1456,7 +1514,7 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfMaskParticlesLocal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticlesLocal");
+  CH_TIME("ParticleContainer::getNumberOfMaskParticlesLocal");
 
   CH_assert(m_isDefined);
 
@@ -1485,7 +1543,7 @@ template <class P>
 unsigned long long
 ParticleContainer<P>::getNumberOfMaskParticlesGlobal() const
 {
-  CH_TIME("ParticleContainer<P>::getNumberOfMaskParticlesGlobal");
+  CH_TIME("ParticleContainer::getNumberOfMaskParticlesGlobal");
 
   CH_assert(m_isDefined);
 
@@ -1498,7 +1556,7 @@ template <class P>
 void
 ParticleContainer<P>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask) const
 {
-  CH_TIME("ParticleContainer<P>::copyMaskParticles(amr)");
+  CH_TIME("ParticleContainer::copyMaskParticles(amr)");
 
   CH_assert(m_isDefined);
 
@@ -1513,7 +1571,10 @@ template <class P>
 void
 ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const
 {
-  CH_TIME("ParticleContainer<P>::copyMaskParticles(level)");
+  CH_TIME("ParticleContainer::copyMaskParticles(level)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::copyMaskParticles(level)" << endl;
+  }
 
   CH_assert(m_isDefined);
 
@@ -1543,12 +1604,12 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
     for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
       const RealVect x  = lit().position();
       const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
-					 std::floor((x[1] - m_probLo[1]) / dx[1]),
-					 std::floor((x[2] - m_probLo[2]) / dx[2])));
+                                        std::floor((x[1] - m_probLo[1]) / dx[1]),
+                                        std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
         std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
 
-        MayDay::Error("ParticleContainer<P>::copyMaskParticles -- logic bust. Particle has fallen off grid");
+        MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
       }
       else if (mask(iv)) {
         maskParticles.add(lit());
@@ -1561,7 +1622,7 @@ template <class P>
 void
 ParticleContainer<P>::transferMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_mask)
 {
-  CH_TIME("ParticleContainer<P>::transferMaskParticles(amr)");
+  CH_TIME("ParticleContainer::transferMaskParticles(amr)");
 
   CH_assert(m_isDefined);
 
@@ -1576,7 +1637,10 @@ template <class P>
 void
 ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask)
 {
-  CH_TIME("ParticleContainer<P>::transferMaskParticles(level)");
+  CH_TIME("ParticleContainer::transferMaskParticles(level)");
+  if (m_verbose) {
+    pout() << "ParticleContainer::transferMaskParticles(level)" << endl;
+  }
 
   CH_assert(m_isDefined);
 
@@ -1604,12 +1668,12 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
     for (ListIterator<P> lit(particles); lit.ok();) {
       const RealVect x  = lit().position();
       const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
-					 std::floor((x[1] - m_probLo[1]) / dx[1]),
-					 std::floor((x[2] - m_probLo[2]) / dx[2])));
+                                        std::floor((x[1] - m_probLo[1]) / dx[1]),
+                                        std::floor((x[2] - m_probLo[2]) / dx[2])));
       if (!(maskBox.contains(iv))) {
         //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
 
-        MayDay::Warning("ParticleContainer<P>::transferMaskParticles -- logic bust. Particle has fallen off grid");
+        MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
 
         ++lit;
       }
@@ -1668,8 +1732,13 @@ ParticleContainer<P>::clearOutcast() noexcept
 }
 
 template <class P>
-void ParticleContainer<P>::clear(AMRParticles<P> & a_particles) const
+void
+ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
 {
+  if (m_verbose) {
+    pout() << "ParticleContainer::clear(AMRParticles)" << endl;
+  }
+
   CH_assert(m_isDefined);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -1698,9 +1767,13 @@ void ParticleContainer<P>::clear(AMRParticles<P> & a_particles) const
 }
 
 template <class P>
-void ParticleContainer<P>::gatherOutcast(ParticleData<P> & a_particles) noexcept
+void
+ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
 {
-  CH_TIME("ParticleContainer<P>::gatherOutcast");
+  CH_TIME("ParticleContainer::gatherOutcast");
+  if (m_verbose) {
+    pout() << "ParticleContainer::gatherOutcast" << endl;
+  }
 
 #if 0
   a_particles.gatherOutcast();
@@ -1727,7 +1800,8 @@ void ParticleContainer<P>::gatherOutcast(ParticleData<P> & a_particles) noexcept
 }
 
 template <class P>
-void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
+void
+ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
 {
   CH_TIMERS("ParticleContainer::remapOutcast");
   CH_TIMER("ParticleContainer::remapOutcast::build_map", t1);
@@ -1738,6 +1812,9 @@ void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
   CH_TIMER("ParticleContainer::remapOutcast::local_map", t7);
   CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t8);
   CH_TIMER("ParticleContainer::remapOutcast::assign", t9);
+  if (m_verbose) {
+    pout() << "ParticleContainer::remapOutcast" << endl;
+  }
 
   // TODO:
   // 1. Thread properly with OpenMP and create local lists
@@ -1796,7 +1873,7 @@ void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
         otherTiles[tile] = boxids(tileID, rankID);
       }
 #else
-      myTiles[tile] = grids.index(lidx);
+      myTiles[tile]      = grids.index(lidx);
 #endif
 
       tileSet.insert(tile);
@@ -1855,13 +1932,13 @@ void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
       CH_START(t5);
 #pragma omp for schedule(runtime) reduction(catenate : outcasts)
       for (int ipart = 0; ipart < numOutcasts; ipart++) {
-        const P&      particle = allOutcasts[ipart];
-        const IntVect tile     = locateBin(particle.position(), dx, origin);
+        const P& particle = allOutcasts[ipart];
+        const IntVect tile = locateBin(particle.position(), dx, origin);
 
         if (myTiles.find(tile) != myTiles.end()) {
           // This particle goes from this rank to this rank.
           const auto& gridIndex = myTiles[tile];
-          const auto& toRank    = myRank;
+          const auto& toRank = myRank;
 
           particlesToSendPerThread[toRank][gridIndex].add(particle);
         }
@@ -1870,7 +1947,7 @@ void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
           if (otherTiles.find(tile) != otherTiles.end()) {
             // Particle goes from this rank to another rank.
             const auto& gridIndex = otherTiles[tile].idx;
-            const auto& toRank    = otherTiles[tile].pid;
+            const auto& toRank = otherTiles[tile].pid;
 
             particlesToSendPerThread[toRank][gridIndex].add(particle);
           }
@@ -1893,8 +1970,8 @@ void ParticleContainer<P>::remapOutcast(ParticleData<P> & a_particles) noexcept
           std::map<unsigned int, List<P>>& particlesToRank = particlesToSend[irank];
 
           for (auto& m : particlesToSendPerThread[irank]) {
-            const unsigned int gridIndex       = m.first;
-            List<P>&           threadParticles = m.second;
+            const unsigned int gridIndex = m.first;
+            List<P>& threadParticles = m.second;
 
             particlesToRank[gridIndex].catenate(threadParticles);
           }
