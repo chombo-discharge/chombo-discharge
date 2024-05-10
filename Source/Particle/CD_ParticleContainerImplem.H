@@ -886,17 +886,17 @@ template <class P>
 void
 ParticleContainer<P>::remap()
 {
-  CH_TIMERS("ParticleContainer::remap");
-  CH_TIMER("ParticleContainer::remap::build_structures", t1);
-  CH_TIMER("ParticleContainer::remap::collect_outcasts", t2);
-  CH_TIMER("ParticleContainer::remap::loop_outcasts", t3);
-  CH_TIMER("ParticleContainer::remap::catenate_list", t4);
-  CH_TIMER("ParticleContainer::remap::gather_local", t5);
-  CH_TIMER("ParticleContainer::remap::scatter_particles", t6);
-  CH_TIMER("ParticleContainer::remap::assign_scattered_particles", t7);
+  CH_TIMERS("ParticleContainer<P>::remap");
+  CH_TIMER("ParticleContainer<P>::remap::build_structures", t1);
+  CH_TIMER("ParticleContainer<P>::remap::collect_outcasts", t2);
+  CH_TIMER("ParticleContainer<P>::remap::loop_outcasts", t3);
+  CH_TIMER("ParticleContainer<P>::remap::catenate_list", t4);
+  CH_TIMER("ParticleContainer<P>::remap::gather_particles_local", t5);
+  CH_TIMER("ParticleContainer<P>::remap::mpi_scatter_particles", t6);
+  CH_TIMER("ParticleContainer<P>::remap::assign_scattered_particles", t7);
   if (m_verbose) {
     pout() << "ParticleContainer::remap" << endl;
-  }
+  }  
 
   // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
   //
@@ -956,7 +956,6 @@ ParticleContainer<P>::remap()
   std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
   std::vector<RealVect>                                     quasiDx(1 + m_finestLevel);
 
-  pout() << "build structures" << endl;
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];
 
@@ -1001,7 +1000,6 @@ ParticleContainer<P>::remap()
     // Particles own by this rank and this thread.
     List<P> outcasts;
 
-    pout() << "outcast collect" << endl;
     CH_START(t2);
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl = m_grids[lvl];
@@ -1022,12 +1020,12 @@ ParticleContainer<P>::remap()
 
     // Starting on the finest level -- figure out where the particles wound up. We are going from finest to coarsest here because we want
     // the particle to end up on the finest grid level that contains them.
-    pout() << "iterate through outcasts" << endl;
     CH_START(t3);
+#pragma omp critical
     for (ListIterator<P> lit(outcasts); lit.ok();) {
       bool foundTile = false;
 
-      for (IntType lvl = m_finestLevel; lvl >= 0; lvl--) {
+      for (int lvl = m_finestLevel; lvl >= 0 && !foundTile; lvl--) {
         const IntVect particleTile = locateBin(lit().position(), quasiDx[lvl], m_probLo);
 
         const std::map<IntVect, unsigned int, CompIntVect>& myLevelTiles    = myTiles[lvl];
@@ -1041,8 +1039,6 @@ ParticleContainer<P>::remap()
           threadLocalParticlesToSend[myRank][gridCode].transfer(lit);
 
           foundTile = true;
-
-          break;
         }
 #ifdef CH_MPI
         else if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
@@ -1054,8 +1050,6 @@ ParticleContainer<P>::remap()
           threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
 
           foundTile = true;
-
-          break;
         }
 #endif
       }
@@ -1064,24 +1058,26 @@ ParticleContainer<P>::remap()
         ++lit;
       }
     }
+#pragma omp barrier
     CH_STOP(t3);
 
     // Rest of the particles fell of the domain and have to go.
     outcasts.clear();
 
-    pout() << "catenate particles" << endl;
     CH_START(t4);
 #pragma omp critical
     {
       // Catenate the thread-local particle lists onto particlesToSend
-      for (unsigned int irank = 0; irank < numRanks; irank++) {
+      for (int irank = 0; irank < numRanks; irank++) {
         std::map<IntType, List<P>>& particlesToRank = particlesToSend[irank];
 
         for (auto& m : threadLocalParticlesToSend[irank]) {
           const IntType& gridCode  = m.first;
           List<P>&       particles = m.second;
 
-          particlesToRank[gridCode].catenate(particles);
+          if (!particles.isEmpty()) {
+            particlesToRank[gridCode].catenate(particles);
+          }
         }
       }
     }
@@ -1099,55 +1095,36 @@ ParticleContainer<P>::remap()
       for (auto mapIter = particlesFromMeToMe.begin(); mapIter != particlesFromMeToMe.end(); mapIter++) {
 #pragma omp task firstprivate(mapIter)
         {
-          const IntType gridCode  = mapIter->first;
-          List<P>&      particles = mapIter->second;
+          const IntType                     gridCode   = mapIter->first;
+          const std::pair<IntType, IntType> gridDecode = decode(gridCode);
+          const unsigned int                gridLevel  = gridDecode.first;
+          const unsigned int                gridIndex  = gridDecode.second;
+          const DataIndex                   din        = myGridIndices[gridLevel][gridIndex];
 
-          const std::pair<unsigned int, unsigned int> gridDecode = decode(gridCode);
-          const unsigned int                          gridLevel  = gridDecode.first;
-          const unsigned int                          gridIndex  = gridDecode.second;
-
-          const DataIndex din = myGridIndices[gridLevel][gridIndex];
-
+          List<P>& particles   = mapIter->second;
           List<P>& myParticles = (*m_particles[gridLevel])[din].listItems();
 
           myParticles.catenate(particles);
-
-          if (m_debug) {
-            const Box      box = m_grids[gridLevel][din];
-            const RealVect dx  = m_dx[gridLevel];
-
-            for (ListIterator<P> lit(myParticles); lit.ok(); ++lit) {
-              const RealVect particlePosition = lit().position();
-              const IntVect  particleCell     = ParticleOps::getParticleCellIndex(particlePosition, m_probLo, dx);
-
-              if (!(box.contains(particleCell))) {
-                MayDay::Error("ParticleContainer::remap -- error1: particle is not contained in grid box!");
-              }
-            }
-          }
         }
       }
     }
   }
   CH_STOP(t5);
 
+  // This one will be empty after catenation above so let it go.
   particlesFromMeToMe.clear();
-
-#if 1 // Debug code to remove later
-  // This code should look through all particles in particlesToSend and check that they are indeed falling onto the correct level/box/rank
-#endif
-
-  // Particles received on this rank - we use the same indexing/decoding as for the sent particles
-  std::map<IntType, List<P>> receivedParticles;
 
   // Scatter particles across MPI ranks.
 #ifdef CH_MPI
-  pout() << "starting particle scatter" << endl;
+#error "Must redo mpi_scatter part to support unsigned long"
+  // Particles received on this rank - we use the same indexing/decoding as for the sent particles, i.e. the
+  // first entry in the map encodes the grid level and the grid patch index.
+  std::map<IntType, List<P>> receivedParticles;
+
   // TODO: mpi_scatter_part should be rewritten to use unsigned long rather than unsigned int
   CH_START(t6);
   mpi_scatter_part(receivedParticles, particlesToSend);
   CH_STOP(t6);
-  pout() << "done with particle scatter" << endl;
 
   // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
   // we got from there.
@@ -1173,7 +1150,6 @@ ParticleContainer<P>::remap()
   }
   CH_STOP(t7);
 #endif
-  pout() << "done assign" << endl;
 
   // Debug hook which makes sure all particles wound up in the correct place.
   if (m_debug) {
@@ -1196,10 +1172,6 @@ ParticleContainer<P>::remap()
       }
     }
   }
-
-#if 1
-  pout() << "done!" << endl;
-#endif
 }
 
 template <class P>
