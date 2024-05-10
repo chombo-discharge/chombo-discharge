@@ -534,8 +534,6 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
   std::vector<unsigned long> sendSizes(numProc(), 0);
   std::vector<unsigned long> recvSizes(numProc(), 0);
 
-  typename std::map<unsigned long, List<P>>::iterator mapIter;
-
   // Figure out the size of a_sentParticles[irank]
   for (int irank = 0; irank < numRanks; irank++) {
     sendSizes[irank] = 0;
@@ -603,7 +601,7 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
         data += sizeof(size_t);
 
         // Linearize the particle list
-        for (ListIterator<P> lit(particles.second); lit.ok(); ++lit) {
+        for (ListIterator<P> lit(cur.second); lit.ok(); ++lit) {
           const P& p = lit();
 
           p.linearOut((void*)data);

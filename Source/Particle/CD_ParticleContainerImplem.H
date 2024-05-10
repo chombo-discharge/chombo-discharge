@@ -896,7 +896,7 @@ ParticleContainer<P>::remap()
   CH_TIMER("ParticleContainer<P>::remap::assign_scattered_particles", t7);
   if (m_verbose) {
     pout() << "ParticleContainer::remap" << endl;
-  }  
+  }
 
   // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
   //
@@ -913,9 +913,9 @@ ParticleContainer<P>::remap()
 
   // These routines are used for encoding a grid level and a grid index onto an unsigned long. The level is encoded onto an 8-bit representation (max 256 levels)
   // onto the left-most bits. The grid index is encoded by the remaining (hopefully 56) bits, which should be enough for anyone.
-  using IntType                 = unsigned int;
+  using IntType                 = unsigned long;
   constexpr size_t numBitsLong  = sizeof(IntType) * 8;
-  constexpr size_t numBitsLevel = 6;
+  constexpr size_t numBitsLevel = 8;
   constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
 
   auto encode = [](const IntType a_level, const IntType a_index) -> IntType {
@@ -1114,16 +1114,15 @@ ParticleContainer<P>::remap()
   // This one will be empty after catenation above so let it go.
   particlesFromMeToMe.clear();
 
-  // Scatter particles across MPI ranks.
+  // If using MPI, scatter the particles across MPI ranks.
 #ifdef CH_MPI
-  //#error "Must redo mpi_scatter part to support unsigned long"
   // Particles received on this rank - we use the same indexing/decoding as for the sent particles, i.e. the
   // first entry in the map encodes the grid level and the grid patch index.
   std::map<IntType, List<P>> receivedParticles;
 
   // TODO: mpi_scatter_part should be rewritten to use unsigned long rather than unsigned int
   CH_START(t6);
-  mpi_scatter_part(receivedParticles, particlesToSend);
+  ParticleOps::scatterParticles(receivedParticles, particlesToSend);
   CH_STOP(t6);
 
   // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
