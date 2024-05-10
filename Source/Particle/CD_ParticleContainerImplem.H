@@ -565,7 +565,7 @@ ParticleContainer<P>::addParticles(const List<P>& a_particles)
   outcastFinest.join(a_particles);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    this->remapOutcast(*m_particles[lvl]);
+    m_particles[lvl]->remapOutcast();
 
     if (lvl > 0) {
       List<P>& outcast     = m_particles[lvl]->outcast();
@@ -595,7 +595,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
   outcastFinest.join(a_particles);
 
   for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    this->remapOutcast(*m_particles[lvl]);
+    m_particles[lvl]->remapOutcast();
 
     if (lvl > 0) {
       List<P>& outcast     = m_particles[lvl]->outcast();
@@ -1141,8 +1141,8 @@ ParticleContainer<P>::levelRemap(const int a_lvl)
     MayDay::Error("ParticleContainer::levelRemap - particles are sorted by cell!");
   }
 
-  this->gatherOutcast(*m_particles[a_lvl]);
-  this->remapOutcast(*m_particles[a_lvl]);
+  m_particles[a_lvl]->gatherOutcast();
+  m_particles[a_lvl]->remapOutcast();
 }
 
 template <class P>
@@ -1253,7 +1253,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
       m_cacheParticles[lvl].clear();
     }
 
-    this->remapOutcast(*m_particles[lvl]);
+    m_particles[lvl]->remapOutcast();
   }
 
   // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
@@ -1266,7 +1266,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
     coarParticles.catenate(fineParticles);
     fineParticles.clear();
 
-    this->remapOutcast(*m_particles[lvl - 1]);
+    m_particles[lvl - 1]->remapOutcast();
   }
 
   // At this point all the particles have been moved to their correct patches, but the PVR is so far not respected. We call ::remap to ensure that
@@ -1670,277 +1670,6 @@ ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const
     List<P>& outcast = levelParticles.outcast();
     outcast.clear();
   }
-}
-
-template <class P>
-void
-ParticleContainer<P>::gatherOutcast(ParticleData<P>& a_particles) noexcept
-{
-  CH_TIME("ParticleContainer::gatherOutcast");
-  if (m_verbose) {
-    pout() << "ParticleContainer::gatherOutcast" << endl;
-  }
-
-#if 0
-  a_particles.gatherOutcast();
-
-  return;
-#endif
-
-  List<P>& outcasts = a_particles.outcast();
-
-  const BoxLayout&   grids = a_particles.getBoxes();
-  const DataIterator dit   = grids.dataIterator();
-  const RealVect&    dx    = a_particles.meshSpacing();
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(catenate : outcasts)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    ListBox<P>& particles = a_particles[din];
-
-    particles.getInvalidDestructive(outcasts, grids[din]);
-  }
-}
-
-template <class P>
-void
-ParticleContainer<P>::remapOutcast(ParticleData<P>& a_particles) noexcept
-{
-  CH_TIMERS("ParticleContainer::remapOutcast");
-  CH_TIMER("ParticleContainer::remapOutcast::build_map", t1);
-  CH_TIMER("ParticleContainer::remapOutcast::mpi_particle_loop", t3);
-  CH_TIMER("ParticleContainer::remapOutcast::omp_copy_particles", t4);
-  CH_TIMER("ParticleContainer::remapOutcast::omp_particle_loop", t5);
-  CH_TIMER("ParticleContainer::remapOutcast::omp_catenate", t6);
-  CH_TIMER("ParticleContainer::remapOutcast::local_map", t7);
-  CH_TIMER("ParticleContainer::remapOutcast::mpi_scatter", t8);
-  CH_TIMER("ParticleContainer::remapOutcast::assign", t9);
-  if (m_verbose) {
-    pout() << "ParticleContainer::remapOutcast" << endl;
-  }
-
-  // TODO:
-  // 1. Thread properly with OpenMP and create local lists
-  // 2. Use unordered_map instead? Insertion should be faster.
-  // 3. Think about adding another routine which does the full grid at once.
-
-  // Uncomment this if you want to default back to Chombo's native remapping routine
-#if 1
-  a_particles.remapOutcast();
-
-  return;
-#endif
-
-  const unsigned int numRanks = numProc();
-  const unsigned int myRank   = procID();
-  const BoxLayout&   grids    = a_particles.getBoxes();
-
-  // Storage for particles to be delivered to each box/proc. The vector holds a map of particles to be sent to
-  // the indicated rank. The map itself indicates the box id and the list of particles to go into that box.
-  std::vector<std::map<unsigned int, List<P>>> particlesToSend(numRanks);
-
-  List<P>& outcasts = a_particles.outcast();
-
-  if (!outcasts.isEmpty()) {
-
-    // Note, dx is a pseudo-grid spacing.
-    const int      fixedBoxSize = a_particles.fixedBoxSize();
-    const RealVect origin       = a_particles.origin();
-    const RealVect dx           = a_particles.meshSpacing() * fixedBoxSize;
-
-    // tileSet = List of all boxes in a "tiled" space.
-    // myTiles = List of this ranks boxes
-    // otherTiles = List of other ranks' boxes. boxids contain the local global box index AND the rank
-    std::set<IntVect, CompIntVect>               tileSet;
-    std::map<IntVect, unsigned int, CompIntVect> myTiles;
-    std::map<IntVect, boxids, CompIntVect>       otherTiles;
-
-    // Build local mapping of the grids -- this figures out which box is owned by which
-    // processor.
-    //
-    // Note: If this becomes expensive we can probably store this structure somewhere.
-    CH_START(t1);
-    for (LayoutIterator lit = grids.layoutIterator(); lit.ok(); ++lit) {
-      const LayoutIndex lidx = lit();
-      const IntVect     tile = coarsen(grids[lidx], fixedBoxSize).smallEnd();
-
-      // If using MPI, need to figure out who owns which tiles.
-#ifdef CH_MPI
-      const unsigned int rankID = grids.procID(lidx);
-      const unsigned int tileID = grids.index(lidx);
-
-      if (rankID == myRank) {
-        myTiles[tile] = tileID;
-      }
-      else {
-        otherTiles[tile] = boxids(tileID, rankID);
-      }
-#else
-      myTiles[tile]      = grids.index(lidx);
-#endif
-
-      tileSet.insert(tile);
-    }
-    CH_STOP(t1);
-
-    // Figure out which particles will go where. This switches between non-OpenMP and OpenMP versions.
-#ifndef _OPENMP
-    CH_START(t3);
-    for (ListIterator<P> lit(outcasts); lit.ok();) {
-      const IntVect tile = locateBin(lit().position(), dx, origin);
-
-      if (myTiles.find(tile) != myTiles.end()) {
-        // This particle goes from this rank to this rank.
-        const auto& gridIndex = myTiles[tile];
-        const auto& toRank    = myRank;
-
-        particlesToSend[toRank][gridIndex].transfer(lit);
-      }
-      else {
-#ifdef CH_MPI
-        if (otherTiles.find(tile) != otherTiles.end()) {
-          // Particle goes from this rank to another rank.
-          const auto& gridIndex = otherTiles[tile].idx;
-          const auto& toRank    = otherTiles[tile].pid;
-
-          particlesToSend[toRank][gridIndex].transfer(lit);
-        }
-        else {
-          ++lit;
-        }
-#else
-        ++lit;
-#endif
-      }
-    }
-    CH_STOP(t3);
-#else
-    // Copy particles and clear outcast list.
-    CH_START(t4);
-    std::vector<P> allOutcasts;
-    allOutcasts.reserve(outcasts.length());
-    for (ListIterator<P> lit(outcasts); lit.ok(); ++lit) {
-      allOutcasts.emplace_back(lit());
-    }
-
-    outcasts.clear();
-    CH_STOP(t4);
-
-    const int numOutcasts = allOutcasts.size();
-
-#pragma omp parallel
-    {
-      std::vector<std::map<unsigned int, List<P>>> particlesToSendPerThread(numRanks);
-
-      CH_START(t5);
-#pragma omp for schedule(runtime) reduction(catenate : outcasts)
-      for (int ipart = 0; ipart < numOutcasts; ipart++) {
-        const P& particle = allOutcasts[ipart];
-        const IntVect tile = locateBin(particle.position(), dx, origin);
-
-        if (myTiles.find(tile) != myTiles.end()) {
-          // This particle goes from this rank to this rank.
-          const auto& gridIndex = myTiles[tile];
-          const auto& toRank = myRank;
-
-          particlesToSendPerThread[toRank][gridIndex].add(particle);
-        }
-        else {
-#ifdef CH_MPI
-          if (otherTiles.find(tile) != otherTiles.end()) {
-            // Particle goes from this rank to another rank.
-            const auto& gridIndex = otherTiles[tile].idx;
-            const auto& toRank = otherTiles[tile].pid;
-
-            particlesToSendPerThread[toRank][gridIndex].add(particle);
-          }
-          else {
-            outcasts.add(particle);
-          }
-#else
-          outcasts.add(particle);
-#endif
-        }
-      }
-      CH_STOP(t5);
-
-#pragma omp critical
-      {
-        CH_START(t6);
-        // Append the thread-local particle to the global particles -- this is a bit more complicated than I
-        // like because we can't just append the vectors.
-        for (int irank = 0; irank < numRanks; irank++) {
-          std::map<unsigned int, List<P>>& particlesToRank = particlesToSend[irank];
-
-          for (auto& m : particlesToSendPerThread[irank]) {
-            const unsigned int gridIndex = m.first;
-            List<P>& threadParticles = m.second;
-
-            particlesToRank[gridIndex].catenate(threadParticles);
-          }
-        }
-
-        particlesToSendPerThread.resize(0);
-      }
-      CH_STOP(t6);
-    }
-#endif
-  }
-
-  // Particles received onto this rank from all ranks.
-  std::map<unsigned int, List<P>> receivedParticles;
-
-  // Collect local particles that didn't change rank ownership so we don't have to
-  // communicate them.
-  CH_START(t7);
-  for (auto& localParticles : particlesToSend[myRank]) {
-    receivedParticles[localParticles.first].catenate(localParticles.second);
-  }
-  particlesToSend[myRank].clear();
-  CH_STOP(t7);
-
-  // Distribute remnant particles.
-#ifdef CH_MPI
-  CH_START(t8);
-  mpi_scatter_part(receivedParticles, particlesToSend);
-  CH_STOP(t8);
-#endif
-
-  // Assign particles to boxes
-  CH_START(t9);
-  const DataIterator dit = grids.dataIterator();
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex    din       = dit[mybox];
-    const unsigned int gridIndex = grids.index(din);
-
-    if (receivedParticles.find(gridIndex) != receivedParticles.end()) {
-      List<P>& particles = a_particles[din].listItems();
-
-      particles.catenate(receivedParticles[gridIndex]);
-    }
-
-    // Debug hook which double-checks that all particles are in the correct box.
-    if (m_debug) {
-      const Box      box       = grids[din];
-      const List<P>& particles = a_particles[din].listItems();
-
-      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-        const RealVect position = lit().position();
-
-        if (!(box.contains(ParticleOps::getParticleCellIndex(lit().position(), m_probLo, a_particles.meshSpacing())))) {
-          MayDay::Error("ParticleContainer::remapOutcast -- particle is not contained in grid box!");
-        }
-      }
-    }
-  }
-  CH_STOP(t9);
 }
 
 #include <CD_NamespaceFooter.H>
