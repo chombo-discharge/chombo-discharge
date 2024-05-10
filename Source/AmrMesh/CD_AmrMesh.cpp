@@ -3025,20 +3025,20 @@ AmrMesh::getValidCells(const std::string a_realm) const
   return m_realms[a_realm]->getValidCells();
 }
 
-const RefCountedPtr<TileSpace>&
-AmrMesh::getTileSpace(const std::string a_realm) const
+const Vector<RefCountedPtr<LevelTiles>>&
+AmrMesh::getLevelTiles(const std::string a_realm) const
 {
-  CH_TIME("AmrMesh::getTileSpace(string)");
+  CH_TIME("AmrMesh::getLevelTiles(string)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getTileSpace(string)" << endl;
+    pout() << "AmrMesh::getLevelTiles(string)" << endl;
   }
 
   if (!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getTileSpace(string) - could not find realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::getLevelTiles(string) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getTileSpace();
+  return m_realms[a_realm]->getLevelTiles();
 }
 
 const Vector<RefCountedPtr<EBLevelGrid>>&

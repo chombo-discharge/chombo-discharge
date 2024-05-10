@@ -24,7 +24,7 @@
 
 // Our includes
 #include <CD_OpenMP.H>
-#include <CD_TileSpace.H>
+#include <CD_LevelTiles.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -63,22 +63,22 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
-    @param[in] a_tileSpace      Tiled AMR grids
+    @param[in] a_levelTiles     Tiled AMR grids
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
     @param[in] a_realm          Realm where these particles live. 
   */
-  ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
-                    const Vector<ProblemDomain>&     a_domains,
-                    const Vector<Real>&              a_dx,
-                    const Vector<int>&               a_refRat,
-                    const Vector<ValidMask>&         a_validMask,
-                    const RefCountedPtr<TileSpace>&  a_tileSpace,
-                    const RealVect&                  a_probLo,
-                    const int                        a_blockingFactor,
-                    const int                        a_finestLevel,
-                    const std::string                a_realm);
+  ParticleContainer(const Vector<DisjointBoxLayout>&         a_grids,
+                    const Vector<ProblemDomain>&             a_domains,
+                    const Vector<Real>&                      a_dx,
+                    const Vector<int>&                       a_refRat,
+                    const Vector<ValidMask>&                 a_validMask,
+                    const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                    const RealVect&                          a_probLo,
+                    const int                                a_blockingFactor,
+                    const int                                a_finestLevel,
+                    const std::string                        a_realm);
 
   /*!
     @brief Destructor ( does nothing)
@@ -92,23 +92,23 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
-    @param[in] a_tileSpace      Tiled AMR grids
+    @param[in] a_levelTiles     Tiled AMR grids
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
     @param[in] a_realm          Realm where these particles live. 
   */
   void
-  define(const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<ProblemDomain>&     a_domains,
-         const Vector<Real>&              a_dx,
-         const Vector<int>&               a_refRat,
-         const Vector<ValidMask>&         a_validMask,
-         const RefCountedPtr<TileSpace>&  a_tileSpace,
-         const RealVect&                  a_probLo,
-         const int                        a_blockingFactor,
-         const int                        a_finestLevel,
-         const std::string                a_realm);
+  define(const Vector<DisjointBoxLayout>&         a_grids,
+         const Vector<ProblemDomain>&             a_domains,
+         const Vector<Real>&                      a_dx,
+         const Vector<int>&                       a_refRat,
+         const Vector<ValidMask>&                 a_validMask,
+         const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+         const RealVect&                          a_probLo,
+         const int                                a_blockingFactor,
+         const int                                a_finestLevel,
+         const std::string                        a_realm);
 
   /*!
     @brief Regrid function. a_base is the coarsest grid level which did not change
@@ -117,19 +117,19 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells
-    @param[in] a_tileSpace      Tiled AMR grids
+    @param[in] a_levelTiles     Tiled AMR grids
     @param[in] a_base           Coarsest grid level that did not change. 
     @param[in] a_newFinestLevel New finest grid level
   */
   void
-  regrid(const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<ProblemDomain>&     a_domains,
-         const Vector<Real>&              a_dx,
-         const Vector<int>&               a_refRat,
-         const Vector<ValidMask>&         a_validMask,
-         const RefCountedPtr<TileSpace>&  a_tileSpace,
-         const int                        a_base,
-         const int                        a_newFinestLevel);
+  regrid(const Vector<DisjointBoxLayout>&         a_grids,
+         const Vector<ProblemDomain>&             a_domains,
+         const Vector<Real>&                      a_dx,
+         const Vector<int>&                       a_refRat,
+         const Vector<ValidMask>&                 a_validMask,
+         const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+         const int                                a_base,
+         const int                                a_newFinestLevel);
 
   /*!
     @brief Cache particles before calling regrid. 
@@ -593,7 +593,7 @@ protected:
   /*!
     @brief Tiled AMR space
   */
-  RefCountedPtr<TileSpace> m_tileSpace;
+  Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
 
   /*!
     @brief AMR grids
@@ -696,6 +696,22 @@ protected:
   */
   void
   remapOutcast(ParticleData<P>& a_particles) noexcept;
+
+  /*!
+    @brief Function which exists for the purposes of encoding a level + grid index into a single integer
+    @param[in] a_level Grid level
+    @param[in] a_index Grid index
+  */
+  inline unsigned long
+  encode(const unsigned long a_level, const unsigned long a_index) const noexcept;
+
+  /*!
+    @brief Function which exists for the purposes of decoding a single integer into a grid level + grid index.
+    @details This is the inverse function of the encode function
+    @param[in] a_gridCode Encoded grid level + index
+  */
+  inline std::pair<unsigned long, unsigned long>
+  decode(const unsigned long a_gridCode) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

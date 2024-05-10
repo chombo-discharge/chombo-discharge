@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_TileSpace.H
-  @brief  Declaration of TileSpace
+  @file   CD_LevelTiles.H
+  @brief  Declaration of LevelTiles
   @author Robert Marskar
 */
 
-#ifndef CD_TileSpace_H
-#define CD_TileSpace_H
+#ifndef CD_LevelTiles_H
+#define CD_LevelTiles_H
 
 // Std includes
 #include <vector>
@@ -29,7 +29,7 @@
   @details This class only makes sense in terms of a grid which uses constant-size grid, which is a restriction we happily accept when using particles. This class
   decomposes the AMR hierarchy into such tiles, each tile being the cells spanned by the blockingFactor^SpaceDim grid patch. 
 */
-class TileSpace
+class LevelTiles
 {
 public:
   using BoxIDs = std::pair<unsigned int, unsigned int>;
@@ -61,47 +61,47 @@ public:
   /*!
     @brief Weak constructor. Must subsequently call the define function
   */
-  TileSpace() noexcept;
+  LevelTiles() noexcept;
 
   /*!
     @brief Full constructor - puts object in usable state. 
-    @param[in] a_grids Grids on each level.
+    @param[in] a_dbl Grids
     @param[in] a_blockingFactor Grid size. 
   */
-  TileSpace(const Vector<DisjointBoxLayout>& a_grids, const int a_blockingFactor) noexcept;
+  LevelTiles(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
 
   /*!
     @brief Destructor (does nothing)
   */
-  virtual ~TileSpace() noexcept;
+  virtual ~LevelTiles() noexcept;
 
   /*!
     @brief Define function. Puts object in usable state. 
-    @param[in] a_grids Grids on each level.
+    @param[in] a_dbl Grids
     @param[in] a_blockingFactor Grid size. 
   */
   virtual void
-  define(const Vector<DisjointBoxLayout>& a_grids, const int a_blockingFactor) noexcept;
+  define(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
 
   /*!
     @brief Get the tiles own by this rank
     @return m_myTiles
   */
-  virtual const std::vector<std::map<IntVect, unsigned int, TileComparator>>&
+  virtual const std::map<IntVect, unsigned int, TileComparator>&
   getMyTiles() const noexcept;
 
   /*!
     @brief Get the tiles own by this rank
     @return m_otherTiles
   */
-  virtual const std::vector<std::map<IntVect, BoxIDs, TileComparator>>&
+  virtual const std::map<IntVect, BoxIDs, TileComparator>&
   getOtherTiles() const noexcept;
 
   /*!
     @brief Get the tiles own by this rank
     @return m_myGridIndices
   */
-  virtual const std::vector<std::map<unsigned int, DataIndex>>&
+  virtual const std::map<unsigned int, DataIndex>&
   getMyGrids() const noexcept;
 
 protected:
@@ -113,17 +113,17 @@ protected:
   /*!
     @brief "Tiles" owned by this rank
   */
-  std::vector<std::map<IntVect, unsigned int, TileComparator>> m_myTiles;
+  std::map<IntVect, unsigned int, TileComparator> m_myTiles;
 
   /*!
     @brief Grids owned by other ranks. 
   */
-  std::vector<std::map<IntVect, BoxIDs, TileComparator>> m_otherTiles;
+  std::map<IntVect, BoxIDs, TileComparator> m_otherTiles;
 
   /*!
     @brief Mapping of grid index to DataIndex
   */
-  std::vector<std::map<unsigned int, DataIndex>> m_myGrids;
+  std::map<unsigned int, DataIndex> m_myGrids;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -17,7 +17,7 @@
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
-#include <CD_TileSpace.H>
+#include <CD_LevelTiles.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -369,8 +369,8 @@ public:
   /*!
     @brief Get the tiled space
   */
-  const RefCountedPtr<TileSpace>&
-  getTileSpace() const noexcept;
+  const Vector<RefCountedPtr<LevelTiles>>&
+  getLevelTiles() const noexcept;
 
 protected:
   /*!
@@ -424,6 +424,11 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid>> m_mflg;
 
   /*!
+    @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.
+  */
+  Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
+
+  /*!
     @brief Index spaces
   */
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
@@ -432,11 +437,6 @@ protected:
     @brief Mask which is true for all valid cells
   */
   AMRMask m_validCells;
-
-  /*!
-    @brief Tile-space 
-  */
-  RefCountedPtr<TileSpace> m_tileSpace;
 
   /*!
     @brief Phase realms. 
@@ -505,7 +505,7 @@ protected:
     @brief Define the tiled space
   */
   void
-  defineTileSpace();
+  defineLevelTiles() noexcept;
 
   /*!
     @brief Get a particular realm

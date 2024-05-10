@@ -41,16 +41,16 @@ ParticleContainer<P>::ParticleContainer()
 }
 
 template <class P>
-ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
-                                        const Vector<ProblemDomain>&     a_domains,
-                                        const Vector<Real>&              a_dx,
-                                        const Vector<int>&               a_refRat,
-                                        const Vector<ValidMask>&         a_validMask,
-                                        const RefCountedPtr<TileSpace>&  a_tileSpace,
-                                        const RealVect&                  a_probLo,
-                                        const int                        a_blockingFactor,
-                                        const int                        a_finestLevel,
-                                        const std::string                a_realm)
+ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>&         a_grids,
+                                        const Vector<ProblemDomain>&             a_domains,
+                                        const Vector<Real>&                      a_dx,
+                                        const Vector<int>&                       a_refRat,
+                                        const Vector<ValidMask>&                 a_validMask,
+                                        const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                                        const RealVect&                          a_probLo,
+                                        const int                                a_blockingFactor,
+                                        const int                                a_finestLevel,
+                                        const std::string                        a_realm)
 {
   CH_TIME("ParticleContainer::ParticleContainer");
 
@@ -59,7 +59,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
                a_dx,
                a_refRat,
                a_validMask,
-               a_tileSpace,
+               a_levelTiles,
                a_probLo,
                a_blockingFactor,
                a_finestLevel,
@@ -74,16 +74,16 @@ ParticleContainer<P>::~ParticleContainer()
 
 template <class P>
 void
-ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
-                             const Vector<ProblemDomain>&     a_domains,
-                             const Vector<Real>&              a_dx,
-                             const Vector<int>&               a_refRat,
-                             const Vector<ValidMask>&         a_validMask,
-                             const RefCountedPtr<TileSpace>&  a_tileSpace,
-                             const RealVect&                  a_probLo,
-                             const int                        a_blockingFactor,
-                             const int                        a_finestLevel,
-                             const std::string                a_realm)
+ParticleContainer<P>::define(const Vector<DisjointBoxLayout>&         a_grids,
+                             const Vector<ProblemDomain>&             a_domains,
+                             const Vector<Real>&                      a_dx,
+                             const Vector<int>&                       a_refRat,
+                             const Vector<ValidMask>&                 a_validMask,
+                             const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                             const RealVect&                          a_probLo,
+                             const int                                a_blockingFactor,
+                             const int                                a_finestLevel,
+                             const std::string                        a_realm)
 {
   CH_TIME("ParticleContainer::~ParticleContainer");
 
@@ -95,7 +95,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_finestLevel    = a_finestLevel;
   m_realm          = a_realm;
   m_blockingFactor = a_blockingFactor;
-  m_tileSpace      = a_tileSpace;
+  m_levelTiles     = a_levelTiles;
 
   m_dx.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -910,7 +910,7 @@ ParticleContainer<P>::remap()
     pout() << "ParticleContainer::remap" << endl;
   }
 
-  CH_assert(!m_tileSpace.isNull());
+  CH_assert(!m_levelTiles.isNull());
 
   // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
   //
@@ -958,10 +958,7 @@ ParticleContainer<P>::remap()
     return std::make_pair(lvl, idx);
   };
 
-  const auto& myTiles       = m_tileSpace->getMyTiles();
-  const auto& otherTiles    = m_tileSpace->getOtherTiles();
-  const auto& myGridIndices = m_tileSpace->getMyGrids();
-
+  // Build the quasi-grid spacing.
   std::vector<RealVect> quasiDx(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     quasiDx[lvl] = m_blockingFactor * m_dx[lvl];
@@ -1008,8 +1005,8 @@ ParticleContainer<P>::remap()
       for (int lvl = m_finestLevel; lvl >= 0 && !foundTile; lvl--) {
         const IntVect particleTile = locateBin(lit().position(), quasiDx[lvl], m_probLo);
 
-        const auto& myLevelTiles    = myTiles[lvl];
-        const auto& otherLevelTiles = otherTiles[lvl];
+        const auto& myLevelTiles    = m_levelTiles[lvl]->getMyTiles();
+        const auto& otherLevelTiles = m_levelTiles[lvl]->getOtherTiles();
 
         if (myLevelTiles.find(particleTile) != myLevelTiles.end()) {
           // Found the particle on this level and this rank is the one who owns it.
@@ -1080,7 +1077,7 @@ ParticleContainer<P>::remap()
           const std::pair<IntType, IntType> gridDecode = decode(gridCode);
           const unsigned int                gridLevel  = gridDecode.first;
           const unsigned int                gridIndex  = gridDecode.second;
-          const DataIndex                   din        = myGridIndices[gridLevel].at(gridIndex);
+          const DataIndex                   din        = m_levelTiles[gridLevel]->getMyGrids().at(gridIndex);
 
           List<P>& particles   = mapIter->second;
           List<P>& myParticles = (*m_particles[gridLevel])[din].listItems();
@@ -1122,7 +1119,7 @@ ParticleContainer<P>::remap()
         const unsigned int                          gridLevel  = gridDecode.first;
         const unsigned int                          gridIndex  = gridDecode.second;
 
-        const DataIndex din = myGridIndices[gridLevel].at(gridIndex);
+        const DataIndex din = m_levelTiles[gridLevel]->getMyGrids().at(gridIndex);
 
         (*m_particles[gridLevel])[din].listItems().catenate(particles);
       }
@@ -1238,14 +1235,14 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
 
 template <class P>
 void
-ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
-                             const Vector<ProblemDomain>&     a_domains,
-                             const Vector<Real>&              a_dx,
-                             const Vector<int>&               a_refRat,
-                             const Vector<ValidMask>&         a_validMask,
-                             const RefCountedPtr<TileSpace>&  a_tileSpace,
-                             const int                        a_lmin,
-                             const int                        a_newFinestLevel)
+ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
+                             const Vector<ProblemDomain>&             a_domains,
+                             const Vector<Real>&                      a_dx,
+                             const Vector<int>&                       a_refRat,
+                             const Vector<ValidMask>&                 a_validMask,
+                             const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                             const int                                a_lmin,
+                             const int                                a_newFinestLevel)
 {
   CH_TIME("ParticleContainer::regrid");
   if (m_verbose) {
@@ -1265,7 +1262,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   m_refRat      = a_refRat;
   m_validRegion = a_validMask;
   m_finestLevel = a_newFinestLevel;
-  m_tileSpace   = a_tileSpace;
+  m_levelTiles  = a_levelTiles;
 
   m_dx.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {

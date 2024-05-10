@@ -166,7 +166,7 @@ Realm::regridBase(const int a_lmin)
 
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
-  this->defineTileSpace();
+  this->defineLevelTiles();
 }
 
 void
@@ -494,19 +494,18 @@ Realm::defineValidCells()
 }
 
 void
-Realm::defineTileSpace()
+Realm::defineLevelTiles() noexcept
 {
-  CH_TIME("Realm::defineTileSpace");
+  CH_TIME("Realm::defineLevelTiles");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineTileSpace" << endl;
+    pout() << "Realm::defineLevelTiles" << endl;
   }
 
-  Vector<DisjointBoxLayout> grids(1 + m_finestLevel);
+  m_levelTiles.resize(1 + m_finestLevel);
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    grids[lvl] = m_grids[lvl];
+    m_levelTiles[lvl] = RefCountedPtr<LevelTiles>(new LevelTiles(m_grids[lvl], m_blockingFactor));
   }
-
-  m_tileSpace = RefCountedPtr<TileSpace>(new TileSpace(grids, m_blockingFactor));
 }
 
 void
@@ -723,10 +722,10 @@ Realm::getValidCells() const
   return m_validCells;
 }
 
-const RefCountedPtr<TileSpace>&
-Realm::getTileSpace() const noexcept
+const Vector<RefCountedPtr<LevelTiles>>&
+Realm::getLevelTiles() const noexcept
 {
-  return m_tileSpace;
+  return m_levelTiles;
 }
 
 #include <CD_NamespaceFooter.H>
