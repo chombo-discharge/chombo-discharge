@@ -430,6 +430,12 @@ public:
   addParticlesDestructive(ParticleContainer<P>& a_otherContainer);
 
   /*!
+    @brief Run a sanity check and make sure all particles are in their correctly assigned box
+  */
+  void
+  sanityCheck() const noexcept;
+
+  /*!
     @brief Remap over the entire AMR hierarchy
   */
   void
@@ -682,6 +688,43 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
+
+  /*!
+    @brief Gather the particles onto a single list
+    @param[inout] a_list List containing all the particles in a_particles
+    @param[inout] a_particles Particles to transfer to list
+    @note This is supposed to get inside an OpenMP parallel region.
+  */
+  inline void
+  transferParticlesToSingleList(List<P>& a_list, AMRParticles<P>& a_particles) const noexcept;
+
+  /*!
+    @brief Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks
+    @param[inout] a_mappedParticles Particles mapped according to rank ownership (vector index) and grid level and index (std::pair)
+    @param[inout] a_unmappedParticles Particles that are not mapped (yet)
+  */
+  inline void
+  mapParticlesToAMRGrid(std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_mappedParticles,
+                        List<P>& a_unmappedParticles) const noexcept;
+
+  /*!
+    @brief Catenate the particles. This is usually called within OpenMP parallel regions.
+    @param[inout] a_globalParticles Global particle map
+    @param[inout] a_localParticles Local particle map
+   */
+  inline void
+  catenateParticleMaps(
+    std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_globalParticles,
+    std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_localParticles) const noexcept;
+
+  /*!
+    @brief Gather particles locally
+    @param[inout] a_mappedParticles Particles that have been mapped to this rank. 
+    @param[inout] a_particleData Where to assign the mapped particles
+  */
+  inline void
+  assignLocalParticles(std::map<std::pair<unsigned int, unsigned int>, List<P>>& a_mappedParticles,
+                       AMRParticles<P>&                                          a_particleData) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
