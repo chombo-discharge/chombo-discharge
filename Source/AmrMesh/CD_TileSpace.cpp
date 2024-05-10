@@ -45,7 +45,13 @@ TileSpace::define(const Vector<DisjointBoxLayout>& a_grids, const int a_blocking
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
 
-  for (int lvl = 0; lvl < a_grids.size(); lvl++) {
+  const int numLevels = a_grids.size();
+
+  m_myTiles.resize(numLevels);
+  m_otherTiles.resize(numLevels);
+  m_myGrids.resize(numLevels);
+
+  for (int lvl = 0; lvl < numLevels; lvl++) {
     const DisjointBoxLayout& dbl = a_grids[lvl];
 
     CH_assert(dbl.isDefined());
@@ -78,9 +84,9 @@ TileSpace::define(const Vector<DisjointBoxLayout>& a_grids, const int a_blocking
       myGrids[dbl.index(dit())] = dit();
     }
 
-    m_myTiles.emplace_back(myTiles);
-    m_otherTiles.emplace_back(otherTiles);
-    m_myGrids.emplace_back(myGrids);
+    m_myTiles[lvl]    = myTiles;
+    m_otherTiles[lvl] = otherTiles;
+    m_myGrids[lvl]    = myGrids;
   }
 
   m_isDefined = true;
@@ -90,6 +96,10 @@ const std::vector<std::map<IntVect, unsigned int, TileSpace::TileComparator>>&
 TileSpace::getMyTiles() const noexcept
 {
   CH_assert(m_isDefined);
+
+  if (!m_isDefined) {
+    MayDay::Abort("define snuck out");
+  }
 
   return m_myTiles;
 }

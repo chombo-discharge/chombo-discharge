@@ -24,6 +24,7 @@
 
 // Our includes
 #include <CD_OpenMP.H>
+#include <CD_TileSpace.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -62,6 +63,7 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
+    @param[in] a_tileSpace      Tiled AMR grids
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
@@ -72,6 +74,7 @@ public:
                     const Vector<Real>&              a_dx,
                     const Vector<int>&               a_refRat,
                     const Vector<ValidMask>&         a_validMask,
+                    const RefCountedPtr<TileSpace>&  a_tileSpace,
                     const RealVect&                  a_probLo,
                     const int                        a_blockingFactor,
                     const int                        a_finestLevel,
@@ -89,6 +92,7 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
+    @param[in] a_tileSpace      Tiled AMR grids
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
@@ -100,6 +104,7 @@ public:
          const Vector<Real>&              a_dx,
          const Vector<int>&               a_refRat,
          const Vector<ValidMask>&         a_validMask,
+         const RefCountedPtr<TileSpace>&  a_tileSpace,
          const RealVect&                  a_probLo,
          const int                        a_blockingFactor,
          const int                        a_finestLevel,
@@ -112,6 +117,7 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells
+    @param[in] a_tileSpace      Tiled AMR grids
     @param[in] a_base           Coarsest grid level that did not change. 
     @param[in] a_newFinestLevel New finest grid level
   */
@@ -121,6 +127,7 @@ public:
          const Vector<Real>&              a_dx,
          const Vector<int>&               a_refRat,
          const Vector<ValidMask>&         a_validMask,
+         const RefCountedPtr<TileSpace>&  a_tileSpace,
          const int                        a_base,
          const int                        a_newFinestLevel);
 
@@ -582,6 +589,11 @@ protected:
     @brief Verbose or not
   */
   bool m_verbose;
+
+  /*!
+    @brief Tiled AMR space
+  */
+  RefCountedPtr<TileSpace> m_tileSpace;
 
   /*!
     @brief AMR grids

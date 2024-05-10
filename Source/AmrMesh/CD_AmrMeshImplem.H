@@ -291,7 +291,7 @@ AmrMesh::allocate(ParticleContainer<T>& a_container, const std::string a_realm) 
                      m_realms[a_realm]->getDx(),
                      m_realms[a_realm]->getRefinementRatios(),
                      m_realms[a_realm]->getValidCells(),
-		     m_realms[a_realm]->getTileSpace(),
+                     m_realms[a_realm]->getTileSpace(),
                      m_probLo,
                      m_blockingFactor,
                      m_finestLevel,
@@ -373,8 +373,9 @@ AmrMesh::remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, co
   const Vector<Real>&              dx         = this->getDx();
   const Vector<int>&               refRat     = this->getRefinementRatios();
   const AMRMask&                   validCells = this->getValidCells(realm);
+  const RefCountedPtr<TileSpace>&  tileSpace  = m_realms[realm]->getTileSpace();
 
-  a_particles.regrid(grids, domains, dx, refRat, validCells, a_lmin, a_newFinestLevel);
+  a_particles.regrid(grids, domains, dx, refRat, validCells, tileSpace, a_lmin, a_newFinestLevel);
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>

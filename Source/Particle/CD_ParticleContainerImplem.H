@@ -46,6 +46,7 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
                                         const Vector<Real>&              a_dx,
                                         const Vector<int>&               a_refRat,
                                         const Vector<ValidMask>&         a_validMask,
+                                        const RefCountedPtr<TileSpace>&  a_tileSpace,
                                         const RealVect&                  a_probLo,
                                         const int                        a_blockingFactor,
                                         const int                        a_finestLevel,
@@ -53,7 +54,16 @@ ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>& a_grids
 {
   CH_TIME("ParticleContainer::ParticleContainer");
 
-  this->define(a_grids, a_domains, a_dx, a_refRat, a_validMask, a_probLo, a_blockingFactor, a_finestLevel, a_realm);
+  this->define(a_grids,
+               a_domains,
+               a_dx,
+               a_refRat,
+               a_validMask,
+               a_tileSpace,
+               a_probLo,
+               a_blockingFactor,
+               a_finestLevel,
+               a_realm);
 }
 
 template <class P>
@@ -69,6 +79,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
                              const Vector<Real>&              a_dx,
                              const Vector<int>&               a_refRat,
                              const Vector<ValidMask>&         a_validMask,
+                             const RefCountedPtr<TileSpace>&  a_tileSpace,
                              const RealVect&                  a_probLo,
                              const int                        a_blockingFactor,
                              const int                        a_finestLevel,
@@ -84,6 +95,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>& a_grids,
   m_finestLevel    = a_finestLevel;
   m_realm          = a_realm;
   m_blockingFactor = a_blockingFactor;
+  m_tileSpace      = a_tileSpace;
 
   m_dx.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -898,6 +910,8 @@ ParticleContainer<P>::remap()
     pout() << "ParticleContainer::remap" << endl;
   }
 
+  CH_assert(!m_tileSpace.isNull());
+
   // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
   //
   // This is done in the following steps:
@@ -944,48 +958,14 @@ ParticleContainer<P>::remap()
     return std::make_pair(lvl, idx);
   };
 
-  // Build the tile-space. This is something that should probably be stored somewhere else.
-  //
-  // myTiles => Tiles on each level owned by this rank. Maps a tile (an IntVect) to a grid index.
-  // myGridIndices => Maps a global grid index to a local DataIndex
-  // othertiles => Tiles on each level owned by another rank.
-  // quasiDx => Spacing on the "tiled" mesh
-  CH_START(t1);
-  std::vector<std::map<IntVect, unsigned int, CompIntVect>> myTiles(1 + m_finestLevel);
-  std::vector<std::map<unsigned int, DataIndex>>            myGridIndices(1 + m_finestLevel);
-  std::vector<std::map<IntVect, boxids, CompIntVect>>       otherTiles(1 + m_finestLevel);
-  std::vector<RealVect>                                     quasiDx(1 + m_finestLevel);
+  const auto& myTiles       = m_tileSpace->getMyTiles();
+  const auto& otherTiles    = m_tileSpace->getOtherTiles();
+  const auto& myGridIndices = m_tileSpace->getMyGrids();
 
+  std::vector<RealVect> quasiDx(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_grids[lvl];
-
-    for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {
-      const LayoutIndex  lidx   = lit();
-      const IntVect      tile   = coarsen(dbl[lidx], m_blockingFactor).smallEnd();
-      const unsigned int rankID = dbl.procID(lidx);
-      const unsigned int tileID = dbl.index(lidx);
-
-      // If using MPI we need to figure out who owns this tile.
-#if CH_MPI
-      if (myRank == rankID) {
-        myTiles[lvl][tile] = tileID;
-      }
-      else {
-        otherTiles[lvl][tile] = boxids(tileID, rankID);
-      }
-#else
-      myTiles[lvl][tile] = tileID;
-#endif
-    }
-
-    // Figure out which global indices correspond to which local indices.
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      myGridIndices[lvl][dbl.index(dit())] = dit();
-    }
-
     quasiDx[lvl] = m_blockingFactor * m_dx[lvl];
   }
-  CH_STOP(t1);
 
   // These are the particles that get sent to each MPI rank. The unsigned integer in the map holds both the grid index AND the level index,
   // which we do by using the first six bits to decode the level and the remaining 26 bits to hold the grid index.
@@ -1028,8 +1008,8 @@ ParticleContainer<P>::remap()
       for (int lvl = m_finestLevel; lvl >= 0 && !foundTile; lvl--) {
         const IntVect particleTile = locateBin(lit().position(), quasiDx[lvl], m_probLo);
 
-        const std::map<IntVect, unsigned int, CompIntVect>& myLevelTiles    = myTiles[lvl];
-        const std::map<IntVect, boxids, CompIntVect>&       otherLevelTiles = otherTiles[lvl];
+        const auto& myLevelTiles    = myTiles[lvl];
+        const auto& otherLevelTiles = otherTiles[lvl];
 
         if (myLevelTiles.find(particleTile) != myLevelTiles.end()) {
           // Found the particle on this level and this rank is the one who owns it.
@@ -1043,9 +1023,9 @@ ParticleContainer<P>::remap()
 #ifdef CH_MPI
         else if (otherLevelTiles.find(particleTile) != otherLevelTiles.end()) {
           // Particle was found on this level but no on this rank.
-          const IntType  gridIndex = otherLevelTiles.at(particleTile).idx;
+          const IntType  gridIndex = otherLevelTiles.at(particleTile).first;
           const IntType  gridCode  = encode(lvl, gridIndex);
-          const IntType& toRank    = otherLevelTiles.at(particleTile).pid;
+          const IntType& toRank    = otherLevelTiles.at(particleTile).second;
 
           threadLocalParticlesToSend[toRank][gridCode].transfer(lit);
 
@@ -1053,7 +1033,8 @@ ParticleContainer<P>::remap()
         }
 #endif
       }
-      // If this triggers the particle fell off the domain.
+
+      // If this triggers the particle fell off the domain and just move onto the next one.
       if (!foundTile) {
         ++lit;
       }
@@ -1099,7 +1080,7 @@ ParticleContainer<P>::remap()
           const std::pair<IntType, IntType> gridDecode = decode(gridCode);
           const unsigned int                gridLevel  = gridDecode.first;
           const unsigned int                gridIndex  = gridDecode.second;
-          const DataIndex                   din        = myGridIndices[gridLevel][gridIndex];
+          const DataIndex                   din        = myGridIndices[gridLevel].at(gridIndex);
 
           List<P>& particles   = mapIter->second;
           List<P>& myParticles = (*m_particles[gridLevel])[din].listItems();
@@ -1141,7 +1122,7 @@ ParticleContainer<P>::remap()
         const unsigned int                          gridLevel  = gridDecode.first;
         const unsigned int                          gridIndex  = gridDecode.second;
 
-        const DataIndex din = myGridIndices[gridLevel][gridIndex];
+        const DataIndex din = myGridIndices[gridLevel].at(gridIndex);
 
         (*m_particles[gridLevel])[din].listItems().catenate(particles);
       }
@@ -1262,6 +1243,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
                              const Vector<Real>&              a_dx,
                              const Vector<int>&               a_refRat,
                              const Vector<ValidMask>&         a_validMask,
+                             const RefCountedPtr<TileSpace>&  a_tileSpace,
                              const int                        a_lmin,
                              const int                        a_newFinestLevel)
 {
@@ -1283,6 +1265,7 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   m_refRat      = a_refRat;
   m_validRegion = a_validMask;
   m_finestLevel = a_newFinestLevel;
+  m_tileSpace   = a_tileSpace;
 
   m_dx.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
