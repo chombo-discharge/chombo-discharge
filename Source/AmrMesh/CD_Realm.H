@@ -95,6 +95,7 @@ public:
     @param[in] a_dx               Grid resolutions
     @param[in] a_probLo           Lower-left corner of physical domain
     @param[in] a_finestLevel      Finest grid level
+    @param[in] a_blockingFactor   Grid blocking factor
     @param[in] a_ebGhost          Number of ghost cells used for geometric information when making operators
     @param[in] a_numGhost         Number of ghost cells in data holders
     @param[in] a_lsfGhost         Number of ghost cells used when computing the level set on the mesh
@@ -114,6 +115,7 @@ public:
          const Vector<Real>&                                       a_dx,
          const RealVect                                            a_probLo,
          const int                                                 a_finestLevel,
+         const int                                                 a_blockingFactor,
          const int                                                 a_ebGhost,
          const int                                                 a_numGhost,
          const int                                                 a_lsfGhost,
@@ -364,6 +366,12 @@ public:
   const AMRMask&
   getValidCells() const;
 
+  /*!
+    @brief Get the tiled space
+  */
+  const RefCountedPtr<TileSpace>&
+  getTileSpace() const noexcept;
+
 protected:
   /*!
     @brief Realm defined or not
@@ -379,6 +387,11 @@ protected:
     @brief Finest AMR level
   */
   int m_finestLevel;
+
+  /*!
+    @brief Blocking factor
+  */
+  int m_blockingFactor;
 
   /*!
     @brief Physical coordinates of lower-left corner in simulation domain
@@ -419,6 +432,11 @@ protected:
     @brief Mask which is true for all valid cells
   */
   AMRMask m_validCells;
+
+  /*!
+    @brief Tile-space 
+  */
+  RefCountedPtr<TileSpace> m_tileSpace;
 
   /*!
     @brief Phase realms. 
@@ -482,6 +500,12 @@ protected:
   */
   void
   defineValidCells();
+
+  /*!
+    @brief Define the tiled space
+  */
+  void
+  defineTileSpace();
 
   /*!
     @brief Get a particular realm
