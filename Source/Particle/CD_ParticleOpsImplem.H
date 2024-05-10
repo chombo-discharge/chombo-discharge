@@ -518,8 +518,9 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value)
 #ifdef CH_MPI
 template <typename P>
 inline void
-ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_receivedParticles,
-                              std::vector<std::map<unsigned long, List<P>>>& a_sentParticles) noexcept
+ParticleOps::scatterParticles(
+  std::map<std::pair<unsigned int, unsigned int>, List<P>>&              a_receivedParticles,
+  std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_sentParticles) noexcept
 {
   CH_TIME("ParticleOps::scatterParticles");
 
@@ -531,15 +532,15 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
 
   const size_t linearSize = P().size();
 
-  std::vector<unsigned long> sendSizes(numProc(), 0);
-  std::vector<unsigned long> recvSizes(numProc(), 0);
+  std::vector<unsigned int> sendSizes(numProc(), 0);
+  std::vector<unsigned int> recvSizes(numProc(), 0);
 
   // Figure out the size of a_sentParticles[irank]
   for (int irank = 0; irank < numRanks; irank++) {
     sendSizes[irank] = 0;
 
     // Figure out the message size sent from this rank.
-    const std::map<unsigned long, List<P>>& particlesToRank = a_sentParticles[irank];
+    const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particlesToRank = a_sentParticles[irank];
 
     // Size of particles along.
     for (const auto& m : particlesToRank) {
@@ -548,10 +549,10 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
     sendSizes[irank] *= linearSize;
 
     // Add in the map keys and the list length
-    sendSizes[irank] += particlesToRank.size() * (sizeof(unsigned long) + sizeof(size_t));
+    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(unsigned int) + sizeof(size_t));
   }
 
-  mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UNSIGNED_LONG, &recvSizes[0], 1, MPI_UNSIGNED_LONG, Chombo_MPI::comm);
+  mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UNSIGNED, &recvSizes[0], 1, MPI_UNSIGNED, Chombo_MPI::comm);
   if (mpiErr != MPI_SUCCESS) {
     MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll");
   }
@@ -587,14 +588,16 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
 
       char* data = sendBuf[irank];
 
-      const std::map<unsigned long, List<P>>& particles = a_sentParticles[irank];
+      const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particles = a_sentParticles[irank];
 
-      // Linearize each entry in the map onto the send buffer. We encode this by (index, list length, List<P>)
+      // Linearize each entry in the map onto the send buffer. We encode this by (level, index, list length, List<P>)
       for (const auto& cur : particles) {
 
-        // Index
-        *((unsigned long*)data) = cur.first;
-        data += sizeof(unsigned long);
+        // and grid index
+        *((unsigned int*)data) = cur.first.first;
+        data += sizeof(unsigned int);
+        *((unsigned int*)data) = cur.first.second;
+        data += sizeof(unsigned int);
 
         // List length aka number of particles
         *((size_t*)data) = cur.second.length();
@@ -643,13 +646,16 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
 
       char* data = recvBuf[irank];
 
-      unsigned long in = 0;
+      unsigned int in = 0;
 
       while (in < recvSizes[irank]) {
 
-        // Index
-        unsigned long idx = *((unsigned long*)data);
-        data += sizeof(unsigned long);
+        // Level and grid index
+        unsigned int lvl = *((unsigned int*)data);
+        data += sizeof(unsigned int);
+
+        unsigned int idx = *((unsigned int*)data);
+        data += sizeof(unsigned int);
 
         // List length aka number of particles
         size_t numParticles = *((size_t*)data);
@@ -659,10 +665,10 @@ ParticleOps::scatterParticles(std::map<unsigned long, List<P>>&              a_r
           p.linearIn((void*)data);
           data += linearSize;
 
-          a_receivedParticles[idx].add(p);
+          a_receivedParticles[std::pair(lvl, idx)].add(p);
         }
 
-        in += sizeof(unsigned long) + sizeof(size_t) + numParticles * linearSize;
+        in += 2 * sizeof(unsigned int) + sizeof(size_t) + numParticles * linearSize;
       }
     }
   }

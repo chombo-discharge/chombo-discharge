@@ -696,22 +696,6 @@ protected:
   */
   void
   remapOutcast(ParticleData<P>& a_particles) noexcept;
-
-  /*!
-    @brief Function which exists for the purposes of encoding a level + grid index into a single integer
-    @param[in] a_level Grid level
-    @param[in] a_index Grid index
-  */
-  inline unsigned long
-  encode(const unsigned long a_level, const unsigned long a_index) const noexcept;
-
-  /*!
-    @brief Function which exists for the purposes of decoding a single integer into a grid level + grid index.
-    @details This is the inverse function of the encode function
-    @param[in] a_gridCode Encoded grid level + index
-  */
-  inline std::pair<unsigned long, unsigned long>
-  decode(const unsigned long a_gridCode) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
