@@ -895,6 +895,48 @@ ParticleContainer<P>::evictInvalidParticles(List<P>&         a_evictedParticles,
 }
 
 template <class P>
+inline unsigned long
+ParticleContainer<P>::encode(const unsigned long a_level, const unsigned long a_index) const noexcept
+{
+  using IntType                 = unsigned long;
+  constexpr size_t numBitsLong  = sizeof(IntType) * 8;
+  constexpr size_t numBitsLevel = 8;
+  constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
+
+  std::bitset<numBitsLevel> levelBits(a_level);
+  std::bitset<numBitsLong>  codeBits(a_index);
+
+  for (size_t pos = 0; pos < numBitsLevel; pos++) {
+    codeBits.set(numBitsIndex + pos, levelBits[pos]);
+  }
+
+  return (IntType)codeBits.to_ulong();
+}
+
+template <class P>
+inline std::pair<unsigned long, unsigned long>
+ParticleContainer<P>::decode(const unsigned long a_gridCode) const noexcept
+{
+  using IntType                 = unsigned long;
+  constexpr size_t numBitsLong  = sizeof(IntType) * 8;
+  constexpr size_t numBitsLevel = 8;
+  constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
+
+  std::bitset<numBitsLevel> levelBits;
+  std::bitset<numBitsLong>  indexBits(a_gridCode);
+
+  for (size_t pos = 0; pos < numBitsLevel; pos++) {
+    levelBits.set(pos, indexBits[numBitsIndex + pos]);
+    indexBits.set(numBitsIndex + pos, false);
+  }
+
+  const IntType lvl = (IntType)levelBits.to_ulong();
+  const IntType idx = (IntType)indexBits.to_ulong();
+
+  return std::make_pair(lvl, idx);
+}
+
+template <class P>
 void
 ParticleContainer<P>::remap()
 {
@@ -922,41 +964,10 @@ ParticleContainer<P>::remap()
   //    5) If using MPI, scatter the particles to the appropriate ranks.
   //    6) Assign particles locally from the particles that were scattered to this rank.
 
+  using IntType = unsigned long;
+
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
-
-  // These routines are used for encoding a grid level and a grid index onto an unsigned long. The level is encoded onto an 8-bit representation (max 256 levels)
-  // onto the left-most bits. The grid index is encoded by the remaining (hopefully 56) bits, which should be enough for anyone.
-  using IntType                 = unsigned long;
-  constexpr size_t numBitsLong  = sizeof(IntType) * 8;
-  constexpr size_t numBitsLevel = 8;
-  constexpr size_t numBitsIndex = numBitsLong - numBitsLevel;
-
-  auto encode = [](const IntType a_level, const IntType a_index) -> IntType {
-    std::bitset<numBitsLevel> levelBits(a_level);
-    std::bitset<numBitsLong>  codeBits(a_index);
-
-    for (size_t pos = 0; pos < numBitsLevel; pos++) {
-      codeBits.set(numBitsIndex + pos, levelBits[pos]);
-    }
-
-    return (IntType)codeBits.to_ulong();
-  };
-
-  auto decode = [](const IntType a_code) -> std::pair<IntType, IntType> {
-    std::bitset<numBitsLevel> levelBits;
-    std::bitset<numBitsLong>  indexBits(a_code);
-
-    for (size_t pos = 0; pos < numBitsLevel; pos++) {
-      levelBits.set(pos, indexBits[numBitsIndex + pos]);
-      indexBits.set(numBitsIndex + pos, false);
-    }
-
-    const IntType lvl = (IntType)levelBits.to_ulong();
-    const IntType idx = (IntType)indexBits.to_ulong();
-
-    return std::make_pair(lvl, idx);
-  };
 
   // Build the quasi-grid spacing.
   std::vector<RealVect> quasiDx(1 + m_finestLevel);
