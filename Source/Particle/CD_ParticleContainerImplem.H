@@ -1116,7 +1116,7 @@ ParticleContainer<P>::remap()
 
   // Scatter particles across MPI ranks.
 #ifdef CH_MPI
-#error "Must redo mpi_scatter part to support unsigned long"
+  //#error "Must redo mpi_scatter part to support unsigned long"
   // Particles received on this rank - we use the same indexing/decoding as for the sent particles, i.e. the
   // first entry in the map encodes the grid level and the grid patch index.
   std::map<IntType, List<P>> receivedParticles;

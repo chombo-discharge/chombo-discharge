@@ -216,6 +216,22 @@ public:
   template <typename P, RealVect& (P::*particleVectorField)()>
   static inline void
   setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept;
+
+#ifdef CH_MPI
+  /*!
+    @brief Scatter particles across MPI ranks
+    @details This will scatter the particles from a_sentParticles onto a_receivedParticles. Each entry in a_sentParticles is the particles 
+    sent form this rank to the other ranks (including itself), so the size of this vector must be equal to the number of MPI ranks. The particles
+    are collected on a_receivedParticles
+    @param[inout] a_receivedParticles Received particles on this rank
+    @param[inout] a_sentParticles Particles sent from this rank to all the other ranks. 
+  */
+  template <typename P>
+  static inline void
+  scatterParticles(std::map<unsigned long, List<P>>&              a_receivedParticles,
+                   std::vector<std::map<unsigned long, List<P>>>& a_sentParticles) noexcept;
+
+#endif
 };
 
 #include <CD_NamespaceFooter.H>
