@@ -898,13 +898,7 @@ template <class P>
 void
 ParticleContainer<P>::remap()
 {
-  CH_TIMERS("ParticleContainer<P>::remap");
-  CH_TIMER("ParticleContainer<P>::remap::collect_outcasts", t2);
-  CH_TIMER("ParticleContainer<P>::remap::loop_outcasts", t3);
-  CH_TIMER("ParticleContainer<P>::remap::catenate_list", t4);
-  CH_TIMER("ParticleContainer<P>::remap::gather_particles_local", t5);
-  CH_TIMER("ParticleContainer<P>::remap::mpi_scatter_particles", t6);
-  CH_TIMER("ParticleContainer<P>::remap::assign_scattered_particles", t7);
+  CH_TIME("ParticleContainer<P>::remap");
   if (m_verbose) {
     pout() << "ParticleContainer::remap" << endl;
   }
@@ -923,12 +917,6 @@ ParticleContainer<P>::remap()
 
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
-
-  // Build the quasi-grid spacing.
-  std::vector<RealVect> quasiDx(1 + m_finestLevel);
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    quasiDx[lvl] = m_blockingFactor * m_dx[lvl];
-  }
 
   using LevelAndIndex = std::pair<unsigned int, unsigned int>;
 
@@ -1191,26 +1179,24 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
 
   // Fill cache particles on each level
   m_cacheParticles.resize(1 + m_finestLevel);
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-
-    List<P>& cacheParticles = m_cacheParticles[lvl];
-
-    cacheParticles.clear();
+    m_cacheParticles[lvl] = RefCountedPtr<ParticleData<P>>(
+      new ParticleData<P>(m_grids[lvl], m_domains[lvl], m_blockingFactor, m_dx[lvl], m_probLo));
 
     const DisjointBoxLayout& dbl = m_grids[lvl];
     const DataIterator&      dit = dbl.dataIterator();
 
     const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime) reduction(catenate : cacheParticles)
+#pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      List<P>& p = (*m_particles[lvl])[din].listItems();
+      List<P>& cacheParticles  = (*m_cacheParticles[lvl])[din].listItems();
+      List<P>& solverParticles = (*m_particles[lvl])[din].listItems();
 
-      cacheParticles.catenate(p);
-
-      p.clear();
+      cacheParticles.catenate(solverParticles);
     }
   }
 }
@@ -1254,52 +1240,53 @@ ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
   this->setupGrownGrids(a_lmin, m_finestLevel);
   this->setupParticleData(a_lmin, m_finestLevel);
 
-  const int oldFinestLevel = m_cacheParticles.size() - 1;
+  // Perform the remapping operation.
+  const unsigned int numRanks = numProc();
+  const unsigned int myRank   = procID();
 
-  // If a level was removed, the length of m_cacheParticles exceeds the size of the new data holders. We need somewhere to put the particles
-  // on the grid levels that were removed -- just put them on the new finest level.
-  if (m_finestLevel < oldFinestLevel) {
-    List<P>& cacheFinest = m_cacheParticles[m_finestLevel];
-    for (int lvl = m_finestLevel + 1; lvl <= oldFinestLevel; lvl++) {
-      List<P>& p = m_cacheParticles[lvl];
+  using LevelAndIndex = std::pair<unsigned int, unsigned int>;
 
-      cacheFinest.catenate(p);
-      p.clear();
-    }
+  // These are the particles that get sent to each MPI rank. The pair contains the grid level and grid index.
+  // Each MPI rank (and OpenMP thread) goes through it's particles and checks if they've falled off the grid. If they have,
+  // then the particles are moved onto appropriate lists that will get sent to each rank.
+  std::vector<std::map<LevelAndIndex, List<P>>> particlesToSend(numRanks);
+
+#pragma omp parallel
+  {
+    List<P> outcasts;
+
+    std::vector<std::map<LevelAndIndex, List<P>>> threadLocalParticlesToSend(numRanks);
+
+    // Collect particles owned by this rank/thread.
+    this->transferParticlesToSingleList(outcasts, m_cacheParticles);
+
+    // Map the particles to other grid patches
+    this->mapParticlesToAMRGrid(threadLocalParticlesToSend, outcasts);
+
+    // Catenate the thread-local particle lists onto particlesToSend
+#pragma omp critical
+    this->catenateParticleMaps(particlesToSend, threadLocalParticlesToSend);
   }
 
-  // Add the particles from m_cacheParticles to each outcast list in m_particles. After we remap, many particles will be remapped to the correct level but the
-  // outcast list is probably not empty after this. For example, we could have removed a grid patch on level 'lvl' and the particles in that grid patch will
-  // still be in the outcast list on level 'lvl' after remapping.
-  for (int lvl = 0; lvl <= a_newFinestLevel; lvl++) {
-    List<P>& outcast = m_particles[lvl]->outcast();
+  // Particles that go from this rank to this rank don't need to be communicated so that we can place them directly on the correct patch.
+  this->assignLocalParticles(particlesToSend[myRank], m_particles);
 
-    // Add particles from cache
-    if (lvl <= oldFinestLevel) {
-      outcast.catenate(m_cacheParticles[lvl]);
-      m_cacheParticles[lvl].clear();
-    }
+  // If using MPI then we have to scatter the particles across MPI ranks.
+#ifdef CH_MPI
+  std::map<LevelAndIndex, List<P>> receivedParticles;
 
-    m_particles[lvl]->remapOutcast();
+  ParticleOps::scatterParticles(receivedParticles, particlesToSend);
+
+  // Assign particles to the correct level and grid patch -- we iterate through receivedParticles and decode the information
+  // we got from there.
+  this->assignLocalParticles(receivedParticles, m_particles);
+#endif
+
+  if (m_debug) {
+    this->sanityCheck();
   }
 
-  // If grids were removed the fine particle outcast list is definitely not empty. Transfer fine particles
-  // to the outcast list below and remap the coarse level again. Some of these particles may be outside the
-  // coar level PVR, but that is taken care of later. After this, only the outcast list on lvl = 0 has particles.
-  for (int lvl = a_newFinestLevel; lvl > 0; lvl--) {
-    List<P>& fineParticles = m_particles[lvl]->outcast();
-    List<P>& coarParticles = m_particles[lvl - 1]->outcast();
-
-    coarParticles.catenate(fineParticles);
-    fineParticles.clear();
-
-    m_particles[lvl - 1]->remapOutcast();
-  }
-
-  // At this point all the particles have been moved to their correct patches, but the PVR is so far not respected. We call ::remap to ensure that
-  // particles that fall off their level's PVR are put in the correct place.
-  this->remap();
-
+  // Discard transient storage.
   m_cacheParticles.resize(0);
 }
 
