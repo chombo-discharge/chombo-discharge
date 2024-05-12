@@ -1704,7 +1704,7 @@ public:
     @param[in] a_realm Realm name
   */
   const Vector<RefCountedPtr<LevelTiles>>&
-  getLevelTiles(const std::string a_realm) const;  
+  getLevelTiles(const std::string a_realm) const;
 
   /*!
     @brief Get the EBLevelGrid for a Realm and phase

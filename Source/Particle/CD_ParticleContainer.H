@@ -442,19 +442,6 @@ public:
   remap();
 
   /*!
-    @brief Do level remaps. This ignores particles moving between levels and moving out of valid regions.
-  */
-  void
-  levelRemap();
-
-  /*!
-    @brief Do a level remap. This ignores particles moving between levels and moving out of valid regions. 
-    @param[in] a_level Grid level
-  */
-  void
-  levelRemap(const int a_level);
-
-  /*!
     @brief Move particles into this container. 
     @param[inout] a_otherContainer Other particle container. 
     @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
@@ -469,15 +456,6 @@ public:
   */
   void
   transferParticles(AMRParticles<P>& a_otherContainer);
-
-  /*!
-    @brief Evict particles if they move out of the valid region.
-    @param[inout] a_evictedParticles List that the particles are moved into.
-    @param[inout] a_particles        Particles.
-    @param[in]    a_level            Grid level.
-  */
-  void
-  evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
 
   /*!
     @brief Evict particles if they move out of the valid region.
@@ -691,6 +669,15 @@ protected:
   */
   inline void
   transferParticlesToSingleList(List<P>& a_list, AMRParticles<P>& a_particles) const noexcept;
+
+  /*!
+    @brief Copy the input particles onto a single list
+    @param[inout] a_list List containing all the particles in a_particles
+    @param[inout] a_particles Particles to transfer to list
+    @note This is supposed to get inside an OpenMP parallel region.
+  */
+  inline void
+  copyParticlesToSingleList(List<P>& a_list, const AMRParticles<P>& a_particles) const noexcept;
 
   /*!
     @brief Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks

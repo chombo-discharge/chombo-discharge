@@ -665,7 +665,7 @@ ParticleOps::scatterParticles(
           p.linearIn((void*)data);
           data += linearSize;
 
-          a_receivedParticles[std::pair(lvl, idx)].add(p);
+          a_receivedParticles[std::pair<unsigned int, unsigned int>(lvl, idx)].add(p);
         }
 
         in += 2 * sizeof(unsigned int) + sizeof(size_t) + numParticles * linearSize;
