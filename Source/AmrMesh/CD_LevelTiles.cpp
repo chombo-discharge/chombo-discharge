@@ -42,8 +42,6 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
 {
   CH_TIME("LevelTiles::define");
 
-  CH_assert(a_dbl.isDefined());
-
   const unsigned int numRanks = numProc();
   const unsigned int myRank   = procID();
 
