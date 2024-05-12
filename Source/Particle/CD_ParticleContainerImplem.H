@@ -977,8 +977,6 @@ ParticleContainer<P>::remap()
     pout() << "ParticleContainer::remap" << endl;
   }
 
-  CH_assert(!m_levelTiles.isNull());
-
   // TLDR: This routine is quite long but does the full remapping on the whole hierarchy. It will discard particles that fall off the grid.
   //
   // This is done in the following steps:
