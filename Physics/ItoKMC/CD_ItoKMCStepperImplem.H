@@ -3753,9 +3753,13 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electricField, const Real a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::advanceReactionNetwork(EBAMRCellData, Real)");
+  CH_TIMERS("ItoKMCStepper::advanceReactionNetwork");
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::compute_ppc",t1);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::integrate_network",t2);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::copies",t3);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile",t4);
   if (m_verbosity > 5) {
-    pout() << m_name + "::advanceReactionNetwork(EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::advanceReactionNetwork" << endl;
   }
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
@@ -3767,6 +3771,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
   // Compute the number of reactive particles for both Ito and CDR species. Also do a backup of the initial number
   // of particles per cell. This is required when reconciling the results lateron.
+  CH_START(t1);
   if (numItoSpecies > 0) {
     this->computeReactiveItoParticlesPerCell(m_particleItoPPC);
 
@@ -3790,14 +3795,18 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
   DataOps::setValue(m_fluidYPC, 0.0);
   DataOps::setValue(m_particleYPC, 0.0);
+  CH_STOP(t1);  
 
   // Advance the reaction network which gives us a new number of particles per cell, as well as the number of
   // photons that need to be generated per cell.
+  CH_START(t2);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->advanceReactionNetwork(*m_fluidPPC[lvl], *m_fluidYPC[lvl], *a_electricField[lvl], lvl, a_dt);
   }
+  CH_STOP(t2);  
 
   // Copy the results back to the holders that hold the number of particles per cell for Ito/Cdr solvers.
+  CH_START(t3);
   if (numItoSpecies > 0) {
     const Interval srcInterv(0, numItoSpecies - 1);
     const Interval dstInterv(0, numItoSpecies - 1);
@@ -3813,9 +3822,11 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   if (numPhotonSpecies > 0) {
     m_amr->copyData(m_particleYPC, m_fluidYPC);
   }
+  CH_START(t3);  
 
   // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
   // and then add the result back into the CDR solvers.
+  CH_START(t4);
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
     m_cdrPhotoiProducts[i].clearParticles();
     m_cdrPhotoiProducts[i].organizeParticlesByCell();
@@ -3849,6 +3860,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
+  CH_START(t4);    
 }
 
 template <typename I, typename C, typename R, typename F>
