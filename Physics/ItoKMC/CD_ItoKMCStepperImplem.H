@@ -4144,9 +4144,12 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
                                               const Box        a_box,
                                               const Real       a_dx) noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
+  CH_TIMERS("ItoKMCStepper::reconcileParticles(patch)");
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::collect_ptr", t1);
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::regular_cells", t2);
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::irregular_cells", t3);      
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
+    pout() << m_name + "::reconcileParticles(patch)" << endl;
   }
 
   // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We have
@@ -4170,6 +4173,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   const int ppc = (a_level < m_particlesPerCell.size()) ? m_particlesPerCell[a_level] : m_particlesPerCell.back();
 
   // List of valid grid cells
+  CH_START(t1);
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
 
   // Pointers to cell-centered particle storages. Note that the BinFabs hold a list of particles/photons
@@ -4226,6 +4230,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   Vector<List<PointParticle>*> cdrParticles(numCdrSpecies);
   Vector<List<Photon>*>        bulkPhotons(numPhotonSpecies);
   Vector<List<Photon>*>        sourcePhotons(numPhotonSpecies);
+  CH_STOP(t1);  
 
   // Regular cells
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4394,8 +4399,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   // Run the kernels.
   VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
 
+  CH_START(t2);
   BoxLoops::loop(a_box, regularKernel);
+  CH_STOP(t2);
+  
+  CH_START(t3);  
   BoxLoops::loop(vofit, irregularKernel);
+  CH_STOP(t3);    
 }
 
 template <typename I, typename C, typename R, typename F>
