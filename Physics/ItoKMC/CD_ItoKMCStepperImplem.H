@@ -3757,7 +3757,8 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   CH_TIMER("ItoKMCStepper::advanceReactionNetwork::compute_ppc",t1);
   CH_TIMER("ItoKMCStepper::advanceReactionNetwork::integrate_network",t2);
   CH_TIMER("ItoKMCStepper::advanceReactionNetwork::copies",t3);
-  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile",t4);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_particles",t4);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_cdr",t5);  
   if (m_verbosity > 5) {
     pout() << m_name + "::advanceReactionNetwork" << endl;
   }
@@ -3835,10 +3836,12 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
   // the source terms.
   this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC);
+  CH_STOP(t4);  
 
   // Deposited PointParticles on the mesh and add the result to m_fluidCdrPPC. This is a bit convoluted because
   // the photoionization products are created in reconcileParticles and  deposited them on the particle realm, but
   // the resulting products need to end up on in the correct data component in m_fluidCdrPPC.
+  CH_START(t5);
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
     m_cdrPhotoiProducts[i].organizeParticlesByPatch();
 
@@ -3860,7 +3863,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
-  CH_STOP(t4);    
+  CH_STOP(t5);    
 }
 
 template <typename I, typename C, typename R, typename F>
