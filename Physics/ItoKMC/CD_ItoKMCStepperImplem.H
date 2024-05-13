@@ -3867,12 +3867,12 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
                                                   LevelData<EBCellFAB>&       a_newPhotonsPerCell,
                                                   const LevelData<EBCellFAB>& a_electricField,
                                                   const int                   a_level,
-                                                  const Real                  a_dt) noexcept
+                                                  const Real                  a_dt) const noexcept
 {
   CH_TIME("ItoKMCStepper::advanceReactionNetwork(LD<EBCellFAB>x3, int, Real)");
   if (m_verbosity > 5) {
@@ -3914,7 +3914,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
                                                   EBCellFAB&       a_newPhotonsPerCell,
                                                   const EBCellFAB& a_electricField,
@@ -3922,7 +3922,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
                                                   const DataIndex  a_dit,
                                                   const Box        a_box,
                                                   const Real       a_dx,
-                                                  const Real       a_dt) noexcept
+                                                  const Real       a_dt) const noexcept
 {
   CH_TIME("ItoKMCStepper::advanceReactionNetwork(EBCellFABx3, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
@@ -4092,10 +4092,10 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                                               const EBAMRCellData& a_oldParticlesPerCell,
-                                              const EBAMRCellData& a_newPhotonsPerCell) noexcept
+                                              const EBAMRCellData& a_newPhotonsPerCell) const noexcept
 {
   CH_TIME("ItoKMCStepper::reconcileParticles(EBAMRCellDatax3)");
   if (m_verbosity > 5) {
@@ -4112,11 +4112,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticle
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-                                              const int                   a_level) noexcept
+                                              const int                   a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
   if (m_verbosity > 5) {
@@ -4150,14 +4150,14 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                               const EBCellFAB& a_oldParticlesPerCell,
                                               const EBCellFAB& a_newPhotonsPerCell,
                                               const int        a_level,
                                               const DataIndex  a_dit,
                                               const Box        a_box,
-                                              const Real       a_dx) noexcept
+                                              const Real       a_dx) const noexcept
 {
   CH_TIMERS("ItoKMCStepper::reconcileParticles(patch)");
   CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::collect_ptr", t1);
