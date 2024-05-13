@@ -3754,11 +3754,11 @@ void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electricField, const Real a_dt) noexcept
 {
   CH_TIMERS("ItoKMCStepper::advanceReactionNetwork");
-  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::compute_ppc",t1);
-  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::integrate_network",t2);
-  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::copies",t3);
-  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_particles",t4);
-  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_cdr",t5);  
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::compute_ppc", t1);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::integrate_network", t2);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::copies", t3);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_particles", t4);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_cdr", t5);
   if (m_verbosity > 5) {
     pout() << m_name + "::advanceReactionNetwork" << endl;
   }
@@ -3796,7 +3796,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
   DataOps::setValue(m_fluidYPC, 0.0);
   DataOps::setValue(m_particleYPC, 0.0);
-  CH_STOP(t1);  
+  CH_STOP(t1);
 
   // Advance the reaction network which gives us a new number of particles per cell, as well as the number of
   // photons that need to be generated per cell.
@@ -3804,7 +3804,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->advanceReactionNetwork(*m_fluidPPC[lvl], *m_fluidYPC[lvl], *a_electricField[lvl], lvl, a_dt);
   }
-  CH_STOP(t2);  
+  CH_STOP(t2);
 
   // Copy the results back to the holders that hold the number of particles per cell for Ito/Cdr solvers.
   CH_START(t3);
@@ -3823,7 +3823,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   if (numPhotonSpecies > 0) {
     m_amr->copyData(m_particleYPC, m_fluidYPC);
   }
-  CH_STOP(t3);  
+  CH_STOP(t3);
 
   // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
   // and then add the result back into the CDR solvers.
@@ -3836,7 +3836,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
   // the source terms.
   this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC);
-  CH_STOP(t4);  
+  CH_STOP(t4);
 
   // Deposited PointParticles on the mesh and add the result to m_fluidCdrPPC. This is a bit convoluted because
   // the photoionization products are created in reconcileParticles and  deposited them on the particle realm, but
@@ -3863,7 +3863,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
-  CH_STOP(t5);    
+  CH_STOP(t5);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4162,7 +4162,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   CH_TIMERS("ItoKMCStepper::reconcileParticles(patch)");
   CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::collect_ptr", t1);
   CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::regular_cells", t2);
-  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::irregular_cells", t3);      
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::irregular_cells", t3);
   if (m_verbosity > 5) {
     pout() << m_name + "::reconcileParticles(patch)" << endl;
   }
@@ -4245,7 +4245,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   Vector<List<PointParticle>*> cdrParticles(numCdrSpecies);
   Vector<List<Photon>*>        bulkPhotons(numPhotonSpecies);
   Vector<List<Photon>*>        sourcePhotons(numPhotonSpecies);
-  CH_STOP(t1);  
+  CH_STOP(t1);
 
   // Regular cells
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4417,10 +4417,10 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   CH_START(t2);
   BoxLoops::loop(a_box, regularKernel);
   CH_STOP(t2);
-  
-  CH_START(t3);  
+
+  CH_START(t3);
   BoxLoops::loop(vofit, irregularKernel);
-  CH_STOP(t3);    
+  CH_STOP(t3);
 }
 
 template <typename I, typename C, typename R, typename F>
