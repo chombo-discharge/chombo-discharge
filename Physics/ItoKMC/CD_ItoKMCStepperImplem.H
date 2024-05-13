@@ -3822,7 +3822,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   if (numPhotonSpecies > 0) {
     m_amr->copyData(m_particleYPC, m_fluidYPC);
   }
-  CH_START(t3);  
+  CH_STOP(t3);  
 
   // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
   // and then add the result back into the CDR solvers.
@@ -3860,7 +3860,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
-  CH_START(t4);    
+  CH_STOP(t4);    
 }
 
 template <typename I, typename C, typename R, typename F>
