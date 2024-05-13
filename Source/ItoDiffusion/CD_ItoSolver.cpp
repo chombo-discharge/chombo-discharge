@@ -3096,7 +3096,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
 }
 
 void
-ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc)
+ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) const noexcept
 {
   CH_TIMERS("ItoSolver::mergeParticles");
 
@@ -3104,7 +3104,9 @@ ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cell
 }
 
 void
-ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc)
+ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
+                                           const CellInfo&    a_cellInfo,
+                                           const int          a_ppc) const noexcept
 {
   CH_TIMERS("ItoSolver::makeSuperparticlesEqualWeightKD");
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::populate_list", t1);
@@ -3169,7 +3171,9 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const
 }
 
 void
-ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc)
+ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
+                                 const CellInfo&    a_cellInfo,
+                                 const int          a_ppc) const noexcept
 {
   CH_TIME("ItoSolver::reinitializeParticles");
 
