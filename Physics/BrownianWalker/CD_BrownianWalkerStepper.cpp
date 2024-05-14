@@ -738,6 +738,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
                    m_amr->getDx(),
                    m_amr->getRefinementRatios(),
                    m_amr->getValidCells(particles.getRealm()),
+                   m_amr->getLevelTiles(particles.getRealm()),
                    a_lmin,
                    a_finestLevel);
 

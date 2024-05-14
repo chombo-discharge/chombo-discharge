@@ -3025,6 +3025,22 @@ AmrMesh::getValidCells(const std::string a_realm) const
   return m_realms[a_realm]->getValidCells();
 }
 
+const Vector<RefCountedPtr<LevelTiles>>&
+AmrMesh::getLevelTiles(const std::string a_realm) const
+{
+  CH_TIME("AmrMesh::getLevelTiles(string)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getLevelTiles(string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getLevelTiles(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getLevelTiles();
+}
+
 const Vector<RefCountedPtr<EBLevelGrid>>&
 AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const
 {
@@ -3354,6 +3370,7 @@ AmrMesh::defineRealms()
                      m_dx,
                      m_probLo,
                      m_finestLevel,
+                     m_blockingFactor,
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
@@ -3409,6 +3426,7 @@ AmrMesh::regridRealm(const std::string          a_realm,
                             m_dx,
                             m_probLo,
                             m_finestLevel,
+                            m_blockingFactor,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,

@@ -516,7 +516,7 @@ Driver::gridReport()
 #ifdef CH_MPI
          << "\tMPI ranks................ = " << numProc() << endl
 #endif
-#if _OPENMP
+#ifdef _OPENMP
          << "\tOpenMP threads........... = " << numThreads << endl
 #endif
          << "\tFinest level............. = " << finestLevel << endl

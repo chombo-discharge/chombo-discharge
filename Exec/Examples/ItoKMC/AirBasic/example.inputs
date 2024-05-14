@@ -110,7 +110,7 @@ ItoSolver.verbosity           = -1            # Class verbosity
 ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
-ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
+ItoSolver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
 ItoSolver.normal_max          = 5.0           # Maximum value (absolute) that can be drawn from the exponential distribution.
 ItoSolver.redistribute        = false         # Turn on/off redistribution. 
 ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
@@ -247,7 +247,7 @@ ItoKMCGodunovStepper.load_balance_particles                = false          # Tu
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction

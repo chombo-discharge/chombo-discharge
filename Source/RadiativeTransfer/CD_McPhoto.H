@@ -396,13 +396,6 @@ public:
   countPhotons(const AMRParticles<Photon>& a_photons) const;
 
   /*!
-    @brief Count number of outcast photons in particle list
-    @param[in] a_photons Particle list
-  */
-  virtual int
-  countOutcast(const AMRParticles<Photon>& a_photons) const;
-
-  /*!
     @brief Get m_photons
     @return m_photons
   */
