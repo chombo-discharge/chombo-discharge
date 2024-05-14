@@ -105,19 +105,19 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#abda5b277132a11b06527b5ac05d53071">ParticleContainer</a> ()</td></tr>
 <tr class="memdesc:abda5b277132a11b06527b5ac05d53071"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Leaves object in undefined state. <br /></td></tr>
 <tr class="separator:abda5b277132a11b06527b5ac05d53071"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a225a58cc7dcdeeb394677cf3df0b54a3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a225a58cc7dcdeeb394677cf3df0b54a3">ParticleContainer</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const RealVect &amp;a_probLo, const int a_blockingFactor, const int a_finestLevel, const std::string a_realm)</td></tr>
-<tr class="memdesc:a225a58cc7dcdeeb394677cf3df0b54a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classParticleContainer.html#a225a58cc7dcdeeb394677cf3df0b54a3">More...</a><br /></td></tr>
-<tr class="separator:a225a58cc7dcdeeb394677cf3df0b54a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86bf25b42c394c6490cb8397c0502cd4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a86bf25b42c394c6490cb8397c0502cd4">ParticleContainer</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt;&gt; &amp;a_levelTiles, const RealVect &amp;a_probLo, const int a_blockingFactor, const int a_finestLevel, const std::string a_realm)</td></tr>
+<tr class="memdesc:a86bf25b42c394c6490cb8397c0502cd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <a href="classParticleContainer.html#a86bf25b42c394c6490cb8397c0502cd4">More...</a><br /></td></tr>
+<tr class="separator:a86bf25b42c394c6490cb8397c0502cd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62323d00a502534bfa3f42cdf181bdc0"><td class="memItemLeft" align="right" valign="top"><a id="a62323d00a502534bfa3f42cdf181bdc0"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a62323d00a502534bfa3f42cdf181bdc0">~ParticleContainer</a> ()</td></tr>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a62323d00a502534bfa3f42cdf181bdc0">~ParticleContainer</a> ()</td></tr>
 <tr class="memdesc:a62323d00a502534bfa3f42cdf181bdc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor ( does nothing) <br /></td></tr>
 <tr class="separator:a62323d00a502534bfa3f42cdf181bdc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2db7e8cb941c386e5dc2b8ca2bd3a2ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2db7e8cb941c386e5dc2b8ca2bd3a2ca">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const RealVect &amp;a_probLo, const int a_blockingFactor, const int a_finestLevel, const std::string a_realm)</td></tr>
-<tr class="memdesc:a2db7e8cb941c386e5dc2b8ca2bd3a2ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the container. This will do a clear-out of all particles.  <a href="classParticleContainer.html#a2db7e8cb941c386e5dc2b8ca2bd3a2ca">More...</a><br /></td></tr>
-<tr class="separator:a2db7e8cb941c386e5dc2b8ca2bd3a2ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d8ac31e1727bd2a355c9cbf30668181"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a4d8ac31e1727bd2a355c9cbf30668181">regrid</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const int a_base, const int a_newFinestLevel)</td></tr>
-<tr class="memdesc:a4d8ac31e1727bd2a355c9cbf30668181"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid function. a_base is the coarsest grid level which did not change.  <a href="classParticleContainer.html#a4d8ac31e1727bd2a355c9cbf30668181">More...</a><br /></td></tr>
-<tr class="separator:a4d8ac31e1727bd2a355c9cbf30668181"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14855ffced9588b4ba3c7109431b30ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a14855ffced9588b4ba3c7109431b30ad">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt;&gt; &amp;a_levelTiles, const RealVect &amp;a_probLo, const int a_blockingFactor, const int a_finestLevel, const std::string a_realm)</td></tr>
+<tr class="memdesc:a14855ffced9588b4ba3c7109431b30ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the container. This will do a clear-out of all particles.  <a href="classParticleContainer.html#a14855ffced9588b4ba3c7109431b30ad">More...</a><br /></td></tr>
+<tr class="separator:a14855ffced9588b4ba3c7109431b30ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc685325bb00a480185b193f0808d96a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#abc685325bb00a480185b193f0808d96a">regrid</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; Real &gt; &amp;a_dx, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; ValidMask &gt; &amp;a_validMask, const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt;&gt; &amp;a_levelTiles, const int a_base, const int a_newFinestLevel)</td></tr>
+<tr class="memdesc:abc685325bb00a480185b193f0808d96a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid function. a_base is the coarsest grid level which did not change.  <a href="classParticleContainer.html#abc685325bb00a480185b193f0808d96a">More...</a><br /></td></tr>
+<tr class="separator:abc685325bb00a480185b193f0808d96a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56f20f8dc3405f672d0bd218710630e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a56f20f8dc3405f672d0bd218710630e2">preRegrid</a> (const int a_base)</td></tr>
 <tr class="memdesc:a56f20f8dc3405f672d0bd218710630e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache particles before calling regrid.  <a href="classParticleContainer.html#a56f20f8dc3405f672d0bd218710630e2">More...</a><br /></td></tr>
 <tr class="separator:a56f20f8dc3405f672d0bd218710630e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,6 +149,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a22c32a7002bc56f9236a194d4f22cded">clearMaskParticles</a> () const</td></tr>
 <tr class="memdesc:a22c32a7002bc56f9236a194d4f22cded"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the "mask" particles. <br /></td></tr>
 <tr class="separator:a22c32a7002bc56f9236a194d4f22cded"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89fbb88c0888d2bb3fbd5bee0adb6964"><td class="memItemLeft" align="right" valign="top"><a id="a89fbb88c0888d2bb3fbd5bee0adb6964"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a89fbb88c0888d2bb3fbd5bee0adb6964">clearOutcast</a> () noexcept</td></tr>
+<tr class="memdesc:a89fbb88c0888d2bb3fbd5bee0adb6964"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear outcast particles. <br /></td></tr>
+<tr class="separator:a89fbb88c0888d2bb3fbd5bee0adb6964"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80b57db3f1493057168d10712d051437"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a80b57db3f1493057168d10712d051437">clear</a> (<a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;a_particles) const</td></tr>
 <tr class="memdesc:a80b57db3f1493057168d10712d051437"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear particles on input data holder.  <a href="classParticleContainer.html#a80b57db3f1493057168d10712d051437">More...</a><br /></td></tr>
 <tr class="separator:a80b57db3f1493057168d10712d051437"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -246,26 +250,20 @@ const Vector&lt; DisjointBoxLayout &gt; &amp;&#160;</td><td class="memItemRight"
 <tr class="memitem:aaeab7228e972686b292c4a7b30d83646"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aaeab7228e972686b292c4a7b30d83646">addParticlesDestructive</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_otherContainer)</td></tr>
 <tr class="memdesc:aaeab7228e972686b292c4a7b30d83646"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add particles from other container to this one. This destroys the particles in the other container.  <a href="classParticleContainer.html#aaeab7228e972686b292c4a7b30d83646">More...</a><br /></td></tr>
 <tr class="separator:aaeab7228e972686b292c4a7b30d83646"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe95bc28796dbd689a4c29b693157d67"><td class="memItemLeft" align="right" valign="top"><a id="abe95bc28796dbd689a4c29b693157d67"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#abe95bc28796dbd689a4c29b693157d67">sanityCheck</a> () const noexcept</td></tr>
+<tr class="memdesc:abe95bc28796dbd689a4c29b693157d67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run a sanity check and make sure all particles are in their correctly assigned box. <br /></td></tr>
+<tr class="separator:abe95bc28796dbd689a4c29b693157d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81d7610978813e98b3c5e968d4495139"><td class="memItemLeft" align="right" valign="top"><a id="a81d7610978813e98b3c5e968d4495139"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a81d7610978813e98b3c5e968d4495139">remap</a> ()</td></tr>
 <tr class="memdesc:a81d7610978813e98b3c5e968d4495139"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remap over the entire AMR hierarchy. <br /></td></tr>
 <tr class="separator:a81d7610978813e98b3c5e968d4495139"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8744522939515a8c36449b0cd70a841"><td class="memItemLeft" align="right" valign="top"><a id="ab8744522939515a8c36449b0cd70a841"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ab8744522939515a8c36449b0cd70a841">levelRemap</a> ()</td></tr>
-<tr class="memdesc:ab8744522939515a8c36449b0cd70a841"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do level remaps. This ignores particles moving between levels and moving out of valid regions. <br /></td></tr>
-<tr class="separator:ab8744522939515a8c36449b0cd70a841"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a629f40d777afe0e25770ce5251d41c0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a629f40d777afe0e25770ce5251d41c0f">levelRemap</a> (const int a_level)</td></tr>
-<tr class="memdesc:a629f40d777afe0e25770ce5251d41c0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a level remap. This ignores particles moving between levels and moving out of valid regions.  <a href="classParticleContainer.html#a629f40d777afe0e25770ce5251d41c0f">More...</a><br /></td></tr>
-<tr class="separator:a629f40d777afe0e25770ce5251d41c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4ce43efcc9e2de503811d62eb27cfe2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af4ce43efcc9e2de503811d62eb27cfe2">transferParticles</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt; &amp;a_otherContainer)</td></tr>
 <tr class="memdesc:af4ce43efcc9e2de503811d62eb27cfe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move particles into this container.  <a href="classParticleContainer.html#af4ce43efcc9e2de503811d62eb27cfe2">More...</a><br /></td></tr>
 <tr class="separator:af4ce43efcc9e2de503811d62eb27cfe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a34c4246d775f802a65822cf3f3bd6c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a0a34c4246d775f802a65822cf3f3bd6c">transferParticles</a> (<a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;a_otherContainer)</td></tr>
 <tr class="memdesc:a0a34c4246d775f802a65822cf3f3bd6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move particles into this container.  <a href="classParticleContainer.html#a0a34c4246d775f802a65822cf3f3bd6c">More...</a><br /></td></tr>
 <tr class="separator:a0a34c4246d775f802a65822cf3f3bd6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4dca1b5501c1c73287daa8626ec705cc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a4dca1b5501c1c73287daa8626ec705cc">evictInvalidParticles</a> (List&lt; P &gt; &amp;a_evictedParticles, ParticleData&lt; P &gt; &amp;a_particles, const int a_coarseLevel)</td></tr>
-<tr class="memdesc:a4dca1b5501c1c73287daa8626ec705cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evict particles if they move out of the valid region.  <a href="classParticleContainer.html#a4dca1b5501c1c73287daa8626ec705cc">More...</a><br /></td></tr>
-<tr class="separator:a4dca1b5501c1c73287daa8626ec705cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ec234df7a81b4ccb91f3be90d17cd99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2ec234df7a81b4ccb91f3be90d17cd99">admitValidParticles</a> (List&lt; P &gt; &amp;a_evictedParticles, ParticleData&lt; P &gt; &amp;a_particles, const int a_coarseLevel)</td></tr>
 <tr class="memdesc:a2ec234df7a81b4ccb91f3be90d17cd99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evict particles if they move out of the valid region.  <a href="classParticleContainer.html#a2ec234df7a81b4ccb91f3be90d17cd99">More...</a><br /></td></tr>
 <tr class="separator:a2ec234df7a81b4ccb91f3be90d17cd99"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -310,6 +308,21 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a2b8a4785746565b0d3af7f30215c0bca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a2b8a4785746565b0d3af7f30215c0bca">setupParticleData</a> (const int a_base, const int a_finestLevel)</td></tr>
 <tr class="memdesc:a2b8a4785746565b0d3af7f30215c0bca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function for the particle data (m_particles and m_maskParticles)  <a href="classParticleContainer.html#a2b8a4785746565b0d3af7f30215c0bca">More...</a><br /></td></tr>
 <tr class="separator:a2b8a4785746565b0d3af7f30215c0bca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0bcda6c5b01cb856928066f15f21c38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ab0bcda6c5b01cb856928066f15f21c38">transferParticlesToSingleList</a> (List&lt; P &gt; &amp;a_list, <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;a_particles) const noexcept</td></tr>
+<tr class="memdesc:ab0bcda6c5b01cb856928066f15f21c38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather the particles onto a single list.  <a href="classParticleContainer.html#ab0bcda6c5b01cb856928066f15f21c38">More...</a><br /></td></tr>
+<tr class="separator:ab0bcda6c5b01cb856928066f15f21c38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcb68c68ec3cf4919b4eeeccde3bc1db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#abcb68c68ec3cf4919b4eeeccde3bc1db">copyParticlesToSingleList</a> (List&lt; P &gt; &amp;a_list, const <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;a_particles) const noexcept</td></tr>
+<tr class="memdesc:abcb68c68ec3cf4919b4eeeccde3bc1db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the input particles onto a single list.  <a href="classParticleContainer.html#abcb68c68ec3cf4919b4eeeccde3bc1db">More...</a><br /></td></tr>
+<tr class="separator:abcb68c68ec3cf4919b4eeeccde3bc1db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f9918a0baa65240e1d8cfdc75fc3cf6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a7f9918a0baa65240e1d8cfdc75fc3cf6">mapParticlesToAMRGrid</a> (std::vector&lt; std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt;&gt; &amp;a_mappedParticles, List&lt; P &gt; &amp;a_unmappedParticles) const noexcept</td></tr>
+<tr class="memdesc:a7f9918a0baa65240e1d8cfdc75fc3cf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks.  <a href="classParticleContainer.html#a7f9918a0baa65240e1d8cfdc75fc3cf6">More...</a><br /></td></tr>
+<tr class="separator:a7f9918a0baa65240e1d8cfdc75fc3cf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a373072a968d874f00fce879cf97d3711"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a373072a968d874f00fce879cf97d3711">catenateParticleMaps</a> (std::vector&lt; std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt;&gt; &amp;a_globalParticles, std::vector&lt; std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt;&gt; &amp;a_localParticles) const noexcept</td></tr>
+<tr class="memdesc:a373072a968d874f00fce879cf97d3711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Catenate the particles. This is usually called within OpenMP parallel regions.  <a href="classParticleContainer.html#a373072a968d874f00fce879cf97d3711">More...</a><br /></td></tr>
+<tr class="separator:a373072a968d874f00fce879cf97d3711"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84689136e35146af3822adfdd8a9e689"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a84689136e35146af3822adfdd8a9e689">assignLocalParticles</a> (std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt; &amp;a_mappedParticles, <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;a_particleData) const noexcept</td></tr>
+<tr class="memdesc:a84689136e35146af3822adfdd8a9e689"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gather particles locally.  <a href="classParticleContainer.html#a84689136e35146af3822adfdd8a9e689">More...</a><br /></td></tr>
+<tr class="separator:a84689136e35146af3822adfdd8a9e689"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -341,6 +354,18 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a85fa3352cd8221499915666a870243a6">m_profile</a></td></tr>
 <tr class="memdesc:a85fa3352cd8221499915666a870243a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Profile or not. <br /></td></tr>
 <tr class="separator:a85fa3352cd8221499915666a870243a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ef206d4c9c131277aefaed866e80907"><td class="memItemLeft" align="right" valign="top"><a id="a3ef206d4c9c131277aefaed866e80907"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a3ef206d4c9c131277aefaed866e80907">m_debug</a></td></tr>
+<tr class="memdesc:a3ef206d4c9c131277aefaed866e80907"><td class="mdescLeft">&#160;</td><td class="mdescRight">Debug or not. <br /></td></tr>
+<tr class="separator:a3ef206d4c9c131277aefaed866e80907"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a1fee920451abe8b52b11904e5145bf"><td class="memItemLeft" align="right" valign="top"><a id="a1a1fee920451abe8b52b11904e5145bf"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a1a1fee920451abe8b52b11904e5145bf">m_verbose</a></td></tr>
+<tr class="memdesc:a1a1fee920451abe8b52b11904e5145bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbose or not. <br /></td></tr>
+<tr class="separator:a1a1fee920451abe8b52b11904e5145bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63ef5313089f21becb56785d3abeb86f"><td class="memItemLeft" align="right" valign="top"><a id="a63ef5313089f21becb56785d3abeb86f"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a63ef5313089f21becb56785d3abeb86f">m_levelTiles</a></td></tr>
+<tr class="memdesc:a63ef5313089f21becb56785d3abeb86f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tiled AMR space. <br /></td></tr>
+<tr class="separator:a63ef5313089f21becb56785d3abeb86f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaefbb1f4bc933a5431a67b9bcd815a8f"><td class="memItemLeft" align="right" valign="top"><a id="aaefbb1f4bc933a5431a67b9bcd815a8f"></a>
 Vector&lt; DisjointBoxLayout &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#aaefbb1f4bc933a5431a67b9bcd815a8f">m_grids</a></td></tr>
 <tr class="memdesc:aaefbb1f4bc933a5431a67b9bcd815a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">AMR grids. <br /></td></tr>
@@ -380,13 +405,9 @@ Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class=
 <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ac29c4836c732dde4e52035aefd73ba3f">m_maskParticles</a></td></tr>
 <tr class="memdesc:ac29c4836c732dde4e52035aefd73ba3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special data holder that holds copies of particles on the coarse level that are within a specified range of the refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. <br /></td></tr>
 <tr class="separator:ac29c4836c732dde4e52035aefd73ba3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af16fe311a1b510e437c3726c5598fcfb"><td class="memItemLeft" align="right" valign="top"><a id="af16fe311a1b510e437c3726c5598fcfb"></a>
-Vector&lt; List&lt; P &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af16fe311a1b510e437c3726c5598fcfb">m_cacheParticles</a></td></tr>
-<tr class="memdesc:af16fe311a1b510e437c3726c5598fcfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before deposition steps. <br /></td></tr>
-<tr class="separator:af16fe311a1b510e437c3726c5598fcfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7b8e818c93458929ae2bc5b3a54e486"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#ae7b8e818c93458929ae2bc5b3a54e486">m_regridParticles</a></td></tr>
-<tr class="memdesc:ae7b8e818c93458929ae2bc5b3a54e486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particles stored on the old grid.  <a href="classParticleContainer.html#ae7b8e818c93458929ae2bc5b3a54e486">More...</a><br /></td></tr>
-<tr class="separator:ae7b8e818c93458929ae2bc5b3a54e486"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af418145c6273465d3108914edece36c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#af418145c6273465d3108914edece36c6">m_cacheParticles</a></td></tr>
+<tr class="memdesc:af418145c6273465d3108914edece36c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particles stored on the old grid.  <a href="classParticleContainer.html#af418145c6273465d3108914edece36c6">More...</a><br /></td></tr>
+<tr class="separator:af418145c6273465d3108914edece36c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28a02527e8bea0e8dc8e8cd7180d4aec"><td class="memItemLeft" align="right" valign="top"><a id="a28a02527e8bea0e8dc8e8cd7180d4aec"></a>
 <a class="el" href="CD__ParticleContainer_8H.html#a7d58e41c5d4c425cb2ab9d9eb80da621">AMRCellParticles</a>&lt; P &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classParticleContainer.html#a28a02527e8bea0e8dc8e8cd7180d4aec">m_cellSortedParticles</a></td></tr>
 <tr class="memdesc:a28a02527e8bea0e8dc8e8cd7180d4aec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cell particles. <br /></td></tr>
@@ -399,8 +420,8 @@ class ParticleContainer&lt; P &gt;</h3>
 <p>Templated class for holding particles on an AMR hierarchy with particle remapping. </p>
 <p>The template parameter P should derive from Chombo's BinItem. </p><dl class="section note"><dt>Note</dt><dd>ParticleContainers are, because of Chombo, restricted to square-block grids. This means that the blocking factor and maximum box size must be the same. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a225a58cc7dcdeeb394677cf3df0b54a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a225a58cc7dcdeeb394677cf3df0b54a3">&#9670;&nbsp;</a></span>ParticleContainer()</h2>
+<a id="a86bf25b42c394c6490cb8397c0502cd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86bf25b42c394c6490cb8397c0502cd4">&#9670;&nbsp;</a></span>ParticleContainer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -436,6 +457,12 @@ template&lt;class P &gt; </div>
           <td></td>
           <td class="paramtype">const Vector&lt; ValidMask &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_validMask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_levelTiles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -477,6 +504,7 @@ template&lt;class P &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratios </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validMask</td><td>Valid cells (false for cells covered by a finer grid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_levelTiles</td><td>Tiled AMR grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the physical domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Grid blocking factor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level </td></tr>
@@ -738,6 +766,100 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
+<a id="a84689136e35146af3822adfdd8a9e689"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84689136e35146af3822adfdd8a9e689">&#9670;&nbsp;</a></span>assignLocalParticles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::assignLocalParticles </td>
+          <td>(</td>
+          <td class="paramtype">std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mappedParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particleData</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gather particles locally. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_mappedParticles</td><td>Particles that have been mapped to this rank. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particleData</td><td>Where to assign the mapped particles </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a373072a968d874f00fce879cf97d3711"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a373072a968d874f00fce879cf97d3711">&#9670;&nbsp;</a></span>catenateParticleMaps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::catenateParticleMaps </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_globalParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_localParticles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Catenate the particles. This is usually called within OpenMP parallel regions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_globalParticles</td><td>Global particle map </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_localParticles</td><td>Local particle map </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a80b57db3f1493057168d10712d051437"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a80b57db3f1493057168d10712d051437">&#9670;&nbsp;</a></span>clear()</h2>
 
@@ -834,8 +956,56 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
-<a id="a2db7e8cb941c386e5dc2b8ca2bd3a2ca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2db7e8cb941c386e5dc2b8ca2bd3a2ca">&#9670;&nbsp;</a></span>define()</h2>
+<a id="abcb68c68ec3cf4919b4eeeccde3bc1db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcb68c68ec3cf4919b4eeeccde3bc1db">&#9670;&nbsp;</a></span>copyParticlesToSingleList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::copyParticlesToSingleList </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_list</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Copy the input particles onto a single list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_list</td><td>List containing all the particles in a_particles </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to transfer to list </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This is supposed to get inside an OpenMP parallel region. </dd></dl>
+
+</div>
+</div>
+<a id="a14855ffced9588b4ba3c7109431b30ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14855ffced9588b4ba3c7109431b30ad">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -871,6 +1041,12 @@ template&lt;class P &gt; </div>
           <td></td>
           <td class="paramtype">const Vector&lt; ValidMask &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_validMask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_levelTiles</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -912,56 +1088,11 @@ template&lt;class P &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratios </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validMask</td><td>Valid cells (false for cells covered by a finer grid) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_levelTiles</td><td>Tiled AMR grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of the physical domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Grid blocking factor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> where these particles live. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a4dca1b5501c1c73287daa8626ec705cc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4dca1b5501c1c73287daa8626ec705cc">&#9670;&nbsp;</a></span>evictInvalidParticles()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class P &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::evictInvalidParticles </td>
-          <td>(</td>
-          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_evictedParticles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ParticleData&lt; P &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particles</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_coarseLevel</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Evict particles if they move out of the valid region. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_evictedParticles</td><td>List that the particles are moved into. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1406,28 +1537,47 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
-<a id="a629f40d777afe0e25770ce5251d41c0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a629f40d777afe0e25770ce5251d41c0f">&#9670;&nbsp;</a></span>levelRemap()</h2>
+<a id="a7f9918a0baa65240e1d8cfdc75fc3cf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f9918a0baa65240e1d8cfdc75fc3cf6">&#9670;&nbsp;</a></span>mapParticlesToAMRGrid()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class P &gt; </div>
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::levelRemap </td>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::mapParticlesToAMRGrid </td>
           <td>(</td>
-          <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>a_level</em></td><td>)</td>
+          <td class="paramtype">std::vector&lt; std::map&lt; std::pair&lt; unsigned int, unsigned int &gt;, List&lt; P &gt;&gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_mappedParticles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_unmappedParticles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Do a level remap. This ignores particles moving between levels and moving out of valid regions. </p>
+<p>Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_mappedParticles</td><td>Particles mapped according to rank ownership (vector index) and grid level and index (std::pair) </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_unmappedParticles</td><td>Particles that are not mapped (yet) </td></tr>
   </table>
   </dd>
 </dl>
@@ -1556,8 +1706,8 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
-<a id="a4d8ac31e1727bd2a355c9cbf30668181"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d8ac31e1727bd2a355c9cbf30668181">&#9670;&nbsp;</a></span>regrid()</h2>
+<a id="abc685325bb00a480185b193f0808d96a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc685325bb00a480185b193f0808d96a">&#9670;&nbsp;</a></span>regrid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1597,6 +1747,12 @@ template&lt;class P &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt;&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_levelTiles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_base</em>, </td>
         </tr>
@@ -1622,6 +1778,7 @@ template&lt;class P &gt; </div>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratios </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_validMask</td><td>Valid cells </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_levelTiles</td><td>Tiled AMR grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_base</td><td>Coarsest grid level that did not change. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newFinestLevel</td><td>New finest grid level </td></tr>
   </table>
@@ -1926,6 +2083,54 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
+<a id="ab0bcda6c5b01cb856928066f15f21c38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0bcda6c5b01cb856928066f15f21c38">&#9670;&nbsp;</a></span>transferParticlesToSingleList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename P &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::transferParticlesToSingleList </td>
+          <td>(</td>
+          <td class="paramtype">List&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_list</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt; P &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gather the particles onto a single list. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_list</td><td>List containing all the particles in a_particles </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to transfer to list </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This is supposed to get inside an OpenMP parallel region. </dd></dl>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a94657fdb83232ee598a2c88c175ee757"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a94657fdb83232ee598a2c88c175ee757">&#9670;&nbsp;</a></span>m_bufferParticles</h2>
@@ -1954,8 +2159,8 @@ template&lt;class P &gt; </div>
 
 </div>
 </div>
-<a id="ae7b8e818c93458929ae2bc5b3a54e486"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae7b8e818c93458929ae2bc5b3a54e486">&#9670;&nbsp;</a></span>m_regridParticles</h2>
+<a id="af418145c6273465d3108914edece36c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af418145c6273465d3108914edece36c6">&#9670;&nbsp;</a></span>m_cacheParticles</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1966,7 +2171,7 @@ template&lt;class P &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt;P&gt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::m_regridParticles</td>
+          <td class="memname"><a class="el" href="CD__ParticleContainer_8H.html#ab57ee0582213ddd8962c5922528275a3">AMRParticles</a>&lt;P&gt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; P &gt;::m_cacheParticles</td>
         </tr>
       </table>
   </td>

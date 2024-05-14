@@ -171,17 +171,25 @@ $(function() {
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> P, RealVect&amp; (P::*particleVectorField)()&gt;</div>
 <div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <a class="code" href="classParticleOps.html#a541054c4e9518af591ba06a7894dd0a7">setValue</a>(<a class="code" href="classParticleContainer.html">ParticleContainer&lt;P&gt;</a>&amp; a_particles, <span class="keyword">const</span> RealVect a_value) noexcept;</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;};</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160; </div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160; </div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__ParticleOpsImplem_8H.html">CD_ParticleOpsImplem.H</a>&gt;</span></div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160; </div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="preprocessor">#ifdef CH_MPI</span></div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> P&gt;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;  scatterParticles(std::map&lt;std::pair&lt;unsigned int, unsigned int&gt;, List&lt;P&gt;&gt;&amp;              a_receivedParticles,</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;                   std::vector&lt;std::map&lt;std::pair&lt;unsigned int, unsigned int&gt;, List&lt;P&gt;&gt;&gt;&amp; a_sentParticles) noexcept;</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160; </div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;};</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160; </div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;<span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160; </div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="CD__ParticleOpsImplem_8H.html">CD_ParticleOpsImplem.H</a>&gt;</span></div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160; </div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aCD__ParticleContainer_8H_html"><div class="ttname"><a href="CD__ParticleContainer_8H.html">CD_ParticleContainer.H</a></div><div class="ttdoc">Declaration of a class for holding particles on an AMR hierarchy.</div></div>
 <div class="ttc" id="aCD__ParticleOpsImplem_8H_html"><div class="ttname"><a href="CD__ParticleOpsImplem_8H.html">CD_ParticleOpsImplem.H</a></div><div class="ttdoc">Implementation of CD_ParticleOps.H.</div></div>
 <div class="ttc" id="aclassEBAMRData_html"><div class="ttname"><a href="classEBAMRData.html">EBAMRData&lt; EBCellFAB &gt;</a></div></div>
-<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:49</div></div>
+<div class="ttc" id="aclassParticleContainer_html"><div class="ttname"><a href="classParticleContainer.html">ParticleContainer</a></div><div class="ttdoc">Templated class for holding particles on an AMR hierarchy with particle remapping.</div><div class="ttdef"><b>Definition:</b> CD_ParticleContainer.H:50</div></div>
 <div class="ttc" id="aclassParticleOps_html"><div class="ttname"><a href="classParticleOps.html">ParticleOps</a></div><div class="ttdoc">A shallow static class for doing various kinds of particle-related operations.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOps.H:29</div></div>
 <div class="ttc" id="aclassParticleOps_html_a00dce5482fe701bd31fb8730e9059912"><div class="ttname"><a href="classParticleOps.html#a00dce5482fe701bd31fb8730e9059912">ParticleOps::copy</a></div><div class="ttdeci">static void copy(ParticleContainer&lt; P &gt; &amp;a_dst, const ParticleContainer&lt; P &gt; &amp;a_src) noexcept</div><div class="ttdoc">Copy all the particles from the a_src to a_dst.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:268</div></div>
 <div class="ttc" id="aclassParticleOps_html_a07bc82adb33e81cf6f821a0f82da99e3"><div class="ttname"><a href="classParticleOps.html#a07bc82adb33e81cf6f821a0f82da99e3">ParticleOps::sum</a></div><div class="ttdeci">static Real sum(const ParticleContainer&lt; P &gt; &amp;a_particles) noexcept</div><div class="ttdoc">Perform a sum of some particle quantity.</div><div class="ttdef"><b>Definition:</b> CD_ParticleOpsImplem.H:316</div></div>

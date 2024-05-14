@@ -106,9 +106,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#af3274ecbfed41f903f8cfecd1233d56e">~Realm</a> ()</td></tr>
 <tr class="memdesc:af3274ecbfed41f903f8cfecd1233d56e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. <br /></td></tr>
 <tr class="separator:af3274ecbfed41f903f8cfecd1233d56e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1d4ee3f7cc7ff3b1aae965660647dab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ae1d4ee3f7cc7ff3b1aae965660647dab">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect a_probLo, const int a_finestLevel, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const <a class="el" href="classIrregStencil.html#ac2a71148a30087346575360af4cacd6f">IrregStencil::StencilType</a> a_centroidStencil, const <a class="el" href="classIrregStencil.html#ac2a71148a30087346575360af4cacd6f">IrregStencil::StencilType</a> a_ebStencil, const std::map&lt; phase::which_phase, RefCountedPtr&lt; BaseIF &gt;&gt; a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
-<tr class="memdesc:ae1d4ee3f7cc7ff3b1aae965660647dab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <a href="classRealm.html#ae1d4ee3f7cc7ff3b1aae965660647dab">More...</a><br /></td></tr>
-<tr class="separator:ae1d4ee3f7cc7ff3b1aae965660647dab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af75403c94725834544df2f94c8da3393"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#af75403c94725834544df2f94c8da3393">define</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const Vector&lt; ProblemDomain &gt; &amp;a_domains, const Vector&lt; int &gt; &amp;a_refRat, const Vector&lt; Real &gt; &amp;a_dx, const RealVect a_probLo, const int a_finestLevel, const int a_blockingFactor, const int a_ebGhost, const int a_numGhost, const int a_lsfGhost, const int a_redistRad, const int a_mgInterpOrder, const int a_mgInterpRadius, const int a_mgInterpWeight, const <a class="el" href="classIrregStencil.html#ac2a71148a30087346575360af4cacd6f">IrregStencil::StencilType</a> a_centroidStencil, const <a class="el" href="classIrregStencil.html#ac2a71148a30087346575360af4cacd6f">IrregStencil::StencilType</a> a_ebStencil, const std::map&lt; phase::which_phase, RefCountedPtr&lt; BaseIF &gt;&gt; a_baseif, const RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt; &amp;a_mfis)</td></tr>
+<tr class="memdesc:af75403c94725834544df2f94c8da3393"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full define function.  <a href="classRealm.html#af75403c94725834544df2f94c8da3393">More...</a><br /></td></tr>
+<tr class="separator:af75403c94725834544df2f94c8da3393"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3caaf4a8867b472534db7698306b671"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad3caaf4a8867b472534db7698306b671">setGrids</a> (const Vector&lt; DisjointBoxLayout &gt; &amp;a_grids, const int a_finestLevel)</td></tr>
 <tr class="memdesc:ad3caaf4a8867b472534db7698306b671"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set grid method.  <a href="classRealm.html#ad3caaf4a8867b472534db7698306b671">More...</a><br /></td></tr>
 <tr class="separator:ad3caaf4a8867b472534db7698306b671"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,6 +212,10 @@ Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelG
 const <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a9413bfe2cf7f117b1c96d270c43a097f">getValidCells</a> () const</td></tr>
 <tr class="memdesc:a9413bfe2cf7f117b1c96d270c43a097f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all valid cells. <br /></td></tr>
 <tr class="separator:a9413bfe2cf7f117b1c96d270c43a097f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd0b2627b0b3a2d7245d2eeb60f70207"><td class="memItemLeft" align="right" valign="top"><a id="acd0b2627b0b3a2d7245d2eeb60f70207"></a>
+const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#acd0b2627b0b3a2d7245d2eeb60f70207">getLevelTiles</a> () const noexcept</td></tr>
+<tr class="memdesc:acd0b2627b0b3a2d7245d2eeb60f70207"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiled space. <br /></td></tr>
+<tr class="separator:acd0b2627b0b3a2d7245d2eeb60f70207"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -241,6 +245,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a5f2289a6d36fe1f903b4a05dde660e04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">defineValidCells</a> ()</td></tr>
 <tr class="memdesc:a5f2289a6d36fe1f903b4a05dde660e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the valid cell region mask.  <a href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">More...</a><br /></td></tr>
 <tr class="separator:a5f2289a6d36fe1f903b4a05dde660e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa61cd4d4a88072855181c04e81bd7f2d"><td class="memItemLeft" align="right" valign="top"><a id="aa61cd4d4a88072855181c04e81bd7f2d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa61cd4d4a88072855181c04e81bd7f2d">defineLevelTiles</a> () noexcept</td></tr>
+<tr class="memdesc:aa61cd4d4a88072855181c04e81bd7f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the tiled space. <br /></td></tr>
+<tr class="separator:aa61cd4d4a88072855181c04e81bd7f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPhaseRealm.html">PhaseRealm</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad2dd1d3c2178a15daa58356f9fdfe7d5">getRealm</a> (const phase::which_phase a_phase)</td></tr>
 <tr class="memdesc:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a particular realm.  <a href="classRealm.html#ad2dd1d3c2178a15daa58356f9fdfe7d5">More...</a><br /></td></tr>
 <tr class="separator:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -259,6 +267,10 @@ int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa8ce4269d5733d5d08c1a6f11e84a474">m_finestLevel</a></td></tr>
 <tr class="memdesc:aa8ce4269d5733d5d08c1a6f11e84a474"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finest AMR level. <br /></td></tr>
 <tr class="separator:aa8ce4269d5733d5d08c1a6f11e84a474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe6f88b726e9438a15b2963561cecf4c"><td class="memItemLeft" align="right" valign="top"><a id="abe6f88b726e9438a15b2963561cecf4c"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#abe6f88b726e9438a15b2963561cecf4c">m_blockingFactor</a></td></tr>
+<tr class="memdesc:abe6f88b726e9438a15b2963561cecf4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocking factor. <br /></td></tr>
+<tr class="separator:abe6f88b726e9438a15b2963561cecf4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeedef2e5c5d187342a16c0b7772b1af1"><td class="memItemLeft" align="right" valign="top"><a id="aeedef2e5c5d187342a16c0b7772b1af1"></a>
 RealVect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aeedef2e5c5d187342a16c0b7772b1af1">m_probLo</a></td></tr>
 <tr class="memdesc:aeedef2e5c5d187342a16c0b7772b1af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Physical coordinates of lower-left corner in simulation domain. <br /></td></tr>
@@ -283,6 +295,10 @@ Vector&lt; ProblemDomain &gt;&#160;</td><td class="memItemRight" valign="bottom"
 Vector&lt; RefCountedPtr&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a8038def76028fd7f950b26ae9eb34175">m_mflg</a></td></tr>
 <tr class="memdesc:a8038def76028fd7f950b26ae9eb34175"><td class="mdescLeft">&#160;</td><td class="mdescRight">MFLevelGrids. <br /></td></tr>
 <tr class="separator:a8038def76028fd7f950b26ae9eb34175"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd2a204518222c34f1cf2b2cd44ed5f2"><td class="memItemLeft" align="right" valign="top"><a id="abd2a204518222c34f1cf2b2cd44ed5f2"></a>
+Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#abd2a204518222c34f1cf2b2cd44ed5f2">m_levelTiles</a></td></tr>
+<tr class="memdesc:abd2a204518222c34f1cf2b2cd44ed5f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level "tiles" &ndash; i.e. the grids viewed as constant-size boxes. <br /></td></tr>
+<tr class="separator:abd2a204518222c34f1cf2b2cd44ed5f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad58b6a05eeb6da16d5d5d4cfdf619daf"><td class="memItemLeft" align="right" valign="top"><a id="ad58b6a05eeb6da16d5d5d4cfdf619daf"></a>
 RefCountedPtr&lt; <a class="el" href="classMultiFluidIndexSpace.html">MultiFluidIndexSpace</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad58b6a05eeb6da16d5d5d4cfdf619daf">m_multifluidIndexSpace</a></td></tr>
 <tr class="memdesc:ad58b6a05eeb6da16d5d5d4cfdf619daf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index spaces. <br /></td></tr>
@@ -375,8 +391,8 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae1d4ee3f7cc7ff3b1aae965660647dab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae1d4ee3f7cc7ff3b1aae965660647dab">&#9670;&nbsp;</a></span>define()</h2>
+<a id="af75403c94725834544df2f94c8da3393"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af75403c94725834544df2f94c8da3393">&#9670;&nbsp;</a></span>define()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -416,6 +432,12 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
           <td></td>
           <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>a_finestLevel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>a_blockingFactor</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -500,6 +522,7 @@ std::map&lt; std::pair&lt; std::string, int &gt;, <a class="el" href="CD__Realm_
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolutions </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_probLo</td><td>Lower-left corner of physical domain </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_finestLevel</td><td>Finest grid level </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_blockingFactor</td><td>Grid blocking factor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_ebGhost</td><td>Number of ghost cells used for geometric information when making operators </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_numGhost</td><td>Number of ghost cells in data holders </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lsfGhost</td><td>Number of ghost cells used when computing the level set on the mesh </td></tr>

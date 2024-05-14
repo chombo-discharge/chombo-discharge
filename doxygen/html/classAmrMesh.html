@@ -592,6 +592,9 @@ const Vector&lt; ProblemDomain &gt; &amp;&#160;</td><td class="memItemRight" val
 <tr class="memitem:a1492043709c933fca6e7c51a42aebf40"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="CD__Realm_8H.html#a906b67939aa45e674c3a94d40c0e5e34">AMRMask</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a1492043709c933fca6e7c51a42aebf40">getValidCells</a> (const std::string a_realm) const</td></tr>
 <tr class="memdesc:a1492043709c933fca6e7c51a42aebf40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a map of all valid cells on a specified realm.  <a href="classAmrMesh.html#a1492043709c933fca6e7c51a42aebf40">More...</a><br /></td></tr>
 <tr class="separator:a1492043709c933fca6e7c51a42aebf40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af12361318b9d25503a7d850ef96a6a5a"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#af12361318b9d25503a7d850ef96a6a5a">getLevelTiles</a> (const std::string a_realm) const</td></tr>
+<tr class="memdesc:af12361318b9d25503a7d850ef96a6a5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the tiled space representation.  <a href="classAmrMesh.html#af12361318b9d25503a7d850ef96a6a5a">More...</a><br /></td></tr>
+<tr class="separator:af12361318b9d25503a7d850ef96a6a5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b1071a09cfc3ff93bd467ae8c63da08"><td class="memItemLeft" align="right" valign="top">const Vector&lt; RefCountedPtr&lt; EBLevelGrid &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAmrMesh.html#a6b1071a09cfc3ff93bd467ae8c63da08">getEBLevelGrid</a> (const std::string a_realm, const phase::which_phase a_phase) const</td></tr>
 <tr class="memdesc:a6b1071a09cfc3ff93bd467ae8c63da08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the EBLevelGrid for a <a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> and phase.  <a href="classAmrMesh.html#a6b1071a09cfc3ff93bd467ae8c63da08">More...</a><br /></td></tr>
 <tr class="separator:a6b1071a09cfc3ff93bd467ae8c63da08"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4534,6 +4537,32 @@ template&lt;class P , Real(P::*)() const particleScalarField&gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_phase</td><td>Phase (gas or solid) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af12361318b9d25503a7d850ef96a6a5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af12361318b9d25503a7d850ef96a6a5a">&#9670;&nbsp;</a></span>getLevelTiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Vector&lt; RefCountedPtr&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt; &amp; AmrMesh::getLevelTiles </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>a_realm</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the tiled space representation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_realm</td><td><a class="el" href="classRealm.html" title="Class for holding multifluid Realms, which are the Realms that we actually use.">Realm</a> name </td></tr>
   </table>
   </dd>
 </dl>
