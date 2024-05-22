@@ -175,7 +175,10 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
 
     domainSplit(a_domain, boxes, a_maxGridSize);
     LoadBalancing::sort(boxes, m_boxSorting);
-    LoadBalancing::makeBalance(procs, boxes);
+
+    // Set proxy loads
+    const Vector<long int> loads(boxes.size(),1);
+    LoadBalancing::makeBalance(procs, loads, boxes);
 
     a_grids.define(boxes, procs, a_domain);
   }
@@ -196,7 +199,9 @@ ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
   Vector<Box> boxes;
   Vector<int> procs;
   domainSplit(m_domains[a_level], boxes, a_maxGridSize);
-  LoadBalancing::makeBalance(procs, boxes);
+
+  const Vector<long int> loads(boxes.size(),1);  
+  LoadBalancing::makeBalance(procs, loads, boxes);
 
   // 2.
   DisjointBoxLayout dbl(boxes, procs, m_domains[a_level]);

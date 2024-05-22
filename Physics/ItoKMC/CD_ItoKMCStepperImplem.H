@@ -5674,8 +5674,9 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
 
   // 5. Finally do the actual load balancing.
   LoadBalancing::sort(a_boxes, loads, m_boxSort);
-  LoadBalancing::balanceLevelByLevel(a_procs, loads, a_boxes);
-  //  LoadBalancing::hierarchy(a_procs, loads, a_boxes); If you want to try something crazy...
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    LoadBalancing::makeBalance(a_procs[lvl], loads[lvl], a_boxes[lvl]);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>

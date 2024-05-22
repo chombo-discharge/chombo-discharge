@@ -115,7 +115,13 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     a_boxes[lvl] = a_grids[lvl].boxArray();
 
-    LoadBalancing::makeBalance(a_procs[lvl], a_boxes[lvl]);
+    Vector<long int> loads(a_boxes[lvl].size());
+
+    for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++) {
+      loads[ibox] = a_boxes[lvl][ibox].numPts();
+    }
+
+    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
   }
 }
 

@@ -35,28 +35,6 @@ public:
   makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes);
 
   /*!
-    @brief Load balancing function which load balances level by level. 
-    @param[out] a_procs Vector containing processor IDs corresponding to boxes (and loads)
-    @param[in]  a_loads Computational loads
-    @param[in]  a_boxes Grid boxes
-  */
-  template <class T>
-  static void
-  balanceLevelByLevel(Vector<Vector<int>>&       a_procs,
-                      const Vector<Vector<T>>&   a_loads,
-                      const Vector<Vector<Box>>& a_boxes);
-
-  /*!
-    @brief Load balancing function which load balances all boxes at once, not caring about actual levels. 
-    @param[out] a_procs Vector containing processor IDs corresponding to boxes (and loads)
-    @param[in]  a_loads Computational loads
-    @param[in]  a_boxes Grid boxes
-  */
-  template <class T>
-  static void
-  balanceHierarchy(Vector<Vector<int>>& a_procs, const Vector<Vector<T>>& a_loads, const Vector<Vector<Box>>& a_boxes);
-
-  /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.
     @param[inout] a_boxes Grid boxes
     @param[inout] a_loads Computational loads
@@ -77,22 +55,6 @@ public:
   template <typename T>
   static void
   sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which);
-
-  /*!
-    @brief Load balancing of grid boxes using the box volume as computational load
-    @param[out] a_ranks Processor IDs
-    @param[in]  a_boxes Grid boxes
-  */
-  static void
-  makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
-
-  /*!
-    @brief Round robin distribution of boxes
-    @param[out] a_ranks Processor IDs
-    @param[in]  a_boxes Grid boxes
-  */
-  static void
-  roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes);
 
   /*!
     @brief Sorts boxes (according to sorting argument)
