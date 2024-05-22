@@ -49,7 +49,7 @@ Driver.initial_regrids                 = 3                # Number of initial re
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 5E-9             # Stop time
-Driver.max_steps                       = 1000             # Maximum number of steps
+Driver.max_steps                       = 10               # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = true             # Write (accumulated) computational loads
@@ -245,7 +245,7 @@ ItoKMCGodunovStepper.dual_grid                             = true          # Tur
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
 ItoKMCGodunovStepper.load_balance_particles                = true          # Turn on/off particle load balancing
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
-ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
+ItoKMCGodunovStepper.load_per_cell                         = 0.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
 ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging

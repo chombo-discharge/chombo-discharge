@@ -367,33 +367,6 @@ public:
   getValidCells() const;
 
   /*!
-    @brief Reset the computational loads 
-  */
-  void
-  resetLoads() noexcept;
-
-  /*!
-    @brief Get the computational loads
-    @return Returns m_loads
-  */
-  std::map<int, long int>&
-  getLoads() noexcept;
-
-  /*!
-    @brief Get the computational loads
-    @return Returns m_loads
-  */
-  const std::map<int, long int>&
-  getLoads() const noexcept;
-
-  /*!
-    @brief Increment loads
-    @param[in] a_increment Load increment for each rank
-  */
-  void
-  incrementLoads(const std::map<int, long int>& a_increment) noexcept;
-
-  /*!
     @brief Get the tiled space
   */
   const Vector<RefCountedPtr<LevelTiles>>&
@@ -480,11 +453,6 @@ protected:
     @brief Masks
   */
   std::map<std::pair<std::string, int>, AMRMask> m_masks;
-
-  /*!
-    @brief Computational loads for the MPI ranks.
-  */
-  std::map<int, long int> m_loads;
 
   /*!
     @brief Define MFLevelGrid

@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_BoxSorting.H>
+#include <CD_Loads.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

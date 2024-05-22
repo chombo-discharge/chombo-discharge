@@ -22,6 +22,7 @@
 #include <CD_MultifluidAlias.H>
 #include <CD_LoadBalancing.H>
 #include <CD_Timer.H>
+#include <CD_Loads.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_TiledMeshRefine.H>
 #include <CD_DataOps.H>
@@ -1218,11 +1219,26 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
   }
 
-  // Sort the boxes and then load balance them, using the patch volume as an initial proxy.
+  // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
   Vector<Vector<int>> processorIDs(1 + m_finestLevel);
+
+  Loads loads;
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+
+    // Sort boxes to ensure locality.
     LoadBalancing::sort(newBoxes[lvl], m_boxSort);
-    LoadBalancing::makeBalance(processorIDs[lvl], newBoxes[lvl]);
+
+    // Compute the loads for the boxes, using the number of cells in the box as a proxy.
+    const Vector<Box>& levelBoxes = newBoxes[lvl];
+    Vector<long int>   levelLoads(levelBoxes.size());
+
+    for (int ibox = 0; ibox < levelBoxes.size(); ibox++) {
+      levelLoads[ibox] = levelBoxes[ibox].numPts();
+    }
+
+    // Load balance this grid.
+    LoadBalancing::makeBalance(processorIDs[lvl], levelLoads, newBoxes[lvl]);
   }
 
   // Now we define the grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
