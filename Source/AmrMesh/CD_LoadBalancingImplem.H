@@ -106,7 +106,7 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
     // Get the accumulated loads per rank, sorted by lowest-to-highest load.
     const std::vector<std::pair<int, Real>>& sortedRankLoads = a_rankLoads.getSortedLoads();
 
-    // Assign the most expensive grid subset to the rank with the lowest accumulated load.
+    // Assign the most expensive grid subset to the rank with the lowest accumulated load - then update the loads.
   }
   else {
     a_ranks.resize(0);
