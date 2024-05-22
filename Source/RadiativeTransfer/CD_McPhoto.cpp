@@ -1770,23 +1770,6 @@ McPhoto::countPhotons(const AMRParticles<Photon>& a_photons) const
   return numPhotons;
 }
 
-int
-McPhoto::countOutcast(const AMRParticles<Photon>& a_photons) const
-{
-  CH_TIME("McPhoto::countOutcast");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::countOutcast" << endl;
-  }
-
-  int num_outcast = 0;
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    num_outcast += a_photons[lvl]->numOutcast();
-  }
-
-  return num_outcast;
-}
-
 void
 McPhoto::writePlotData(LevelData<EBCellFAB>& a_output,
                        int&                  a_comp,

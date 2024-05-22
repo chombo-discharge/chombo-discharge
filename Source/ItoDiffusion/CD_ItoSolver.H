@@ -824,7 +824,9 @@ public:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_particlesPerCell);
+  mergeParticles(List<ItoParticle>& a_particles,
+                 const CellInfo&    a_cellInfo,
+                 const int          a_particlesPerCell) const noexcept;
 
   /*!
     @brief Superparticle merging with KD/BVH trees
@@ -835,7 +837,7 @@ public:
   virtual void
   makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
                                   const CellInfo&    a_cellInfo,
-                                  const int          a_particlesPerCell);
+                                  const int          a_particlesPerCell) const noexcept;
 
   /*!
     @brief Particle re-initialization algorithm
@@ -844,7 +846,9 @@ public:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_particlesPerCell);
+  reinitializeParticles(List<ItoParticle>& a_particles,
+                        const CellInfo&    a_cellInfo,
+                        const int          a_particlesPerCell) const noexcept;
 
   /*!
     @brief Remap the bulk particle container.

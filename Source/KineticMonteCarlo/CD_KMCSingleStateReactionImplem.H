@@ -119,7 +119,7 @@ template <typename State, typename T>
 inline T
 KMCSingleStateReaction<State, T>::computeCriticalNumberOfReactions(const State& a_state) const noexcept
 {
-  T Lj = std::numeric_limits<long long>::max();
+  T Lj = std::numeric_limits<T>::max();
 
   for (const auto& s : m_stateChange) {
 

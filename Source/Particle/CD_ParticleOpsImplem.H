@@ -515,6 +515,178 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value)
   }
 }
 
+#ifdef CH_MPI
+template <typename P>
+inline void
+ParticleOps::scatterParticles(
+  std::map<std::pair<unsigned int, unsigned int>, List<P>>&              a_receivedParticles,
+  std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_sentParticles) noexcept
+{
+  CH_TIME("ParticleOps::scatterParticles");
+
+  const int numRanks = numProc();
+
+  int mpiErr;
+
+  CH_assert(a_sentParticles.size() == numProc());
+
+  const size_t linearSize = P().size();
+
+  std::vector<unsigned int> sendSizes(numProc(), 0);
+  std::vector<unsigned int> recvSizes(numProc(), 0);
+
+  // Figure out the size of a_sentParticles[irank]
+  for (int irank = 0; irank < numRanks; irank++) {
+    sendSizes[irank] = 0;
+
+    // Figure out the message size sent from this rank.
+    const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particlesToRank = a_sentParticles[irank];
+
+    // Size of particles along.
+    for (const auto& m : particlesToRank) {
+      sendSizes[irank] += m.second.length();
+    }
+    sendSizes[irank] *= linearSize;
+
+    // Add in the map keys and the list length
+    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(unsigned int) + sizeof(size_t));
+  }
+
+  mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UNSIGNED, &recvSizes[0], 1, MPI_UNSIGNED, Chombo_MPI::comm);
+  if (mpiErr != MPI_SUCCESS) {
+    MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll");
+  }
+
+  // Sanity check
+  if (recvSizes[procID()] != 0) {
+    MayDay::Error("ParticleOps::scatterParticles - 'recvSizes[procID()] != 0' failed");
+  }
+
+  std::vector<MPI_Request> recvReq(numRanks - 1);
+  std::vector<char*>       recvBuf(numRanks, nullptr);
+
+  std::vector<MPI_Request> sendReq(numRanks - 1);
+  std::vector<char*>       sendBuf(numRanks, nullptr);
+
+  int recvReqCount = 0;
+  int sendReqCount = 0;
+
+  for (int irank = 0; irank < numRanks; irank++) {
+    if (recvSizes[irank] > 0) {
+      recvBuf[irank] = new char[recvSizes[irank]];
+
+      MPI_Irecv(recvBuf[irank], recvSizes[irank], MPI_CHAR, irank, 1, Chombo_MPI::comm, &recvReq[recvReqCount]);
+
+      recvReqCount++;
+    }
+  }
+
+  // Pack data into buffers
+  for (int irank = 0; irank < numRanks; irank++) {
+    if (sendSizes[irank] > 0) {
+      sendBuf[irank] = new char[sendSizes[irank]];
+
+      char* data = sendBuf[irank];
+
+      const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particles = a_sentParticles[irank];
+
+      // Linearize each entry in the map onto the send buffer. We encode this by (level, index, list length, List<P>)
+      for (const auto& cur : particles) {
+
+        // and grid index
+        *((unsigned int*)data) = cur.first.first;
+        data += sizeof(unsigned int);
+        *((unsigned int*)data) = cur.first.second;
+        data += sizeof(unsigned int);
+
+        // List length aka number of particles
+        *((size_t*)data) = cur.second.length();
+        data += sizeof(size_t);
+
+        // Linearize the particle list
+        for (ListIterator<P> lit(cur.second); lit.ok(); ++lit) {
+          const P& p = lit();
+
+          p.linearOut((void*)data);
+          data += linearSize;
+        }
+      }
+
+      // Send from me to the other rank.
+      MPI_Isend(sendBuf[irank], sendSizes[irank], MPI_CHAR, irank, 1, Chombo_MPI::comm, &sendReq[sendReqCount]);
+
+      sendReqCount++;
+    }
+  }
+
+  std::vector<MPI_Status> recvStatus(numRanks - 1);
+  std::vector<MPI_Status> sendStatus(numRanks - 1);
+
+  if (sendReqCount > 0) {
+    mpiErr = MPI_Waitall(sendReqCount, &sendReq[0], &sendStatus[0]);
+
+    if (mpiErr != MPI_SUCCESS) {
+      MayDay::Error("ParticleOps::scatterParticles: send communication failed");
+    }
+  }
+
+  if (recvReqCount > 0) {
+    mpiErr = MPI_Waitall(recvReqCount, &recvReq[0], &recvStatus[0]);
+
+    if (mpiErr != MPI_SUCCESS) {
+      MayDay::Error("ParticleOps::scatterParticles: receive communication failed");
+    }
+  }
+
+  // Unpack the send buffers
+  for (int irank = 0; irank < numRanks; irank++) {
+    P p;
+
+    if (recvSizes[irank] > 0) {
+
+      char* data = recvBuf[irank];
+
+      unsigned int in = 0;
+
+      while (in < recvSizes[irank]) {
+
+        // Level and grid index
+        unsigned int lvl = *((unsigned int*)data);
+        data += sizeof(unsigned int);
+
+        unsigned int idx = *((unsigned int*)data);
+        data += sizeof(unsigned int);
+
+        // List length aka number of particles
+        size_t numParticles = *((size_t*)data);
+        data += sizeof(size_t);
+
+        for (size_t ipart = 0; ipart < numParticles; ipart++) {
+          p.linearIn((void*)data);
+          data += linearSize;
+
+          a_receivedParticles[std::pair<unsigned int, unsigned int>(lvl, idx)].add(p);
+        }
+
+        in += 2 * sizeof(unsigned int) + sizeof(size_t) + numParticles * linearSize;
+      }
+    }
+  }
+
+  // Delete buffers
+  for (int irank = 0; irank < numRanks; irank++) {
+    a_sentParticles[irank].clear();
+
+    if (sendSizes[irank] > 0) {
+      delete[] sendBuf[irank];
+    }
+    if (recvSizes[irank] > 0) {
+      delete[] recvBuf[irank];
+    }
+  }
+}
+#endif
+
 #include <CD_NamespaceFooter.H>
 
 #endif
