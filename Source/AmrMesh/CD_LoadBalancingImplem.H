@@ -80,6 +80,12 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
     bool boxesLeftEqualsSubsetsLeft = false;
     for (int ibox = 0; ibox < numBoxes; ibox++) {
 
+      // For next iteration: We should try to stop as close to the target goal as we can. If we keep only adding
+      // subset loads that exceed the target load, the dynamic target load will consistently decrease between subsets,
+      // which will lead to load imbalance.
+      //
+      // Also, might have to figure out what to do when we have some boxes without any loads.
+
       subsetLoad += 1.0 * a_boxLoads[ibox];
 
       const int remainingBoxes   = numBoxes - ibox;
@@ -111,11 +117,18 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
     }
 
 #if 1 // Debug hook - remove later
+    Real loadSum = 0.0;
+
+    for (const auto& s : subsets) {
+      loadSum += s.second;
+    }
+
     pout() << "//// start subset report" << endl;
     pout() << "num boxes = " << numBoxes << endl;
     pout() << "num subsets = " << numSubsets << endl;
     pout() << "actual subsets = " << subsets.size() << endl;
     pout() << "total load = " << totalLoad << endl;
+    pout() << "actual load = " << loadSum << endl;
     pout() << "target load = " << totalLoad / numSubsets << endl;
     for (int i = 0; i < subsets.size(); i++) {
       pout() << i << "\t" << subsets[i].first.first << "\t" << subsets[i].first.second << "\t" << subsets[i].second
@@ -136,12 +149,6 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
       if (subsets[i].first.second + 1 != subsets[i + 1].first.first) {
         MayDay::Abort("indices are wrong");
       }
-    }
-
-    Real loadSum = 0.0;
-
-    for (const auto& s : subsets) {
-      loadSum += s.second;
     }
 
     if (loadSum != totalLoad) {
