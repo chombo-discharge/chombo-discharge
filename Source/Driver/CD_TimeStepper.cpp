@@ -104,12 +104,9 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                               const int                        a_lmin,
                               const int                        a_finestLevel)
 {
-  CH_TIME(
-    "TimeStepper::loadBalanceBoxes(Vector<Vector<int> >, Vector<Vector<Box>, string, Vector<DisjointBoxLayout>, int, int)");
+  CH_TIME("TimeStepper::loadBalanceBoxes");
   if (m_verbosity > 5) {
-    pout()
-      << "TimeStepper::loadBalanceBoxes(Vector<Vector<int> >, Vector<Vector<Box>, string, Vector<DisjointBoxLayout>, int, int)"
-      << endl;
+    pout() << "TimeStepper::loadBalanceBoxes" << endl;
   }
 
   a_procs.resize(1 + a_finestLevel);

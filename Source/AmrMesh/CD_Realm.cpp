@@ -35,10 +35,14 @@ Realm::Realm()
   // Just empty points until define() is called
   m_realms.emplace(phase::gas, RefCountedPtr<PhaseRealm>(new PhaseRealm()));
   m_realms.emplace(phase::solid, RefCountedPtr<PhaseRealm>(new PhaseRealm()));
+
+  this->resetLoads();
 }
 
 Realm::~Realm()
 {}
+
+
 
 void
 Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
@@ -486,6 +490,53 @@ Realm::defineValidCells()
 
         BoxLoops::loop(fabMask.box(), kernel);
       }
+    }
+  }
+}
+
+void
+Realm::resetLoads() noexcept
+{
+  CH_TIME("Realm::resetLoads");
+
+  const int numRanks = numProc();
+
+  m_loads.clear();
+
+  for (int irank = 0; irank < numRanks; irank++) {
+    m_loads[irank] = 0;
+  }
+}
+
+std::map<int, long int>&
+Realm::getLoads() noexcept
+{
+  CH_TIME("Realm::getLoads");
+
+  return m_loads;
+}
+
+const std::map<int, long int>&
+Realm::getLoads() const noexcept
+{
+  CH_TIME("Realm::getLoads");
+
+  return m_loads;
+}
+
+void
+Realm::incrementLoads(const std::map<int, long int>& a_increment) noexcept
+{
+  CH_TIME("Realm::incrementLoads");
+
+  const int numRanks = numProc();
+
+  if (a_increment.size() != numRanks) {
+    MayDay::Abort("Realm::incrementLoads -- input map size != numProc()");
+  }
+  else {
+    for (int irank = 0; irank < numRanks; irank++) {
+      m_loads[irank] += a_increment.at(irank);
     }
   }
 }
