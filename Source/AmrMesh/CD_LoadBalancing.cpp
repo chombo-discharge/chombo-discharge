@@ -18,7 +18,13 @@ LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes)
 {
   CH_TIME("LoadBalancing::makeBalance");
 
-  LoadBalance(a_ranks, a_boxes);
+  Vector<long int> loads(a_boxes.size());
+
+  for (int ibox = 0; ibox < a_boxes.size(); ibox++) {
+    loads[ibox] = a_boxes[ibox].numPts();
+  }
+
+  LoadBalancing::makeBalance<long int>(a_ranks, loads, a_boxes);
 }
 
 void
