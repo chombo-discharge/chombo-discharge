@@ -43,14 +43,14 @@ public:
     @brief Get the computational loads
     @return m_loads
   */
-  virtual std::map<int, long int>&
+  virtual std::map<int, Real>&
   getLoads() noexcept;
 
   /*!
     @brief Get the computational loads
     @return m_loads
   */
-  virtual const std::map<int, long int>&
+  virtual const std::map<int, Real>&
   getLoads() const noexcept;
 
   /*!
@@ -64,48 +64,48 @@ public:
     @param[in] a_assignedLoads Loads assigned to ranks.
   */
   virtual void
-  assignLoads(const std::map<int, long int>& a_assignedLoads) noexcept;
+  assignLoads(const std::map<int, Real>& a_assignedLoads) noexcept;
 
   /*!
     @brief Assign loads. In this version a_assignedLoads[0] is the load assigned to rank 0, and so on. 
     @param[in] a_assignedLoads Loads assigned to ranks.
   */
   virtual void
-  assignLoads(const std::vector<long int>& a_assignedLoads) noexcept;
+  assignLoads(const std::vector<Real>& a_assignedLoads) noexcept;
 
   /*!
     @brief Assign loads. In this version a_assignedLoads[0] is the load assigned to rank 0, and so on. 
     @param[in] a_assignedLoads Loads assigned to ranks.
   */
   virtual void
-  assignLoads(const Vector<long int>& a_assignedLoads) noexcept;
+  assignLoads(const Vector<Real>& a_assignedLoads) noexcept;
 
   /*!
     @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on. 
     @param[in] a_increments Loads to increment by.
   */
   virtual void
-  incrementLoads(const std::map<int, long int>& a_increments) noexcept;
+  incrementLoads(const std::map<int, Real>& a_increments) noexcept;
 
   /*!
     @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on. 
     @param[in] a_increments Loads to increment by.
   */
   virtual void
-  incrementLoads(const std::vector<long int>& a_increments) noexcept;
+  incrementLoads(const std::vector<Real>& a_increments) noexcept;
 
   /*!
     @brief Increment loads. In this version a_increments[0] is the load increment for rank 0, and so on. 
     @param[in] a_increments Loads to increment by.
   */
   virtual void
-  incrementLoads(const Vector<long int>& a_increments) noexcept;
+  incrementLoads(const Vector<Real>& a_increments) noexcept;
 
   /*!
     @brief Get sorted loads. 
     @details This routine sorts the computational loads from smallest to largest, and returns the result as a vector of ranks (and loads). 
   */
-  virtual std::vector<std::pair<int, long int>>
+  virtual std::vector<std::pair<int, Real>>
   getSortedLoads() const noexcept;
 
 protected:
@@ -113,7 +113,7 @@ protected:
     @brief Actual computational loads per MPI rank. 
     @details The key is the rank, and the value is the actual load
   */
-  std::map<int, long int> m_loads;
+  std::map<int, Real> m_loads;
 };
 
 #include <CD_NamespaceFooter.H>

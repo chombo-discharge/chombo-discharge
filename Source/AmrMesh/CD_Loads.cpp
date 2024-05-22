@@ -33,7 +33,7 @@ Loads::~Loads() noexcept {
   m_loads.clear();
 }
 
-std::map<int, long int>&
+std::map<int, Real>&
 Loads::getLoads() noexcept
 {
   CH_TIME("Loads::getLoads");
@@ -41,7 +41,7 @@ Loads::getLoads() noexcept
   return (m_loads);
 }
 
-const std::map<int, long int>&
+const std::map<int, Real>&
 Loads::getLoads() const noexcept
 {
   CH_TIME("Loads::getLoads");
@@ -62,7 +62,7 @@ Loads::resetLoads() noexcept
 }
 
 void
-Loads::assignLoads(const std::map<int, long int>& a_assignedLoads) noexcept
+Loads::assignLoads(const std::map<int, Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(std::map)");
 
@@ -79,7 +79,7 @@ Loads::assignLoads(const std::map<int, long int>& a_assignedLoads) noexcept
 }
 
 void
-Loads::assignLoads(const std::vector<long int>& a_assignedLoads) noexcept
+Loads::assignLoads(const std::vector<Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(std::vector)");
 
@@ -96,7 +96,7 @@ Loads::assignLoads(const std::vector<long int>& a_assignedLoads) noexcept
 }
 
 void
-Loads::assignLoads(const Vector<long int>& a_assignedLoads) noexcept
+Loads::assignLoads(const Vector<Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(Vector)");
 
@@ -113,7 +113,7 @@ Loads::assignLoads(const Vector<long int>& a_assignedLoads) noexcept
 }
 
 void
-Loads::incrementLoads(const std::map<int, long int>& a_increments) noexcept
+Loads::incrementLoads(const std::map<int, Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(std::map)");
 
@@ -130,7 +130,7 @@ Loads::incrementLoads(const std::map<int, long int>& a_increments) noexcept
 }
 
 void
-Loads::incrementLoads(const std::vector<long int>& a_increments) noexcept
+Loads::incrementLoads(const std::vector<Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(std::vector)");
 
@@ -147,7 +147,7 @@ Loads::incrementLoads(const std::vector<long int>& a_increments) noexcept
 }
 
 void
-Loads::incrementLoads(const Vector<long int>& a_increments) noexcept
+Loads::incrementLoads(const Vector<Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(Vector)");
 
@@ -163,12 +163,12 @@ Loads::incrementLoads(const Vector<long int>& a_increments) noexcept
   }
 }
 
-std::vector<std::pair<int, long int>>
+std::vector<std::pair<int, Real>>
 Loads::getSortedLoads() const noexcept
 {
   CH_TIME("Loads::sortedLoads");
 
-  std::vector<std::pair<int, long int>> sortedLoads;
+  std::vector<std::pair<int, Real>> sortedLoads;
 
   // Insert loads into a vector so we can sort
   for (const auto& curLoad : m_loads) {
@@ -176,7 +176,7 @@ Loads::getSortedLoads() const noexcept
   }
 
   // Sort -- if there is a load tie then use the rank number.
-  auto loadSort = [](const std::pair<int, long int>& A, const std::pair<int, long int>& B) -> bool {
+  auto loadSort = [](const std::pair<int, Real>& A, const std::pair<int, Real>& B) -> bool {
     if (A.second < B.second) {
       return true;
     }

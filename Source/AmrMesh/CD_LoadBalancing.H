@@ -35,6 +35,17 @@ public:
   makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes);
 
   /*!
+    @brief Load balancing, assigning ranks to boxes. 
+    @param[out]   a_ranks Vector containing processor IDs corresponding to boxes (and loads)
+    @param[inout] a_rankLoads MPI rank loads so far
+    @param[in]    a_boxLoads Computational loads for each box
+    @param[in]    a_boxes Grid boxes
+  */
+  template <class T>
+  static void
+  makeBalance(Vector<int>& a_ranks, Loads& a_rankLoads, const Vector<T>& a_boxLoads, const Vector<Box>& a_boxes);  
+
+  /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.
     @param[inout] a_boxes Grid boxes
     @param[inout] a_loads Computational loads
