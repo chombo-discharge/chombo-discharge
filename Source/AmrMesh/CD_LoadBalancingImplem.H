@@ -55,12 +55,10 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
   if (numSubsets > 0) {
 
     // Figure out the total and target load (load per subset) on this level.
-    Real totalLoad  = 0;
-    Real targetLoad = 0;
+    Real totalLoad = 0.0;
 
     for (int ibox = 0; ibox < numBoxes; ibox++) {
       totalLoad += 1.0 * a_boxLoads[ibox];
-      targetLoad += 1.0 * a_boxLoads[ibox] / numSubsets;
     }
 
     // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
@@ -73,30 +71,85 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
 
     std::vector<Subset> subsets;
 
-    // If we have fewer boxes than ranks, each subset is just one of the box and one load.
-    if (numBoxes <= numRanks) {
-      for (int ibox = 0; ibox < numBoxes; ibox++) {
-        subsets.emplace_back(std::make_pair(std::make_pair(ibox, ibox), 1.0 * a_boxLoads[ibox]));
+    int startIndex = 0;
+
+    Real remainingLoad = totalLoad;
+    Real targetLoad    = remainingLoad / numSubsets;
+    Real subsetLoad    = 0.0;
+
+    bool boxesLeftEqualsSubsetsLeft = false;
+    for (int ibox = 0; ibox < numBoxes; ibox++) {
+
+      subsetLoad += 1.0 * a_boxLoads[ibox];
+
+      const int remainingBoxes   = numBoxes - ibox;
+      const int remainingSubsets = numSubsets - subsets.size();
+
+      // If the number of boxes we have left is smaller or equal to the number of subsets we have left,
+      // each subsequent subset will consist of only one box.
+      if (remainingBoxes <= remainingSubsets) {
+        pout() << "create1: "
+               << "\t" << ibox << "\t" << ibox << "\t" << targetLoad << endl;
+        subsets.emplace_back(std::make_pair(std::make_pair(startIndex, ibox), subsetLoad));
+
+        startIndex = ibox + 1;
+        subsetLoad = 0.0;
       }
-    }
-    else {
-      // If we have more boxes than ranks, this gets a bit more complicated. But still doable.
-      int startIndex = 0;
-      int endIndex   = -1;
+      else {
+        if (subsetLoad >= targetLoad) {
+          pout() << "create2: "
+                 << "\t" << startIndex << "\t" << ibox << "\t" << targetLoad << endl;
+          subsets.emplace_back(std::make_pair(std::make_pair(startIndex, ibox), subsetLoad));
 
-      Real curLoadSoFar = 0.0;
-      Real avgLoadSoFar = 0.0;
-      int  curSubset    = 1;
-
-      for (int ibox = 1; ibox < numBoxes; ibox++) {
-        const Real curLoadWithoutThisBox = curLoadSoFar;
-        const Real curLoadWithThisBox    = curLoadSoFar + a_boxLoads[ibox];
-
-        // If we exceed the target load, we must include either ibox-1 or ibox
-        if (curLoadWithThisBox > targetLoad * curSubset) {
+          // Update the target load and starting index for the next subset.
+          remainingLoad = remainingLoad - subsetLoad;
+          targetLoad    = remainingLoad / (numSubsets - subsets.size());
+          startIndex    = ibox + 1;
+          subsetLoad    = 0.0;
         }
       }
     }
+
+#if 1 // Debug hook - remove later
+    pout() << "//// start subset report" << endl;
+    pout() << "num boxes = " << numBoxes << endl;
+    pout() << "num subsets = " << numSubsets << endl;
+    pout() << "actual subsets = " << subsets.size() << endl;
+    pout() << "total load = " << totalLoad << endl;
+    pout() << "target load = " << totalLoad / numSubsets << endl;
+    for (int i = 0; i < subsets.size(); i++) {
+      pout() << i << "\t" << subsets[i].first.first << "\t" << subsets[i].first.second << "\t" << subsets[i].second
+             << endl;
+    }
+    pout() << "//// end subset report" << endl;
+
+    if (subsets.size() != numSubsets) {
+      MayDay::Abort("subset size is wrong");
+    }
+    if (subsets.front().first.first != 0) {
+      MayDay::Abort("first index is wrong");
+    }
+    if (subsets.back().first.second != numBoxes - 1) {
+      MayDay::Abort("second index is wrong");
+    }
+    for (int i = 0; i < numSubsets - 1; i++) {
+      if (subsets[i].first.second + 1 != subsets[i + 1].first.first) {
+        MayDay::Abort("indices are wrong");
+      }
+    }
+
+    Real loadSum = 0.0;
+
+    for (const auto& s : subsets) {
+      loadSum += s.second;
+    }
+
+    if (loadSum != totalLoad) {
+      std::cout << loadSum << "\t" << totalLoad << std::endl;
+      MayDay::Abort("load sum is wrong");
+    }
+
+#endif
 
     // Sort the subsets from largest to smallest computational load.
     std::sort(subsets.begin(), subsets.end(), [](const Subset& A, const Subset& B) -> bool {
