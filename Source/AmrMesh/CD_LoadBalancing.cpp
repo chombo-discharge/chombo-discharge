@@ -30,73 +30,84 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
   if (numSubsets > 0) {
 
     // Figure out the total and target load (load per subset) on this level.
-    Real totalLoad = 0.0;
-
+    Real totalLoad        = 0.0;
+    Real staticTargetLoad = 0.0;
     for (int ibox = 0; ibox < numBoxes; ibox++) {
       totalLoad += a_boxLoads[ibox];
     }
 
+    staticTargetLoad = totalLoad / numSubsets;
+
     // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
-    // the subsets such that the subsetLoad is as close to the targetLoad as possible, and that the total load
-    // for the subsets we've calculated so far is as close as possible to to the targetLoad * number of subsets so far.
+    // the subsets such that the subsetLoad is as close to the dynamic targetLoad as possible.
     //
     // The pair contains the starting index for the subset and the computational load for the subset.
     using Span   = std::pair<int, int>;
     using Subset = std::pair<Span, Real>;
 
-    std::vector<Subset> subsets;
+    std::vector<Subset> subsets(numSubsets);
 
-    int startIndex = 0;
+    int firstSubsetBox = 0;
 
-    Real remainingLoad = totalLoad;
-    Real targetLoad    = remainingLoad / numSubsets;
-    Real subsetLoad    = 0.0;
+    Real remainingLoad     = totalLoad;
+    Real dynamicTargetLoad = staticTargetLoad;
 
-    bool boxesLeftEqualsSubsetsLeft = false;
+    pout() << endl;
+    pout() << "//// start subset report" << endl;
+    pout() << "num boxes = " << numBoxes << endl;
+    pout() << "num subsets = " << numSubsets << endl;
+    pout() << "target load = " << totalLoad / numSubsets << endl;
+    pout() << "total load = " << totalLoad << endl;
 
-    for (int ibox = 0; ibox < numBoxes; ibox++) {
+    for (int curSubset = 0; curSubset < numSubsets; curSubset++) {
 
-      // Rules are as follows: If there are as many boxes left as there are subsets left, we create subsets
-      // that consist of a single box. Otherwise, we check
-      //
-      //
-      // 1. If the load for the current box is zero, we add it to the current subset anyways.
+      // The starting index is always a part of this subset.
+      Real subsetLoad = a_boxLoads[firstSubsetBox];
 
-      // Check if we should add this box to the current subset
-      // For next iteration: We should try to stop as close to the target goal as we can. If we keep only adding
-      // subset loads that exceed the target load, the dynamic target load will consistently decrease between subsets,
-      // which will lead to load imbalance.
-      //
-      // Also, might have to figure out what to do when we have some boxes without any loads.
+      const int subsetsLeft = numSubsets - curSubset;
+      const int boxesLeft   = numBoxes - firstSubsetBox;
 
-      subsetLoad += a_boxLoads[ibox];
-
-      const int remainingBoxes   = numBoxes - ibox;
-      const int remainingSubsets = numSubsets - subsets.size();
-
-      // If the number of boxes we have left is smaller or equal to the number of subsets we have left,
-      // each subsequent subset will consist of only one box.
-      if (remainingBoxes <= remainingSubsets) {
+      if (boxesLeft <= subsetsLeft) {
         pout() << "create1: "
-               << "\t" << ibox << "\t" << ibox << "\t" << targetLoad << endl;
-        subsets.emplace_back(std::make_pair(std::make_pair(startIndex, ibox), subsetLoad));
+               << "\t" << firstSubsetBox << "\t" << firstSubsetBox << "\t" << subsetLoad << "\t" << staticTargetLoad
+               << "\t" << dynamicTargetLoad << endl;
+        subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, firstSubsetBox), subsetLoad);
 
-        startIndex = ibox + 1;
-        subsetLoad = 0.0;
+        firstSubsetBox = firstSubsetBox + 1;
       }
       else {
-        if (subsetLoad >= targetLoad) {
-          pout() << "create2: "
-                 << "\t" << startIndex << "\t" << ibox << "\t" << targetLoad << endl;
-          subsets.emplace_back(std::make_pair(std::make_pair(startIndex, ibox), subsetLoad));
+        // Figure out if we should add ibox to this subset.
+        for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
 
-          // Update the target load and starting index for the next subset.
-          remainingLoad = remainingLoad - subsetLoad;
-          targetLoad    = remainingLoad / (numSubsets - subsets.size());
-          startIndex    = ibox + 1;
-          subsetLoad    = 0.0;
+          // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
+          // to the static load as possible.
+          const int  remainingSubsets = numSubsets - curSubset + 1;
+          const bool oldDynamicLoad   = std::abs(remainingLoad - subsetLoad) / remainingSubsets;
+          const bool newDynamicLoad   = std::abs(remainingLoad - subsetLoad - a_boxLoads[ibox]) / remainingSubsets;
+          const Real oldLoadDiff      = std::abs(oldDynamicLoad - std::abs(staticTargetLoad));
+          const Real newLoadDiff      = std::abs(newDynamicLoad - std::abs(staticTargetLoad));
+          const bool addBoxToSubset   = std::abs(newLoadDiff) <= std::abs(oldLoadDiff);
+
+          if (addBoxToSubset) {
+            subsetLoad += a_boxLoads[ibox];
+          }
+          else {
+            pout() << "create2: "
+                   << "\t" << firstSubsetBox << "\t" << ibox - 1 << "\t" << subsetLoad << "\t" << staticTargetLoad
+                   << " \t" << dynamicTargetLoad << endl;
+            subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, ibox - 1), subsetLoad);
+
+            // Next subset must start on next box.
+            firstSubsetBox = ibox;
+
+            break;
+          }
         }
       }
+
+      // Compute a new target load.
+      remainingLoad     = remainingLoad - subsetLoad;
+      dynamicTargetLoad = remainingLoad / (numSubsets - curSubset + 1);
     }
 
 #if 1 // Debug hook - remove later
@@ -106,18 +117,15 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
       loadSum += s.second;
     }
 
-    pout() << "//// start subset report" << endl;
-    pout() << "num boxes = " << numBoxes << endl;
-    pout() << "num subsets = " << numSubsets << endl;
     pout() << "actual subsets = " << subsets.size() << endl;
-    pout() << "total load = " << totalLoad << endl;
     pout() << "actual load = " << loadSum << endl;
-    pout() << "target load = " << totalLoad / numSubsets << endl;
+
     for (int i = 0; i < subsets.size(); i++) {
       pout() << i << "\t" << subsets[i].first.first << "\t" << subsets[i].first.second << "\t" << subsets[i].second
              << endl;
     }
     pout() << "//// end subset report" << endl;
+    pout() << endl;
 
     if (subsets.size() != numSubsets) {
       MayDay::Abort("subset size is wrong");
