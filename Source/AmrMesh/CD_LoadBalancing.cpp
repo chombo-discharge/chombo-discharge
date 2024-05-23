@@ -14,6 +14,155 @@
 #include <CD_NamespaceHeader.H>
 
 void
+LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
+                            Loads&              a_rankLoads,
+                            const Vector<Real>& a_boxLoads,
+                            const Vector<Box>&  a_boxes)
+{
+  CH_TIME("LoadBalancing::makeBalance");
+
+  // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
+  // is the number of ranks.
+  const int numBoxes   = a_boxes.size();
+  const int numRanks   = numProc();
+  const int numSubsets = std::min(numBoxes, numRanks);
+
+  if (numSubsets > 0) {
+
+    // Figure out the total and target load (load per subset) on this level.
+    Real totalLoad = 0.0;
+
+    for (int ibox = 0; ibox < numBoxes; ibox++) {
+      totalLoad += a_boxLoads[ibox];
+    }
+
+    // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
+    // the subsets such that the subsetLoad is as close to the targetLoad as possible, and that the total load
+    // for the subsets we've calculated so far is as close as possible to to the targetLoad * number of subsets so far.
+    //
+    // The pair contains the starting index for the subset and the computational load for the subset.
+    using Span   = std::pair<int, int>;
+    using Subset = std::pair<Span, Real>;
+
+    std::vector<Subset> subsets;
+
+    int startIndex = 0;
+
+    Real remainingLoad = totalLoad;
+    Real targetLoad    = remainingLoad / numSubsets;
+    Real subsetLoad    = 0.0;
+
+    bool boxesLeftEqualsSubsetsLeft = false;
+
+    for (int ibox = 0; ibox < numBoxes; ibox++) {
+
+      // Rules are as follows: If there are as many boxes left as there are subsets left, we create subsets
+      // that consist of a single box. Otherwise, we check
+      //
+      //
+      // 1. If the load for the current box is zero, we add it to the current subset anyways.
+
+      // Check if we should add this box to the current subset
+      // For next iteration: We should try to stop as close to the target goal as we can. If we keep only adding
+      // subset loads that exceed the target load, the dynamic target load will consistently decrease between subsets,
+      // which will lead to load imbalance.
+      //
+      // Also, might have to figure out what to do when we have some boxes without any loads.
+
+      subsetLoad += a_boxLoads[ibox];
+
+      const int remainingBoxes   = numBoxes - ibox;
+      const int remainingSubsets = numSubsets - subsets.size();
+
+      // If the number of boxes we have left is smaller or equal to the number of subsets we have left,
+      // each subsequent subset will consist of only one box.
+      if (remainingBoxes <= remainingSubsets) {
+        pout() << "create1: "
+               << "\t" << ibox << "\t" << ibox << "\t" << targetLoad << endl;
+        subsets.emplace_back(std::make_pair(std::make_pair(startIndex, ibox), subsetLoad));
+
+        startIndex = ibox + 1;
+        subsetLoad = 0.0;
+      }
+      else {
+        if (subsetLoad >= targetLoad) {
+          pout() << "create2: "
+                 << "\t" << startIndex << "\t" << ibox << "\t" << targetLoad << endl;
+          subsets.emplace_back(std::make_pair(std::make_pair(startIndex, ibox), subsetLoad));
+
+          // Update the target load and starting index for the next subset.
+          remainingLoad = remainingLoad - subsetLoad;
+          targetLoad    = remainingLoad / (numSubsets - subsets.size());
+          startIndex    = ibox + 1;
+          subsetLoad    = 0.0;
+        }
+      }
+    }
+
+#if 1 // Debug hook - remove later
+    Real loadSum = 0.0;
+
+    for (const auto& s : subsets) {
+      loadSum += s.second;
+    }
+
+    pout() << "//// start subset report" << endl;
+    pout() << "num boxes = " << numBoxes << endl;
+    pout() << "num subsets = " << numSubsets << endl;
+    pout() << "actual subsets = " << subsets.size() << endl;
+    pout() << "total load = " << totalLoad << endl;
+    pout() << "actual load = " << loadSum << endl;
+    pout() << "target load = " << totalLoad / numSubsets << endl;
+    for (int i = 0; i < subsets.size(); i++) {
+      pout() << i << "\t" << subsets[i].first.first << "\t" << subsets[i].first.second << "\t" << subsets[i].second
+             << endl;
+    }
+    pout() << "//// end subset report" << endl;
+
+    if (subsets.size() != numSubsets) {
+      MayDay::Abort("subset size is wrong");
+    }
+    if (subsets.front().first.first != 0) {
+      MayDay::Abort("first index is wrong");
+    }
+    if (subsets.back().first.second != numBoxes - 1) {
+      MayDay::Abort("second index is wrong");
+    }
+    for (int i = 0; i < numSubsets - 1; i++) {
+      if (subsets[i].first.second + 1 != subsets[i + 1].first.first) {
+        MayDay::Abort("indices are wrong");
+      }
+    }
+
+    if (loadSum != totalLoad) {
+      std::cout << loadSum << "\t" << totalLoad << std::endl;
+      MayDay::Abort("load sum is wrong");
+    }
+
+#endif
+
+    // Sort the subsets from largest to smallest computational load.
+    std::sort(subsets.begin(), subsets.end(), [](const Subset& A, const Subset& B) -> bool {
+      return A.second >= B.second;
+    });
+
+    // Get the accumulated loads per rank, sorted by lowest-to-highest load.
+    const std::vector<std::pair<int, Real>>& sortedRankLoads = a_rankLoads.getSortedLoads();
+
+    // Assign the most expensive grid subset to the rank with the lowest accumulated load.
+  }
+  else {
+    a_ranks.resize(0);
+  }
+
+#if 1 // Chombo fallback code - to be removed later.
+  Vector<long int> proxyLoads(a_boxLoads.size(), 1L);
+
+  LoadBalance(a_ranks, proxyLoads, a_boxes);
+#endif
+}
+
+void
 LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which)
 {
   CH_TIME("LoadBalancing::sort");
