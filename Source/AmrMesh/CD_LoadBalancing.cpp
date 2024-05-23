@@ -80,13 +80,15 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
         for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
 
           // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
-          // to the static load as possible.
-          const int  remainingSubsets = numSubsets - curSubset + 1;
-          const bool oldDynamicLoad   = std::abs(remainingLoad - subsetLoad) / remainingSubsets;
-          const bool newDynamicLoad   = std::abs(remainingLoad - subsetLoad - a_boxLoads[ibox]) / remainingSubsets;
-          const Real oldLoadDiff      = std::abs(oldDynamicLoad - std::abs(staticTargetLoad));
-          const Real newLoadDiff      = std::abs(newDynamicLoad - std::abs(staticTargetLoad));
-          const bool addBoxToSubset   = std::abs(newLoadDiff) <= std::abs(oldLoadDiff);
+          // to the static load as possible. We have two scenarios; if we add the current box to the subset then the remaining load becomes
+          // smaller but the number of subsets stay the same. If we don't add the current box to the subset the remaining load stays the same
+          // but the number of subsets decreases by one.
+          const int  remainingSubsets      = numSubsets - curSubset + 1;
+          const Real dynamicLoadWithBox    = std::abs(remainingLoad - subsetLoad - a_boxLoads[ibox]) / remainingSubsets;
+          const Real dynamicLoadWithoutBox = std::abs(remainingLoad - subsetLoad) / (remainingSubsets - 1);
+          const Real loadDiffWithBox       = std::abs(dynamicLoadWithBox - std::abs(staticTargetLoad));
+          const Real loadDiffWithoutBox    = std::abs(dynamicLoadWithoutBox - std::abs(staticTargetLoad));
+          const bool addBoxToSubset        = std::abs(newLoadDiff) < std::abs(oldLoadDiff);
 
           if (addBoxToSubset) {
             subsetLoad += a_boxLoads[ibox];
