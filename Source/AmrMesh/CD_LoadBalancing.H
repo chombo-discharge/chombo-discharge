@@ -43,7 +43,11 @@ public:
   */
   template <class T>
   static void
-  makeBalance(Vector<int>& a_ranks, Loads& a_rankLoads, const Vector<T>& a_boxLoads, const Vector<Box>& a_boxes);  
+  makeBalance(Vector<int>& a_ranks, Loads& a_rankLoads, const Vector<T>& a_boxLoads, const Vector<Box>& a_boxes);
+
+  // To be removed later
+  static void
+  makeBalance2(Vector<int>& a_ranks, Loads& a_rankLoads, const Vector<Real>& a_boxLoads, const Vector<Box>& a_boxes);  
 
   /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.

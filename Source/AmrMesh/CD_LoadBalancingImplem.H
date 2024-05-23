@@ -46,75 +46,12 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
 {
   CH_TIME("LoadBalancing::makeBalance");
 
-  // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
-  // is the number of ranks.
-  const int numBoxes   = a_boxes.size();
-  const int numRanks   = numProc();
-  const int numSubsets = std::min(numBoxes, numRanks);
-
-  if (numSubsets > 0) {
-
-    // Figure out the total and target load (load per subset) on this level.
-    Real totalLoad  = 0;
-    Real targetLoad = 0;
-
-    for (int ibox = 0; ibox < numBoxes; ibox++) {
-      totalLoad += 1.0 * a_boxLoads[ibox];
-      targetLoad += 1.0 * a_boxLoads[ibox] / numSubsets;
-    }
-
-    // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
-    // the subsets such that the subsetLoad is as close to the targetLoad as possible, and that the total load
-    // for the subsets we've calculated so far is as close as possible to to the targetLoad * number of subsets so far.
-    //
-    // The pair contains the starting index for the subset and the computational load for the subset.
-    using Span   = std::pair<int, int>;
-    using Subset = std::pair<Span, Real>;
-
-    std::vector<Subset> subsets;
-
-    // If we have fewer boxes than ranks, each subset is just one of the box and one load.
-    if (numBoxes <= numRanks) {
-      for (int ibox = 0; ibox < numBoxes; ibox++) {
-        subsets.emplace_back(std::make_pair(std::make_pair(ibox, ibox), 1.0 * a_boxLoads[ibox]));
-      }
-    }
-    else {
-      // If we have more boxes than ranks, this gets a bit more complicated. But still doable.
-      int startIndex = 0;
-      int endIndex   = -1;
-
-      Real curLoadSoFar = 0.0;
-      Real avgLoadSoFar = 0.0;
-      int  curSubset    = 1;
-
-      for (int ibox = 1; ibox < numBoxes; ibox++) {
-        const Real curLoadWithoutThisBox = curLoadSoFar;
-        const Real curLoadWithThisBox    = curLoadSoFar + a_boxLoads[ibox];
-
-        // If we exceed the target load, we must include either ibox-1 or ibox
-        if (curLoadWithThisBox > targetLoad * curSubset) {
-        }
-      }
-    }
-
-    // Sort the subsets from largest to smallest computational load.
-    std::sort(subsets.begin(), subsets.end(), [](const Subset& A, const Subset& B) -> bool {
-      return A.second >= B.second;
-    });
-
-    // Get the accumulated loads per rank, sorted by lowest-to-highest load.
-    const std::vector<std::pair<int, Real>>& sortedRankLoads = a_rankLoads.getSortedLoads();
-
-    // Assign the most expensive grid subset to the rank with the lowest accumulated load - then update the loads.
-  }
-  else {
-    a_ranks.resize(0);
+  Vector<Real> boxLoads;
+  for (int i = 0; i < a_boxLoads.size(); i++) {
+    boxLoads.push_back(1.0 * a_boxLoads[i]);
   }
 
-#if 1 // Chombo fallback code - to be removed later.
-  LoadBalance(a_ranks, a_boxLoads, a_boxes);
-#endif
+  LoadBalancing::makeBalance2(a_ranks, a_rankLoads, boxLoads, a_boxes);
 }
 
 template <class T>
