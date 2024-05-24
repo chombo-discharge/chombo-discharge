@@ -70,7 +70,7 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
       if (boxesLeft <= subsetsLeft) {
         pout() << "create1: "
                << "\t" << firstSubsetBox << "\t" << firstSubsetBox << "\t" << subsetLoad << "\t" << staticTargetLoad
-               << "\t" << dynamicTargetLoad << endl;
+               << endl;
         subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, firstSubsetBox), subsetLoad);
 
         firstSubsetBox = firstSubsetBox + 1;
@@ -83,12 +83,12 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
           // to the static load as possible. We have two scenarios; if we add the current box to the subset then the remaining load becomes
           // smaller but the number of subsets stay the same. If we don't add the current box to the subset the remaining load stays the same
           // but the number of subsets decreases by one.
-          const int  remainingSubsets      = numSubsets - curSubset + 1;
+          const int  remainingSubsets      = numSubsets - curSubset - 1;
           const Real dynamicLoadWithBox    = std::abs(remainingLoad - subsetLoad - a_boxLoads[ibox]) / remainingSubsets;
           const Real dynamicLoadWithoutBox = std::abs(remainingLoad - subsetLoad) / (remainingSubsets - 1);
           const Real loadDiffWithBox       = std::abs(dynamicLoadWithBox - std::abs(staticTargetLoad));
           const Real loadDiffWithoutBox    = std::abs(dynamicLoadWithoutBox - std::abs(staticTargetLoad));
-          const bool addBoxToSubset        = std::abs(newLoadDiff) < std::abs(oldLoadDiff);
+          const bool addBoxToSubset        = std::abs(loadDiffWithoutBox) <= std::abs(loadDiffWithBox);
 
           if (addBoxToSubset) {
             subsetLoad += a_boxLoads[ibox];
@@ -96,7 +96,7 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
           else {
             pout() << "create2: "
                    << "\t" << firstSubsetBox << "\t" << ibox - 1 << "\t" << subsetLoad << "\t" << staticTargetLoad
-                   << " \t" << dynamicTargetLoad << endl;
+                   << " \t" << dynamicLoadWithoutBox << endl;
             subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, ibox - 1), subsetLoad);
 
             // Next subset must start on next box.
