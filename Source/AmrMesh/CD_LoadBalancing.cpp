@@ -47,11 +47,6 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
 
     std::vector<Subset> subsets(numSubsets);
 
-    int firstSubsetBox = 0;
-
-    Real remainingLoad     = totalLoad;
-    Real dynamicTargetLoad = staticTargetLoad;
-
     pout() << endl;
     pout() << "//// start subset report" << endl;
     pout() << "num boxes = " << numBoxes << endl;
@@ -59,24 +54,21 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
     pout() << "target load = " << totalLoad / numSubsets << endl;
     pout() << "total load = " << totalLoad << endl;
 
+    int firstSubsetBox = 0;
+
+    Real remainingLoad = totalLoad;
+
     for (int curSubset = 0; curSubset < numSubsets; curSubset++) {
 
-      // The starting index is always a part of this subset.
+      // The firstSubsetBox is the index for the first box in this subset (always assigned).
       Real subsetLoad = a_boxLoads[firstSubsetBox];
 
-      const int subsetsLeft = numSubsets - curSubset;
-      const int boxesLeft   = numBoxes - firstSubsetBox;
+      int lastSubsetBox = firstSubsetBox;
 
-      if (boxesLeft <= subsetsLeft) {
-        pout() << "create1: "
-               << "\t" << firstSubsetBox << "\t" << firstSubsetBox << "\t" << subsetLoad << "\t" << staticTargetLoad
-               << endl;
-        subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, firstSubsetBox), subsetLoad);
+      const int subsetsLeft = numSubsets - curSubset - 1;
+      const int boxesLeft   = numBoxes - firstSubsetBox - 1;
 
-        firstSubsetBox = firstSubsetBox + 1;
-      }
-      else {
-        // Figure out if we should add ibox to this subset.
+      if (boxesLeft > subsetsLeft) {
         for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
 
           // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
@@ -88,28 +80,36 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
           const Real dynamicLoadWithoutBox = std::abs(remainingLoad - subsetLoad) / (remainingSubsets - 1);
           const Real loadDiffWithBox       = std::abs(dynamicLoadWithBox - std::abs(staticTargetLoad));
           const Real loadDiffWithoutBox    = std::abs(dynamicLoadWithoutBox - std::abs(staticTargetLoad));
-          const bool addBoxToSubset        = std::abs(loadDiffWithoutBox) <= std::abs(loadDiffWithBox);
+          const bool addBoxToSubset        = std::abs(loadDiffWithBox) < std::abs(loadDiffWithoutBox);
 
           if (addBoxToSubset) {
             subsetLoad += a_boxLoads[ibox];
+
+            lastSubsetBox = ibox;
           }
           else {
-            pout() << "create2: "
-                   << "\t" << firstSubsetBox << "\t" << ibox - 1 << "\t" << subsetLoad << "\t" << staticTargetLoad
-                   << " \t" << dynamicLoadWithoutBox << endl;
-            subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, ibox - 1), subsetLoad);
+            lastSubsetBox = ibox - 1;
 
-            // Next subset must start on next box.
-            firstSubsetBox = ibox;
+            break;
+          }
 
+          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least one box.
+          if (numBoxes - lastSubsetBox - 1 <= subsetsLeft) {
             break;
           }
         }
       }
 
-      // Compute a new target load.
-      remainingLoad     = remainingLoad - subsetLoad;
-      dynamicTargetLoad = remainingLoad / (numSubsets - curSubset + 1);
+      // Create the subset
+      pout() << "create: "
+             << "\t" << firstSubsetBox << "\t" << lastSubsetBox << "\t" << subsetLoad << "\t" << staticTargetLoad
+             << endl;
+      subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, lastSubsetBox), subsetLoad);
+
+      // Update the remaining load and starting box for next iteration
+      remainingLoad  = remainingLoad - subsetLoad;
+      firstSubsetBox = lastSubsetBox + 1;
+      lastSubsetBox  = -1;
     }
 
 #if 1 // Debug hook - remove later
