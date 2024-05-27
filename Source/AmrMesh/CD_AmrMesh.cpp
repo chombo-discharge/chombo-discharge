@@ -1226,6 +1226,8 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   Loads rankLoads;
   rankLoads.resetLoads();
 
+  MayDay::Abort("AmrMesh::buildGrids -- checkpoint for myself. Everyone must use the new version of makeBalance");
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
     // Sort boxes to ensure locality.
