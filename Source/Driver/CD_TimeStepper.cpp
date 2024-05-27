@@ -112,16 +112,19 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
 
+  Loads rankLoads;
+  rankLoads.resetLoads();
+  
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     a_boxes[lvl] = a_grids[lvl].boxArray();
 
-    Vector<long int> loads(a_boxes[lvl].size());
+    Vector<long int> boxLoads(a_boxes[lvl].size());
 
     for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++) {
-      loads[ibox] = a_boxes[lvl][ibox].numPts();
+      boxLoads[ibox] = a_boxes[lvl][ibox].numPts();
     }
 
-    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
+    LoadBalancing::makeBalance(a_procs[lvl], rankLoads, boxLoads, a_boxes[lvl]);
   }
 }
 

@@ -2438,8 +2438,11 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
     Vector<Vector<int>> processorIDs(1 + m_finestLevel);
 
     // Do load balancing.
+    Loads rankLoads;
+    rankLoads.resetLoads();
+    
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      LoadBalancing::makeBalance(processorIDs[lvl], curLoads[lvl], a_boxes[lvl]);
+      LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, curLoads[lvl], a_boxes[lvl]);
     }
 
     this->regridRealm(curRealm, processorIDs, a_boxes, lmin);

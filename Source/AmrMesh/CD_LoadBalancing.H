@@ -26,6 +26,7 @@ class LoadBalancing
 public:
   /*!
     @brief Load balancing, assigning ranks to boxes. 
+    @details This version does not take into loads already assigned to ranks and will thus always start assigning from rank 0. 
     @param[out] a_ranks Vector containing processor IDs corresponding to boxes (and loads)
     @param[in]  a_loads Computational loads
     @param[in]  a_boxes Grid boxes
@@ -36,6 +37,8 @@ public:
 
   /*!
     @brief Load balancing, assigning ranks to boxes. 
+    @details This version takes into account loads already assigned to ranks, and assigns grid subsets to the least
+    loaded ranks. 
     @param[out]   a_ranks Vector containing processor IDs corresponding to boxes (and loads)
     @param[inout] a_rankLoads MPI rank loads so far
     @param[in]    a_boxLoads Computational loads for each box
@@ -44,10 +47,6 @@ public:
   template <class T>
   static void
   makeBalance(Vector<int>& a_ranks, Loads& a_rankLoads, const Vector<T>& a_boxLoads, const Vector<Box>& a_boxes);
-
-  // To be removed later
-  static void
-  makeBalance2(Vector<int>& a_ranks, Loads& a_rankLoads, const Vector<Real>& a_boxLoads, const Vector<Box>& a_boxes);  
 
   /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.

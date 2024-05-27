@@ -46,12 +46,160 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
 {
   CH_TIME("LoadBalancing::makeBalance");
 
+#if 0
   Vector<Real> boxLoads;
   for (int i = 0; i < a_boxLoads.size(); i++) {
     boxLoads.push_back(1.0 * a_boxLoads[i]);
   }
 
   LoadBalancing::makeBalance2(a_ranks, a_rankLoads, boxLoads, a_boxes);
+#else
+
+  // Convert everything to floating points
+  Vector<Real> boxLoads;
+  for (int i = 0; i < a_boxLoads.size(); i++) {
+    boxLoads.push_back(1.0 * a_boxLoads[i]);
+  }
+
+  
+  // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
+  // is the number of ranks.
+  const int numBoxes   = a_boxes.size();
+  const int numRanks   = numProc();
+  const int numSubsets = std::min(numBoxes, numRanks);
+
+  a_ranks.resize(numBoxes);
+
+  if (numSubsets > 0) {
+
+    // Figure out the total and target load (load per subset) on this level.
+    Real totalLoad = 0.0;
+    for (int ibox = 0; ibox < numBoxes; ibox++) {
+      totalLoad += boxLoads[ibox];
+    }
+
+    Real staticTargetLoad = totalLoad / numSubsets;
+
+    // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
+    // the subsets such that the subsetLoad is as close to the dynamic targetLoad as possible.
+    //
+    // The pair contains the starting index for the subset and the computational load for the subset.
+    using Span   = std::pair<int, int>;
+    using Subset = std::pair<Span, Real>;
+
+    std::vector<Subset> subsets(numSubsets);
+
+    int firstSubsetBox = 0;
+
+    Real remainingLoad = totalLoad;
+
+    for (int curSubset = 0; curSubset < numSubsets; curSubset++) {
+
+      // The firstSubsetBox is the index for the first box in this subset (always assigned).
+      Real subsetLoad = boxLoads[firstSubsetBox];
+
+      int lastSubsetBox = firstSubsetBox;
+
+      const int subsetsLeft = numSubsets - (curSubset + 1);
+      const int boxesLeft   = numBoxes - (firstSubsetBox + 1);
+
+      if (boxesLeft > subsetsLeft) {
+        for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
+
+          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least one box.
+          if (numBoxes - lastSubsetBox - 1 <= subsetsLeft) {
+            break;
+          }
+
+          // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
+          // to the static load as possible.
+          //
+          // In the below, '1' is the load without ibox, and '2' is the load with ibox
+          const Real load1 = subsetLoad;
+          const Real load2 = subsetLoad + boxLoads[ibox];
+
+          // Check if we should add this box.
+          bool addBoxToSubset = false;
+
+          if (boxLoads[ibox] <= std::numeric_limits<Real>::epsilon()) {
+            addBoxToSubset = true;
+          }
+          else if (load1 > staticTargetLoad) {
+            addBoxToSubset = false;
+          }
+          else if (load2 <= staticTargetLoad) {
+            addBoxToSubset = true;
+          }
+          else if (load1 <= staticTargetLoad && load2 > staticTargetLoad) {
+            // Compute the new average load if we add or don't add this box to the current subset. Accept the answer
+            // that leads to a smallest deviation from the static target load.
+            const Real loadErrWithoutBox = std::abs(load1 - staticTargetLoad);
+            const Real loadErrWithBox    = std::abs(load2 - staticTargetLoad);
+
+            if (loadErrWithBox <= loadErrWithoutBox) {
+              addBoxToSubset = true;
+            }
+          }
+
+          // Add box or break out of box iteration.
+          if (addBoxToSubset) {
+            subsetLoad    = subsetLoad + boxLoads[ibox];
+            lastSubsetBox = ibox;
+
+            continue;
+          }
+          else {
+            lastSubsetBox = ibox - 1;
+
+            break;
+          }
+        }
+      }
+
+      // Create the subset
+      subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, lastSubsetBox), subsetLoad);
+
+      // Update the remaining load.
+      remainingLoad    = remainingLoad - subsetLoad;
+      staticTargetLoad = remainingLoad / subsetsLeft;
+
+      // Update start box for next iteration.
+      firstSubsetBox = lastSubsetBox + 1;
+    }
+
+    // Sort the subsets from largest to smallest computational load.
+    std::sort(subsets.begin(), subsets.end(), [](const Subset& A, const Subset& B) -> bool {
+      return A.second >= B.second;
+    });
+
+    // Get the accumulated loads per rank, sorted by lowest-to-highest load.
+    const std::vector<std::pair<int, Real>> sortedRankLoads = a_rankLoads.getSortedLoads();
+
+    // Assign the most expensive grid subset to the rank with the lowest accumulated load.
+    for (int i = 0; i < subsets.size(); i++) {
+      const int  startIndex = subsets[i].first.first;
+      const int  endIndex   = subsets[i].first.second;
+      const Real subsetLoad = subsets[i].second;
+
+      if(i < subsets.size()-1){
+	if(subsetLoad < subsets[i+1].second){
+	  MayDay::Abort("shait");
+	}
+      }
+
+      // Assign to rank
+      for (int ibox = startIndex; ibox <= endIndex; ibox++) {
+        a_ranks[ibox] = sortedRankLoads[i].first;
+      }
+
+      // Update load on this rank.
+      a_rankLoads.incrementLoad(i, subsetLoad);
+    }
+  }
+  else {
+    a_ranks.resize(0);
+  }
+#endif
 }
 
 template <class T>
