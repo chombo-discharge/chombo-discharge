@@ -27,7 +27,8 @@ Loads::Loads() noexcept
   this->resetLoads();
 }
 
-Loads::~Loads() noexcept {
+Loads::~Loads() noexcept
+{
   CH_TIME("Loads::~Loads");
 
   m_loads.clear();
@@ -160,6 +161,21 @@ Loads::incrementLoads(const Vector<Real>& a_increments) noexcept
     for (int irank = 0; irank < numRanks; irank++) {
       m_loads[irank] += a_increments[irank];
     }
+  }
+}
+
+void
+Loads::incrementLoad(const int a_rank, const Real a_increment) noexcept
+{
+  CH_TIME("Loads::incrementLoad");
+
+  const int numRanks = numProc();
+
+  if (a_rank >= numRanks) {
+    MayDay::Abort("Loads::incrementLoad -- 'a_rank > numProc()'");
+  }
+  else {
+    m_loads[a_rank] += a_increment;
   }
 }
 

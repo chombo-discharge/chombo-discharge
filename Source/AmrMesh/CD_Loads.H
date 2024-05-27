@@ -102,6 +102,14 @@ public:
   incrementLoads(const Vector<Real>& a_increments) noexcept;
 
   /*!
+    @brief Increment load on rank
+    @param[in] a_rank MPI rank where load is incremented
+    @param[in] a_increment Load increment
+  */
+  virtual void
+  incrementLoad(const int a_rank, const Real a_increment) noexcept;
+
+  /*!
     @brief Get sorted loads. 
     @details This routine sorts the computational loads from smallest to largest, and returns the result as a vector of ranks (and loads). 
   */
