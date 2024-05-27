@@ -30,13 +30,12 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
   if (numSubsets > 0) {
 
     // Figure out the total and target load (load per subset) on this level.
-    Real totalLoad        = 0.0;
-    Real staticTargetLoad = 0.0;
+    Real totalLoad = 0.0;
     for (int ibox = 0; ibox < numBoxes; ibox++) {
       totalLoad += a_boxLoads[ibox];
     }
 
-    staticTargetLoad = totalLoad / numSubsets;
+    Real staticTargetLoad = totalLoad / numSubsets;
 
     // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
     // the subsets such that the subsetLoad is as close to the dynamic targetLoad as possible.
@@ -47,12 +46,16 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
 
     std::vector<Subset> subsets(numSubsets);
 
-    pout() << endl;
-    pout() << "//// start subset report" << endl;
-    pout() << "num boxes = " << numBoxes << endl;
-    pout() << "num subsets = " << numSubsets << endl;
-    pout() << "target load = " << totalLoad / numSubsets << endl;
-    pout() << "total load = " << totalLoad << endl;
+#if 0
+    if (procID() == 0) {
+      std::cout << endl;
+      std::cout << "//// start subset report" << endl;
+      std::cout << "num boxes = " << numBoxes << endl;
+      std::cout << "num subsets = " << numSubsets << endl;
+      std::cout << "target load = " << totalLoad / numSubsets << endl;
+      std::cout << "total load = " << totalLoad << endl;
+    }
+#endif
 
     int firstSubsetBox = 0;
 
@@ -65,51 +68,83 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
 
       int lastSubsetBox = firstSubsetBox;
 
-      const int subsetsLeft = numSubsets - curSubset - 1;
-      const int boxesLeft   = numBoxes - firstSubsetBox - 1;
+      const int subsetsLeft = numSubsets - (curSubset + 1);
+      const int boxesLeft   = numBoxes - (firstSubsetBox + 1);
 
       if (boxesLeft > subsetsLeft) {
         for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
 
+          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least one box.
+          if (numBoxes - lastSubsetBox - 1 <= subsetsLeft) {
+            break;
+          }
+
           // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
-          // to the static load as possible. We have two scenarios; if we add the current box to the subset then the remaining load becomes
-          // smaller but the number of subsets stay the same. If we don't add the current box to the subset the remaining load stays the same
-          // but the number of subsets decreases by one.
-          const int  remainingSubsets      = numSubsets - curSubset - 1;
-          const Real dynamicLoadWithBox    = std::abs(remainingLoad - subsetLoad - a_boxLoads[ibox]) / remainingSubsets;
-          const Real dynamicLoadWithoutBox = std::abs(remainingLoad - subsetLoad) / (remainingSubsets - 1);
-          const Real loadDiffWithBox       = std::abs(dynamicLoadWithBox - std::abs(staticTargetLoad));
-          const Real loadDiffWithoutBox    = std::abs(dynamicLoadWithoutBox - std::abs(staticTargetLoad));
-          const bool addBoxToSubset        = std::abs(loadDiffWithBox) < std::abs(loadDiffWithoutBox);
+          // to the static load as possible.
+          //
+          // In the below, '1' is the load without ibox, and '2' is the load with ibox
+          const Real load1 = subsetLoad;
+          const Real load2 = subsetLoad + a_boxLoads[ibox];
 
+          // Check if we should add this box.
+          bool addBoxToSubset = false;
+
+          if (a_boxLoads[ibox] <= std::numeric_limits<Real>::epsilon()) {
+            addBoxToSubset = true;
+          }
+          else if (load1 > staticTargetLoad) {
+            addBoxToSubset = false;
+          }
+          else if (load2 <= staticTargetLoad) {
+            addBoxToSubset = true;
+          }
+          else if (load1 <= staticTargetLoad && load2 > staticTargetLoad) {
+            // Compute the new average load if we add or don't add this box to the current subset. Accept the answer
+            // that leads to a smallest deviation from the static target load.
+            const Real loadErrWithoutBox = std::abs(load1 -
+                                                    staticTargetLoad); // Deviation from target load without this box
+            const Real loadErrWithBox = std::abs(load2 - staticTargetLoad); // Deviation from target load with this box.
+
+            if (loadErrWithBox <= loadErrWithoutBox) {
+              addBoxToSubset = true;
+            }
+          }
+
+          // Add box or break out of box iteration.
           if (addBoxToSubset) {
-            subsetLoad += a_boxLoads[ibox];
-
+            subsetLoad    = subsetLoad + a_boxLoads[ibox];
             lastSubsetBox = ibox;
+
+            continue;
           }
           else {
             lastSubsetBox = ibox - 1;
 
             break;
           }
-
-          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least one box.
-          if (numBoxes - lastSubsetBox - 1 <= subsetsLeft) {
-            break;
-          }
         }
       }
 
+// Create the subset
+#if 0
+      const Real newStaticTargetLoad = (remainingLoad - subsetLoad) / subsetsLeft;
+      if (procID() == 0) {
+        const int nbox = lastSubsetBox - firstSubsetBox + 1;
+        std::cout << "create: "
+                  << "\t" << firstSubsetBox << "\t" << lastSubsetBox << "\t" << nbox << "\t" << subsetLoad << "\t"
+                  << staticTargetLoad << "\t" << newStaticTargetLoad << endl;
+      }
+#endif
+
       // Create the subset
-      pout() << "create: "
-             << "\t" << firstSubsetBox << "\t" << lastSubsetBox << "\t" << subsetLoad << "\t" << staticTargetLoad
-             << endl;
       subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, lastSubsetBox), subsetLoad);
 
-      // Update the remaining load and starting box for next iteration
-      remainingLoad  = remainingLoad - subsetLoad;
+      // Update the remaining load.
+      remainingLoad    = remainingLoad - subsetLoad;
+      staticTargetLoad = remainingLoad / subsetsLeft;
+
+      // Update start box for next iteration.
       firstSubsetBox = lastSubsetBox + 1;
-      lastSubsetBox  = -1;
     }
 
 #if 1 // Debug hook - remove later
@@ -119,15 +154,19 @@ LoadBalancing::makeBalance2(Vector<int>&        a_ranks,
       loadSum += s.second;
     }
 
-    pout() << "actual subsets = " << subsets.size() << endl;
-    pout() << "actual load = " << loadSum << endl;
+#if 0    
+    if (procID() == 0) {
+      std::cout << "actual subsets = " << subsets.size() << endl;
+      std::cout << "actual load = " << loadSum << endl;
 
-    for (int i = 0; i < subsets.size(); i++) {
-      pout() << i << "\t" << subsets[i].first.first << "\t" << subsets[i].first.second << "\t" << subsets[i].second
-             << endl;
+      for (int i = 0; i < subsets.size(); i++) {
+        std::cout << i << "\t" << subsets[i].first.first << "\t" << subsets[i].first.second << "\t" << subsets[i].second
+                  << endl;
+      }
+      std::cout << "//// end subset report" << endl;
+      std::cout << endl;
     }
-    pout() << "//// end subset report" << endl;
-    pout() << endl;
+#endif
 
     if (subsets.size() != numSubsets) {
       MayDay::Abort("subset size is wrong");
