@@ -1222,7 +1222,9 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
   Vector<Vector<int>> processorIDs(1 + m_finestLevel);
 
-  Loads loads;
+  // Accumulated loads on each rank. 
+  Loads rankLoads;
+  rankLoads.resetLoads();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
@@ -1231,14 +1233,14 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
 
     // Compute the loads for the boxes, using the number of cells in the box as a proxy.
     const Vector<Box>& levelBoxes = newBoxes[lvl];
-    Vector<long int>   levelLoads(levelBoxes.size());
+    Vector<long int>   boxLoads(levelBoxes.size());
 
     for (int ibox = 0; ibox < levelBoxes.size(); ibox++) {
-      levelLoads[ibox] = levelBoxes[ibox].numPts();
+      boxLoads[ibox] = levelBoxes[ibox].numPts();
     }
 
-    // Load balance this grid.
-    LoadBalancing::makeBalance(processorIDs[lvl], levelLoads, newBoxes[lvl]);
+    // Load balance this grid -- assign grid subsets to the least loaded rank. 
+    LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, boxLoads, newBoxes[lvl]);
   }
 
   // Now we define the grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
