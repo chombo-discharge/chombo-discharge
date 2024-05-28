@@ -88,14 +88,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4cef3b9e67877b6719d14014b00265ea"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a4cef3b9e67877b6719d14014b00265ea">makeBalance</a> (Vector&lt; int &gt; &amp;a_ranks, const Vector&lt; T &gt; &amp;a_loads, const Vector&lt; Box &gt; &amp;a_boxes)</td></tr>
 <tr class="memdesc:a4cef3b9e67877b6719d14014b00265ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing, assigning ranks to boxes.  <a href="classLoadBalancing.html#a4cef3b9e67877b6719d14014b00265ea">More...</a><br /></td></tr>
 <tr class="separator:a4cef3b9e67877b6719d14014b00265ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1e72161df40db62ec722b2a4d78f102"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:ad1e72161df40db62ec722b2a4d78f102"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#ad1e72161df40db62ec722b2a4d78f102">balanceLevelByLevel</a> (Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, const Vector&lt; Vector&lt; T &gt;&gt; &amp;a_loads, const Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes)</td></tr>
-<tr class="memdesc:ad1e72161df40db62ec722b2a4d78f102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing function which load balances level by level.  <a href="classLoadBalancing.html#ad1e72161df40db62ec722b2a4d78f102">More...</a><br /></td></tr>
-<tr class="separator:ad1e72161df40db62ec722b2a4d78f102"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1778fcebe3688daf426fe59802a1f93a"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:a1778fcebe3688daf426fe59802a1f93a"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a1778fcebe3688daf426fe59802a1f93a">balanceHierarchy</a> (Vector&lt; Vector&lt; int &gt;&gt; &amp;a_procs, const Vector&lt; Vector&lt; T &gt;&gt; &amp;a_loads, const Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes)</td></tr>
-<tr class="memdesc:a1778fcebe3688daf426fe59802a1f93a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing function which load balances all boxes at once, not caring about actual levels.  <a href="classLoadBalancing.html#a1778fcebe3688daf426fe59802a1f93a">More...</a><br /></td></tr>
-<tr class="separator:a1778fcebe3688daf426fe59802a1f93a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1687f07609ff2a123661ad9281c94aa3"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a1687f07609ff2a123661ad9281c94aa3"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a1687f07609ff2a123661ad9281c94aa3">makeBalance</a> (Vector&lt; int &gt; &amp;a_ranks, <a class="el" href="classLoads.html">Loads</a> &amp;a_rankLoads, const Vector&lt; T &gt; &amp;a_boxLoads, const Vector&lt; Box &gt; &amp;a_boxes)</td></tr>
+<tr class="memdesc:a1687f07609ff2a123661ad9281c94aa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing, assigning ranks to boxes.  <a href="classLoadBalancing.html#a1687f07609ff2a123661ad9281c94aa3">More...</a><br /></td></tr>
+<tr class="separator:a1687f07609ff2a123661ad9281c94aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a704ca1a8c6c621d5d6a010ce09344881"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a704ca1a8c6c621d5d6a010ce09344881"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a704ca1a8c6c621d5d6a010ce09344881">sort</a> (Vector&lt; Vector&lt; Box &gt;&gt; &amp;a_boxes, Vector&lt; Vector&lt; T &gt;&gt; &amp;a_loads, const <a class="el" href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a> a_whichSorting)</td></tr>
 <tr class="memdesc:a704ca1a8c6c621d5d6a010ce09344881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sorts boxes and loads over a hierarchy according to some sorting criterion.  <a href="classLoadBalancing.html#a704ca1a8c6c621d5d6a010ce09344881">More...</a><br /></td></tr>
@@ -104,12 +100,6 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a676452d025189fb8d6d7004180916b60"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a676452d025189fb8d6d7004180916b60">sort</a> (Vector&lt; Box &gt; &amp;a_boxes, Vector&lt; T &gt; &amp;a_loads, const <a class="el" href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a> a_which)</td></tr>
 <tr class="memdesc:a676452d025189fb8d6d7004180916b60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sorting function for sorting boxes and loads.  <a href="classLoadBalancing.html#a676452d025189fb8d6d7004180916b60">More...</a><br /></td></tr>
 <tr class="separator:a676452d025189fb8d6d7004180916b60"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5c8d8e06fb4bd6594e3faaf8d844de0b"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a5c8d8e06fb4bd6594e3faaf8d844de0b">makeBalance</a> (Vector&lt; int &gt; &amp;a_ranks, const Vector&lt; Box &gt; &amp;a_boxes)</td></tr>
-<tr class="memdesc:a5c8d8e06fb4bd6594e3faaf8d844de0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing of grid boxes using the box volume as computational load.  <a href="classLoadBalancing.html#a5c8d8e06fb4bd6594e3faaf8d844de0b">More...</a><br /></td></tr>
-<tr class="separator:a5c8d8e06fb4bd6594e3faaf8d844de0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32d0cf7d91b7006c51cc245a75362d6a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a32d0cf7d91b7006c51cc245a75362d6a">roundRobin</a> (Vector&lt; int &gt; &amp;a_ranks, const Vector&lt; Box &gt; &amp;a_boxes)</td></tr>
-<tr class="memdesc:a32d0cf7d91b7006c51cc245a75362d6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Round robin distribution of boxes.  <a href="classLoadBalancing.html#a32d0cf7d91b7006c51cc245a75362d6a">More...</a><br /></td></tr>
-<tr class="separator:a32d0cf7d91b7006c51cc245a75362d6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99ab0f130f19d5967c397fa2076fa132"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLoadBalancing.html#a99ab0f130f19d5967c397fa2076fa132">sort</a> (Vector&lt; Box &gt; &amp;a_boxes, const <a class="el" href="CD__BoxSorting_8H.html#ab5db8b3a96e3a04473aaa898f7eb2128">BoxSorting</a> a_which)</td></tr>
 <tr class="memdesc:a99ab0f130f19d5967c397fa2076fa132"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sorts boxes (according to sorting argument)  <a href="classLoadBalancing.html#a99ab0f130f19d5967c397fa2076fa132">More...</a><br /></td></tr>
 <tr class="separator:a99ab0f130f19d5967c397fa2076fa132"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,114 +152,6 @@ Static Protected Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Static class which contains various load balancing routines. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1778fcebe3688daf426fe59802a1f93a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1778fcebe3688daf426fe59802a1f93a">&#9670;&nbsp;</a></span>balanceHierarchy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void LoadBalancing::balanceHierarchy </td>
-          <td>(</td>
-          <td class="paramtype">Vector&lt; Vector&lt; int &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_procs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Vector&lt; T &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_loads</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Vector&lt; Box &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_boxes</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Load balancing function which load balances all boxes at once, not caring about actual levels. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_procs</td><td>Vector containing processor IDs corresponding to boxes (and loads) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_loads</td><td>Computational loads </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ad1e72161df40db62ec722b2a4d78f102"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1e72161df40db62ec722b2a4d78f102">&#9670;&nbsp;</a></span>balanceLevelByLevel()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void LoadBalancing::balanceLevelByLevel </td>
-          <td>(</td>
-          <td class="paramtype">Vector&lt; Vector&lt; int &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_procs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Vector&lt; T &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_loads</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Vector&lt; Box &gt;&gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_boxes</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Load balancing function which load balances level by level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_procs</td><td>Vector containing processor IDs corresponding to boxes (and loads) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_loads</td><td>Computational loads </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a35ddeb39b2ed9589f44d486b3a269c3e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35ddeb39b2ed9589f44d486b3a269c3e">&#9670;&nbsp;</a></span>gatherBoxes()</h2>
 
@@ -456,53 +338,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="a5c8d8e06fb4bd6594e3faaf8d844de0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c8d8e06fb4bd6594e3faaf8d844de0b">&#9670;&nbsp;</a></span>makeBalance() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void LoadBalancing::makeBalance </td>
-          <td>(</td>
-          <td class="paramtype">Vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_ranks</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_boxes</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Load balancing of grid boxes using the box volume as computational load. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_ranks</td><td>Processor IDs </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a4cef3b9e67877b6719d14014b00265ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4cef3b9e67877b6719d14014b00265ea">&#9670;&nbsp;</a></span>makeBalance() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cef3b9e67877b6719d14014b00265ea">&#9670;&nbsp;</a></span>makeBalance() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -544,10 +381,71 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 
 <p>Load balancing, assigning ranks to boxes. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>This version does not take into loads already assigned to ranks and will thus always start assigning from rank 0. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_ranks</td><td>Vector containing processor IDs corresponding to boxes (and loads) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_loads</td><td>Computational loads </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1687f07609ff2a123661ad9281c94aa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1687f07609ff2a123661ad9281c94aa3">&#9670;&nbsp;</a></span>makeBalance() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void LoadBalancing::makeBalance </td>
+          <td>(</td>
+          <td class="paramtype">Vector&lt; int &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_ranks</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classLoads.html">Loads</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_rankLoads</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxLoads</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_boxes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Load balancing, assigning ranks to boxes. </p>
+<p>This version takes into account loads already assigned to ranks, and assigns grid subsets to the least loaded ranks. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_ranks</td><td>Vector containing processor IDs corresponding to boxes (and loads) </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_rankLoads</td><td>MPI rank loads so far </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxLoads</td><td>Computational loads for each box </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
   </table>
   </dd>
@@ -744,51 +642,6 @@ template&lt;class T &gt; </div>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_loads</td><td>Computational loads </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a32d0cf7d91b7006c51cc245a75362d6a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32d0cf7d91b7006c51cc245a75362d6a">&#9670;&nbsp;</a></span>roundRobin()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void LoadBalancing::roundRobin </td>
-          <td>(</td>
-          <td class="paramtype">Vector&lt; int &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_ranks</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Vector&lt; Box &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_boxes</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Round robin distribution of boxes. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_ranks</td><td>Processor IDs </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_boxes</td><td>Grid boxes </td></tr>
   </table>
   </dd>
 </dl>
@@ -1037,7 +890,7 @@ template&lt;class T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">a_boxes</td><td>Boxes to be sorted. </td></tr>
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_loads</td><td>Loads to be sorted.</td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_loads</td><td><a class="el" href="classLoads.html" title="Class for holding computational loads.">Loads</a> to be sorted.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1091,7 +944,7 @@ template&lt;class T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">a_boxes</td><td>Boxes. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">a_loads</td><td>Loads. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_loads</td><td><a class="el" href="classLoads.html" title="Class for holding computational loads.">Loads</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a_pairs</td><td>Boxes and loads, stored as a pair. </td></tr>
   </table>
   </dd>
