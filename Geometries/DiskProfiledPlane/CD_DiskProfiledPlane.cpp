@@ -149,17 +149,16 @@ DiskProfiledPlane::defineDielectric() noexcept
   pp.get("golfpeg_curvature1", golfpegCurvature1);
   pp.get("golfpeg_curvature2", golfpegCurvature2);
   pp.get("mirror_profile", mirrorProfile);
+  pp.get("lshape_cut_angle", lshapeCutAngle);
 
   pp.getarr("box_dimensions", boxDimensions, 0, 3);
   pp.getarr("box_translate", boxTranslation, 0, 3);
   pp.getarr("profile_translate", profileTranslate, 0, 3);
-  // pp.getarr("lshape_translate ", lshapeTranslate, 0, 3);
   pp.getarr("profile_repetition_lo", profileRepetitionLo, 0, 3);
   pp.getarr("profile_repetition_hi", profileRepetitionHi, 0, 3);
   pp.getarr("profile_period", profilePeriod, 0, 3);
   pp.getarr("square_dimensions", squareDimensions, 0, 3);
   pp.getarr("lshape_dimensions", lshapeDimensions, 0, 3);
-  pp.get("lshape_cut_angle", lshapeCutAngle);
   
 
   if (boxCurvature <= 0.0) {
@@ -239,9 +238,11 @@ DiskProfiledPlane::defineDielectric() noexcept
   profile    = FiniteRepetition<Real>(profile, profilePer, profileRepLo, profileRepHi);
   profile    = Translate<Real>(profile, profileTra);
   roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+  
   if (mirrorProfile) {
-  profile = Reflect<Real>(profile, 0);
-  roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
+	  // mirror profile about x = 0
+	  profile = Reflect<Real>(profile, 0);
+	  roundedBox = SmoothDifference<Real>(roundedBox, profile, boxCurvature);
   }
   // roundedBox = SmoothUnion<Real>(roundedBox, profile, sphereRadius);
   }
