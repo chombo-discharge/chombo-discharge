@@ -19,11 +19,13 @@ DiskProfiledPlane.box_permittivity      = 3.3                     # Dielectric b
 DiskProfiledPlane.box_curvature         = 100E-6                  # Corner curvatures
 
 DiskProfiledPlane.profile_type          = none                    # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z', "lshape", "golfpeg"
-DiskProfiledPlane.profile_translate     = 0.075E-3 0.0E-3 0       # Profile translation
+DiskProfiledPlane.profile_translate_lo  = -0.3E-3 0.0E-3 0        # Profile translation in low coordinate direction
+DiskProfiledPlane.profile_translate_hi  = 0.675E-3 0.0E-3 0       # Profile translation in high coordinate direction
 DiskProfiledPlane.profile_repetition_lo = 0 0 0                   # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 0 0 0                   # Repetition pattern in high coordinate direction
+DiskProfiledPlane.reflect_lo 			= true                    # mirror profile about y axis at x = 0
+DiskProfiledPlane.reflect_hi	        = true                    # mirror profile about y axis at x = 0
 DiskProfiledPlane.profile_period        = 1.05001E-3 1 1          # Repetition period 
-DiskProfiledPlane.mirror_profile        = true                    # mirror profile about y axis at x = 0
 
 DiskProfiledPlane.square_dimensions     = 0E-6 0E-6 10            # Dimensions for squares/square channels
 DiskProfiledPlane.lshape_dimensions     = 799E-6 999E-6 10        # Main dimensions for l_shape channels
