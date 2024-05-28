@@ -198,7 +198,8 @@ namespace Physics {
 	@param[in]  a_finestLevel New finest grid level
 	@details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation
 	uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and
-	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector<int>, Vector<T>, Vector<Box>).
+	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance on each level. It is up to the user/programmer
+	to decide if load balancing should be done independently on each level, or if loads per MPI rank are accumulated across levels.
       */
       void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,

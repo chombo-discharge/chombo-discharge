@@ -650,6 +650,9 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
     a_boxes[lvl] = a_grids[lvl].boxArray();
   }
 
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
   // Load balance these levels.
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_grids[lvl];
@@ -702,7 +705,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 
     // Sort the boxes and loads using a Morton code. Then load balance the application.
     LoadBalancing::sort(boxes, loads, BoxSorting::Morton);
-    LoadBalancing::makeBalance(ranks, loads, boxes);
+    LoadBalancing::makeBalance(ranks, rankLoads, loads, boxes);
 
     // Assign ranks to boxes
     a_boxes[lvl] = boxes;
@@ -751,6 +754,9 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
     a_boxes[lvl] = a_grids[lvl].boxArray();
   }
 
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
   // Load balance these levels.
   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = a_grids[lvl];
@@ -783,7 +789,7 @@ BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&           
 
     // Sort the boxes and loads using a Morton code. Then load balance the application.
     LoadBalancing::sort(boxes, loads, BoxSorting::Morton);
-    LoadBalancing::makeBalance(ranks, loads, boxes);
+    LoadBalancing::makeBalance(ranks, rankLoads, loads, boxes);
 
     // Assign ranks to boxes
     a_boxes[lvl] = boxes;

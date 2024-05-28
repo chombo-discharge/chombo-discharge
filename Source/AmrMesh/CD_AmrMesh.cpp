@@ -1222,11 +1222,9 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
   Vector<Vector<int>> processorIDs(1 + m_finestLevel);
 
-  // Accumulated loads on each rank. 
+  // Accumulated loads on each rank.
   Loads rankLoads;
   rankLoads.resetLoads();
-
-  MayDay::Abort("AmrMesh::buildGrids -- checkpoint for myself. Everyone must use the new version of makeBalance");
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
@@ -1241,7 +1239,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
       boxLoads[ibox] = levelBoxes[ibox].numPts();
     }
 
-    // Load balance this grid -- assign grid subsets to the least loaded rank. 
+    // Load balance this grid -- assign grid subsets to the least loaded rank.
     LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, boxLoads, newBoxes[lvl]);
   }
 
@@ -2442,7 +2440,7 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
     // Do load balancing.
     Loads rankLoads;
     rankLoads.resetLoads();
-    
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, curLoads[lvl], a_boxes[lvl]);
     }

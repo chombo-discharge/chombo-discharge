@@ -61,7 +61,6 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
     boxLoads.push_back(1.0 * a_boxLoads[i]);
   }
 
-  
   // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
   // is the number of ranks.
   const int numBoxes   = a_boxes.size();
@@ -181,10 +180,10 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
       const int  endIndex   = subsets[i].first.second;
       const Real subsetLoad = subsets[i].second;
 
-      if(i < subsets.size()-1){
-	if(subsetLoad < subsets[i+1].second){
-	  MayDay::Abort("shait");
-	}
+      if (i < subsets.size() - 1) {
+        if (subsetLoad < subsets[i + 1].second) {
+          MayDay::Abort("shait");
+        }
       }
 
       // Assign to rank
