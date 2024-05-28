@@ -104,21 +104,27 @@ TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                               const int                        a_lmin,
                               const int                        a_finestLevel)
 {
-  CH_TIME(
-    "TimeStepper::loadBalanceBoxes(Vector<Vector<int> >, Vector<Vector<Box>, string, Vector<DisjointBoxLayout>, int, int)");
+  CH_TIME("TimeStepper::loadBalanceBoxes");
   if (m_verbosity > 5) {
-    pout()
-      << "TimeStepper::loadBalanceBoxes(Vector<Vector<int> >, Vector<Vector<Box>, string, Vector<DisjointBoxLayout>, int, int)"
-      << endl;
+    pout() << "TimeStepper::loadBalanceBoxes" << endl;
   }
 
   a_procs.resize(1 + a_finestLevel);
   a_boxes.resize(1 + a_finestLevel);
 
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
     a_boxes[lvl] = a_grids[lvl].boxArray();
 
-    LoadBalancing::makeBalance(a_procs[lvl], a_boxes[lvl]);
+    Vector<long int> boxLoads(a_boxes[lvl].size());
+
+    for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++) {
+      boxLoads[ibox] = a_boxes[lvl][ibox].numPts();
+    }
+
+    LoadBalancing::makeBalance(a_procs[lvl], rankLoads, boxLoads, a_boxes[lvl]);
   }
 }
 

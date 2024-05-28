@@ -2054,7 +2054,7 @@ Driver::writeComputationalLoads()
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    const int width = 12;
+    const int width = 16;
 
     std::ofstream f;
     f.open(fname, std::ios_base::trunc);
