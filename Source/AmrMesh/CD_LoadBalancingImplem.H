@@ -46,15 +46,6 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
 {
   CH_TIME("LoadBalancing::makeBalance");
 
-#if 0
-  Vector<Real> boxLoads;
-  for (int i = 0; i < a_boxLoads.size(); i++) {
-    boxLoads.push_back(1.0 * a_boxLoads[i]);
-  }
-
-  LoadBalancing::makeBalance2(a_ranks, a_rankLoads, boxLoads, a_boxes);
-#else
-
   // Convert everything to floating points
   Vector<Real> boxLoads;
   for (int i = 0; i < a_boxLoads.size(); i++) {
@@ -168,7 +159,7 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
 
     // Sort the subsets from largest to smallest computational load.
     std::sort(subsets.begin(), subsets.end(), [](const Subset& A, const Subset& B) -> bool {
-      return A.second >= B.second;
+      return A.second > B.second;
     });
 
     // Get the accumulated loads per rank, sorted by lowest-to-highest load.
@@ -179,16 +170,11 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
       const int  startIndex = subsets[i].first.first;
       const int  endIndex   = subsets[i].first.second;
       const Real subsetLoad = subsets[i].second;
-
-      if (i < subsets.size() - 1) {
-        if (subsetLoad < subsets[i + 1].second) {
-          MayDay::Abort("shait");
-        }
-      }
+      const int  rank       = sortedRankLoads[i].first;
 
       // Assign to rank
       for (int ibox = startIndex; ibox <= endIndex; ibox++) {
-        a_ranks[ibox] = sortedRankLoads[i].first;
+        a_ranks[ibox] = rank;
       }
 
       // Update load on this rank.
@@ -198,7 +184,6 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
   else {
     a_ranks.resize(0);
   }
-#endif
 }
 
 template <class T>
