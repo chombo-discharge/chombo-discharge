@@ -191,9 +191,8 @@ Loads::getSortedLoads() const noexcept
     sortedLoads.emplace_back(curLoad.first, curLoad.second);
   }
 
-  // Sort -- if there is a load tie then use the rank number.
   auto loadSort = [](const std::pair<int, Real>& A, const std::pair<int, Real>& B) -> bool {
-    return A.first < B.first;
+    return A.second < B.second;
   };
 
   std::sort(sortedLoads.begin(), sortedLoads.end(), loadSort);
@@ -201,7 +200,7 @@ Loads::getSortedLoads() const noexcept
 #if 1 // Remove later
 
   for (int i = 0; i < sortedLoads.size() - 1; i++) {
-    if (sortedLoads[i] > sortedLoads[i + 1]) {
+    if (sortedLoads[i].second > sortedLoads[i + 1].second) {
       MayDay::Abort("Loads::getSortedLoads - crap on sorting method");
     }
   }

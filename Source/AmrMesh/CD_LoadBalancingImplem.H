@@ -178,7 +178,7 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
       }
 
       // Update load on this rank.
-      a_rankLoads.incrementLoad(i, subsetLoad);
+      a_rankLoads.incrementLoad(rank, subsetLoad);
     }
   }
   else {
