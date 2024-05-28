@@ -32,72 +32,157 @@ LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const
 {
   CH_TIME("LoadBalancing::makeBalance");
 
-  LoadBalance(a_ranks, a_loads, a_boxes);
+  //  LoadBalance(a_ranks, a_loads, a_boxes);
+  Loads rankLoads;
+  LoadBalancing::makeBalance<T>(a_ranks, rankLoads, a_loads, a_boxes);
 }
 
 template <class T>
 void
-LoadBalancing::balanceLevelByLevel(Vector<Vector<int>>&       a_procs,
-                                   const Vector<Vector<T>>&   a_loads,
-                                   const Vector<Vector<Box>>& a_boxes)
+LoadBalancing::makeBalance(Vector<int>&       a_ranks,
+                           Loads&             a_rankLoads,
+                           const Vector<T>&   a_boxLoads,
+                           const Vector<Box>& a_boxes)
 {
-  CH_TIME("LoadBalancing::balanceLevelByLevel");
+  CH_TIME("LoadBalancing::makeBalance");
 
-  const int nlevels = a_boxes.size();
-
-  for (int lvl = 0; lvl < nlevels; lvl++) {
-    LoadBalancing::makeBalance(a_procs[lvl], a_loads[lvl], a_boxes[lvl]);
+  // Convert everything to floating points
+  Vector<Real> boxLoads;
+  for (int i = 0; i < a_boxLoads.size(); i++) {
+    boxLoads.push_back(1.0 * a_boxLoads[i]);
   }
-}
 
-template <class T>
-void
-LoadBalancing::balanceHierarchy(Vector<Vector<int>>&       a_procs,
-                                const Vector<Vector<T>>&   a_loads,
-                                const Vector<Vector<Box>>& a_boxes)
-{
-  CH_TIME("LoadBalancing::balanceHierarchy");
+  // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
+  // is the number of ranks.
+  const int numBoxes   = a_boxes.size();
+  const int numRanks   = numProc();
+  const int numSubsets = std::min(numBoxes, numRanks);
 
-  const int nlevels = a_procs.size();
+  a_ranks.resize(numBoxes);
 
-  std::map<std::pair<int, int>, int> boxmap;
+  if (numSubsets > 0) {
 
-  Vector<Box> allBoxes;
-  Vector<T>   allLoads;
-  Vector<int> allProcs;
+    // Figure out the total and target load (load per subset) on this level.
+    Real totalLoad = 0.0;
+    for (int ibox = 0; ibox < numBoxes; ibox++) {
+      totalLoad += boxLoads[ibox];
+    }
 
-  int gbox = 0;
+    Real staticTargetLoad = totalLoad / numSubsets;
 
-  // Make the hierarchy to level mapping
-  for (int lvl = 0; lvl < nlevels; lvl++) {
-    for (int ibox = 0; ibox < a_boxes[lvl].size(); ibox++) {
+    // Build the grid subsets. When we do this we iterate through the boxes and try to ensure that we partition
+    // the subsets such that the subsetLoad is as close to the dynamic targetLoad as possible.
+    //
+    // The pair contains the starting index for the subset and the computational load for the subset.
+    using Span   = std::pair<int, int>;
+    using Subset = std::pair<Span, Real>;
 
-      allBoxes.push_back(a_boxes[lvl][ibox]);
-      allLoads.push_back(a_loads[lvl][ibox]);
+    std::vector<Subset> subsets(numSubsets);
 
-      boxmap.emplace(std::pair<int, int>(lvl, ibox), gbox);
+    int firstSubsetBox = 0;
 
-      gbox++;
+    Real remainingLoad = totalLoad;
+
+    for (int curSubset = 0; curSubset < numSubsets; curSubset++) {
+
+      // The firstSubsetBox is the index for the first box in this subset (always assigned).
+      Real subsetLoad = boxLoads[firstSubsetBox];
+
+      int lastSubsetBox = firstSubsetBox;
+
+      const int subsetsLeft = numSubsets - (curSubset + 1);
+      const int boxesLeft   = numBoxes - (firstSubsetBox + 1);
+
+      if (boxesLeft > subsetsLeft) {
+        for (int ibox = firstSubsetBox + 1; ibox < numBoxes; ibox++) {
+
+          // Hook for catching case when we add too many boxes to this subset. Each remaining subset must have at least one box.
+          if (numBoxes - lastSubsetBox - 1 <= subsetsLeft) {
+            break;
+          }
+
+          // Check if we should add this box - we do this by making sure that the dynamically moving target load stays as close
+          // to the static load as possible.
+          //
+          // In the below, '1' is the load without ibox, and '2' is the load with ibox
+          const Real load1 = subsetLoad;
+          const Real load2 = subsetLoad + boxLoads[ibox];
+
+          // Check if we should add this box.
+          bool addBoxToSubset = false;
+
+          if (boxLoads[ibox] <= std::numeric_limits<Real>::epsilon()) {
+            addBoxToSubset = true;
+          }
+          else if (load1 > staticTargetLoad) {
+            addBoxToSubset = false;
+          }
+          else if (load2 <= staticTargetLoad) {
+            addBoxToSubset = true;
+          }
+          else if (load1 <= staticTargetLoad && load2 > staticTargetLoad) {
+            // Compute the new average load if we add or don't add this box to the current subset. Accept the answer
+            // that leads to a smallest deviation from the static target load.
+            const Real loadErrWithoutBox = std::abs(load1 - staticTargetLoad);
+            const Real loadErrWithBox    = std::abs(load2 - staticTargetLoad);
+
+            if (loadErrWithBox <= loadErrWithoutBox) {
+              addBoxToSubset = true;
+            }
+          }
+
+          // Add box or break out of box iteration.
+          if (addBoxToSubset) {
+            subsetLoad    = subsetLoad + boxLoads[ibox];
+            lastSubsetBox = ibox;
+
+            continue;
+          }
+          else {
+            lastSubsetBox = ibox - 1;
+
+            break;
+          }
+        }
+      }
+
+      // Create the subset
+      subsets[curSubset] = std::make_pair(std::make_pair(firstSubsetBox, lastSubsetBox), subsetLoad);
+
+      // Update the remaining load.
+      remainingLoad    = remainingLoad - subsetLoad;
+      staticTargetLoad = remainingLoad / subsetsLeft;
+
+      // Update start box for next iteration.
+      firstSubsetBox = lastSubsetBox + 1;
+    }
+
+    // Sort the subsets from largest to smallest computational load.
+    std::sort(subsets.begin(), subsets.end(), [](const Subset& A, const Subset& B) -> bool {
+      return A.second > B.second;
+    });
+
+    // Get the accumulated loads per rank, sorted by lowest-to-highest load.
+    const std::vector<std::pair<int, Real>> sortedRankLoads = a_rankLoads.getSortedLoads();
+
+    // Assign the most expensive grid subset to the rank with the lowest accumulated load.
+    for (int i = 0; i < subsets.size(); i++) {
+      const int  startIndex = subsets[i].first.first;
+      const int  endIndex   = subsets[i].first.second;
+      const Real subsetLoad = subsets[i].second;
+      const int  rank       = sortedRankLoads[i].first;
+
+      // Assign to rank
+      for (int ibox = startIndex; ibox <= endIndex; ibox++) {
+        a_ranks[ibox] = rank;
+      }
+
+      // Update load on this rank.
+      a_rankLoads.incrementLoad(rank, subsetLoad);
     }
   }
-
-  // Do global load balancing
-  LoadBalancing::makeBalance(allProcs, allLoads, allBoxes);
-
-  // Resize the a_procs vector to correct size.
-  a_procs.resize(nlevels);
-  for (int lvl = 0; lvl < nlevels; lvl++) {
-    a_procs[lvl].resize(a_boxes[lvl].size(), -1);
-  }
-
-  // Do the global to local mapping
-  for (const auto& bmap : boxmap) {
-    const int gid = bmap.second;       // Global index
-    const int lvl = bmap.first.first;  // Current level
-    const int lid = bmap.first.second; // Local box index on level lvl
-    const int pid = allProcs[gid];     // Processor ownership
-
-    a_procs[lvl][lid] = pid;
+  else {
+    a_ranks.resize(0);
   }
 }
 

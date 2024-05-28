@@ -22,6 +22,7 @@
 #include <CD_MultifluidAlias.H>
 #include <CD_LoadBalancing.H>
 #include <CD_Timer.H>
+#include <CD_Loads.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_TiledMeshRefine.H>
 #include <CD_DataOps.H>
@@ -1218,11 +1219,28 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
     domainSplit(m_domains[0], newBoxes[0], m_maxBoxSize, m_blockingFactor);
   }
 
-  // Sort the boxes and then load balance them, using the patch volume as an initial proxy.
+  // Sort the boxes and then load balance them, using the patch volume as a proxy for the computational load.
   Vector<Vector<int>> processorIDs(1 + m_finestLevel);
+
+  // Accumulated loads on each rank.
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+
+    // Sort boxes to ensure locality.
     LoadBalancing::sort(newBoxes[lvl], m_boxSort);
-    LoadBalancing::makeBalance(processorIDs[lvl], newBoxes[lvl]);
+
+    // Compute the loads for the boxes, using the number of cells in the box as a proxy.
+    const Vector<Box>& levelBoxes = newBoxes[lvl];
+    Vector<long int>   boxLoads(levelBoxes.size());
+
+    for (int ibox = 0; ibox < levelBoxes.size(); ibox++) {
+      boxLoads[ibox] = levelBoxes[ibox].numPts();
+    }
+
+    // Load balance this grid -- assign grid subsets to the least loaded rank.
+    LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, boxLoads, newBoxes[lvl]);
   }
 
   // Now we define the grids. If a_lmin=0 every grid is new, otherwise keep old grids up to but not including a_lmin
@@ -2420,8 +2438,11 @@ AmrMesh::setGrids(const Vector<Vector<Box>>&                             a_boxes
     Vector<Vector<int>> processorIDs(1 + m_finestLevel);
 
     // Do load balancing.
+    Loads rankLoads;
+    rankLoads.resetLoads();
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      LoadBalancing::makeBalance(processorIDs[lvl], curLoads[lvl], a_boxes[lvl]);
+      LoadBalancing::makeBalance(processorIDs[lvl], rankLoads, curLoads[lvl], a_boxes[lvl]);
     }
 
     this->regridRealm(curRealm, processorIDs, a_boxes, lmin);
@@ -3025,6 +3046,22 @@ AmrMesh::getValidCells(const std::string a_realm) const
   return m_realms[a_realm]->getValidCells();
 }
 
+const Vector<RefCountedPtr<LevelTiles>>&
+AmrMesh::getLevelTiles(const std::string a_realm) const
+{
+  CH_TIME("AmrMesh::getLevelTiles(string)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::getLevelTiles(string)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getLevelTiles(string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getLevelTiles();
+}
+
 const Vector<RefCountedPtr<EBLevelGrid>>&
 AmrMesh::getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const
 {
@@ -3354,6 +3391,7 @@ AmrMesh::defineRealms()
                      m_dx,
                      m_probLo,
                      m_finestLevel,
+                     m_blockingFactor,
                      m_numEbGhostsCells,
                      m_numGhostCells,
                      m_numLsfGhostCells,
@@ -3409,6 +3447,7 @@ AmrMesh::regridRealm(const std::string          a_realm,
                             m_dx,
                             m_probLo,
                             m_finestLevel,
+                            m_blockingFactor,
                             m_numEbGhostsCells,
                             m_numGhostCells,
                             m_numLsfGhostCells,

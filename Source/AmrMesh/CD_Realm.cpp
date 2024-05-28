@@ -47,6 +47,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
               const Vector<Real>&                                       a_dx,
               const RealVect                                            a_probLo,
               const int                                                 a_finestLevel,
+              const int                                                 a_blockingFactor,
               const int                                                 a_ebGhost,
               const int                                                 a_numGhost,
               const int                                                 a_lsfGhost,
@@ -70,6 +71,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
   m_dx                   = a_dx;
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
+  m_blockingFactor       = a_blockingFactor;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
 
@@ -164,6 +166,7 @@ Realm::regridBase(const int a_lmin)
 
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
+  this->defineLevelTiles();
 }
 
 void
@@ -491,6 +494,21 @@ Realm::defineValidCells()
 }
 
 void
+Realm::defineLevelTiles() noexcept
+{
+  CH_TIME("Realm::defineLevelTiles");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineLevelTiles" << endl;
+  }
+
+  m_levelTiles.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    m_levelTiles[lvl] = RefCountedPtr<LevelTiles>(new LevelTiles(m_grids[lvl], m_blockingFactor));
+  }
+}
+
+void
 Realm::registerOperator(const std::string a_operator, const phase::which_phase a_phase)
 {
   CH_TIME("Realm::registerOperator(operator, phase)");
@@ -702,6 +720,12 @@ const AMRMask&
 Realm::getValidCells() const
 {
   return m_validCells;
+}
+
+const Vector<RefCountedPtr<LevelTiles>>&
+Realm::getLevelTiles() const noexcept
+{
+  return m_levelTiles;
 }
 
 #include <CD_NamespaceFooter.H>

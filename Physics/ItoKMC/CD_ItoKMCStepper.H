@@ -204,7 +204,7 @@ namespace Physics {
 	@return    Returns the time step that was used. 
       */
       virtual Real
-      advance(const Real a_dt) = 0;
+      advance(const Real a_dt) override = 0;
 
       /*!
 	@brief Compute a time step used for the advance method
@@ -291,7 +291,8 @@ namespace Physics {
 	@param[in]  a_finestLevel New finest grid level
 	@details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation
 	uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and
-	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance(Vector<int>, Vector<T>, Vector<Box>).
+	he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance on each level. It is up to the user/programmer
+	to decide if load balancing should be done independently on each level, or if loads per MPI rank are accumulated across levels.
       */
       virtual void
       loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
@@ -635,7 +636,7 @@ namespace Physics {
 	@note This is agglomerated with Ito particle photoionization functionality, and is
 	therefore defined on the particle realm. 
       */
-      Vector<ParticleContainer<PointParticle>> m_cdrPhotoiProducts;
+      mutable Vector<ParticleContainer<PointParticle>> m_cdrPhotoiProducts;
 
       /*!
 	@brief Solver indices used when load-balancing the particle solvers.
@@ -1408,12 +1409,12 @@ namespace Physics {
 	@note This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel will
 	only run over valid grid cells (not covered by a finer grid. 
       */
-      virtual void
+      inline void
       advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
                              LevelData<EBCellFAB>&       a_newPhotonsPerCell,
                              const LevelData<EBCellFAB>& a_electricField,
                              const int                   a_level,
-                             const Real                  a_dt) noexcept;
+                             const Real                  a_dt) const noexcept;
 
       /*!
 	@brief Chemistry advance over time a_dt. Patch version. 
@@ -1428,7 +1429,7 @@ namespace Physics {
 	@note This should be called through the AMR signature. All data should be defined on the fluid realm. The kernel will
 	only run over valid grid cells (not covered by a finer grid. 
       */
-      virtual void
+      inline void
       advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
                              EBCellFAB&       a_newPhotonsPerCell,
                              const EBCellFAB& a_electricField,
@@ -1436,7 +1437,7 @@ namespace Physics {
                              const DataIndex  a_dit,
                              const Box        a_box,
                              const Real       a_dx,
-                             const Real       a_dt) noexcept;
+                             const Real       a_dt) const noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
@@ -1445,10 +1446,10 @@ namespace Physics {
 	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
-      virtual void
+      inline void
       reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                          const EBAMRCellData& a_oldParticlesPerCell,
-                         const EBAMRCellData& a_newPhotonsPerCell) noexcept;
+                         const EBAMRCellData& a_newPhotonsPerCell) const noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
@@ -1458,11 +1459,11 @@ namespace Physics {
 	@param[in] a_level                Grid level
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
-      virtual void
+      inline void
       reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                          const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                          const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-                         const int                   a_level) noexcept;
+                         const int                   a_level) const noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
@@ -1475,14 +1476,14 @@ namespace Physics {
 	@param[in] a_dx                   Grid resolution. 
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
-      virtual void
+      inline void
       reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                          const EBCellFAB& a_oldParticlesPerCell,
                          const EBCellFAB& a_newPhotonsPerCell,
                          const int        a_level,
                          const DataIndex  a_dit,
                          const Box        a_box,
-                         const Real       a_dx) noexcept;
+                         const Real       a_dx) const noexcept;
 
       /*!
 	@brief Reconcile the results from photoionization reactions

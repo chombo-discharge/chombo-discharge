@@ -95,7 +95,7 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearIn(void* a_buffer);
+  linearIn(void* a_buffer) override;
 
 protected:
   /*!

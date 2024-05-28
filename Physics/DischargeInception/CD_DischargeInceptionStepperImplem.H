@@ -587,13 +587,13 @@ DischargeInceptionStepper<P, F, C>::parseTransportAlgorithm() noexcept
   CH_assert(m_firstDt > 0.0);
 
   if (str == "euler") {
-    m_transportAlgorithm == TransportAlgorithm::Euler;
+    m_transportAlgorithm = TransportAlgorithm::Euler;
   }
   else if (str == "heun") {
-    m_transportAlgorithm == TransportAlgorithm::Heun;
+    m_transportAlgorithm = TransportAlgorithm::Heun;
   }
   else if (str == "imex") {
-    m_transportAlgorithm == TransportAlgorithm::ImExCTU;
+    m_transportAlgorithm = TransportAlgorithm::ImExCTU;
   }
   else {
     MayDay::Error("Expected 'euler', 'heun', or 'imex' for 'DischargeInceptionStepper.transport_alg'");
@@ -2566,11 +2566,9 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
   m_tracerParticleSolver->remap();
 
-  size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
 
   if (m_debug) {
-    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
@@ -2724,19 +2722,14 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
   this->rewindTracerParticles();
 
-  size_t outcastsAfter  = 0;
   size_t particlesAfter = 0;
 
   if (m_debug) {
-    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::inceptionIntegrateEuler - lost/gained particles!");
-  }
-  if (outcastsBefore != outcastsAfter) {
-    MayDay::Warning("DischargeInceptionStepper::inceptionIntegrateEuler - lost/gained outcast particles!");
   }
 }
 
@@ -2774,11 +2767,9 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
 
   m_tracerParticleSolver->remap();
 
-  size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
 
   if (m_debug) {
-    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
@@ -3224,11 +3215,9 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
 
   m_tracerParticleSolver->remap();
 
-  size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
 
   if (m_debug) {
-    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
@@ -3333,19 +3322,14 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
 
   this->rewindTracerParticles();
 
-  size_t outcastsAfter  = 0;
   size_t particlesAfter = 0;
 
   if (m_debug) {
-    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::townsendTrackEuler - lost/gained particles!");
-  }
-  if (outcastsBefore != outcastsAfter) {
-    MayDay::Warning("DischargeInceptionStepper::townsendTrackEuler - lost/gained outcast particles!");
   }
 }
 
@@ -3377,11 +3361,9 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
 
   m_tracerParticleSolver->remap();
 
-  size_t outcastsBefore  = 0;
   size_t particlesBefore = 0;
 
   if (m_debug) {
-    outcastsBefore  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesBefore = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
@@ -3555,19 +3537,14 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
 
   this->rewindTracerParticles();
 
-  size_t outcastsAfter  = 0;
   size_t particlesAfter = 0;
 
   if (m_debug) {
-    outcastsAfter  = amrParticles.getNumberOfOutcastParticlesGlobal();
     particlesAfter = amrParticles.getNumberOfValidParticlesGlobal();
   }
 
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::townsendTrackTrapezoidal - lost/gained particles!");
-  }
-  if (outcastsBefore != outcastsAfter) {
-    MayDay::Warning("DischargeInceptionStepper::townsendTrackTrapezoidal - lost/gained outcast particles!");
   }
 }
 

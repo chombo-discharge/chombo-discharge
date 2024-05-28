@@ -24,6 +24,7 @@
 
 // Our includes
 #include <CD_OpenMP.H>
+#include <CD_LevelTiles.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -62,25 +63,27 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
+    @param[in] a_levelTiles     Tiled AMR grids
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
     @param[in] a_realm          Realm where these particles live. 
   */
-  ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
-                    const Vector<ProblemDomain>&     a_domains,
-                    const Vector<Real>&              a_dx,
-                    const Vector<int>&               a_refRat,
-                    const Vector<ValidMask>&         a_validMask,
-                    const RealVect&                  a_probLo,
-                    const int                        a_blockingFactor,
-                    const int                        a_finestLevel,
-                    const std::string                a_realm);
+  ParticleContainer(const Vector<DisjointBoxLayout>&         a_grids,
+                    const Vector<ProblemDomain>&             a_domains,
+                    const Vector<Real>&                      a_dx,
+                    const Vector<int>&                       a_refRat,
+                    const Vector<ValidMask>&                 a_validMask,
+                    const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+                    const RealVect&                          a_probLo,
+                    const int                                a_blockingFactor,
+                    const int                                a_finestLevel,
+                    const std::string                        a_realm);
 
   /*!
     @brief Destructor ( does nothing)
   */
-  ~ParticleContainer();
+  virtual ~ParticleContainer();
 
   /*!
     @brief Define the container. This will do a clear-out of all particles. 
@@ -89,21 +92,23 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells (false for cells covered by a finer grid)
+    @param[in] a_levelTiles     Tiled AMR grids
     @param[in] a_probLo         Lower-left corner of the physical domain
     @param[in] a_blockingFactor Grid blocking factor
     @param[in] a_finestLevel    Finest grid level
     @param[in] a_realm          Realm where these particles live. 
   */
   void
-  define(const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<ProblemDomain>&     a_domains,
-         const Vector<Real>&              a_dx,
-         const Vector<int>&               a_refRat,
-         const Vector<ValidMask>&         a_validMask,
-         const RealVect&                  a_probLo,
-         const int                        a_blockingFactor,
-         const int                        a_finestLevel,
-         const std::string                a_realm);
+  define(const Vector<DisjointBoxLayout>&         a_grids,
+         const Vector<ProblemDomain>&             a_domains,
+         const Vector<Real>&                      a_dx,
+         const Vector<int>&                       a_refRat,
+         const Vector<ValidMask>&                 a_validMask,
+         const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+         const RealVect&                          a_probLo,
+         const int                                a_blockingFactor,
+         const int                                a_finestLevel,
+         const std::string                        a_realm);
 
   /*!
     @brief Regrid function. a_base is the coarsest grid level which did not change
@@ -112,17 +117,19 @@ public:
     @param[in] a_dx             Grid resolutions
     @param[in] a_refRat         Refinement ratios
     @param[in] a_validMask      Valid cells
+    @param[in] a_levelTiles     Tiled AMR grids
     @param[in] a_base           Coarsest grid level that did not change. 
     @param[in] a_newFinestLevel New finest grid level
   */
   void
-  regrid(const Vector<DisjointBoxLayout>& a_grids,
-         const Vector<ProblemDomain>&     a_domains,
-         const Vector<Real>&              a_dx,
-         const Vector<int>&               a_refRat,
-         const Vector<ValidMask>&         a_validMask,
-         const int                        a_base,
-         const int                        a_newFinestLevel);
+  regrid(const Vector<DisjointBoxLayout>&         a_grids,
+         const Vector<ProblemDomain>&             a_domains,
+         const Vector<Real>&                      a_dx,
+         const Vector<int>&                       a_refRat,
+         const Vector<ValidMask>&                 a_validMask,
+         const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
+         const int                                a_base,
+         const int                                a_newFinestLevel);
 
   /*!
     @brief Cache particles before calling regrid. 
@@ -186,6 +193,12 @@ public:
   */
   void
   clearMaskParticles() const;
+
+  /*!
+    @brief Clear outcast particles
+  */
+  void
+  clearOutcast() noexcept;
 
   /*!
     @brief Clear particles on input data holder
@@ -417,23 +430,16 @@ public:
   addParticlesDestructive(ParticleContainer<P>& a_otherContainer);
 
   /*!
+    @brief Run a sanity check and make sure all particles are in their correctly assigned box
+  */
+  void
+  sanityCheck() const noexcept;
+
+  /*!
     @brief Remap over the entire AMR hierarchy
   */
   void
   remap();
-
-  /*!
-    @brief Do level remaps. This ignores particles moving between levels and moving out of valid regions.
-  */
-  void
-  levelRemap();
-
-  /*!
-    @brief Do a level remap. This ignores particles moving between levels and moving out of valid regions. 
-    @param[in] a_level Grid level
-  */
-  void
-  levelRemap(const int a_level);
 
   /*!
     @brief Move particles into this container. 
@@ -450,15 +456,6 @@ public:
   */
   void
   transferParticles(AMRParticles<P>& a_otherContainer);
-
-  /*!
-    @brief Evict particles if they move out of the valid region.
-    @param[inout] a_evictedParticles List that the particles are moved into.
-    @param[inout] a_particles        Particles.
-    @param[in]    a_level            Grid level.
-  */
-  void
-  evictInvalidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
 
   /*!
     @brief Evict particles if they move out of the valid region.
@@ -568,6 +565,21 @@ protected:
   bool m_profile;
 
   /*!
+    @brief Debug or not
+  */
+  bool m_debug;
+
+  /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
+
+  /*!
+    @brief Tiled AMR space
+  */
+  Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
+
+  /*!
     @brief AMR grids
   */
   Vector<DisjointBoxLayout> m_grids;
@@ -623,16 +635,10 @@ protected:
   mutable AMRParticles<P> m_maskParticles;
 
   /*!
-    @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
-    deposition steps. 
-  */
-  Vector<List<P>> m_cacheParticles;
-
-  /*!
     @brief Particles stored on the old grid. 
     @details Populated during the preRegrid call.
   */
-  AMRParticles<P> m_regridParticles;
+  AMRParticles<P> m_cacheParticles;
 
   /*!
     @brief Cell particles. 
@@ -654,6 +660,52 @@ protected:
   */
   void
   setupParticleData(const int a_base, const int a_finestLevel);
+
+  /*!
+    @brief Gather the particles onto a single list
+    @param[inout] a_list List containing all the particles in a_particles
+    @param[inout] a_particles Particles to transfer to list
+    @note This is supposed to get inside an OpenMP parallel region.
+  */
+  inline void
+  transferParticlesToSingleList(List<P>& a_list, AMRParticles<P>& a_particles) const noexcept;
+
+  /*!
+    @brief Copy the input particles onto a single list
+    @param[inout] a_list List containing all the particles in a_particles
+    @param[inout] a_particles Particles to transfer to list
+    @note This is supposed to get inside an OpenMP parallel region.
+  */
+  inline void
+  copyParticlesToSingleList(List<P>& a_list, const AMRParticles<P>& a_particles) const noexcept;
+
+  /*!
+    @brief Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks
+    @param[inout] a_mappedParticles Particles mapped according to rank ownership (vector index) and grid level and index (std::pair)
+    @param[inout] a_unmappedParticles Particles that are not mapped (yet)
+  */
+  inline void
+  mapParticlesToAMRGrid(std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_mappedParticles,
+                        List<P>& a_unmappedParticles) const noexcept;
+
+  /*!
+    @brief Catenate the particles. This is usually called within OpenMP parallel regions.
+    @param[inout] a_globalParticles Global particle map
+    @param[inout] a_localParticles Local particle map
+   */
+  inline void
+  catenateParticleMaps(
+    std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_globalParticles,
+    std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_localParticles) const noexcept;
+
+  /*!
+    @brief Gather particles locally
+    @param[inout] a_mappedParticles Particles that have been mapped to this rank. 
+    @param[inout] a_particleData Where to assign the mapped particles
+  */
+  inline void
+  assignLocalParticles(std::map<std::pair<unsigned int, unsigned int>, List<P>>& a_mappedParticles,
+                       AMRParticles<P>&                                          a_particleData) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

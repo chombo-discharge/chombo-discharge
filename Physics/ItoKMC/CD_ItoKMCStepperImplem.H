@@ -3753,9 +3753,14 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electricField, const Real a_dt) noexcept
 {
-  CH_TIME("ItoKMCStepper::advanceReactionNetwork(EBAMRCellData, Real)");
+  CH_TIMERS("ItoKMCStepper::advanceReactionNetwork");
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::compute_ppc", t1);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::integrate_network", t2);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::copies", t3);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_particles", t4);
+  CH_TIMER("ItoKMCStepper::advanceReactionNetwork::reconcile_cdr", t5);
   if (m_verbosity > 5) {
-    pout() << m_name + "::advanceReactionNetwork(EBAMRCellData, Real)" << endl;
+    pout() << m_name + "::advanceReactionNetwork" << endl;
   }
 
   const int numItoSpecies    = m_physics->getNumItoSpecies();
@@ -3767,6 +3772,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
   // Compute the number of reactive particles for both Ito and CDR species. Also do a backup of the initial number
   // of particles per cell. This is required when reconciling the results lateron.
+  CH_START(t1);
   if (numItoSpecies > 0) {
     this->computeReactiveItoParticlesPerCell(m_particleItoPPC);
 
@@ -3790,14 +3796,18 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
   DataOps::setValue(m_fluidYPC, 0.0);
   DataOps::setValue(m_particleYPC, 0.0);
+  CH_STOP(t1);
 
   // Advance the reaction network which gives us a new number of particles per cell, as well as the number of
   // photons that need to be generated per cell.
+  CH_START(t2);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     this->advanceReactionNetwork(*m_fluidPPC[lvl], *m_fluidYPC[lvl], *a_electricField[lvl], lvl, a_dt);
   }
+  CH_STOP(t2);
 
   // Copy the results back to the holders that hold the number of particles per cell for Ito/Cdr solvers.
+  CH_START(t3);
   if (numItoSpecies > 0) {
     const Interval srcInterv(0, numItoSpecies - 1);
     const Interval dstInterv(0, numItoSpecies - 1);
@@ -3813,9 +3823,11 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   if (numPhotonSpecies > 0) {
     m_amr->copyData(m_particleYPC, m_fluidYPC);
   }
+  CH_STOP(t3);
 
   // If we have photoionization reactions and CDR solvers we need to put the resulting particles on the mesh first,
   // and then add the result back into the CDR solvers.
+  CH_START(t4);
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
     m_cdrPhotoiProducts[i].clearParticles();
     m_cdrPhotoiProducts[i].organizeParticlesByCell();
@@ -3824,10 +3836,12 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
   // the source terms.
   this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC);
+  CH_STOP(t4);
 
   // Deposited PointParticles on the mesh and add the result to m_fluidCdrPPC. This is a bit convoluted because
   // the photoionization products are created in reconcileParticles and  deposited them on the particle realm, but
   // the resulting products need to end up on in the correct data component in m_fluidCdrPPC.
+  CH_START(t5);
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
     m_cdrPhotoiProducts[i].organizeParticlesByPatch();
 
@@ -3849,15 +3863,16 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   }
 
   this->reconcileCdrDensities(m_fluidCdrPPC, m_fluidOldCdrPPC, a_dt);
+  CH_STOP(t5);
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_particlesPerCell,
                                                   LevelData<EBCellFAB>&       a_newPhotonsPerCell,
                                                   const LevelData<EBCellFAB>& a_electricField,
                                                   const int                   a_level,
-                                                  const Real                  a_dt) noexcept
+                                                  const Real                  a_dt) const noexcept
 {
   CH_TIME("ItoKMCStepper::advanceReactionNetwork(LD<EBCellFAB>x3, int, Real)");
   if (m_verbosity > 5) {
@@ -3876,23 +3891,30 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(LevelData<EBCellFAB>&       a_
 
   const int nbox = dit.size();
 
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
+#pragma omp parallel
+  {
+    m_physics->defineKMC();
 
-    this->advanceReactionNetwork(a_particlesPerCell[din],
-                                 a_newPhotonsPerCell[din],
-                                 a_electricField[din],
-                                 a_level,
-                                 din,
-                                 dbl[din],
-                                 m_amr->getDx()[a_level],
-                                 a_dt);
+#pragma omp for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      this->advanceReactionNetwork(a_particlesPerCell[din],
+                                   a_newPhotonsPerCell[din],
+                                   a_electricField[din],
+                                   a_level,
+                                   din,
+                                   dbl[din],
+                                   m_amr->getDx()[a_level],
+                                   a_dt);
+    }
+
+    m_physics->killKMC();
   }
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPerCell,
                                                   EBCellFAB&       a_newPhotonsPerCell,
                                                   const EBCellFAB& a_electricField,
@@ -3900,7 +3922,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
                                                   const DataIndex  a_dit,
                                                   const Box        a_box,
                                                   const Real       a_dx,
-                                                  const Real       a_dt) noexcept
+                                                  const Real       a_dt) const noexcept
 {
   CH_TIME("ItoKMCStepper::advanceReactionNetwork(EBCellFABx3, int, DataIndex, Box, Realx2)");
   if (m_verbosity > 5) {
@@ -4070,10 +4092,10 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                                               const EBAMRCellData& a_oldParticlesPerCell,
-                                              const EBAMRCellData& a_newPhotonsPerCell) noexcept
+                                              const EBAMRCellData& a_newPhotonsPerCell) const noexcept
 {
   CH_TIME("ItoKMCStepper::reconcileParticles(EBAMRCellDatax3)");
   if (m_verbosity > 5) {
@@ -4090,11 +4112,11 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticle
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-                                              const int                   a_level) noexcept
+                                              const int                   a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
   if (m_verbosity > 5) {
@@ -4128,18 +4150,21 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
 }
 
 template <typename I, typename C, typename R, typename F>
-void
+inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                               const EBCellFAB& a_oldParticlesPerCell,
                                               const EBCellFAB& a_newPhotonsPerCell,
                                               const int        a_level,
                                               const DataIndex  a_dit,
                                               const Box        a_box,
-                                              const Real       a_dx) noexcept
+                                              const Real       a_dx) const noexcept
 {
-  CH_TIME("ItoKMCStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
+  CH_TIMERS("ItoKMCStepper::reconcileParticles(patch)");
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::collect_ptr", t1);
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::regular_cells", t2);
+  CH_TIMER("ItoKMCStepper::reconcileParticles(patch)::irregular_cells", t3);
   if (m_verbosity > 5) {
-    pout() << m_name + "::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
+    pout() << m_name + "::reconcileParticles(patch)" << endl;
   }
 
   // TLDR: This is the main routine for generating new particles/photons after the chemistry advance have finished. We have
@@ -4163,6 +4188,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   const int ppc = (a_level < m_particlesPerCell.size()) ? m_particlesPerCell[a_level] : m_particlesPerCell.back();
 
   // List of valid grid cells
+  CH_START(t1);
   const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
 
   // Pointers to cell-centered particle storages. Note that the BinFabs hold a list of particles/photons
@@ -4219,6 +4245,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   Vector<List<PointParticle>*> cdrParticles(numCdrSpecies);
   Vector<List<Photon>*>        bulkPhotons(numPhotonSpecies);
   Vector<List<Photon>*>        sourcePhotons(numPhotonSpecies);
+  CH_STOP(t1);
 
   // Regular cells
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4387,8 +4414,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   // Run the kernels.
   VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
 
+  CH_START(t2);
   BoxLoops::loop(a_box, regularKernel);
+  CH_STOP(t2);
+
+  CH_START(t3);
   BoxLoops::loop(vofit, irregularKernel);
+  CH_STOP(t3);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -5642,8 +5674,13 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
 
   // 5. Finally do the actual load balancing.
   LoadBalancing::sort(a_boxes, loads, m_boxSort);
-  LoadBalancing::balanceLevelByLevel(a_procs, loads, a_boxes);
-  //  LoadBalancing::hierarchy(a_procs, loads, a_boxes); If you want to try something crazy...
+
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
+    LoadBalancing::makeBalance(a_procs[lvl], rankLoads, loads[lvl], a_boxes[lvl]);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -5678,15 +5715,19 @@ ItoKMCStepper<I, C, R, F>::loadBalanceFluidRealm(Vector<Vector<int>>&           
   m_fieldSolver->allocate();
   m_fieldSolver->setupSolver();
 
+  // Loads on each rank
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
   // Field solver implementation gets the responsibility of computing loads on each level.
   for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-    Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
+    Vector<long long> boxLoads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
 
     // Do the desired sorting and load balancing
     a_boxes[lvl] = a_grids[lvl].boxArray();
 
-    LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
-    LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
+    LoadBalancing::sort(a_boxes[lvl], boxLoads, m_boxSort);
+    LoadBalancing::makeBalance(a_procs[lvl], rankLoads, boxLoads, a_boxes[lvl]);
   }
 }
 

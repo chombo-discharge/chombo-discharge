@@ -421,15 +421,18 @@ namespace Physics {
       // for doing that but it will not know if AmrMesh has updated it's operators or not. So, we need to regrid them.
       m_amr->regridOperators(a_lmin);
 
+      Loads rankLoads;
+      rankLoads.resetLoads();
+
       // Field solver implementation gets the responsibility of computing loads on each level.
       for (int lvl = 0; lvl <= a_finestLevel; lvl++) {
-        Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
+        Vector<long long> boxLoads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
 
         // Do the desired sorting and load balancing
         a_boxes[lvl] = a_grids[lvl].boxArray();
 
-        LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
-        LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
+        LoadBalancing::sort(a_boxes[lvl], boxLoads, m_boxSort);
+        LoadBalancing::makeBalance(a_procs[lvl], rankLoads, boxLoads, a_boxes[lvl]);
       }
     }
 

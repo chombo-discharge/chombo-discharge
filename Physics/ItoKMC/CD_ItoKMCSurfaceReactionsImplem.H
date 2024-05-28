@@ -10,7 +10,7 @@
 */
 
 #ifndef CD_ItoKMCSurfaceReactionsImplem_H
-#define CD_ItoKMCSurfaceReactionsIMplem_H
+#define CD_ItoKMCSurfaceReactionsImplem_H
 
 // Our includes
 #include <CD_ItoKMCSurfaceReactions.H>

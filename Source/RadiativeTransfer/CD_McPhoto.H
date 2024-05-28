@@ -386,7 +386,7 @@ public:
     @return Returns number of plot variables that will be written to file in writePlotData
   */
   virtual int
-  getNumberOfPlotVariables() const;
+  getNumberOfPlotVariables() const override;
 
   /*!
     @brief Count number of photons in particle list
@@ -394,13 +394,6 @@ public:
   */
   virtual int
   countPhotons(const AMRParticles<Photon>& a_photons) const;
-
-  /*!
-    @brief Count number of outcast photons in particle list
-    @param[in] a_photons Particle list
-  */
-  virtual int
-  countOutcast(const AMRParticles<Photon>& a_photons) const;
 
   /*!
     @brief Get m_photons
@@ -459,7 +452,7 @@ public:
     @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
   */
   virtual void
-  computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept;
+  computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept override;
 
 protected:
   /*!

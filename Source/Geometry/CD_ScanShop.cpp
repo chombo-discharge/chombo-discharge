@@ -175,7 +175,14 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
 
     domainSplit(a_domain, boxes, a_maxGridSize);
     LoadBalancing::sort(boxes, m_boxSorting);
-    LoadBalancing::makeBalance(procs, boxes);
+
+    // Set proxy loads
+    const Vector<long int> loads(boxes.size(), 1);
+
+    Loads rankLoads;
+    rankLoads.resetLoads();
+
+    LoadBalancing::makeBalance(procs, rankLoads, loads, boxes);
 
     a_grids.define(boxes, procs, a_domain);
   }
@@ -196,7 +203,13 @@ ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
   Vector<Box> boxes;
   Vector<int> procs;
   domainSplit(m_domains[a_level], boxes, a_maxGridSize);
-  LoadBalancing::makeBalance(procs, boxes);
+
+  const Vector<long int> loads(boxes.size(), 1);
+
+  Loads rankLoads;
+  rankLoads.resetLoads();
+
+  LoadBalancing::makeBalance(procs, rankLoads, loads, boxes);
 
   // 2.
   DisjointBoxLayout dbl(boxes, procs, m_domains[a_level]);
@@ -377,7 +390,8 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   LoadBalancing::sort(a_cutCellBoxes, m_boxSorting);
   m_timer.stopEvent("Sort boxes");
 
-  // Load balance the boxes.
+  // Load balance the boxes - we do not care about accumulated load imbalance across levels here. If it becomes
+  // a problem (never has been in the past) we can easily add accumulated load factor.
   m_timer.startEvent("Make balance");
   const Vector<long> reguCovLoads(reguCovBoxes.size(), 1L);
   const Vector<long> cutCellLoads(a_cutCellBoxes.size(), 1L);
@@ -385,8 +399,14 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   Vector<int> reguCovProcs;
   Vector<int> cutCellProcs;
 
-  LoadBalancing::makeBalance(reguCovProcs, reguCovLoads, reguCovBoxes);
-  LoadBalancing::makeBalance(cutCellProcs, cutCellLoads, a_cutCellBoxes);
+  Loads rankLoads1;
+  Loads rankLoads2;
+
+  rankLoads1.resetLoads();
+  rankLoads2.resetLoads();
+
+  LoadBalancing::makeBalance(reguCovProcs, rankLoads1, reguCovLoads, reguCovBoxes);
+  LoadBalancing::makeBalance(cutCellProcs, rankLoads2, cutCellLoads, a_cutCellBoxes);
   m_timer.stopEvent("Make balance");
 
   // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map

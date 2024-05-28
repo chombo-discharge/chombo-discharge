@@ -68,13 +68,13 @@ public:
     @brief Parse class options
   */
   virtual void
-  parseOptions() = 0;
+  parseOptions() override = 0;
 
   /*!
     @brief Parse class options
   */
   virtual void
-  parseRuntimeOptions() = 0;
+  parseRuntimeOptions() override = 0;
 
   /*!
     @brief Register operator
@@ -288,7 +288,7 @@ protected:
     @brief Advection-only extrapolation to faces
   */
   virtual void
-  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override = 0;
 
   /*!
     @brief Set up diffusion solver

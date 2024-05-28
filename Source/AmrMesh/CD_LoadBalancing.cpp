@@ -9,31 +9,12 @@
   @author  Robert Marskar
 */
 
+// Chombo includes
+#include <ParmParse.H>
+
 // Our includes
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
-
-void
-LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes)
-{
-  CH_TIME("LoadBalancing::makeBalance");
-
-  LoadBalance(a_ranks, a_boxes);
-}
-
-void
-LoadBalancing::roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes)
-{
-  CH_TIME("LoadBalancing::roundRobin");
-
-  const int nProcs = numProc();
-  const int nBoxes = a_boxes.size();
-
-  a_ranks.resize(nBoxes);
-  for (int ibox = 0; ibox < nBoxes; ibox++) {
-    a_ranks[ibox] = ibox % nProcs;
-  }
-}
 
 void
 LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which)
