@@ -201,6 +201,12 @@ namespace Physics {
       getNumPhotonSpecies() const;
 
       /*!
+	@brief Return true/false if physics model needs species gradients.
+      */
+      virtual bool
+      needGradients() const noexcept;
+
+      /*!
 	@brief Get the internal mapping between plasma species and Ito solvers
       */
       inline const std::map<int, std::pair<SpeciesType, int>>&
