@@ -234,9 +234,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
   m_timer.stopEvent("Deposit photons");
 
-  // Compute the number of particles per cell.
-  this->getPhysicalParticlesPerCell(this->m_oldPPC);
-
   // ====== BEGIN TRANSPORT STEP ======
   // Semi-implicitly advance the particles and the field.
   switch (m_algorithm) {
@@ -347,7 +344,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
   }
 
-  this->getPhysicalParticlesPerCell(this->m_newPPC);
   m_timer.stopEvent("EB/Particle intersection");
 
   // Remove the run-time configurable particle storage. It is no longer needed.
@@ -359,18 +355,13 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->advancePhotons(a_dt);
   m_timer.stopEvent("Photon transport");
 
-  // Resolve injection at the EB.
-  this->barrier();
-  m_timer.startEvent("EB particle injection");
-  this->fillSecondaryEmissionEB(a_dt);
-  this->resolveSecondaryEmissionEB(a_dt);
-  m_timer.stopEvent("EB particle injection");
-
   // Compute the gradients of the various species densities - this is used in the KMC kernels.
-  m_timer.startEvent("Gradient calculation");
-  (this->m_ito)->depositParticles();
-  this->computeDensityGradients();
-  m_timer.stopEvent("Gradient calculation");
+  if ((this->m_physics)->needGradients()) {
+    m_timer.startEvent("Gradient calculation");
+    (this->m_ito)->depositParticles();
+    this->computeDensityGradients();
+    m_timer.stopEvent("Gradient calculation");
+  }
 
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
@@ -394,13 +385,22 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
-  // Remove particles that are inside the EB.
+  // Resolve secondary emission. We have filled the relevant particles in the transport step. This is done
+  // AFTER the reaction step to improve stability behavior in cathode sheaths.
+  this->barrier();
+  m_timer.startEvent("EB particle injection");
+  this->fillSecondaryEmissionEB(a_dt);
+  this->resolveSecondaryEmissionEB(a_dt);
+  m_timer.stopEvent("EB particle injection");
+
+  // Remove particles that are inside the EB -- this is not a part of the algorithm, just a safety measure to make sure
+  // we don't do things with particles that lie inside the EB.
   this->barrier();
   m_timer.startEvent("Remove covered");
   this->removeCoveredParticles(SpeciesSubset::AllMobileOrDiffusive, EBRepresentation::Discrete, this->m_toleranceEB);
   m_timer.stopEvent("Remove covered");
 
-  // Clear BC data holders for now.
+  // Clear BC data holders.
   for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
     solverIt()->clear(ItoSolver::WhichContainer::EB);
     solverIt()->clear(ItoSolver::WhichContainer::Domain);
@@ -416,11 +416,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   m_timer.startEvent("Post-compute D");
   this->computeDiffusionCoefficients();
   m_timer.stopEvent("Post-compute D");
-
-  this->barrier();
-  m_timer.startEvent("Compute J");
-  this->computeCurrentDensity(this->m_currentDensity);
-  m_timer.stopEvent("Compute J");
 
   if ((this->m_profile)) {
     m_timer.eventReport(pout(), false);
