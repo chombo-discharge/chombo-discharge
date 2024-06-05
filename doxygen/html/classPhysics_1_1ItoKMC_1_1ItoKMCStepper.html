@@ -801,12 +801,6 @@ Vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class=
 <tr class="memitem:aa9226b44c0686c6cc40a06535da52b77"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRIVData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aa9226b44c0686c6cc40a06535da52b77">m_conductivityEB</a></td></tr>
 <tr class="memdesc:aa9226b44c0686c6cc40a06535da52b77"><td class="mdescLeft">&#160;</td><td class="mdescRight">EB-centered conductivity.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aa9226b44c0686c6cc40a06535da52b77">More...</a><br /></td></tr>
 <tr class="separator:aa9226b44c0686c6cc40a06535da52b77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a61d3b5253c2ca095b226ae82ce017fb1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a61d3b5253c2ca095b226ae82ce017fb1">m_oldPPC</a></td></tr>
-<tr class="memdesc:a61d3b5253c2ca095b226ae82ce017fb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of physical particles per cell.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a61d3b5253c2ca095b226ae82ce017fb1">More...</a><br /></td></tr>
-<tr class="separator:a61d3b5253c2ca095b226ae82ce017fb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeddc9236f34c7b7917e25331df3cc46a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aeddc9236f34c7b7917e25331df3cc46a">m_newPPC</a></td></tr>
-<tr class="memdesc:aeddc9236f34c7b7917e25331df3cc46a"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of physical particles per cell.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aeddc9236f34c7b7917e25331df3cc46a">More...</a><br /></td></tr>
-<tr class="separator:aeddc9236f34c7b7917e25331df3cc46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4eebf477f5f4e9a71147b308669aa860"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a4eebf477f5f4e9a71147b308669aa860">m_particleItoPPC</a></td></tr>
 <tr class="memdesc:a4eebf477f5f4e9a71147b308669aa860"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of physical particles per cell for all Ito species.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a4eebf477f5f4e9a71147b308669aa860">More...</a><br /></td></tr>
 <tr class="separator:a4eebf477f5f4e9a71147b308669aa860"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5750,60 +5744,6 @@ template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto
 
 <p>How often to merge superparticles. </p>
 <p>If &lt;= 1 we merge every time step. </p>
-
-</div>
-</div>
-<a id="aeddc9236f34c7b7917e25331df3cc46a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeddc9236f34c7b7917e25331df3cc46a">&#9670;&nbsp;</a></span>m_newPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverMultigrid&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_newPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of physical particles per cell. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined over the particle realm. </dd></dl>
-
-</div>
-</div>
-<a id="a61d3b5253c2ca095b226ae82ce017fb1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61d3b5253c2ca095b226ae82ce017fb1">&#9670;&nbsp;</a></span>m_oldPPC</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename I  = ItoSolver, typename C  = CdrCTU, typename R  = McPhoto, typename F  = FieldSolverMultigrid&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; I, C, R, F &gt;::m_oldPPC</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>For holding the number of physical particles per cell. </p>
-<dl class="section note"><dt>Note</dt><dd>Defined over the particle realm. </dd></dl>
 
 </div>
 </div>

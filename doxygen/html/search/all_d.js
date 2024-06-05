@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['na_2752',['Na',['../namespaceUnits.html#ac5610edcd876e7c54d72bf34ffc33990',1,'Units']]],
-  ['ncomp_2753',['nComp',['../classDomainFluxIFFAB.html#a50665a2bc513db91afed8bc8af60452f',1,'DomainFluxIFFAB']]],
+  ['na_2751',['Na',['../namespaceUnits.html#ac5610edcd876e7c54d72bf34ffc33990',1,'Units']]],
+  ['ncomp_2752',['nComp',['../classDomainFluxIFFAB.html#a50665a2bc513db91afed8bc8af60452f',1,'DomainFluxIFFAB']]],
+  ['needgradients_2753',['needGradients',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aea4fc097ef2944cbc42c17b412d05817',1,'Physics::ItoKMC::ItoKMCPhysics::needGradients()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab26daaca1d1373dc63bee1f6e7ee8a37',1,'Physics::ItoKMC::ItoKMCJSON::needGradients()']]],
   ['needleif_2754',['NeedleIF',['../classNeedleIF.html',1,'NeedleIF'],['../classNeedleIF.html#a8943e1b740f5d8a0fa593be0d228fef6',1,'NeedleIF::NeedleIF(const Real &amp;a_length, const Real &amp;a_radius, const Real &amp;a_tipRadius, const Real &amp;a_angle, const bool &amp;a_flipInside)'],['../classNeedleIF.html#a5046fc31e3e613c7f92146429f905015',1,'NeedleIF::NeedleIF(const NeedleIF &amp;a_inputIF)']]],
   ['needtoregrid_2755',['needToRegrid',['../classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899',1,'TimeStepper::needToRegrid()'],['../classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a0c3b677e30b7cbeda27e67e016c2d60b',1,'Physics::BrownianWalker::BrownianWalkerStepper::needToRegrid()']]],
   ['neighborhood_2756',['Neighborhood',['../classVofUtils.html#a20afa13a2365fadd02bb69ae65ee9eb9',1,'VofUtils']]],
