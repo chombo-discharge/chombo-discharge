@@ -29,8 +29,8 @@
 	     "header": "E/N (Td)\tMobility *N (1/m/V/s)",
 	     "E/N": 0,
 	     "mu*N": 1,
-	     "min E/N": 1,
-	     "max E/N": 10000,
+	     "min E/N": 200,
+	     "max E/N": 1000,
 	     "points" : 500,
 	     "spacing": "exponential"
 	 },
@@ -51,7 +51,7 @@
 	     [
 		 {
 		     "radius": 200E-6,
-		     "amplitude": 1.0E18,
+		     "amplitude": 1.0E16,
 		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
@@ -83,7 +83,7 @@
 	     [
 		 {
 		     "radius": 200E-6,
-		     "amplitude": 0.8E18,
+		     "amplitude": 0.8E16,
 		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
@@ -104,7 +104,7 @@
 	     [
 		 {
 		     "radius": 200E-6,
-		     "amplitude": 0.2E18,
+		     "amplitude": 0.2E16,
 		     "position": [0, 7.5E-2, 0]
 		 }
 	     ]
