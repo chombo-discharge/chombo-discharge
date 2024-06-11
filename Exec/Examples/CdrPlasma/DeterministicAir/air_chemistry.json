@@ -29,8 +29,8 @@
 	     "header": "E/N (Td)\tMobility *N (1/m/V/s)",
 	     "E/N": 0,
 	     "mu*N": 1,
-	     "min E/N": 200,
-	     "max E/N": 1000,
+	     "min E/N": 1,
+	     "max E/N": 10000,
 	     "points" : 500,
 	     "spacing": "exponential"
 	 },
