@@ -159,6 +159,12 @@ namespace Physics {
       getNumberOfPlotVariables() const noexcept override;
 
       /*!
+	@brief Return true/false if physics model needs species gradients.
+      */
+      virtual bool
+      needGradients() const noexcept override;
+
+      /*!
 	@brief Compute the Ito solver mobilities.
 	@param[in] a_time Time
 	@param[in] a_pos  Position

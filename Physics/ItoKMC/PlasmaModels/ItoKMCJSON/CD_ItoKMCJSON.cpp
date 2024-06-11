@@ -3108,6 +3108,25 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   }
 }
 
+bool
+ItoKMCJSON::needGradients() const noexcept
+{
+  CH_TIME("ItoKMCJSON::needGradients");
+  if (m_verbose) {
+    pout() << m_className + "::needGradients" << endl;
+  }
+
+  bool needGradient = false;
+
+  for (const auto& gradCorr : m_kmcReactionGradientCorrections) {
+    if (gradCorr.first) {
+      needGradient = true;
+    }
+  }
+
+  return needGradient;
+}
+
 int
 ItoKMCJSON::getNumberOfPlotVariables() const noexcept
 {

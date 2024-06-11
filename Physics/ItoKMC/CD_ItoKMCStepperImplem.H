@@ -597,8 +597,6 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
   // Storage required for the reaction network.
-  m_amr->allocate(m_oldPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
-  m_amr->allocate(m_newPPC, m_particleRealm, m_plasmaPhase, numPlasmaSpecies);
   m_amr->allocate(m_fluidPPC, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
 
   if (numItoSpecies > 0) {
@@ -1528,6 +1526,8 @@ ItoKMCStepper<I, C, R, F>::prePlot() noexcept
   }
 
   this->computePhysicsPlotVariables(m_physicsPlotVariables);
+  this->computeCurrentDensity(this->m_currentDensity);
+  m_ito->depositParticles();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1619,8 +1619,6 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
   }
 
   m_currentDensity.clear();
-  m_oldPPC.clear();
-  m_newPPC.clear();
   m_fluidPPC.clear();
 
   m_particleItoPPC.clear();
@@ -4781,8 +4779,6 @@ ItoKMCStepper<I, C, R, F>::fillSecondaryEmissionEB(Vector<ParticleContainer<ItoP
 
       const EBISBox&       ebisbox       = ebisl[din];
       const EBCellFAB&     electricField = (*a_electricField[lvl])[din];
-      const EBCellFAB&     oldPPC        = (*m_oldPPC[lvl])[din];
-      const EBCellFAB&     newPPC        = (*m_newPPC[lvl])[din];
       const BaseFab<bool>& validCells    = (*m_amr->getValidCells(m_particleRealm)[lvl])[din];
 
       bool isDielectric = false;

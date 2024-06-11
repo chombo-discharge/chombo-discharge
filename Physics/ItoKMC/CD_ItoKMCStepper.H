@@ -673,18 +673,6 @@ namespace Physics {
       EBAMRIVData m_conductivityEB;
 
       /*!
-	@brief For holding the number of physical particles per cell
-	@note Defined over the particle realm. 
-      */
-      EBAMRCellData m_oldPPC;
-
-      /*!
-	@brief For holding the number of physical particles per cell
-	@note Defined over the particle realm. 
-      */
-      EBAMRCellData m_newPPC;
-
-      /*!
 	@brief For holding the number of physical particles per cell for all Ito species.
 	@note Defined on the particle realm with components = number of Ito species
       */
