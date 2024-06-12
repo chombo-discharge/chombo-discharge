@@ -1293,15 +1293,15 @@ ItoKMCJSON::initializeMobilities()
           return mu;
         };
       }
-      else if (type == "mu*N") {
+      else if (type == "constant mu*N") {
         if (!(mobilityJSON.contains("value"))) {
-          this->throwParserError(baseErrorID + " and got 'mu*N' but 'value' field is not specified");
+          this->throwParserError(baseErrorID + " and got 'constant mu*N' but 'value' field is not specified");
         }
 
         const Real mu = mobilityJSON["value"].get<Real>();
 
         if (mu < 0.0) {
-          this->throwParserError(baseErrorID + " and got 'mu*N' but 'value' can't be negative");
+          this->throwParserError(baseErrorID + " and got 'constant mu*N' but 'value' can't be negative");
         }
 
         mobilityFunction = [this, mu](const Real E, const RealVect x) -> Real {
@@ -1388,15 +1388,15 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           return D;
         };
       }
-      else if (type == "D*N") {
+      else if (type == "constant D*N") {
         if (!(diffusionJSON.contains("value"))) {
-          this->throwParserError(baseErrorID + " and got 'D*N' but 'value' field is not specified");
+          this->throwParserError(baseErrorID + " and got 'constant D*N' but 'value' field is not specified");
         }
 
         const Real D = diffusionJSON["value"].get<Real>();
 
         if (D < 0.0) {
-          this->throwParserError(baseErrorID + " and got 'D*N' but 'value' can't be negative");
+          this->throwParserError(baseErrorID + " and got 'constant D*N' but 'value' can't be negative");
         }
 
         diffusionCoefficient = [this, D](const Real E, const RealVect x) -> Real {

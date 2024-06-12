@@ -726,7 +726,7 @@ For example,
 Constant
 ^^^^^^^^
 
-To set a coefficient that is constant vs :math:`N`, set the ``type`` specifier to ``mu*N`` or ``D*N`` and then assign the value.
+To set a coefficient that is constant vs :math:`N`, set the ``type`` specifier to ``constant mu*N`` or ``constant D*N`` and then assign the value.
 For example,
 
 .. code-block:: json
@@ -735,17 +735,17 @@ For example,
     "plasma species" :
     [
 	{
-            "id": "e",             // Species ID
-	    "Z" : -1,              // Charge number
-	    "solver" : "ito",      // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : true,       // Mobile or not
-	    "diffusive" : true     // Diffusive or not,
+            "id": "e",			// Species ID
+	    "Z" : -1,			// Charge number
+	    "solver" : "ito",		// Solver type. Either 'ito' or 'cdr'
+	    "mobile" : true,		// Mobile or not
+	    "diffusive" : true		// Diffusive or not,
 	    "mobility": {
-	       "type": "mu*N",     // Set mu*N to a constant
+	       "type": "constant mu*N", // Set mu*N to a constant
 	       "value": 1E24
 	    },
 	    "diffusion": {
-	       "type": "D*N",      // Set D*N to a constant
+	       "type": "constant D*N",  // Set D*N to a constant
 	       "value": 5E24
 	    }
 	}
