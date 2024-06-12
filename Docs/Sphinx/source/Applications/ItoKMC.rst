@@ -723,8 +723,8 @@ For example,
 	}
     ]
 
-Constant
-^^^^^^^^
+Constant :math:`*N`
+^^^^^^^^^^^^^^^^^^^^^^
 
 To set a coefficient that is constant vs :math:`N`, set the ``type`` specifier to ``constant mu*N`` or ``constant D*N`` and then assign the value.
 For example,
