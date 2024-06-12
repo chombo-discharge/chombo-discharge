@@ -1293,6 +1293,23 @@ ItoKMCJSON::initializeMobilities()
           return mu;
         };
       }
+      else if (type == "mu*N") {
+        if (!(mobilityJSON.contains("value"))) {
+          this->throwParserError(baseErrorID + " and got 'mu*N' but 'value' field is not specified");
+        }
+
+        const Real mu = mobilityJSON["value"].get<Real>();
+
+        if (mu < 0.0) {
+          this->throwParserError(baseErrorID + " and got 'mu*N' but 'value' can't be negative");
+        }
+
+        mobilityFunction = [this, mu](const Real E, const RealVect x) -> Real {
+          const Real N = m_gasNumberDensity(x);
+
+          return mu / (std::numeric_limits<Real>::epsilon() + N);
+        };
+      }
       else if (type == "table vs E/N") {
         const std::string baseErrorTable = baseErrorID + " and also got table vs E/N";
 
@@ -1369,6 +1386,23 @@ ItoKMCJSON::initializeDiffusionCoefficients()
 
         diffusionCoefficient = [D](const Real E, const RealVect x) -> Real {
           return D;
+        };
+      }
+      else if (type == "D*N") {
+        if (!(diffusionJSON.contains("value"))) {
+          this->throwParserError(baseErrorID + " and got 'D*N' but 'value' field is not specified");
+        }
+
+        const Real D = diffusionJSON["value"].get<Real>();
+
+        if (D < 0.0) {
+          this->throwParserError(baseErrorID + " and got 'D*N' but 'value' can't be negative");
+        }
+
+        diffusionCoefficient = [this, D](const Real E, const RealVect x) -> Real {
+          const Real N = m_gasNumberDensity(x);
+
+          return D / (std::numeric_limits<Real>::epsilon() + N);
         };
       }
       else if (type == "table vs E/N") {
