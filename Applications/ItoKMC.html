@@ -1410,6 +1410,31 @@ For example,</p>
 </span></pre></div>
 </div>
 </section>
+<section id="constant-n">
+<h5>Constant <span class="math notranslate nohighlight">\(*N\)</span><a class="headerlink" href="#constant-n" title="Permalink to this heading"></a></h5>
+<p>To set a coefficient that is constant vs <span class="math notranslate nohighlight">\(N\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">constant</span> <span class="pre">mu*N</span></code> or <code class="docutils literal notranslate"><span class="pre">constant</span> <span class="pre">D*N</span></code> and then assign the value.
+For example,</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span> &quot;plasma species&quot; :
+ [
+     {
+         &quot;id&quot;: &quot;e&quot;,                  // Species ID
+         &quot;Z&quot; : -1,                   // Charge number
+         &quot;solver&quot; : &quot;ito&quot;,           // Solver type. Either &#39;ito&#39; or &#39;cdr&#39;
+         &quot;mobile&quot; : true,            // Mobile or not
+         &quot;diffusive&quot; : true          // Diffusive or not,
+         &quot;mobility&quot;: {
+            &quot;type&quot;: &quot;constant mu*N&quot;, // Set mu*N to a constant
+            &quot;value&quot;: 1E24
+<span class="hll">         },
+</span><span class="hll">         &quot;diffusion&quot;: {
+</span><span class="hll">            &quot;type&quot;: &quot;constant D*N&quot;,  // Set D*N to a constant
+</span><span class="hll">            &quot;value&quot;: 5E24
+</span><span class="hll">         }
+</span><span class="hll">     }
+</span><span class="hll"> ]
+</span></pre></div>
+</div>
+</section>
 <section id="table-vs-e-n">
 <h5>Table vs <span class="math notranslate nohighlight">\(E/N\)</span><a class="headerlink" href="#table-vs-e-n" title="Permalink to this heading"></a></h5>
 <p>To set the transport coefficients as functions <span class="math notranslate nohighlight">\(f = f\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
