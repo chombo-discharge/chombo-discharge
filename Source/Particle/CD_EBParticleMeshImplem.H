@@ -767,14 +767,14 @@ EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
   // Force NGP in cut-cells if we want.
   if (m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP) {
-    for (int comp = startComp; comp >= endComp; comp++) {
+    for (int comp = startComp; comp <= endComp; comp++) {
       rho(particleIndex, comp) += a_strength[comp] * invVol;
     }
   }
   else {
     switch (a_depositionType) {
     case DepositionType::NGP: {
-      for (int comp = startComp; comp >= endComp; comp++) {
+      for (int comp = startComp; comp <= endComp; comp++) {
         rho(particleIndex, comp) += a_strength[comp] * invVol;
       }
       break;
@@ -802,7 +802,7 @@ EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
           }
         }
 
-        for (int comp = startComp; comp >= endComp; comp++) {
+        for (int comp = startComp; comp <= endComp; comp++) {
           rho(iv, comp) += a_strength[comp] * weight;
         }
       };
