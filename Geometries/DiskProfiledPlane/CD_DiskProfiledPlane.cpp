@@ -93,13 +93,13 @@ DiskProfiledPlane::defineElectrode() noexcept
   if (wheelThickness > 0.0) {
     wheel = Elongate<Real>(wheel, 0.5 * wheelThickness * Vec3::unit(2));
   }
-  wheel = Rotate<Real>(wheel, 90.0, 1);
+  wheel = Rotate<Real>(wheel, 90.0, 0);
   wheel = Translate<Real>(wheel, Vec3(v[0], v[1], v[2]));
 
   if (SpaceDim == 2) {
     wheel = Elongate<Real>(wheel, std::numeric_limits<Real>::max() * Vec3::unit(2));
   }
-
+	
   // Turn EBGeometry into Chombo
   m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(wheel, true)), isLive));
 }
