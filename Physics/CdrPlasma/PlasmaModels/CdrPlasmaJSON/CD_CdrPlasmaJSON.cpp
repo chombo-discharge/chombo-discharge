@@ -70,6 +70,11 @@ CdrPlasmaJSON::CdrPlasmaJSON()
   m_numRtSpecies  = m_rtSpecies.size();
 }
 
+CdrPlasmaJSON::CdrPlasmaJSON(const int a_dummy)
+{
+  CH_TIME("CdrPlasmaJSON::CdrPlasmaJSON(int)");
+}
+
 CdrPlasmaJSON::~CdrPlasmaJSON()
 {
   CH_TIME("CdrPlasmaJSON::~CdrPlasmaJSON()");
@@ -731,8 +736,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     // Print out a message if we're verbose.
     // clang-format off
     if (m_verbose) {
-      pout() << "CdrPlasmaJSON::initializePlasmaSpecies: instantiating species"
-             << "\n"
+      pout() << "CdrPlasmaJSON::initializePlasmaSpecies: instantiating species" << "\n"
              << "\tName             = " << name << "\n"
              << "\tZ                = " << Z << "\n"
              << "\tMobile           = " << mobile << "\n"
