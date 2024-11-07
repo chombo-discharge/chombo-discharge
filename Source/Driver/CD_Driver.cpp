@@ -280,61 +280,71 @@ Driver::getGeometryTags()
 
     // Evaluate angles between cut-cells and refine based on that.
     // Need one ghost cell because we fetch normal vectors from neighboring cut-cells.
-    DisjointBoxLayout irregGrids = ebisGas->getIrregGrids(curDomain);
-    EBISLayout        ebisl;
-    ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
+    RefCountedPtr<EBIndexSpace> indexSpaces[2];
+    indexSpaces[0] = ebisGas;
+    indexSpaces[1] = ebisSol;
 
-    const RealVect     probLo = m_amr->getProbLo();
-    const DataIterator dit    = irregGrids.dataIterator();
+    for (int is = 0; is < 2; is++) {
+      const RefCountedPtr<EBIndexSpace>& ebis = indexSpaces[is];
 
-    const int nbox = dit.size();
+      if (!(ebis.isNull())) {
+        DisjointBoxLayout irregGrids = ebis->getIrregGrids(curDomain);
+        EBISLayout        ebisl;
+        ebis->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
+
+        const RealVect     probLo = m_amr->getProbLo();
+        const DataIterator dit    = irregGrids.dataIterator();
+
+        const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime) reduction(+ : geomTags)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          const DataIndex& din = dit[mybox];
 
-      const Box        box     = irregGrids[din];
-      const EBISBox&   ebisbox = ebisl[din];
-      const EBGraph&   ebgraph = ebisbox.getEBGraph();
-      const IntVectSet irreg   = ebisbox.getIrregIVS(box);
+          const Box        box     = irregGrids[din];
+          const EBISBox&   ebisbox = ebisl[din];
+          const EBGraph&   ebgraph = ebisbox.getEBGraph();
+          const IntVectSet irreg   = ebisbox.getIrregIVS(box);
 
-      VoFIterator vofit(irreg, ebgraph);
+          VoFIterator vofit(irreg, ebgraph);
 
-      auto kernel = [&](const VolIndex& vof) -> void {
-        const IntVect  iv     = vof.gridIndex();
-        const RealVect normal = ebisbox.normal(vof);
+          auto kernel = [&](const VolIndex& vof) -> void {
+            const IntVect  iv     = vof.gridIndex();
+            const RealVect normal = ebisbox.normal(vof);
 
-        // Check the angle between the normal vector in this irregular cell and neighboring irregular cells. If the
-        // angle exceeds a specified threshold the cell is refined.
-        const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof,
-                                                                     ebisbox,
-                                                                     1,
-                                                                     VofUtils::Connectivity::MonotonePath,
-                                                                     false);
+            // Check the angle between the normal vector in this irregular cell and neighboring irregular cells. If the
+            // angle exceeds a specified threshold the cell is refined.
+            const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof,
+                                                                         ebisbox,
+                                                                         1,
+                                                                         VofUtils::Connectivity::MonotonePath,
+                                                                         false);
 
-        for (int i = 0; i < otherVofs.size(); i++) {
-          const VolIndex& curVof = otherVofs[i];
+            for (int i = 0; i < otherVofs.size(); i++) {
+              const VolIndex& curVof = otherVofs[i];
 
-          if (ebisbox.isIrregular(curVof.gridIndex())) {
-            const RealVect curNormal        = ebisbox.normal(curVof);
-            const Real     degreesPerRadian = 180.0 / Units::pi;
-            const Real     normLength       = normal.vectorLength();
-            const Real     curNormLength    = curNormal.vectorLength();
-            const Real     cosAngle         = PolyGeom::dot(normal, curNormal) / (normLength * curNormLength);
-            const Real     theta            = acos(cosAngle) * degreesPerRadian;
+              if (ebisbox.isIrregular(curVof.gridIndex())) {
+                const RealVect curNormal        = ebisbox.normal(curVof);
+                const Real     degreesPerRadian = 180.0 / Units::pi;
+                const Real     normLength       = normal.vectorLength();
+                const Real     curNormLength    = curNormal.vectorLength();
+                const Real     cosAngle         = PolyGeom::dot(normal, curNormal) / (normLength * curNormLength);
+                const Real     theta            = acos(cosAngle) * degreesPerRadian;
 
-            // Refine if angle exceeds threshold
-            if (std::abs(theta) > m_refineAngle) {
-              geomTags |= iv;
+                // Refine if angle exceeds threshold
+                if (std::abs(theta) > m_refineAngle) {
+                  geomTags |= iv;
+                }
+              }
             }
-          }
+          };
+
+          BoxLoops::loop(vofit, kernel);
+
+          // Always refine multi-valued cells.
+          geomTags |= ebisbox.getMultiCells(box);
         }
-      };
-
-      BoxLoops::loop(vofit, kernel);
-
-      // Always refine multi-valued cells.
-      geomTags |= ebisbox.getMultiCells(box);
+      }
     }
 
     // Things from depth specifications
