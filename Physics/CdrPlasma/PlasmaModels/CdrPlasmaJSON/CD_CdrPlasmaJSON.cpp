@@ -734,6 +734,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     }
 
     // Print out a message if we're verbose.
+    // clang-format off
     if (m_verbose) {
       pout() << "CdrPlasmaJSON::initializePlasmaSpecies: instantiating species" << "\n"
              << "\tName             = " << name << "\n"
@@ -742,6 +743,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
              << "\tDiffusive        = " << diffusive << "\n"
              << "\tEnergy transport = " << energyTransport << "\n";
     }
+    // clang-format on
   }
 }
 
