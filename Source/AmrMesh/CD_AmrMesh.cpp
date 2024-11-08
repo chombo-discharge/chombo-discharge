@@ -2135,7 +2135,8 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
   // for performance at large scales (> 1M boxes and 10k ranks).
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
     if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
-      const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
+      //      const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
+      Copier copier(m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl]);
 
       CH_assert(copier.isDefined());
 
@@ -2162,7 +2163,8 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
     // to pollute the solution with interpolation there since we already have valid data.
     if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
       if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
-        const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
+        //        const Copier& copier = m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl];
+        Copier copier(m_oldToNewCellCopiers.at(a_newData.getRealm())[lvl]);
 
         CH_assert(copier.isDefined());
 
@@ -2204,7 +2206,8 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
   // These levels have not changed but ownership might have changed so we still need to copy.
   for (int lvl = 0; lvl <= std::max(0, a_lmin - 1); lvl++) {
     if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
-      const Copier& copier = m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl];
+      //      const Copier& copier = m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl];
+      Copier copier(m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl]);
 
       CH_assert(copier.isDefined());
 
@@ -2229,7 +2232,8 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
     // to pollute the solution with interpolation errors there since we already have valid data.
     if (lvl <= std::min(a_oldFinestLevel, a_newFinestLevel)) {
       if (m_hasRegridCopiers && a_newData[lvl]->ghostVect() == ghost) {
-        const Copier& copier = m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl];
+        //        const Copier& copier = m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl];
+        Copier copier(m_oldToNewEBCopiers.at(a_newData.getRealm())[lvl]);
 
         CH_assert(copier.isDefined());
 
