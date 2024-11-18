@@ -12,8 +12,8 @@ set -o nounset
 
 ## Software modules
 module restore system
-module load foss/2020a
-module load HDF5/1.10.6-gompi-2020a
+module load foss/2023a
+module load HDF5/1.14.0-foss-2023a
 
 # Program to run and input script
 executable=main3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI.ex

@@ -1875,7 +1875,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data)
   CH_TIME("DataOps::getMaxMinNorm(EBAMRIVData)");
 
   a_max = -std::numeric_limits<Real>::max();
-  a_min = std::numeric_limits<Real>::min();
+  a_min = +std::numeric_limits<Real>::max();
 
   for (int lvl = 0; lvl < a_data.size(); lvl++) {
     Real lvlMax;

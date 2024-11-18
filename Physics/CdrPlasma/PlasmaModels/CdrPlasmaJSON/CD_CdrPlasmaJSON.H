@@ -90,9 +90,17 @@ namespace Physics {
       using FunctionTT = std::function<Real(const Real a_T1, const Real a_T2)>;
 
       /*!
-	@brief Default constructor.
+	@brief Default constructor. Puts object in usable state. 
       */
       CdrPlasmaJSON();
+
+      /*!
+	@brief Dummy constructor. Leaves object in undefined state.
+	@details This constructor is present in order to allow new derived class of CdrPlasmaJSON that instantiate
+	without calling the all-defining base constructor. 
+	@param[in] a_dummy Dummy argument. 
+      */
+      CdrPlasmaJSON(const int a_dummy);
 
       /*!
 	@brief Destructor

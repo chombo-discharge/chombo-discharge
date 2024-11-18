@@ -1293,6 +1293,23 @@ ItoKMCJSON::initializeMobilities()
           return mu;
         };
       }
+      else if (type == "constant mu*N") {
+        if (!(mobilityJSON.contains("value"))) {
+          this->throwParserError(baseErrorID + " and got 'constant mu*N' but 'value' field is not specified");
+        }
+
+        const Real mu = mobilityJSON["value"].get<Real>();
+
+        if (mu < 0.0) {
+          this->throwParserError(baseErrorID + " and got 'constant mu*N' but 'value' can't be negative");
+        }
+
+        mobilityFunction = [this, mu](const Real E, const RealVect x) -> Real {
+          const Real N = m_gasNumberDensity(x);
+
+          return mu / (std::numeric_limits<Real>::epsilon() + N);
+        };
+      }
       else if (type == "table vs E/N") {
         const std::string baseErrorTable = baseErrorID + " and also got table vs E/N";
 
@@ -1369,6 +1386,23 @@ ItoKMCJSON::initializeDiffusionCoefficients()
 
         diffusionCoefficient = [D](const Real E, const RealVect x) -> Real {
           return D;
+        };
+      }
+      else if (type == "constant D*N") {
+        if (!(diffusionJSON.contains("value"))) {
+          this->throwParserError(baseErrorID + " and got 'constant D*N' but 'value' field is not specified");
+        }
+
+        const Real D = diffusionJSON["value"].get<Real>();
+
+        if (D < 0.0) {
+          this->throwParserError(baseErrorID + " and got 'constant D*N' but 'value' can't be negative");
+        }
+
+        diffusionCoefficient = [this, D](const Real E, const RealVect x) -> Real {
+          const Real N = m_gasNumberDensity(x);
+
+          return D / (std::numeric_limits<Real>::epsilon() + N);
         };
       }
       else if (type == "table vs E/N") {
@@ -3106,6 +3140,25 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       }
     }
   }
+}
+
+bool
+ItoKMCJSON::needGradients() const noexcept
+{
+  CH_TIME("ItoKMCJSON::needGradients");
+  if (m_verbose) {
+    pout() << m_className + "::needGradients" << endl;
+  }
+
+  bool needGradient = false;
+
+  for (const auto& gradCorr : m_kmcReactionGradientCorrections) {
+    if (gradCorr.first) {
+      needGradient = true;
+    }
+  }
+
+  return needGradient;
 }
 
 int

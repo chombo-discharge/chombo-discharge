@@ -52,4 +52,12 @@ ItoKMCPhysics::getNumberOfPlotVariables() const noexcept
   return 0;
 }
 
+bool
+ItoKMCPhysics::needGradients() const noexcept
+{
+  CH_TIME("ItoKMCPhysics::needGradients");
+
+  return false;
+}
+
 #include <CD_NamespaceFooter.H>
