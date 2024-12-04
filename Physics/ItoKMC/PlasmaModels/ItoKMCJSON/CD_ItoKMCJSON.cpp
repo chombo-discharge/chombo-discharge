@@ -2771,8 +2771,8 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
 
   LookupTable::Spacing spacing = LookupTable::Spacing::Exponential;
 
-  if (a_tableEntry.contains("EbyN column")) {
-    columnEbyN = a_tableEntry["EbyN column"].get<int>();
+  if (a_tableEntry.contains("E/N column")) {
+    columnEbyN = a_tableEntry["E/N column"].get<int>();
   }
   if (a_tableEntry.contains(a_dataID + " column")) {
     columnCoeff = a_tableEntry[a_dataID + " column"].get<int>();
