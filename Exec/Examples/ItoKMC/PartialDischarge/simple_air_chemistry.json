@@ -124,8 +124,8 @@
 		"file" : "bolsig_air.dat",                    // File containg the mobility data
 		//"dump" : "debug_mobility.dat",              // Optional argument for dumping table to disk (useful for debugging)		
 		"header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
-		"E/N" : 0,                                    // Column containing E/N
-		"mu*N" : 1,                                   // Column containing mu*N
+		"E/N column" : 0,                                    // Column containing E/N
+		"mu*N column" : 1,                                   // Column containing mu*N
 		"min E/N" : 1,                                // Minimum E/N kept when resampling table
 		"max E/N" : 2E6,                              // Maximum E/N kept when resampling table
 		"points" : 1000,                              // Number of grid points kept when resampling the table
@@ -139,8 +139,8 @@
 		"file" : "bolsig_air.dat",
 		//"dump": "debug_diffusion.dat",		
 		"header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
-		"E/N" : 0,
-		"D*N" : 1,
+		"E/N column" : 0,
+		"D*N column" : 1,
 		"min E/N" : 10,
 		"max E/N" : 2E6,
 		"spacing" : "exponential",
@@ -152,8 +152,8 @@
 		"file": "bolsig_air.dat",
 		//"dump": "debug_temperature.dat",				
 		"header" : "E/N (Td)\tMean energy (eV)",
-		"E/N" : 0,
-		"eV" : 1,
+		"E/N column" : 0,
+		"eV column" : 1,
 		"min E/N" : 10,
 		"max E/N" : 2E6,
 		"E/N scale": 1.0,
