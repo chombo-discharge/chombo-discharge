@@ -1449,8 +1449,8 @@ For example,</p>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">header</span></code> For specifying where in the file one starts reading data.
 This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(\mu N\)</span> (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(\mu N\)</span> (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).
 This is an optional argument that defaults to 1.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">mu*N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(\mu N\)</span> data (or alternatively <span class="math notranslate nohighlight">\(DN\)</span> for the diffusion coefficient).</p></li>
@@ -1475,8 +1475,8 @@ This is an optional argument that defaults to <code class="docutils literal notr
 </span><span class="hll">          &quot;file&quot; : &quot;bolsig_air.dat&quot;,                    // File containg the mobility data
 </span><span class="hll">          &quot;dump&quot; : &quot;debug_mobility.dat&quot;,                // Optional argument for dumping table to disk (useful for debugging)
 </span><span class="hll">          &quot;header&quot; : &quot;E/N (Td)\tMobility *N (1/m/V/s)&quot;, // Line immediately preceding the colum data
-</span><span class="hll">          &quot;E/N&quot; : 0,                                    // Column containing E/N
-</span><span class="hll">          &quot;mu*N&quot; : 1,                                   // Column containing mu*N
+</span><span class="hll">          &quot;E/N column&quot; : 0,                             // Column containing E/N
+</span><span class="hll">          &quot;mu*N column&quot; : 1,                            // Column containing mu*N
 </span><span class="hll">          &quot;min E/N&quot; : 1,                                // Minimum E/N kept when resampling table
 </span><span class="hll">          &quot;max E/N&quot; : 2E6,                              // Maximum E/N kept when resampling table
 </span><span class="hll">          &quot;points&quot; : 1000,                              // Number of grid points kept when resampling the table
@@ -1554,8 +1554,8 @@ For example:</p>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">header</span></code> For specifying where in the file one starts reading data.
 This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">eV</span></code> For setting which column in the data file contains the energy vs <span class="math notranslate nohighlight">\(E/N\)</span>.
+<li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">column</span></code> For setting which column in the data file contains the values of <span class="math notranslate nohighlight">\(E/N\)</span> (optional, defaults to 0).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eV</span> <span class="pre">column</span></code> For setting which column in the data file contains the energy vs <span class="math notranslate nohighlight">\(E/N\)</span>.
 This is an optional argument that defaults to 1.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">E/N</span> <span class="pre">scale</span></code> Optional scaling of the column containing the <span class="math notranslate nohighlight">\(E/N\)</span> data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">eV</span> <span class="pre">scale</span></code> Optional scaling of the column containing the energy (in eV).</p></li>
@@ -1580,8 +1580,8 @@ This is an optional argument that defaults to <code class="docutils literal notr
 </span><span class="hll">          &quot;file&quot;: &quot;bolsig_air.dat&quot;,                // File name
 </span><span class="hll">          &quot;dump&quot;: &quot;debug_temperature.dat&quot;,         // Dump to file
 </span><span class="hll">          &quot;header&quot; : &quot;E/N (Td)\tMean energy (eV)&quot;, // Header preceding data
-</span><span class="hll">          &quot;E/N&quot; : 0,                               // Column containing E/N
-</span><span class="hll">          &quot;eV&quot; : 1,                                // Column containing the energy
+</span><span class="hll">          &quot;E/N column&quot; : 0,                        // Column containing E/N
+</span><span class="hll">          &quot;eV column&quot; : 1,                         // Column containing the energy
 </span><span class="hll">          &quot;min E/N&quot; : 10,                          // Truncation of table
 </span><span class="hll">          &quot;max E/N&quot; : 2E6,                         // Truncation of table
 </span><span class="hll">          &quot;E/N scale&quot;: 1.0,                        // Scaling of input data

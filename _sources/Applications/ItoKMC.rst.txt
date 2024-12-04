@@ -767,8 +767,8 @@ To set the transport coefficients as functions :math:`f = f\left(E/N\right)`, se
 
 * ``header`` For specifying where in the file one starts reading data.
   This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.
-* ``E/N`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
-* ``mu*N`` For setting which column in the data file contains the values of :math:`\mu N` (or alternatively :math:`DN` for the diffusion coefficient).
+* ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
+* ``mu*N column`` For setting which column in the data file contains the values of :math:`\mu N` (or alternatively :math:`DN` for the diffusion coefficient).
   This is an optional argument that defaults to 1.
 * ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
 * ``mu*N scale`` Optional scaling of the column containing the :math:`\mu N` data (or alternatively :math:`DN` for the diffusion coefficient).
@@ -797,8 +797,8 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	     "file" : "bolsig_air.dat",                    // File containg the mobility data
 	     "dump" : "debug_mobility.dat",                // Optional argument for dumping table to disk (useful for debugging)		
 	     "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
-	     "E/N" : 0,                                    // Column containing E/N
-	     "mu*N" : 1,                                   // Column containing mu*N
+	     "E/N column" : 0,                             // Column containing E/N
+	     "mu*N column" : 1,                            // Column containing mu*N
 	     "min E/N" : 1,                                // Minimum E/N kept when resampling table
 	     "max E/N" : 2E6,                              // Maximum E/N kept when resampling table
 	     "points" : 1000,                              // Number of grid points kept when resampling the table
@@ -884,8 +884,8 @@ To set the species temperature as a function :math:`T = T\left(E/N\right)`, set 
 
 * ``header`` For specifying where in the file one starts reading data.
   This is an optional argument intended for use with BOLSIG+ output data where the user specifies that the data is contained in the lines below the specified header.
-* ``E/N`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
-* ``eV`` For setting which column in the data file contains the energy vs :math:`E/N`.
+* ``E/N column`` For setting which column in the data file contains the values of :math:`E/N` (optional, defaults to 0).
+* ``eV column`` For setting which column in the data file contains the energy vs :math:`E/N`.
   This is an optional argument that defaults to 1.
 * ``E/N scale`` Optional scaling of the column containing the :math:`E/N` data.
 * ``eV scale`` Optional scaling of the column containing the energy (in eV).
@@ -914,8 +914,8 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	     "file": "bolsig_air.dat",                // File name
 	     "dump": "debug_temperature.dat",         // Dump to file
 	     "header" : "E/N (Td)\tMean energy (eV)", // Header preceding data
-	     "E/N" : 0,                               // Column containing E/N
-	     "eV" : 1,                                // Column containing the energy
+	     "E/N column" : 0,                        // Column containing E/N
+	     "eV column" : 1,                         // Column containing the energy
 	     "min E/N" : 10,                          // Truncation of table
 	     "max E/N" : 2E6,                         // Truncation of table
 	     "E/N scale": 1.0,                        // Scaling of input data
