@@ -50,23 +50,23 @@ RodNeedleDisk::defineRodNeedle() noexcept
 
   ParmParse pp("RodNeedleDisk");
 
-  bool useRod          = false;
-  bool useNeedle       = false;
-  bool rodLive         = false;
-  bool rodPlateau      =false;
-  
-  Real needleLength        = 0.0;
-  Real needleRadius        = 0.0;
-  Real needleAngle         = 0.0;
-  Real needleTipRadius     = 0.0;
-  Real bigRadius           = -1.0;
-  Real smallRadius         = -1.0;
-  Real rodSmooth           = -1.0;
-  Real smallBegin          = -1.0;
-  Real bigEnd              = -1.0;
-  Real midpoint            = -1.0;
-  Real rodNeedleSmooth     = -1.0;
-  Real rodPlateauRadius    = -1.0;
+  bool useRod     = false;
+  bool useNeedle  = false;
+  bool rodLive    = false;
+  bool rodPlateau = false;
+
+  Real needleLength     = 0.0;
+  Real needleRadius     = 0.0;
+  Real needleAngle      = 0.0;
+  Real needleTipRadius  = 0.0;
+  Real bigRadius        = -1.0;
+  Real smallRadius      = -1.0;
+  Real rodSmooth        = -1.0;
+  Real smallBegin       = -1.0;
+  Real bigEnd           = -1.0;
+  Real midpoint         = -1.0;
+  Real rodNeedleSmooth  = -1.0;
+  Real rodPlateauRadius = -1.0;
 
   Vector<Real> v;
   std::string  orientation = "+z";
@@ -170,12 +170,14 @@ RodNeedleDisk::defineRodNeedle() noexcept
       cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, rodPlateauRadius);
       torus    = std::make_shared<EBGeoemtry::TorusSDF<Real>>(Vec3::zero(), rodPlateauRadius, plateauCurvature);
       disk     = EBGeometry::Union<Real>(cylinder, torus);
-      disk     = EBGeometry::Elongate<Real>(disk, Vec3(0.0,0.0,0.5*rodPlateauRadius)); //Making sure that the plateau reaches the wide part of the big rod
-      disk     = EBGeometry::Translate<Real>(disk, Vec3(0.0, 0.0, -(plateauCurvature+0.5*rodPlateauRadius+midpoint)));
-      rod      = EBGeometry::SmoothUnion<Real>(bigCapsule, disk, 0.0);
-      rod      = EBGeometry::SmoothUnion<Real>(rod, smallCapsule, rodSmooth);
+      disk     = EBGeometry::Elongate<Real>(
+        disk,
+        Vec3(0.0, 0.0, 0.5 * rodPlateauRadius)); //Making sure that the plateau reaches the wide part of the big rod
+      disk = EBGeometry::Translate<Real>(disk, Vec3(0.0, 0.0, -(plateauCurvature + 0.5 * rodPlateauRadius + midpoint)));
+      rod  = EBGeometry::SmoothUnion<Real>(bigCapsule, disk, 0.0);
+      rod  = EBGeometry::SmoothUnion<Real>(rod, smallCapsule, rodSmooth);
     }
-    
+
     implicitFunctions.emplace_back(rod);
   }
 
