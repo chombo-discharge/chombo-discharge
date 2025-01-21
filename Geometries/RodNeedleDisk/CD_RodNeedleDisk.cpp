@@ -168,7 +168,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
       std::shared_ptr<ImpFunc> disk;
 
       cylinder = std::make_shared<EBGeometry::CylinderSDF<Real>>(zLo, zHi, rodPlateauRadius);
-      torus    = std::make_shared<EBGeoemtry::TorusSDF<Real>>(Vec3::zero(), rodPlateauRadius, plateauCurvature);
+      torus    = std::make_shared<EBGeometry::TorusSDF<Real>>(Vec3::zero(), rodPlateauRadius, plateauCurvature);
       disk     = EBGeometry::Union<Real>(cylinder, torus);
       disk     = EBGeometry::Elongate<Real>(
         disk,
