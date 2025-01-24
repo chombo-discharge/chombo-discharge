@@ -706,7 +706,15 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
     const EBGraph&       ebgraph = ebisbox.getEBGraph();
     const ProblemDomain& domain  = ebisbox.getDomain();
 
-    // Make a copy of the input data.
+    // All cells that are either irregular or in range of stride-1 of
+    // an irregular cell. These cells are not filtered.
+    IntVectSet irregCells = ebisbox.getIrregIVS(cellBox);
+    irregCells.grow(a_stride - 1);
+    irregCells &= cellBox;
+
+    VoFIterator vofit(irregCells, ebgraph);
+
+    // Storage for copy of input data.
     EBCellFAB clone;
 
     clone.define(ebisbox, dataBox, 1);
@@ -749,6 +757,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
         dataReg(iv, icomp) += C * (cloneReg(iv + x + y) + cloneReg(iv + x - y) + cloneReg(iv - x + y) +
                                    cloneReg(iv - x - y));
       };
+
 #elif CH_SPACEDIM == 3
       const Real A = std::pow(a_alpha, 3.0) * std::pow((1.0 - a_alpha) / 2.0, 0.0);
       const Real B = std::pow(a_alpha, 2.0) * std::pow((1.0 - a_alpha) / 2.0, 1.0);
@@ -778,7 +787,12 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
       MayDay::Error("DataOps::filterSmooth -- dimensionality logic bust");
 #endif
 
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        data(vof, icomp) = clone(vof, icomp);
+      };
+
       BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }

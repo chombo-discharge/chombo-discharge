@@ -1105,6 +1105,28 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   this->m_amr->arithmeticAverage(rho, this->m_fluidRealm);
   this->m_amr->interpGhostPwl(rho, this->m_fluidRealm);
 
+#if 1 //Filter rho
+  ParmParse pp("poisson");
+
+  int numFilter = -1;
+  Real alpha =0.5;
+  
+  pp.query("alpha", alpha);
+  pp.query("num_filter", numFilter);
+
+  if(numFilter > 0) {
+    for (int i = 0; i < numFilter; i++) {
+      DataOps::filterSmooth(rhoPhase, alpha, 1, true);
+      this->m_amr->arithmeticAverage(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+      this->m_amr->interpGhost(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+
+      DataOps::filterSmooth(rhoPhase, alpha, 2, true);
+      this->m_amr->arithmeticAverage(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+      this->m_amr->interpGhost(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+    }
+  }
+#endif  
+
   this->m_amr->interpToCentroids(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
 }
 
