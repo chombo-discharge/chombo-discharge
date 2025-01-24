@@ -792,7 +792,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
       };
 
       BoxLoops::loop(cellBox, regularKernel);
-      BoxLoops::loop(vofit, irregularKernel);
+      //      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
