@@ -334,14 +334,13 @@ ItoKMCJSON::initializeGasLaw()
 
     const Real T0   = m_json["gas"]["law"][curLaw]["temperature"].get<Real>();
     const Real P0   = m_json["gas"]["law"][curLaw]["pressure"].get<Real>();
-    const Real P    = P0 * Units::atm2pascal;
-    const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
+    const Real Rho0 = (P0 * Units::Na) / (T0 * Units::R);
 
     m_gasTemperature = [T0](const RealVect a_position) -> Real {
       return T0;
     };
-    m_gasPressure = [P](const RealVect a_position) -> Real {
-      return P;
+    m_gasPressure = [P0](const RealVect a_position) -> Real {
+      return P0;
     };
     m_gasNumberDensity = [Rho0](const RealVect a_position) -> Real {
       return Rho0;
