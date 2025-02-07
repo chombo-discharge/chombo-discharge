@@ -26,11 +26,11 @@
 	    "id" : "my_ideal_gas", // Specify which gas law we use.
 	    "plot" : true,         // Turn on/off plotting.
 	    "my_ideal_gas" : {
-		// Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
+		// Definition for an ideal gas law. Temperature is always in Kelvin the pressure is in Pascal. The neutral density
 		// is derived using an ideal gas law.
 		"type" : "ideal",
 		"temperature" : 300,
-		"pressure" : 1.0
+		"pressure" : 1E5
 	    }
 	}
     },

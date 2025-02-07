@@ -36,28 +36,11 @@
 	    "id" : "my_ideal_gas", // Specify which gas law we use.
 	    "plot" : true,         // Turn on/off plotting.
 	    "my_ideal_gas" : {
-		// Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
+		// Definition for an ideal gas law. Temperature is always in Kelvin and the pressure is in Pascal. The neutral density
 		// is derived using an ideal gas law.
 		"type" : "ideal",
 		"temperature" : 300,
-		"pressure" : 1.0
-	    },
-	    "tabulated atmosphere" : {
-		// Tabulated gas law. The user must supply a file containing the pressure, temperature and number density and
-		// specify the table resolution that will be used internally.
-		"type" : "table vs height",       // Specify that our gas law contains table-vs-height data
-		"file" : "ENMSIS_Atmosphere.dat", // File name
-		"axis" : "y",                     // Associated Cartesian axis for the "height"
-		"temperature column" : 0,         // Column containing the temperature
-		"pressure column" : 1,            // Column containing the pressure
-		"density column" : 2,             // Column containing the number density
-		"min height" : 0.0,               // Minium height kept when resampling the table
-		"max height" : 250000,            // Maximum height kept when resampling the table
-		"res height" : 500,               // Table resolution
-		"dump tables" : false,            // Optional argument for dumping tables to disk (useful for debugging)
-		"T scale" : 1.0,                  // Optional argument for user-specified temperature data scaling.
-		"P scale" : 1.0,                  // Optional argument for user-specified pressure data scaling.
-		"Rho scale" : 1.0                 // Optional argument for user-specified density data scaling.
+		"pressure" : 1E5
 	    }
 	}
     },
