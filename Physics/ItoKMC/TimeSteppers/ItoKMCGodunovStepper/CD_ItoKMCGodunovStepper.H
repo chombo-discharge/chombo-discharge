@@ -178,6 +178,21 @@ namespace Physics {
       Timer m_timer;
 
       /*!
+	@brief Number of filterings when computing the semi-implicit space charge density
+      */
+      int m_filterNum;
+
+      /*!
+	@brief Number of filterings when computing the semi-implicit space charge density
+      */
+      int m_filterMaxStride;
+
+      /*!
+	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
+      */
+      Real m_filterAlpha;
+
+      /*!
 	@brief Storage for simplified particles that gave us sigma^k
 	@note Needed for regrids
       */
@@ -236,6 +251,12 @@ namespace Physics {
       */
       virtual void
       parseAlgorithm() noexcept;
+
+      /*!
+	@brief Parse filter settings
+      */
+      virtual void
+      parseFiltering() noexcept;
 
       /*!
 	@brief Parse checkpoint-restart functionality.
