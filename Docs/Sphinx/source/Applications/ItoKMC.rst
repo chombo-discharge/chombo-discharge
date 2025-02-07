@@ -47,6 +47,31 @@ Algorithms
 Time stepping
 -------------
 
+Spatial filtering
+_________________
+
+It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
+Filters are applied as follows:
+
+.. math::
+
+   \rho_i = \alpha\rho_i + \frac{1-\alpha}{2}\left(\rho_{i+s} + \rho_{i-s}\right).
+
+where :math:`\alpha` is a filtering factor and :math:`s` a stride.
+Users can apply this filtering by adjusting the following input options:
+
+.. code-block:: txt
+
+   ItoKMCGodunovStepper.filter_num        = 0   # Number of filterings for the space-density
+   ItoKMCGodunovStepper.filter_max_stride = 1   # Maximum stride for filter
+   ItoKMCGodunovStepper.filter_alpha      = 0.5 # Filtering factor (0.5 is a bilinear filter)		
+
+.. warning::
+
+   Spatial filtering of the space-charge density is a work-in-progress which may yield unexpected results.
+   Bugs may or may not be present. 
+   Users should exercise caution when using this feature. 
+
 Reaction network
 ----------------
 
