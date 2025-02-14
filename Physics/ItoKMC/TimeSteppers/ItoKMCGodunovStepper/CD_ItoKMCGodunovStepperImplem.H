@@ -136,6 +136,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseOptions() noexcept
   ItoKMCStepper<I, C, R, F>::parseOptions();
 
   this->parseAlgorithm();
+  this->parseFiltering();
   this->parseCheckpointParticles();
 }
 
@@ -151,6 +152,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   ItoKMCStepper<I, C, R, F>::parseRuntimeOptions();
 
   this->parseAlgorithm();
+  this->parseFiltering();
   this->parseCheckpointParticles();
 }
 
@@ -176,6 +178,31 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   }
   else {
     MayDay::Abort("ItoKMCGodunovStepper::parseAlgorithm - unknown algorithm requested");
+  }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::parseFiltering() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::parseFiltering");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseFiltering" << endl;
+  }
+
+  ParmParse   pp(this->m_name.c_str());
+  std::string str;
+
+  m_filterNum       = -1;
+  m_filterMaxStride = 1;
+  m_filterAlpha     = 0.5;
+
+  pp.query("filter_num", m_filterNum);
+  pp.query("filter_max_stride", m_filterMaxStride);
+  pp.query("filter_alpha", m_filterAlpha);
+
+  if (m_filterAlpha <= 0.0 || m_filterAlpha >= 1.0) {
+    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1");
   }
 }
 
@@ -1104,6 +1131,19 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   // Sync across levels
   this->m_amr->arithmeticAverage(rho, this->m_fluidRealm);
   this->m_amr->interpGhostPwl(rho, this->m_fluidRealm);
+
+  // User can choose to filter the space charge density
+  if (m_filterNum > 0 && m_filterMaxStride > 0) {
+    for (int i = 0; i < m_filterNum; i++) {
+      for (int curStride = 1; curStride <= m_filterMaxStride; curStride++) {
+
+        DataOps::filterSmooth(rhoPhase, m_filterAlpha, curStride, true);
+
+        this->m_amr->arithmeticAverage(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+        this->m_amr->interpGhost(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+      }
+    }
+  }
 
   this->m_amr->interpToCentroids(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
 }
