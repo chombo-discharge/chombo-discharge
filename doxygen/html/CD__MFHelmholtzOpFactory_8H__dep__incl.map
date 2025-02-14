@@ -1,17 +1,37 @@
 <map id="Source/Elliptic/CD_MFHelmholtzOpFactory.H" name="Source/Elliptic/CD_MFHelmholtzOpFactory.H">
-<area shape="rect" id="node1" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="313,5,506,47"/>
-<area shape="rect" id="node2" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="199,95,395,136"/>
-<area shape="rect" id="node15" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="419,95,626,136"/>
-<area shape="rect" id="node3" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,184,271,225"/>
-<area shape="rect" id="node5" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="314,191,577,218"/>
-<area shape="rect" id="node4" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="5,281,296,322"/>
-<area shape="rect" id="node6" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="321,281,570,322"/>
-<area shape="rect" id="node7" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="594,288,849,315"/>
-<area shape="rect" id="node13" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="883,273,1099,329"/>
-<area shape="rect" id="node8" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="345,385,575,426"/>
-<area shape="rect" id="node12" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="600,385,843,426"/>
-<area shape="rect" id="node9" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="345,489,575,530"/>
-<area shape="rect" id="node10" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="599,481,801,537"/>
-<area shape="rect" id="node11" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="579,585,821,641"/>
-<area shape="rect" id="node14" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="867,377,1115,433"/>
+<area shape="rect" id="Node000001" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="313,5,506,45"/>
+<area shape="rect" id="Node000002" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="199,93,395,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="375,56,324,95,321,91,372,52"/>
+<area shape="rect" id="Node000015" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="419,93,626,133"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="447,52,499,91,496,95,444,56"/>
+<area shape="rect" id="Node000003" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,181,271,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="254,143,184,184,181,179,252,138"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="314,189,577,214"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="343,138,427,186,424,191,340,143"/>
+<area shape="rect" id="Node000004" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="5,277,296,317"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="145,235,146,277,141,277,139,235"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="157,263,155,221,161,221,162,263"/>
+<area shape="rect" id="Node000006" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="321,277,570,317"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="440,227,441,276,435,277,435,227"/>
+<area shape="rect" id="Node000007" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="594,284,849,309"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="493,216,688,281,686,286,491,221"/>
+<area shape="rect" id="Node000013" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="883,269,1099,324"/>
+<area shape="poly" id="edge17_Node000005_Node000013" title=" " alt="" coords="536,213,862,267,883,271,882,276,861,272,535,219"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="451,263,449,214,454,214,457,263"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="345,379,575,419"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="679,317,510,382,508,377,677,312"/>
+<area shape="rect" id="Node000012" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="600,379,843,419"/>
+<area shape="poly" id="edge15_Node000007_Node000012" title=" " alt="" coords="716,323,717,379,711,379,711,323"/>
+<area shape="rect" id="Node000009" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="345,482,575,522"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="454,433,455,482,450,482,449,433"/>
+<area shape="rect" id="Node000010" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="599,475,801,529"/>
+<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="518,422,638,472,636,477,516,427"/>
+<area shape="poly" id="edge11_Node000009_Node000008" title=" " alt="" coords="466,469,465,420,470,419,471,469"/>
+<area shape="rect" id="Node000011" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="579,577,821,632"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="694,543,695,577,689,577,689,543"/>
+<area shape="poly" id="edge14_Node000011_Node000010" title=" " alt="" coords="706,564,705,530,711,530,711,564"/>
+<area shape="poly" id="edge16_Node000012_Node000007" title=" " alt="" coords="727,366,725,310,730,309,732,365"/>
+<area shape="rect" id="Node000014" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="867,372,1115,427"/>
+<area shape="poly" id="edge18_Node000013_Node000014" title=" " alt="" coords="985,338,985,372,980,372,979,338"/>
+<area shape="poly" id="edge19_Node000014_Node000013" title=" " alt="" coords="997,359,996,324,1001,324,1002,358"/>
 </map>

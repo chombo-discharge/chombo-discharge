@@ -1,6 +1,10 @@
 <map id="ItoSolver" name="ItoSolver">
-<area shape="rect" id="node1" title="Base class for Ito diffusion particle models." alt="" coords="164,243,244,269"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="135,5,273,32"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="214,102,410,129"/>
+<area shape="rect" id="Node000001" title="Base class for Ito diffusion particle models." alt="" coords="170,240,250,265"/>
+<area shape="rect" id="Node000002" href="$classEBAMRData.html" title=" " alt="" coords="5,101,201,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,139,121,177,130,197,143,214,158,228,177,238,174,242,155,232,139,218,126,199,116,179,105,140"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="141,5,279,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,41,168,57,117,102,114,98,164,53,183,37"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="226,93,410,133"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="245,35,269,53,306,91,302,95,266,57,242,40"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="314,148,301,183,279,218,262,232,243,242,241,238,259,228,275,214,296,181,309,146"/>
 </map>

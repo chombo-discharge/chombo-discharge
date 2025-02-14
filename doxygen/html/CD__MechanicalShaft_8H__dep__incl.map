@@ -1,4 +1,5 @@
 <map id="Geometries/MechanicalShaft/CD_MechanicalShaft.H" name="Geometries/MechanicalShaft/CD_MechanicalShaft.H">
-<area shape="rect" id="node1" title="Declaration of a mechanical shaft geometry." alt="" coords="5,5,215,47"/>
-<area shape="rect" id="node2" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="5,95,215,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a mechanical shaft geometry." alt="" coords="5,5,215,45"/>
+<area shape="rect" id="Node000002" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="5,93,215,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,59,113,93,107,93,107,59"/>
 </map>

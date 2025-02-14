@@ -1,7 +1,11 @@
 <map id="Physics::CdrPlasma::CdrPlasmaImExSdcStepper" name="Physics::CdrPlasma::CdrPlasmaImExSdcStepper">
-<area shape="rect" id="node1" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="9,289,216,331"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="37,199,188,240"/>
-<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,95,111,121"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="135,95,331,121"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,32"/>
+<area shape="rect" id="Node000001" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="9,285,216,325"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="37,196,188,236"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,250,115,285,110,285,110,250"/>
+<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,93,111,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="72,130,105,194,101,197,68,132"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="135,93,331,119"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="211,130,136,198,132,194,208,126"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="163,5,302,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="235,45,235,93,230,93,230,45"/>
 </map>

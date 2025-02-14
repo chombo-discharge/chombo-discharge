@@ -1,6 +1,9 @@
 <map id="IrregStencil" name="IrregStencil">
-<area shape="rect" id="node1" title="Class for holding stencils on irregular cells over a single AMR level." alt="" coords="5,56,101,83"/>
-<area shape="rect" id="node2" href="$classCentroidInterpolationStencil.html" title="Class which can take cell&#45;centered data and interpolate it to cell centroids." alt="" coords="157,5,361,32"/>
-<area shape="rect" id="node3" href="$classEbCentroidInterpolationStencil.html" title="Class which can take cell&#45;centered data and interpolate it to embedded boundary centroids." alt="" coords="149,56,369,83"/>
-<area shape="rect" id="node4" href="$classNonConservativeDivergenceStencil.html" title="Stencil class for computing non&#45;conservative divergences using neighborhood algorithms." alt="" coords="155,107,363,149"/>
+<area shape="rect" id="Node000001" title="Class for holding stencils on irregular cells over a single AMR level." alt="" coords="5,55,101,80"/>
+<area shape="rect" id="Node000002" href="$classCentroidInterpolationStencil.html" title="Class which can take cell&#45;centered data and interpolate it to cell centroids." alt="" coords="157,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,49,149,39,198,28,199,33,150,45,114,54"/>
+<area shape="rect" id="Node000003" href="$classEbCentroidInterpolationStencil.html" title="Class which can take cell&#45;centered data and interpolate it to embedded boundary centroids." alt="" coords="149,55,369,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="115,65,149,65,149,70,115,70"/>
+<area shape="rect" id="Node000004" href="$classNonConservativeDivergenceStencil.html" title="Stencil class for computing non&#45;conservative divergences using neighborhood algorithms." alt="" coords="155,105,363,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="114,81,188,102,186,107,112,86"/>
 </map>

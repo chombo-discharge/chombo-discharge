@@ -1,7 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,111,100,138"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionSpecies.html" title="Advection and diffused species for AdvectionDiffusionStepper." alt="" coords="176,5,379,47"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1CdrPlasma_1_1CdrSpeciesJSON.html" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="203,71,352,112"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html" title="Advection and diffused species for DischargeInceptionStepper." alt="" coords="175,136,380,177"/>
-<area shape="rect" id="node5" href="$classPhysics_1_1ItoKMC_1_1ItoKMCCDRSpecies.html" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="148,202,407,229"/>
+<area shape="rect" id="Node000000" href="$classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="5,31,91,56"/>
+<area shape="rect" id="Node000001" href="$classCdrMultigrid.html" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="139,31,241,56"/>
+<area shape="poly" id="edge32_Node000000_Node000001" title=" " alt="" coords="104,41,138,41,138,46,104,46"/>
+<area shape="rect" id="Node000002" href="$classCdrCTU.html" title="Class that uses a slope limited method for advection, in combination with corner transport upwind (CT..." alt="" coords="305,5,376,31"/>
+<area shape="poly" id="edge33_Node000001_Node000002" title=" " alt="" coords="255,30,305,21,306,26,255,35"/>
+<area shape="rect" id="Node000003" href="$classCdrGodunov.html" title="Godunov implementation for advection." alt="" coords="289,55,392,80"/>
+<area shape="poly" id="edge34_Node000001_Node000003" title=" " alt="" coords="255,51,290,57,289,62,254,56"/>
 </map>

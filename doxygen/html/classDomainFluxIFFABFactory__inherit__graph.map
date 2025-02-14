@@ -1,4 +1,5 @@
 <map id="DomainFluxIFFABFactory" name="DomainFluxIFFABFactory">
-<area shape="rect" id="node1" title="Factory class for making DomainFluxIFFAB." alt="" coords="36,80,220,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,251,32"/>
+<area shape="rect" id="Node000001" title="Factory class for making DomainFluxIFFAB." alt="" coords="36,79,220,104"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,251,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,44,131,79,125,79,125,44"/>
 </map>

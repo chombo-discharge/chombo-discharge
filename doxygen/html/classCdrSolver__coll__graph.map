@@ -1,9 +1,18 @@
 <map id="CdrSolver" name="CdrSolver">
-<area shape="rect" id="node1" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="888,188,973,215"/>
-<area shape="rect" id="node2" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,24,534,51"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="385,147,569,189"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,289,144,316"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="355,225,600,252"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="379,319,575,345"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="378,381,577,408"/>
+<area shape="rect" id="Node000001" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="888,241,973,266"/>
+<area shape="rect" id="Node000002" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,33,534,58"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="546,28,618,19,702,18,746,24,788,34,829,50,866,73,884,90,899,112,919,159,928,205,932,240,926,240,923,206,914,161,894,114,880,94,862,77,826,55,787,39,745,29,702,24,618,24,547,33"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="379,185,575,210"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="589,181,652,179,723,180,795,188,865,205,894,220,918,239,914,243,892,225,863,211,794,194,722,186,652,184,589,187"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,299,144,325"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="112,291,167,268,293,232,405,208,406,213,294,237,169,273,114,296"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="378,265,577,290"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="158,302,378,283,378,288,158,308"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="385,321,569,361"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="157,324,168,325,281,334,385,338,385,343,281,339,168,331,156,329"/>
+<area shape="rect" id="Node000007" href="$classEBAMRData.html" title=" " alt="" coords="355,398,600,423"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="109,329,169,357,263,382,355,397,354,402,262,387,167,363,106,334"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="590,269,887,253,888,258,590,274"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="545,363,615,382,697,393,740,394,783,389,824,379,863,362,887,341,904,315,924,265,929,267,909,317,891,345,865,366,826,384,784,395,740,399,697,399,614,387,544,368"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="528,425,599,443,687,454,733,454,778,448,822,435,862,414,880,399,893,381,912,339,922,298,926,266,931,267,927,299,917,341,898,384,883,403,866,418,824,440,780,453,733,459,686,459,598,448,526,430"/>
 </map>

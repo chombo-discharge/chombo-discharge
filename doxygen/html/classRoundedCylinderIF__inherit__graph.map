@@ -1,4 +1,5 @@
 <map id="RoundedCylinderIF" name="RoundedCylinderIF">
-<area shape="rect" id="node1" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="5,80,151,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="45,5,111,32"/>
+<area shape="rect" id="Node000001" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="5,79,151,104"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="45,5,111,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,44,81,79,75,79,75,44"/>
 </map>

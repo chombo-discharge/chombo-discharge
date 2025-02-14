@@ -293,7 +293,7 @@ I.e. the flow field is a circulation around the Cartesian grid origin.</p>
 <section id="id2">
 <h3>Custom value<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting a user-specified velocity, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -312,7 +312,7 @@ To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set
 <section id="id4">
 <h3>Custom value<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -346,11 +346,11 @@ AdvectionDiffusion.refine_magn = 1E-2
 <h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/AdvectionDiffusion</span></code> is the simplest way.
 To see available setup options, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 <p>For example, to set up a new problem in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications/MyAdvectionDiffusionProblem</span></code> for a coaxial cable geometry, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py -base_dir<span class="o">=</span>MyApplications -app_name<span class="o">=</span>MyAdvectionDiffusionProblem -geometry<span class="o">=</span>CoaxialCable
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusionProblem<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
 </pre></div>
 </div>
 <p>This will set up a new problem in a coaxial cable geometry (defined in <code class="file docutils literal notranslate"><span class="pre">Geometries/CoaxialCable</span></code>).</p>

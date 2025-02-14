@@ -1,34 +1,83 @@
 <map id="Source/Particle/CD_ParticleManagement.H" name="Source/Particle/CD_ParticleManagement.H">
-<area shape="rect" id="node1" title="Namespace containing various particle management utilities." alt="" coords="1818,5,1995,47"/>
-<area shape="rect" id="node2" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="145,199,290,240"/>
-<area shape="rect" id="node3" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="607,102,753,143"/>
-<area shape="rect" id="node22" href="$CD__ParticleManagementImplem_8H.html" title="Implementation of CD_ParticleManagement.H." alt="" coords="1793,102,2020,143"/>
-<area shape="rect" id="node23" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="2044,102,2228,143"/>
-<area shape="rect" id="node24" href="$CD__BrownianWalkerSpecies_8cpp.html" title="Implementation of CD_BrownianWalkerSpecies.H." alt="" coords="2252,102,2487,143"/>
-<area shape="rect" id="node25" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="2510,95,2709,151"/>
-<area shape="rect" id="node26" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1204,102,1452,143"/>
-<area shape="rect" id="node30" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="1559,385,1801,426"/>
-<area shape="rect" id="node31" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="2733,102,2987,143"/>
-<area shape="rect" id="node4" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="314,199,459,240"/>
-<area shape="rect" id="node8" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="419,288,639,329"/>
-<area shape="rect" id="node10" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="853,295,1115,322"/>
-<area shape="rect" id="node20" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="483,199,658,240"/>
-<area shape="rect" id="node21" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="683,199,896,240"/>
-<area shape="rect" id="node5" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="65,288,210,329"/>
-<area shape="rect" id="node7" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="211,385,389,426"/>
-<area shape="rect" id="node6" href="$CD__ItoIteratorImplem_8H.html" title="Implementation of CD_ItoIterator.H." alt="" coords="5,385,187,426"/>
-<area shape="rect" id="node9" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="413,385,646,426"/>
-<area shape="rect" id="node11" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="911,385,1161,426"/>
-<area shape="rect" id="node12" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="1185,392,1439,419"/>
-<area shape="rect" id="node18" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="671,377,887,433"/>
-<area shape="rect" id="node13" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="1458,489,1689,530"/>
-<area shape="rect" id="node17" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="1191,489,1433,530"/>
-<area shape="rect" id="node14" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="1458,593,1689,634"/>
-<area shape="rect" id="node15" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="1713,585,1914,641"/>
-<area shape="rect" id="node16" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="1692,689,1935,745"/>
-<area shape="rect" id="node19" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="655,481,903,537"/>
-<area shape="rect" id="node27" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="1197,206,1459,233"/>
-<area shape="rect" id="node28" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="1191,295,1465,322"/>
-<area shape="rect" id="node29" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="1490,288,1718,329"/>
-<area shape="rect" id="node32" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="2759,199,2961,240"/>
+<area shape="rect" id="Node000001" title="Namespace containing various particle management utilities." alt="" coords="1053,5,1230,45"/>
+<area shape="rect" id="Node000002" href="$CD__BrownianWalkerSpecies_8cpp.html" title="Implementation of CD_BrownianWalkerSpecies.H." alt="" coords="5,101,240,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1039,33,689,52,470,70,251,96,208,103,207,98,250,91,470,65,689,47,1039,27"/>
+<area shape="rect" id="Node000003" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="263,93,462,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1039,36,785,58,632,75,480,96,463,99,462,94,480,91,632,69,784,52,1039,31"/>
+<area shape="rect" id="Node000004" href="$CD__ItoKMCPhysicsImplem_8H.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="564,101,812,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1040,50,780,103,779,98,1039,45"/>
+<area shape="rect" id="Node000018" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="378,379,619,419"/>
+<area shape="poly" id="edge25_Node000001_Node000018" title=" " alt="" coords="1039,34,901,43,749,56,621,74,577,84,554,95,528,127,510,164,498,204,492,245,492,323,498,379,493,379,486,323,487,245,493,203,505,162,523,124,550,91,575,79,620,69,748,51,900,38,1039,29"/>
+<area shape="rect" id="Node000019" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="836,101,1089,141"/>
+<area shape="poly" id="edge26_Node000001_Node000019" title=" " alt="" coords="1094,54,1000,103,998,98,1092,49"/>
+<area shape="rect" id="Node000021" href="$CD__ItoSolver_8H.html" title="Declaration of solver class for Ito diffusion." alt="" coords="1249,101,1394,141"/>
+<area shape="poly" id="edge29_Node000001_Node000021" title=" " alt="" coords="1191,49,1286,98,1284,103,1188,54"/>
+<area shape="rect" id="Node000029" href="$CD__ItoSolver_8cpp.html" title="Implementation of CD_ItoSolver.H." alt="" coords="1779,196,1925,236"/>
+<area shape="poly" id="edge46_Node000001_Node000029" title=" " alt="" coords="1245,36,1327,56,1369,71,1408,91,1425,105,1434,120,1443,133,1459,146,1500,165,1536,176,1570,182,1602,184,1671,185,1758,193,1780,197,1779,203,1757,199,1671,190,1602,190,1569,188,1535,182,1498,170,1456,150,1439,137,1430,123,1420,109,1405,96,1367,76,1325,61,1243,41"/>
+<area shape="rect" id="Node000031" href="$CD__ParticleManagementImplem_8H.html" title="Implementation of CD_ParticleManagement.H." alt="" coords="1469,101,1696,141"/>
+<area shape="poly" id="edge47_Node000001_Node000031" title=" " alt="" coords="1237,46,1487,98,1486,103,1236,51"/>
+<area shape="rect" id="Node000032" href="$CD__McPhoto_8cpp.html" title="Implementation of CD_McPhoto.H." alt="" coords="1720,101,1904,141"/>
+<area shape="poly" id="edge49_Node000001_Node000032" title=" " alt="" coords="1244,32,1458,54,1584,70,1708,91,1743,98,1742,103,1708,96,1583,76,1458,59,1243,37"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCPhysics_8H.html" title="Main file for describing Ito&#45;based plasma physics." alt="" coords="557,203,819,229"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="682,154,684,203,679,203,677,154"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="693,190,693,141,698,141,699,190"/>
+<area shape="rect" id="Node000006" href="$CD__ItoKMCPhysics_8cpp.html" title="Implementation of CD_ItoKMCPhysics.H." alt="" coords="840,291,1115,317"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="741,230,939,289,938,294,739,235"/>
+<area shape="rect" id="Node000007" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="1157,291,1419,317"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="782,228,1209,289,1208,294,781,233"/>
+<area shape="rect" id="Node000009" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="643,387,898,412"/>
+<area shape="poly" id="edge22_Node000005_Node000009" title=" " alt="" coords="728,233,757,254,780,283,788,311,788,340,778,387,772,386,783,340,783,312,775,285,753,258,725,238"/>
+<area shape="rect" id="Node000017" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="537,284,765,324"/>
+<area shape="poly" id="edge23_Node000005_Node000017" title=" " alt="" coords="680,242,661,285,657,282,675,240"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="1163,379,1413,419"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="1283,330,1283,379,1278,379,1277,330"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="1210,322,911,375,832,389,831,384,910,369,1209,316"/>
+<area shape="rect" id="Node000015" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="923,372,1139,427"/>
+<area shape="poly" id="edge19_Node000007_Node000015" title=" " alt="" coords="1244,324,1104,374,1102,369,1243,319"/>
+<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="1294,366,1291,317,1297,317,1299,366"/>
+<area shape="rect" id="Node000010" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="655,482,886,522"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="773,426,773,482,768,482,768,426"/>
+<area shape="rect" id="Node000014" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="388,482,631,522"/>
+<area shape="poly" id="edge17_Node000009_Node000014" title=" " alt="" coords="722,419,552,484,550,479,721,414"/>
+<area shape="rect" id="Node000011" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="655,585,886,625"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="765,535,766,585,761,585,760,536"/>
+<area shape="rect" id="Node000012" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="910,577,1111,632"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="829,525,949,575,947,580,827,530"/>
+<area shape="poly" id="edge13_Node000011_Node000010" title=" " alt="" coords="776,571,775,522,781,522,782,571"/>
+<area shape="rect" id="Node000013" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="889,680,1132,735"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="1005,646,1005,680,1000,680,999,646"/>
+<area shape="poly" id="edge16_Node000013_Node000012" title=" " alt="" coords="1017,667,1016,632,1021,632,1022,666"/>
+<area shape="poly" id="edge18_Node000014_Node000009" title=" " alt="" coords="577,475,746,410,748,415,579,480"/>
+<area shape="rect" id="Node000016" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="911,475,1159,529"/>
+<area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="1026,440,1028,474,1023,475,1021,441"/>
+<area shape="poly" id="edge21_Node000016_Node000015" title=" " alt="" coords="1039,461,1037,427,1042,427,1045,461"/>
+<area shape="poly" id="edge24_Node000017_Node000018" title=" " alt="" coords="610,333,531,382,528,377,607,329"/>
+<area shape="rect" id="Node000020" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="844,196,1047,236"/>
+<area shape="poly" id="edge27_Node000019_Node000020" title=" " alt="" coords="951,154,944,196,939,196,945,153"/>
+<area shape="poly" id="edge28_Node000020_Node000019" title=" " alt="" coords="957,182,964,140,969,141,963,183"/>
+<area shape="poly" id="edge33_Node000021_Node000007" title=" " alt="" coords="1318,155,1293,292,1287,291,1313,154"/>
+<area shape="rect" id="Node000022" href="$CD__BrownianWalkerStepper_8H.html" title="TimeStepper class for only solving the Brownian_Walker equation (with surface charge)" alt="" coords="1701,284,1921,324"/>
+<area shape="poly" id="edge30_Node000021_Node000022" title=" " alt="" coords="1397,142,1414,145,1460,153,1500,156,1570,156,1603,157,1638,162,1675,174,1717,194,1745,213,1768,237,1802,282,1797,285,1764,240,1741,217,1715,198,1673,179,1636,168,1603,162,1570,161,1500,161,1459,158,1413,151,1396,147"/>
+<area shape="rect" id="Node000024" href="$CD__BrownianWalkerTagger_8H.html" title="Class for tagging cells across an AMR hierarchy." alt="" coords="1071,196,1284,236"/>
+<area shape="poly" id="edge32_Node000021_Node000024" title=" " alt="" coords="1282,151,1208,198,1205,194,1279,146"/>
+<area shape="rect" id="Node000025" href="$CD__ItoLayout_8H.html" title="Declaration of a class that holds a set of ItoSolvers." alt="" coords="1558,196,1703,236"/>
+<area shape="poly" id="edge34_Node000021_Node000025" title=" " alt="" coords="1398,142,1569,193,1567,198,1396,147"/>
+<area shape="poly" id="edge43_Node000021_Node000029" title=" " alt="" coords="1397,142,1414,145,1511,163,1587,172,1663,179,1760,193,1780,197,1779,202,1760,199,1662,185,1586,177,1510,168,1413,151,1396,147"/>
+<area shape="rect" id="Node000030" href="$CD__ItoSolverImplem_8H.html" title="Implementation of CD_ItoSolver.H." alt="" coords="1359,196,1534,236"/>
+<area shape="poly" id="edge44_Node000021_Node000030" title=" " alt="" coords="1351,147,1416,194,1412,198,1348,151"/>
+<area shape="rect" id="Node000023" href="$CD__BrownianWalkerStepper_8cpp.html" title="Implementation of CD_BrownianWalkerStepper.H." alt="" coords="1845,379,2078,419"/>
+<area shape="poly" id="edge31_Node000022_Node000023" title=" " alt="" coords="1854,329,1932,377,1929,382,1851,334"/>
+<area shape="poly" id="edge36_Node000025_Node000007" title=" " alt="" coords="1546,241,1334,294,1333,289,1544,236"/>
+<area shape="poly" id="edge35_Node000025_Node000022" title=" " alt="" coords="1683,239,1772,282,1770,286,1681,244"/>
+<area shape="rect" id="Node000026" href="$CD__ItoIterator_8H.html" title="Declaration of an iterator class for ItoLayout." alt="" coords="1455,284,1601,324"/>
+<area shape="poly" id="edge37_Node000025_Node000026" title=" " alt="" coords="1599,247,1552,286,1549,282,1596,243"/>
+<area shape="rect" id="Node000028" href="$CD__ItoLayoutImplem_8H.html" title="Implementation of CD_ItoLayout.H." alt="" coords="1643,379,1821,419"/>
+<area shape="poly" id="edge42_Node000025_Node000028" title=" " alt="" coords="1640,248,1680,323,1714,378,1709,381,1675,325,1635,250"/>
+<area shape="rect" id="Node000027" href="$CD__ItoIteratorImplem_8H.html" title="Implementation of CD_ItoIterator.H." alt="" coords="1437,379,1619,419"/>
+<area shape="poly" id="edge38_Node000026_Node000027" title=" " alt="" coords="1522,338,1523,379,1518,379,1517,338"/>
+<area shape="poly" id="edge40_Node000026_Node000028" title=" " alt="" coords="1583,327,1692,377,1690,382,1581,332"/>
+<area shape="poly" id="edge39_Node000027_Node000026" title=" " alt="" coords="1534,366,1533,324,1538,324,1539,366"/>
+<area shape="poly" id="edge41_Node000028_Node000025" title=" " alt="" coords="1723,368,1699,325,1647,238,1652,235,1704,323,1727,366"/>
+<area shape="poly" id="edge45_Node000030_Node000021" title=" " alt="" coords="1417,190,1353,143,1356,139,1420,185"/>
+<area shape="poly" id="edge48_Node000031_Node000001" title=" " alt="" coords="1487,100,1230,46,1231,41,1488,95"/>
 </map>

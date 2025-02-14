@@ -1,12 +1,25 @@
 <map id="Source/Electrostatics/CD_ElectrostaticEbBc.cpp" name="Source/Electrostatics/CD_ElectrostaticEbBc.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_ElectrostaticEbBc.H." alt="" coords="227,5,419,47"/>
-<area shape="rect" id="node2" href="$CD__ElectrostaticEbBc_8H.html" title="Data holder for holding the voltage at electrodes." alt="" coords="236,95,411,121"/>
-<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,244,191,271"/>
-<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,244,650,271"/>
-<area shape="rect" id="node3" title=" " alt="" coords="345,169,432,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="456,169,519,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="30,169,123,196"/>
-<area shape="rect" id="node6" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="198,169,321,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="215,244,293,271"/>
-<area shape="rect" id="node8" title=" " alt="" coords="317,244,447,271"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_ElectrostaticEbBc.H." alt="" coords="227,5,419,45"/>
+<area shape="rect" id="Node000002" href="$CD__ElectrostaticEbBc_8H.html" title="Data holder for holding the voltage at electrodes." alt="" coords="236,93,411,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="326,46,326,79,321,79,321,46"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,240,191,265"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="228,45,172,62,114,87,62,122,39,143,20,168,16,185,25,202,41,218,62,231,59,236,38,222,20,205,11,186,16,166,35,140,58,118,112,82,170,57,226,40"/>
+<area shape="rect" id="Node000010" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,240,650,265"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="388,43,433,62,481,88,525,122,544,142,560,166,569,196,569,227,563,227,564,197,556,168,540,146,522,126,478,92,431,66,386,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="345,167,432,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="336,117,371,155,367,158,332,121"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="456,167,519,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="351,116,449,159,447,164,349,121"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="30,167,123,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="284,121,130,165,129,160,283,116"/>
+<area shape="rect" id="Node000006" href="$CD__Electrode_8H.html" title="Declaration of an electrode class." alt="" coords="198,167,321,192"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="315,121,281,158,277,155,311,117"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="289,121,239,141,187,169,150,200,119,231,115,227,146,196,185,164,237,136,287,116"/>
+<area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="412,111,475,129,506,144,533,165,544,178,552,194,561,225,556,227,547,196,540,181,529,169,503,149,473,134,410,116"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="215,240,293,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="261,193,259,227,253,226,256,192"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="317,240,447,265"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="280,190,352,231,349,235,278,194"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="234,194,138,237,136,232,232,190"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="308,189,499,234,498,239,307,195"/>
 </map>

@@ -1,9 +1,17 @@
 <map id="Source/Utilities/CD_RealBox.cpp" name="Source/Utilities/CD_RealBox.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_RealBox.H." alt="" coords="220,5,364,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="63,95,161,121"/>
-<area shape="rect" id="node3" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="186,95,302,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="209,169,394,196"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="419,169,597,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,169,99,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="123,169,184,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_RealBox.H." alt="" coords="220,5,364,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="63,93,161,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,48,152,90,150,85,248,43"/>
+<area shape="rect" id="Node000003" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="186,93,302,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="283,47,261,83,256,80,278,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="209,167,394,192"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="302,45,316,93,316,125,311,154,306,153,311,124,311,94,297,46"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="419,167,597,192"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="320,43,482,156,479,161,317,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,167,99,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,121,97,164,95,159,212,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="123,167,184,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="231,121,181,160,177,156,228,117"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="256,117,285,154,281,158,251,121"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="287,116,453,160,451,166,286,121"/>
 </map>

@@ -1,19 +1,45 @@
 <map id="Source/Geometry/CD_ScanShop.H" name="Source/Geometry/CD_ScanShop.H">
-<area shape="rect" id="node1" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="587,5,746,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="81,95,215,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="239,95,388,121"/>
-<area shape="rect" id="node4" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="412,95,511,121"/>
-<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="485,244,670,271"/>
-<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="695,244,873,271"/>
-<area shape="rect" id="node16" href="$CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="793,169,927,196"/>
-<area shape="rect" id="node17" href="$CD__ScanShopImplem_8H_source.html" title=" " alt="" coords="642,95,817,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="295,169,361,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="436,169,487,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="511,169,566,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="25,169,95,196"/>
-<area shape="rect" id="node11" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="119,169,270,196"/>
-<area shape="rect" id="node12" title=" " alt="" coords="5,244,80,271"/>
-<area shape="rect" id="node13" title=" " alt="" coords="104,244,184,271"/>
-<area shape="rect" id="node14" title=" " alt="" coords="209,244,282,271"/>
-<area shape="rect" id="node15" title=" " alt="" coords="307,244,381,271"/>
+<area shape="rect" id="Node000001" title="Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizatio..." alt="" coords="587,5,746,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="81,93,215,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="588,41,229,95,228,90,587,36"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="239,93,388,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="588,47,379,93,378,88,586,42"/>
+<area shape="rect" id="Node000004" href="$CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="412,93,511,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="618,48,505,91,504,86,617,43"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="485,240,670,265"/>
+<area shape="poly" id="edge21_Node000001_Node000009" title=" " alt="" coords="658,47,633,94,606,167,587,228,582,226,601,165,628,92,653,44"/>
+<area shape="rect" id="Node000010" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="695,240,873,265"/>
+<area shape="poly" id="edge22_Node000001_Node000010" title=" " alt="" coords="747,38,801,54,856,80,882,96,906,116,926,139,941,166,945,179,944,192,929,213,903,228,871,239,870,234,901,223,925,209,939,190,940,180,936,168,921,142,902,120,879,101,854,84,799,59,746,43"/>
+<area shape="rect" id="Node000016" href="$CD__BoxSorting_8H.html" title="Declaration of an enum for identifying various ways of sorting grid patches." alt="" coords="793,167,927,192"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="747,42,792,62,831,92,850,121,859,153,854,154,845,124,827,95,789,66,745,47"/>
+<area shape="rect" id="Node000017" href="$CD__ScanShopImplem_8H_source.html" title=" " alt="" coords="642,93,817,119"/>
+<area shape="poly" id="edge23_Node000001_Node000017" title=" " alt="" coords="676,44,706,81,702,85,672,47"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="295,167,361,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="441,121,363,162,361,158,439,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="436,167,487,192"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="464,119,464,153,459,153,459,119"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="511,167,566,192"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="476,117,518,155,514,159,472,121"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="25,167,95,192"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="412,119,400,121,256,144,109,169,108,164,255,138,400,116,411,114"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="451,121,438,136,427,154,421,173,426,191,453,216,488,233,485,238,450,221,422,193,416,173,422,152,434,133,447,117"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="488,116,747,232,745,237,486,121"/>
+<area shape="rect" id="Node000011" href="$CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="119,167,270,192"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="412,121,245,165,244,160,411,116"/>
+<area shape="poly" id="edge15_Node000011_Node000004" title=" " alt="" coords="244,164,411,120,413,125,245,169"/>
+<area shape="poly" id="edge16_Node000011_Node000009" title=" " alt="" coords="257,189,502,235,501,240,256,195"/>
+<area shape="poly" id="edge17_Node000011_Node000010" title=" " alt="" coords="270,188,283,189,681,237,681,242,282,195,270,193"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="5,240,80,265"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="171,194,81,237,79,232,169,190"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="104,240,184,265"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="188,194,162,230,158,227,184,191"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="209,240,282,265"/>
+<area shape="poly" id="edge13_Node000011_Node000014" title=" " alt="" coords="205,191,231,227,227,230,201,194"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="307,240,381,265"/>
+<area shape="poly" id="edge14_Node000011_Node000015" title=" " alt="" coords="220,190,308,232,306,236,218,194"/>
+<area shape="poly" id="edge19_Node000016_Node000009" title=" " alt="" coords="815,195,637,239,635,234,814,189"/>
+<area shape="poly" id="edge20_Node000016_Node000010" title=" " alt="" coords="850,194,808,232,805,229,846,190"/>
+<area shape="poly" id="edge24_Node000017_Node000001" title=" " alt="" coords="724,95,697,57,701,54,729,91"/>
+<area shape="poly" id="edge25_Node000017_Node000009" title=" " alt="" coords="719,121,601,232,598,229,715,117"/>
+<area shape="poly" id="edge26_Node000017_Node000010" title=" " alt="" coords="736,118,777,226,772,228,731,120"/>
 </map>

@@ -1,7 +1,11 @@
 <map id="CdrSpecies" name="CdrSpecies">
-<area shape="rect" id="node1" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,111,100,138"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionSpecies.html" title="Advection and diffused species for AdvectionDiffusionStepper." alt="" coords="176,5,379,47"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1CdrPlasma_1_1CdrSpeciesJSON.html" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="203,71,352,112"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html" title="Advection and diffused species for DischargeInceptionStepper." alt="" coords="175,136,380,177"/>
-<area shape="rect" id="node5" href="$classPhysics_1_1ItoKMC_1_1ItoKMCCDRSpecies.html" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="148,202,407,229"/>
+<area shape="rect" id="Node000001" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="5,109,100,134"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionSpecies.html" title="Advection and diffused species for AdvectionDiffusionStepper." alt="" coords="176,5,379,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,98,110,75,147,55,179,43,181,48,149,60,113,80,81,102"/>
+<area shape="rect" id="Node000003" href="$classPhysics_1_1CdrPlasma_1_1CdrSpeciesJSON.html" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="203,69,352,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="113,110,202,97,203,103,114,115"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionSpecies.html" title="Advection and diffused species for DischargeInceptionStepper." alt="" coords="175,133,380,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="115,127,175,136,174,141,114,133"/>
+<area shape="rect" id="Node000005" href="$classPhysics_1_1ItoKMC_1_1ItoKMCCDRSpecies.html" title="Simple CdrSpecies class for usage with ItoKMC." alt="" coords="148,198,407,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="81,141,113,163,149,183,188,195,186,200,147,188,110,168,78,145"/>
 </map>

@@ -1,7 +1,13 @@
 <map id="Source/ImplicitFunctions/CD_TorusSdf.cpp" name="Source/ImplicitFunctions/CD_TorusSdf.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_TorusSdf.H." alt="" coords="163,5,345,47"/>
-<area shape="rect" id="node2" href="$CD__TorusSdf_8H.html" title="Declaration of a signed distance function for a torus." alt="" coords="196,95,312,121"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,169,191,196"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="318,169,497,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="215,169,293,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_TorusSdf.H." alt="" coords="163,5,345,45"/>
+<area shape="rect" id="Node000002" href="$CD__TorusSdf_8H.html" title="Declaration of a signed distance function for a torus." alt="" coords="196,93,312,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,46,257,79,251,79,251,46"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,167,191,192"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="235,48,185,95,121,159,117,155,181,91,232,44"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="318,167,497,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="276,44,327,91,389,155,385,159,323,95,273,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="215,167,293,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="257,119,257,153,251,153,251,119"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="230,121,137,163,135,158,228,116"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="280,116,371,158,369,163,278,121"/>
 </map>

@@ -1,6 +1,10 @@
 <map id="Physics/RadiativeTransfer/CD_RadiativeTransferSpecies.H" name="Physics/RadiativeTransfer/CD_RadiativeTransferSpecies.H">
-<area shape="rect" id="node1" title="Simple species for Physics/RadiativeTransfer." alt="" coords="154,5,385,47"/>
-<area shape="rect" id="node2" href="$CD__RadiativeTransferSpecies_8cpp.html" title="Implementation of CD_RadiativeTransferSpecies.H." alt="" coords="5,95,248,136"/>
-<area shape="rect" id="node3" href="$CD__RadiativeTransferStepperImplem_8H.html" title="Implementation of CD_RadiativeTransferStepper.H." alt="" coords="272,95,552,136"/>
-<area shape="rect" id="node4" href="$CD__RadiativeTransferStepper_8H.html" title="TimeStepper class for only evolving radiative transfer modules." alt="" coords="297,184,527,225"/>
+<area shape="rect" id="Node000001" title="Simple species for Physics/RadiativeTransfer." alt="" coords="154,5,385,45"/>
+<area shape="rect" id="Node000002" href="$CD__RadiativeTransferSpecies_8cpp.html" title="Implementation of CD_RadiativeTransferSpecies.H." alt="" coords="5,93,248,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,55,159,96,157,91,225,50"/>
+<area shape="rect" id="Node000003" href="$CD__RadiativeTransferStepperImplem_8H.html" title="Implementation of CD_RadiativeTransferStepper.H." alt="" coords="272,93,552,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="314,50,382,91,379,96,311,55"/>
+<area shape="rect" id="Node000004" href="$CD__RadiativeTransferStepper_8H.html" title="TimeStepper class for only evolving radiative transfer modules." alt="" coords="297,181,527,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="406,147,407,181,402,181,401,147"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="418,168,417,134,422,134,423,168"/>
 </map>

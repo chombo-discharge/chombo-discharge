@@ -1,8 +1,16 @@
 <map id="Physics/ItoKMC/CD_ItoKMCPhotoReaction.H" name="Physics/ItoKMC/CD_ItoKMCPhotoReaction.H">
-<area shape="rect" id="node1" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="142,5,378,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,48,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="72,95,141,121"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="146,169,331,196"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="387,169,565,196"/>
-<area shape="rect" id="node6" href="$CD__ItoKMCPhotoReactionImplem_8H.html" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="216,95,469,121"/>
+<area shape="rect" id="Node000001" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="142,5,378,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,48,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,48,62,95,60,90,203,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="72,93,141,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,48,142,89,140,85,222,43"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="146,167,331,192"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="240,48,221,69,207,94,204,110,207,125,222,154,218,157,202,127,199,110,201,92,216,66,236,44"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="387,167,565,192"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="379,32,409,40,437,53,462,70,484,92,491,107,493,123,488,154,483,153,487,123,485,108,479,95,459,74,434,57,407,45,378,37"/>
+<area shape="rect" id="Node000006" href="$CD__ItoKMCPhotoReactionImplem_8H.html" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="216,93,469,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="274,44,315,83,311,86,270,47"/>
+<area shape="poly" id="edge6_Node000006_Node000001" title=" " alt="" coords="335,95,296,56,300,52,339,91"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="327,121,269,161,266,156,324,116"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="365,116,443,158,441,162,363,121"/>
 </map>

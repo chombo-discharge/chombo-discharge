@@ -1,6 +1,9 @@
 <map id="PerlinSphereSdf" name="PerlinSphereSdf">
-<area shape="rect" id="node1" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="110,80,235,107"/>
-<area shape="rect" id="node3" href="$classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="5,155,177,181"/>
-<area shape="rect" id="node4" href="$classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="201,155,307,181"/>
-<area shape="rect" id="node2" title=" " alt="" coords="139,5,206,32"/>
+<area shape="rect" id="Node000001" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="110,79,235,104"/>
+<area shape="rect" id="Node000003" href="$classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="5,152,177,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,115,106,154,103,150,148,111"/>
+<area shape="rect" id="Node000004" href="$classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="201,152,307,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="198,111,242,150,239,154,194,115"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="139,5,206,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,44,175,79,170,79,170,44"/>
 </map>

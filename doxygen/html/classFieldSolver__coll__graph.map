@@ -1,10 +1,20 @@
 <map id="FieldSolver" name="FieldSolver">
-<area shape="rect" id="node1" title="Base class for electrostatic solvers." alt="" coords="752,157,847,184"/>
-<area shape="rect" id="node2" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="379,7,549,33"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="372,59,556,101"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,163,144,189"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="355,129,573,156"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="365,188,563,215"/>
-<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="363,253,565,280"/>
-<area shape="rect" id="node6" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="397,307,531,333"/>
+<area shape="rect" id="Node000001" title="Base class for electrostatic solvers." alt="" coords="752,210,847,235"/>
+<area shape="rect" id="Node000002" href="$classEBAMRData.html" title=" " alt="" coords="365,70,563,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="578,87,655,103,693,117,729,135,751,152,769,172,794,208,789,211,765,175,747,156,727,140,691,122,653,108,576,92"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,159,144,185"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="112,151,167,129,268,106,364,90,365,96,269,111,169,135,114,156"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="372,120,556,160"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="157,163,372,145,372,150,158,168"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="363,185,565,210"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="157,184,168,185,268,192,363,195,362,200,268,198,168,191,156,189"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="355,234,573,259"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="109,189,138,203,169,215,263,234,355,242,354,248,262,239,167,220,135,208,107,194"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="570,150,649,164,729,185,777,207,775,212,727,191,648,169,569,155"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="579,203,752,216,751,222,579,209"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="587,249,657,247,728,240,760,233,761,238,728,245,657,252,587,254"/>
+<area shape="rect" id="Node000007" href="$classElectrostaticDomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="379,283,549,309"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="564,295,645,288,687,280,727,268,757,252,782,234,785,238,760,257,729,273,688,285,646,293,564,301"/>
+<area shape="rect" id="Node000008" href="$classElectrostaticEbBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="397,333,531,358"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="545,349,589,348,636,343,683,331,727,312,749,295,767,274,790,234,795,237,771,277,752,299,729,317,685,336,637,348,589,353,545,354"/>
 </map>

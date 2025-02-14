@@ -1,11 +1,21 @@
 <map id="Source/ImplicitFunctions/CD_RoundedBoxIF.cpp" name="Source/ImplicitFunctions/CD_RoundedBoxIF.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_RoundedBoxIF.H." alt="" coords="304,5,485,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,88,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="113,95,237,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="261,95,371,121"/>
-<area shape="rect" id="node5" href="$CD__RoundedBoxIF_8H.html" title="Declaration of an implicit function describing a rectangle with rounded corners (and edges in 3D)" alt="" coords="396,95,551,121"/>
-<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="438,169,623,196"/>
-<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="648,169,827,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="217,169,311,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="335,169,414,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_RoundedBoxIF.H." alt="" coords="304,5,485,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,88,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="312,48,102,95,101,90,311,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="113,93,237,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="343,48,221,91,219,86,341,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="261,93,371,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="378,47,339,85,336,82,374,44"/>
+<area shape="rect" id="Node000005" href="$CD__RoundedBoxIF_8H.html" title="Declaration of an implicit function describing a rectangle with rounded corners (and edges in 3D)" alt="" coords="396,93,551,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="416,44,454,82,450,85,412,47"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="438,167,623,192"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="487,39,530,59,549,74,565,92,571,108,569,126,552,157,548,154,564,124,565,109,560,95,545,78,527,64,485,44"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="648,167,827,192"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="457,43,519,64,585,91,652,125,709,157,706,162,650,129,583,96,518,69,455,48"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="217,167,311,192"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="441,121,312,165,310,160,439,116"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,167,414,192"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="459,121,403,161,400,156,456,117"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="485,117,515,154,511,158,481,121"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="516,116,682,160,681,166,515,121"/>
 </map>

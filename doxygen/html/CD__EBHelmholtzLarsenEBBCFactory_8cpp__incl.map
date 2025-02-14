@@ -1,29 +1,84 @@
 <map id="Source/RadiativeTransfer/CD_EBHelmholtzLarsenEBBCFactory.cpp" name="Source/RadiativeTransfer/CD_EBHelmholtzLarsenEBBCFactory.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_EBHelmholtzLarsenEBBCFactory.H." alt="" coords="1329,5,1615,47"/>
-<area shape="rect" id="node2" href="$CD__EBHelmholtzLarsenEBBCFactory_8H.html" title="Declaration of a Electrostatic boundary condition class for MFHelmholtzOp." alt="" coords="1252,95,1521,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="479,543,665,569"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1449,543,1628,569"/>
-<area shape="rect" id="node20" href="$CD__EBHelmholtzRobinEBBC_8H_source.html" title=" " alt="" coords="1252,244,1471,271"/>
-<area shape="rect" id="node3" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="1415,319,1542,345"/>
-<area shape="rect" id="node8" href="$CD__EBHelmholtzRobinEBBCFactory_8H_source.html" title=" " alt="" coords="1033,169,1295,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="1253,393,1339,420"/>
-<area shape="rect" id="node5" title=" " alt="" coords="1759,393,1852,420"/>
-<area shape="rect" id="node9" href="$CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="609,244,836,271"/>
-<area shape="rect" id="node10" title=" " alt="" coords="195,393,309,420"/>
-<area shape="rect" id="node11" href="$CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="632,319,813,345"/>
-<area shape="rect" id="node12" title=" " alt="" coords="895,393,1025,420"/>
-<area shape="rect" id="node13" title=" " alt="" coords="385,393,487,420"/>
-<area shape="rect" id="node14" title=" " alt="" coords="766,393,871,420"/>
-<area shape="rect" id="node15" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1516,393,1633,420"/>
-<area shape="rect" id="node18" href="$CD__EBHelmholtzEBBCImplem_8H_source.html" title=" " alt="" coords="511,393,742,420"/>
-<area shape="rect" id="node16" title=" " alt="" coords="1697,468,1788,495"/>
-<area shape="rect" id="node17" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="1455,468,1622,495"/>
-<area shape="rect" id="node19" title=" " alt="" coords="610,468,753,495"/>
-<area shape="rect" id="node21" href="$CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut&#45;cells." alt="" coords="1975,319,2089,345"/>
-<area shape="rect" id="node22" title=" " alt="" coords="2381,393,2467,420"/>
-<area shape="rect" id="node23" title=" " alt="" coords="2491,393,2594,420"/>
-<area shape="rect" id="node24" title=" " alt="" coords="2619,393,2760,420"/>
-<area shape="rect" id="node25" title=" " alt="" coords="1927,393,2019,420"/>
-<area shape="rect" id="node26" title=" " alt="" coords="2044,393,2137,420"/>
-<area shape="rect" id="node27" title=" " alt="" coords="2162,393,2305,420"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_EBHelmholtzLarsenEBBCFactory.H." alt="" coords="1329,5,1615,45"/>
+<area shape="rect" id="Node000002" href="$CD__EBHelmholtzLarsenEBBCFactory_8H.html" title="Declaration of a Electrostatic boundary condition class for MFHelmholtzOp." alt="" coords="1252,93,1521,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1453,48,1411,86,1408,82,1450,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="479,533,665,559"/>
+<area shape="poly" id="edge54_Node000001_Node000006" title=" " alt="" coords="1328,29,966,35,748,43,529,56,327,75,161,101,97,118,48,136,18,156,11,167,8,178,8,400,13,431,28,451,52,467,82,483,112,495,152,505,251,521,362,531,465,538,465,543,362,537,251,526,151,510,111,500,80,488,49,472,25,455,8,433,3,401,3,178,6,165,14,153,46,131,95,113,160,96,326,70,528,51,747,38,966,30,1328,24"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1449,533,1628,559"/>
+<area shape="poly" id="edge55_Node000001_Node000007" title=" " alt="" coords="1616,26,1945,35,2141,44,2335,58,2514,78,2662,103,2719,118,2762,136,2790,155,2797,166,2800,178,2800,401,2797,412,2790,423,2761,442,2717,459,2660,474,2511,498,2332,517,2140,530,1949,538,1642,546,1642,541,1949,533,2139,524,2332,511,2511,493,2658,469,2716,454,2759,438,2786,419,2792,410,2795,400,2795,178,2792,168,2786,159,2759,140,2717,123,2660,108,2514,83,2335,64,2140,50,1945,40,1616,31"/>
+<area shape="rect" id="Node000020" href="$CD__EBHelmholtzRobinEBBC_8H_source.html" title=" " alt="" coords="1252,240,1471,265"/>
+<area shape="poly" id="edge37_Node000001_Node000020" title=" " alt="" coords="1501,44,1517,59,1532,77,1539,98,1536,120,1509,159,1474,192,1437,217,1402,236,1399,232,1434,213,1471,187,1505,156,1531,118,1534,99,1527,80,1513,63,1497,47"/>
+<area shape="rect" id="Node000003" href="$CD__RtSpecies_8H.html" title="Declaration of a class which supplies a user interface to radiative transfer code." alt="" coords="1415,313,1542,339"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1401,117,1445,167,1468,201,1485,239,1490,270,1487,300,1482,299,1484,271,1480,241,1463,204,1441,170,1397,121"/>
+<area shape="poly" id="edge35_Node000002_Node000006" title=" " alt="" coords="1252,111,922,118,725,126,527,139,345,157,196,182,138,197,95,213,68,232,61,242,59,252,59,400,64,431,78,451,101,467,130,483,156,494,191,503,277,518,466,536,466,542,276,523,189,508,155,499,128,488,98,471,74,455,59,433,53,401,53,251,56,239,64,228,92,209,137,192,195,176,345,152,527,134,725,121,922,112,1252,105"/>
+<area shape="poly" id="edge36_Node000002_Node000007" title=" " alt="" coords="1522,111,1592,125,1626,136,1658,150,1684,169,1705,191,1719,219,1724,251,1724,327,1728,372,1735,390,1749,410,1761,422,1775,432,1806,447,1827,463,1829,474,1822,487,1794,506,1750,521,1697,532,1642,539,1641,534,1696,526,1748,516,1791,501,1818,484,1824,473,1822,465,1803,451,1773,436,1757,426,1745,414,1730,392,1723,373,1719,327,1719,252,1714,220,1701,194,1681,173,1655,155,1625,141,1591,130,1521,116"/>
+<area shape="rect" id="Node000008" href="$CD__EBHelmholtzRobinEBBCFactory_8H_source.html" title=" " alt="" coords="1033,167,1295,192"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="1352,121,1214,165,1212,160,1350,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="1253,387,1339,412"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1450,341,1340,384,1338,379,1448,336"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="1759,387,1852,412"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="1532,336,1746,382,1744,388,1531,341"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="1466,341,1418,376,1353,414,1310,432,1276,441,1241,449,1197,463,1165,476,1133,488,1012,512,890,529,776,539,679,545,678,539,775,534,890,523,1011,507,1131,483,1163,471,1195,457,1239,444,1274,436,1309,427,1351,410,1415,372,1463,337"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="1473,340,1458,367,1443,404,1437,445,1439,465,1446,484,1467,508,1494,525,1491,530,1463,512,1442,487,1434,467,1432,445,1438,403,1453,365,1469,338"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="1173,191,1284,373,1280,376,1169,194"/>
+<area shape="poly" id="edge33_Node000008_Node000006" title=" " alt="" coords="1032,188,768,201,463,227,325,246,212,268,169,281,136,295,116,310,109,325,109,400,114,430,127,450,148,467,176,483,227,501,301,516,466,535,465,540,300,521,226,507,174,488,145,471,123,454,109,432,104,401,104,324,112,306,133,290,167,276,211,263,324,240,463,222,768,196,1032,182"/>
+<area shape="poly" id="edge34_Node000008_Node000007" title=" " alt="" coords="1167,192,1172,233,1184,290,1207,354,1223,383,1243,410,1267,433,1294,454,1352,487,1412,511,1467,527,1466,533,1410,516,1350,492,1291,458,1264,437,1239,414,1219,386,1202,356,1179,292,1167,233,1162,193"/>
+<area shape="rect" id="Node000009" href="$CD__EBHelmholtzEBBCFactory_8H_source.html" title=" " alt="" coords="609,240,836,265"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="1094,195,808,240,807,235,1093,189"/>
+<area shape="poly" id="edge31_Node000009_Node000006" title=" " alt="" coords="610,268,490,285,362,310,303,326,252,344,211,365,185,388,174,406,169,423,170,437,176,451,202,475,243,494,294,510,352,522,466,536,466,541,351,527,293,515,241,499,199,479,171,454,165,439,164,422,169,404,181,385,208,361,250,339,302,321,361,305,489,279,609,263"/>
+<area shape="poly" id="edge32_Node000009_Node000007" title=" " alt="" coords="758,263,903,313,1088,384,1147,412,1192,436,1238,459,1298,483,1384,509,1466,528,1464,533,1383,514,1296,488,1236,463,1190,440,1145,416,1086,389,901,318,756,268"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="195,387,309,412"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="686,268,303,385,302,380,685,263"/>
+<area shape="rect" id="Node000011" href="$CD__EBHelmholtzEBBC_8H_source.html" title=" " alt="" coords="632,313,813,339"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="725,266,725,300,720,300,720,266"/>
+<area shape="poly" id="edge24_Node000011_Node000006" title=" " alt="" coords="632,333,557,338,480,348,414,365,390,376,374,388,363,410,365,431,378,450,400,469,460,502,522,526,520,531,457,507,397,474,374,454,360,432,358,409,370,385,387,371,412,360,479,343,556,333,631,327"/>
+<area shape="poly" id="edge25_Node000011_Node000007" title=" " alt="" coords="814,336,922,354,1038,384,1099,408,1143,433,1188,458,1248,483,1348,510,1443,529,1442,534,1347,515,1246,488,1185,463,1141,438,1096,413,1037,389,921,360,813,341"/>
+<area shape="poly" id="edge12_Node000011_Node000010" title=" " alt="" coords="647,341,324,390,323,385,647,336"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="895,387,1025,412"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="762,336,909,380,908,385,760,341"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="385,387,487,412"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="677,341,496,386,495,381,676,336"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="766,387,871,412"/>
+<area shape="poly" id="edge15_Node000011_Node000014" title=" " alt="" coords="740,337,793,376,790,380,737,341"/>
+<area shape="rect" id="Node000015" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="1516,387,1633,412"/>
+<area shape="poly" id="edge16_Node000011_Node000015" title=" " alt="" coords="814,332,1503,389,1502,395,813,338"/>
+<area shape="rect" id="Node000018" href="$CD__EBHelmholtzEBBCImplem_8H_source.html" title=" " alt="" coords="511,387,742,412"/>
+<area shape="poly" id="edge26_Node000011_Node000018" title=" " alt="" coords="702,341,647,380,644,376,699,337"/>
+<area shape="poly" id="edge18_Node000015_Node000006" title=" " alt="" coords="1537,415,1404,451,1234,488,1084,509,933,525,679,543,678,537,932,520,1083,504,1233,483,1403,446,1536,410"/>
+<area shape="poly" id="edge19_Node000015_Node000007" title=" " alt="" coords="1595,410,1613,424,1630,443,1640,464,1641,475,1637,487,1615,512,1587,530,1584,526,1611,508,1632,484,1636,474,1635,465,1626,446,1610,428,1591,414"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="1697,460,1788,485"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="1603,410,1704,452,1702,457,1601,414"/>
+<area shape="rect" id="Node000017" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="1455,460,1622,485"/>
+<area shape="poly" id="edge20_Node000015_Node000017" title=" " alt="" coords="1564,414,1545,449,1540,446,1560,411"/>
+<area shape="poly" id="edge22_Node000017_Node000006" title=" " alt="" coords="1455,483,1386,488,679,540,678,534,1385,483,1455,478"/>
+<area shape="poly" id="edge23_Node000017_Node000007" title=" " alt="" coords="1541,486,1541,520,1536,520,1536,486"/>
+<area shape="poly" id="edge21_Node000017_Node000015" title=" " alt="" coords="1549,459,1569,424,1573,426,1554,461"/>
+<area shape="poly" id="edge29_Node000018_Node000006" title=" " alt="" coords="623,413,601,461,581,521,576,519,596,459,618,411"/>
+<area shape="poly" id="edge30_Node000018_Node000007" title=" " alt="" coords="677,410,840,445,1044,483,1253,512,1436,532,1435,537,1252,517,1044,488,839,450,676,415"/>
+<area shape="poly" id="edge28_Node000018_Node000011" title=" " alt="" coords="648,384,702,345,705,350,651,389"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="610,460,753,485"/>
+<area shape="poly" id="edge27_Node000018_Node000019" title=" " alt="" coords="638,411,666,448,662,451,634,414"/>
+<area shape="poly" id="edge38_Node000020_Node000004" title=" " alt="" coords="1358,267,1309,375,1304,373,1354,265"/>
+<area shape="poly" id="edge52_Node000020_Node000006" title=" " alt="" coords="1342,268,1216,335,1129,376,1038,414,929,453,819,486,637,533,636,528,818,481,928,447,1036,410,1127,371,1214,330,1340,263"/>
+<area shape="poly" id="edge53_Node000020_Node000007" title=" " alt="" coords="1413,263,1482,282,1556,311,1600,335,1631,358,1662,383,1704,410,1733,421,1758,427,1781,436,1802,459,1808,473,1802,487,1777,505,1738,519,1642,537,1641,532,1737,513,1775,500,1798,484,1802,473,1798,461,1778,441,1757,432,1731,426,1701,414,1659,387,1628,363,1597,340,1554,316,1480,287,1412,268"/>
+<area shape="poly" id="edge51_Node000020_Node000011" title=" " alt="" coords="1259,268,827,316,827,310,1258,263"/>
+<area shape="rect" id="Node000021" href="$CD__VofUtils_8H.html" title="Various functions for getting Vofs near cut&#45;cells." alt="" coords="1975,313,2089,339"/>
+<area shape="poly" id="edge39_Node000020_Node000021" title=" " alt="" coords="1469,263,1962,315,1961,320,1469,268"/>
+<area shape="poly" id="edge43_Node000021_Node000005" title=" " alt="" coords="1996,341,1856,385,1854,380,1995,336"/>
+<area shape="poly" id="edge49_Node000021_Node000006" title=" " alt="" coords="1976,334,1767,352,1636,368,1505,389,1368,422,1234,462,1209,476,1183,488,1087,506,952,521,679,542,678,536,952,516,1086,501,1182,483,1207,471,1232,458,1367,417,1503,384,1635,363,1767,346,1975,328"/>
+<area shape="poly" id="edge50_Node000021_Node000007" title=" " alt="" coords="2089,324,2176,326,2265,338,2301,349,2325,365,2331,375,2333,387,2329,400,2319,414,2299,432,2273,449,2204,477,2117,499,2020,516,1917,528,1816,537,1642,546,1641,540,1816,532,1917,523,2019,511,2116,494,2202,472,2270,444,2296,428,2315,410,2324,397,2327,386,2326,377,2321,369,2298,354,2264,343,2176,332,2089,329"/>
+<area shape="poly" id="edge48_Node000021_Node000015" title=" " alt="" coords="1975,339,1647,389,1647,384,1975,334"/>
+<area shape="poly" id="edge41_Node000021_Node000016" title=" " alt="" coords="2010,341,1865,414,1780,456,1778,451,1863,410,2008,337"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="2381,387,2467,412"/>
+<area shape="poly" id="edge40_Node000021_Node000022" title=" " alt="" coords="2090,335,2362,384,2368,385,2367,390,2361,389,2089,340"/>
+<area shape="rect" id="Node000023" title=" " alt="" coords="2491,387,2594,412"/>
+<area shape="poly" id="edge42_Node000021_Node000023" title=" " alt="" coords="2089,331,2259,353,2478,384,2477,389,2258,358,2088,337"/>
+<area shape="rect" id="Node000024" title=" " alt="" coords="2619,387,2760,412"/>
+<area shape="poly" id="edge44_Node000021_Node000024" title=" " alt="" coords="2089,330,2311,352,2605,384,2605,389,2310,357,2088,335"/>
+<area shape="rect" id="Node000025" title=" " alt="" coords="1927,387,2019,412"/>
+<area shape="poly" id="edge45_Node000021_Node000025" title=" " alt="" coords="2024,341,1993,378,1989,375,2020,337"/>
+<area shape="rect" id="Node000026" title=" " alt="" coords="2044,387,2137,412"/>
+<area shape="poly" id="edge46_Node000021_Node000026" title=" " alt="" coords="2044,337,2075,375,2071,378,2040,341"/>
+<area shape="rect" id="Node000027" title=" " alt="" coords="2162,387,2305,412"/>
+<area shape="poly" id="edge47_Node000021_Node000027" title=" " alt="" coords="2065,336,2189,379,2187,385,2063,341"/>
 </map>

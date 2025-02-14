@@ -1,9 +1,15 @@
 <map id="Source/Particle/CD_EBCoarseFineParticleMesh.H" name="Source/Particle/CD_EBCoarseFineParticleMesh.H">
-<area shape="rect" id="node1" title="Declaration of a class for handling particle deposition arithmetics near refinement boundaries." alt="" coords="341,5,555,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,160,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="184,95,299,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="323,95,426,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="451,95,592,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="617,95,802,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="827,95,1005,121"/>
+<area shape="rect" id="Node000001" title="Declaration of a class for handling particle deposition arithmetics near refinement boundaries." alt="" coords="341,5,555,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,160,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="361,48,150,93,149,88,360,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="184,93,299,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="399,48,285,91,283,86,398,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="323,93,426,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="432,47,397,85,393,81,428,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="451,93,592,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="468,44,503,81,499,85,464,47"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="617,93,802,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="511,43,659,87,657,92,510,48"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="827,93,1005,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="556,42,835,88,834,94,555,47"/>
 </map>

@@ -1,7 +1,11 @@
 <map id="Physics::CdrPlasma::CdrPlasmaFieldTagger" name="Physics::CdrPlasma::CdrPlasmaFieldTagger">
-<area shape="rect" id="node1" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="90,228,265,269"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="5,95,155,136"/>
-<area shape="rect" id="node3" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="35,5,125,32"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="179,102,375,129"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="208,5,347,32"/>
+<area shape="rect" id="Node000001" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="90,225,265,265"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="5,93,155,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,143,165,224,161,227,100,146"/>
+<area shape="rect" id="Node000003" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="35,5,125,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,44,83,93,77,93,77,44"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="179,101,375,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="262,139,194,227,190,223,258,135"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="208,5,347,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="280,44,280,101,275,101,275,44"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="RodIF" name="RodIF">
-<area shape="rect" id="node1" title="Cylinder with rounded caps at its ends." alt="" coords="9,80,68,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,72,32"/>
+<area shape="rect" id="Node000001" title="Cylinder with rounded caps at its ends." alt="" coords="9,79,68,104"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,72,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="41,44,41,79,36,79,36,44"/>
 </map>

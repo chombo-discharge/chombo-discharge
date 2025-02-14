@@ -183,7 +183,7 @@ If your code contains templates or inlined functions, these should be defined in
 <span class="cm">* Copyright © &lt;Copyright holder 1&gt;</span>
 <span class="cm">* Copyright © &lt;Copyright holder 2&gt;</span>
 <span class="cm">* Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.</span>
-<span class="cm">*/</span><span class="w"></span>
+<span class="cm">*/</span>
 </pre></div>
 </div>
 <p>where <em>&lt;Copyright holder 1&gt;</em>, <em>&lt;Copyright holder 2&gt;</em>, etc. are replaced by the copyright holder.</p>
@@ -213,40 +213,40 @@ I.e. for a file <code class="file docutils literal notranslate"><span class="pre
 <span class="cm">* Copyright © &lt;Copyright holder 1&gt;</span>
 <span class="cm">* Copyright © &lt;Copyright holder 2&gt;</span>
 <span class="cm">* Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.</span>
-<span class="cm">*/</span><span class="w"></span>
+<span class="cm">*/</span>
 
 <span class="cm">/*!</span>
 <span class="cm">  @file   CD_MyClass.H</span>
 <span class="cm">  @brief  This file contains ...</span>
 <span class="cm">  @author Author name</span>
-<span class="cm">*/</span><span class="w"></span>
+<span class="cm">*/</span>
 
 <span class="cp">#ifndef CD_MyClass_H</span>
 <span class="cp">#define CD_MyClass_H</span>
 
 <span class="c1">// Std includes (e.g.)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;memory&gt;</span>
 
 <span class="c1">// Chombo includes (e.g.)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;LevelData.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;LevelData.H&gt;</span>
 
 <span class="c1">// Our includes (e.g.)</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_EBAMRData.H&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_EBAMRData.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span>
 
 <span class="cm">/*!</span>
 <span class="cm">  @brief This class does the following: ....</span>
-<span class="cm">*/</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="cm">*/</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 
 <span class="c1">//...</span>
-<span class="p">};</span><span class="w"></span>
+<span class="p">};</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span>
 
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_MyClassImplem.H&gt;</span><span class="c1"> // Inline and template code included at the end.</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_MyClassImplem.H&gt;</span><span class="c1"> // Inline and template code included at the end.</span>
 
 <span class="cp">#endif</span>
 </pre></div>
@@ -287,7 +287,7 @@ MyClass.bc.x.lo        = dirichlet 1.0
 <h2>clang-format<a class="headerlink" href="#clang-format" title="Permalink to this heading"></a></h2>
 <p>We use <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> for formatting the source code.
 Before opening a pull request for review, navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and format the code using</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find Source Physics Geometries Exec <span class="se">\(</span> -name <span class="s2">&quot;*.H&quot;</span> -o -name <span class="s2">&quot;*.cpp&quot;</span> <span class="se">\)</span> -exec clang-format -i <span class="o">{}</span> +
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>find<span class="w"> </span>Source<span class="w"> </span>Physics<span class="w"> </span>Geometries<span class="w"> </span>Exec<span class="w"> </span><span class="se">\(</span><span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.H&quot;</span><span class="w"> </span>-o<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.cpp&quot;</span><span class="w"> </span><span class="se">\)</span><span class="w"> </span>-exec<span class="w"> </span>clang-format<span class="w"> </span>-i<span class="w"> </span><span class="o">{}</span><span class="w"> </span>+
 </pre></div>
 </div>
 </section>

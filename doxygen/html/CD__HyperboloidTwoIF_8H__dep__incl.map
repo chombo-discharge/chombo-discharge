@@ -1,4 +1,5 @@
 <map id="Source/ImplicitFunctions/CD_HyperboloidTwoIF.H" name="Source/ImplicitFunctions/CD_HyperboloidTwoIF.H">
-<area shape="rect" id="node1" title="Declaration of a two&#45;sheet hyperboloidal implicit function object." alt="" coords="11,5,193,47"/>
-<area shape="rect" id="node2" href="$CD__HyperboloidTwoIF_8cpp.html" title="Implementation of CD_HyperboloidTwoIF.H." alt="" coords="5,95,199,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a two&#45;sheet hyperboloidal implicit function object." alt="" coords="11,5,193,45"/>
+<area shape="rect" id="Node000002" href="$CD__HyperboloidTwoIF_8cpp.html" title="Implementation of CD_HyperboloidTwoIF.H." alt="" coords="5,93,199,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,59,105,93,99,93,99,59"/>
 </map>

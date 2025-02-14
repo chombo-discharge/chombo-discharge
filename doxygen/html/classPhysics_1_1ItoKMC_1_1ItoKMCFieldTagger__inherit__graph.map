@@ -1,6 +1,9 @@
 <map id="Physics::ItoKMC::ItoKMCFieldTagger&lt; S &gt;" name="Physics::ItoKMC::ItoKMCFieldTagger&lt; S &gt;">
-<area shape="rect" id="node1" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="31,155,243,196"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="Cell tagging class for streamers." alt="" coords="16,244,257,285"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="5,80,268,107"/>
-<area shape="rect" id="node3" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="91,5,182,32"/>
+<area shape="rect" id="Node000001" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="31,152,243,192"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="Cell tagging class for streamers." alt="" coords="16,240,257,280"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="139,206,139,240,134,240,134,206"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="5,79,268,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,118,139,152,134,152,134,118"/>
+<area shape="rect" id="Node000003" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="91,5,182,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,44,139,79,134,79,134,44"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="Source/RadiativeTransfer/CD_EddingtonSP1.H" name="Source/RadiativeTransfer/CD_EddingtonSP1.H">
-<area shape="rect" id="node1" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="5,5,189,47"/>
-<area shape="rect" id="node2" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="5,95,189,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="5,5,189,45"/>
+<area shape="rect" id="Node000002" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="5,93,189,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,59,100,93,95,93,95,59"/>
 </map>

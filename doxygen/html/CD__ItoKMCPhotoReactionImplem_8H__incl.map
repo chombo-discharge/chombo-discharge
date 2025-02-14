@@ -1,8 +1,16 @@
 <map id="Physics/ItoKMC/CD_ItoKMCPhotoReactionImplem.H" name="Physics/ItoKMC/CD_ItoKMCPhotoReactionImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="110,5,346,47"/>
-<area shape="rect" id="node2" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="57,95,260,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="166,169,351,196"/>
-<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="376,169,555,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,169,48,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="72,169,141,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_ItoKMCPhotoReaction.H." alt="" coords="110,5,346,45"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCPhotoReaction_8H.html" title="Declaration of a class for holding photoionization reaction types in ito_plasma physics." alt="" coords="57,93,260,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,47,173,84,169,80,201,44"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="166,167,351,192"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="247,44,262,66,275,93,277,125,271,154,266,153,272,124,269,94,258,69,243,47"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="376,167,555,192"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="259,43,437,157,434,161,256,48"/>
+<area shape="poly" id="edge6_Node000002_Node000001" title=" " alt="" coords="174,91,209,54,212,58,178,95"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,48,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,121,61,162,59,158,136,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="72,167,141,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="152,121,125,157,121,154,148,117"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="176,117,233,156,230,161,173,121"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="209,116,403,161,402,166,207,121"/>
 </map>

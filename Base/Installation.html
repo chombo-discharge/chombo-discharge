@@ -210,17 +210,17 @@ When cloning with submodules, both <code class="docutils literal notranslate"><s
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>To clone <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> directly to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code>, set the environment variables and clone (using <code class="docutils literal notranslate"><span class="pre">--recursive</span></code> to fetch submodules):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
-<span class="nb">export</span> <span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
+<span class="nb">export</span><span class="w"> </span><span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
 
-git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git <span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>git@github.com:chombo-discharge/chombo-discharge.git<span class="w"> </span><span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
 </pre></div>
 </div>
 <p>Alternatively, if cloning using https:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
-<span class="nb">export</span> <span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DISCHARGE_HOME</span><span class="o">=</span>/home/foo/chombo-discharge
+<span class="nb">export</span><span class="w"> </span><span class="nv">CHOMBO_HOME</span><span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/Submodules/Chombo-3.3/lib
 
-git clone --recursive https://github.com/chombo-discharge/chombo-discharge.git <span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
+git<span class="w"> </span>clone<span class="w"> </span>--recursive<span class="w"> </span>https://github.com/chombo-discharge/chombo-discharge.git<span class="w"> </span><span class="si">${</span><span class="nv">DISCHARGE_HOME</span><span class="si">}</span>
 </pre></div>
 </div>
 </div>
@@ -337,9 +337,9 @@ To use a newer version of HDF5 together with the 1.10 API, add <code class="docu
 <p>To turn on OpenMP threading one can set the <code class="docutils literal notranslate"><span class="pre">OPENMPCC</span></code> to <code class="docutils literal notranslate"><span class="pre">TRUE</span></code>.
 When compiled with OpenMP all loops over grid patches uses threading in the form</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#pragma omp parallel for schedule(runtime)</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">mybox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">mybox</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nbox</span><span class="p">;</span><span class="w"> </span><span class="n">mybox</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">mybox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">mybox</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nbox</span><span class="p">;</span><span class="w"> </span><span class="n">mybox</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 
-<span class="p">}</span><span class="w"></span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <div class="admonition warning">
@@ -377,8 +377,8 @@ These steps are intended for users that do not have MPI or HDF5 installed.
 If you already have installed MPI and/or HDF5, the steps below might require modifications.</p>
 <ol class="arabic">
 <li><p>Ensure that <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code> and <code class="docutils literal notranslate"><span class="pre">$CHOMBO_HOME</span></code> point to the correct locations:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="nv">$DISCHARGE_HOME</span>
-<span class="nb">echo</span> <span class="nv">$CHOMBO_HOME</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$CHOMBO_HOME</span>
 </pre></div>
 </div>
 </li>
@@ -468,8 +468,8 @@ The configuration files are located in <code class="file docutils literal notran
 However, due to dependencies on <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and HDF5, compilation can sometimes be an issue.
 Our experience is that if <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> compiles, so does <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 <p>If experiencing issues, try cleaning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> by</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$DISCHARGE_HOME</span>
-make pristine
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
+make<span class="w"> </span>pristine
 </pre></div>
 </div>
 <div class="admonition note">
@@ -497,11 +497,11 @@ This will turn on some assertions throughout <code class="docutils literal notra
 <blockquote>
 <div><p>On some installations the linker can not find the HDF5 library.
 To troubleshoot, make sure that the the environment variable <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code> can find the HDF5 libraries:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="nv">$LD_LIBRARY_PATH</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="nv">$LD_LIBRARY_PATH</span>
 </pre></div>
 </div>
 <p>If the path is not included, it can be defined by:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/&lt;path_to_hdf5_installation&gt;/lib
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/&lt;path_to_hdf5_installation&gt;/lib
 </pre></div>
 </div>
 </div></blockquote>

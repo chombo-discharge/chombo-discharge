@@ -1,7 +1,11 @@
 <map id="EBHelmholtzEBBCFactory" name="EBHelmholtzEBBCFactory">
-<area shape="rect" id="node1" title="Factory class for making EBHelmholtzEBBCs." alt="" coords="5,56,193,83"/>
-<area shape="rect" id="node2" href="$classEBHelmholtzDirichletEBBCFactory.html" title="Factory class for making Dirichlet BCs on EBs in EBHelmholtzOp." alt="" coords="245,5,488,32"/>
-<area shape="rect" id="node3" href="$classEBHelmholtzNeumannEBBCFactory.html" title="Factory class which generates EBHelmholtzNeumannEBBC." alt="" coords="241,56,492,83"/>
-<area shape="rect" id="node4" href="$classEBHelmholtzRobinEBBCFactory.html" title="Base class for making Robin boundary conditions with EBHelmholtzOp." alt="" coords="254,107,479,133"/>
-<area shape="rect" id="node5" href="$classEBHelmholtzLarsenEBBCFactory.html" title="Class for making Larsen boundary conditions." alt="" coords="540,107,771,133"/>
+<area shape="rect" id="Node000001" title="Factory class for making EBHelmholtzEBBCs." alt="" coords="5,55,193,80"/>
+<area shape="rect" id="Node000002" href="$classEBHelmholtzDirichletEBBCFactory.html" title="Factory class for making Dirichlet BCs on EBs in EBHelmholtzOp." alt="" coords="245,5,488,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,50,296,28,297,33,183,55"/>
+<area shape="rect" id="Node000003" href="$classEBHelmholtzNeumannEBBCFactory.html" title="Factory class which generates EBHelmholtzNeumannEBBC." alt="" coords="241,55,492,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="207,65,241,65,241,70,207,70"/>
+<area shape="rect" id="Node000004" href="$classEBHelmholtzRobinEBBCFactory.html" title="Base class for making Robin boundary conditions with EBHelmholtzOp." alt="" coords="254,104,479,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="183,80,297,101,296,107,182,85"/>
+<area shape="rect" id="Node000005" href="$classEBHelmholtzLarsenEBBCFactory.html" title="Class for making Larsen boundary conditions." alt="" coords="540,104,771,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="493,114,540,114,540,119,493,119"/>
 </map>

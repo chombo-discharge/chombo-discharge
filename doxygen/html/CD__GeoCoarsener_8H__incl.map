@@ -1,10 +1,19 @@
 <map id="Source/Geometry/CD_GeoCoarsener.H" name="Source/Geometry/CD_GeoCoarsener.H">
-<area shape="rect" id="node1" title="Declaration of a utility class for removing geometrically tagged cells." alt="" coords="211,5,369,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,81,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="105,95,208,121"/>
-<area shape="rect" id="node4" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="232,95,348,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="245,169,431,196"/>
-<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="455,169,634,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="42,169,135,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="159,169,221,196"/>
+<area shape="rect" id="Node000001" title="Declaration of a utility class for removing geometrically tagged cells." alt="" coords="211,5,369,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,81,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,48,93,92,91,87,230,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="105,93,208,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,48,189,89,187,84,257,43"/>
+<area shape="rect" id="Node000004" href="$CD__RealBox_8H.html" title="Declaration of an axis&#45;aligned box in space." alt="" coords="232,93,348,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="293,46,293,79,287,79,287,46"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="245,167,431,192"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="321,43,345,65,363,92,367,109,366,125,355,155,350,153,361,124,362,109,358,94,341,68,318,47"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="455,167,634,192"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="323,43,514,157,512,161,320,48"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="42,167,135,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="259,121,135,165,133,159,257,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="159,167,221,192"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="275,121,219,161,216,156,272,117"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="300,118,325,154,320,157,296,121"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="332,116,491,160,490,166,330,121"/>
 </map>

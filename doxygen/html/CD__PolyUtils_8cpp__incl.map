@@ -1,9 +1,17 @@
 <map id="Source/Utilities/CD_PolyUtils.cpp" name="Source/Utilities/CD_PolyUtils.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_PolyUtils.cpp." alt="" coords="271,5,415,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="108,95,211,121"/>
-<area shape="rect" id="node3" href="$CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="235,95,355,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,169,447,196"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,169,650,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,169,135,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="159,169,237,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_PolyUtils.cpp." alt="" coords="271,5,415,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="108,93,211,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="300,48,200,90,198,85,298,43"/>
+<area shape="rect" id="Node000003" href="$CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="235,93,355,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="334,47,312,83,307,80,329,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,167,447,192"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="355,45,370,93,370,125,365,154,360,153,365,124,365,94,350,46"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,167,650,192"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="372,43,534,156,531,161,369,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,167,135,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="260,121,120,165,119,160,258,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="159,167,237,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="281,121,227,160,224,156,278,117"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="307,117,338,155,334,158,303,121"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="339,116,505,160,504,166,337,121"/>
 </map>

@@ -1,9 +1,20 @@
 <map id="EddingtonSP1" name="EddingtonSP1">
-<area shape="rect" id="node1" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="1000,156,1111,183"/>
-<area shape="rect" id="node2" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="735,156,812,183"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="362,105,546,146"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,112,144,139"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="356,51,552,77"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,175,553,201"/>
-<area shape="rect" id="node7" href="$classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="684,280,863,307"/>
+<area shape="rect" id="Node000001" title="Radiative tranfer equation solver in the SP1 (diffusion) approximation." alt="" coords="1000,123,1111,149"/>
+<area shape="rect" id="Node000002" href="$classRtSolver.html" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="735,123,812,149"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="826,133,1000,133,1000,139,826,139"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="356,79,552,105"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="566,88,577,88,778,90,865,98,976,115,1006,121,1005,126,976,120,864,104,777,96,577,93,566,93"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="497,108,536,121,578,132,661,139,734,137,734,142,661,144,577,137,534,127,495,113"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,79,144,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="158,89,356,89,356,95,158,95"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="355,15,553,41"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="155,74,168,72,372,38,373,43,168,77,156,79"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="362,161,546,201"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="143,105,369,159,367,164,142,110"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="567,17,709,18,787,25,863,39,915,55,964,78,1037,121,1034,126,961,82,913,60,862,44,786,30,709,23,567,23"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="534,41,597,59,661,83,685,99,735,121,733,126,683,104,659,88,596,64,533,46"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="560,182,704,182,862,172,936,161,1003,146,1004,151,937,166,863,177,704,187,560,188"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="560,172,660,160,734,144,735,149,660,165,560,177"/>
+<area shape="rect" id="Node000007" href="$classEddingtonSP1DomainBc.html" title="Class which maps boundary condition types to a side and direction." alt="" coords="684,274,863,299"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="876,287,927,277,952,268,974,256,1002,232,1023,202,1047,148,1052,150,1027,205,1006,236,978,261,954,273,929,282,877,292"/>
 </map>

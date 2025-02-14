@@ -1,11 +1,20 @@
 <map id="Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;" name="Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;">
-<area shape="rect" id="node1" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="1603,254,1841,295"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="1264,247,1495,303"/>
-<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="401,339,507,365"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="749,254,980,295"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="362,38,546,79"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,144,144,171"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="356,144,552,171"/>
-<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="355,275,553,301"/>
-<area shape="rect" id="node9" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="1349,327,1409,353"/>
+<area shape="rect" id="Node000001" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="360,479,599,519"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="364,359,595,399"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="482,413,482,479,477,479,477,413"/>
+<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="657,101,763,126"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="715,139,717,178,713,226,700,276,688,300,673,321,628,338,546,362,545,357,626,333,670,317,684,297,695,274,708,226,711,178,710,140"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="5,101,201,126"/>
+<area shape="poly" id="edge10_Node000001_Node000004" title=" " alt="" coords="98,140,85,195,77,269,78,307,84,346,97,382,117,414,132,427,155,439,215,458,287,473,360,484,359,489,286,478,213,463,152,444,129,431,113,418,92,384,79,347,72,308,71,268,79,194,93,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="117,137,125,157,134,205,136,246,143,282,152,299,169,317,183,324,203,330,253,335,305,337,345,340,415,357,414,362,344,345,305,342,252,340,202,335,181,329,166,321,148,302,138,284,130,246,129,206,119,158,112,139"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="255,5,394,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="274,37,219,57,125,103,123,98,217,52,272,32"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="225,101,424,126"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="327,44,327,101,322,101,322,44"/>
+<area shape="rect" id="Node000007" href="$classEBAMRData.html" title=" " alt="" coords="449,93,633,133"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="380,32,435,52,510,91,508,96,433,57,378,37"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="324,140,323,178,326,224,336,273,346,296,359,317,383,340,413,357,411,361,380,345,355,320,341,299,331,275,320,225,317,178,319,140"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="536,147,486,360,481,359,531,146"/>
+<area shape="rect" id="Node000008" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="619,367,679,392"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="627,403,609,418,513,481,510,476,606,414,624,399"/>
 </map>

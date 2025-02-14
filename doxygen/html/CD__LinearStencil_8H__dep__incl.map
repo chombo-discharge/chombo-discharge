@@ -1,6 +1,9 @@
 <map id="Source/AmrMesh/CD_LinearStencil.H" name="Source/AmrMesh/CD_LinearStencil.H">
-<area shape="rect" id="node1" title="Routines for computing a bi/tri&#45;linear interpolation stencil in cut&#45;cells." alt="" coords="262,5,465,47"/>
-<area shape="rect" id="node2" href="$CD__CentroidInterpolationStencil_8cpp.html" title="Implementation of CD_CentroidInterpolationStencil.H." alt="" coords="5,95,223,136"/>
-<area shape="rect" id="node3" href="$CD__EbCentroidInterpolationStencil_8cpp.html" title="Implementation of CD_EbCentroidInterpolationStencil.H." alt="" coords="247,95,480,136"/>
-<area shape="rect" id="node4" href="$CD__LinearStencil_8cpp.html" title="Implementation of CD_LinearStencil.H." alt="" coords="505,95,707,136"/>
+<area shape="rect" id="Node000001" title="Routines for computing a bi/tri&#45;linear interpolation stencil in cut&#45;cells." alt="" coords="262,5,465,45"/>
+<area shape="rect" id="Node000002" href="$CD__CentroidInterpolationStencil_8cpp.html" title="Implementation of CD_CentroidInterpolationStencil.H." alt="" coords="5,93,223,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="296,52,169,96,168,91,295,47"/>
+<area shape="rect" id="Node000003" href="$CD__EbCentroidInterpolationStencil_8cpp.html" title="Implementation of CD_EbCentroidInterpolationStencil.H." alt="" coords="247,93,480,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="366,59,366,93,361,93,361,59"/>
+<area shape="rect" id="Node000004" href="$CD__LinearStencil_8cpp.html" title="Implementation of CD_LinearStencil.H." alt="" coords="505,93,707,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="430,47,554,91,552,96,428,52"/>
 </map>

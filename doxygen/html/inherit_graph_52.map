@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classFieldSolverFactory.html" title="Factory class for poisson solvers. Used to instantiate any FieldSolver&#45;derived classes with automatic..." alt="" coords="5,5,184,32"/>
+<area shape="rect" id="Node000000" href="$classGenericParticle.html" title=" " alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000001" href="$classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="228,5,331,31"/>
+<area shape="poly" id="edge94_Node000000_Node000001" title=" " alt="" coords="193,15,228,15,228,21,193,21"/>
 </map>

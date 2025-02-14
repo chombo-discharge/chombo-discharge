@@ -1,8 +1,15 @@
 <map id="Source/ImplicitFunctions/CD_HyperboloidIF.cpp" name="Source/ImplicitFunctions/CD_HyperboloidIF.cpp">
-<area shape="rect" id="node1" title="Implementation CD_HyperboloidIF.H." alt="" coords="267,5,448,47"/>
-<area shape="rect" id="node2" href="$CD__HyperboloidIF_8H.html" title="Declaration of a hyperboloid implicit function." alt="" coords="169,95,319,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="226,169,411,196"/>
-<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="436,169,615,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,169,99,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="123,169,202,196"/>
+<area shape="rect" id="Node000001" title="Implementation CD_HyperboloidIF.H." alt="" coords="267,5,448,45"/>
+<area shape="rect" id="Node000002" href="$CD__HyperboloidIF_8H.html" title="Declaration of a hyperboloid implicit function." alt="" coords="169,93,319,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="331,48,274,87,271,83,328,43"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="226,167,411,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="355,46,328,154,322,153,350,45"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="436,167,615,192"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="380,44,504,155,501,159,376,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,99,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,121,97,164,95,159,212,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="123,167,202,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="233,121,188,160,184,156,229,117"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="258,117,298,155,295,159,254,121"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="290,116,467,161,466,166,289,121"/>
 </map>

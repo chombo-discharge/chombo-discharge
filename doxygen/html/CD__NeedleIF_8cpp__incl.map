@@ -1,15 +1,37 @@
 <map id="Source/ImplicitFunctions/CD_NeedleIF.cpp" name="Source/ImplicitFunctions/CD_NeedleIF.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_NeedleIF.H." alt="" coords="252,5,433,47"/>
-<area shape="rect" id="node2" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="5,169,101,196"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="105,244,290,271"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="601,244,780,271"/>
-<area shape="rect" id="node6" href="$CD__NeedleIF_8H.html" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="283,95,402,121"/>
-<area shape="rect" id="node9" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="613,95,768,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="11,244,80,271"/>
-<area shape="rect" id="node7" title=" " alt="" coords="433,169,511,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="227,169,357,196"/>
-<area shape="rect" id="node10" title=" " alt="" coords="869,169,947,196"/>
-<area shape="rect" id="node11" title=" " alt="" coords="971,169,1093,196"/>
-<area shape="rect" id="node12" title=" " alt="" coords="1117,169,1248,196"/>
-<area shape="rect" id="node13" href="$CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="587,169,794,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_NeedleIF.H." alt="" coords="252,5,433,45"/>
+<area shape="rect" id="Node000002" href="$CD__Units_8H.html" title="Declaration of various useful units." alt="" coords="5,167,101,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="252,43,185,63,152,78,122,95,91,124,69,156,64,153,87,121,118,91,150,73,184,58,251,38"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="105,240,290,265"/>
+<area shape="poly" id="edge21_Node000001_Node000004" title=" " alt="" coords="312,48,283,69,251,96,222,130,200,168,194,197,195,226,190,226,188,197,195,166,217,127,247,93,280,65,309,43"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="601,240,780,265"/>
+<area shape="poly" id="edge22_Node000001_Node000005" title=" " alt="" coords="433,24,636,29,759,36,886,48,1008,66,1116,90,1163,105,1204,123,1237,143,1262,165,1270,179,1268,192,1257,203,1240,213,1188,228,1118,239,952,251,794,254,794,249,951,245,1118,233,1187,223,1238,208,1254,199,1263,190,1264,180,1258,168,1234,147,1201,128,1161,110,1115,95,1007,71,885,53,759,41,636,34,433,29"/>
+<area shape="rect" id="Node000006" href="$CD__NeedleIF_8H.html" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="283,93,402,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="345,46,345,79,340,79,340,46"/>
+<area shape="rect" id="Node000009" href="$CD__EBGeometryIF_8H.html" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="613,93,768,119"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="427,43,627,88,626,93,425,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="11,240,80,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="55,193,51,227,45,226,49,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="78,190,163,231,160,236,75,194"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="102,183,588,237,587,243,101,189"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="294,121,252,139,233,152,217,168,204,196,199,226,194,226,198,195,212,165,229,148,249,134,292,116"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="352,117,379,154,399,173,421,190,461,209,504,223,588,241,587,246,502,229,459,214,419,194,395,177,375,157,348,120"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="433,167,511,192"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="365,116,440,157,437,162,362,121"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="227,167,357,192"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="336,121,310,157,306,154,332,117"/>
+<area shape="poly" id="edge15_Node000009_Node000004" title=" " alt="" coords="670,121,525,194,412,224,304,243,303,237,411,219,523,190,668,116"/>
+<area shape="poly" id="edge16_Node000009_Node000005" title=" " alt="" coords="734,116,766,129,795,145,812,167,814,180,809,193,784,220,752,238,749,233,780,216,804,191,809,179,808,169,792,149,764,133,732,121"/>
+<area shape="poly" id="edge12_Node000009_Node000007" title=" " alt="" coords="656,121,521,165,520,160,655,116"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="869,167,947,192"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="726,116,861,160,859,165,725,121"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="971,167,1093,192"/>
+<area shape="poly" id="edge13_Node000009_Node000011" title=" " alt="" coords="746,116,964,161,963,166,745,121"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1117,167,1248,192"/>
+<area shape="poly" id="edge14_Node000009_Node000012" title=" " alt="" coords="769,116,1104,164,1104,169,768,121"/>
+<area shape="rect" id="Node000013" href="$CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="587,167,794,192"/>
+<area shape="poly" id="edge17_Node000009_Node000013" title=" " alt="" coords="686,119,685,153,679,153,681,119"/>
+<area shape="poly" id="edge19_Node000013_Node000004" title=" " alt="" coords="612,195,290,241,290,235,611,189"/>
+<area shape="poly" id="edge20_Node000013_Node000005" title=" " alt="" coords="693,192,693,226,688,226,688,192"/>
+<area shape="poly" id="edge18_Node000013_Node000009" title=" " alt="" coords="695,166,697,132,702,133,700,167"/>
 </map>

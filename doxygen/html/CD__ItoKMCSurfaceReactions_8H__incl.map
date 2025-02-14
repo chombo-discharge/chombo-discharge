@@ -1,11 +1,27 @@
 <map id="Physics/ItoKMC/CD_ItoKMCSurfaceReactions.H" name="Physics/ItoKMC/CD_ItoKMCSurfaceReactions.H">
-<area shape="rect" id="node1" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="360,5,608,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,102,77,129"/>
-<area shape="rect" id="node3" href="$CD__ItoKMCSurfaceReaction_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="259,102,474,129"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="319,273,505,300"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="589,273,768,300"/>
-<area shape="rect" id="node9" href="$CD__ItoKMCSurfaceReactionsImplem_8H.html" title="Implementation of CD_ItoKMCSurfaceReactions.H." alt="" coords="499,95,707,136"/>
-<area shape="rect" id="node4" title=" " alt="" coords="152,191,195,218"/>
-<area shape="rect" id="node5" title=" " alt="" coords="219,191,288,218"/>
-<area shape="rect" id="node8" href="$CD__ItoKMCSurfaceReactionImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="363,184,565,225"/>
+<area shape="rect" id="Node000001" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="360,5,608,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,101,77,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="360,46,232,67,97,96,86,99,85,94,95,91,231,61,359,40"/>
+<area shape="rect" id="Node000003" href="$CD__ItoKMCSurfaceReaction_8H.html" title="Declaration of a class that encapsulates a set secondary emission at EBs and domain edges/faces." alt="" coords="259,101,474,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="460,48,395,95,392,90,456,43"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="319,269,505,295"/>
+<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="360,45,297,62,235,90,207,108,181,129,159,154,142,182,136,206,141,225,156,240,177,252,237,269,306,277,305,282,236,274,175,257,152,244,137,227,131,206,138,180,155,151,177,125,204,103,233,85,295,57,359,40"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="589,269,768,295"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="597,43,672,63,702,76,721,92,732,112,737,134,736,157,732,181,716,224,696,259,692,257,711,222,727,179,731,157,731,135,727,114,717,95,699,81,671,68,596,48"/>
+<area shape="rect" id="Node000009" href="$CD__ItoKMCSurfaceReactionsImplem_8H.html" title="Implementation of CD_ItoKMCSurfaceReactions.H." alt="" coords="499,93,707,133"/>
+<area shape="poly" id="edge13_Node000001_Node000009" title=" " alt="" coords="504,43,559,83,556,88,501,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="152,189,195,214"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="337,129,208,184,206,185,204,180,206,179,335,124"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="219,189,288,214"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="353,128,281,182,278,178,350,124"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="364,127,350,170,348,195,353,220,367,241,385,259,381,263,362,245,348,222,343,196,345,169,358,126"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="427,123,501,145,540,160,577,179,626,217,663,257,659,260,623,221,575,184,538,165,499,150,426,129"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCSurfaceReactionImplem_8H.html" title="Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces." alt="" coords="363,181,565,221"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="375,124,426,170,422,174,372,128"/>
+<area shape="poly" id="edge8_Node000008_Node000003" title=" " alt="" coords="448,183,395,137,399,133,452,179"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="454,223,430,259,425,256,449,220"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="516,219,635,262,634,267,515,224"/>
+<area shape="poly" id="edge14_Node000009_Node000001" title=" " alt="" coords="582,95,528,55,531,51,586,91"/>
+<area shape="poly" id="edge15_Node000009_Node000006" title=" " alt="" coords="606,134,600,178,592,202,578,223,543,251,502,268,500,263,540,246,574,220,587,199,595,177,600,133"/>
+<area shape="poly" id="edge16_Node000009_Node000007" title=" " alt="" coords="632,132,656,153,674,180,684,219,684,256,679,256,679,220,670,182,652,156,629,135"/>
 </map>

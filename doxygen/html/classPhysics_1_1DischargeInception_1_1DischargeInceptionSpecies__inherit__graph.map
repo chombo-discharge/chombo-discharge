@@ -1,4 +1,5 @@
 <map id="Physics::DischargeInception::DischargeInceptionSpecies" name="Physics::DischargeInception::DischargeInceptionSpecies">
-<area shape="rect" id="node1" title="Advection and diffused species for DischargeInceptionStepper." alt="" coords="5,80,211,121"/>
-<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="61,5,155,32"/>
+<area shape="rect" id="Node000001" title="Advection and diffused species for DischargeInceptionStepper." alt="" coords="5,79,211,119"/>
+<area shape="rect" id="Node000002" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="61,5,155,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,44,111,79,105,79,105,44"/>
 </map>

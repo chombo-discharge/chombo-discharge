@@ -1,4 +1,5 @@
 <map id="Physics::AdvectionDiffusion::AdvectionDiffusionTagger" name="Physics::AdvectionDiffusion::AdvectionDiffusionTagger">
-<area shape="rect" id="node1" title="Class for tagging cells in AdvectionDiffusion physics." alt="" coords="5,80,208,121"/>
-<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="61,5,152,32"/>
+<area shape="rect" id="Node000001" title="Class for tagging cells in AdvectionDiffusion physics." alt="" coords="5,79,208,119"/>
+<area shape="rect" id="Node000002" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="61,5,152,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,44,109,79,104,79,104,44"/>
 </map>

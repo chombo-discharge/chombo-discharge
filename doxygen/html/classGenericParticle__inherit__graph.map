@@ -1,12 +1,21 @@
 <map id="GenericParticle&lt; M, N &gt;" name="GenericParticle&lt; M, N &gt;">
-<area shape="rect" id="node1" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,107,185,133"/>
-<area shape="rect" id="node2" href="$classTracerParticle.html" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="295,5,464,32"/>
-<area shape="rect" id="node3" href="$classGenericParticle.html" title=" " alt="" coords="292,56,467,83"/>
-<area shape="rect" id="node5" href="$classGenericParticle.html" title=" " alt="" coords="292,107,467,133"/>
-<area shape="rect" id="node7" href="$classGenericParticle.html" title=" " alt="" coords="292,157,467,184"/>
-<area shape="rect" id="node9" href="$classGenericParticle.html" title=" " alt="" coords="292,208,467,235"/>
-<area shape="rect" id="node4" href="$classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer." alt="" coords="549,56,615,83"/>
-<area shape="rect" id="node6" href="$classSimpleItoParticle.html" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="516,107,648,133"/>
-<area shape="rect" id="node8" href="$classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="531,157,633,184"/>
-<area shape="rect" id="node10" href="$classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="539,208,625,235"/>
+<area shape="rect" id="Node000001" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,104,185,129"/>
+<area shape="rect" id="Node000002" href="$classTracerParticle.html" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="295,5,464,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,96,208,66,291,39,330,28,332,33,293,45,210,71,138,101"/>
+<area shape="rect" id="Node000003" href="$classGenericParticle.html" title=" " alt="" coords="292,55,467,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,99,305,77,306,83,183,104"/>
+<area shape="rect" id="Node000005" href="$classGenericParticle.html" title=" " alt="" coords="292,104,467,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="199,114,292,114,292,119,199,119"/>
+<area shape="rect" id="Node000007" href="$classGenericParticle.html" title=" " alt="" coords="292,153,467,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="182,129,210,134,305,151,304,156,209,139,181,134"/>
+<area shape="rect" id="Node000009" href="$classGenericParticle.html" title=" " alt="" coords="292,203,467,228"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="136,133,210,165,327,200,325,205,208,170,134,138"/>
+<area shape="rect" id="Node000004" href="$classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="539,55,625,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="481,65,539,65,539,70,481,70"/>
+<area shape="rect" id="Node000006" href="$classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer." alt="" coords="549,104,615,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="481,114,548,114,548,119,481,119"/>
+<area shape="rect" id="Node000008" href="$classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="531,153,633,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="481,163,530,163,530,169,481,169"/>
+<area shape="rect" id="Node000010" href="$classSimpleItoParticle.html" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="516,203,648,228"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="481,213,516,213,516,218,481,218"/>
 </map>

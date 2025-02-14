@@ -1,8 +1,13 @@
 <map id="Physics::ItoKMC::ItoKMCStreamerTagger&lt; S &gt;" name="Physics::ItoKMC::ItoKMCStreamerTagger&lt; S &gt;">
-<area shape="rect" id="node1" title="Cell tagging class for streamers." alt="" coords="141,304,383,345"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="156,213,368,255"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="5,95,268,121"/>
-<area shape="rect" id="node4" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="91,5,182,32"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="292,95,488,121"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="321,5,459,32"/>
+<area shape="rect" id="Node000001" title="Cell tagging class for streamers." alt="" coords="141,300,383,340"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="156,211,368,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="265,265,265,300,259,300,259,265"/>
+<area shape="rect" id="Node000003" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="5,93,268,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="160,127,244,208,241,212,157,130"/>
+<area shape="rect" id="Node000004" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="91,5,182,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="139,45,139,93,134,93,134,45"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="292,93,488,119"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="370,131,284,212,280,208,366,127"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="321,5,459,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="393,45,393,93,387,93,387,45"/>
 </map>

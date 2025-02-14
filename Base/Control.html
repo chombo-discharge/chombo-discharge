@@ -173,7 +173,7 @@ Below, we consider basic examples for serial and parallel execution.</p>
 <section id="serial">
 <h3>Serial<a class="headerlink" href="#serial" title="Permalink to this heading"></a></h3>
 <p>If the application was compiled for serial execution one runs it with:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt; &lt;input_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>where &lt;input_file&gt; is your input file.</p>
@@ -183,19 +183,19 @@ Below, we consider basic examples for serial and parallel execution.</p>
 <p>When running with OpenMP one must specify the number of threads, and possibly also the binding of threads.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is compiled with run-time thread scheduling (which defaults to static), which can be specified.
 For example</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">8</span>
-<span class="nb">export</span> <span class="nv">OMP_PLACES</span><span class="o">=</span>cores
-<span class="nb">export</span> <span class="nv">OMP_PROC_BIND</span><span class="o">=</span><span class="nb">true</span>
-<span class="nb">export</span> <span class="nv">OMP_SCHEDULE</span><span class="o">=</span><span class="s2">&quot;dynamic, 4&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">8</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMP_PLACES</span><span class="o">=</span>cores
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMP_PROC_BIND</span><span class="o">=</span><span class="nb">true</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMP_SCHEDULE</span><span class="o">=</span><span class="s2">&quot;dynamic, 4&quot;</span>
 
-./&lt;application_executable&gt; &lt;input_file&gt;
+./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 </section>
 <section id="parallel-with-mpi">
 <h3>Parallel with MPI<a class="headerlink" href="#parallel-with-mpi" title="Permalink to this heading"></a></h3>
 <p>If the executable was compiled with MPI, one executes with e.g. <code class="docutils literal notranslate"><span class="pre">mpirun</span></code> (or one of its aliases):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">8</span> &lt;application_executable&gt; &lt;input_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>On clusters, this is a little bit different and usually requires passing the above command through a batch system.
@@ -210,24 +210,24 @@ With OpenMP one can use <code class="docutils literal notranslate"><span class="
 <li><p>Bind OpenMP threads to resources available to each MPI rank.</p></li>
 </ol>
 <p>For example, the following may not work as expected:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
-mpiexec -n <span class="m">2</span> ./&lt;application_executable&gt; &lt;input_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
+mpiexec<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>Each MPI rank may spawn threads on the same physical cores.
 With e.g. OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
 For example, on a local workstation one might do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">NRANKS</span><span class="o">=</span><span class="m">2</span>
-<span class="nb">export</span> <span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
-<span class="nb">export</span> <span class="nv">OMP_PLACES</span><span class="o">=</span>cores
-<span class="nb">export</span> <span class="nv">OMP_PROC_BIND</span><span class="o">=</span><span class="nb">true</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">NRANKS</span><span class="o">=</span><span class="m">2</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMP_PLACES</span><span class="o">=</span>cores
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMP_PROC_BIND</span><span class="o">=</span><span class="nb">true</span>
 
-mpiexec --bind-to core --map-by slot:PE<span class="o">=</span><span class="nv">$OMP_NUM_THREADS</span> -n <span class="nv">$NRANKS</span> ./&lt;application_executable&gt; &lt;input_file&gt;
+mpiexec<span class="w"> </span>--bind-to<span class="w"> </span>core<span class="w"> </span>--map-by<span class="w"> </span>slot:PE<span class="o">=</span><span class="nv">$OMP_NUM_THREADS</span><span class="w"> </span>-n<span class="w"> </span><span class="nv">$NRANKS</span><span class="w"> </span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>MPI bindings are here bound to cores and will spawn threads only on the cores they are associated with.
 It is often useful to verify this by reporting the bindings as follows:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpiexec --report-bindings --bind-to core --map-by slot:PE<span class="o">=</span><span class="nv">$OMP_NUM_THREADS</span> -n <span class="nv">$NRANKS</span> ./&lt;application_executable&gt; &lt;input_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpiexec<span class="w"> </span>--report-bindings<span class="w"> </span>--bind-to<span class="w"> </span>core<span class="w"> </span>--map-by<span class="w"> </span>slot:PE<span class="o">=</span><span class="nv">$OMP_NUM_THREADS</span><span class="w"> </span>-n<span class="w"> </span><span class="nv">$NRANKS</span><span class="w"> </span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <div class="admonition important">
@@ -253,7 +253,7 @@ For example, the configuration options that adjusts the number of time steps tha
 </pre></div>
 </div>
 <p>You may also pass input parameters through the command line. For example, running</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt; Driver.max_steps<span class="o">=</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">32</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;<span class="w"> </span>Driver.max_steps<span class="o">=</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>will set the <code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code> parameter to 10.
@@ -327,13 +327,13 @@ An empty entry like <code class="docutils literal notranslate"><span class="pre"
 These files are written in the directory where you executed your application, and are <em>not</em> related to plot files or checkpoint files.
 However, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> prints information to these files as simulations advance (for example by displaying information of the current time step, or convergence rates for multigrid solvers).
 To see information regarding the latest time steps, simply print a few lines in these files, e.g.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tail -200 pout.0
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tail<span class="w"> </span>-200<span class="w"> </span>pout.0
 </pre></div>
 </div>
 <p>While it is possible to monitor the evolution of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for each MPI rank, most of these files contain redundant information.
 To adjust the number of files that will be written, <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> can read an environment variable <code class="docutils literal notranslate"><span class="pre">CH_OUTPUT_INTERVAL</span></code> that determines which MPI ranks write <code class="file docutils literal notranslate"><span class="pre">pout.n</span></code> files.
 For example, if you only want the master MPI rank to write <code class="file docutils literal notranslate"><span class="pre">pout.0</span></code>, you would do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CH_OUTPUT_INTERVAL</span><span class="o">=</span><span class="m">999999999</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CH_OUTPUT_INTERVAL</span><span class="o">=</span><span class="m">999999999</span>
 </pre></div>
 </div>
 <div class="admonition important">
@@ -345,7 +345,7 @@ For example, if you only want the master MPI rank to write <code class="file doc
 <span id="chap-restartingsimulations"></span><h3>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this heading"></a></h3>
 <p>Restarting simulations is done in exactly the same way as running simulations, although the user must set the <code class="docutils literal notranslate"><span class="pre">Driver.restart</span></code> parameter.
 For example,</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">32</span> &lt;application_executable&gt; &lt;input_file&gt; Driver.restart<span class="o">=</span><span class="m">10</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">32</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;<span class="w"> </span>Driver.restart<span class="o">=</span><span class="m">10</span>
 </pre></div>
 </div>
 <p>will restart from step 10.</p>

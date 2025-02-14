@@ -1,9 +1,18 @@
 <map id="Source/ImplicitFunctions/CD_BoundedNoisePlane.H" name="Source/ImplicitFunctions/CD_BoundedNoisePlane.H">
-<area shape="rect" id="node1" title="Declaration of a signed distance function for a noisy plane." alt="" coords="125,5,321,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,88,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="14,169,93,196"/>
-<area shape="rect" id="node4" href="$CD__PerlinSdf_8H.html" title="Declaration of signed distance Perlin noise." alt="" coords="163,95,282,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="227,169,413,196"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="437,169,616,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="117,169,203,196"/>
+<area shape="rect" id="Node000001" title="Declaration of a signed distance function for a noisy plane." alt="" coords="125,5,321,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,88,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,48,86,90,84,85,179,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="14,167,93,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,48,78,159,75,155,200,44"/>
+<area shape="rect" id="Node000004" href="$CD__PerlinSdf_8H.html" title="Declaration of signed distance Perlin noise." alt="" coords="163,93,282,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="225,46,225,79,220,79,220,46"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="227,167,413,192"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="250,43,274,65,296,92,310,123,318,152,313,154,305,124,291,95,270,69,247,47"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="437,167,616,192"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="262,43,493,158,490,163,259,48"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="196,121,95,164,93,159,194,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="117,167,203,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="214,121,181,158,177,154,210,117"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="240,117,294,156,291,160,237,121"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="272,116,465,161,464,166,271,121"/>
 </map>

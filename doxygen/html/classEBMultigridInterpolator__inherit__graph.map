@@ -1,4 +1,5 @@
 <map id="EBMultigridInterpolator" name="EBMultigridInterpolator">
-<area shape="rect" id="node1" title="Multigrid interpolator class." alt="" coords="49,5,222,32"/>
-<area shape="rect" id="node2" href="$classEBLeastSquaresMultigridInterpolator.html" title="Multigrid interpolator class." alt="" coords="5,80,265,107"/>
+<area shape="rect" id="Node000001" title="Multigrid interpolator class." alt="" coords="49,5,222,31"/>
+<area shape="rect" id="Node000002" href="$classEBLeastSquaresMultigridInterpolator.html" title="Multigrid interpolator class." alt="" coords="5,79,265,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,44,138,79,133,79,133,44"/>
 </map>

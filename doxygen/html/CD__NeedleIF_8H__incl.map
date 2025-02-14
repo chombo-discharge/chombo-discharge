@@ -1,7 +1,11 @@
 <map id="Source/ImplicitFunctions/CD_NeedleIF.H" name="Source/ImplicitFunctions/CD_NeedleIF.H">
-<area shape="rect" id="node1" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="173,5,354,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,84,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="108,95,237,121"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,95,447,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,95,650,121"/>
+<area shape="rect" id="Node000001" title="Declaration of needle electrode (cylinder with one pointy end and one flat end)" alt="" coords="173,5,354,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,84,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,48,91,91,89,86,210,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="108,93,237,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="243,48,198,86,195,82,240,44"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,93,447,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="287,44,332,82,328,86,284,48"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,93,650,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="335,43,505,87,504,92,334,48"/>
 </map>

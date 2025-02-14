@@ -1,4 +1,5 @@
 <map id="CentroidInterpolationStencil" name="CentroidInterpolationStencil">
-<area shape="rect" id="node1" title="Class which can take cell&#45;centered data and interpolate it to cell centroids." alt="" coords="5,80,209,107"/>
-<area shape="rect" id="node2" href="$classIrregStencil.html" title="Class for holding stencils on irregular cells over a single AMR level." alt="" coords="59,5,155,32"/>
+<area shape="rect" id="Node000001" title="Class which can take cell&#45;centered data and interpolate it to cell centroids." alt="" coords="5,79,209,104"/>
+<area shape="rect" id="Node000002" href="$classIrregStencil.html" title="Class for holding stencils on irregular cells over a single AMR level." alt="" coords="59,5,155,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,44,110,79,105,79,105,44"/>
 </map>

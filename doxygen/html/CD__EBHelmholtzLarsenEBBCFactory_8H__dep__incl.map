@@ -1,5 +1,7 @@
 <map id="Source/RadiativeTransfer/CD_EBHelmholtzLarsenEBBCFactory.H" name="Source/RadiativeTransfer/CD_EBHelmholtzLarsenEBBCFactory.H">
-<area shape="rect" id="node1" title="Declaration of a Electrostatic boundary condition class for MFHelmholtzOp." alt="" coords="141,5,415,47"/>
-<area shape="rect" id="node2" href="$CD__EBHelmholtzLarsenEBBCFactory_8cpp.html" title="Implementation of CD_EBHelmholtzLarsenEBBCFactory.H." alt="" coords="5,95,292,136"/>
-<area shape="rect" id="node3" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="317,95,501,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a Electrostatic boundary condition class for MFHelmholtzOp." alt="" coords="141,5,415,45"/>
+<area shape="rect" id="Node000002" href="$CD__EBHelmholtzLarsenEBBCFactory_8cpp.html" title="Implementation of CD_EBHelmholtzLarsenEBBCFactory.H." alt="" coords="5,93,292,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,56,179,95,176,91,236,51"/>
+<area shape="rect" id="Node000003" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="317,93,501,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="320,51,381,91,378,95,317,55"/>
 </map>

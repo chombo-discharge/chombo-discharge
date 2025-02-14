@@ -1,10 +1,20 @@
 <map id="Source/ImplicitFunctions/CD_EBGeometryIF.H" name="Source/ImplicitFunctions/CD_EBGeometryIF.H">
-<area shape="rect" id="node1" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="383,5,564,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,83,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="107,95,186,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="211,95,333,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="357,95,488,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="470,169,655,196"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="699,169,877,196"/>
-<area shape="rect" id="node8" href="$CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="563,95,770,121"/>
+<area shape="rect" id="Node000001" title="Binding of EBGeometry signed distance functions to Chombo objcts." alt="" coords="383,5,564,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,83,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="383,44,97,96,96,90,382,39"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="107,93,186,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="396,48,200,95,199,90,394,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="211,93,333,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="426,48,315,91,313,86,424,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="357,93,488,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="463,47,440,83,435,80,459,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="470,167,655,192"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="487,44,551,153,547,156,482,47"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="699,167,877,192"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="564,32,629,40,694,52,749,69,770,80,785,92,793,106,797,122,796,153,791,153,792,123,788,108,781,95,767,84,747,74,693,57,628,45,564,37"/>
+<area shape="rect" id="Node000008" href="$CD__EBGeometryIFImplem_8H.html" title="Implementation of CD_EBGeometryIF.H." alt="" coords="563,93,770,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="513,43,620,86,618,91,511,48"/>
+<area shape="poly" id="edge8_Node000008_Node000001" title=" " alt="" coords="644,96,539,53,541,48,646,91"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="651,121,593,161,590,156,648,116"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="688,116,758,157,755,162,685,121"/>
 </map>

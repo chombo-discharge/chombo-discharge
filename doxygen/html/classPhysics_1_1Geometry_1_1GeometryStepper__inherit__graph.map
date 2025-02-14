@@ -1,4 +1,5 @@
 <map id="Physics::Geometry::GeometryStepper" name="Physics::Geometry::GeometryStepper">
-<area shape="rect" id="node1" title="This implementation does absolutely nothing – it instantiates a TimeStepper with empty functionality." alt="" coords="5,80,156,121"/>
-<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="28,5,133,32"/>
+<area shape="rect" id="Node000001" title="This implementation does absolutely nothing – it instantiates a TimeStepper with empty functionality." alt="" coords="5,79,156,119"/>
+<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="28,5,133,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,44,83,79,78,79,78,44"/>
 </map>

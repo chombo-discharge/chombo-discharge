@@ -1,6 +1,9 @@
 <map id="Source/ImplicitFunctions/CD_GradedPerlinSphereSdf.H" name="Source/ImplicitFunctions/CD_GradedPerlinSphereSdf.H">
-<area shape="rect" id="node1" title="Declaration of a graded noisy sphere." alt="" coords="127,5,341,47"/>
-<area shape="rect" id="node2" href="$CD__GradedPerlinSphereSdf_8cpp.html" title="Implementation of CD_GradedPerlinSphereSdf.H." alt="" coords="5,95,233,136"/>
-<area shape="rect" id="node3" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="258,95,439,136"/>
-<area shape="rect" id="node4" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="265,184,433,225"/>
+<area shape="rect" id="Node000001" title="Declaration of a graded noisy sphere." alt="" coords="127,5,341,45"/>
+<area shape="rect" id="Node000002" href="$CD__GradedPerlinSphereSdf_8cpp.html" title="Implementation of CD_GradedPerlinSphereSdf.H." alt="" coords="5,93,233,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,56,146,95,143,91,196,52"/>
+<area shape="rect" id="Node000003" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="258,93,439,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,52,325,91,322,95,269,56"/>
+<area shape="rect" id="Node000004" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="265,181,433,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="351,147,351,181,346,181,346,147"/>
 </map>

@@ -1,10 +1,21 @@
 <map id="Source/ImplicitFunctions/CD_SignedDistanceBVHImplem.H" name="Source/ImplicitFunctions/CD_SignedDistanceBVHImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_SignedDistanceBVH.H." alt="" coords="269,5,515,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,169,72,196"/>
-<area shape="rect" id="node3" href="$CD__SignedDistanceBVH_8H.html" title="Declaration of an signe distance function class that gets its value function from a DCEL surface Tess..." alt="" coords="297,95,487,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="455,169,641,196"/>
-<area shape="rect" id="node8" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="665,169,844,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="96,169,173,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="197,169,328,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="353,169,431,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_SignedDistanceBVH.H." alt="" coords="269,5,515,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,167,72,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="349,48,79,164,77,159,347,43"/>
+<area shape="rect" id="Node000003" href="$CD__SignedDistanceBVH_8H.html" title="Declaration of an signe distance function class that gets its value function from a DCEL surface Tess..." alt="" coords="297,93,487,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="387,46,386,79,381,79,381,45"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="455,167,641,192"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="433,43,468,64,501,91,524,122,540,153,536,155,519,125,497,95,465,69,430,48"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="665,167,844,192"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="438,43,715,159,713,164,436,48"/>
+<area shape="poly" id="edge9_Node000003_Node000001" title=" " alt="" coords="396,93,398,59,404,59,401,93"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="328,121,86,169,85,164,327,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="96,167,173,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="351,121,187,166,186,161,350,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="197,167,328,192"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="372,121,297,162,295,157,370,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="353,167,431,192"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="395,119,395,153,389,153,389,119"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="418,116,511,158,509,163,416,121"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="451,116,683,161,682,167,450,121"/>
 </map>

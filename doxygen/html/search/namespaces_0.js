@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['boxloops_3885',['BoxLoops',['../namespaceBoxLoops.html',1,'']]]
+  ['boxloops_0',['BoxLoops',['../namespaceBoxLoops.html',1,'']]]
 ];

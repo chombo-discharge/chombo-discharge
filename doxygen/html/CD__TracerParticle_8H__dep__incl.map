@@ -1,10 +1,22 @@
 <map id="Source/TracerParticles/CD_TracerParticle.H" name="Source/TracerParticles/CD_TracerParticle.H">
-<area shape="rect" id="node1" title="Declaration of a tracer particle class." alt="" coords="181,5,345,47"/>
-<area shape="rect" id="node2" href="$CD__TracerParticleImplem_8H.html" title="Implementation of CD_TracerParticle.H." alt="" coords="51,95,254,136"/>
-<area shape="rect" id="node3" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="279,95,472,136"/>
-<area shape="rect" id="node5" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="526,184,766,225"/>
-<area shape="rect" id="node4" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="5,184,249,225"/>
-<area shape="rect" id="node7" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="274,184,477,225"/>
-<area shape="rect" id="node6" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="514,273,805,315"/>
-<area shape="rect" id="node8" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="237,273,490,315"/>
+<area shape="rect" id="Node000001" title="Declaration of a tracer particle class." alt="" coords="207,5,371,45"/>
+<area shape="rect" id="Node000002" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,181,271,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,54,201,72,178,95,167,116,159,139,153,182,148,181,154,138,162,114,174,92,197,68,225,50"/>
+<area shape="rect" id="Node000004" href="$CD__TracerParticleImplem_8H.html" title="Implementation of CD_TracerParticle.H." alt="" coords="188,93,391,133"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="283,59,284,93,279,93,278,59"/>
+<area shape="rect" id="Node000005" href="$CD__TracerParticleSolver_8H.html" title="Declaration of a solver class that advances tracer particles." alt="" coords="415,93,609,133"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="352,48,464,91,462,96,350,53"/>
+<area shape="rect" id="Node000003" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="5,269,296,309"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,235,146,269,140,269,139,235"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="157,256,156,222,161,222,162,256"/>
+<area shape="poly" id="edge5_Node000004_Node000001" title=" " alt="" coords="295,80,294,46,300,46,301,80"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="420,139,230,184,229,179,419,134"/>
+<area shape="rect" id="Node000006" href="$CD__TracerParticleStepper_8H.html" title="Declaration of a TimeStepper implementation for advancing a tracer particle solver." alt="" coords="345,181,548,221"/>
+<area shape="poly" id="edge8_Node000005_Node000006" title=" " alt="" coords="491,146,463,183,459,179,487,143"/>
+<area shape="rect" id="Node000008" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="573,181,817,221"/>
+<area shape="poly" id="edge11_Node000005_Node000008" title=" " alt="" coords="558,137,648,179,646,184,555,142"/>
+<area shape="rect" id="Node000007" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="320,269,573,309"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="441,235,442,269,436,269,435,235"/>
+<area shape="poly" id="edge10_Node000007_Node000006" title=" " alt="" coords="453,256,452,222,457,222,458,256"/>
+<area shape="poly" id="edge12_Node000008_Node000005" title=" " alt="" coords="649,178,559,136,561,131,651,173"/>
 </map>

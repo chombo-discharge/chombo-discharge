@@ -1,3 +1,61 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="5,5,119,32"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,647,72,672"/>
+<area shape="rect" id="Node000001" href="$classBoundedNoisePlane.html" title="Infinite plane with spatially bounded surface noise (Perlin noise)." alt="" coords="141,5,293,31"/>
+<area shape="poly" id="edge3_Node000000_Node000001" title=" " alt="" coords="37,633,38,508,47,331,57,240,71,156,91,88,104,61,118,40,140,25,143,29,122,44,108,64,96,90,76,158,62,241,52,331,43,509,42,633"/>
+<area shape="rect" id="Node000002" href="$classBoxSdf.html" title="Class for defining a two&#45; or three&#45;dimensional box with arbitrary centroid and orientation." alt="" coords="183,55,251,80"/>
+<area shape="poly" id="edge4_Node000000_Node000002" title=" " alt="" coords="37,633,40,518,50,355,60,272,74,196,93,133,105,108,118,90,132,78,149,70,183,64,184,69,150,76,135,83,122,93,109,111,98,135,79,197,65,272,55,355,45,518,43,633"/>
+<area shape="rect" id="Node000003" href="$classCylinderSdf.html" title="Declaration of a cylinder IF class." alt="" coords="169,104,266,129"/>
+<area shape="poly" id="edge5_Node000000_Node000003" title=" " alt="" coords="38,632,42,525,53,378,63,303,77,234,95,178,118,139,141,123,168,115,169,120,143,128,122,142,100,180,82,236,69,304,58,378,47,526,43,633"/>
+<area shape="rect" id="Node000004" href="$classEBGeometryIF.html" title="Shallow binding of EBGeometry signed distance functions to Chombo." alt="" coords="140,153,295,179"/>
+<area shape="poly" id="edge6_Node000000_Node000004" title=" " alt="" coords="38,633,43,535,56,402,67,335,80,273,97,223,118,188,138,174,142,178,122,192,102,225,85,275,72,336,62,403,49,535,43,633"/>
+<area shape="rect" id="Node000005" href="$classHollowCylinderIF.html" title="This class is used to generate a hollow cylinder with rounded edges." alt="" coords="151,203,284,228"/>
+<area shape="poly" id="edge7_Node000000_Node000005" title=" " alt="" coords="39,633,45,544,60,426,83,313,99,268,118,238,133,226,149,219,151,224,135,231,122,241,104,271,88,314,65,427,51,545,44,633"/>
+<area shape="rect" id="Node000006" href="$classHyperboloidIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="161,252,274,277"/>
+<area shape="poly" id="edge8_Node000000_Node000006" title=" " alt="" coords="40,632,48,553,63,450,86,352,101,313,118,287,137,273,159,265,161,270,140,278,122,291,105,316,91,353,68,451,53,554,45,633"/>
+<area shape="rect" id="Node000007" href="$classHyperboloidOneIF.html" title="Declaration of a one&#45;sheet hyperboloid." alt="" coords="148,301,287,327"/>
+<area shape="poly" id="edge9_Node000000_Node000007" title=" " alt="" coords="40,633,50,563,66,475,89,391,103,359,118,336,146,319,149,324,122,340,107,361,94,393,72,476,55,564,46,633"/>
+<area shape="rect" id="Node000008" href="$classHyperboloidTwoIF.html" title="Declaration of a two&#45;sheet hyperboloid." alt="" coords="148,351,287,376"/>
+<area shape="poly" id="edge10_Node000000_Node000008" title=" " alt="" coords="37,632,40,580,51,514,62,479,76,445,94,413,118,385,147,369,149,373,122,389,99,416,81,447,67,481,57,515,45,581,42,633"/>
+<area shape="rect" id="Node000009" href="$classMushroomIF.html" title="&quot;Mushroom&quot; implicit function. Consists of a cylinder with a circular plate on top." alt="" coords="166,400,269,425"/>
+<area shape="poly" id="edge11_Node000000_Node000009" title=" " alt="" coords="39,632,45,589,58,536,82,481,98,457,118,435,140,421,165,413,166,418,143,426,122,439,102,460,86,484,63,538,50,590,44,633"/>
+<area shape="rect" id="Node000010" href="$classNeedleIF.html" title="Cylinder with one pointed end and one circular end." alt="" coords="177,449,257,475"/>
+<area shape="poly" id="edge12_Node000000_Node000010" title=" " alt="" coords="42,633,51,599,66,559,88,518,118,484,146,469,176,461,178,467,148,474,122,488,92,521,71,561,56,600,47,634"/>
+<area shape="rect" id="Node000011" href="$classNewIntersectionIF.html" title="New intersection IF which does not mess up the return value function when there are no implicit funct..." alt="" coords="147,499,287,524"/>
+<area shape="poly" id="edge13_Node000000_Node000011" title=" " alt="" coords="47,633,74,582,94,556,118,533,146,519,148,524,122,538,98,559,78,585,52,635"/>
+<area shape="rect" id="Node000012" href="$classPerlinPlaneSdf.html" title="Infinite plane with surface noise (Perlin noise)." alt="" coords="159,548,275,573"/>
+<area shape="poly" id="edge14_Node000000_Node000012" title=" " alt="" coords="58,634,85,607,119,582,158,567,160,572,121,587,88,611,61,637"/>
+<area shape="rect" id="Node000013" href="$classPerlinSdf.html" title="Class that implements the improved Perlin noise function." alt="" coords="177,597,257,623"/>
+<area shape="poly" id="edge15_Node000000_Node000013" title=" " alt="" coords="84,642,119,631,176,617,178,622,121,637,86,647"/>
+<area shape="rect" id="Node000014" href="$classPerlinSlabSdf.html" title="Implicit function class describing a slab (box) with surface noise on the top." alt="" coords="163,647,271,672"/>
+<area shape="poly" id="edge16_Node000000_Node000014" title=" " alt="" coords="86,657,163,657,163,662,86,662"/>
+<area shape="rect" id="Node000015" href="$classPerlinSphereSdf.html" title="Noisy sphere geometry (with Perlin noise)." alt="" coords="155,696,280,721"/>
+<area shape="poly" id="edge17_Node000000_Node000015" title=" " alt="" coords="86,671,121,681,167,693,166,699,119,686,84,676"/>
+<area shape="rect" id="Node000018" href="$classPolygonRodIF.html" title="Implicit function class describing a rod with a polygonal cross scetion." alt="" coords="162,745,273,771"/>
+<area shape="poly" id="edge20_Node000000_Node000018" title=" " alt="" coords="61,681,88,708,121,732,163,747,161,752,119,736,85,712,58,685"/>
+<area shape="rect" id="Node000019" href="$classProfileCylinderIF.html" title="Implicit function which takes the form of a cylinder with a surface profiles (grooves)." alt="" coords="153,795,282,820"/>
+<area shape="poly" id="edge21_Node000000_Node000019" title=" " alt="" coords="52,683,78,734,98,760,121,781,154,796,151,801,119,786,94,763,74,737,47,686"/>
+<area shape="rect" id="Node000020" href="$classProfilePlaneIF.html" title="Implicit function which represents an infinite half&#45;plane with &quot;holes&quot;." alt="" coords="162,844,273,869"/>
+<area shape="poly" id="edge22_Node000000_Node000020" title=" " alt="" coords="47,685,56,718,71,758,92,797,122,831,141,842,163,849,161,854,139,847,118,835,88,800,66,760,51,720,42,686"/>
+<area shape="rect" id="Node000021" href="$classRodIF.html" title="Cylinder with rounded caps at its ends." alt="" coords="188,893,247,919"/>
+<area shape="poly" id="edge23_Node000000_Node000021" title=" " alt="" coords="44,686,50,729,63,781,86,835,102,859,122,880,137,890,154,897,188,903,187,908,152,902,134,895,118,884,98,862,82,837,58,783,45,730,39,686"/>
+<area shape="rect" id="Node000022" href="$classRoundedBoxIF.html" title="A box with rounded corners and edges." alt="" coords="159,943,275,968"/>
+<area shape="poly" id="edge24_Node000000_Node000022" title=" " alt="" coords="42,686,45,738,57,803,67,838,81,871,99,902,122,929,139,941,160,949,158,954,137,946,118,933,94,905,76,874,62,840,51,805,40,738,37,686"/>
+<area shape="rect" id="Node000023" href="$classRoundedCylinderIF.html" title="Cylinder object with rounded edges (no endcaps)" alt="" coords="145,992,290,1017"/>
+<area shape="poly" id="edge25_Node000000_Node000023" title=" " alt="" coords="46,685,55,755,72,843,94,926,107,957,122,979,146,994,143,998,118,983,103,960,89,927,66,844,50,755,40,686"/>
+<area shape="rect" id="Node000024" href="$classSignedDistanceBVH.html" title="Signed distance function for a DCEL mesh." alt="" coords="136,1042,299,1082"/>
+<area shape="poly" id="edge26_Node000000_Node000024" title=" " alt="" coords="45,686,54,764,69,867,92,964,106,1002,122,1028,138,1041,134,1045,118,1032,101,1005,87,966,64,868,48,765,40,686"/>
+<area shape="rect" id="Node000025" href="$classSignedDistanceDCEL.html" title="Signed distance function from a DCEL mesh." alt="" coords="120,1107,315,1132"/>
+<area shape="poly" id="edge27_Node000000_Node000025" title=" " alt="" coords="44,686,50,777,64,899,74,960,87,1016,103,1062,122,1092,138,1104,135,1109,118,1096,98,1064,82,1018,69,961,59,900,45,778,39,686"/>
+<area shape="rect" id="Node000026" href="$classSphereArray.html" title="A Cartesian array of spheres." alt="" coords="166,1156,269,1181"/>
+<area shape="poly" id="edge28_Node000000_Node000026" title=" " alt="" coords="43,686,48,787,61,924,71,994,84,1057,101,1108,122,1143,142,1157,167,1164,165,1170,140,1162,118,1146,96,1110,79,1058,66,994,55,925,43,787,38,686"/>
+<area shape="rect" id="Node000027" href="$classSphereSdf.html" title="Signed distance function for sphere." alt="" coords="173,1205,261,1231"/>
+<area shape="poly" id="edge29_Node000000_Node000027" title=" " alt="" coords="43,686,46,795,57,948,67,1025,81,1096,99,1153,122,1192,146,1208,174,1215,173,1220,143,1213,118,1196,94,1155,76,1097,62,1026,52,948,41,796,38,686"/>
+<area shape="rect" id="Node000028" href="$classTorusSdf.html" title="Signed distance function for a torus (oriented along z)." alt="" coords="179,1255,256,1280"/>
+<area shape="poly" id="edge30_Node000000_Node000028" title=" " alt="" coords="43,686,44,805,54,972,64,1057,78,1135,97,1199,109,1223,122,1242,134,1251,148,1258,179,1265,178,1270,146,1263,131,1256,118,1245,104,1226,93,1201,73,1136,59,1058,49,972,39,805,37,686"/>
+<area shape="rect" id="Node000029" href="$classWedgeIF.html" title="Implicit function for a wedge." alt="" coords="178,1304,257,1329"/>
+<area shape="poly" id="edge31_Node000000_Node000029" title=" " alt="" coords="42,686,43,814,51,996,61,1089,76,1174,96,1244,108,1271,122,1291,134,1301,148,1308,179,1314,177,1320,146,1313,131,1305,118,1294,103,1273,91,1246,70,1175,56,1090,46,996,37,814,37,686"/>
+<area shape="rect" id="Node000016" href="$classGradedPerlinSphereSdf.html" title="GradedPerlinSphereSdf function." alt="" coords="363,672,535,697"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="294,698,362,691,363,696,294,703"/>
+<area shape="rect" id="Node000017" href="$classPerlinRodSdf.html" title="A rod geometry, but with noise on one of the end caps." alt="" coords="396,721,501,747"/>
+<area shape="poly" id="edge19_Node000015_Node000017" title=" " alt="" coords="294,714,396,726,396,731,294,720"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="Physics::CdrPlasma::CdrSpeciesJSON" name="Physics::CdrPlasma::CdrSpeciesJSON">
-<area shape="rect" id="node1" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="5,80,155,121"/>
-<area shape="rect" id="node2" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="33,5,127,32"/>
+<area shape="rect" id="Node000001" title="Encapsulation of species settings and initial conditions for CDR species in CdrPlasma." alt="" coords="5,79,155,119"/>
+<area shape="rect" id="Node000002" href="$classCdrSpecies.html" title="Abstract class that describes the scalar quantity that is advected in CdrSolver." alt="" coords="33,5,127,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,44,83,79,77,79,77,44"/>
 </map>

@@ -1,5 +1,8 @@
 <map id="Physics/DischargeInception/CD_DischargeInceptionSpecies.H" name="Physics/DischargeInception/CD_DischargeInceptionSpecies.H">
-<area shape="rect" id="node1" title="Simple species for DischargeInception test problem." alt="" coords="30,5,271,47"/>
-<area shape="rect" id="node2" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="5,95,296,136"/>
-<area shape="rect" id="node3" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,184,271,225"/>
+<area shape="rect" id="Node000001" title="Simple species for DischargeInception test problem." alt="" coords="30,5,271,45"/>
+<area shape="rect" id="Node000002" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="5,93,296,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,59,153,93,148,93,148,59"/>
+<area shape="rect" id="Node000003" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,181,271,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,147,146,181,140,181,139,147"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="157,168,156,134,161,134,162,168"/>
 </map>

@@ -1,14 +1,37 @@
 <map id="Source/RadiativeTransfer/CD_PhotonImplem.H" name="Source/RadiativeTransfer/CD_PhotonImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_Photon.H." alt="" coords="372,5,556,47"/>
-<area shape="rect" id="node2" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="411,95,517,121"/>
-<area shape="rect" id="node10" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="73,319,258,345"/>
-<area shape="rect" id="node11" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="729,319,908,345"/>
-<area shape="rect" id="node3" title=" " alt="" coords="739,244,797,271"/>
-<area shape="rect" id="node4" title=" " alt="" coords="822,244,898,271"/>
-<area shape="rect" id="node5" title=" " alt="" coords="32,244,93,271"/>
-<area shape="rect" id="node6" title=" " alt="" coords="118,244,181,271"/>
-<area shape="rect" id="node7" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="384,169,544,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="373,244,429,271"/>
-<area shape="rect" id="node9" title=" " alt="" coords="205,244,299,271"/>
-<area shape="rect" id="node12" href="$CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="453,244,664,271"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_Photon.H." alt="" coords="372,5,556,45"/>
+<area shape="rect" id="Node000002" href="$CD__Photon_8H.html" title="Declaration of a photon class for particle methods." alt="" coords="411,93,517,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="459,46,458,79,453,79,453,45"/>
+<area shape="rect" id="Node000010" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="73,313,258,339"/>
+<area shape="poly" id="edge22_Node000001_Node000010" title=" " alt="" coords="372,38,276,58,224,74,172,95,122,121,78,154,40,194,12,241,8,253,9,264,23,282,47,297,78,307,77,312,45,302,19,286,4,266,3,253,7,239,36,191,74,150,119,117,170,90,222,69,275,53,371,33"/>
+<area shape="rect" id="Node000011" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="729,313,908,339"/>
+<area shape="poly" id="edge23_Node000001_Node000011" title=" " alt="" coords="557,34,653,55,706,71,760,92,812,119,859,152,901,191,934,239,939,251,938,263,925,283,901,299,874,311,872,306,899,294,921,279,933,261,933,252,930,241,897,195,856,156,809,123,758,97,704,76,652,60,556,39"/>
+<area shape="poly" id="edge21_Node000002_Node000001" title=" " alt="" coords="468,93,470,59,475,59,473,93"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="739,240,797,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="489,116,733,232,730,236,487,121"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="822,240,898,265"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="498,116,635,164,819,233,817,238,634,169,496,121"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="32,240,93,265"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="428,121,283,169,105,237,103,232,282,164,426,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="118,240,181,265"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="440,121,188,237,185,232,438,116"/>
+<area shape="rect" id="Node000007" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="384,167,544,192"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="467,119,467,153,461,153,461,119"/>
+<area shape="poly" id="edge19_Node000002_Node000010" title=" " alt="" coords="411,118,311,135,192,162,135,179,86,198,47,219,22,242,17,253,17,263,22,272,31,281,58,296,92,307,91,312,56,301,28,285,18,275,12,264,12,252,18,238,44,214,83,193,134,174,191,157,310,130,410,112"/>
+<area shape="poly" id="edge20_Node000002_Node000011" title=" " alt="" coords="518,112,618,130,737,157,794,174,845,193,885,215,911,238,917,249,917,260,906,280,886,296,862,310,859,305,883,292,902,276,912,259,911,251,907,242,882,219,843,198,792,179,736,162,617,135,517,118"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="514,189,721,237,726,239,724,244,719,243,513,195"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="537,189,809,237,808,243,536,195"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="384,194,258,214,107,243,106,237,257,209,383,189"/>
+<area shape="poly" id="edge10_Node000007_Node000006" title=" " alt="" coords="410,195,195,242,194,237,409,189"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="373,240,429,265"/>
+<area shape="poly" id="edge11_Node000007_Node000008" title=" " alt="" coords="456,194,423,231,419,228,452,191"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="205,240,299,265"/>
+<area shape="poly" id="edge12_Node000007_Node000009" title=" " alt="" coords="431,195,300,238,298,233,429,189"/>
+<area shape="poly" id="edge13_Node000007_Node000010" title=" " alt="" coords="446,194,387,229,312,268,210,311,208,306,309,263,384,224,444,190"/>
+<area shape="poly" id="edge14_Node000007_Node000011" title=" " alt="" coords="520,189,596,209,677,238,740,270,793,303,790,308,738,275,675,242,594,214,519,195"/>
+<area shape="rect" id="Node000012" href="$CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="453,240,664,265"/>
+<area shape="poly" id="edge15_Node000007_Node000012" title=" " alt="" coords="474,190,527,230,523,234,471,194"/>
+<area shape="poly" id="edge16_Node000012_Node000007" title=" " alt="" coords="548,242,495,202,499,197,552,238"/>
+<area shape="poly" id="edge17_Node000012_Node000010" title=" " alt="" coords="496,268,243,313,242,308,495,263"/>
+<area shape="poly" id="edge18_Node000012_Node000011" title=" " alt="" coords="601,263,764,307,763,312,600,268"/>
 </map>

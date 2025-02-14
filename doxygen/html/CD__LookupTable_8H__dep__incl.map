@@ -1,11 +1,23 @@
 <map id="Source/Utilities/CD_LookupTable.H" name="Source/Utilities/CD_LookupTable.H">
-<area shape="rect" id="node1" title="Declaration of a table for looking up coefficients etc." alt="" coords="446,5,590,47"/>
-<area shape="rect" id="node2" href="$CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="231,102,375,143"/>
-<area shape="rect" id="node6" href="$CD__LookupTable1D_8H.html" title="Declaration of a lookup table in one independent variable." alt="" coords="671,102,815,143"/>
-<area shape="rect" id="node8" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="8,95,207,151"/>
-<area shape="rect" id="node9" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="404,102,632,143"/>
-<area shape="rect" id="node3" href="$CD__DataParser_8cpp.html" title="Implementation of CD_DataParser.H." alt="" coords="229,206,373,247"/>
-<area shape="rect" id="node4" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,199,204,255"/>
-<area shape="rect" id="node5" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="397,206,639,247"/>
-<area shape="rect" id="node7" href="$CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="663,206,853,247"/>
+<area shape="rect" id="Node000001" title="Declaration of a table for looking up coefficients etc." alt="" coords="446,5,590,45"/>
+<area shape="rect" id="Node000002" href="$CD__CdrPlasmaJSON_8H.html" title="Declaration of a generic CdrPlasma model." alt="" coords="8,93,207,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="433,48,223,96,207,99,206,94,221,91,432,43"/>
+<area shape="rect" id="Node000004" href="$CD__ItoKMCJSON_8H.html" title="Declaration of a ItoKMC plasma model which reads reactions from a JSON file." alt="" coords="404,101,632,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="521,59,521,101,515,101,515,59"/>
+<area shape="rect" id="Node000006" href="$CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="234,101,378,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="464,53,350,103,348,98,461,48"/>
+<area shape="rect" id="Node000008" href="$CD__LookupTable1D_8H.html" title="Declaration of a lookup table in one independent variable." alt="" coords="671,101,815,141"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="570,48,691,98,689,103,567,53"/>
+<area shape="rect" id="Node000003" href="$CD__CdrPlasmaJSON_8cpp.html" title="Implementation of CD_CdrPlasmaJSON.H." alt="" coords="5,196,204,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,162,108,196,103,196,104,162"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="397,203,639,243"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="521,155,521,203,515,203,515,155"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="257,149,158,198,156,194,255,145"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="359,144,479,201,477,206,357,149"/>
+<area shape="rect" id="Node000007" href="$CD__DataParser_8cpp.html" title="Implementation of CD_DataParser.H." alt="" coords="229,203,373,243"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="307,155,304,203,299,203,302,154"/>
+<area shape="poly" id="edge10_Node000008_Node000001" title=" " alt="" coords="692,98,570,48,572,43,694,93"/>
+<area shape="rect" id="Node000009" href="$CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="663,203,853,243"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="742,154,751,203,745,204,737,155"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="759,190,751,141,756,140,764,189"/>
 </map>

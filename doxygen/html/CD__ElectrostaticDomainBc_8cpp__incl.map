@@ -1,11 +1,21 @@
 <map id="Source/Electrostatics/CD_ElectrostaticDomainBc.cpp" name="Source/Electrostatics/CD_ElectrostaticDomainBc.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_ElectrostaticDomainBc.H." alt="" coords="335,5,561,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="149,95,248,121"/>
-<area shape="rect" id="node3" href="$CD__ElectrostaticDomainBc_8H.html" title="Declaration of a class for holding function&#45;based boundary conditions on domain edges." alt="" coords="272,95,483,121"/>
-<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="427,169,613,196"/>
-<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="637,169,816,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="241,169,327,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="352,169,403,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="5,169,99,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="123,169,216,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_ElectrostaticDomainBc.H." alt="" coords="335,5,561,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="149,93,248,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="389,48,249,92,247,87,387,43"/>
+<area shape="rect" id="Node000003" href="$CD__ElectrostaticDomainBc_8H.html" title="Declaration of a class for holding function&#45;based boundary conditions on domain edges." alt="" coords="272,93,483,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="433,47,399,85,395,81,429,44"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="427,167,613,192"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="466,44,497,92,509,123,517,153,512,154,504,125,492,95,461,47"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="637,167,816,192"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="484,43,695,158,693,162,481,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="241,167,327,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="364,121,312,160,308,156,361,117"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="352,167,403,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="380,119,380,153,375,153,375,119"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,167,99,192"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="326,121,113,168,112,162,324,116"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="123,167,216,192"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="345,121,217,165,215,160,343,116"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="401,116,486,158,483,163,399,121"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="434,116,658,161,656,167,433,121"/>
 </map>

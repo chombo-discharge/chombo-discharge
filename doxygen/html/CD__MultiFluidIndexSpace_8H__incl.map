@@ -1,9 +1,15 @@
 <map id="Source/Multifluid/CD_MultiFluidIndexSpace.H" name="Source/Multifluid/CD_MultiFluidIndexSpace.H">
-<area shape="rect" id="node1" title="Multi&#45;fluid index space." alt="" coords="354,5,537,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,155,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="179,95,307,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="331,95,424,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="448,95,579,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="603,95,789,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="813,95,992,121"/>
+<area shape="rect" id="Node000001" title="Multi&#45;fluid index space." alt="" coords="354,5,537,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,155,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,48,147,93,146,88,357,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="179,93,307,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="398,48,286,91,284,86,396,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="331,93,424,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="431,47,398,84,394,81,427,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="448,93,579,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="464,44,496,81,492,84,460,47"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="603,93,789,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="506,43,647,87,646,92,505,48"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="813,93,992,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="537,40,823,88,822,94,536,45"/>
 </map>

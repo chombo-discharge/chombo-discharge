@@ -1,4 +1,5 @@
 <map id="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCPhotonSpecies.H" name="Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCPhotonSpecies.H">
-<area shape="rect" id="node1" title="Declaration of a simple PhotonSpecies derived class for usage in ItoKMC." alt="" coords="5,5,296,47"/>
-<area shape="rect" id="node2" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="30,95,271,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a simple PhotonSpecies derived class for usage in ItoKMC." alt="" coords="5,5,296,45"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCJSON_8cpp.html" title="Implementation of CD_ItoKMCJSON.H." alt="" coords="30,93,271,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,59,153,93,148,93,148,59"/>
 </map>

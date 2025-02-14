@@ -1,10 +1,22 @@
 <map id="Source/AmrMesh/CD_EBGhostCellInterpolator.H" name="Source/AmrMesh/CD_EBGhostCellInterpolator.H">
-<area shape="rect" id="node1" title="Declaration of a class which interpolates ghost cells across the coarse&#45;fine interface." alt="" coords="123,5,341,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,56,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="80,95,195,121"/>
-<area shape="rect" id="node4" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="383,95,500,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="547,244,733,271"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="193,244,372,271"/>
-<area shape="rect" id="node5" title=" " alt="" coords="320,169,411,196"/>
-<area shape="rect" id="node8" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="435,169,602,196"/>
+<area shape="rect" id="Node000001" title="Declaration of a class which interpolates ghost cells across the coarse&#45;fine interface." alt="" coords="123,5,341,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,56,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,48,70,92,68,87,183,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="80,93,195,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="211,48,164,86,161,82,207,43"/>
+<area shape="rect" id="Node000004" href="$CD__Location_8H.html" title="Declaration of cell positions." alt="" coords="383,93,500,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="283,43,399,86,397,91,281,48"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="547,240,733,265"/>
+<area shape="poly" id="edge11_Node000001_Node000006" title=" " alt="" coords="342,42,426,63,513,91,588,115,616,133,642,165,651,196,649,226,644,226,646,197,638,168,613,137,585,120,511,96,425,68,340,48"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="193,240,372,265"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="239,45,280,226,274,227,234,46"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="320,167,411,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="431,121,390,159,386,155,427,117"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="501,111,561,129,591,144,617,165,634,195,641,226,636,227,629,197,613,168,588,148,559,134,499,116"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="392,121,348,139,328,152,310,168,294,196,287,226,282,225,289,194,306,165,324,148,346,134,390,116"/>
+<area shape="rect" id="Node000008" href="$CD__LocationImplem_8H.html" title="Implementation of CD_Location.H." alt="" coords="435,167,602,192"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="449,117,490,156,487,160,445,121"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="511,168,469,129,473,125,515,164"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="540,190,610,231,607,235,537,194"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="482,195,335,239,333,233,480,189"/>
 </map>

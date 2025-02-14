@@ -1,4 +1,5 @@
 <map id="LookupTable1D&lt; T, N, I &gt;" name="LookupTable1D&lt; T, N, I &gt;">
-<area shape="rect" id="node1" title="Class for interpolation of f = f(x) data in one independent variable x." alt="" coords="9,5,197,32"/>
-<area shape="rect" id="node2" href="$classLookupTable1D.html" title=" " alt="" coords="5,95,200,121"/>
+<area shape="rect" id="Node000001" title="Class for interpolation of f = f(x) data in one independent variable x." alt="" coords="9,5,197,31"/>
+<area shape="rect" id="Node000002" href="$classLookupTable1D.html" title=" " alt="" coords="5,93,200,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,45,105,93,100,93,100,45"/>
 </map>

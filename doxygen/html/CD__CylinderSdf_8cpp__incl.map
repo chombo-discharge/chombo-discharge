@@ -1,8 +1,15 @@
 <map id="Source/ImplicitFunctions/CD_CylinderSdf.cpp" name="Source/ImplicitFunctions/CD_CylinderSdf.cpp">
-<area shape="rect" id="node1" title="CD_Implementation of CylinderSdf.H." alt="" coords="110,5,291,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="8,95,111,121"/>
-<area shape="rect" id="node3" href="$CD__CylinderSdf_8H.html" title="Declaration of a cylindrical signed distance function." alt="" coords="186,95,322,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,169,191,196"/>
-<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="318,169,497,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="215,169,293,196"/>
+<area shape="rect" id="Node000001" title="CD_Implementation of CylinderSdf.H." alt="" coords="110,5,291,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="8,93,111,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,48,94,89,91,84,166,43"/>
+<area shape="rect" id="Node000003" href="$CD__CylinderSdf_8H.html" title="Declaration of a cylindrical signed distance function." alt="" coords="186,93,322,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,44,240,80,236,83,211,47"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,167,191,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="190,47,116,157,111,154,185,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="318,167,497,192"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="251,43,293,64,336,91,368,122,394,154,390,157,364,126,332,95,291,69,248,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="215,167,293,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="257,119,257,153,251,153,251,119"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="230,121,137,163,135,158,228,116"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="280,116,371,158,369,163,278,121"/>
 </map>

@@ -1,8 +1,16 @@
 <map id="Physics/ItoKMC/CD_ItoKMCTagger.H" name="Physics/ItoKMC/CD_ItoKMCTagger.H">
-<area shape="rect" id="node1" title="Parent tagger class for ItoKMC." alt="" coords="255,5,509,32"/>
-<area shape="rect" id="node2" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="5,80,236,121"/>
-<area shape="rect" id="node6" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="261,80,503,121"/>
-<area shape="rect" id="node3" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="5,177,236,218"/>
-<area shape="rect" id="node4" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="260,169,461,225"/>
-<area shape="rect" id="node5" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="239,273,482,329"/>
+<area shape="rect" id="Node000001" title="Parent tagger class for ItoKMC." alt="" coords="255,5,509,31"/>
+<area shape="rect" id="Node000002" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="5,79,236,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="332,37,184,81,183,76,330,32"/>
+<area shape="rect" id="Node000006" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="261,79,503,119"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="376,44,377,78,372,79,371,44"/>
+<area shape="rect" id="Node000003" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="5,174,236,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,132,116,174,111,174,109,132"/>
+<area shape="rect" id="Node000004" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="260,167,461,221"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="183,121,294,164,292,169,181,126"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="127,160,125,119,131,119,132,160"/>
+<area shape="rect" id="Node000005" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="239,269,482,324"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="355,235,355,269,350,269,349,235"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="367,256,366,222,371,222,372,256"/>
+<area shape="poly" id="edge8_Node000006_Node000001" title=" " alt="" coords="388,65,386,31,391,31,394,65"/>
 </map>

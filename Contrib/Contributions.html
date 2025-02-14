@@ -166,11 +166,11 @@ Note that when a pull request is submitted, you are asked to provide a brief sum
 <p>It will be beneficial to first compile the changes locally and run e.g. the test suite, see <a class="reference internal" href="../Base/Testing.html#chap-testing"><span class="std std-ref">Code testing</span></a> in debug mode.
 Also make sure to run e.g. <em>valgrind</em> to spot memory leaks.
 In serial, running valgrind can be done by calling valgrind with <code class="docutils literal notranslate"><span class="pre">--leak-check=yes</span></code>, e.g.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>valgrind --leak-check<span class="o">=</span>full --track-origins<span class="o">=</span>yes &lt;my_executable&gt; &lt;my_inputs_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>valgrind<span class="w"> </span>--leak-check<span class="o">=</span>full<span class="w"> </span>--track-origins<span class="o">=</span>yes<span class="w"> </span>&lt;my_executable&gt;<span class="w"> </span>&lt;my_inputs_file&gt;
 </pre></div>
 </div>
 <p>With MPI this looks like</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun -np <span class="m">12</span> valgrind --leak-check<span class="o">=</span>full --track-origins<span class="o">=</span>yes &lt;my_executable&gt; &lt;my_inputs_file&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">12</span><span class="w"> </span>valgrind<span class="w"> </span>--leak-check<span class="o">=</span>full<span class="w"> </span>--track-origins<span class="o">=</span>yes<span class="w"> </span>&lt;my_executable&gt;<span class="w"> </span>&lt;my_inputs_file&gt;
 </pre></div>
 </div>
 </section>

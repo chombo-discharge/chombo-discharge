@@ -1,4 +1,5 @@
 <map id="ScanShop" name="ScanShop">
-<area shape="rect" id="node1" title="Derived version of GeometryShop that load balances based on the cut cells themselves." alt="" coords="22,80,107,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,124,32"/>
+<area shape="rect" id="Node000001" title="Derived version of GeometryShop that load balances based on the cut cells themselves." alt="" coords="22,79,107,104"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,124,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,44,67,79,62,79,62,44"/>
 </map>

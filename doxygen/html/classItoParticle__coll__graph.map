@@ -1,5 +1,7 @@
 <map id="ItoParticle" name="ItoParticle">
-<area shape="rect" id="node1" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="52,171,139,197"/>
-<area shape="rect" id="node2" href="$classGenericParticle.html" title=" " alt="" coords="8,95,183,121"/>
-<area shape="rect" id="node3" href="$classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
+<area shape="rect" id="Node000001" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="52,168,139,193"/>
+<area shape="rect" id="Node000002" href="$classGenericParticle.html" title=" " alt="" coords="8,93,183,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,133,98,168,93,168,93,133"/>
+<area shape="rect" id="Node000003" href="$classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,45,98,93,93,93,93,45"/>
 </map>

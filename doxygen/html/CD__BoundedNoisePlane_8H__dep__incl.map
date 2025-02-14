@@ -1,6 +1,9 @@
 <map id="Source/ImplicitFunctions/CD_BoundedNoisePlane.H" name="Source/ImplicitFunctions/CD_BoundedNoisePlane.H">
-<area shape="rect" id="node1" title="Declaration of a signed distance function for a noisy plane." alt="" coords="228,5,424,47"/>
-<area shape="rect" id="node2" href="$CD__BoundedNoisePlane_8cpp.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="5,95,215,136"/>
-<area shape="rect" id="node3" href="$CD__NoisePlane_8cpp.html" title="Implementation of CD_NoisePlane.H." alt="" coords="239,95,413,136"/>
-<area shape="rect" id="node4" href="$CD__RandomInterface_8cpp.html" title="Implementation of CD_RandomInterface.H." alt="" coords="437,95,652,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a signed distance function for a noisy plane." alt="" coords="213,5,409,45"/>
+<area shape="rect" id="Node000002" href="$CD__NoisePlane_8cpp.html" title="Implementation of CD_NoisePlane.H." alt="" coords="5,93,180,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="251,53,142,96,140,91,250,48"/>
+<area shape="rect" id="Node000003" href="$CD__RandomInterface_8cpp.html" title="Implementation of CD_RandomInterface.H." alt="" coords="204,93,419,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="314,59,314,93,309,93,309,59"/>
+<area shape="rect" id="Node000004" href="$CD__BoundedNoisePlane_8cpp.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="443,93,652,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="377,48,497,91,495,96,375,53"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="EBHelmholtzRobinEBBCFactory" name="EBHelmholtzRobinEBBCFactory">
-<area shape="rect" id="node1" title="Base class for making Robin boundary conditions with EBHelmholtzOp." alt="" coords="5,80,231,107"/>
-<area shape="rect" id="node2" href="$classEBHelmholtzEBBCFactory.html" title="Factory class for making EBHelmholtzEBBCs." alt="" coords="24,5,212,32"/>
+<area shape="rect" id="Node000001" title="Base class for making Robin boundary conditions with EBHelmholtzOp." alt="" coords="5,79,231,104"/>
+<area shape="rect" id="Node000002" href="$classEBHelmholtzEBBCFactory.html" title="Factory class for making EBHelmholtzEBBCs." alt="" coords="24,5,212,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,44,121,79,115,79,115,44"/>
 </map>

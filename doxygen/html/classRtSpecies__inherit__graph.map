@@ -1,6 +1,9 @@
 <map id="RtSpecies" name="RtSpecies">
-<area shape="rect" id="node1" title="Declaration of a class that defines an interface to radiative transfer solvers, i...." alt="" coords="5,78,92,105"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html" title="Encapsulation of radiative transfer species for usage with CdrPlasmaJSON." alt="" coords="179,5,328,47"/>
-<area shape="rect" id="node3" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhotonSpecies.html" title="Simple RtSpecies class for usage with ItoKMCJSON." alt="" coords="140,71,367,112"/>
-<area shape="rect" id="node4" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html" title="Implementation of RtSpecies for usage in RadiativeTransfer module." alt="" coords="156,136,351,177"/>
+<area shape="rect" id="Node000001" title="Declaration of a class that defines an interface to radiative transfer solvers, i...." alt="" coords="5,77,92,102"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html" title="Encapsulation of radiative transfer species for usage with CdrPlasmaJSON." alt="" coords="179,5,328,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,70,139,55,178,43,180,48,141,60,98,75"/>
+<area shape="rect" id="Node000003" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhotonSpecies.html" title="Simple RtSpecies class for usage with ItoKMCJSON." alt="" coords="140,69,367,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="106,87,140,87,140,92,106,92"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferSpecies.html" title="Implementation of RtSpecies for usage in RadiativeTransfer module." alt="" coords="156,133,351,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="98,104,141,119,180,131,178,136,139,124,96,109"/>
 </map>

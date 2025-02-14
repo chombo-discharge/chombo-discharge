@@ -1,7 +1,11 @@
 <map id="Source/ImplicitFunctions/CD_PerlinSdf.H" name="Source/ImplicitFunctions/CD_PerlinSdf.H">
-<area shape="rect" id="node1" title="Declaration of signed distance Perlin noise." alt="" coords="141,5,323,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,91,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="115,95,194,121"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="218,95,403,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="428,95,607,121"/>
+<area shape="rect" id="Node000001" title="Declaration of signed distance Perlin noise." alt="" coords="141,5,323,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,91,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,48,89,90,86,85,187,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="115,93,194,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,47,178,85,174,82,211,44"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="218,93,403,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="253,44,291,82,287,85,249,47"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="428,93,607,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="301,43,463,87,462,92,300,48"/>
 </map>

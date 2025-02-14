@@ -171,23 +171,23 @@
 Note that the underlying data type for <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> and <span class="math notranslate nohighlight">\(\vec{F}\)</span> is <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code>, see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>.
 Such a solver is useful, for example, as a surface charge solver where <span class="math notranslate nohighlight">\(\phi\)</span> is the surface charge density and <span class="math notranslate nohighlight">\(F\)</span> is the charge flux onto the EB.</p>
 <p>The surface charge solver is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SurfaceODESolver</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SurfaceODESolver</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>where <span class="math notranslate nohighlight">\(N\)</span> indicates the number of variables stored in each cut cell.</p>
 <section id="instantiation">
 <h2>Instantiation<a class="headerlink" href="#instantiation" title="Permalink to this heading"></a></h2>
 <p>To instantiate the solver, use the default constructor</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">SurfaceODESolver</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">SurfaceODESolver</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>The solver also requires a reference to <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, and the computational geometry such that a full instantiation example is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;*</span><span class="w"> </span><span class="n">solver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;*</span><span class="w"> </span><span class="n">solver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">();</span>
 
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">setAmr</span><span class="p">(...);</span><span class="w"></span>
-<span class="n">solver</span><span class="o">-&gt;</span><span class="n">setComputationalGeometry</span><span class="p">(...);</span><span class="w"></span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">setAmr</span><span class="p">(...);</span>
+<span class="n">solver</span><span class="o">-&gt;</span><span class="n">setComputationalGeometry</span><span class="p">(...);</span>
 </pre></div>
 </div>
 </section>
@@ -196,9 +196,9 @@ Such a solver is useful, for example, as a surface charge solver where <span cla
 <section id="mesh-based">
 <h3>Mesh-based<a class="headerlink" href="#mesh-based" title="Permalink to this heading"></a></h3>
 <p>To set <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the mesh, one can fetch the underlying data by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getPhi</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">EBAMRIVData</span><span class="o">&amp;</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getPhi</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This returns a reference to the underlying data which is defined on all cut-cells.
@@ -207,9 +207,9 @@ The user can then iterate through this data and set the values accordingly, see 
 <section id="function-based">
 <h3>Function-based<a class="headerlink" href="#function-based" title="Permalink to this heading"></a></h3>
 <p>To set the data directly, <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code> defines a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_func</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_func</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where the input argument represents a function <span class="math notranslate nohighlight">\(\vec{f} = \vec{f}\left(\mathbf{x}\right)\)</span> that returns a value for each component in <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>.</p>
@@ -220,9 +220,9 @@ The user can then iterate through this data and set the values accordingly, see 
 <section id="id1">
 <h3>Mesh-based<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>To set <span class="math notranslate nohighlight">\(\vec{F}\)</span> on the mesh, one can fetch the underlying data by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">EBAMRIVData</span><span class="o">&amp;</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This returns a reference to the underlying data which is defined on all cut-cells.
@@ -231,9 +231,9 @@ The user can then iterate through this data and set the values accordingly, see 
 <section id="id2">
 <h3>Function-based<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>To set the right-hand side directly, <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code> defines a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setRHS</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_func</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setRHS</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_func</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where the input argument represents a function <span class="math notranslate nohighlight">\(\vec{f} = \vec{f}\left(\mathbf{x}\right)\)</span> that returns a value for each component in <span class="math notranslate nohighlight">\(\vec{F}\)</span>.</p>
@@ -258,16 +258,16 @@ Note that one can always call <code class="docutils literal notranslate"><span c
 <section id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
 <p>When regridding the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code>, one should call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="kt">void</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">void</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p><em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids.
 This will store <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the old mesh.
 After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has generated the new grids, <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> can be interpolated onto the new grids by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"></span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Note that when interpolating to the new grids one can choose to initialize data in the new cells using the value in the underlying coarse cells, i.e.</p>

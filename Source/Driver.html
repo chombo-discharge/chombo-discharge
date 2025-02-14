@@ -162,11 +162,11 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations.
 The primary purpose of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is to coordinate the simulation advance (i.e. <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> integration) together with I/O and regrid functionality.
 The constructor for this class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_compgeom</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">TimeStepper</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_timestepper</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w">               </span><span class="n">a_amr</span><span class="p">,</span><span class="w"></span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_celltagger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">),</span><span class="w"></span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">GeoCoarsener</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_geocoarsen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">GeoCoarsener</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">));</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_compgeom</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">TimeStepper</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_timestepper</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w">               </span><span class="n">a_amr</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_celltagger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">),</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">GeoCoarsener</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_geocoarsen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">GeoCoarsener</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">));</span>
 </pre></div>
 </div>
 <div class="admonition tip">
@@ -176,7 +176,7 @@ The constructor for this class is</p>
 <section id="simulation-setup">
 <h2>Simulation setup<a class="headerlink" href="#simulation-setup" title="Permalink to this heading"></a></h2>
 <p>For setting up an running simulations, only a single routine is used:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setupAndRun</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_inputFile</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setupAndRun</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_inputFile</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This routine will set up and run a simulation.</p>
@@ -250,30 +250,30 @@ In brief, the algorithm looks like this:</p>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">TimerStepper</span></code> performs a <em>post-regrid</em> operation (e.g. filling solvers with auxiliary data).</p></li>
 </ol>
 <p>In C++ pseudo-code, this looks something like:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="o">::</span><span class="n">regrid</span><span class="p">(){</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="o">::</span><span class="n">regrid</span><span class="p">(){</span>
 
 <span class="w">   </span><span class="c1">// Tag cells</span>
-<span class="w">   </span><span class="n">CellTagger</span><span class="o">-&gt;</span><span class="n">tagCellsForRefinement</span><span class="p">()</span><span class="w"></span>
+<span class="w">   </span><span class="n">CellTagger</span><span class="o">-&gt;</span><span class="n">tagCellsForRefinement</span><span class="p">()</span>
 
 <span class="w">   </span><span class="c1">// Store old data and free up some memory</span>
-<span class="w">   </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">storeOldGridData</span><span class="p">()</span><span class="w"></span>
+<span class="w">   </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">storeOldGridData</span><span class="p">()</span>
 
 <span class="w">   </span><span class="c1">// Generate the new grids</span>
-<span class="w">   </span><span class="n">AmrMesh</span><span class="o">-&gt;</span><span class="n">makeNewGrids</span><span class="p">()</span><span class="w"></span>
+<span class="w">   </span><span class="n">AmrMesh</span><span class="o">-&gt;</span><span class="n">makeNewGrids</span><span class="p">()</span>
 
-<span class="w">   </span><span class="k">if</span><span class="p">(</span><span class="n">loadBalance</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">     </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">loadBalance</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="k">if</span><span class="p">(</span><span class="n">loadBalance</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">loadBalance</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="c1">// AmrMesh finalizes the EBAMR grids</span>
-<span class="w">   </span><span class="n">AmrMesh</span><span class="o">-&gt;</span><span class="n">regridOperators</span><span class="p">()</span><span class="w"></span>
+<span class="w">   </span><span class="n">AmrMesh</span><span class="o">-&gt;</span><span class="n">regridOperators</span><span class="p">()</span>
 
 <span class="w">   </span><span class="c1">// Regrid timestepper</span>
-<span class="w">   </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">regrid</span><span class="p">()</span><span class="w"></span>
+<span class="w">   </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">regrid</span><span class="p">()</span>
 
 <span class="w">   </span><span class="c1">// Do a post-regrid step</span>
-<span class="w">   </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">postRegrid</span><span class="p">()</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="n">TimeStepper</span><span class="o">-&gt;</span><span class="n">postRegrid</span><span class="p">()</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <div class="admonition note">

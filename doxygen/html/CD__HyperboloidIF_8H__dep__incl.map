@@ -1,4 +1,5 @@
 <map id="Source/ImplicitFunctions/CD_HyperboloidIF.H" name="Source/ImplicitFunctions/CD_HyperboloidIF.H">
-<area shape="rect" id="node1" title="Declaration of a hyperboloid implicit function." alt="" coords="5,5,187,47"/>
-<area shape="rect" id="node2" href="$CD__HyperboloidIF_8cpp.html" title="Implementation CD_HyperboloidIF.H." alt="" coords="5,95,187,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a hyperboloid implicit function." alt="" coords="5,5,187,45"/>
+<area shape="rect" id="Node000002" href="$CD__HyperboloidIF_8cpp.html" title="Implementation CD_HyperboloidIF.H." alt="" coords="5,93,187,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,59,99,93,93,93,93,59"/>
 </map>

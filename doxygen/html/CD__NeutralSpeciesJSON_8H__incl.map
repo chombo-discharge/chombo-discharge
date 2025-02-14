@@ -1,7 +1,11 @@
 <map id="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_NeutralSpeciesJSON.H" name="Physics/CdrPlasma/PlasmaModels/CdrPlasmaJSON/CD_NeutralSpeciesJSON.H">
-<area shape="rect" id="node1" title="Declaration of a class that encapsulates a neutral species for use with CdrPlasmaJSON." alt="" coords="101,5,299,61"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,109,48,136"/>
-<area shape="rect" id="node3" title=" " alt="" coords="72,109,165,136"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="190,109,375,136"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="400,109,579,136"/>
+<area shape="rect" id="Node000001" title="Declaration of a class that encapsulates a neutral species for use with CdrPlasmaJSON." alt="" coords="101,5,299,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,48,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,62,62,105,59,100,146,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="72,108,165,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,62,141,100,137,96,173,58"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="190,108,375,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="227,58,264,96,260,100,223,62"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="400,108,579,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="289,58,438,102,437,107,288,63"/>
 </map>

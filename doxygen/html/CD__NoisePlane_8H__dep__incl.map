@@ -1,4 +1,5 @@
 <map id="Geometries/NoisePlane/CD_NoisePlane.H" name="Geometries/NoisePlane/CD_NoisePlane.H">
-<area shape="rect" id="node1" title="Rough sphere geometry." alt="" coords="5,5,180,47"/>
-<area shape="rect" id="node2" href="$CD__NoisePlane_8cpp.html" title="Implementation of CD_NoisePlane.H." alt="" coords="5,95,180,136"/>
+<area shape="rect" id="Node000001" title="Rough sphere geometry." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$CD__NoisePlane_8cpp.html" title="Implementation of CD_NoisePlane.H." alt="" coords="5,93,180,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,59,95,93,90,93,90,59"/>
 </map>

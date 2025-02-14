@@ -1,9 +1,18 @@
 <map id="Physics::CdrPlasma::CdrPlasmaGodunovStepper" name="Physics::CdrPlasma::CdrPlasmaGodunovStepper">
-<area shape="rect" id="node1" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="1021,141,1229,183"/>
-<area shape="rect" id="node2" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="809,5,960,47"/>
-<area shape="rect" id="node3" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="400,13,505,39"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="355,117,551,143"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,179,144,206"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="582,172,766,213"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="575,238,773,265"/>
+<area shape="rect" id="Node000001" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="1021,140,1229,180"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html" title="Abstract class for evolving the minimal plasma model in time." alt="" coords="809,5,960,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="948,49,973,62,1040,101,1096,138,1094,142,1037,106,971,66,945,54"/>
+<area shape="rect" id="Node000003" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="400,13,505,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="519,23,809,23,809,28,519,28"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="355,115,551,141"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="564,130,997,149,1021,151,1021,156,997,155,564,135"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="536,110,649,87,773,57,822,43,824,48,774,63,650,92,537,115"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,178,144,203"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="145,172,168,168,356,138,357,143,168,173,146,178"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="575,178,773,203"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="158,188,574,188,574,193,158,193"/>
+<area shape="rect" id="Node000007" href="$classEBAMRData.html" title=" " alt="" coords="582,229,766,269"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="142,204,168,208,279,222,391,232,582,243,582,249,391,237,279,227,168,213,141,209"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="787,181,972,169,1021,166,1021,171,972,175,787,187"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="779,234,873,220,971,201,1061,177,1062,183,973,207,874,225,780,239"/>
 </map>

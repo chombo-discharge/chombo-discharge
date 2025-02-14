@@ -1,8 +1,15 @@
 <map id="Source/ImplicitFunctions/CD_NewIntersectionIF.cpp" name="Source/ImplicitFunctions/CD_NewIntersectionIF.cpp">
-<area shape="rect" id="node1" title="Implementation of NewIntersectionIF.H." alt="" coords="93,5,287,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="31,95,90,121"/>
-<area shape="rect" id="node3" href="$CD__NewIntersectionIF_8H.html" title="Declaration of a signed distance function which is infinitely far away from everything." alt="" coords="165,95,343,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,169,191,196"/>
-<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="318,169,497,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="215,169,293,196"/>
+<area shape="rect" id="Node000001" title="Implementation of NewIntersectionIF.H." alt="" coords="93,5,287,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="31,93,90,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,48,93,88,90,84,157,43"/>
+<area shape="rect" id="Node000003" href="$CD__NewIntersectionIF_8H.html" title="Declaration of a signed distance function which is infinitely far away from everything." alt="" coords="165,93,343,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,44,238,81,234,84,203,47"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,167,191,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="181,47,114,156,110,153,176,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="318,167,497,192"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="265,43,313,63,357,91,383,121,400,152,395,155,378,124,354,95,310,67,263,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="215,167,293,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="257,119,257,153,251,153,251,119"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="230,121,137,163,135,158,228,116"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="280,116,371,158,369,163,278,121"/>
 </map>

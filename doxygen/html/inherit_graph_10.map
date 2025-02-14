@@ -1,3 +1,21 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classCoarseInterpQuadCF.html" title="Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cel..." alt="" coords="5,5,161,32"/>
+<area shape="rect" id="Node000000" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,141,96,166"/>
+<area shape="rect" id="Node000001" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionTagger.html" title="Class for tagging cells in AdvectionDiffusion physics." alt="" coords="174,5,377,45"/>
+<area shape="poly" id="edge39_Node000000_Node000001" title=" " alt="" coords="67,128,99,90,120,71,143,55,173,41,175,46,145,60,123,75,103,94,71,131"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerTagger.html" title="Implementation of CellTagger for tagging cells for Brownian walker physics." alt="" coords="183,69,367,109"/>
+<area shape="poly" id="edge40_Node000000_Node000002" title=" " alt="" coords="98,134,143,119,187,107,188,112,145,124,100,139"/>
+<area shape="rect" id="Node000003" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html" title="Abstract Class which implements CellTagger for the CDR plasma physics module." alt="" coords="201,133,350,173"/>
+<area shape="poly" id="edge41_Node000000_Node000003" title=" " alt="" coords="110,151,200,151,200,156,110,156"/>
+<area shape="rect" id="Node000006" href="$classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html" title="Class for tagging cells in the DischargeInception module." alt="" coords="173,197,377,237"/>
+<area shape="poly" id="edge44_Node000000_Node000006" title=" " alt="" coords="100,168,145,183,188,195,187,200,143,188,98,173"/>
+<area shape="rect" id="Node000007" href="$classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html" title="Class for tagging grid cells using the Ito&#45;KMC&#45;Poisson module. Note that S is the time integrator typ..." alt="" coords="144,262,407,287"/>
+<area shape="poly" id="edge45_Node000000_Node000007" title=" " alt="" coords="70,176,102,213,123,232,145,247,176,259,173,264,143,252,119,236,99,217,66,179"/>
+<area shape="rect" id="Node000004" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaFieldTagger.html" title="Lightweight tagging class which flags cells for refinement/coarsening using the electric field only." alt="" coords="473,133,648,173"/>
+<area shape="poly" id="edge42_Node000003_Node000004" title=" " alt="" coords="364,151,473,151,473,156,364,156"/>
+<area shape="rect" id="Node000005" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html" title="Class which implements CdrPlasmaFieldTagger and refines cells based on the criterion alpha*dx &gt; thres..." alt="" coords="734,133,937,173"/>
+<area shape="poly" id="edge43_Node000004_Node000005" title=" " alt="" coords="662,151,734,151,734,156,662,156"/>
+<area shape="rect" id="Node000008" href="$classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html" title="Lightweight tagging class. Only tags cells based on the electric field." alt="" coords="455,255,667,295"/>
+<area shape="poly" id="edge46_Node000007_Node000008" title=" " alt="" coords="420,272,454,272,454,277,420,277"/>
+<area shape="rect" id="Node000009" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html" title="Cell tagging class for streamers." alt="" coords="715,255,956,295"/>
+<area shape="poly" id="edge47_Node000008_Node000009" title=" " alt="" coords="680,272,714,272,714,277,680,277"/>
 </map>

@@ -1,6 +1,10 @@
 <map id="Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage" name="Physics::CdrPlasma::CdrPlasmaGodunovStepper::RtStorage">
-<area shape="rect" id="node1" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="112,199,320,255"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="147,5,285,32"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="213,102,459,129"/>
+<area shape="rect" id="Node000001" title="Utility class for memory handling in CdrPlasmaStepper." alt="" coords="112,196,320,251"/>
+<area shape="rect" id="Node000002" href="$classEBAMRData.html" title=" " alt="" coords="5,93,189,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,141,189,194,185,198,126,144"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="147,5,285,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="164,38,134,57,118,75,107,94,103,92,114,71,130,53,161,34"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="213,101,459,126"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="265,34,296,53,318,76,332,99,328,102,314,79,293,57,263,38"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="315,137,247,198,243,194,311,133"/>
 </map>

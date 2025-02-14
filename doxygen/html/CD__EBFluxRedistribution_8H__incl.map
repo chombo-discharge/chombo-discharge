@@ -1,9 +1,15 @@
 <map id="Source/AmrMesh/CD_EBFluxRedistribution.H" name="Source/AmrMesh/CD_EBFluxRedistribution.H">
-<area shape="rect" id="node1" title="Declaration of a class which can perform redistribution in an EB&#45;AMR context." alt="" coords="283,5,490,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,120,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="145,95,247,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="271,95,374,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="398,95,503,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="527,95,713,121"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="737,95,916,121"/>
+<area shape="rect" id="Node000001" title="Declaration of a class which can perform redistribution in an EB&#45;AMR context." alt="" coords="283,5,490,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,120,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="310,48,124,93,123,88,308,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="145,93,247,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="342,48,238,91,236,86,340,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="271,93,374,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="373,47,343,84,339,81,369,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="398,93,503,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="404,44,434,81,430,84,400,47"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="527,93,713,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="443,43,574,86,572,91,442,48"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="737,93,916,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="491,42,749,88,749,94,490,48"/>
 </map>

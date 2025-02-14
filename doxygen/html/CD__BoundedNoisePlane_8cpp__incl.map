@@ -1,11 +1,24 @@
 <map id="Source/ImplicitFunctions/CD_BoundedNoisePlane.cpp" name="Source/ImplicitFunctions/CD_BoundedNoisePlane.cpp">
-<area shape="rect" id="node1" title="Declaration of a signed distance function for a noisy plane." alt="" coords="127,5,336,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,108,121"/>
-<area shape="rect" id="node3" href="$CD__BoundedNoisePlane_8H.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="221,95,413,121"/>
-<area shape="rect" id="node8" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="96,244,281,271"/>
-<area shape="rect" id="node9" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="518,244,697,271"/>
-<area shape="rect" id="node4" title=" " alt="" coords="234,169,317,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="305,244,384,271"/>
-<area shape="rect" id="node6" href="$CD__PerlinSdf_8H.html" title="Declaration of signed distance Perlin noise." alt="" coords="392,169,511,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="409,244,494,271"/>
+<area shape="rect" id="Node000001" title="Declaration of a signed distance function for a noisy plane." alt="" coords="127,5,336,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,108,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,48,96,90,94,85,188,43"/>
+<area shape="rect" id="Node000003" href="$CD__BoundedNoisePlane_8H.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="221,93,413,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="254,44,296,82,292,86,250,48"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="96,240,281,265"/>
+<area shape="poly" id="edge12_Node000001_Node000008" title=" " alt="" coords="226,46,211,94,199,166,193,227,188,226,194,165,206,93,221,45"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="518,240,697,265"/>
+<area shape="poly" id="edge13_Node000001_Node000009" title=" " alt="" coords="318,43,376,61,440,87,503,121,559,165,583,195,599,226,595,228,578,198,555,169,500,125,438,92,374,66,316,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="234,167,317,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="312,120,291,156,287,153,308,118"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="305,240,384,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="322,118,331,166,343,226,337,227,326,167,316,119"/>
+<area shape="rect" id="Node000006" href="$CD__PerlinSdf_8H.html" title="Declaration of signed distance Perlin noise." alt="" coords="392,167,511,192"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="340,116,418,158,416,162,337,121"/>
+<area shape="poly" id="edge10_Node000003_Node000008" title=" " alt="" coords="291,121,256,140,224,168,207,197,197,227,192,225,202,195,220,165,253,136,288,116"/>
+<area shape="poly" id="edge11_Node000003_Node000009" title=" " alt="" coords="390,116,457,134,492,148,525,164,563,195,593,227,589,231,559,199,522,169,490,153,456,139,388,121"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="436,194,375,235,372,230,433,190"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="409,240,494,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="454,192,454,226,449,226,449,192"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="410,195,245,239,244,234,408,189"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="477,190,570,232,568,237,475,194"/>
 </map>

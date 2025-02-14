@@ -170,7 +170,7 @@ The tests are defined in <code class="file docutils literal notranslate"><span c
 <section id="running-the-test-suite">
 <h3>Running the test suite<a class="headerlink" href="#running-the-test-suite" title="Permalink to this heading"></a></h3>
 <p>To do a clean compile and run of all tests, navigate to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Tests</span></code> and execute the following:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 tests.py --compile --clean --silent --no_exec -cores X
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>tests.py<span class="w"> </span>--compile<span class="w"> </span>--clean<span class="w"> </span>--silent<span class="w"> </span>--no_exec<span class="w"> </span>-cores<span class="w"> </span>X
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">X</span></code> is the number of cores to use when compiling.
@@ -263,7 +263,7 @@ Our approach for convergence testing is found in <a class="reference internal" h
 Most routines in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> use these macros and they will compute the wall clock time spent in each routine.</p>
 <p>To enable these timers, set <code class="docutils literal notranslate"><span class="pre">CH_TIMER=1</span></code> in the shell where you run your application.
 E.g,</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CH_TIMER</span><span class="o">=</span><span class="m">1</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CH_TIMER</span><span class="o">=</span><span class="m">1</span>
 </pre></div>
 </div>
 <div class="admonition warning">

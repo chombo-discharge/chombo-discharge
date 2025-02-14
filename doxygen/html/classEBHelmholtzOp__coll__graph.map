@@ -1,7 +1,11 @@
 <map id="EBHelmholtzOp" name="EBHelmholtzOp">
-<area shape="rect" id="node1" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="311,124,435,151"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,224,47"/>
-<area shape="rect" id="node3" href="$classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="249,13,359,39"/>
-<area shape="rect" id="node4" href="$classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="389,13,499,39"/>
-<area shape="rect" id="node5" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="551,13,611,39"/>
+<area shape="rect" id="Node000001" title="Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho." alt="" coords="270,123,394,148"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,224,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,49,310,120,307,125,164,54"/>
+<area shape="rect" id="Node000003" href="$classTimer.html" title="Class which is used for run&#45;time monitoring of events." alt="" coords="249,13,309,38"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="284,51,290,74,300,97,320,121,316,124,295,100,285,76,279,52"/>
+<area shape="rect" id="Node000004" href="$classEBMGRestrict.html" title="Class for restricting multigrid residual onto a coarser grid." alt="" coords="333,13,443,38"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="382,52,360,100,343,124,339,121,355,97,377,50"/>
+<area shape="rect" id="Node000005" href="$classEBMGProlong.html" title="Class for prolongation of multigrid residual onto a finer grid." alt="" coords="469,13,579,38"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="518,52,505,78,484,101,463,113,441,123,395,133,394,128,439,118,461,109,481,97,501,75,514,50"/>
 </map>

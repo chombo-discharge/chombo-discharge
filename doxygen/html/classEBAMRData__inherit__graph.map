@@ -1,12 +1,21 @@
 <map id="EBAMRData&lt; T &gt;" name="EBAMRData&lt; T &gt;">
-<area shape="rect" id="node1" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,239,144,265"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="355,20,600,47"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="378,71,577,97"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="368,121,587,148"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="385,173,569,214"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="376,239,579,265"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="379,289,575,316"/>
-<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="393,341,562,382"/>
-<area shape="rect" id="node9" href="$classEBAMRData.html" title=" " alt="" coords="379,407,575,433"/>
-<area shape="rect" id="node10" href="$classEBAMRData.html" title=" " alt="" coords="378,457,577,484"/>
+<area shape="rect" id="Node000001" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,241,144,266"/>
+<area shape="rect" id="Node000002" href="$classEBAMRData.html" title=" " alt="" coords="379,19,575,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,226,88,189,105,144,130,99,147,80,167,63,217,37,271,23,327,17,379,17,379,22,327,22,272,28,218,42,169,68,151,84,135,103,109,146,93,190,83,228"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="378,69,577,94"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="86,227,117,177,140,152,167,131,217,107,272,91,327,82,377,77,378,82,327,87,273,96,219,112,169,136,143,156,121,180,90,230"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="385,119,569,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="100,230,131,208,167,190,222,171,279,158,385,142,385,147,280,163,223,176,169,194,134,213,103,234"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="355,183,600,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="143,235,168,231,354,205,355,211,168,236,144,240"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="393,233,562,273"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="158,251,392,251,392,256,158,256"/>
+<area shape="rect" id="Node000007" href="$classEBAMRData.html" title=" " alt="" coords="378,298,577,323"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="144,266,168,271,378,298,378,304,168,276,143,271"/>
+<area shape="rect" id="Node000008" href="$classEBAMRData.html" title=" " alt="" coords="376,347,579,373"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="102,273,133,295,169,314,220,330,274,342,376,355,375,360,273,347,219,335,167,318,130,299,99,277"/>
+<area shape="rect" id="Node000009" href="$classEBAMRData.html" title=" " alt="" coords="368,397,587,422"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="90,277,121,327,143,351,169,371,217,392,268,405,319,412,368,414,368,420,318,417,267,410,215,397,167,376,139,355,117,330,85,280"/>
+<area shape="rect" id="Node000010" href="$classEBAMRData.html" title=" " alt="" coords="379,446,575,471"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="83,279,93,315,110,358,135,399,151,417,169,432,197,448,227,459,290,471,352,473,407,469,408,474,352,479,289,477,225,464,195,453,167,437,147,421,131,402,105,360,88,317,78,280"/>
 </map>

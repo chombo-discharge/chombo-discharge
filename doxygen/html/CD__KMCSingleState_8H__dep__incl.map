@@ -1,6 +1,11 @@
 <map id="Source/KineticMonteCarlo/CD_KMCSingleState.H" name="Source/KineticMonteCarlo/CD_KMCSingleState.H">
-<area shape="rect" id="node1" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="20,5,211,47"/>
-<area shape="rect" id="node2" href="$CD__KMCSingleStateImplem_8H.html" title="Implementation of CD_KMCSingleState.H." alt="" coords="5,95,225,136"/>
-<area shape="rect" id="node3" href="$CD__KMCSingleStateReaction_8H.html" title="Declaration of a simple reaction type for advancing &quot;single states&quot; in Kinetic Monte Carlo codes." alt="" coords="250,95,477,136"/>
-<area shape="rect" id="node4" href="$CD__KMCSingleStateReactionImplem_8H.html" title="Implementation of CD_KMCSingleStateReaction.H." alt="" coords="225,184,502,225"/>
+<area shape="rect" id="Node000001" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="20,5,211,45"/>
+<area shape="rect" id="Node000002" href="$CD__KMCSingleStateImplem_8H.html" title="Implementation of CD_KMCSingleState.H." alt="" coords="5,93,225,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,59,110,93,105,93,104,59"/>
+<area shape="rect" id="Node000003" href="$CD__KMCSingleStateReaction_8H.html" title="Declaration of a simple reaction type for advancing &quot;single states&quot; in Kinetic Monte Carlo codes." alt="" coords="250,93,477,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="184,47,310,91,308,96,182,52"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="121,80,120,46,126,46,127,80"/>
+<area shape="rect" id="Node000004" href="$CD__KMCSingleStateReactionImplem_8H.html" title="Implementation of CD_KMCSingleStateReaction.H." alt="" coords="225,181,502,221"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="357,147,358,181,353,181,352,147"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="369,168,368,134,374,134,375,168"/>
 </map>

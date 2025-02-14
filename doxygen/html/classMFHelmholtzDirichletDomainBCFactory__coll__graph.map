@@ -1,4 +1,5 @@
 <map id="MFHelmholtzDirichletDomainBCFactory" name="MFHelmholtzDirichletDomainBCFactory">
-<area shape="rect" id="node1" title="Factory class for passing Dirichlet domain boundary conditions into MFHelmholtzOp." alt="" coords="11,80,225,121"/>
-<area shape="rect" id="node2" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="5,5,231,32"/>
+<area shape="rect" id="Node000001" title="Factory class for passing Dirichlet domain boundary conditions into MFHelmholtzOp." alt="" coords="11,79,225,119"/>
+<area shape="rect" id="Node000002" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="5,5,231,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,44,121,79,115,79,115,44"/>
 </map>

@@ -1,4 +1,6 @@
 <map id="Source/ImplicitFunctions/CD_SignedDistanceBVHImplem.H" name="Source/ImplicitFunctions/CD_SignedDistanceBVHImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_SignedDistanceBVH.H." alt="" coords="5,5,251,47"/>
-<area shape="rect" id="node2" href="$CD__SignedDistanceBVH_8H.html" title="Declaration of an signe distance function class that gets its value function from a DCEL surface Tess..." alt="" coords="31,95,225,136"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_SignedDistanceBVH.H." alt="" coords="5,5,251,45"/>
+<area shape="rect" id="Node000002" href="$CD__SignedDistanceBVH_8H.html" title="Declaration of an signe distance function class that gets its value function from a DCEL surface Tess..." alt="" coords="31,93,225,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,59,123,93,118,93,117,59"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="134,80,133,46,138,46,139,80"/>
 </map>

@@ -1,6 +1,9 @@
 <map id="Source/AmrMesh/CD_CellInfo.H" name="Source/AmrMesh/CD_CellInfo.H">
-<area shape="rect" id="node1" title="Simple class for holding some quantities relevant in a grid cell." alt="" coords="103,5,329,32"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,80,99,107"/>
-<area shape="rect" id="node3" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="123,80,309,107"/>
-<area shape="rect" id="node4" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="333,80,512,107"/>
+<area shape="rect" id="Node000001" title="Simple class for holding some quantities relevant in a grid cell." alt="" coords="103,5,329,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,99,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,33,92,76,90,71,189,28"/>
+<area shape="rect" id="Node000003" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="123,79,309,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,31,219,65,213,65,213,31"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="333,79,512,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,28,377,72,375,77,248,33"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="NeedleIF" name="NeedleIF">
-<area shape="rect" id="node1" title="Cylinder with one pointed end and one circular end." alt="" coords="5,80,85,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="12,5,79,32"/>
+<area shape="rect" id="Node000001" title="Cylinder with one pointed end and one circular end." alt="" coords="5,79,85,104"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="12,5,79,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="48,44,48,79,43,79,43,44"/>
 </map>

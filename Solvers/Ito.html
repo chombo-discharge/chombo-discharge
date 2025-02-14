@@ -219,33 +219,33 @@ Regardless of which method is chosen (see <a class="reference internal" href="#c
 <span id="chap-itoparticle"></span><h2>ItoParticle<a class="headerlink" href="#itoparticle" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">ItoParticle</span></code> is used as the underlying particle type for running the Ito drift-diffusion solvers.
 It derives from <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">,</span><span class="mi">2</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>and contains the following relevant member functions</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Storing for particle weight</span>
-<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoParticle::weight</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span>
+<span class="nf">ItoParticle::weight</span><span class="p">();</span>
 
 <span class="c1">// Storage for particle diffusion coefficient</span>
-<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoParticle::diffusion</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span>
+<span class="nf">ItoParticle::diffusion</span><span class="p">();</span>
 
 <span class="c1">// Storage for particle mobility</span>
-<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoParticle::mobility</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span>
+<span class="nf">ItoParticle::mobility</span><span class="p">();</span>
 
 <span class="c1">// Storage for particle energy</span>
-<span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoParticle::energy</span><span class="p">();</span><span class="w"></span>
+<span class="n">Real</span><span class="o">&amp;</span>
+<span class="nf">ItoParticle::energy</span><span class="p">();</span>
 
 <span class="c1">// Storage for particle velocity</span>
-<span class="n">RealVect</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoParticle::velocity</span><span class="p">();</span><span class="w"></span>
+<span class="n">RealVect</span><span class="o">&amp;</span>
+<span class="nf">ItoParticle::velocity</span><span class="p">();</span>
 
 <span class="c1">// Storage for previous particle position</span>
-<span class="n">RealVect</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoParticle::oldPosition</span><span class="p">();</span><span class="w"></span>
+<span class="n">RealVect</span><span class="o">&amp;</span>
+<span class="nf">ItoParticle::oldPosition</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>All of these functions have corresponding functions with <code class="docutils literal notranslate"><span class="pre">const</span></code> qualifiers.</p>
@@ -254,7 +254,7 @@ It derives from <a class="reference internal" href="../Source/Particles.html#cha
 <span id="chap-itospecies"></span><h2>ItoSpecies<a class="headerlink" href="#itospecies" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> is a class for parsing information into <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code>.
 The constructor for the <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ItoSpecies</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_name</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_chargeNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_mobile</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_diffusive</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ItoSpecies</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_name</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_chargeNumber</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_mobile</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_diffusive</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>and this will set the name of the class, the charge, and whether or not the transport kernels use drift and/or diffusion.</p>
@@ -264,16 +264,16 @@ The constructor for the <code class="docutils literal notranslate"><span class="
 </div>
 <p>Initial data for the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> is provided through <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> by providing it with a list of initial particles.
 <code class="docutils literal notranslate"><span class="pre">ItoSpecies</span></code> have members that provide/modify the initial particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoSpecies</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoSpecies</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 
-<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"></span>
-<span class="w">   </span><span class="n">getInitialParticles</span><span class="p">();</span><span class="w"></span>
+<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span>
+<span class="w">   </span><span class="n">getInitialParticles</span><span class="p">();</span>
 
-<span class="k">protected</span><span class="o">:</span><span class="w"></span>
+<span class="k">protected</span><span class="o">:</span>
 
-<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_initialParticles</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_initialParticles</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>When <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> initializes the data in the solver, it transfers the particles from the species and into the solver.
@@ -282,15 +282,15 @@ See <a class="reference internal" href="../Source/Particles.html#chap-particleop
 <section id="transport-kernel">
 <h2>Transport kernel<a class="headerlink" href="#transport-kernel" title="Permalink to this heading"></a></h2>
 <p>The transport kernels for the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> will simply consist of particle updates of the following type:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span><span class="w"></span>
-<span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;</span><span class="w"> </span><span class="n">particles</span><span class="p">;</span>
 
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">   </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">ListIterator</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">lit</span><span class="p">(</span><span class="n">particles</span><span class="p">);</span><span class="w"> </span><span class="n">lit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">lit</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lit</span><span class="p">();</span>
 
-<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">oldPosition</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">()</span><span class="w">   </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a_dt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">p</span><span class="p">.</span><span class="n">diffusion</span><span class="p">()</span><span class="o">*</span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">randomGaussian</span><span class="p">();</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">oldPosition</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">();</span>
+<span class="w">   </span><span class="n">p</span><span class="p">.</span><span class="n">position</span><span class="p">()</span><span class="w">   </span><span class="o">+=</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">velocity</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a_dt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">p</span><span class="p">.</span><span class="n">diffusion</span><span class="p">()</span><span class="o">*</span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">this</span><span class="o">-&gt;</span><span class="n">randomGaussian</span><span class="p">();</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The function <code class="docutils literal notranslate"><span class="pre">randomGaussian</span></code> implements a diffusion hopping and returns a 2D/3D dimensional vector with values drawn from a normal distribution with standard width of one and mean value of zero.
@@ -300,14 +300,14 @@ The user can choose to truncate the normal distribution, see <a class="reference
 <section id="remapping-particles">
 <h2>Remapping particles<a class="headerlink" href="#remapping-particles" title="Permalink to this heading"></a></h2>
 <p>To remap, call the <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> remapping functions as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::remap</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::remap</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>This will remap the particles to the correct grid patches.</p>
 <p>To remap the other <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> data holders (holding e.g. particles that intersected the EB), there’s an alternative function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::remap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::remap</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_container</span></code> is one of the particle containers.</p>
@@ -315,19 +315,19 @@ The user can choose to truncate the normal distribution, see <a class="reference
 <section id="deposition">
 <h2>Deposition<a class="headerlink" href="#deposition" title="Permalink to this heading"></a></h2>
 <p>To deposit the particle weights onto the grid one can use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::depositParticles</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::depositParticles</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>The particles are deposited into the data holder <code class="docutils literal notranslate"><span class="pre">m_phi</span></code>.
 The data can then be fetched with</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"></span>
-<span class="nf">ItoSolver::getPhi</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBAMRCellData</span><span class="o">&amp;</span>
+<span class="nf">ItoSolver::getPhi</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>To deposit a different particle data holder into <code class="docutils literal notranslate"><span class="pre">m_phi</span></code> one can use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::depositParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::depositParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This can be used, for example, to deposit the EB particles on the mesh.
@@ -340,14 +340,14 @@ More general methods also exist, see the <code class="docutils literal notransla
 </ul>
 <p>Here, <span class="math notranslate nohighlight">\(W\)</span> is the particle weight, <span class="math notranslate nohighlight">\(\mu\)</span> is the particle mobility, <span class="math notranslate nohighlight">\(D\)</span> is the particle diffusion coefficient and <span class="math notranslate nohighlight">\(\epsilon\)</span> is the particle energy.
 These functions exist as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::depositConductivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::depositConductivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::depositDiffusivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">ItoSolver::depositDiffusivity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::depositEnergyDensity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">ItoSolver::depositEnergyDensity</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <div class="admonition important">
@@ -359,8 +359,8 @@ These functions exist as</p>
 <span id="chap-itointerpolation"></span><h2>Velocity interpolation<a class="headerlink" href="#velocity-interpolation" title="Permalink to this heading"></a></h2>
 <p>Computing the particle velocity is done by first computing the particle mobility and then computing the particle velocity.
 For interpolating the mobility to the particle position one will call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::interpolateMobilities</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::interpolateMobilities</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>which will compute <span class="math notranslate nohighlight">\(\mu\left(\mathbf{X}\right)\)</span> using the user-specified deposition/interpolation method for computing the mobility.
@@ -376,8 +376,8 @@ The other is to compute the mobility as</p>
 See <a class="reference internal" href="#chap-itoinput"><span class="std std-ref">Input options</span></a>.</p>
 </div>
 <p>After the mobility has been appropriately set, the velocity can be interpolated from</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::interpolateVelocities</span><span class="p">();</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::interpolateVelocities</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>The above will compute <span class="math notranslate nohighlight">\(v\left(\mathbf{X}\right)\)</span> and set the velocity as <span class="math notranslate nohighlight">\(\mathbf{V} = \mu\left(\mathbf{X}\right)\mathbf{v}\left(\mathbf{X}\right)\)</span>.</p>
@@ -391,8 +391,8 @@ See <a class="reference internal" href="#chap-itoinput"><span class="std std-ref
 <p>It will happen that particles occasionally hit the embedded boundary or leave through the domain sides.
 In this case one might want to keep the particles in separate data holders rather than discard them.
 <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> supplies the following routine for transferring the particles to the containers that hold the EB and domain particles:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::intersectParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EbIntersection</span><span class="w"> </span><span class="n">a_ebIntersection</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_deleteParticles</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::intersectParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EbIntersection</span><span class="w"> </span><span class="n">a_ebIntersection</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_deleteParticles</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">EbIntersection</span></code> is a just an enum for putting logic into how the intersection is computed.
@@ -411,8 +411,8 @@ This routine is implemented as</p>
 </div>
 <p>which returns a CFL-like condition <span class="math notranslate nohighlight">\(\Delta x/\textrm{max}(v_x, v_y, v_z)\)</span> on the the various AMR levels and patches.</p>
 <p>The signatures for the diffusion time step are similar to the ones for drift:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"></span>
-<span class="nf">ItoSolver::computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
+<span class="nf">ItoSolver::computeDiffusiveDt</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>and this returns another CFL-like condition <span class="math notranslate nohighlight">\(\Delta x^2 / (2dD)\)</span> for all the particles, where <span class="math notranslate nohighlight">\(d\)</span> is the spatial dimension.
@@ -430,8 +430,8 @@ Note that there is no fundamental limitation to how far the particles can move, 
 <h2>Superparticles<a class="headerlink" href="#superparticles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> currently handles superparticles through kD-trees, see <a class="reference internal" href="../Source/Particles.html#chap-superparticles"><span class="std std-ref">Superparticles</span></a>, re-initialization, or user-based criteria.
 The function for splitting and merging the particles is in all cases</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"></span>
-<span class="nf">ItoSolver::makeSuperparticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">ItoSolver::makeSuperparticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">WhichContainer</span><span class="w"> </span><span class="n">a_container</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_particlesPerCell</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Calling this function will merge/split the particles.</p>
@@ -443,8 +443,8 @@ In order to specify the merging algorithm the user must set the <code class="doc
 <li><p><code class="docutils literal notranslate"><span class="pre">reinitialize</span></code> Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Set a particle merging algorithm</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="nf">setParticleMerger</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CelInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_cellinfo</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numParticles</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span><span class="w"></span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setParticleMerger</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CelInfo</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_cellinfo</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_numParticles</span><span class="p">)</span><span class="o">&gt;</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>where the input function is a function which merges the input particles, possibly also taking into account geometric information in the cell.</p>

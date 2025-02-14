@@ -1,10 +1,21 @@
 <map id="CdrMultigrid" name="CdrMultigrid">
-<area shape="rect" id="node1" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="1032,397,1135,424"/>
-<area shape="rect" id="node2" href="$classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="893,249,978,276"/>
-<area shape="rect" id="node3" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,109,534,136"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="385,213,569,254"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,253,144,280"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,279,600,305"/>
-<area shape="rect" id="node7" href="$classEBAMRData.html" title=" " alt="" coords="379,405,575,432"/>
-<area shape="rect" id="node8" href="$classEBAMRData.html" title=" " alt="" coords="378,59,577,85"/>
+<area shape="rect" id="Node000001" title="Extension class of CdrSolver that uses multigrid for diffusion part. Can also solve for stochastic di..." alt="" coords="1032,93,1135,118"/>
+<area shape="rect" id="Node000002" href="$classCdrSolver.html" title="Base class for solving convection&#45;diffusion&#45;reaction equations." alt="" coords="893,187,978,213"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="966,178,1061,116,1064,120,969,182"/>
+<area shape="rect" id="Node000003" href="$classCdrDomainBC.html" title="Class for encapsulating possible domain boundary conditions for CdrSolver." alt="" coords="421,165,534,190"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="548,178,893,195,892,201,547,183"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="379,115,575,141"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="499,104,553,61,587,41,623,25,685,13,749,10,812,15,874,27,981,59,1057,90,1055,95,980,64,872,32,811,21,749,15,686,18,625,31,589,46,556,66,503,108"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="590,131,744,143,814,151,865,161,892,172,915,185,913,189,890,177,863,167,813,157,744,148,589,136"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,258,144,283"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="113,249,167,224,259,184,354,151,404,138,406,143,355,156,261,189,169,229,115,254"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="378,283,577,309"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="158,277,168,277,378,289,378,295,168,283,158,282"/>
+<area shape="rect" id="Node000007" href="$classEBAMRData.html" title=" " alt="" coords="385,364,569,404"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="116,286,169,307,281,339,386,363,385,369,280,344,167,312,114,291"/>
+<area shape="rect" id="Node000008" href="$classEBAMRData.html" title=" " alt="" coords="355,221,600,246"/>
+<area shape="poly" id="edge10_Node000008_Node000005" title=" " alt="" coords="158,260,354,242,355,247,158,266"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="558,308,626,315,705,315,786,305,825,294,863,279,884,265,901,247,925,211,930,214,905,250,887,269,865,284,827,299,787,310,705,320,626,320,557,313"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="536,406,608,430,650,440,694,446,738,448,782,443,824,431,862,410,884,390,901,365,913,337,922,308,930,253,932,213,937,213,936,254,927,309,918,339,905,367,888,393,866,414,826,436,783,448,739,453,693,451,649,445,606,435,534,411"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="614,231,736,226,864,213,892,208,893,213,864,219,736,231,614,236"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="MFHelmholtzOp" name="MFHelmholtzOp">
-<area shape="rect" id="node1" title="Operator for solving multifluid Helmholtz on a grid level." alt="" coords="51,95,178,121"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,224,47"/>
+<area shape="rect" id="Node000001" title="Operator for solving multifluid Helmholtz on a grid level." alt="" coords="51,93,178,119"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,224,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,59,117,93,112,93,112,59"/>
 </map>

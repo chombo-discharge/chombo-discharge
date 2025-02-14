@@ -1,4 +1,6 @@
 <map id="Source/ImplicitFunctions/CD_SignedDistanceDCELImplem.H" name="Source/ImplicitFunctions/CD_SignedDistanceDCELImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_SignedDistanceDCEL.H." alt="" coords="5,5,256,47"/>
-<area shape="rect" id="node2" href="$CD__SignedDistanceDCEL_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface Tesselatio..." alt="" coords="30,95,231,136"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_SignedDistanceDCEL.H." alt="" coords="5,5,256,45"/>
+<area shape="rect" id="Node000002" href="$CD__SignedDistanceDCEL_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface Tesselatio..." alt="" coords="30,93,231,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,59,126,93,120,93,119,59"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="137,80,136,46,141,46,142,80"/>
 </map>

@@ -280,14 +280,14 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 <section id="implementation">
 <span id="chap-kmcsolver"></span><h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
 <p>The Kinetic Monte Carlo solver is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">ReactionList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">ReactionList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">;</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ReactionList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reaction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ReactionList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reaction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>The template parameters are:</p>
@@ -303,7 +303,7 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 <section id="state">
 <h3>State<a class="headerlink" href="#state" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">State</span></code> representation <em>must</em> have a member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">State::isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">State::isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which determines if the state is thermodynamically valid (e.g. no negative populations).
@@ -313,20 +313,20 @@ The functionality is used when using the hybrid advancement algorithm, see <a cl
 <h3>Reaction(s)<a class="headerlink" href="#reaction-s" title="Permalink to this heading"></a></h3>
 <p>The reaction representation <code class="docutils literal notranslate"><span class="pre">R</span></code> <em>must</em> have the following member functions:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Compute the propensity of the current reaction.</span>
-<span class="n">Real</span><span class="w"> </span><span class="nf">R::propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">Real</span><span class="w"> </span><span class="nf">R::propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Compute the number of reactions before exhausting one of the reactants</span>
-<span class="n">T</span><span class="w"> </span><span class="nf">R::computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">T</span><span class="w"> </span><span class="nf">R::computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Compute the number of reactions before exhausting one of the reactants</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">R::advanceState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">R::advanceState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Get a vector/list/deque etc. of the reactants. &lt;some_container&gt; can be e.g. std::vector&lt;size_t&gt;</span>
-<span class="o">&lt;</span><span class="n">some_container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">R</span><span class="o">::</span><span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="o">&lt;</span><span class="n">some_container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">R</span><span class="o">::</span><span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="c1">// Get the population corresponding to &#39;reactant&#39; in the input state. If e.g. &lt;some_container&gt; is</span>
 <span class="c1">// std::vector&lt;size_t&gt; then &lt;some_type&gt; will be &lt;size_t&gt;</span>
-<span class="n">T</span><span class="w"> </span><span class="nf">R::population</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="o">&lt;</span><span class="n">some_type</span><span class="o">&gt;</span><span class="w"> </span><span class="n">reactant</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="n">T</span><span class="w"> </span><span class="nf">R::population</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="o">&lt;</span><span class="n">some_type</span><span class="o">&gt;</span><span class="w"> </span><span class="n">reactant</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>These template requirements exist so that users can define their states independent of their reactions.
@@ -336,18 +336,18 @@ Likewise, reactions can be defined to operate flexibly on state, and the <code c
 <h3>Defining states<a class="headerlink" href="#defining-states" title="Permalink to this heading"></a></h3>
 <p>State representations <code class="docutils literal notranslate"><span class="pre">State</span></code> can be defined quite simply (e.g. just a list of indices).
 In the absolute simplest case a state can be defined by maintaining a list of populations like below:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyState</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">   </span><span class="n">MyState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">numSpecies</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="n">m_populations</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">numSpecies</span><span class="p">);</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyState</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">   </span><span class="n">MyState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">numSpecies</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_populations</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">numSpecies</span><span class="p">);</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="kt">bool</span><span class="w"> </span><span class="n">isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kt">bool</span><span class="w"> </span><span class="n">isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_populations</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_populations</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>More advanced examples can distinguish between different <em>modes</em> of populations, e.g. between species that can only appear on the left/right hand side of the reactions.
@@ -357,72 +357,72 @@ See <a class="reference internal" href="#chap-kmcdualstate"><span class="std std
 <h3>Defining reactions<a class="headerlink" href="#defining-reactions" title="Permalink to this heading"></a></h3>
 <p>See <a class="reference internal" href="#chap-kmcsolver"><span class="std std-ref">Implementation</span></a> for template requirements on state-advancing reactions.
 Using <code class="docutils literal notranslate"><span class="pre">MyState</span></code> above as an example, a minimal reaction that can advance <span class="math notranslate nohighlight">\(A\rightarrow B\)</span> with a rate of <span class="math notranslate nohighlight">\(k=1\)</span> is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyStateReaction</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyStateReaction</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 
 <span class="w">   </span><span class="c1">// List of reactants and products</span>
-<span class="w">   </span><span class="n">MyStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_A</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="n">m_A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_A</span><span class="p">;</span><span class="w"></span>
-<span class="w">      </span><span class="n">m_B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_B</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="n">MyStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_A</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_A</span><span class="p">;</span>
+<span class="w">      </span><span class="n">m_B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_B</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="c1">// Compute propensity</span>
-<span class="w">   </span><span class="n">Real</span><span class="w"> </span><span class="n">propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">a_state</span><span class="p">[</span><span class="n">m_A</span><span class="p">];</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="n">Real</span><span class="w"> </span><span class="n">propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">a_state</span><span class="p">[</span><span class="n">m_A</span><span class="p">];</span>
+<span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="c1">// Never consider these reactions to be &quot;critical&quot;</span>
-<span class="w">   </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Mystate</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">();</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Mystate</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">();</span>
+<span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="c1">// Get a vector/list/deque etc. of the reactant&#39;s. &lt;some_container&gt; can be e.g. std::vector&lt;size_t&gt;</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">R</span><span class="o">::</span><span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">{</span><span class="n">m_A</span><span class="p">};</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">R</span><span class="o">::</span><span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">{</span><span class="n">m_A</span><span class="p">};</span>
+<span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="c1">// Get population</span>
-<span class="w">   </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">population</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reactant</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MyState</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">a_state</span><span class="p">.</span><span class="n">m_populations</span><span class="p">[</span><span class="n">a_reactant</span><span class="p">];</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">population</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reactant</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">MyState</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">a_state</span><span class="p">.</span><span class="n">m_populations</span><span class="p">[</span><span class="n">a_reactant</span><span class="p">];</span>
+<span class="w">   </span><span class="p">}</span>
 
 <span class="w">   </span><span class="c1">// Advance state with reaction A -&gt; B</span>
-<span class="w">   </span><span class="kt">void</span><span class="w"> </span><span class="n">advanceState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">MyState</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&amp;</span><span class="w"> </span><span class="n">numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="n">s</span><span class="p">.</span><span class="n">populations</span><span class="p">[</span><span class="n">m_A</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">numReactions</span><span class="p">;</span><span class="w"></span>
-<span class="w">      </span><span class="n">s</span><span class="p">.</span><span class="n">populations</span><span class="p">[</span><span class="n">m_B</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">numReactions</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="p">}</span><span class="w"></span>
+<span class="w">   </span><span class="kt">void</span><span class="w"> </span><span class="n">advanceState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">MyState</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&amp;</span><span class="w"> </span><span class="n">numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">s</span><span class="p">.</span><span class="n">populations</span><span class="p">[</span><span class="n">m_A</span><span class="p">]</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="n">numReactions</span><span class="p">;</span>
+<span class="w">      </span><span class="n">s</span><span class="p">.</span><span class="n">populations</span><span class="p">[</span><span class="n">m_B</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">numReactions</span><span class="p">;</span>
+<span class="w">   </span><span class="p">}</span>
 
-<span class="k">protected</span><span class="o">:</span><span class="w"></span>
-<span class="w">   </span><span class="kt">size_t</span><span class="w"> </span><span class="n">m_A</span><span class="p">;</span><span class="w"></span>
-<span class="w">   </span><span class="kt">size_t</span><span class="w"> </span><span class="n">m_B</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">protected</span><span class="o">:</span>
+<span class="w">   </span><span class="kt">size_t</span><span class="w"> </span><span class="n">m_A</span><span class="p">;</span>
+<span class="w">   </span><span class="kt">size_t</span><span class="w"> </span><span class="n">m_B</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 </section>
 <section id="advancement-routines">
 <h3>Advancement routines<a class="headerlink" href="#advancement-routines" title="Permalink to this heading"></a></h3>
 <p>The advancement routines for the <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code> are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 
 <span class="w">   </span><span class="c1">// Advance one step with the SSA algorithm.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">   </span><span class="n">advanceSSA</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="n">advanceSSA</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">   </span><span class="c1">// Advance using tau leaping</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">   </span><span class="nf">advanceTau</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="nf">advanceTau</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">   </span><span class="c1">// Advance using hybrid algorithm.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">   </span><span class="nf">advanceHybrid</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="nf">advanceHybrid</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">   </span><span class="c1">// Set hybrid solver parameters.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span><span class="w"></span>
-<span class="w">   </span><span class="nf">setSolverParameters</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numCrit</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numSSA</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_eps</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_SSAlim</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="nf">setSolverParameters</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numCrit</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numSSA</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_eps</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_SSAlim</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>When using the hybrid algorithm, the user should set the hybrid solver parameters through <code class="docutils literal notranslate"><span class="pre">setSolverParameters</span></code>.
@@ -436,12 +436,12 @@ See <a class="reference internal" href="#chap-kmchybridadvance"><span class="std
 <span id="chap-kmcsinglestate"></span><h3>Single-state<a class="headerlink" href="#single-state" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">KMCSingleState</span></code> class defines a single state vector <span class="math notranslate nohighlight">\(\vec{X}\)</span> that can appear on either side of reactions.
 The user defines the number of species through the constructor</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSingleState</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KMCSingleState</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 <span class="w">   </span><span class="c1">// Define a state vector with specified number of species.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSingleState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numSpecies</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSingleState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numSpecies</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p>Internally the state just uses a <code class="docutils literal notranslate"><span class="pre">std::vector&lt;T&gt;</span></code> for representing the populations.</p>
@@ -450,19 +450,19 @@ The reaction is specified as a generic type of reaction</p>
 <div class="math notranslate nohighlight">
 \[X_A + X_B + \ldots \xrightarrow{k} X_C + X_D + \ldots.\]</div>
 <p>The relevant function signatures that specify the reactants, products, and the rate <span class="math notranslate nohighlight">\(k\)</span>, are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCSingleState</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSingleStateReaction</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCSingleState</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KMCSingleStateReaction</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 
 <span class="w">   </span><span class="c1">// Define list of reactants/products through constructor</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">KMCSingleStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_reactants</span><span class="p">,</span><span class="w"></span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_products</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">KMCSingleStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_reactants</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_products</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">   </span><span class="c1">// For setting the reaction rate used in the propensity calculation.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="w">   </span><span class="nf">rate</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
+<span class="w">   </span><span class="nf">rate</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 </section>
@@ -474,35 +474,35 @@ For example:</p>
 <div class="math notranslate nohighlight">
 \[X_A \ldots \xrightarrow{k} 2X_A + Y_A + \emptyset\]</div>
 <p>The class is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCDualState</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KMCDualState</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 <span class="w">   </span><span class="c1">// Define a state vector with specified number of species.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCDualState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numReactiveSpecies</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numNonReactiveSpecies</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCDualState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numReactiveSpecies</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numNonReactiveSpecies</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">   </span><span class="c1">// Get the reactant state (i.e, X)</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getReactiveState</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getReactiveState</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">   </span><span class="c1">// Get the non-reactant state (i.e, Y)</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getNonReactiveState</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getNonReactiveState</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">KMCDualStateReaction</span></code> can define reactions between states in the state vector <span class="math notranslate nohighlight">\(\vec{X}\)</span> which give products in both <span class="math notranslate nohighlight">\(\vec{X}\)</span> and <span class="math notranslate nohighlight">\(\vec{Y}\)</span> as follows.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualState</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span><span class="w"></span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCDualStateReaction</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualState</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KMCDualStateReaction</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
 
 <span class="w">   </span><span class="c1">// Define list of reactants/products through constructor</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"></span>
-<span class="w">   </span><span class="n">KMCDualStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_lhsReactives</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhsReactives</span><span class="p">,</span><span class="w"></span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhsNonReactives</span><span class="p">);</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span>
+<span class="w">   </span><span class="n">KMCDualStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_lhsReactives</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhsReactives</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhsNonReactives</span><span class="p">);</span>
 
 <span class="w">   </span><span class="c1">// For setting the reaction rate used in the propensity calculation.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"></span>
-<span class="w">   </span><span class="nf">rate</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
+<span class="w">   </span><span class="nf">rate</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 </div>
 </section>

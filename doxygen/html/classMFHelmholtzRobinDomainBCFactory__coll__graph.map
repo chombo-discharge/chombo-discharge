@@ -1,4 +1,5 @@
 <map id="MFHelmholtzRobinDomainBCFactory" name="MFHelmholtzRobinDomainBCFactory">
-<area shape="rect" id="node1" title="Base class for making Robin domain boundary conditions with MFHelmholtzOp." alt="" coords="5,80,268,107"/>
-<area shape="rect" id="node2" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="24,5,249,32"/>
+<area shape="rect" id="Node000001" title="Base class for making Robin domain boundary conditions with MFHelmholtzOp." alt="" coords="5,79,268,104"/>
+<area shape="rect" id="Node000002" href="$classMFHelmholtzDomainBCFactory.html" title="Base class for creating domain boundary condition objects in MFHelmholtzOp." alt="" coords="24,5,249,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,44,139,79,134,79,134,44"/>
 </map>

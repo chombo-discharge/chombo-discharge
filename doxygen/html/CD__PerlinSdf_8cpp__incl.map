@@ -1,8 +1,15 @@
 <map id="Source/ImplicitFunctions/CD_PerlinSdf.cpp" name="Source/ImplicitFunctions/CD_PerlinSdf.cpp">
-<area shape="rect" id="node1" title="Implementation of CD_PerlinSdf.H." alt="" coords="259,5,440,47"/>
-<area shape="rect" id="node2" href="$CD__PerlinSdf_8H.html" title="Declaration of signed distance Perlin noise." alt="" coords="193,95,311,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="218,169,403,196"/>
-<area shape="rect" id="node6" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="428,169,607,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,169,91,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="115,169,194,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_PerlinSdf.H." alt="" coords="259,5,440,45"/>
+<area shape="rect" id="Node000002" href="$CD__PerlinSdf_8H.html" title="Declaration of signed distance Perlin noise." alt="" coords="193,93,311,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="327,48,279,87,275,82,324,43"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="218,167,403,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="347,46,320,154,314,153,342,45"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="428,167,607,192"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="372,44,496,155,493,159,368,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,91,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="220,121,95,165,93,160,218,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="115,167,194,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="238,121,183,160,180,156,235,117"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="264,117,295,155,291,158,260,121"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="295,116,462,160,460,166,294,121"/>
 </map>

@@ -1,9 +1,18 @@
 <map id="Source/ImplicitFunctions/CD_SignedDistanceDCELImplem.H" name="Source/ImplicitFunctions/CD_SignedDistanceDCELImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_SignedDistanceDCEL.H." alt="" coords="264,5,515,47"/>
-<area shape="rect" id="node2" href="$CD__SignedDistanceDCEL_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface Tesselatio..." alt="" coords="223,95,420,121"/>
-<area shape="rect" id="node6" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="365,169,550,196"/>
-<area shape="rect" id="node7" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="575,169,753,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,169,83,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="107,169,237,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="262,169,341,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_SignedDistanceDCEL.H." alt="" coords="264,5,515,45"/>
+<area shape="rect" id="Node000002" href="$CD__SignedDistanceDCEL_8H.html" title="Declaration of an implicit&#45;function class that gets its value function from a DCEL surface Tesselatio..." alt="" coords="223,93,420,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,47,335,84,331,80,363,44"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="365,167,550,192"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="406,44,434,92,454,152,449,154,430,94,401,47"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="575,167,753,192"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="425,43,632,157,630,162,422,48"/>
+<area shape="poly" id="edge7_Node000002_Node000001" title=" " alt="" coords="336,91,370,54,374,58,340,95"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,83,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="277,121,97,167,95,162,276,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="107,167,237,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="298,121,210,163,208,158,296,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="262,167,341,192"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="321,120,311,154,306,153,315,118"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="344,116,424,158,422,163,342,121"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="377,116,596,161,595,166,376,121"/>
 </map>

@@ -1,8 +1,15 @@
 <map id="Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;" name="Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;">
-<area shape="rect" id="node1" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="749,158,980,199"/>
-<area shape="rect" id="node2" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="401,5,507,32"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title=" " alt="" coords="362,97,546,138"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,256,144,283"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="356,256,552,283"/>
-<area shape="rect" id="node6" href="$classEBAMRData.html" title=" " alt="" coords="355,307,553,333"/>
+<area shape="rect" id="Node000001" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="749,202,980,242"/>
+<area shape="rect" id="Node000002" href="$classTimeStepper.html" title="Base class for advancing equations." alt="" coords="401,5,507,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="520,7,568,5,621,8,675,18,727,38,751,54,773,74,811,119,839,164,857,201,852,203,834,167,807,122,770,78,748,59,724,43,674,23,620,13,568,10,521,12"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title=" " alt="" coords="356,187,552,212"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="566,203,749,213,749,218,565,208"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="5,236,144,261"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="153,231,168,229,355,206,356,211,168,234,154,236"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="355,236,553,261"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="158,246,354,246,354,251,158,251"/>
+<area shape="rect" id="Node000006" href="$classEBAMRData.html" title=" " alt="" coords="362,293,546,333"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="146,262,168,266,362,297,361,303,168,271,145,267"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="567,242,725,233,749,231,749,236,726,238,567,247"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="559,313,641,307,725,291,783,268,832,240,835,244,785,273,726,297,642,313,560,318"/>
 </map>

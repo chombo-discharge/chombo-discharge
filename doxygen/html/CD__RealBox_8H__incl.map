@@ -1,7 +1,11 @@
 <map id="Source/Utilities/CD_RealBox.H" name="Source/Utilities/CD_RealBox.H">
-<area shape="rect" id="node1" title="Declaration of an axis&#45;aligned box in space." alt="" coords="155,5,299,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,99,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="123,95,184,121"/>
-<area shape="rect" id="node4" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="209,95,394,121"/>
-<area shape="rect" id="node5" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="419,95,597,121"/>
+<area shape="rect" id="Node000001" title="Declaration of an axis&#45;aligned box in space." alt="" coords="155,5,299,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,99,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,48,91,90,89,85,184,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="123,93,184,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="211,47,176,85,172,81,207,44"/>
+<area shape="rect" id="Node000004" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="209,93,394,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="247,44,283,81,279,85,243,47"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="419,93,597,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="295,43,455,87,453,92,293,48"/>
 </map>

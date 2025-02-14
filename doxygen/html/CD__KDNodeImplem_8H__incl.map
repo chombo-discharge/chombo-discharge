@@ -1,12 +1,24 @@
 <map id="Source/Particle/CD_KDNodeImplem.H" name="Source/Particle/CD_KDNodeImplem.H">
-<area shape="rect" id="node1" title="Implementation of CD_KDNode.H." alt="" coords="279,5,425,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="94,95,154,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="178,95,270,121"/>
-<area shape="rect" id="node4" href="$CD__KDNode_8H.html" title="Namespace containing various particle management utilities." alt="" coords="295,95,409,121"/>
-<area shape="rect" id="node9" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="394,169,579,196"/>
-<area shape="rect" id="node10" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="604,169,783,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="205,169,283,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="307,169,370,196"/>
-<area shape="rect" id="node7" title=" " alt="" coords="5,169,99,196"/>
-<area shape="rect" id="node8" title=" " alt="" coords="123,169,181,196"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_KDNode.H." alt="" coords="279,5,425,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="94,93,154,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="298,48,168,92,166,87,297,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="178,93,270,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="322,48,256,88,253,84,320,43"/>
+<area shape="rect" id="Node000004" href="$CD__KDNode_8H.html" title="Namespace containing various particle management utilities." alt="" coords="295,93,409,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="347,46,346,79,341,79,341,45"/>
+<area shape="rect" id="Node000009" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="394,167,579,192"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="375,44,423,92,473,154,468,157,419,95,372,48"/>
+<area shape="rect" id="Node000010" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="604,167,783,192"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="395,43,656,159,654,163,393,48"/>
+<area shape="poly" id="edge10_Node000004_Node000001" title=" " alt="" coords="356,93,358,59,364,59,361,93"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="205,167,283,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="336,121,275,161,272,157,333,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="307,167,370,192"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="352,119,346,154,341,153,347,119"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,167,99,192"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="304,121,113,166,111,161,303,116"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="123,167,181,192"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="321,121,195,166,194,160,319,116"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="375,116,454,158,451,162,372,121"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="407,116,625,161,624,166,406,121"/>
 </map>

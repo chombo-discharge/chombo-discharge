@@ -1,5 +1,7 @@
 <map id="Source/AmrMesh/CD_Average.H" name="Source/AmrMesh/CD_Average.H">
-<area shape="rect" id="node1" title="Declaration of averaging methods." alt="" coords="86,5,315,32"/>
-<area shape="rect" id="node2" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,80,191,107"/>
-<area shape="rect" id="node3" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="215,80,394,107"/>
+<area shape="rect" id="Node000001" title="Declaration of averaging methods." alt="" coords="86,5,315,31"/>
+<area shape="rect" id="Node000002" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="5,79,191,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,33,128,73,125,68,183,28"/>
+<area shape="rect" id="Node000003" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="215,79,394,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,28,278,68,275,73,216,33"/>
 </map>

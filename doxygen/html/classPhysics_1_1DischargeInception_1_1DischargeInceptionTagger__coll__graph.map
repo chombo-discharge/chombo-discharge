@@ -1,6 +1,10 @@
 <map id="Physics::DischargeInception::DischargeInceptionTagger" name="Physics::DischargeInception::DischargeInceptionTagger">
-<area shape="rect" id="node1" title="Class for tagging cells in the DischargeInception module." alt="" coords="42,184,246,225"/>
-<area shape="rect" id="node2" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,95,96,121"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="96,5,235,32"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="273,95,469,121"/>
+<area shape="rect" id="Node000001" title="Class for tagging cells in the DischargeInception module." alt="" coords="42,181,246,221"/>
+<area shape="rect" id="Node000002" href="$classCellTagger.html" title="Base class for tagging cells across an AMR hierarchy." alt="" coords="5,93,96,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,126,127,179,123,183,70,130"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="96,5,235,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,45,149,181,144,181,160,45"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="273,93,469,119"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="206,34,344,91,342,96,204,38"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="331,126,191,184,189,179,329,121"/>
 </map>

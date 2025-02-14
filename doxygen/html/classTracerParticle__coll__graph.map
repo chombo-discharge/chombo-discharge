@@ -1,4 +1,5 @@
 <map id="TracerParticle&lt; M, N &gt;" name="TracerParticle&lt; M, N &gt;">
-<area shape="rect" id="node1" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="11,80,180,107"/>
-<area shape="rect" id="node2" href="$classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,32"/>
+<area shape="rect" id="Node000001" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="11,79,180,104"/>
+<area shape="rect" id="Node000002" href="$classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,44,98,79,93,79,93,44"/>
 </map>

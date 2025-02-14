@@ -1,4 +1,5 @@
 <map id="Physics::ItoKMC::ItoKMCPhotonSpecies" name="Physics::ItoKMC::ItoKMCPhotonSpecies">
-<area shape="rect" id="node1" title="Simple RtSpecies class for usage with ItoKMCJSON." alt="" coords="5,80,232,121"/>
-<area shape="rect" id="node2" href="$classRtSpecies.html" title="Declaration of a class that defines an interface to radiative transfer solvers, i...." alt="" coords="75,5,162,32"/>
+<area shape="rect" id="Node000001" title="Simple RtSpecies class for usage with ItoKMCJSON." alt="" coords="5,79,232,119"/>
+<area shape="rect" id="Node000002" href="$classRtSpecies.html" title="Declaration of a class that defines an interface to radiative transfer solvers, i...." alt="" coords="75,5,162,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,44,121,79,116,79,116,44"/>
 </map>

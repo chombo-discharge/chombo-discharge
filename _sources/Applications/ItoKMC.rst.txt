@@ -47,6 +47,31 @@ Algorithms
 Time stepping
 -------------
 
+Spatial filtering
+_________________
+
+It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
+Filters are applied as follows:
+
+.. math::
+
+   \rho_i = \alpha\rho_i + \frac{1-\alpha}{2}\left(\rho_{i+s} + \rho_{i-s}\right).
+
+where :math:`\alpha` is a filtering factor and :math:`s` a stride.
+Users can apply this filtering by adjusting the following input options:
+
+.. code-block:: txt
+
+   ItoKMCGodunovStepper.filter_num        = 0   # Number of filterings for the space-density
+   ItoKMCGodunovStepper.filter_max_stride = 1   # Maximum stride for filter
+   ItoKMCGodunovStepper.filter_alpha      = 0.5 # Filtering factor (0.5 is a bilinear filter)		
+
+.. warning::
+
+   Spatial filtering of the space-charge density is a work-in-progress which may yield unexpected results.
+   Bugs may or may not be present. 
+   Users should exercise caution when using this feature. 
+
 Reaction network
 ----------------
 
@@ -241,15 +266,16 @@ This is defined within a JSON entry ``gas`` and a subentry ``law``.
 In the ``gas/law`` field one must specify an ``id`` field which indicates which gas law to use.
 One may also set an optional field ``plot`` to true/false if one wants to include the pressure, temperature, and density in the HDF5 output files.
 
+.. important::
+
+   Gas parameters are specified in SI units.
+
 Each user-defined gas law exists as a separate entry in the ``gas/law`` field, and the minimum requirements for these are that they contain a ``type`` specifier.
 Currently, the supported types are
 
 * ``ideal`` (for constant ideal gas)
-* ``table vs height`` for tabulated density, temperature and pressure vs some height/axis.
   
-The specification rules for these are different, and are discussed below.
 An example JSON specification is given below.
-Here, we have defined two gas law ``my_ideal_gas`` and ``tabulated_atmosphere`` and specified through the ``id`` parameter that we will use the ``my_ideal_gas`` specification.
 
 .. raw:: html
 
@@ -265,28 +291,11 @@ Here, we have defined two gas law ``my_ideal_gas`` and ``tabulated_atmosphere`` 
 	    "id" : "my_ideal_gas", // Specify which gas law we use.
 	    "plot" : true,         // Turn on/off plotting.
 	    "my_ideal_gas" : {
-		// Definition for an ideal gas law. Temperature is always in Kevlin the pressure is in bar. The neutral density
+		// Definition for an ideal gas law. Temperature is always in Kelvin the pressure is in Pascal. The neutral density
 		// is derived using an ideal gas law.
 		"type" : "ideal",
 		"temperature" : 300,
-		"pressure" : 1.0
-	    },
-	    "tabulated_atmosphere" : {
-		// Tabulated gas law. The user must supply a file containing the pressure, temperature and number density and
-		// specify the table resolution that will be used internally.
-		"type" : "table vs height",       // Specify that our gas law contains table-vs-height data
-		"file" : "ENMSIS_Atmosphere.dat", // File name
-		"axis" : "y",                     // Associated Cartesian axis for the "height"
-		"temperature column" : 0,         // Column containing the temperature
-		"pressure column" : 1,            // Column containing the pressure
-		"density column" : 2,             // Column containing the number density
-		"min height" : 0.0,               // Minium height kept when resampling the table
-		"max height" : 250000,            // Maximum height kept when resampling the table
-		"res height" : 500,               // Table resolution
-		"dump tables" : true,             // Optional argument for dumping tables to disk (useful for debugging)
-		"T scale" : 1.0,                  // Optional argument for user-specified temperature data scaling.
-		"P scale" : 1.0,                  // Optional argument for user-specified pressure data scaling.
-		"Rho scale" : 1.0                 // Optional argument for user-specified density data scaling.
+		"pressure" : 1E5
 	    }
 	 }
       }
@@ -294,7 +303,7 @@ Here, we have defined two gas law ``my_ideal_gas`` and ``tabulated_atmosphere`` 
 
 .. raw:: html
 
-   </details><br>   
+   </details><br>
 
 
 Ideal gas
@@ -328,8 +337,13 @@ When specifying that the gas law ``type`` is ``ideal``, the user must further sp
    </details><br>
 
 
-Table vs height
-_______________
+..
+   Table vs height
+   _______________
+
+   .. warning::
+
+      Not yet implemented.
 
 Background species
 ------------------

@@ -1,16 +1,29 @@
 <map id="Source/ImplicitFunctions/CD_PerlinSdf.H" name="Source/ImplicitFunctions/CD_PerlinSdf.H">
-<area shape="rect" id="node1" title="Declaration of signed distance Perlin noise." alt="" coords="603,5,785,47"/>
-<area shape="rect" id="node2" href="$CD__BoundedNoisePlane_8H.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="263,95,459,136"/>
-<area shape="rect" id="node6" href="$CD__PerlinPlaneSdf_8cpp.html" title="CD_Implementation of CD_PerlinPlaneSdf.H." alt="" coords="501,95,682,136"/>
-<area shape="rect" id="node7" href="$CD__PerlinSdf_8cpp.html" title="Implementation of CD_PerlinSdf.H." alt="" coords="706,95,887,136"/>
-<area shape="rect" id="node8" href="$CD__PerlinSphereSdf_8H.html" title="Implementation of CD_PerlinSphereSdf.H." alt="" coords="919,95,1101,136"/>
-<area shape="rect" id="node3" href="$CD__BoundedNoisePlane_8cpp.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="5,184,215,225"/>
-<area shape="rect" id="node4" href="$CD__NoisePlane_8cpp.html" title="Implementation of CD_NoisePlane.H." alt="" coords="239,184,413,225"/>
-<area shape="rect" id="node5" href="$CD__RandomInterface_8cpp.html" title="Implementation of CD_RandomInterface.H." alt="" coords="437,184,652,225"/>
-<area shape="rect" id="node9" href="$CD__GradedPerlinSphereSdf_8H.html" title="Declaration of a graded noisy sphere." alt="" coords="676,184,891,225"/>
-<area shape="rect" id="node13" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="915,184,1124,225"/>
-<area shape="rect" id="node14" href="$CD__RoughSphere_8cpp.html" title="Implementation of CD_RoughSphere.H." alt="" coords="1148,184,1336,225"/>
-<area shape="rect" id="node10" href="$CD__GradedPerlinSphereSdf_8cpp.html" title="Implementation of CD_GradedPerlinSphereSdf.H." alt="" coords="555,273,783,315"/>
-<area shape="rect" id="node11" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="807,273,989,315"/>
-<area shape="rect" id="node12" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="814,363,982,404"/>
+<area shape="rect" id="Node000001" title="Declaration of signed distance Perlin noise." alt="" coords="587,5,769,45"/>
+<area shape="rect" id="Node000002" href="$CD__BoundedNoisePlane_8H.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="247,93,443,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="592,51,418,96,417,91,591,46"/>
+<area shape="rect" id="Node000006" href="$CD__PerlinPlaneSdf_8cpp.html" title="CD_Implementation of CD_PerlinPlaneSdf.H." alt="" coords="485,93,666,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="646,56,600,95,596,91,643,52"/>
+<area shape="rect" id="Node000007" href="$CD__PerlinSdf_8cpp.html" title="Implementation of CD_PerlinSdf.H." alt="" coords="690,93,871,133"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="713,52,760,91,756,95,710,56"/>
+<area shape="rect" id="Node000008" href="$CD__PerlinSphereSdf_8H.html" title="Implementation of CD_PerlinSphereSdf.H." alt="" coords="903,93,1085,133"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="761,46,926,91,924,96,760,52"/>
+<area shape="rect" id="Node000003" href="$CD__NoisePlane_8cpp.html" title="Implementation of CD_NoisePlane.H." alt="" coords="5,181,180,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="277,140,149,184,147,179,276,135"/>
+<area shape="rect" id="Node000004" href="$CD__RandomInterface_8cpp.html" title="Implementation of CD_RandomInterface.H." alt="" coords="204,181,419,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="335,147,321,182,316,180,330,145"/>
+<area shape="rect" id="Node000005" href="$CD__BoundedNoisePlane_8cpp.html" title="Declaration of a signed distance function for a noisy plane." alt="" coords="443,181,652,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="403,136,504,179,502,184,400,141"/>
+<area shape="rect" id="Node000009" href="$CD__MechanicalShaft_8cpp.html" title="Implementation of CD_MechanicalShaft.H." alt="" coords="676,181,885,221"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="936,141,828,184,826,179,934,136"/>
+<area shape="rect" id="Node000010" href="$CD__RoughSphere_8cpp.html" title="Implementation of CD_RoughSphere.H." alt="" coords="909,181,1097,221"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="1000,147,1004,181,999,181,995,147"/>
+<area shape="rect" id="Node000011" href="$CD__GradedPerlinSphereSdf_8H.html" title="Declaration of a graded noisy sphere." alt="" coords="1121,181,1336,221"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="1059,136,1178,179,1176,184,1057,141"/>
+<area shape="rect" id="Node000012" href="$CD__GradedPerlinSphereSdf_8cpp.html" title="Implementation of CD_GradedPerlinSphereSdf.H." alt="" coords="1000,269,1228,309"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="1194,232,1141,271,1138,267,1191,228"/>
+<area shape="rect" id="Node000013" href="$CD__PerlinRodSdf_8H.html" title="Declaration of a rod with a rounded, noisy tip." alt="" coords="1253,269,1434,309"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="1267,228,1320,267,1316,271,1263,232"/>
+<area shape="rect" id="Node000014" href="$CD__RoughRod_8cpp.html" title="Implementation of CD_RoughRod.H." alt="" coords="1259,357,1427,397"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1346,323,1346,357,1341,357,1341,323"/>
 </map>

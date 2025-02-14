@@ -1,7 +1,13 @@
 <map id="RtSolver" name="RtSolver">
-<area shape="rect" id="node1" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="273,228,351,255"/>
-<area shape="rect" id="node2" href="$classEBAMRData.html" title=" " alt="" coords="5,95,189,136"/>
-<area shape="rect" id="node3" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="243,5,381,32"/>
-<area shape="rect" id="node4" href="$classEBAMRData.html" title=" " alt="" coords="214,102,410,129"/>
-<area shape="rect" id="node5" href="$classEBAMRData.html" title=" " alt="" coords="434,102,633,129"/>
+<area shape="rect" id="Node000001" title="Abstract RTE solver class for doing various kinds of radiative transfer equations...." alt="" coords="286,225,363,251"/>
+<area shape="rect" id="Node000002" href="$classEBAMRData.html" title=" " alt="" coords="5,101,201,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,132,180,165,238,199,293,223,291,228,235,204,177,169,128,136"/>
+<area shape="rect" id="Node000003" href="$classEBAMRData.html" title="Default class for holding LevelData&lt;T&gt; data across an EBAMR realm." alt="" coords="255,5,394,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="274,37,219,57,125,103,123,98,217,52,272,32"/>
+<area shape="rect" id="Node000004" href="$classEBAMRData.html" title=" " alt="" coords="225,101,424,126"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="327,44,327,101,322,101,322,44"/>
+<area shape="rect" id="Node000005" href="$classEBAMRData.html" title=" " alt="" coords="449,93,633,133"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="380,32,435,52,510,91,508,96,433,57,378,37"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="327,140,327,225,322,225,322,140"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="500,143,395,204,349,228,347,223,393,199,497,138"/>
 </map>
