@@ -867,9 +867,9 @@ FieldSolver::setPermittivities()
 
   const Real relEpsGas = m_computationalGeometry->getGasPermittivity();
 
-  DataOps::setValue(m_permittivityCell, relEpsGas);
-  DataOps::setValue(m_permittivityFace, relEpsGas);
-  DataOps::setValue(m_permittivityEB, relEpsGas);
+  DataOps::setValue(m_permittivityCell, 0.0);
+  DataOps::setValue(m_permittivityFace, 0.0);
+  DataOps::setValue(m_permittivityEB, 0.0);
 
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
@@ -934,9 +934,9 @@ FieldSolver::setPermittivities()
 
 	Box compBox = grow(cellBox,1) & domain;
 
-        this->setCellPermittivities(cellPermFAB, cellBox, ebisbox, probLo, dx);
-        this->setFacePermittivities(facePermFAB, cellBox, ebisbox, probLo, dx);
-        this->setEbPermittivities(ebPermFAB, cellBox, ebisbox, probLo, dx);
+        this->setCellPermittivities(cellPermFAB, compBox, ebisbox, probLo, dx);
+        this->setFacePermittivities(facePermFAB, compBox, ebisbox, probLo, dx);
+        this->setEbPermittivities(ebPermFAB, compBox, ebisbox, probLo, dx);
       }
     }
   }

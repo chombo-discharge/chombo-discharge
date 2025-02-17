@@ -50,7 +50,7 @@ FieldSolver::getDielectricPermittivity(const RealVect& a_pos) const
   CH_assert(dielectrics.size() > 0);
   CH_assert(relPerm > 0.0);
 
-  return a_pos[0];
+  return std::max(0.0,a_pos[0]);
 }
 
 #include <CD_NamespaceFooter.H>
