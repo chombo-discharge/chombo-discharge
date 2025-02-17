@@ -525,8 +525,6 @@ FieldSolverMultigrid::setPermittivities()
 
     m_amr->average(permFluxSol, m_realm, phase::solid, average);
   }
-
-  //  FieldSolver::setPermittivities();  
 #endif
 }
 
