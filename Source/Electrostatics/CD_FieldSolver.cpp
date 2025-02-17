@@ -905,6 +905,41 @@ FieldSolver::setPermittivities()
       }
     }
   }
+  else {
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const ProblemDomain& domain = m_amr->getDomains()[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const Real               dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
+
+      LevelData<EBCellFAB>       cellPerm;
+      LevelData<EBFluxFAB>       facePerm;
+      LevelData<BaseIVFAB<Real>> ebPerm;
+
+      MultifluidAlias::aliasMF(cellPerm, phase::gas, *m_permittivityCell[lvl]);
+      MultifluidAlias::aliasMF(facePerm, phase::gas, *m_permittivityFace[lvl]);
+      MultifluidAlias::aliasMF(ebPerm, phase::gas, *m_permittivityEB[lvl]);
+
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        EBCellFAB&       cellPermFAB = cellPerm[din];
+        EBFluxFAB&       facePermFAB = facePerm[din];
+        BaseIVFAB<Real>& ebPermFAB   = ebPerm[din];
+        const Box        cellBox     = dbl[din];
+        const EBISBox&   ebisbox     = cellPermFAB.getEBISBox();
+
+	Box compBox = grow(cellBox,1) & domain;
+
+        this->setCellPermittivities(cellPermFAB, cellBox, ebisbox, probLo, dx);
+        this->setFacePermittivities(facePermFAB, cellBox, ebisbox, probLo, dx);
+        this->setEbPermittivities(ebPermFAB, cellBox, ebisbox, probLo, dx);
+      }
+    }
+  }
 }
 
 void

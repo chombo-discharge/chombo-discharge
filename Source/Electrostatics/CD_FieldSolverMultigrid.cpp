@@ -468,6 +468,7 @@ FieldSolverMultigrid::setPermittivities()
   // Parent method fills permittivities over the "valid" region.
   FieldSolver::setPermittivities();
 
+#if 1
   // With EBHelmholtzOp/MFHelmholtzOp, the stencils can reach out of grid
   // patches and into ghost faces when computing the centroid flux on a cut-cell
   // face. To be on the safe side, we fill ghost cells for the cell-centered
@@ -524,6 +525,7 @@ FieldSolverMultigrid::setPermittivities()
 
     m_amr->average(permFluxSol, m_realm, phase::solid, average);
   }
+#endif
 }
 
 void
