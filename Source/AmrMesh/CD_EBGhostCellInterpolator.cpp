@@ -262,51 +262,72 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
           switch (a_interpType) {
           case EBGhostCellInterpolator::Type::MinMod: {
             regularSlopeKernel = [&](const IntVect& iv) -> void {
-              Real dwl = 0.0;
-              Real dwr = 0.0;
+              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
+              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
 
-              if (domainCoar.contains(iv - s)) {
-                dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              }
-              if (domainCoar.contains(iv + s)) {
-                dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-              }
+              const bool hasLo = domainCoar.contains(iv - s);
+              const bool hasHi = domainCoar.contains(iv + s);
 
-              slopes(iv, 0) = this->minmod(dwl, dwr);
+              if (hasLo && hasHi) {
+                slopes(iv, 0) = this->minmod(dwl, dwr);
+              }
+              else if (hasLo && !hasHi) {
+                slopes(iv, 0) = dwl;
+              }
+              else if (!hasLo && hasHi) {
+                slopes(iv, 0) = dwr;
+              }
+              else {
+                slopes(iv, 0) = 0.0;
+              }
             };
 
             break;
           }
           case EBGhostCellInterpolator::Type::MonotonizedCentral: {
             regularSlopeKernel = [&](const IntVect& iv) -> void {
-              Real dwl = 0.0;
-              Real dwr = 0.0;
+              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
+              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
 
-              if (domainCoar.contains(iv - s)) {
-                dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              }
-              if (domainCoar.contains(iv + s)) {
-                dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-              }
+              const bool hasLo = domainCoar.contains(iv - s);
+              const bool hasHi = domainCoar.contains(iv + s);
 
-              slopes(iv, 0) = this->monotonizedCentral(dwl, dwr);
+              if (hasLo && hasHi) {
+                slopes(iv, 0) = this->monotonizedCentral(dwl, dwr);
+              }
+              else if (hasLo && !hasHi) {
+                slopes(iv, 0) = dwl;
+              }
+              else if (!hasLo && hasHi) {
+                slopes(iv, 0) = dwr;
+              }
+              else {
+                slopes(iv, 0) = 0.0;
+              }
             };
 
             break;
           }
           case EBGhostCellInterpolator::Type::Superbee: {
             regularSlopeKernel = [&](const IntVect& iv) -> void {
-              Real dwl = 0.0;
-              Real dwr = 0.0;
+              const Real dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
+              const Real dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
 
-              if (domainCoar.contains(iv - s)) {
-                dwl = a_phiCoar(iv, a_coarVar) - a_phiCoar(iv - s, a_coarVar);
-              }
-              if (domainCoar.contains(iv + s)) {
-                dwr = a_phiCoar(iv + s, a_coarVar) - a_phiCoar(iv, a_coarVar);
-              }
+              const bool hasLo = domainCoar.contains(iv - s);
+              const bool hasHi = domainCoar.contains(iv + s);
 
-              slopes(iv, 0) = this->superbee(dwl, dwr);
+              if (hasLo && hasHi) {
+                slopes(iv, 0) = this->superbee(dwl, dwr);
+              }
+              else if (hasLo && !hasHi) {
+                slopes(iv, 0) = dwl;
+              }
+              else if (!hasLo && hasHi) {
+                slopes(iv, 0) = dwr;
+              }
+              else {
+                slopes(iv, 0) = 0.0;
+              }
             };
 
             break;
