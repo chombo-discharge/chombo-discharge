@@ -97,6 +97,46 @@ public:
   inline virtual void
   linearIn(void* a_buffer) override;
 
+  /*!
+    @brief Get one of the scalars. 
+    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+    @return m_scalars[K]
+  */
+  template <size_t K>
+  inline Real&
+  real();
+
+  /*!
+    @brief Get one of the scalars. 
+    @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+    @return m_scalars[K]
+  */
+  template <size_t K>
+  inline const Real&
+  real() const;
+
+  /*!
+    @brief Get one of the RealVects.
+    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+    @return m_vectors[K]
+  */
+  template <size_t K>
+  inline RealVect&
+  vect();
+
+  /*!
+    @brief Get one of the RealVects.
+    @details Template parameter is the position in the m_vectors array. This is templated so that compilers may throw
+    compile-time errors if trying to fetch elements out of range. 
+    @return m_vectors[K]
+  */
+  template <size_t K>
+  inline const RealVect&
+  vect() const;  
+
 protected:
   /*!
     @brief Particle "weight".
