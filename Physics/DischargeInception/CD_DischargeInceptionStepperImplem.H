@@ -2223,6 +2223,9 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     pout() << "DischargeInceptionStepper::seedIonizationParticles" << endl;
   }
 
+#warning "seedIonizationParticles -- consider compute for alpha-eta rather than just alpha"
+#warning "seedIonizationParticles -- can we add the distance from regions alpha = 0 here?"
+
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
@@ -2709,7 +2712,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
 #warning "development code on line 2964 or thereabouts"
 #warning "for large steps we should not overstep but check how far we can move while maintaining alpha > 0"
-#warning "this might require a separate interpolation _after_ stepping"
+#warning "this might require a separate interpolation _after_ stepping, to figure out the maximum step we can take before alpha becomes negative"
 #if 1
           const Real alphaScale = p.template real<2>();
 
