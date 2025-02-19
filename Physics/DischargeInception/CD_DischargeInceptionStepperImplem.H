@@ -185,7 +185,7 @@ DischargeInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_electricFieldHomo, m_realm, SpaceDim);
   m_amr->allocate(m_electricFieldInho, m_realm, SpaceDim);
 
-  m_amr->allocate(m_alphaByGradAlpha, m_realm, m_phase, 1);
+  m_amr->allocate(m_gradAlpha, m_realm, m_phase, SpaceDim);
 
   DataOps::setValue(m_potentialHomo, 0.0);
   DataOps::setValue(m_potentialInho, 0.0);
@@ -1896,7 +1896,7 @@ DischargeInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFine
   m_amr->reallocate(m_electricFieldHomo, a_lmin);
   m_amr->reallocate(m_electricFieldInho, a_lmin);
 
-  m_amr->reallocate(m_alphaByGradAlpha, m_phase, a_lmin);
+  m_amr->reallocate(m_gradAlpha, m_phase, a_lmin);
 
   const EBCoarseToFineInterp::Type interpType = EBCoarseToFineInterp::ConservativeMinMod;
 
@@ -2225,24 +2225,21 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
 #warning "seedIonizationParticles -- consider compute for alpha-eta rather than just alpha"
 #warning "seedIonizationParticles -- can we add the distance from regions alpha = 0 here?"
+#warning "seedIonizationParticles -- beware of proper centering of the electric field"
 
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
-  // Compute the electric field at the input voltage
+  // Scratch storages
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
-  this->superposition(scratch, a_voltage);
-
-  // Storage for alpha and grad(alpha) on the mesh
   EBAMRCellData alphaMesh;
-  EBAMRCellData gradAlphaMesh;
-
+  
+  m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   m_amr->allocate(alphaMesh, m_realm, m_phase, 1);
-  m_amr->allocate(gradAlphaMesh, m_realm, m_phase, SpaceDim);
+
+  this->superposition(scratch, a_voltage);  
 
   DataOps::setValue(alphaMesh, 0.0);
-  DataOps::setValue(gradAlphaMesh, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -2292,9 +2289,9 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
               p.position() = x;
 
               particles.add(p);
+
+	      alphaReg(iv,0) = curAlpha - curEta;
             }
-	    
-	    alphaReg(iv, 0) = curAlpha;
           }
         };
 
@@ -2302,7 +2299,6 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
           const IntVect iv = vof.gridIndex();
 
           if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
-
             const RealVect x  = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
             const Real     E  = EE.vectorLength();
@@ -2316,9 +2312,14 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
               p.position() = x;
 
               particles.add(p);
-            }
 
-	    alpha(vof, 0) = curAlpha;	    
+#warning "Trying to put particle on centroid to increase precision"
+	      if(EE.dotProduct(ebisbox.normal(vof)) < 0.0) {
+		p.position() = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);		
+	      }
+
+	      alpha(vof, 0) = curAlpha-curEta;	      
+            }
           }
         };
 
@@ -2335,23 +2336,21 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
         p.weight()           = 0.0;
         p.template vect<0>() = p.position();
+        p.template vect<2>() = RealVect::Zero;
       }
     }
   }
 
-  // Compute alpha/grad(alpha) using a tolerance to avoid division by zero
-  const Real tolerance = 1E-30;
-
-  m_amr->conservativeAverage(alphaMesh, m_realm, m_phase);
+  // Compute grad(alpha)
+  m_amr->arithmeticAverage(alphaMesh, m_realm, m_phase);
   m_amr->interpGhost(alphaMesh, m_realm, m_phase);
-  m_amr->computeGradient(gradAlphaMesh, alphaMesh, m_realm, m_phase);
+  
+  m_amr->computeGradient(m_gradAlpha, alphaMesh, m_realm, m_phase);
+  
+  m_amr->arithmeticAverage(m_gradAlpha, m_realm, m_phase);
+  m_amr->interpGhost(m_gradAlpha, m_realm, m_phase);
 
-  DataOps::copy(m_alphaByGradAlpha, alphaMesh);
-  DataOps::vectorLength(alphaMesh, gradAlphaMesh);
-  DataOps::divideFallback(m_alphaByGradAlpha, alphaMesh, tolerance);
-
-  m_amr->conservativeAverage(m_alphaByGradAlpha, m_realm, m_phase);
-  m_amr->interpGhost(m_alphaByGradAlpha, m_realm, m_phase);  
+  m_amr->interpToCentroids(m_gradAlpha, m_realm, m_phase);
 }
 
 template <typename P, typename F, typename C>
@@ -2437,28 +2436,29 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
   }
   }
 
-#warning "Copying alphabygradalpha to inception volume, which needs to be reversed"  
-#if 1
-  DataOps::copy(m_inceptionVoltagePlus, m_alphaByGradAlpha);
-#endif
+#warning "putting grad(phi) in inceptionVoltagePlus"
+  DataOps::setValue(m_inceptionVoltagePlus, 0.0);
+  DataOps::vectorLength(m_inceptionVoltagePlus, m_gradAlpha);
+  m_amr->arithmeticAverage(m_inceptionVoltagePlus, m_realm, m_phase);
+  m_amr->interpGhost(m_inceptionVoltagePlus, m_realm, m_phase);  
 }
 
 template <typename P, typename F, typename C>
 void
-DischargeInceptionStepper<P, F, C>::interpolateAlphaByGradAlphaToParticles() noexcept
+DischargeInceptionStepper<P, F, C>::interpolateGradAlphaToParticles() noexcept
 {
-  CH_TIME("DischargeInceptionStepper::interpolateAlphaByGradAlphaToParticles");
+  CH_TIME("DischargeInceptionStepper::interpolateGradAlphaToParticles");
   if (m_verbosity > 5) {
-    pout() << "DischargeInceptionStepper::interpolateAlphaByGradAlphaToParticles" << endl;
+    pout() << "DischargeInceptionStepper::interpolateGradAlphaToParticles" << endl;
   }
 
   // Interpolate onto the particle weight structure
-  m_amr->interpolateParticles<P, &P::template real<2>>(m_tracerParticleSolver->getParticles(),
+  m_amr->interpolateParticles<P, &P::template vect<2>>(m_tracerParticleSolver->getParticles(),
                                                        m_realm,
                                                        m_phase,
-                                                       m_alphaByGradAlpha,
+                                                       m_gradAlpha,
                                                        m_tracerParticleSolver->getInterpolationType(),
-                                                       false);
+                                                       true);
 }
 
 template <typename P, typename F, typename C>
@@ -2504,10 +2504,11 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
     // for positive polarity the particles move opposite to the field.
     std::vector<Real> polarities{1.0, -1.0};
 
-    this->seedIonizationParticles(m_voltageSweeps[i]);
+
 
     for (const auto& p : polarities) {
-
+      this->seedIonizationParticles(p*m_voltageSweeps[i]);                
+    
       this->resetTracerParticles();
 
       // Switch between various integration algorithms. At the end of this
@@ -2643,18 +2644,13 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   this->superposition(scratch, a_voltage);
-  DataOps::scale(scratch, -1.0);
-  m_amr->arithmeticAverage(scratch, m_realm, m_phase);
-  m_amr->interpGhost(scratch, m_realm, m_phase);  
-  m_amr->interpToCentroids(scratch, m_realm, m_phase);
 
   m_tracerParticleSolver->setVelocity(scratch);
   m_tracerParticleSolver->interpolateVelocities();
 
-  // Interpolate alphaByGradAlpha to the particle positions
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
-    this->interpolateAlphaByGradAlphaToParticles();    
+    this->interpolateGradAlphaToParticles();
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2676,7 +2672,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
       }
       case StepSizeMethod::Alpha: {
         spaceStep = m_stepSizeFactor * dx;
-        alphaStep = m_stepSizeFactor;
+        alphaStep = 1.0;
 
         break;
       }
@@ -2712,13 +2708,46 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
 #warning "development code on line 2964 or thereabouts"
 #warning "for large steps we should not overstep but check how far we can move while maintaining alpha > 0"
-#warning "this might require a separate interpolation _after_ stepping, to figure out the maximum step we can take before alpha becomes negative"
+#warning \
+  "this might require a separate interpolation _after_ stepping, to figure out the maximum step we can take before alpha becomes negative"
 #if 1
-          const Real alphaScale = p.template real<2>();
+          const RealVect gradAlpha  = p.template vect<2>();
+          const RealVect vunit      = vel / v;
+          Real           alphaScale = 0.0;
 
-          const Real deltaX = std::abs(alphaStep * alphaScale);
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            alphaScale = std::max(alphaScale, std::abs(gradAlpha[dir]));
+          }
+          alphaScale = std::abs(alphaEff) / (1.E-10 + std::abs(alphaScale));
+
+          const Real maxDx   = 10 * dx;
+          const Real minDx   = dx;
+          const Real alphaDx = std::abs(1.0 / alphaEff);
+          const Real derivDx = alphaScale * m_stepSizeFactor;
+
+          Real deltaX = derivDx;
+          deltaX      = std::min(maxDx, deltaX); // Never exceed maxDx
+          deltaX      = std::max(minDx, deltaX); // Never go below minDx
+
+          // // Permit larger dX if alpha changes slowly on the grid
+          // if (alphaEff * dx < 1.0 && alphaEff > 0.0) {
+
+          //   Real oldDx = deltaX;
+
+          //   //            deltaX = std::max(alphaStep / std::abs(alphaEff), std::abs(alphaFactor));
+
+          //   Real newDx = deltaX;
+
+          //   if (newDx != oldDx) {
+          //     std::cout << newDx / oldDx << std::endl;
+          //   }
+          //            std::cout << alpha << "\t" << dx << std::abs(alphaFactor) << "\t" << newDx / oldDx << std::endl;
+          //        }
+
+          //	  std::cout << deltaX << "\t" << alphaEff << "\t" << gradAlpha.vectorLength() << std::endl;
 #else
-          const Real deltaX = std::min(spaceStep, alphaStep / alphaEff);
+          Real deltaX = std::min(spaceStep, 1.0 / alphaEff);
+          deltaX      = std::max(deltaX, 0.5 * dx);
 #endif
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
@@ -2865,6 +2894,8 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
 
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
 
+    this->interpolateGradAlphaToParticles();
+
     // Euler stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real dx = m_amr->getDx()[lvl];
@@ -2919,7 +2950,28 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
 
-          const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
+#if 1
+          const RealVect gradAlpha = p.template vect<2>();
+          const RealVect vunit     = vel / v;
+
+          Real alphaScale = 0.0;
+
+          for (int dir = 0; dir < SpaceDim; dir++) {
+            alphaScale = std::max(alphaScale, std::abs(gradAlpha[dir]));
+          }
+          alphaScale = std::abs(alphaEff) / (1.E-10 + std::abs(alphaScale));
+
+          const Real maxDx   = 10 * dx;
+          const Real minDx   = dx;
+          const Real alphaDx = std::abs(1.0 / alphaEff);
+          const Real derivDx = alphaScale * m_stepSizeFactor;
+
+          Real deltaX = derivDx;
+          deltaX      = std::min(maxDx, deltaX); // Never exceed maxDx
+          deltaX      = std::max(minDx, deltaX); // Never go below minDx
+#else
+          const Real deltaX = std::min(spaceStep, alphaStep / alphaEff);
+#endif
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
           const Real     delta  = (newPos - x).vectorLength();
@@ -5294,7 +5346,7 @@ DischargeInceptionStepper<P, F, C>::superposition(EBAMRCellData&       a_sumFiel
 
   m_amr->arithmeticAverage(a_sumField, m_realm, m_phase);
   m_amr->interpGhostPwl(a_sumField, m_realm, m_phase);
-  m_amr->interpToCentroids(a_sumField, m_realm, m_phase);
+  //  m_amr->interpToCentroids(a_sumField, m_realm, m_phase);
 }
 
 template <typename P, typename F, typename C>

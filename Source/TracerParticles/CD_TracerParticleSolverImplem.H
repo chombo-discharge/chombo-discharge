@@ -384,7 +384,7 @@ TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexce
     pout() << m_name + "::interpolateWeight(EBAMRCellData)" << endl;
   }
 
-  m_amr->interpolateParticles<P, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, false);
+  m_amr->interpolateParticles<P, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, true);
 }
 
 template <typename P>
@@ -396,7 +396,7 @@ TracerParticleSolver<P>::interpolateVelocities()
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
-  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, m_velocityField, m_interpolation, false);
+  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, m_velocityField, m_interpolation, true);
 }
 
 template <typename P>
