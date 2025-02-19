@@ -183,6 +183,8 @@ DischargeInceptionStepper<P, F, C>::allocate()
   m_amr->allocate(m_electricFieldHomo, m_realm, SpaceDim);
   m_amr->allocate(m_electricFieldInho, m_realm, SpaceDim);
 
+  m_amr->allocate(m_alphaByGradAlpha, m_realm, m_phase, 1);
+
   DataOps::setValue(m_potentialHomo, 0.0);
   DataOps::setValue(m_potentialInho, 0.0);
 
@@ -1892,6 +1894,8 @@ DischargeInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFine
   m_amr->reallocate(m_electricFieldHomo, a_lmin);
   m_amr->reallocate(m_electricFieldInho, a_lmin);
 
+  m_amr->reallocate(m_alphaByGradAlpha, m_phase, a_lmin);
+
   const EBCoarseToFineInterp::Type interpType = EBCoarseToFineInterp::ConservativeMinMod;
 
   m_amr->interpToNewGrids(m_potentialHomo, m_scratchHomo, a_lmin, a_oldFinestLevel, a_newFinestLevel, interpType);
@@ -2225,6 +2229,16 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   this->superposition(scratch, a_voltage);
 
+  // Storage for alpha and grad(alpha) on the mesh
+  EBAMRCellData alphaMesh;
+  EBAMRCellData gradAlphaMesh;
+
+  m_amr->allocate(alphaMesh, m_realm, m_phase, 1);
+  m_amr->allocate(gradAlphaMesh, m_realm, m_phase, SpaceDim);
+
+  DataOps::setValue(alphaMesh, 0.0);
+  DataOps::setValue(gradAlphaMesh, 0.0);
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit   = dbl.dataIterator();
@@ -2251,6 +2265,9 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
       const EBCellFAB& electricField    = (*scratch[lvl])[din];
       const FArrayBox& electricFieldReg = electricField.getFArrayBox();
 
+      EBCellFAB& alpha    = (*alphaMesh[lvl])[din];
+      FArrayBox& alphaReg = alpha.getFArrayBox();
+
       if (!ebisbox.isAllCovered()) {
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -2260,17 +2277,19 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
             const RealVect EE = RealVect(
               D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
 
-            const Real E     = EE.vectorLength();
-            const Real alpha = m_alpha(E, x);
-            const Real eta   = m_eta(E, x);
+            const Real E        = EE.vectorLength();
+            const Real curAlpha = m_alpha(E, x);
+            const Real curEta   = m_eta(E, x);
 
-            if (alpha > eta) {
+            if (curAlpha > curEta) {
               P p;
 
               p.position() = x;
 
               particles.add(p);
             }
+
+            alphaReg(iv, 0) = curAlpha;
           }
         };
 
@@ -2283,16 +2302,18 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
             const RealVect EE = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
             const Real     E  = EE.vectorLength();
 
-            const Real alpha = m_alpha(E, x);
-            const Real eta   = m_eta(E, x);
+            const Real curAlpha = m_alpha(E, x);
+            const Real curEta   = m_eta(E, x);
 
-            if (alpha > eta) {
+            if (curAlpha > curEta) {
               P p;
 
               p.position() = x;
 
               particles.add(p);
             }
+
+            alpha(vof, 0) = curAlpha;
           }
         };
 
@@ -2312,6 +2333,17 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
       }
     }
   }
+
+  // Compute alpha/grad(alpha) using a tolerance to avoid division by zero
+  const Real tolerance = 1E-30;
+
+  m_amr->conservativeAverage(alphaMesh, m_realm, m_phase);
+  m_amr->interpGhost(alphaMesh, m_realm, m_phase);
+  m_amr->computeGradient(gradAlphaMesh, alphaMesh, m_realm, m_phase);
+
+  DataOps::copy(m_alphaByGradAlpha, alphaMesh);
+  DataOps::vectorLength(alphaMesh, gradAlphaMesh);
+  DataOps::divideFallback(m_alphaByGradAlpha, alphaMesh, tolerance);
 }
 
 template <typename P, typename F, typename C>
@@ -2396,6 +2428,24 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     break;
   }
   }
+}
+
+template <typename P, typename F, typename C>
+void
+DischargeInceptionStepper<P, F, C>::interpolateAlphaByGradAlphaToParticles() noexcept
+{
+  CH_TIME("DischargeInceptionStepper::interpolateAlphaByGradAlphaToParticles");
+  if (m_verbosity > 5) {
+    pout() << "DischargeInceptionStepper::interpolateAlphaByGradAlphaToParticles" << endl;
+  }
+
+  // Interpolate onto the particle weight structure
+  m_amr->interpolateParticles<P, &P::*real<>(0)>(m_tracerParticleSolver->getParticles(),
+                                                 m_realm,
+                                                 m_phase,
+                                                 m_alphaByGradAlpha,
+                                                 m_tracerParticleSolver->getInterpolationType,
+                                                 false);
 }
 
 template <typename P, typename F, typename C>

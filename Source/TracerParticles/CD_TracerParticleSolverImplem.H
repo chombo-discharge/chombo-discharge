@@ -689,6 +689,39 @@ TracerParticleSolver<P>::getVelocityField() const
 }
 
 template <typename P>
+inline DepositionType
+TracerParticleSolver<P>::getDepositionType() const {
+  CH_TIME("TracerParticleSolver::getDepositionType");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getDepositionType" << endl;
+  }
+
+  return m_deposition;
+}
+
+template <typename P>
+inline CoarseFineDeposition
+TracerParticleSolver<P>::getCoarseFineDepositionType() const {
+  CH_TIME("TracerParticleSolver::getCoarseFineDepositionType");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getCoarseFineDepositionType" << endl;
+  }
+
+  return m_coarseFineDeposition;
+}
+
+template <typename P>
+inline DepositionType
+TracerParticleSolver<P>::getInterpolationType() const {
+  CH_TIME("TracerParticleSolver::getInterpolationType");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::getInterpolationType" << endl;
+  }
+
+  return m_interpolation;
+}
+
+template <typename P>
 template <typename T, const Real& (T::*particleScalarFunction)() const>
 void
 TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,

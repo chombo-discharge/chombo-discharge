@@ -85,7 +85,7 @@ namespace Physics {
                F is the field solver type. 
                C is the convection-diffusion-reaction solver type. 
     */
-    template <typename P = TracerParticle<2, 2>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
+    template <typename P = TracerParticle<3, 2>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
     class DischargeInceptionStepper : public TimeStepper
     {
     public:
@@ -593,6 +593,11 @@ namespace Physics {
       */
       EBAMRCellData m_townsendCriterionMinu;
 
+      /*!
+	@brief Calculated version of alpha/(|grad(alpha)|) on the mesh. 
+      */
+      EBAMRCellData m_alphaByGradAlpha;
+
       /*! 
 	@brief Max K value for every voltage
 	@note Stationary mode, positive polarity
@@ -921,7 +926,8 @@ namespace Physics {
       seedUniformParticles() noexcept;
 
       /*!
-	@brief Add particles to every cell where alpha - eta > 0.0
+	@brief Add particles to every cell where alpha - eta > 0.0.
+	@details This also populates the alpha/grad(alpha) container. 
 	@param[in] a_voltage Input voltage
       */
       virtual void
@@ -956,6 +962,12 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Interpolate alpha/|grad(alpha)| onto some scratch particle storage
+      */
+      virtual void
+      interpolateAlphaByGradAlphaToParticles() noexcept;
 
       /*!
 	@brief Solve for the Townsend criterion for each particle in each voltage. 
