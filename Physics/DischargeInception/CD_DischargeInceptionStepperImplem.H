@@ -31,6 +31,8 @@
 
 using namespace Physics::DischargeInception;
 
+#warning "DischargeInceptionStepper needs a more careful revision of where the electric field is centered"
+
 template <typename P, typename F, typename C>
 DischargeInceptionStepper<P, F, C>::DischargeInceptionStepper()
 {
@@ -2288,8 +2290,8 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
               particles.add(p);
             }
-
-            alphaReg(iv, 0) = curAlpha;
+	    
+	    alphaReg(iv, 0) = curAlpha;
           }
         };
 
@@ -2313,7 +2315,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
               particles.add(p);
             }
 
-            alpha(vof, 0) = curAlpha;
+	    alpha(vof, 0) = curAlpha;	    
           }
         };
 
@@ -2344,6 +2346,9 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
   DataOps::copy(m_alphaByGradAlpha, alphaMesh);
   DataOps::vectorLength(alphaMesh, gradAlphaMesh);
   DataOps::divideFallback(m_alphaByGradAlpha, alphaMesh, tolerance);
+
+  m_amr->conservativeAverage(m_alphaByGradAlpha, m_realm, m_phase);
+  m_amr->interpGhost(m_alphaByGradAlpha, m_realm, m_phase);  
 }
 
 template <typename P, typename F, typename C>
@@ -2428,6 +2433,11 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     break;
   }
   }
+
+#warning "Copying alphabygradalpha to inception volume, which needs to be reversed"  
+#if 1
+  DataOps::copy(m_inceptionVoltagePlus, m_alphaByGradAlpha);
+#endif
 }
 
 template <typename P, typename F, typename C>
@@ -2440,12 +2450,12 @@ DischargeInceptionStepper<P, F, C>::interpolateAlphaByGradAlphaToParticles() noe
   }
 
   // Interpolate onto the particle weight structure
-  m_amr->interpolateParticles<P, &P::*real<>(0)>(m_tracerParticleSolver->getParticles(),
-                                                 m_realm,
-                                                 m_phase,
-                                                 m_alphaByGradAlpha,
-                                                 m_tracerParticleSolver->getInterpolationType,
-                                                 false);
+  m_amr->interpolateParticles<P, &P::template real<2>>(m_tracerParticleSolver->getParticles(),
+                                                       m_realm,
+                                                       m_phase,
+                                                       m_alphaByGradAlpha,
+                                                       m_tracerParticleSolver->getInterpolationType(),
+                                                       false);
 }
 
 template <typename P, typename F, typename C>
@@ -2480,6 +2490,8 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
   m_amr->allocate(Kminu, m_realm, m_phase, 1);
 
   // Integrate for each voltage
+  Timer timer("discharge_inception");
+  timer.startEvent("integration");
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
     DataOps::setValue(Kplus, 0.0);
@@ -2557,6 +2569,8 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
       }
     }
   }
+  timer.stopEvent("integration");
+  timer.eventReport(pout(), false);
 }
 
 template <typename P, typename F, typename C>
@@ -2627,11 +2641,17 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   this->superposition(scratch, a_voltage);
   DataOps::scale(scratch, -1.0);
+  m_amr->arithmeticAverage(scratch, m_realm, m_phase);
+  m_amr->interpGhost(scratch, m_realm, m_phase);  
+  m_amr->interpToCentroids(scratch, m_realm, m_phase);
 
   m_tracerParticleSolver->setVelocity(scratch);
   m_tracerParticleSolver->interpolateVelocities();
 
+  // Interpolate alphaByGradAlpha to the particle positions
   while (amrParticles.getNumberOfValidParticlesGlobal() > 0) {
+
+    this->interpolateAlphaByGradAlphaToParticles();    
 
     // Euler integration.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -2687,7 +2707,16 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           const Real     eta      = m_eta(E, x);
           const Real     alphaEff = alpha - eta;
 
-          const Real     deltaX = std::min(spaceStep, alphaStep / alphaEff);
+#warning "development code on line 2964 or thereabouts"
+#warning "for large steps we should not overstep but check how far we can move while maintaining alpha > 0"
+#warning "this might require a separate interpolation _after_ stepping"
+#if 1
+          const Real alphaScale = p.template real<2>();
+
+          const Real deltaX = std::abs(alphaStep * alphaScale);
+#else
+          const Real deltaX = std::min(spaceStep, alphaStep / alphaEff);
+#endif
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
           const Real     delta  = (newPos - x).vectorLength();
@@ -2717,7 +2746,6 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
             processedParticles.transfer(lit);
           }
-
           else {
             p.position() = newPos;
             p.weight()   = p.weight() + deltaX * alphaEff;
