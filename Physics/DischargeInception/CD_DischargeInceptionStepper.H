@@ -39,16 +39,6 @@ namespace Physics {
     };
 
     /*!
-      @brief Step size selection method
-    */
-    enum class StepSizeMethod
-    {
-      Fixed,
-      Dx,
-      Alpha
-    };
-
-    /*!
       @brief Algorithm for negative ion advancement
     */
     enum class TransportAlgorithm
@@ -419,11 +409,6 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
-	@brief Step size selection method
-      */
-      StepSizeMethod m_stepSizeMethod;
-
-      /*!
 	@brief Transport algorithm for advancing negative ions in the transient mode
       */
       TransportAlgorithm m_transportAlgorithm;
@@ -742,12 +727,36 @@ namespace Physics {
 	@brief Maximum permitted time step growth 
       */
       Real m_maxDtGrowth;
+      
+      /*!
+	@brief Minimum spatial step (physical dimensions)
+      */
+      Real m_minPhysDx;            
 
       /*!
-	@brief Fixed step size (physical dimensions)
-	@brief Step size factor
+	@brief Maximum spatial step (physical dimensions)
       */
-      Real m_stepSizeFactor;
+      Real m_maxPhysDx;
+
+      /*!
+	@brief Minimum spatial step (relative to grid resolution)
+      */
+      Real m_minGridDx;            
+
+      /*!
+	@brief Maximum spatial step (relative to grid resolution)
+      */
+      Real m_maxGridDx;      
+
+      /*!
+	@brief Space step size relative to 1/alpha
+      */
+      Real m_alphaDx;
+
+      /*!
+	@brief Space step size relative to alpha/|grad(alpha)|
+      */
+      Real m_gradAlphaDx;
 
       /*!
 	@brief Inception criteria (read from input)

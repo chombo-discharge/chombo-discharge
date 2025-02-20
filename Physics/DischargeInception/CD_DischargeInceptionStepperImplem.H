@@ -1,6 +1,7 @@
-/* chombo-discharge
+/*! chombo-discharge
  * Copyright © 2022 SINTEF Energy Research.
  * Copyright © 2022 NTNU.
+ * Copyright © 2022 Fanny Skirbekk
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 
@@ -30,8 +31,6 @@
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::DischargeInception;
-
-#warning "DischargeInceptionStepper needs a more careful revision of where the electric field is centered"
 
 template <typename P, typename F, typename C>
 DischargeInceptionStepper<P, F, C>::DischargeInceptionStepper()
@@ -529,7 +528,7 @@ DischargeInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
 
   // Get the inception algorithm
   pp.get("full_integration", m_fullIntegration);
-  pp.get("inception_alg", str, 0);
+  pp.get("inception_alg", str);
   if (str == "euler") {
     m_inceptionAlgorithm = IntegrationAlgorithm::Euler;
   }
@@ -540,28 +539,12 @@ DischargeInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
     MayDay::Error("Expected 'euler' or 'trapz' for 'DischargeInceptionStepper.inception_alg'");
   }
 
-  // Get the step size selection
-  Real stepSize;
-  pp.get("inception_alg", str, 1);
-  pp.get("inception_alg", stepSize, 2);
-  if (str == "dx") {
-    m_stepSizeFactor = stepSize;
-
-    m_stepSizeMethod = StepSizeMethod::Fixed;
-  }
-  else if (str == "fixed") {
-    m_stepSizeFactor = stepSize;
-
-    m_stepSizeMethod = StepSizeMethod::Dx;
-  }
-  else if (str == "alpha") {
-    m_stepSizeFactor = stepSize;
-
-    m_stepSizeMethod = StepSizeMethod::Alpha;
-  }
-  else {
-    MayDay::Error("Expected 'fixed', 'dx', or 'alpha' for 'DischargeInceptionStepper.inception_alg'");
-  }
+  pp.get("min_phys_dx", m_minPhysDx);
+  pp.get("max_phys_dx", m_maxPhysDx);
+  pp.get("min_grid_dx", m_minGridDx);
+  pp.get("max_grid_dx", m_maxGridDx);
+  pp.get("alpha_dx", m_alphaDx);
+  pp.get("grad_alpha_dx", m_gradAlphaDx);
 }
 
 template <typename P, typename F, typename C>
@@ -2223,21 +2206,17 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     pout() << "DischargeInceptionStepper::seedIonizationParticles" << endl;
   }
 
-#warning "seedIonizationParticles -- consider compute for alpha-eta rather than just alpha"
-#warning "seedIonizationParticles -- can we add the distance from regions alpha = 0 here?"
-#warning "seedIonizationParticles -- beware of proper centering of the electric field"
-
   ParticleContainer<P>& amrParticles = m_tracerParticleSolver->getParticles();
   amrParticles.clearParticles();
 
   // Scratch storages
   EBAMRCellData scratch;
   EBAMRCellData alphaMesh;
-  
+
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   m_amr->allocate(alphaMesh, m_realm, m_phase, 1);
 
-  this->superposition(scratch, a_voltage);  
+  this->superposition(scratch, a_voltage);
 
   DataOps::setValue(alphaMesh, 0.0);
 
@@ -2290,7 +2269,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
               particles.add(p);
 
-	      alphaReg(iv,0) = curAlpha - curEta;
+              alphaReg(iv, 0) = curAlpha - curEta;
             }
           }
         };
@@ -2313,12 +2292,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
 
               particles.add(p);
 
-#warning "Trying to put particle on centroid to increase precision"
-	      if(EE.dotProduct(ebisbox.normal(vof)) < 0.0) {
-		p.position() = probLo + Location::position(Location::Cell::Boundary, vof, ebisbox, dx);		
-	      }
-
-	      alpha(vof, 0) = curAlpha-curEta;	      
+              alpha(vof, 0) = curAlpha - curEta;
             }
           }
         };
@@ -2341,15 +2315,16 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
     }
   }
 
-  // Compute grad(alpha)
+  // Update ghost cells
   m_amr->arithmeticAverage(alphaMesh, m_realm, m_phase);
   m_amr->interpGhost(alphaMesh, m_realm, m_phase);
-  
+
+  // Compute gradient
   m_amr->computeGradient(m_gradAlpha, alphaMesh, m_realm, m_phase);
-  
+
+  // Update ghost cells in the gradient
   m_amr->arithmeticAverage(m_gradAlpha, m_realm, m_phase);
   m_amr->interpGhost(m_gradAlpha, m_realm, m_phase);
-
   m_amr->interpToCentroids(m_gradAlpha, m_realm, m_phase);
 }
 
@@ -2435,12 +2410,6 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     break;
   }
   }
-
-#warning "putting grad(phi) in inceptionVoltagePlus"
-  DataOps::setValue(m_inceptionVoltagePlus, 0.0);
-  DataOps::vectorLength(m_inceptionVoltagePlus, m_gradAlpha);
-  m_amr->arithmeticAverage(m_inceptionVoltagePlus, m_realm, m_phase);
-  m_amr->interpGhost(m_inceptionVoltagePlus, m_realm, m_phase);  
 }
 
 template <typename P, typename F, typename C>
@@ -2656,33 +2625,6 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real dx = m_amr->getDx()[lvl];
 
-      Real spaceStep = std::numeric_limits<Real>::max();
-      Real alphaStep = std::numeric_limits<Real>::max();
-
-      switch (m_stepSizeMethod) {
-      case StepSizeMethod::Fixed: {
-        spaceStep = m_stepSizeFactor;
-
-        break;
-      }
-      case StepSizeMethod::Dx: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      case StepSizeMethod::Alpha: {
-        spaceStep = m_stepSizeFactor * dx;
-        alphaStep = 1.0;
-
-        break;
-      }
-      default: {
-        MayDay::Error("DischargeInceptionStepper::inceptionIntegrateEuler - logic bust");
-
-        break;
-      }
-      }
-
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
@@ -2698,57 +2640,24 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect x        = p.position();
-          const RealVect vel      = p.velocity();
-          const Real     v        = vel.vectorLength();
-          const Real     E        = v;
-          const Real     alpha    = m_alpha(E, x);
-          const Real     eta      = m_eta(E, x);
-          const Real     alphaEff = alpha - eta;
+          const RealVect x         = p.position();
+          const RealVect vel       = p.velocity();
+          const Real     v         = vel.vectorLength();
+          const Real     E         = v;
+          const Real     alpha     = m_alpha(E, x);
+          const Real     eta       = m_eta(E, x);
+          const Real     alphaEff  = alpha - eta;
+          const Real     tol       = 1E-10;
+          const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
 
-#warning "development code on line 2964 or thereabouts"
-#warning "for large steps we should not overstep but check how far we can move while maintaining alpha > 0"
-#warning \
-  "this might require a separate interpolation _after_ stepping, to figure out the maximum step we can take before alpha becomes negative"
-#if 1
-          const RealVect gradAlpha  = p.template vect<2>();
-          const RealVect vunit      = vel / v;
-          Real           alphaScale = 0.0;
+          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          Real deltaX;
+          deltaX = std::min(m_alphaDx / std::abs(alphaEff), std::abs(alphaEff / gradAlpha));
+          deltaX = std::max(deltaX, m_minGridDx * dx);
+          deltaX = std::min(deltaX, m_maxGridDx * dx);
+          deltaX = std::min(deltaX, m_maxPhysDx);
+          deltaX = std::max(deltaX, m_minPhysDx);
 
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            alphaScale = std::max(alphaScale, std::abs(gradAlpha[dir]));
-          }
-          alphaScale = std::abs(alphaEff) / (1.E-10 + std::abs(alphaScale));
-
-          const Real maxDx   = 10 * dx;
-          const Real minDx   = dx;
-          const Real alphaDx = std::abs(1.0 / alphaEff);
-          const Real derivDx = alphaScale * m_stepSizeFactor;
-
-          Real deltaX = derivDx;
-          deltaX      = std::min(maxDx, deltaX); // Never exceed maxDx
-          deltaX      = std::max(minDx, deltaX); // Never go below minDx
-
-          // // Permit larger dX if alpha changes slowly on the grid
-          // if (alphaEff * dx < 1.0 && alphaEff > 0.0) {
-
-          //   Real oldDx = deltaX;
-
-          //   //            deltaX = std::max(alphaStep / std::abs(alphaEff), std::abs(alphaFactor));
-
-          //   Real newDx = deltaX;
-
-          //   if (newDx != oldDx) {
-          //     std::cout << newDx / oldDx << std::endl;
-          //   }
-          //            std::cout << alpha << "\t" << dx << std::abs(alphaFactor) << "\t" << newDx / oldDx << std::endl;
-          //        }
-
-          //	  std::cout << deltaX << "\t" << alphaEff << "\t" << gradAlpha.vectorLength() << std::endl;
-#else
-          Real deltaX = std::min(spaceStep, 1.0 / alphaEff);
-          deltaX      = std::max(deltaX, 0.5 * dx);
-#endif
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
           const Real     delta  = (newPos - x).vectorLength();
@@ -2756,16 +2665,16 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           const bool outsideDomain = this->particleOutsideGrid(newPos, probLo, probHi);
           const bool insideEB      = this->particleInsideEB(newPos);
 
-          // If the particle struck the EB or domain we finish off the integration with a partial step
           Real s = 0.0;
 
           if (alphaEff < 0.0) {
             processedParticles.transfer(lit);
           }
           else if (insideEB) {
+            // If the particle struck the EB or domain we finish off the integration with a partial step
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
-            if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s)) {
+            if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, m_minGridDx * dx, s)) {
               p.weight() = p.weight() + s * delta * alphaEff;
             }
 
@@ -2900,33 +2809,6 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real dx = m_amr->getDx()[lvl];
 
-      Real spaceStep = std::numeric_limits<Real>::max();
-      Real alphaStep = std::numeric_limits<Real>::max();
-
-      switch (m_stepSizeMethod) {
-      case StepSizeMethod::Fixed: {
-        spaceStep = m_stepSizeFactor;
-
-        break;
-      }
-      case StepSizeMethod::Dx: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      case StepSizeMethod::Alpha: {
-        spaceStep = m_stepSizeFactor * dx;
-        alphaStep = m_stepSizeFactor;
-
-        break;
-      }
-      default: {
-        MayDay::Error("DischargeInceptionStepper::inceptionIntegrateTrapezoidal - logic bust");
-
-        break;
-      }
-      }
-
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
 
@@ -2942,36 +2824,24 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
         for (ListIterator<P> lit(solverParticles); lit.ok();) {
           P& p = lit();
 
-          const RealVect x        = p.position();
-          const RealVect vel      = p.velocity();
-          const Real     v        = vel.vectorLength();
-          const Real     E        = v;
-          const Real     alpha    = m_alpha(E, x);
-          const Real     eta      = m_eta(E, x);
-          const Real     alphaEff = alpha - eta;
+          const RealVect x         = p.position();
+          const RealVect vel       = p.velocity();
+          const Real     v         = vel.vectorLength();
+          const Real     E         = v;
+          const Real     alpha     = m_alpha(E, x);
+          const Real     eta       = m_eta(E, x);
+          const Real     alphaEff  = alpha - eta;
+          const Real     tol       = 1E-10;
+          const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
 
-#if 1
-          const RealVect gradAlpha = p.template vect<2>();
-          const RealVect vunit     = vel / v;
+          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          Real deltaX;
+          deltaX = std::min(m_alphaDx / std::abs(alphaEff), std::abs(alphaEff / gradAlpha));
+          deltaX = std::max(deltaX, m_minGridDx * dx);
+          deltaX = std::min(deltaX, m_maxGridDx * dx);
+          deltaX = std::min(deltaX, m_maxPhysDx);
+          deltaX = std::max(deltaX, m_minPhysDx);
 
-          Real alphaScale = 0.0;
-
-          for (int dir = 0; dir < SpaceDim; dir++) {
-            alphaScale = std::max(alphaScale, std::abs(gradAlpha[dir]));
-          }
-          alphaScale = std::abs(alphaEff) / (1.E-10 + std::abs(alphaScale));
-
-          const Real maxDx   = 10 * dx;
-          const Real minDx   = dx;
-          const Real alphaDx = std::abs(1.0 / alphaEff);
-          const Real derivDx = alphaScale * m_stepSizeFactor;
-
-          Real deltaX = derivDx;
-          deltaX      = std::min(maxDx, deltaX); // Never exceed maxDx
-          deltaX      = std::max(minDx, deltaX); // Never go below minDx
-#else
-          const Real deltaX = std::min(spaceStep, alphaStep / alphaEff);
-#endif
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
           const Real     delta  = (newPos - x).vectorLength();
@@ -2988,7 +2858,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           else if (insideEB) {
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
-            if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, spaceStep, s)) {
+            if (ParticleOps::ebIntersectionBisect(impFunc, x, newPos, m_minGridDx * dx, s)) {
               p.weight() = p.weight() + s * delta * alphaEff;
             }
 
@@ -3022,33 +2892,6 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
     // Second stage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real dx = m_amr->getDx()[lvl];
-
-      Real spaceStep = std::numeric_limits<Real>::max();
-      Real alphaStep = std::numeric_limits<Real>::max();
-
-      switch (m_stepSizeMethod) {
-      case StepSizeMethod::Fixed: {
-        spaceStep = m_stepSizeFactor;
-
-        break;
-      }
-      case StepSizeMethod::Dx: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      case StepSizeMethod::Alpha: {
-        spaceStep = m_stepSizeFactor * dx;
-        alphaStep = m_stepSizeFactor;
-
-        break;
-      }
-      default: {
-        MayDay::Error("DischargeInceptionStepper::inceptionIntegrateTrapezoidal - logic bust");
-
-        break;
-      }
-      }
 
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -3097,7 +2940,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           else if (insideEB) {
             const RefCountedPtr<BaseIF>& impFunc = m_amr->getBaseImplicitFunction(m_phase);
 
-            if (ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, spaceStep, s)) {
+            if (ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_minGridDx * dx, s)) {
               p.weight() = p.weight() + s * delta * alphak;
             }
 
@@ -3334,7 +3177,8 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::townsendTrackEuler" << endl;
   }
-
+#warning "commenting out townsendtrackeuler"
+#if 0
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
@@ -3464,6 +3308,7 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::townsendTrackEuler - lost/gained particles!");
   }
+#endif
 }
 
 template <typename P, typename F, typename C>
@@ -3474,6 +3319,8 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::townsendTrackTrapezoidal" << endl;
   }
+#warning "commenting out townsendtracktrapezoidal"
+#if 0
 
   // TLDR: We move the particle using Heun's method.
   //
@@ -3679,6 +3526,7 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::townsendTrackTrapezoidal - lost/gained particles!");
   }
+#endif
 }
 
 template <typename P, typename F, typename C>
