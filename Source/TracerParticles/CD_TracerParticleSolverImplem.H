@@ -690,7 +690,8 @@ TracerParticleSolver<P>::getVelocityField() const
 
 template <typename P>
 inline DepositionType
-TracerParticleSolver<P>::getDepositionType() const {
+TracerParticleSolver<P>::getDepositionType() const
+{
   CH_TIME("TracerParticleSolver::getDepositionType");
   if (m_verbosity > 5) {
     pout() << m_name + "::getDepositionType" << endl;
@@ -701,7 +702,8 @@ TracerParticleSolver<P>::getDepositionType() const {
 
 template <typename P>
 inline CoarseFineDeposition
-TracerParticleSolver<P>::getCoarseFineDepositionType() const {
+TracerParticleSolver<P>::getCoarseFineDepositionType() const
+{
   CH_TIME("TracerParticleSolver::getCoarseFineDepositionType");
   if (m_verbosity > 5) {
     pout() << m_name + "::getCoarseFineDepositionType" << endl;
@@ -712,7 +714,8 @@ TracerParticleSolver<P>::getCoarseFineDepositionType() const {
 
 template <typename P>
 inline DepositionType
-TracerParticleSolver<P>::getInterpolationType() const {
+TracerParticleSolver<P>::getInterpolationType() const
+{
   CH_TIME("TracerParticleSolver::getInterpolationType");
   if (m_verbosity > 5) {
     pout() << m_name + "::getInterpolationType" << endl;
