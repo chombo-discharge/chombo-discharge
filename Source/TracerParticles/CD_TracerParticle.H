@@ -135,7 +135,7 @@ public:
   */
   template <size_t K>
   inline const RealVect&
-  vect() const;  
+  vect() const;
 
 protected:
   /*!
