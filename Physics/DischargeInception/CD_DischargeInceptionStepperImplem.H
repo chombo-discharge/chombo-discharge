@@ -2485,8 +2485,6 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
   m_amr->allocate(Kminu, m_realm, m_phase, 1);
 
   // Integrate for each voltage
-  Timer timer("discharge_inception");
-  timer.startEvent("integration");
   for (int i = 0; i < m_voltageSweeps.size(); ++i) {
 
     DataOps::setValue(Kplus, 0.0);
@@ -2563,8 +2561,6 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
       }
     }
   }
-  timer.stopEvent("integration");
-  timer.eventReport(pout(), false);
 }
 
 template <typename P, typename F, typename C>
