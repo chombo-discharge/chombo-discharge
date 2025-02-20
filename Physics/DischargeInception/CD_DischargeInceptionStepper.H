@@ -39,16 +39,6 @@ namespace Physics {
     };
 
     /*!
-      @brief Step size selection method
-    */
-    enum class StepSizeMethod
-    {
-      Fixed,
-      Dx,
-      Alpha
-    };
-
-    /*!
       @brief Algorithm for negative ion advancement
     */
     enum class TransportAlgorithm
@@ -85,7 +75,7 @@ namespace Physics {
                F is the field solver type. 
                C is the convection-diffusion-reaction solver type. 
     */
-    template <typename P = TracerParticle<2, 2>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
+    template <typename P = TracerParticle<2, 3>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
     class DischargeInceptionStepper : public TimeStepper
     {
     public:
@@ -419,11 +409,6 @@ namespace Physics {
       IntegrationAlgorithm m_inceptionAlgorithm;
 
       /*!
-	@brief Step size selection method
-      */
-      StepSizeMethod m_stepSizeMethod;
-
-      /*!
 	@brief Transport algorithm for advancing negative ions in the transient mode
       */
       TransportAlgorithm m_transportAlgorithm;
@@ -593,6 +578,11 @@ namespace Physics {
       */
       EBAMRCellData m_townsendCriterionMinu;
 
+      /*!
+	@brief Calculated version of alpha/(|grad(alpha)|) on the mesh. 
+      */
+      EBAMRCellData m_gradAlpha;
+
       /*! 
 	@brief Max K value for every voltage
 	@note Stationary mode, positive polarity
@@ -739,10 +729,39 @@ namespace Physics {
       Real m_maxDtGrowth;
 
       /*!
-	@brief Fixed step size (physical dimensions)
-	@brief Step size factor
+	@brief Minimum spatial step (physical dimensions)
       */
-      Real m_stepSizeFactor;
+      Real m_minPhysDx;
+
+      /*!
+	@brief Maximum spatial step (physical dimensions)
+      */
+      Real m_maxPhysDx;
+
+      /*!
+	@brief Minimum spatial step (relative to grid resolution)
+      */
+      Real m_minGridDx;
+
+      /*!
+	@brief Maximum spatial step (relative to grid resolution)
+      */
+      Real m_maxGridDx;
+
+      /*!
+	@brief Space step size relative to 1/alpha
+      */
+      Real m_alphaDx;
+
+      /*!
+	@brief Space step size used for ion tracking
+      */
+      Real m_townsendGridDx;
+
+      /*!
+	@brief Space step size relative to alpha/|grad(alpha)|
+      */
+      Real m_gradAlphaDx;
 
       /*!
 	@brief Inception criteria (read from input)
@@ -921,7 +940,8 @@ namespace Physics {
       seedUniformParticles() noexcept;
 
       /*!
-	@brief Add particles to every cell where alpha - eta > 0.0
+	@brief Add particles to every cell where alpha - eta > 0.0.
+	@details This also populates the alpha/grad(alpha) container. 
 	@param[in] a_voltage Input voltage
       */
       virtual void
@@ -956,6 +976,12 @@ namespace Physics {
       */
       virtual void
       inceptionIntegrateTrapezoidal(const Real& a_voltage) noexcept;
+
+      /*!
+	@brief Interpolate alpha/|grad(alpha)| onto some scratch particle storage
+      */
+      virtual void
+      interpolateGradAlphaToParticles() noexcept;
 
       /*!
 	@brief Solve for the Townsend criterion for each particle in each voltage. 

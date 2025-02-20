@@ -154,6 +154,38 @@ TracerParticle<M, N>::linearIn(void* buf)
 }
 
 template <size_t M, size_t N>
+template <size_t K>
+inline Real&
+TracerParticle<M, N>::real()
+{
+  return GenericParticle<M, N>::template real<K>();
+}
+
+template <size_t M, size_t N>
+template <size_t K>
+inline const Real&
+TracerParticle<M, N>::real() const
+{
+  return GenericParticle<M, N>::template real<K>();
+}
+
+template <size_t M, size_t N>
+template <size_t K>
+inline RealVect&
+TracerParticle<M, N>::vect()
+{
+  return GenericParticle<M, N>::template vect<K>();
+}
+
+template <size_t M, size_t N>
+template <size_t K>
+inline const RealVect&
+TracerParticle<M, N>::vect() const
+{
+  return GenericParticle<M, N>::template vect<K>();
+}
+
+template <size_t M, size_t N>
 inline std::ostream&
 operator<<(std::ostream& ostr, const TracerParticle<M, N>& p)
 {
