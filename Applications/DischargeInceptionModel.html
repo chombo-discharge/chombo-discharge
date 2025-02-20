@@ -142,6 +142,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#k-inception">K_inception</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#eval-townsend">eval_townsend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plt-vars">plt_vars</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-size-selection">Step size selection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#for-stationary-mode">For stationary mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#for-transient-mode">For transient mode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#caveats">Caveats</a></li>
@@ -607,31 +608,10 @@ Accepted values are <code class="docutils literal notranslate"><span class="pre"
 <h3>inception_alg<a class="headerlink" href="#inception-alg" title="Permalink to this heading"></a></h3>
 <p>Controls the discharge inception algorithm (for computing the <span class="math notranslate nohighlight">\(K\)</span> integral).
 This should be specified in the form</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.inception_alg = &lt;algorithm&gt; &lt;mode&gt; &lt;value&gt;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.inception_alg = &lt;algorithm&gt;,
 </pre></div>
 </div>
-<p>These indicate the following:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;algorithm&gt;</span></code> indicates the integration algorithm.
-Currently supported is <code class="docutils literal notranslate"><span class="pre">trapz</span></code> (trapezoidal rule) and <code class="docutils literal notranslate"><span class="pre">euler</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code> indicates the integration step size selection.
-This can be the following:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">fixed</span></code> for a spatially fixed step size.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dx</span></code> for step sizes relative to the grid resolution <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code> For setting the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>, and mode is either <code class="docutils literal notranslate"><span class="pre">fixed</span></code> or <code class="docutils literal notranslate"><span class="pre">dx</span></code>.</p></li>
-</ul>
-<p>Normally, <code class="docutils literal notranslate"><span class="pre">alpha</span></code> will yield the best integration results since the step size is adaptively selected, taking large steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is small and smaller steps where <span class="math notranslate nohighlight">\(\alpha\)</span> is large.</p>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">value</span></code> indicates a step size, and has a different interpretation for the various modes.
-* If using <code class="docutils literal notranslate"><span class="pre">fixed</span></code> integration, <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the physical length of the step size.
-* If using <code class="docutils literal notranslate"><span class="pre">dx</span></code> integration,  <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the step size relative to the grid cell resolution.
-* If using <code class="docutils literal notranslate"><span class="pre">alpha</span></code> integration, <code class="docutils literal notranslate"><span class="pre">value</span></code> indicates the step size relative to the avalanche length <span class="math notranslate nohighlight">\(1/\alpha\)</span>.</p></li>
-</ul>
-<p>For example, the following will set an Euler integration with an adaptive step size:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.inception_alg = euler alpha 0.5
-</pre></div>
-</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;algorithm&gt;</span></code> is either <code class="docutils literal notranslate"><span class="pre">euler</span></code> or <code class="docutils literal notranslate"><span class="pre">trapz</span></code>.</p>
 </section>
 <section id="full-integration">
 <h3>full_integration<a class="headerlink" href="#full-integration" title="Permalink to this heading"></a></h3>
@@ -696,6 +676,36 @@ Valid options are</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DischargeInceptionStepper.plt_vars = K Uinc bg_rate emission ions
 </pre></div>
 </div>
+</section>
+<section id="step-size-selection">
+<h3>Step size selection<a class="headerlink" href="#step-size-selection" title="Permalink to this heading"></a></h3>
+<p>The permitted tracer particle step size is controlled by user-specified maximum and minimum space steps:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}&amp;\Delta_{\textrm{phys,min}}: \textrm{Minimum physical step size}  \\
+&amp;\Delta_{\textrm{phys,max}}: \textrm{Maximum physical step size}  \\
+&amp;\Delta_{\textrm{grid,min}}: \textrm{Minimum grid-cell step size}  \\
+&amp;\Delta_{\textrm{grid,max}}: \textrm{Maximum grid-cell step size}  \\
+&amp;\Delta_{\alpha}:            \textrm{Avalanche length}  \\
+&amp;\Delta_{\nabla\alpha}:      \textrm{Rate-of-change of ionization coefficient}.\end{split}\]</div>
+<p>The particle integration step size is then selected according to the following heuristic:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Delta X &amp;= \min\left(\Delta_\alpha\frac{1}{\overline{\alpha}}, \Delta_{\nabla\alpha}\frac{\overline{\alpha}}{\left|\nabla\overline{\alpha}\right|}\right) \\
+\Delta X &amp;= \min\left(\Delta X, \Delta_{\textrm{phys,max}}\right) \\
+\Delta X &amp;= \max\left(\Delta X, \Delta_{\textrm{phys,min}}\right) \\
+\Delta X &amp;= \min\left(\Delta X, \Delta_{\textrm{grid,max}}\Delta x\right) \\
+\Delta X &amp;= \max\left(\Delta X, \Delta_{\textrm{grid,min}}\Delta x\right).\end{split}\]</div>
+<p>These parameters are implemented through the following input options:</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># Particle integration controls
+DischargeInceptionStepper.min_phys_dx      = 1.E-10          ## Minimum permitted physical step size
+DischargeInceptionStepper.max_phys_dx      = 1.E99           ## Maximum permitted physical step size
+DischargeInceptionStepper.min_grid_dx      = 0.5             ## Minimum permitted grid step size
+DischargeInceptionStepper.max_grid_dx      = 5.0             ## Maximum permitted grid step size
+DischargeInceptionStepper.alpha_dx         = 5.0             ## Step size relative to avalanche length
+DischargeInceptionStepper.grad_alpha_dx    = 0.1             ## Maximum step size relative to alpha/grad(alpha)
+DischargeInceptionStepper.townsend_grid_dx = 2.0             ## Space step to use for Townsend tracking
+</pre></div>
+</div>
+<p>Note that the input variable <code class="docutils literal notranslate"><span class="pre">townsend_grid_dx</span></code> determines the spatial step (relative to the grid resolution <span class="math notranslate nohighlight">\(\Delta x\)</span>) when tracking ions for the Townsend region reconstruction.</p>
 </section>
 <section id="for-stationary-mode">
 <h3>For stationary mode<a class="headerlink" href="#for-stationary-mode" title="Permalink to this heading"></a></h3>

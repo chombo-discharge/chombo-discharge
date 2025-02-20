@@ -325,6 +325,10 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a24ab9671e93c0d2048388d8f5b72363d" id="r_a24ab9671e93c0d2048388d8f5b72363d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a24ab9671e93c0d2048388d8f5b72363d">inceptionIntegrateTrapezoidal</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_voltage</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a24ab9671e93c0d2048388d8f5b72363d"><td class="mdescLeft">&#160;</td><td class="mdescRight">K integral: Add integration parts after particles move.  <br /></td></tr>
 <tr class="separator:a24ab9671e93c0d2048388d8f5b72363d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac56081af79981acfdcf5bddc9f2eeecf" id="r_ac56081af79981acfdcf5bddc9f2eeecf"><td class="memItemLeft" align="right" valign="top"><a id="ac56081af79981acfdcf5bddc9f2eeecf" name="ac56081af79981acfdcf5bddc9f2eeecf"></a>
+<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>interpolateGradAlphaToParticles</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ac56081af79981acfdcf5bddc9f2eeecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interpolate alpha/|grad(alpha)| onto some scratch particle storage. <br /></td></tr>
+<tr class="separator:ac56081af79981acfdcf5bddc9f2eeecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d9bbb04160c98ebc7d13786cd8cac6a" id="r_a2d9bbb04160c98ebc7d13786cd8cac6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a2d9bbb04160c98ebc7d13786cd8cac6a">computeTownsendCriterionStationary</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a2d9bbb04160c98ebc7d13786cd8cac6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve for the Townsend criterion for each particle in each voltage.  <br /></td></tr>
 <tr class="separator:a2d9bbb04160c98ebc7d13786cd8cac6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -466,10 +470,6 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="CD__DischargeInceptionStepper_8H.html#a3d65e2d4ec9b648915d5308d6919738b">IntegrationAlgorithm</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_inceptionAlgorithm</b></td></tr>
 <tr class="memdesc:a91bad2c6ab2ec0bad1f16826941565d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integration algorithm for K-value. <br /></td></tr>
 <tr class="separator:a91bad2c6ab2ec0bad1f16826941565d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4012c6a417211cae69607a2421cd3926" id="r_a4012c6a417211cae69607a2421cd3926"><td class="memItemLeft" align="right" valign="top"><a id="a4012c6a417211cae69607a2421cd3926" name="a4012c6a417211cae69607a2421cd3926"></a>
-<a class="el" href="CD__DischargeInceptionStepper_8H.html#a544c22712d0cb31efd25735e83c8e26d">StepSizeMethod</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_stepSizeMethod</b></td></tr>
-<tr class="memdesc:a4012c6a417211cae69607a2421cd3926"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step size selection method. <br /></td></tr>
-<tr class="separator:a4012c6a417211cae69607a2421cd3926"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a606d87dc13df0582604b36fceef73dcd" id="r_a606d87dc13df0582604b36fceef73dcd"><td class="memItemLeft" align="right" valign="top"><a id="a606d87dc13df0582604b36fceef73dcd" name="a606d87dc13df0582604b36fceef73dcd"></a>
 <a class="el" href="CD__DischargeInceptionStepper_8H.html#a318232b1ed77f6e6c51b498f1643c96e">TransportAlgorithm</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_transportAlgorithm</b></td></tr>
 <tr class="memdesc:a606d87dc13df0582604b36fceef73dcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transport algorithm for advancing negative ions in the transient mode. <br /></td></tr>
@@ -579,6 +579,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_townsendCriterionMinu</b></td></tr>
 <tr class="memdesc:a4c2d7a906073335373fc49aad036318c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Townsend criterion for starting positive ions. <br /></td></tr>
 <tr class="separator:a4c2d7a906073335373fc49aad036318c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26490d34b435797293a780a2625ef428" id="r_a26490d34b435797293a780a2625ef428"><td class="memItemLeft" align="right" valign="top"><a id="a26490d34b435797293a780a2625ef428" name="a26490d34b435797293a780a2625ef428"></a>
+<a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_gradAlpha</b></td></tr>
+<tr class="memdesc:a26490d34b435797293a780a2625ef428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculated version of alpha/(|grad(alpha)|) on the mesh. <br /></td></tr>
+<tr class="separator:a26490d34b435797293a780a2625ef428"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa972f35b1c16353b6d38ebabb0677a05" id="r_aa972f35b1c16353b6d38ebabb0677a05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#aa972f35b1c16353b6d38ebabb0677a05">m_maxKPlus</a></td></tr>
 <tr class="memdesc:aa972f35b1c16353b6d38ebabb0677a05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every voltage.  <br /></td></tr>
 <tr class="separator:aa972f35b1c16353b6d38ebabb0677a05"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -660,9 +664,34 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxDtGrowth</b></td></tr>
 <tr class="memdesc:afe77ff2d570076d9e2d9fbcfee73f4c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum permitted time step growth. <br /></td></tr>
 <tr class="separator:afe77ff2d570076d9e2d9fbcfee73f4c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a431dbb99edeab2ea49e0833a769fbac2" id="r_a431dbb99edeab2ea49e0833a769fbac2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a431dbb99edeab2ea49e0833a769fbac2">m_stepSizeFactor</a></td></tr>
-<tr class="memdesc:a431dbb99edeab2ea49e0833a769fbac2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fixed step size (physical dimensions)  <br /></td></tr>
-<tr class="separator:a431dbb99edeab2ea49e0833a769fbac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a636ed20aa1479881a2ef2d2492f6657f" id="r_a636ed20aa1479881a2ef2d2492f6657f"><td class="memItemLeft" align="right" valign="top"><a id="a636ed20aa1479881a2ef2d2492f6657f" name="a636ed20aa1479881a2ef2d2492f6657f"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_minPhysDx</b></td></tr>
+<tr class="memdesc:a636ed20aa1479881a2ef2d2492f6657f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum spatial step (physical dimensions) <br /></td></tr>
+<tr class="separator:a636ed20aa1479881a2ef2d2492f6657f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cd7840f5e72b2e047f3f6b9d28f8738" id="r_a4cd7840f5e72b2e047f3f6b9d28f8738"><td class="memItemLeft" align="right" valign="top"><a id="a4cd7840f5e72b2e047f3f6b9d28f8738" name="a4cd7840f5e72b2e047f3f6b9d28f8738"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxPhysDx</b></td></tr>
+<tr class="memdesc:a4cd7840f5e72b2e047f3f6b9d28f8738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum spatial step (physical dimensions) <br /></td></tr>
+<tr class="separator:a4cd7840f5e72b2e047f3f6b9d28f8738"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76cb2e3ee3e84ab442d778e67c6dc5aa" id="r_a76cb2e3ee3e84ab442d778e67c6dc5aa"><td class="memItemLeft" align="right" valign="top"><a id="a76cb2e3ee3e84ab442d778e67c6dc5aa" name="a76cb2e3ee3e84ab442d778e67c6dc5aa"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_minGridDx</b></td></tr>
+<tr class="memdesc:a76cb2e3ee3e84ab442d778e67c6dc5aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum spatial step (relative to grid resolution) <br /></td></tr>
+<tr class="separator:a76cb2e3ee3e84ab442d778e67c6dc5aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8f687f555b5085b08657c1d27be5ff6" id="r_ab8f687f555b5085b08657c1d27be5ff6"><td class="memItemLeft" align="right" valign="top"><a id="ab8f687f555b5085b08657c1d27be5ff6" name="ab8f687f555b5085b08657c1d27be5ff6"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxGridDx</b></td></tr>
+<tr class="memdesc:ab8f687f555b5085b08657c1d27be5ff6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum spatial step (relative to grid resolution) <br /></td></tr>
+<tr class="separator:ab8f687f555b5085b08657c1d27be5ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d585fe507a7e43b1dc3fa62f30c41c6" id="r_a2d585fe507a7e43b1dc3fa62f30c41c6"><td class="memItemLeft" align="right" valign="top"><a id="a2d585fe507a7e43b1dc3fa62f30c41c6" name="a2d585fe507a7e43b1dc3fa62f30c41c6"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_alphaDx</b></td></tr>
+<tr class="memdesc:a2d585fe507a7e43b1dc3fa62f30c41c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Space step size relative to 1/alpha. <br /></td></tr>
+<tr class="separator:a2d585fe507a7e43b1dc3fa62f30c41c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b3ee690758793797d965de3867557a4" id="r_a9b3ee690758793797d965de3867557a4"><td class="memItemLeft" align="right" valign="top"><a id="a9b3ee690758793797d965de3867557a4" name="a9b3ee690758793797d965de3867557a4"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_townsendGridDx</b></td></tr>
+<tr class="memdesc:a9b3ee690758793797d965de3867557a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Space step size used for ion tracking. <br /></td></tr>
+<tr class="separator:a9b3ee690758793797d965de3867557a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e09262d75c4d83168f4fefdbb6abf6c" id="r_a0e09262d75c4d83168f4fefdbb6abf6c"><td class="memItemLeft" align="right" valign="top"><a id="a0e09262d75c4d83168f4fefdbb6abf6c" name="a0e09262d75c4d83168f4fefdbb6abf6c"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_gradAlphaDx</b></td></tr>
+<tr class="memdesc:a0e09262d75c4d83168f4fefdbb6abf6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Space step size relative to alpha/|grad(alpha)|. <br /></td></tr>
+<tr class="separator:a0e09262d75c4d83168f4fefdbb6abf6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea11e52fba2576897d5cc00314a1047c" id="r_aea11e52fba2576897d5cc00314a1047c"><td class="memItemLeft" align="right" valign="top"><a id="aea11e52fba2576897d5cc00314a1047c" name="aea11e52fba2576897d5cc00314a1047c"></a>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_inceptionK</b></td></tr>
 <tr class="memdesc:aea11e52fba2576897d5cc00314a1047c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inception criteria (read from input) <br /></td></tr>
@@ -826,7 +855,7 @@ phase::which_phase&#160;</td><td class="memItemRight" valign="bottom"><b>m_phase
 <tr class="separator:a87a085f6781132b4eea40f5ab48889e5 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> = CdrCTU&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> = CdrCTU&gt;<br />
 class Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</div><p>Class for streamer inception integral evaluations. </p>
 <p>P is the tracer particle type F is the field solver type. C is the convection-diffusion-reaction solver type. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -1934,7 +1963,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -2249,7 +2278,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </div><div class="memdoc">
 
 <p>Add particles to every cell where alpha - eta &gt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">0.0</a>. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>This also populates the alpha/grad(alpha) container. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_voltage</td><td>Input voltage </td></tr>
   </table>
@@ -2480,7 +2509,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -2516,7 +2545,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -2691,7 +2720,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3291,7 +3320,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3318,7 +3347,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3345,7 +3374,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3372,7 +3401,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3399,7 +3428,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3426,7 +3455,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3453,7 +3482,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3480,7 +3509,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3507,7 +3536,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3534,7 +3563,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3561,7 +3590,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3588,7 +3617,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3615,7 +3644,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3642,7 +3671,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3669,7 +3698,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3696,7 +3725,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3723,7 +3752,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3750,7 +3779,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3777,7 +3806,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3804,7 +3833,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3831,7 +3860,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3858,7 +3887,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3885,7 +3914,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3912,7 +3941,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3939,7 +3968,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3966,7 +3995,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -3993,7 +4022,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4020,7 +4049,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4041,40 +4070,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="a431dbb99edeab2ea49e0833a769fbac2" name="a431dbb99edeab2ea49e0833a769fbac2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a431dbb99edeab2ea49e0833a769fbac2">&#9670;&#160;</a></span>m_stepSizeFactor</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_stepSizeFactor</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Fixed step size (physical dimensions) </p>
-<p>Step size factor </p>
-
-</div>
-</div>
 <a id="a85689fc76d2b4f776231c3915cab25d9" name="a85689fc76d2b4f776231c3915cab25d9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a85689fc76d2b4f776231c3915cab25d9">&#9670;&#160;</a></span>m_streamerInceptionVoltageMinu</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4101,7 +4103,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4128,7 +4130,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4155,7 +4157,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4182,7 +4184,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -4209,7 +4211,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 2&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">

@@ -575,32 +575,9 @@ This should be specified in the form
 
 .. code-block:: text
 
-   DischargeInceptionStepper.inception_alg = <algorithm> <mode> <value>
+   DischargeInceptionStepper.inception_alg = <algorithm>,
 
-These indicate the following:
-
-* ``<algorithm>`` indicates the integration algorithm.
-  Currently supported is ``trapz`` (trapezoidal rule) and ``euler``.
-
-* ``mode`` indicates the integration step size selection.
-  This can be the following:
-  
-  * ``fixed`` for a spatially fixed step size.
-  * ``dx`` for step sizes relative to the grid resolution :math:`\Delta x`.
-  * ``alpha`` For setting the step size relative to the avalanche length :math:`1/\alpha`, and mode is either ``fixed`` or ``dx``.
-
-  Normally, ``alpha`` will yield the best integration results since the step size is adaptively selected, taking large steps where :math:`\alpha` is small and smaller steps where :math:`\alpha` is large.
-
-* ``value`` indicates a step size, and has a different interpretation for the various modes.
-  * If using ``fixed`` integration, ``value`` indicates the physical length of the step size.
-  * If using ``dx`` integration,  ``value`` indicates the step size relative to the grid cell resolution.
-  * If using ``alpha`` integration, ``value`` indicates the step size relative to the avalanche length :math:`1/\alpha`.
-
-For example, the following will set an Euler integration with an adaptive step size:
-
-.. code-block:: text
-
-   DischargeInceptionStepper.inception_alg = euler alpha 0.5
+where ``<algorithm>`` is either ``euler`` or ``trapz``. 
 
    
 full_integration
@@ -679,6 +656,46 @@ For example:
 .. code-block:: text
 
    DischargeInceptionStepper.plt_vars = K Uinc bg_rate emission ions
+
+Step size selection
+___________________
+
+The permitted tracer particle step size is controlled by user-specified maximum and minimum space steps:
+
+.. math::
+
+   &\Delta_{\textrm{phys,min}}: \textrm{Minimum physical step size}  \\
+   &\Delta_{\textrm{phys,max}}: \textrm{Maximum physical step size}  \\
+   &\Delta_{\textrm{grid,min}}: \textrm{Minimum grid-cell step size}  \\
+   &\Delta_{\textrm{grid,max}}: \textrm{Maximum grid-cell step size}  \\
+   &\Delta_{\alpha}:            \textrm{Avalanche length}  \\
+   &\Delta_{\nabla\alpha}:      \textrm{Rate-of-change of ionization coefficient}.
+
+The particle integration step size is then selected according to the following heuristic:
+
+.. math::
+
+   \Delta X &= \min\left(\Delta_\alpha\frac{1}{\overline{\alpha}}, \Delta_{\nabla\alpha}\frac{\overline{\alpha}}{\left|\nabla\overline{\alpha}\right|}\right) \\
+   \Delta X &= \min\left(\Delta X, \Delta_{\textrm{phys,max}}\right) \\
+   \Delta X &= \max\left(\Delta X, \Delta_{\textrm{phys,min}}\right) \\
+   \Delta X &= \min\left(\Delta X, \Delta_{\textrm{grid,max}}\Delta x\right) \\
+   \Delta X &= \max\left(\Delta X, \Delta_{\textrm{grid,min}}\Delta x\right).
+
+These parameters are implemented through the following input options:
+
+.. code-block:: txt
+
+   # Particle integration controls
+   DischargeInceptionStepper.min_phys_dx      = 1.E-10		## Minimum permitted physical step size
+   DischargeInceptionStepper.max_phys_dx      = 1.E99		## Maximum permitted physical step size
+   DischargeInceptionStepper.min_grid_dx      = 0.5		## Minimum permitted grid step size
+   DischargeInceptionStepper.max_grid_dx      = 5.0		## Maximum permitted grid step size
+   DischargeInceptionStepper.alpha_dx         = 5.0		## Step size relative to avalanche length
+   DischargeInceptionStepper.grad_alpha_dx    = 0.1		## Maximum step size relative to alpha/grad(alpha)
+   DischargeInceptionStepper.townsend_grid_dx = 2.0		## Space step to use for Townsend tracking		
+
+Note that the input variable ``townsend_grid_dx`` determines the spatial step (relative to the grid resolution :math:`\Delta x`) when tracking ions for the Townsend region reconstruction.
+
 
 For stationary mode
 ____________________
