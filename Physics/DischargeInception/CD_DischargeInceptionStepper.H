@@ -727,11 +727,11 @@ namespace Physics {
 	@brief Maximum permitted time step growth 
       */
       Real m_maxDtGrowth;
-      
+
       /*!
 	@brief Minimum spatial step (physical dimensions)
       */
-      Real m_minPhysDx;            
+      Real m_minPhysDx;
 
       /*!
 	@brief Maximum spatial step (physical dimensions)
@@ -741,17 +741,22 @@ namespace Physics {
       /*!
 	@brief Minimum spatial step (relative to grid resolution)
       */
-      Real m_minGridDx;            
+      Real m_minGridDx;
 
       /*!
 	@brief Maximum spatial step (relative to grid resolution)
       */
-      Real m_maxGridDx;      
+      Real m_maxGridDx;
 
       /*!
 	@brief Space step size relative to 1/alpha
       */
       Real m_alphaDx;
+
+      /*!
+	@brief Space step size used for ion tracking
+      */
+      Real m_townsendGridDx;
 
       /*!
 	@brief Space step size relative to alpha/|grad(alpha)|

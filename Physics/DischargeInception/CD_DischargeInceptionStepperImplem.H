@@ -545,6 +545,29 @@ DischargeInceptionStepper<P, F, C>::parseInceptionAlgorithm() noexcept
   pp.get("max_grid_dx", m_maxGridDx);
   pp.get("alpha_dx", m_alphaDx);
   pp.get("grad_alpha_dx", m_gradAlphaDx);
+  pp.get("townsend_grid_dx", m_townsendGridDx);
+
+  if (m_minPhysDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.min_phys_dx must be > 0.0");
+  }
+  if (m_maxPhysDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.max_phys_dx must be > 0.0");
+  }
+  if (m_minGridDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.min_grid_dx must be > 0.0");
+  }
+  if (m_maxGridDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.max_grid_dx must be > 0.0");
+  }
+  if (m_alphaDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.alpha_dx must be > 0.0");
+  }
+  if (m_gradAlphaDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.grad_alpha_dx must be > 0.0");
+  }
+  if (m_townsendGridDx <= 0.0) {
+    MayDay::Abort("DischargeInceptionStepper.townsend_grid_dx must be > 0.0");
+  }
 }
 
 template <typename P, typename F, typename C>
@@ -2473,11 +2496,9 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
     // for positive polarity the particles move opposite to the field.
     std::vector<Real> polarities{1.0, -1.0};
 
-
-
     for (const auto& p : polarities) {
-      this->seedIonizationParticles(p*m_voltageSweeps[i]);                
-    
+      this->seedIonizationParticles(p * m_voltageSweeps[i]);
+
       this->resetTracerParticles();
 
       // Switch between various integration algorithms. At the end of this
@@ -2652,7 +2673,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
           // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
           Real deltaX;
-          deltaX = std::min(m_alphaDx / std::abs(alphaEff), std::abs(alphaEff / gradAlpha));
+          deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
           deltaX = std::min(deltaX, m_maxGridDx * dx);
           deltaX = std::min(deltaX, m_maxPhysDx);
@@ -2836,7 +2857,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
 
           // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
           Real deltaX;
-          deltaX = std::min(m_alphaDx / std::abs(alphaEff), std::abs(alphaEff / gradAlpha));
+          deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
           deltaX = std::min(deltaX, m_maxGridDx * dx);
           deltaX = std::min(deltaX, m_maxPhysDx);
@@ -3177,8 +3198,6 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::townsendTrackEuler" << endl;
   }
-#warning "commenting out townsendtrackeuler"
-#if 0
   const RealVect probLo = m_amr->getProbLo();
   const RealVect probHi = m_amr->getProbHi();
 
@@ -3212,32 +3231,6 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real dx = m_amr->getDx()[lvl];
 
-      // Set the spatial step.
-      Real spaceStep = std::numeric_limits<Real>::max();
-
-      switch (m_stepSizeMethod) {
-      case StepSizeMethod::Fixed: {
-        spaceStep = m_stepSizeFactor;
-
-        break;
-      }
-      case StepSizeMethod::Dx: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      case StepSizeMethod::Alpha: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      default: {
-        MayDay::Error("DischargeInceptionStepper::townsendTrackEuler - logic bust");
-
-        break;
-      }
-      }
-
       // Integrate particles until they leave alpha > 0 or strike a cathode surface.
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -3258,7 +3251,7 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
           const RealVect vel    = p.velocity();
           const Real     v      = vel.vectorLength();
           const Real     E      = v;
-          const Real     deltaX = spaceStep;
+          const Real     deltaX = m_townsendGridDx * dx;
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + dt * vel;
 
@@ -3308,7 +3301,6 @@ DischargeInceptionStepper<P, F, C>::townsendTrackEuler(const Real& a_voltage) no
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::townsendTrackEuler - lost/gained particles!");
   }
-#endif
 }
 
 template <typename P, typename F, typename C>
@@ -3319,8 +3311,6 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::townsendTrackTrapezoidal" << endl;
   }
-#warning "commenting out townsendtracktrapezoidal"
-#if 0
 
   // TLDR: We move the particle using Heun's method.
   //
@@ -3361,32 +3351,6 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const Real dx = m_amr->getDx()[lvl];
 
-      Real spaceStep = std::numeric_limits<Real>::max();
-      Real alphaStep = std::numeric_limits<Real>::max();
-
-      switch (m_stepSizeMethod) {
-      case StepSizeMethod::Fixed: {
-        spaceStep = m_stepSizeFactor;
-
-        break;
-      }
-      case StepSizeMethod::Dx: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      case StepSizeMethod::Alpha: {
-        spaceStep = m_stepSizeFactor * dx;
-
-        break;
-      }
-      default: {
-        MayDay::Error("DischargeInceptionStepper::townsendTrackTrapezoidal - logic bust");
-
-        break;
-      }
-      }
-
       // First stage
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -3412,7 +3376,7 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
           const Real     alphaEff = alpha - eta;
 
           // Compute a time step that we will use for the integration.
-          const Real     deltaX = spaceStep;
+          const Real     deltaX = m_townsendGridDx * dx;
           const Real     dt     = deltaX / v;
           const RealVect newPos = p.position() + vel * dt;
 
@@ -3526,7 +3490,6 @@ DischargeInceptionStepper<P, F, C>::townsendTrackTrapezoidal(const Real& a_volta
   if (particlesBefore != particlesAfter) {
     MayDay::Warning("DischargeInceptionStepper::townsendTrackTrapezoidal - lost/gained particles!");
   }
-#endif
 }
 
 template <typename P, typename F, typename C>
