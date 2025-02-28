@@ -2630,6 +2630,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   this->superposition(scratch, a_voltage);
+  DataOps::scale(scratch, -1.0);
 
   m_tracerParticleSolver->setVelocity(scratch);
   m_tracerParticleSolver->interpolateVelocities();
