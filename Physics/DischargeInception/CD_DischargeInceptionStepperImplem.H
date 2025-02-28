@@ -2630,6 +2630,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
   this->superposition(scratch, a_voltage);
+  DataOps::scale(scratch, -1.0);
 
   m_tracerParticleSolver->setVelocity(scratch);
   m_tracerParticleSolver->interpolateVelocities();
@@ -2669,7 +2670,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
 
           // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
           Real deltaX;
-          deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), std::abs(alphaEff / gradAlpha));
+          deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
           deltaX = std::min(deltaX, m_maxGridDx * dx);
           deltaX = std::min(deltaX, m_maxPhysDx);
@@ -2853,7 +2854,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
 
           // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
           Real deltaX;
-          deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), std::abs(alphaEff / gradAlpha));
+          deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
           deltaX = std::min(deltaX, m_maxGridDx * dx);
           deltaX = std::min(deltaX, m_maxPhysDx);

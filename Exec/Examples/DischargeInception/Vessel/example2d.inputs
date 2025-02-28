@@ -185,7 +185,7 @@ DischargeInceptionStepper.townsend_grid_dx = 2.0		## Space step to use for Towns
 # Static mode
 DischargeInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier
 DischargeInceptionStepper.voltage_hi       = 60E3                     # Highest voltage multiplier
-DischargeInceptionStepper.voltage_steps    = 20			                            # Number of voltage steps
+DischargeInceptionStepper.voltage_steps    = 19			                            # Number of voltage steps
 
 # Dynamic mode
 DischargeInceptionStepper.ion_transport = true                    # Turn on/off ion transport
@@ -201,8 +201,8 @@ DischargeInceptionStepper.max_dt_growth = 0.05                    # Maximum rela
 # DischargeInceptionTagger class options
 # ====================================================================================================
 DischargeInceptionTagger.verbosity   = -1    # Tagger chattiness. 
-DischargeInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
-DischargeInceptionTagger.max_voltage = 40E3 # Maximum applied voltage 
+DischargeInceptionTagger.buffer      = 4     # Grown buffer around flagged cells
+DischargeInceptionTagger.max_voltage = 60E3 # Maximum applied voltage 
 DischargeInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 DischargeInceptionTagger.plot        = false # Plot tagging field or not.
 
