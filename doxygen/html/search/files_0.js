@@ -145,7 +145,7 @@ var searchData=
   ['cd_5febhelmholtzop_2eh_142',['CD_EBHelmholtzOp.H',['../CD__EBHelmholtzOp_8H.html',1,'']]],
   ['cd_5febhelmholtzopfactory_2ecpp_143',['CD_EBHelmholtzOpFactory.cpp',['../CD__EBHelmholtzOpFactory_8cpp.html',1,'']]],
   ['cd_5febhelmholtzopfactory_2eh_144',['CD_EBHelmholtzOpFactory.H',['../CD__EBHelmholtzOpFactory_8H.html',1,'']]],
-  ['cd_5febintersection_2eh_145',['cd_ebintersection.h',['../CD__EBIntersection_8H.html',1,'(Global Namespace)'],['../CD__EbIntersection_8H.html',1,'(Global Namespace)']]],
+  ['cd_5febintersection_2eh_145',['cd_ebintersection.h',['../CD__EbIntersection_8H.html',1,'(Global Namespace)'],['../CD__EBIntersection_8H.html',1,'(Global Namespace)']]],
   ['cd_5febleastsquaresmultigridinterpolator_2ecpp_146',['CD_EBLeastSquaresMultigridInterpolator.cpp',['../CD__EBLeastSquaresMultigridInterpolator_8cpp.html',1,'']]],
   ['cd_5febleastsquaresmultigridinterpolator_2eh_147',['CD_EBLeastSquaresMultigridInterpolator.H',['../CD__EBLeastSquaresMultigridInterpolator_8H.html',1,'']]],
   ['cd_5febmgprolong_2ecpp_148',['CD_EBMGProlong.cpp',['../CD__EBMGProlong_8cpp.html',1,'']]],
