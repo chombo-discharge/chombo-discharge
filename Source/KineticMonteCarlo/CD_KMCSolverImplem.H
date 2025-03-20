@@ -511,24 +511,23 @@ KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactio
   if (numReactions > 0) {
 
     std::vector<Real> aj = this->propensities(a_state, a_reactions);
-    std::vector<Real> ak = aj;
+    
+    const std::vector<Real> ak = aj;
 
     for (int j = 0; j < numReactions; j++) {
-      aj[j] *= a_dt;
-
       for (int k = 0; k < numReactions; k++) {
         State x = a_state;
 
-        a_reactions[k]->advanceState(x, 1);
+        a_reactions[k]->advanceState(x, (T)1);
 
         const Real etajk = a_reactions[j]->propensity(x) - ak[j];
 
-        aj[j] += 0.5 * a_dt * a_dt * ak[k] * etajk;
+        aj[j] += 0.5 * a_dt * ak[k] * etajk;
       }
     }
 
     for (size_t i = 0; i < numReactions; i++) {
-      const T nr = (T)Random::getPoisson<long long>(aj[i]);
+      const T nr = (T)Random::getPoisson<long long>(aj[i]*a_dt);
 
       a_reactions[i]->advanceState(a_state, nr);
     }

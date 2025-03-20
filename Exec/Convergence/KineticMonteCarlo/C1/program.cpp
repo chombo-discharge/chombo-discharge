@@ -83,7 +83,7 @@ main(int argc, char* argv[])
   Vector<Real> algMean(numSteps.size(), 0.0);
   Vector<Real> algVar(numSteps.size(), 0.0);
 
-  for (int istep = 0; istep < numSteps.size(); istep++) {
+  for (int istep = numSteps.size() - 1; istep >= 0; istep--) {
     Vector<Real> algSoln;
 
     for (int irun = 0; irun < numRuns; irun++) {
@@ -168,10 +168,10 @@ main(int argc, char* argv[])
     algMean[istep] /= numRuns;
 #endif
 
-    // Compute the variance.
+    // Compute the variance -- i.e. the deviation from the "exact" solution.
     algVar[istep] = 0.0;
     for (int irun = 0; irun < numRuns; irun++) {
-      algVar[istep] += std::pow(algSoln[irun] - algMean[istep], 2);
+      algVar[istep] += std::pow(algSoln[irun] - algMean.back(), 2);
     }
 #if CH_MPI
     algVar[istep] = ParallelOps::sum(algVar[istep]);
@@ -185,16 +185,15 @@ main(int argc, char* argv[])
   exactMean = algMean.back();
   exactVar  = algVar.back();
 
-  // exactMean = initVal * exp((ionizationRate - attachmentRate)*stopTime);
-
   // Print the mean solution error and convergence rate. Oh, and this only makes sense for non-SSA runs
   // since the SSA algorithm does the time steps differently.
   if (procID() == 0 && alg != "ssa") {
     // clang-format off
     std::cout << std::left << std::setw(20) << "# dt"
 	      << std::left << std::setw(20) << "num steps"
-	      << std::left << std::setw(20) << "Mean error"
-	      << std::left << std::setw(20) << "Std error"
+	      << std::left << std::setw(20) << "Mean"      
+	      << std::left << std::setw(20) << "Rel. mean error"
+	      << std::left << std::setw(20) << "Rel. std error"
 	      << std::left << std::setw(20) << "Mean conv. order"
 	      << std::left << std::setw(20) << "Var conv. order"
 	      << "\n";
@@ -216,8 +215,9 @@ main(int argc, char* argv[])
         // clang-format off
 	std::cout << std::left << std::setw(20) << curDt
 		  << std::left << std::setw(20) << numSteps[istep]
-		  << std::left << std::setw(20) << meanErr
-		  << std::left << std::setw(20) << varErr
+		  << std::left << std::setw(20) << algMean[istep]
+		  << std::left << std::setw(20) << meanErr/exactMean
+		  << std::left << std::setw(20) << varErr/exactMean
 		  << std::left << std::setw(20) << meanConv
 		  << std::left << std::setw(20) << varConv
 		  << "\n";
@@ -226,7 +226,8 @@ main(int argc, char* argv[])
       else {
         // clang-format off
 	std::cout << std::left << std::setw(20) << curDt
-		  << std::left << std::setw(20) << numSteps[istep]	  
+		  << std::left << std::setw(20) << numSteps[istep]
+		  << std::left << std::setw(20) << algMean[istep]	  
 		  << std::left << std::setw(20) << meanErr
 		  << std::left << std::setw(20) << varErr
 		  << std::left << std::setw(20) << "*"

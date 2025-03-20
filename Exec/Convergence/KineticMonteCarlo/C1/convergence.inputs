@@ -2,16 +2,16 @@
 Random.seed=0
 
 # Basic settings
-stop_time = 10.0
-nsteps = 80 160 320 640 1280 2560
+stop_time = 20.0
+nsteps = 40 80 160 320 640 1280 2560 5120
 nruns = 2000
 ionization_rate = 2.0
 attachment_rate = 1.0
-initial_particles = 2000000000
+initial_particles = 20000000
 
 # Algorithm to be used. Valid selections are:
 # 'ssa', 'tau_plain', 'tau_midpoint', 'tau_prc', 'hybrid_plain', 'hybrid_midpoint', 'hybrid_prc'
-algorithm = tau_prc
+algorithm = tau_midpoint
 
 # Settings for hybrid SSA/tau algoriuhm (i.e., the Cao algorithm)
 num_crit = 10
