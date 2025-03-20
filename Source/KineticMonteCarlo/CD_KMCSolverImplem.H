@@ -452,7 +452,9 @@ KMCSolver<R, State, T>::advanceTauMidpoint(State& a_state, const Real a_dt) cons
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
+                                           const ReactionList& a_reactions,
+                                           const Real          a_dt) const noexcept
 {
   CH_TIME("KMCSolver::advanceTauMidpoint(State&, const ReactionList&, const Real)");
 
@@ -511,7 +513,7 @@ KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactio
   if (numReactions > 0) {
 
     std::vector<Real> aj = this->propensities(a_state, a_reactions);
-    
+
     const std::vector<Real> ak = aj;
 
     for (int j = 0; j < numReactions; j++) {
@@ -527,7 +529,7 @@ KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactio
     }
 
     for (size_t i = 0; i < numReactions; i++) {
-      const T nr = (T)Random::getPoisson<long long>(aj[i]*a_dt);
+      const T nr = (T)Random::getPoisson<long long>(aj[i] * a_dt);
 
       a_reactions[i]->advanceState(a_state, nr);
     }
