@@ -270,12 +270,18 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   else if (str == "tau_midpoint") {
     m_algorithm = Algorithm::TauMidpoint;
   }
+  else if (str == "tau_prc") {
+    m_algorithm = Algorithm::TauPRC;
+  }  
   else if (str == "hybrid_plain") {
     m_algorithm = Algorithm::HybridPlain;
   }
   else if (str == "hybrid_midpoint") {
     m_algorithm = Algorithm::HybridMidpoint;
   }
+  else if (str == "hybrid_prc") {
+    m_algorithm = Algorithm::HybridPRC;
+  }  
   else {
     MayDay::Error("ItoKMCPhysics::parseAlgorithm - unknown algorithm requested");
   }
@@ -378,6 +384,11 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
     break;
   }
+  case Algorithm::TauPRC: {
+    m_kmcSolver.advanceTauPRC(m_kmcState, a_dt);
+
+    break;
+  }    
   case Algorithm::HybridPlain: {
     m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
 
@@ -388,6 +399,11 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
     break;
   }
+  case Algorithm::HybridPRC: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPRC);
+
+    break;
+  }    
   default: {
     MayDay::Error("ItoKMCPhysics::advanceKMC - logic bust");
   }

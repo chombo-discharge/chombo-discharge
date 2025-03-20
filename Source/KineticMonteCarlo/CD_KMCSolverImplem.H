@@ -425,6 +425,7 @@ KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const ReactionList& a_re
     std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
     State Xdagger = a_state;
+
     for (size_t i = 0; i < numReactions; i++) {
       // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
       //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
@@ -451,9 +452,7 @@ KMCSolver<R, State, T>::advanceTauMidpoint(State& a_state, const Real a_dt) cons
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
-                                           const ReactionList& a_reactions,
-                                           const Real          a_dt) const noexcept
+KMCSolver<R, State, T>::advanceTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
   CH_TIME("KMCSolver::advanceTauMidpoint(State&, const ReactionList&, const Real)");
 
@@ -475,6 +474,100 @@ KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
 
         // Do a tau-leaping step.
         this->stepTauMidpoint(state, a_reactions, curDt);
+
+        // If this was a valid step, accept it. Else reduce dt.
+        valid = state.isValidState();
+
+        if (valid) {
+          a_state = state;
+
+          curTime += curDt;
+        }
+        else {
+          curDt *= 0.5;
+        }
+      }
+    }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepTauPRC(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepTauPRC(State&, const Real)");
+
+  this->stepTauPRC(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepTauPRC(State&, const ReactionList&, const Real)");
+
+  const int numReactions = a_reactions.size();
+
+  if (numReactions > 0) {
+
+    std::vector<Real> aj = this->propensities(a_state, a_reactions);
+    std::vector<Real> ak = aj;
+
+    for (int j = 0; j < numReactions; j++) {
+      aj[j] *= a_dt;
+
+      for (int k = 0; k < numReactions; k++) {
+        State x = a_state;
+
+        a_reactions[k]->advanceState(x, 1);
+
+        const Real etajk = a_reactions[j]->propensity(x) - ak[j];
+
+        aj[j] += 0.5 * a_dt * a_dt * ak[k] * etajk;
+      }
+    }
+
+    for (size_t i = 0; i < numReactions; i++) {
+      const T nr = (T)Random::getPoisson<long long>(aj[i]);
+
+      a_reactions[i]->advanceState(a_state, nr);
+    }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::advanceTauPRC(State&, const Real)");
+
+  this->advanceTauPRC(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::advanceTauPRC(State&, const ReactionList&, const Real)");
+
+  if (a_reactions.size() > 0) {
+    Real curTime = 0.0;
+    Real curDt   = a_dt;
+
+    while (curTime < a_dt) {
+
+      // Try big time step first.
+      curDt = a_dt - curTime;
+
+      bool valid = false;
+
+      // Substepping so we end up with a valid state.
+      while (!valid) {
+
+        State state = a_state;
+
+        // Do a tau-leaping step.
+        this->stepTauPRC(state, a_reactions, curDt);
 
         // If this was a valid step, accept it. Else reduce dt.
         valid = state.isValidState();
@@ -627,6 +720,13 @@ KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
   case KMCLeapPropagator::TauMidpoint: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
       this->stepTauMidpoint(s, r, dt);
+    });
+
+    break;
+  }
+  case KMCLeapPropagator::TauPRC: {
+    this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
+      this->stepTauPRC(s, r, dt);
     });
 
     break;

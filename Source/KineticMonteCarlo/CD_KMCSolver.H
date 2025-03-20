@@ -23,12 +23,19 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-    @brief Supported propagators for hybrid tau leaping. 
-  */
+  @brief Supported propagators for hybrid tau leaping.
+  @details These leap propagators are as follows:
+  TauPlain = Regular tau leaping.
+  TauMidpoint = Gillespie's midpoint method
+  TauPRC = Hu and Li's Poisson random correction leap method
+  TauGRC1 = Hu and Li's Gaussian random correction leap method  
+*/
 enum class KMCLeapPropagator
 {
   TauPlain,
-  TauMidpoint
+  TauMidpoint,
+  TauPRC,
+  TauGRC1
 };
 
 /*!
@@ -299,6 +306,42 @@ public:
   */
   inline void
   advanceTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the PRC method for ALL reactions over a time step a_dt
+    @param[inout] a_state State vector to be advanced
+    @param[in]    a_dt    Time increment
+    @note Calls the other version with m_reactions
+  */
+  inline void
+  stepTauPRC(State& a_state, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
+    @param[inout] a_state        State vector to be advanced
+    @param[in]    a_reactions    List of reactions to advance with
+    @param[in]    a_dt           Time increment
+  */
+  inline void
+  stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the PRC method all reactions over a time step a_dt
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_dt        Time increment
+    @note Calls the other version with m_reactions.
+  */
+  inline void
+  advanceTauPRC(State& a_state, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_reactions List of reactions to advance with
+    @param[in]    a_dt        Time increment
+  */
+  inline void
+  advanceTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform a single SSA step.
