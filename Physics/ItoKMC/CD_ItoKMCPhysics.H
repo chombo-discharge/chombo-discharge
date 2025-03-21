@@ -387,8 +387,10 @@ namespace Physics {
         SSA,
         TauPlain,
         TauMidpoint,
+        TauPRC,
         HybridPlain,
         HybridMidpoint,
+        HybridPRC
       };
 
       /*!
