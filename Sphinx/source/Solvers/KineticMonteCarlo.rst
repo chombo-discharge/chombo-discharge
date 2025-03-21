@@ -102,7 +102,17 @@ With tau-leaping the state is advanced over a time :math:`\Delta t` as
 
    
 where :math:`\mathcal{P}` is a Poisson-distributed random variable.
-Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.    
+Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.
+
+Tau-leaping variants
+____________________
+
+The following forms of tau-leaping are also supported:
+
+#. Midpoint tau-leaping.
+#. Poisson random-corrections tau-leaping.
+
+These methods can be used either as standalone methods or together with the hybrid algorithm.
 
 .. _Chap:KMCHybridAdvance:
 

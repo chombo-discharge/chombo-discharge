@@ -85,7 +85,10 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Kinetic Monte Carlo</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#concept">Concept</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stochastic-simulation-algorithm">Stochastic simulation algorithm</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tau-leaping">Tau leaping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tau-leaping">Tau leaping</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tau-leaping-variants">Tau-leaping variants</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#hybrid-algorithm">Hybrid algorithm</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#state">State</a></li>
@@ -234,6 +237,15 @@ The state is then advanced as</p>
 \[\vec{X}\left(t+\Delta t\right) =  \vec{X}\left(t\right) + \sum_{\vec{R}} \vec{\nu}_r\mathcal{P}\left(a_r\left[\vec{X}\left(t\right)\right]\Delta t\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.</p>
+<section id="tau-leaping-variants">
+<h3>Tau-leaping variants<a class="headerlink" href="#tau-leaping-variants" title="Permalink to this heading"></a></h3>
+<p>The following forms of tau-leaping are also supported:</p>
+<ol class="arabic simple">
+<li><p>Midpoint tau-leaping.</p></li>
+<li><p>Poisson random-corrections tau-leaping.</p></li>
+</ol>
+<p>These methods can be used either as standalone methods or together with the hybrid algorithm.</p>
+</section>
 </section>
 <section id="hybrid-algorithm">
 <span id="chap-kmchybridadvance"></span><h2>Hybrid algorithm<a class="headerlink" href="#hybrid-algorithm" title="Permalink to this heading"></a></h2>
