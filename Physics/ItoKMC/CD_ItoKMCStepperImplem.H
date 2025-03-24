@@ -1346,7 +1346,7 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeCDRDensity(Real&        a_maxDensity
 
     if (Z != 0) {
       Real curMin = std::numeric_limits<Real>::max();
-      Real curMax = -std::numeric_limits<Real>::max();      
+      Real curMax = -std::numeric_limits<Real>::max();
 
       // Copy the data over to a temporary holder before dividing by the neutral density
       const Interval dstInterv = Interval(0, 0);
