@@ -613,8 +613,7 @@ ItoKMCJSON::initializePlasmaSpecies()
     m_allSpecies.emplace(speciesID);
 
     if (m_verbose) {
-      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:"
-             << "\n"
+      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:" << "\n"
              << "\tName             = " << speciesID << "\n"
              << "\tZ                = " << Z << "\n"
              << "\tMobile           = " << mobile << "\n"
@@ -2920,7 +2919,8 @@ ItoKMCJSON::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Rea
 }
 
 Real
-ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept {
+ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept
+{
   CH_TIME("ItoKMCJSON::getNeutralDensity");
   if (m_verbose) {
     pout() << m_className + "::getNeutralDensity" << endl;
