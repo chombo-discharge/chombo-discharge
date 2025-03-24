@@ -544,7 +544,10 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_particleScratchD, m_particleRealm, m_plasmaPhase, SpaceDim);
   m_amr->allocate(m_particleScratchEB, m_particleRealm, m_plasmaPhase, 1);
 
-  // Storage for conductiviies on cell, cell faces, and EB faces.
+  // Storage for neutral density
+  m_amr->allocate(m_neutralDensity, m_fluidRealm, m_plasmaPhase, 1);
+
+  // Storage for conductivities on cell, cell faces, and EB faces.
   m_amr->allocate(m_conductivityCell, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_conductivityFace, m_fluidRealm, m_plasmaPhase, 1);
   m_amr->allocate(m_conductivityEB, m_fluidRealm, m_plasmaPhase, 1);
@@ -672,6 +675,9 @@ ItoKMCStepper<I, C, R, F>::initialData() noexcept
   // Fill solvers with velocities and diffusion coefficients
   this->computeDriftVelocities();
   this->computeDiffusionCoefficients();
+
+  // Fill the internal neutral density
+  this->fillNeutralDensity();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1158,7 +1164,7 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
     pout() << m_name + "::printStepReport" << endl;
   }
 
-  const Real Emax = this->computeMaxElectricField(m_plasmaPhase);
+  const Real Emax = this->computeMaxReducedElectricField(m_plasmaPhase);
 
   const unsigned long long localParticlesBulk    = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
   const unsigned long long globalParticlesBulk   = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
@@ -1186,8 +1192,8 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   std::string maxSolver = "invalid solver";
   std::string minSolver = "invalid solver";
 
-  this->getMaxMinItoDensity(maxDensity, minDensity, maxSolver, minSolver);
-  this->getMaxMinCDRDensity(maxDensity, minDensity, maxSolver, minSolver);
+  this->getMaxMinRelativeItoDensity(maxDensity, minDensity, maxSolver, minSolver);
+  this->getMaxMinRelativeCDRDensity(maxDensity, minDensity, maxSolver, minSolver);
 
   std::string str;
   switch (m_timeCode) {
@@ -1244,8 +1250,8 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   //clang-format off
   const std::string whitespace = "                                   ";
   pout() << "                                   " + str << endl;
-  pout() << whitespace + "Emax        = " << Emax << endl
-         << whitespace + "Max density = " << maxDensity << " (" << maxSolver << ")" << endl
+  pout() << whitespace + "Emax        = " << Emax << " (Td)" << endl
+         << whitespace + "Max n/N     = " << maxDensity << " (" << maxSolver << ")" << endl
          << whitespace + "Qplus       = " << Qplus << endl
          << whitespace + "Qminu       = " << Qminu << endl
          << whitespace + "Qsurf       = " << Qsurf << endl
@@ -1270,66 +1276,96 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::getMaxMinItoDensity(Real&        a_maxDensity,
-                                               Real&        a_minDensity,
-                                               std::string& a_maxSolver,
-                                               std::string& a_minSolver) const noexcept
+ItoKMCStepper<I, C, R, F>::getMaxMinRelativeItoDensity(Real&        a_maxDensity,
+                                                       Real&        a_minDensity,
+                                                       std::string& a_maxSolver,
+                                                       std::string& a_minSolver) const noexcept
 {
   CH_TIME("ItoKMCStepper::getMaxMinDensity(Realx2, std::string2x)");
   if (m_verbosity > 5) {
     pout() << m_name + "::getMaxMinDensity(Realx2, std::string2x)" << endl;
   }
 
+  // Allocate some temporary storage.
+  EBAMRCellData tmp;
+  m_amr->allocate(tmp, m_fluidRealm, m_plasmaPhase, 1);
+
   // Go through each solver and find the max/min values.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<ItoSolver>& solver = solverIt();
+    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const int                        Z       = species->getChargeNumber();
 
-    Real curMin = std::numeric_limits<Real>::max();
-    Real curMax = -std::numeric_limits<Real>::max();
+    if (Z != 0) {
+      Real curMin = std::numeric_limits<Real>::max();
+      Real curMax = -std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(curMax, curMin, solverIt()->getPhi(), 0);
+      // Ito solvers might be defined on a separate realm, so we have to copy the data over
+      // before dividing by the neutral density
+      const Interval dstInterv = Interval(0, 0);
+      const Interval srcInterv = Interval(0, 0);
 
-    if (curMax > a_maxDensity) {
-      a_maxDensity = curMax;
-      a_maxSolver  = solver->getName();
-    }
+      m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
 
-    if (curMin < a_minDensity) {
-      a_minDensity = curMin;
-      a_minSolver  = solver->getName();
+      DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
+      DataOps::getMaxMin(curMax, curMin, tmp, 0);
+
+      if (curMax > a_maxDensity) {
+        a_maxDensity = curMax;
+        a_maxSolver  = solver->getName();
+      }
+
+      if (curMin < a_minDensity) {
+        a_minDensity = curMin;
+        a_minSolver  = solver->getName();
+      }
     }
   }
 }
 
 template <typename I, typename C, typename R, typename F>
 void
-ItoKMCStepper<I, C, R, F>::getMaxMinCDRDensity(Real&        a_maxDensity,
-                                               Real&        a_minDensity,
-                                               std::string& a_maxSolver,
-                                               std::string& a_minSolver) const noexcept
+ItoKMCStepper<I, C, R, F>::getMaxMinRelativeCDRDensity(Real&        a_maxDensity,
+                                                       Real&        a_minDensity,
+                                                       std::string& a_maxSolver,
+                                                       std::string& a_minSolver) const noexcept
 {
-  CH_TIME("ItoKMCStepper::getMaxMinCDRDensity(Realx2, std::string2x)");
+  CH_TIME("ItoKMCStepper::getMaxMinRelativeCDRDensity(Realx2, std::string2x)");
   if (m_verbosity > 5) {
-    pout() << m_name + "::getMaxMinCDRDensity(Realx2, std::string2x)" << endl;
+    pout() << m_name + "::getMaxMinRelativeCDRDensity(Realx2, std::string2x)" << endl;
   }
+
+  EBAMRCellData tmp;
+  m_amr->allocate(tmp, m_fluidRealm, m_plasmaPhase, 1);
 
   // Go through each solver and find the max/min values.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+    const int                        Z       = species->getChargeNumber();
 
-    Real curMin = std::numeric_limits<Real>::max();
-    Real curMax = -std::numeric_limits<Real>::max();
+    if (Z != 0) {
+      Real curMin = std::numeric_limits<Real>::max();
+      Real curMax = -std::numeric_limits<Real>::max();
 
-    DataOps::getMaxMin(curMax, curMin, solverIt()->getPhi(), 0);
+      // Copy the data over to a temporary holder before dividing by the neutral density
+      const Interval dstInterv = Interval(0, 0);
+      const Interval srcInterv = Interval(0, 0);
 
-    if (curMax > a_maxDensity) {
-      a_maxDensity = curMax;
-      a_maxSolver  = solver->getName();
-    }
+      m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
 
-    if (curMin < a_minDensity) {
-      a_minDensity = curMin;
-      a_minSolver  = solver->getName();
+      DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
+      DataOps::getMaxMin(curMax, curMin, tmp, 0);
+
+      if (curMax > a_maxDensity) {
+        a_maxDensity = curMax;
+        a_maxSolver  = solver->getName();
+      }
+
+      if (curMin < a_minDensity) {
+        a_minDensity = curMin;
+        a_minSolver  = solver->getName();
+      }
     }
   }
 }
@@ -1680,6 +1716,8 @@ ItoKMCStepper<I, C, R, F>::regrid(const int a_lmin, const int a_oldFinestLevel, 
 
   this->computeDriftVelocities();
   this->computeDiffusionCoefficients();
+
+  this->fillNeutralDensity();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1708,31 +1746,87 @@ ItoKMCStepper<I, C, R, F>::setVoltage(const std::function<Real(const Real a_time
 }
 
 template <typename I, typename C, typename R, typename F>
-Real
-ItoKMCStepper<I, C, R, F>::computeMaxElectricField(const phase::which_phase a_phase) const noexcept
+void
+ItoKMCStepper<I, C, R, F>::fillNeutralDensity() noexcept
 {
-  CH_TIME("ItoKMCStepper::computeMaxElectricField");
+  CH_TIME("ItoKMCStepper::fillNeutralDensity");
   if (m_verbosity > 5) {
-    pout() << m_name + "::computeMaxElectricField" << endl;
+    pout() << m_name + "::fillNeutralDensity" << endl;
+  }
+
+  DataOps::setValue(m_neutralDensity, 0.0);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_fluidRealm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
+    const Real               dx     = m_amr->getDx()[lvl];
+    const RealVect           probLo = m_amr->getProbLo();
+
+    const int nbox = dit.size();
+
+    CH_assert(!(m_neutralDensity[lvl].isNull()));
+    CH_assert(m_neutralDensity[lvl]->nComp() == 1);
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
+
+      EBCellFAB& neutralDensity    = (*m_neutralDensity[lvl])[din];
+      FArrayBox& neutralDensityReg = neutralDensity.getFArrayBox();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        const RealVect pos = probLo + (0.5 * RealVect::Unit + iv) * dx;
+
+        neutralDensityReg(iv, 0) = m_physics->getNeutralDensity(pos);
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+
+        neutralDensity(vof, 0) = m_physics->getNeutralDensity(pos);
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
+
+      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  m_amr->conservativeAverage(m_neutralDensity, m_fluidRealm, m_plasmaPhase);
+  m_amr->interpGhostPwl(m_neutralDensity, m_fluidRealm, m_plasmaPhase);
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("ItoKMCStepper::computeMaxReducedElectricField");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeMaxReducedElectricField" << endl;
   }
 
   // Get a handle to the E-field. Note that this is the cell-centered field!
   const EBAMRCellData cellCenteredE = m_amr->alias(a_phase, m_fieldSolver->getElectricField());
 
   // Interpolate to centroids
-  EBAMRCellData centroidCenteredE;
-  m_amr->allocate(centroidCenteredE, m_fluidRealm, a_phase, SpaceDim);
+  EBAMRCellData tmp;
+  m_amr->allocate(tmp, m_fluidRealm, a_phase, 1);
 
-  DataOps::copy(centroidCenteredE, cellCenteredE);
+  DataOps::vectorLength(tmp, cellCenteredE);
+  m_amr->interpToCentroids(tmp, m_fluidRealm, m_plasmaPhase);
 
-  m_amr->interpToCentroids(centroidCenteredE, m_fluidRealm, m_plasmaPhase);
+  DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
 
   Real max = 0.0;
   Real min = 0.0;
 
-  DataOps::getMaxMinNorm(max, min, centroidCenteredE);
+  DataOps::getMaxMin(max, min, tmp, 0);
 
-  return max;
+  return max * 1E21;
 }
 
 template <typename I, typename C, typename R, typename F>

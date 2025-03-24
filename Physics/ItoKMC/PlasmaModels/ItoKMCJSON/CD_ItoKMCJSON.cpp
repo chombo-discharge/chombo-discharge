@@ -613,14 +613,15 @@ ItoKMCJSON::initializePlasmaSpecies()
     m_allSpecies.emplace(speciesID);
 
     if (m_verbose) {
-      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:"
-             << "\n"
+      // clang-format off
+      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:" << "\n"
              << "\tName             = " << speciesID << "\n"
              << "\tZ                = " << Z << "\n"
              << "\tMobile           = " << mobile << "\n"
              << "\tDiffusive        = " << diffusive << "\n"
              << "\tSolver type      = " << solver << "\n"
              << "\n";
+      // clang-format on
     }
   }
 
@@ -2917,6 +2918,17 @@ ItoKMCJSON::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Rea
   }
 
   return std::numeric_limits<Real>::infinity();
+}
+
+Real
+ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getNeutralDensity");
+  if (m_verbose) {
+    pout() << m_className + "::getNeutralDensity" << endl;
+  }
+
+  return m_gasNumberDensity(a_pos);
 }
 
 Real

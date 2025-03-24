@@ -655,6 +655,11 @@ namespace Physics {
       EBAMRCellData m_physicsPlotVariables;
 
       /*!
+	@brief Storage for the neutral density.
+      */
+      EBAMRCellData m_neutralDensity;
+
+      /*!
 	@brief Cell-centered conductivity.
 	@note Defined on the fluid realm with 1 component
       */
@@ -932,30 +937,30 @@ namespace Physics {
                                      const int             a_level) const noexcept;
 
       /*!
-	@brief Get maximum density of the Ito species
+	@brief Get maximum density of the Ito species (only for charged species)
 	@param[inout] a_maxDensity Maximum mesh density
 	@param[inout] a_minDensity Minium mesh density
 	@param[inout] a_maxSolver  Solver with highest density
 	@param[inout] a_minSolver  Solver with lowest density
       */
       virtual void
-      getMaxMinItoDensity(Real&        a_maxDensity,
-                          Real&        a_minDensity,
-                          std::string& a_maxSolver,
-                          std::string& a_minSolver) const noexcept;
+      getMaxMinRelativeItoDensity(Real&        a_maxDensity,
+                                  Real&        a_minDensity,
+                                  std::string& a_maxSolver,
+                                  std::string& a_minSolver) const noexcept;
 
       /*!
-	@brief Get maximum density of the CDr species
+	@brief Get maximum density of the CDR species (only for charged species)
 	@param[inout] a_maxDensity Maximum mesh density
 	@param[inout] a_minDensity Minium mesh density
 	@param[inout] a_maxSolver  Solver with highest density
 	@param[inout] a_minSolver  Solver with lowest density
       */
       virtual void
-      getMaxMinCDRDensity(Real&        a_maxDensity,
-                          Real&        a_minDensity,
-                          std::string& a_maxSolver,
-                          std::string& a_minSolver) const noexcept;
+      getMaxMinRelativeCDRDensity(Real&        a_maxDensity,
+                                  Real&        a_minDensity,
+                                  std::string& a_maxSolver,
+                                  std::string& a_minSolver) const noexcept;
 
       /*!
 	@brief Compute some particle statistics
@@ -1016,11 +1021,18 @@ namespace Physics {
       getLoadBalanceSolvers() const noexcept;
 
       /*!
+	@brief Compute the neutral density on the mesh.
+	@details This will populate m_neutralDensity with a density given by the physics interface
+      */
+      virtual void
+      fillNeutralDensity() noexcept;
+
+      /*!
 	@brief Compute the maximum electric field (norm)
 	@param[in] a_phase Phase where we compute the field. 
       */
       virtual Real
-      computeMaxElectricField(const phase::which_phase a_phase) const noexcept;
+      computeMaxReducedElectricField(const phase::which_phase a_phase) const noexcept;
 
       /*!
 	@brief Compute the space charge. Calls the other version. 
