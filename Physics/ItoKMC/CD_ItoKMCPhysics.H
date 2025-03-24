@@ -109,6 +109,14 @@ namespace Physics {
       computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept;
 
       /*!
+	@brief Get the neutral density at a position in space
+	@param[in] a_pos Physical position
+	@return Neutral density
+      */
+      virtual Real
+      getNeutralDensity(const RealVect a_pos) const noexcept = 0;
+
+      /*!
 	@brief Compute Townsend ionization coefficient
 	@param[in] a_E Electric field magnitude
 	@param[in] a_x Physical coordinate

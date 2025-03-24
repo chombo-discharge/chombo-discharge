@@ -675,6 +675,9 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
 
   // No reason to have this lying around.
   this->m_amr->deallocate(m_scratchSemiImplicitRhoCDR);
+
+  // Fill the neutral density on the mesh
+  this->fillNeutralDensity();
 }
 
 template <typename I, typename C, typename R, typename F>
