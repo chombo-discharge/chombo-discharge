@@ -1766,6 +1766,7 @@ ItoKMCStepper<I, C, R, F>::fillNeutralDensity() noexcept
     const int nbox = dit.size();
 
     CH_assert(!(m_neutralDensity[lvl].isNull()));
+    CH_assert(m_neutralDensity[lvl]->nComp() == 1);
 
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
@@ -1775,8 +1776,6 @@ ItoKMCStepper<I, C, R, F>::fillNeutralDensity() noexcept
 
       EBCellFAB& neutralDensity    = (*m_neutralDensity[lvl])[din];
       FArrayBox& neutralDensityReg = neutralDensity.getFArrayBox();
-
-      CH_assert(neutralDensity.nComp() == 1);
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         const RealVect pos = probLo + (0.5 * RealVect::Unit + iv) * dx;
@@ -1815,7 +1814,7 @@ ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_pha
 
   // Interpolate to centroids
   EBAMRCellData tmp;
-  m_amr->allocate(tmp, m_fluidRealm, a_phase, SpaceDim);
+  m_amr->allocate(tmp, m_fluidRealm, a_phase, 1);
 
   DataOps::vectorLength(tmp, cellCenteredE);
   m_amr->interpToCentroids(tmp, m_fluidRealm, m_plasmaPhase);
@@ -1825,7 +1824,7 @@ ItoKMCStepper<I, C, R, F>::computeMaxReducedElectricField(const phase::which_pha
   Real max = 0.0;
   Real min = 0.0;
 
-  DataOps::getMaxMinNorm(max, min, tmp);
+  DataOps::getMaxMin(max, min, tmp, 0);
 
   return max * 1E21;
 }
