@@ -613,6 +613,7 @@ ItoKMCJSON::initializePlasmaSpecies()
     m_allSpecies.emplace(speciesID);
 
     if (m_verbose) {
+      // clang-format off
       pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:" << "\n"
              << "\tName             = " << speciesID << "\n"
              << "\tZ                = " << Z << "\n"
@@ -620,6 +621,7 @@ ItoKMCJSON::initializePlasmaSpecies()
              << "\tDiffusive        = " << diffusive << "\n"
              << "\tSolver type      = " << solver << "\n"
              << "\n";
+      // clang-format on
     }
   }
 

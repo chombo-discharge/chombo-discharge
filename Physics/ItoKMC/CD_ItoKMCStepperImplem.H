@@ -1292,29 +1292,33 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeItoDensity(Real&        a_maxDensity
 
   // Go through each solver and find the max/min values.
   for (auto solverIt = m_ito->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<ItoSolver>& solver = solverIt();
+    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const int                        Z       = species->getChargeNumber();
 
-    Real curMin = std::numeric_limits<Real>::max();
-    Real curMax = -std::numeric_limits<Real>::max();
+    if (Z != 0) {
+      Real curMin = std::numeric_limits<Real>::max();
+      Real curMax = -std::numeric_limits<Real>::max();
 
-    // Ito solvers might be defined on a separate realm, so we have to copy the data over
-    // before dividing by the neutral density
-    const Interval dstInterv = Interval(0, 0);
-    const Interval srcInterv = Interval(0, 0);
+      // Ito solvers might be defined on a separate realm, so we have to copy the data over
+      // before dividing by the neutral density
+      const Interval dstInterv = Interval(0, 0);
+      const Interval srcInterv = Interval(0, 0);
 
-    m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
+      m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
 
-    DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
-    DataOps::getMaxMin(curMax, curMin, tmp, 0);
+      DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
+      DataOps::getMaxMin(curMax, curMin, tmp, 0);
 
-    if (curMax > a_maxDensity) {
-      a_maxDensity = curMax;
-      a_maxSolver  = solver->getName();
-    }
+      if (curMax > a_maxDensity) {
+        a_maxDensity = curMax;
+        a_maxSolver  = solver->getName();
+      }
 
-    if (curMin < a_minDensity) {
-      a_minDensity = curMin;
-      a_minSolver  = solver->getName();
+      if (curMin < a_minDensity) {
+        a_minDensity = curMin;
+        a_minSolver  = solver->getName();
+      }
     }
   }
 }
@@ -1336,28 +1340,32 @@ ItoKMCStepper<I, C, R, F>::getMaxMinRelativeCDRDensity(Real&        a_maxDensity
 
   // Go through each solver and find the max/min values.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<CdrSolver>& solver = solverIt();
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solver->getSpecies();
+    const int                        Z       = species->getChargeNumber();
 
-    Real curMin = std::numeric_limits<Real>::max();
-    Real curMax = -std::numeric_limits<Real>::max();
+    if (Z != 0) {
+      Real curMin = std::numeric_limits<Real>::max();
+      Real curMax = -std::numeric_limits<Real>::max();      
 
-    // Copy the data over to a temporary holder before dividing by the neutral density
-    const Interval dstInterv = Interval(0, 0);
-    const Interval srcInterv = Interval(0, 0);
+      // Copy the data over to a temporary holder before dividing by the neutral density
+      const Interval dstInterv = Interval(0, 0);
+      const Interval srcInterv = Interval(0, 0);
 
-    m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
+      m_amr->copyData(tmp, solverIt()->getPhi(), dstInterv, srcInterv);
 
-    DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
-    DataOps::getMaxMin(curMax, curMin, tmp, 0);
+      DataOps::divideFallback(tmp, m_neutralDensity, 0.0);
+      DataOps::getMaxMin(curMax, curMin, tmp, 0);
 
-    if (curMax > a_maxDensity) {
-      a_maxDensity = curMax;
-      a_maxSolver  = solver->getName();
-    }
+      if (curMax > a_maxDensity) {
+        a_maxDensity = curMax;
+        a_maxSolver  = solver->getName();
+      }
 
-    if (curMin < a_minDensity) {
-      a_minDensity = curMin;
-      a_minSolver  = solver->getName();
+      if (curMin < a_minDensity) {
+        a_minDensity = curMin;
+        a_minSolver  = solver->getName();
+      }
     }
   }
 }
