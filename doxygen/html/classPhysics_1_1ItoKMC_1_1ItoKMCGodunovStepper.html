@@ -295,6 +295,10 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parseCheckpointParticles</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ae8c15a0cd3a7a9087a654c577ba966b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse checkpoint-restart functionality. <br /></td></tr>
 <tr class="separator:ae8c15a0cd3a7a9087a654c577ba966b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a616a7b23478e175613992653f1634536" id="r_a616a7b23478e175613992653f1634536"><td class="memItemLeft" align="right" valign="top"><a id="a616a7b23478e175613992653f1634536" name="a616a7b23478e175613992653f1634536"></a>
+<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parseSecondaryEmissionSpecification</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a616a7b23478e175613992653f1634536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse when secondary particles are emitted. <br /></td></tr>
+<tr class="separator:a616a7b23478e175613992653f1634536"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaab37e5dbc98e7f51d832df50b6606df" id="r_aaab37e5dbc98e7f51d832df50b6606df"><td class="memItemLeft" align="right" valign="top"><a id="aaab37e5dbc98e7f51d832df50b6606df" name="aaab37e5dbc98e7f51d832df50b6606df"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setOldPositions</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aaab37e5dbc98e7f51d832df50b6606df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the starting positions for the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> particles. <br /></td></tr>
@@ -681,6 +685,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_smoothConductivity</b></td></tr>
 <tr class="memdesc:aafe52e134e492a3fc04aeef7da89058b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smooth the conductivity or not. <br /></td></tr>
 <tr class="separator:aafe52e134e492a3fc04aeef7da89058b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a286f3f55cf040c01e05b2a04faf48a" id="r_a1a286f3f55cf040c01e05b2a04faf48a"><td class="memItemLeft" align="right" valign="top"><a id="a1a286f3f55cf040c01e05b2a04faf48a" name="a1a286f3f55cf040c01e05b2a04faf48a"></a>
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_emitSecondaryParticlesBeforeReactions</b></td></tr>
+<tr class="memdesc:a1a286f3f55cf040c01e05b2a04faf48a"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, particles will be emitted before the reactive step. <br /></td></tr>
+<tr class="separator:a1a286f3f55cf040c01e05b2a04faf48a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39c5f2476951b04368669f12b7ef462c" id="r_a39c5f2476951b04368669f12b7ef462c"><td class="memItemLeft" align="right" valign="top"><a id="a39c5f2476951b04368669f12b7ef462c" name="a39c5f2476951b04368669f12b7ef462c"></a>
 <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a4e603a6ec57721b9b8d9d3cc49c385dd">WhichAlgorithm</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_algorithm</b></td></tr>
 <tr class="memdesc:a39c5f2476951b04368669f12b7ef462c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Which advancement algorithm to use. <br /></td></tr>
