@@ -168,6 +168,11 @@ namespace Physics {
       bool m_smoothConductivity;
 
       /*!
+	@brief If true, particles will be emitted before the reactive step
+      */
+      bool m_emitSecondaryParticlesBeforeReactions;
+
+      /*!
 	@brief Which advancement algorithm to use.
       */
       WhichAlgorithm m_algorithm;
@@ -263,6 +268,12 @@ namespace Physics {
       */
       virtual void
       parseCheckpointParticles() noexcept;
+
+      /*!
+	@brief Parse when secondary particles are emitted
+      */
+      virtual void
+      parseSecondaryEmissionSpecification() noexcept;
 
       /*!
 	@brief Set the starting positions for the ItoSolver particles
