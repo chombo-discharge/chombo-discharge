@@ -138,6 +138,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseOptions() noexcept
   this->parseAlgorithm();
   this->parseFiltering();
   this->parseCheckpointParticles();
+  this->parseSecondaryEmissionSpecification();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -154,6 +155,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseRuntimeOptions() noexcept
   this->parseAlgorithm();
   this->parseFiltering();
   this->parseCheckpointParticles();
+  this->parseSecondaryEmissionSpecification();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -218,6 +220,37 @@ ItoKMCGodunovStepper<I, C, R, F>::parseCheckpointParticles() noexcept
   ParmParse pp(this->m_name.c_str());
 
   pp.query("checkpoint_particles", m_writeCheckpointParticles);
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::parseSecondaryEmissionSpecification() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::parseSecondaryEmissionSpecifiation");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::parseSecondaryEmissionSpecification" << endl;
+  }
+
+  ParmParse pp(this->m_name.c_str());
+
+  std::string str;
+
+  pp.query("secondary_emission", str);
+
+  if (str == "before_reactions") {
+    m_emitSecondaryParticlesBeforeReactions = true;
+  }
+  else if (str == "after_reactions") {
+    m_emitSecondaryParticlesBeforeReactions = false;
+  }
+  else {
+    std::string err;
+
+    err = "ItoKMCGodunovStepper::parseSecondaryEmissionSpecification - expected 'before_reactions' or 'after_reactions'";
+    err += "but got" + str;
+
+    MayDay::Abort(err.c_str());
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -390,6 +423,16 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     m_timer.stopEvent("Gradient calculation");
   }
 
+  // Resolve secondary emission. We have filled the relevant particles in the transport step -- this can be done
+  // either before or after the reactions.
+  if (m_emitSecondaryParticlesBeforeReactions) {
+    this->barrier();
+    m_timer.startEvent("EB particle injection");
+    this->fillSecondaryEmissionEB(a_dt);
+    this->resolveSecondaryEmissionEB(a_dt);
+    m_timer.stopEvent("EB particle injection");
+  }
+
   // Sort the particles and photons per cell so we can call reaction algorithms
   this->barrier();
   m_timer.startEvent("Sort by cell");
@@ -412,13 +455,15 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   m_timer.stopEvent("Sort by patch");
 
-  // Resolve secondary emission. We have filled the relevant particles in the transport step. This is done
-  // AFTER the reaction step to improve stability behavior in cathode sheaths.
-  this->barrier();
-  m_timer.startEvent("EB particle injection");
-  this->fillSecondaryEmissionEB(a_dt);
-  this->resolveSecondaryEmissionEB(a_dt);
-  m_timer.stopEvent("EB particle injection");
+  // Resolve secondary emission. We have filled the relevant particles in the transport step -- this can be done
+  // either before or after the reactions.
+  if (!m_emitSecondaryParticlesBeforeReactions) {
+    this->barrier();
+    m_timer.startEvent("EB particle injection");
+    this->fillSecondaryEmissionEB(a_dt);
+    this->resolveSecondaryEmissionEB(a_dt);
+    m_timer.stopEvent("EB particle injection");
+  }
 
   // Remove particles that are inside the EB -- this is not a part of the algorithm, just a safety measure to make sure
   // we don't do things with particles that lie inside the EB.

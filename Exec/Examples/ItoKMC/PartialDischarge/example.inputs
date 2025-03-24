@@ -223,6 +223,7 @@ Aerosol.sphere1.center    = 0.0 0.0 0.0    # Sphere position
 # ====================================================================================================
 ItoKMCGodunovStepper.checkpoint_particles                  = true           # If true, regrid on restart is supported (otherwise it's not)
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
+ItoKMCGodunovStepper.secondary_emission                    = after_reactions # When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
 ItoKMCGodunovStepper.profile                               = true          # Turn on/off run-time profiling
