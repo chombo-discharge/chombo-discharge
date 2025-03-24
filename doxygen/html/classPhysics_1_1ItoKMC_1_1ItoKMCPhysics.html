@@ -141,6 +141,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1e2dcd8a6ff5383a612681c90f649dd3" id="r_a1e2dcd8a6ff5383a612681c90f649dd3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a1e2dcd8a6ff5383a612681c90f649dd3">computeDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#a9d925e020399fbcb9b67cc8a8c751694">FPR</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_numParticles</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a1e2dcd8a6ff5383a612681c90f649dd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a time step to use.  <br /></td></tr>
 <tr class="separator:a1e2dcd8a6ff5383a612681c90f649dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf86eba4533f555e8286b4016329ccf4" id="r_adf86eba4533f555e8286b4016329ccf4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#adf86eba4533f555e8286b4016329ccf4">getNeutralDensity</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
+<tr class="memdesc:adf86eba4533f555e8286b4016329ccf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the neutral density at a position in space.  <br /></td></tr>
+<tr class="separator:adf86eba4533f555e8286b4016329ccf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6098547f6792d1b247ca84bd836a5bab" id="r_a6098547f6792d1b247ca84bd836a5bab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6098547f6792d1b247ca84bd836a5bab">computeAlpha</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_x</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
 <tr class="memdesc:a6098547f6792d1b247ca84bd836a5bab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend ionization coefficient.  <br /></td></tr>
 <tr class="separator:a6098547f6792d1b247ca84bd836a5bab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -827,6 +830,43 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Get all particle drift-diffusion species. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_itoSpecies </dd></dl>
+
+</div>
+</div>
+<a id="adf86eba4533f555e8286b4016329ccf4" name="adf86eba4533f555e8286b4016329ccf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf86eba4533f555e8286b4016329ccf4">&#9670;&#160;</a></span>getNeutralDensity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a> Physics::ItoKMC::ItoKMCPhysics::getNeutralDensity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramname"><em>a_pos</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the neutral density at a position in space. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Neutral density </dd></dl>
+
+<p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae3b60588b84ef4fce5d12e0fc8d5fd26">Physics::ItoKMC::ItoKMCJSON</a>.</p>
 
 </div>
 </div>

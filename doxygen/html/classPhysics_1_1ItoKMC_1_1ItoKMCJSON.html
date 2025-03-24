@@ -161,6 +161,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab0526bb9164d47231ceae9dcc1fc073b" id="r_ab0526bb9164d47231ceae9dcc1fc073b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ab0526bb9164d47231ceae9dcc1fc073b">computeDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_densities</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:ab0526bb9164d47231ceae9dcc1fc073b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a physics-based time step.  <br /></td></tr>
 <tr class="separator:ab0526bb9164d47231ceae9dcc1fc073b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3b60588b84ef4fce5d12e0fc8d5fd26" id="r_ae3b60588b84ef4fce5d12e0fc8d5fd26"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae3b60588b84ef4fce5d12e0fc8d5fd26">getNeutralDensity</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
+<tr class="memdesc:ae3b60588b84ef4fce5d12e0fc8d5fd26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the neutral density at a position in space.  <br /></td></tr>
+<tr class="separator:ae3b60588b84ef4fce5d12e0fc8d5fd26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd91a6b7d203c0902f4e34958a918e6a" id="r_abd91a6b7d203c0902f4e34958a918e6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#abd91a6b7d203c0902f4e34958a918e6a">computeAlpha</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_E</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">a_pos</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:abd91a6b7d203c0902f4e34958a918e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Townsend ionization coefficient.  <br /></td></tr>
 <tr class="separator:abd91a6b7d203c0902f4e34958a918e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1231,6 +1234,43 @@ Additional Inherited Members</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ae3b60588b84ef4fce5d12e0fc8d5fd26" name="ae3b60588b84ef4fce5d12e0fc8d5fd26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3b60588b84ef4fce5d12e0fc8d5fd26">&#9670;&#160;</a></span>getNeutralDensity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ItoKMCJSON::getNeutralDensity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td>
+          <td class="paramname"><em>a_pos</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the neutral density at a position in space. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_pos</td><td>Physical position </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Neutral density </dd></dl>
+
+<p>Implements <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#adf86eba4533f555e8286b4016329ccf4">Physics::ItoKMC::ItoKMCPhysics</a>.</p>
 
 </div>
 </div>
