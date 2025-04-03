@@ -1451,6 +1451,120 @@ public:
   remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, const int a_newFinestLevel) const noexcept;
 
   /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(EBAMRCellData&            a_data,
+              const std::string&        a_realm,
+              const phase::which_phase& a_phase,
+              const Location::Cell&     a_from,
+              const Location::Cell&     a_to,
+              const IrregStencil::Type& a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_level Grid level
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(LevelData<EBCellFAB>&     a_data,
+              const int&                a_level,
+              const std::string&        a_realm,
+              const phase::which_phase& a_phase,
+              const Location::Cell&     a_from,
+              const Location::Cell&     a_to,
+              const IrregStencil::Type& a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_level Grid level
+    @param[in] a_din Grid index
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(EBCellFAB&                a_data,
+              const int&                a_level,
+              const DataIndex&          a_din,
+              const std::string&        a_realm,
+              const phase::which_phase& a_phase,
+              const Location::Cell&     a_from,
+              const Location::Cell&     a_to,
+              const IrregStencil::Type& a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(EBAMRIVData&              a_data,
+              const std::string&        a_realm,
+              const phase::which_phase& a_phase,
+              const Location::Cell&     a_from,
+              const Location::Cell&     a_to,
+              const IrregStencil::Type& a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_level Grid level
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(LevelData<BaseIVFAB<Real>>& a_data,
+              const int&                  a_level,
+              const std::string&          a_realm,
+              const phase::which_phase&   a_phase,
+              const Location::Cell&       a_from,
+              const Location::Cell&       a_to,
+              const IrregStencil::Type&   a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_level Grid level
+    @param[in] a_din Grid index
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(BaseIVFAB<Real>&          a_data,
+              const int&                a_level,
+              const DataIndex&          a_din,
+              const std::string&        a_realm,
+              const phase::which_phase& a_phase,
+              const Location::Cell&     a_from,
+              const Location::Cell&     a_to,
+              const IrregStencil::Type& a_type) const noexcept;
+
+  /*!
     @brief Interpolate data to centroids on realm and phase
     @param[inout] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
