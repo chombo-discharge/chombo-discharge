@@ -614,15 +614,20 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
       const std::map<int, int>&       localToGlobalMap = m_photoPathways.at(i).second;
 
       for (ListIterator<Photon> lit(*a_absorbedPhotons[i]); lit.ok(); ++lit) {
-        const RealVect x = lit().position();
-        const Real     w = lit().weight();
+        const RealVect x            = lit().position();
+        const Real     photonWeight = lit().weight();
 
         // Determine the photo-reaction type.
         const int localReaction  = Random::get(d);
         const int globalReaction = localToGlobalMap.at(localReaction);
 
-        const ItoKMCPhotoReaction& photoReaction = m_photoReactions[globalReaction];
-        const std::list<size_t>&   plasmaTargets = photoReaction.getTargetSpecies();
+        const ItoKMCPhotoReaction& photoReaction      = m_photoReactions[globalReaction];
+        const std::list<size_t>&   plasmaTargets      = photoReaction.getTargetSpecies();
+        const Real&                reactionEfficiency = photoReaction.getEfficiency();
+
+        std::binomial_distribution<long long> d(static_cast<long long>(llround(photonWeight)), reactionEfficiency);
+
+        const Real numReactions = 1.0 * Random::get(d);
 
         for (const auto& t : plasmaTargets) {
           const SpeciesType& type       = m_speciesMap.at(t).first;
