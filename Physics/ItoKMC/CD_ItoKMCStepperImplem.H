@@ -1443,6 +1443,10 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   m_relaxationTime = this->computeRelaxationTime();
   timer.stopEvent("Relaxation");
 
+  const bool hasParticleAdvectionDt          = m_particleAdvectionDt < std::numeric_limits<Real>::max();
+  const bool hasParticleDiffusionDt          = m_particleDiffusionDt < std::numeric_limits<Real>::max();
+  const bool hasParticleAdvectionDiffusionDt = m_particleAdvectionDiffusionDt < std::numeric_limits<Real>::max();
+
   if (m_maxParticleAdvectionCFL * m_particleAdvectionDt < dt) {
     dt         = m_maxParticleAdvectionCFL * m_particleAdvectionDt;
     m_timeCode = TimeCode::AdvectionIto;
@@ -1473,21 +1477,18 @@ ItoKMCStepper<I, C, R, F>::computeDt()
     m_timeCode = TimeCode::Physics;
   }
 
-  if (dt < m_minParticleAdvectionCFL * m_particleAdvectionDt) {
-    dt = m_minParticleAdvectionCFL * m_particleAdvectionDt;
-
+  if ((dt < m_minParticleAdvectionCFL * m_particleAdvectionDt) && hasParticleAdvectionDt) {
+    dt         = m_minParticleAdvectionCFL * m_particleAdvectionDt;
     m_timeCode = TimeCode::AdvectionIto;
   }
 
-  if (dt < m_minParticleDiffusionCFL * m_particleDiffusionDt) {
-    dt = m_minParticleDiffusionCFL * m_particleDiffusionDt;
-
+  if ((dt < m_minParticleDiffusionCFL * m_particleDiffusionDt) && hasParticleDiffusionDt) {
+    dt         = m_minParticleDiffusionCFL * m_particleDiffusionDt;
     m_timeCode = TimeCode::DiffusionIto;
   }
 
-  if (dt < m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt) {
-    dt = m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
-
+  if ((dt < m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt) && hasParticleAdvectionDiffusionDt) {
+    dt         = m_minParticleAdvectionDiffusionCFL * m_particleAdvectionDiffusionDt;
     m_timeCode = TimeCode::AdvectionDiffusionIto;
   }
 
