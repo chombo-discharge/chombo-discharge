@@ -1460,12 +1460,12 @@ public:
     @param[in] a_type Interpolation type. 
   */
   void
-  interpIrreg(EBAMRCellData&            a_data,
-              const std::string&        a_realm,
-              const phase::which_phase& a_phase,
-              const Location::Cell&     a_from,
-              const Location::Cell&     a_to,
-              const IrregStencil::Type& a_type) const noexcept;
+  interpIrreg(EBAMRCellData&                   a_data,
+              const std::string&               a_realm,
+              const phase::which_phase&        a_phase,
+              const Location::Cell&            a_from,
+              const Location::Cell&            a_to,
+              const IrregStencil::StencilType& a_type) const noexcept;
 
   /*!
     @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
@@ -1478,70 +1478,13 @@ public:
     @param[in] a_type Interpolation type. 
   */
   void
-  interpIrreg(LevelData<EBCellFAB>&     a_data,
-              const int&                a_level,
-              const std::string&        a_realm,
-              const phase::which_phase& a_phase,
-              const Location::Cell&     a_from,
-              const Location::Cell&     a_to,
-              const IrregStencil::Type& a_type) const noexcept;
-
-  /*!
-    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
-    @param[inout] a_data Data to interpolate.
-    @param[in] a_level Grid level
-    @param[in] a_din Grid index
-    @param[in] a_realm Realm where the data lives.
-    @param[in] a_phase Phase where the data lives.
-    @param[in] a_from Position in cell to interpolate from.
-    @param[in] a_to Position in cell to interpolate to.
-    @param[in] a_type Interpolation type. 
-  */
-  void
-  interpIrreg(EBCellFAB&                a_data,
-              const int&                a_level,
-              const DataIndex&          a_din,
-              const std::string&        a_realm,
-              const phase::which_phase& a_phase,
-              const Location::Cell&     a_from,
-              const Location::Cell&     a_to,
-              const IrregStencil::Type& a_type) const noexcept;
-
-  /*!
-    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
-    @param[inout] a_data Data to interpolate.
-    @param[in] a_realm Realm where the data lives.
-    @param[in] a_phase Phase where the data lives.
-    @param[in] a_from Position in cell to interpolate from.
-    @param[in] a_to Position in cell to interpolate to.
-    @param[in] a_type Interpolation type. 
-  */
-  void
-  interpIrreg(EBAMRIVData&              a_data,
-              const std::string&        a_realm,
-              const phase::which_phase& a_phase,
-              const Location::Cell&     a_from,
-              const Location::Cell&     a_to,
-              const IrregStencil::Type& a_type) const noexcept;
-
-  /*!
-    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
-    @param[inout] a_data Data to interpolate.
-    @param[in] a_level Grid level
-    @param[in] a_realm Realm where the data lives.
-    @param[in] a_phase Phase where the data lives.
-    @param[in] a_from Position in cell to interpolate from.
-    @param[in] a_to Position in cell to interpolate to.
-    @param[in] a_type Interpolation type. 
-  */
-  void
-  interpIrreg(LevelData<BaseIVFAB<Real>>& a_data,
-              const int&                  a_level,
-              const std::string&          a_realm,
-              const phase::which_phase&   a_phase,
-              const Location::Cell&       a_from,
-              const Location::Cell&       a_to,
-              const IrregStencil::Type&   a_type) const noexcept;
+  interpIrreg(LevelData<EBCellFAB>&            a_data,
+              const int&                       a_level,
+              const std::string&               a_realm,
+              const phase::which_phase&        a_phase,
+              const Location::Cell&            a_from,
+              const Location::Cell&            a_to,
+              const IrregStencil::StencilType& a_type) const noexcept;
 
   /*!
     @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
@@ -1555,15 +1498,125 @@ public:
     @param[in] a_type Interpolation type. 
   */
   void
-  interpIrreg(BaseIVFAB<Real>&          a_data,
-              const int&                a_level,
-              const DataIndex&          a_din,
-              const std::string&        a_realm,
-              const phase::which_phase& a_phase,
-              const Location::Cell&     a_from,
-              const Location::Cell&     a_to,
-              const IrregStencil::Type& a_type) const noexcept;
+  interpIrreg(EBCellFAB&                       a_data,
+              const int&                       a_level,
+              const DataIndex&                 a_din,
+              const std::string&               a_realm,
+              const phase::which_phase&        a_phase,
+              const Location::Cell&            a_from,
+              const Location::Cell&            a_to,
+              const IrregStencil::StencilType& a_type) const noexcept;
 
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(EBAMRIVData&                     a_data,
+              const std::string&               a_realm,
+              const phase::which_phase&        a_phase,
+              const Location::Cell&            a_from,
+              const Location::Cell&            a_to,
+              const IrregStencil::StencilType& a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_level Grid level
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(LevelData<BaseIVFAB<Real>>&      a_data,
+              const int&                       a_level,
+              const std::string&               a_realm,
+              const phase::which_phase&        a_phase,
+              const Location::Cell&            a_from,
+              const Location::Cell&            a_to,
+              const IrregStencil::StencilType& a_type) const noexcept;
+
+  /*!
+    @brief Apply a cut-cell interpolation stencil and apply it to the input data holder. 
+    @param[inout] a_data Data to interpolate.
+    @param[in] a_level Grid level
+    @param[in] a_din Grid index
+    @param[in] a_realm Realm where the data lives.
+    @param[in] a_phase Phase where the data lives.
+    @param[in] a_from Position in cell to interpolate from.
+    @param[in] a_to Position in cell to interpolate to.
+    @param[in] a_type Interpolation type. 
+  */
+  void
+  interpIrreg(BaseIVFAB<Real>&                 a_data,
+              const int&                       a_level,
+              const DataIndex&                 a_din,
+              const std::string&               a_realm,
+              const phase::which_phase&        a_phase,
+              const Location::Cell&            a_from,
+              const Location::Cell&            a_to,
+              const IrregStencil::StencilType& a_type) const noexcept;
+
+  /*!
+    @brief Compute a non-conservative divergence.
+    @details This computes divNC(F) = sum(kappa*divC(F))/sum(kappa), where kappa*divC(F) is the finite-volume approximation to
+    kappa*div(F) = int_A F*dA (and dA is in grid units, not physical units). 
+    @param[out] a_nonConsDivF The non-conservative divergence. 
+    @param[in] a_kappaDivF Conservative divergence, not weighted by kappa.
+    @param[in] a_realm Realm where the data lives.    
+    @param[in] a_phase Phase where the data lives.
+  */
+  void
+  nonConservativeDivergence(EBAMRIVData&              a_nonConsDivF,
+                            const EBAMRCellData&      a_kappaDivF,
+                            const std::string&        a_realm,
+                            const phase::which_phase& a_phase) const noexcept;
+
+  /*!
+    @brief Compute a non-conservative divergence.
+    @details This computes divNC(F) = sum(kappa*divC(F))/sum(kappa), where kappa*divC(F) is the finite-volume approximation to
+    kappa*div(F) = int_A F*dA (and dA is in grid units, not physical units). 
+    @param[out] a_nonConsDivF The non-conservative divergence.
+    @param[in] a_level Grid level
+    @param[in] a_kappaDivF Conservative divergence, not weighted by kappa.
+    @param[in] a_realm Realm where the data lives.    
+    @param[in] a_phase Phase where the data lives.
+  */
+  void
+  nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
+                            const LevelData<EBCellFAB>& a_kappaDivF,
+                            const int&                  a_level,
+                            const std::string&          a_realm,
+                            const phase::which_phase&   a_phase) const noexcept;
+
+  /*!
+    @brief Compute a non-conservative divergence.
+    @details This computes divNC(F) = sum(kappa*divC(F))/sum(kappa), where kappa*divC(F) is the finite-volume approximation to
+    kappa*div(F) = int_A F*dA (and dA is in grid units, not physical units). 
+    @param[out] a_nonConsDivF The non-conservative divergence.
+    @param[in] a_level Grid level
+    @param[in] a_din Grid index
+    @param[in] a_kappaDivF Conservative divergence, not weighted by kappa.
+    @param[in] a_realm Realm where the data lives.    
+    @param[in] a_phase Phase where the data lives.
+  */
+  void
+  nonConservativeDivergence(BaseIVFAB<Real>&          a_nonConsDivF,
+                            const EBCellFAB&          a_kappaDivF,
+                            const int&                a_level,
+                            const DataIndex&          a_din,
+                            const std::string&        a_realm,
+                            const phase::which_phase& a_phase) const noexcept;
+
+#if 1
+#warning "CD_AmrMesh.H -- code marked for removal"
   /*!
     @brief Interpolate data to centroids on realm and phase
     @param[inout] a_data  Data to be interpolated
@@ -1586,6 +1639,31 @@ public:
                     const std::string        a_realm,
                     const phase::which_phase a_phase,
                     const int                a_level) const;
+
+  /*!
+    @brief Get interpolation stencils for going from cell center to cell centroid
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const IrregAmrStencil<CentroidInterpolationStencil>&
+  getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get interpolation stencils for going from cell center to cell boundary centroid
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const IrregAmrStencil<EbCentroidInterpolationStencil>&
+  getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Get the nonconservative divergence stencils
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
+  */
+  const IrregAmrStencil<NonConservativeDivergenceStencil>&
+  getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
+#endif
 
   /*!
     @brief Sets multifluid index space. 
@@ -1919,30 +1997,6 @@ public:
   */
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get interpolation stencils for going from cell center to cell centroid
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get interpolation stencils for going from cell center to cell boundary centroid
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>&
-  getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get the nonconservative divergence stencils
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the name of all Realms
