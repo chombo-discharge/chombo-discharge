@@ -35,6 +35,7 @@
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_EBGhostCellInterpolator.H>
 #include <CD_EBNonConservativeDivergence.H>
+#include <CD_CellCentroidInterpolation.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
 #include <CD_NamespaceHeader.H>
@@ -262,7 +263,13 @@ public:
   getEbCentroidInterpolationStencilStencils() const;
 
   /*!
-    @brief Get stencils for computing "non-conservative divergences"
+    @brief Get objects for interpolation from cell centers to centroids. 
+  */
+  const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+  getCellCentroidInterpolation() const;  
+
+  /*!
+    @brief Get objects for computing non-conservative divergences.
   */
   const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
   getNonConservativeDivergence() const;
@@ -521,6 +528,11 @@ protected:
     @brief For doing particle deposition onto surfaces
   */
   mutable EBAMRSurfaceDeposition m_surfaceDeposition;
+
+  /*!
+    @brief For interpolating data from cell centers to cell centroids. 
+  */
+  mutable Vector<RefCountedPtr<CellCentroidInterpolation>> m_cellCentroidInterpolation;    
 
   /*!
     @brief For computing non-conservative divergences

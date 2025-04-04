@@ -639,6 +639,12 @@ Realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phas
   return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
 }
 
+const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+Realm::getCellCentroidInterpolation(const phase::which_phase a_phase) const
+{
+  return m_realms[a_phase]->getCellCentroidInterpolation();
+}
+
 const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
 Realm::getNonConservativeDivergence(const phase::which_phase a_phase) const
 {

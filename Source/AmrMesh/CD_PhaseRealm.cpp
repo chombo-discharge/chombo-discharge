@@ -133,8 +133,8 @@ PhaseRealm::preRegrid()
   m_gradientOp.resize(0);
   m_levelset.resize(0);
 
-  m_centroidInterpolationStencil     = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
-  m_ebCentroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
+  m_centroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
+  m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
 }
 
 void
@@ -802,8 +802,17 @@ PhaseRealm::defineIrregSten()
 
   const bool doThisOperator = this->queryOperator(s_eb_irreg_interp);
 
+  m_cellCentroidInterpolation.resize(1 + m_finestLevel);
+
   if (doThisOperator) {
 
+#warning "CellCentroidInterpolation definition must parse the interpolation method"
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      m_cellCentroidInterpolation[lvl] = RefCountedPtr<CellCentroidInterpolation>(
+        new CellCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], CellCentroidInterpolation::Type::MinMod));
+    }
+#if 1
+#warning "Marked for removal"
     // I don't want these to be have a large radius or high order. The reason for that is simple: Only first-order stencils
     // can be guaranteed to have non-negative interpolation weights.
 
@@ -830,6 +839,7 @@ PhaseRealm::defineIrregSten()
                                                           rad,
                                                           m_ebCentroidStencilType));
   }
+#endif
 }
 
 void
@@ -926,6 +936,16 @@ PhaseRealm::getGradientOp() const
   }
 
   return m_gradientOp;
+}
+
+const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+PhaseRealm::getCellCentroidInterpolation() const
+{
+  if (!this->queryOperator(s_eb_irreg_interp)) {
+    MayDay::Error("PhaseRealm::getCellCentroidInterpolation - operator not registered!");
+  }
+
+  return m_cellCentroidInterpolation;
 }
 
 const Vector<RefCountedPtr<EBNonConservativeDivergence>>&

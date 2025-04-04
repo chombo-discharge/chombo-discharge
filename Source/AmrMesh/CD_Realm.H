@@ -277,6 +277,13 @@ public:
   getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const;
 
   /*!
+    @brief Get objects for computing interpolation of cell-centered data to cell centroids.
+    @param[in] a_phase Phase
+  */
+  const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+  getCellCentroidInterpolation(const phase::which_phase a_phase) const;  
+
+  /*!
     @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
   */
