@@ -100,6 +100,13 @@ public:
   virtual void
   interpolate(LevelData<EBCellFAB>& a_centroidData, const LevelData<EBCellFAB>& a_cellData) const noexcept;
 
+  /*!
+    @brief Function for interpolating data.
+    @param[inout] a_centroidData Cell-centered on input and centroid centered on output.
+  */
+  virtual void
+  interpolate(LevelData<EBCellFAB>& a_data) const noexcept;
+
 protected:
   /*!
     @brief Defined or not
@@ -183,13 +190,22 @@ protected:
                             const EBISBox&       a_ebisBox,
                             const ProblemDomain& a_domain) const noexcept;
 
+  /*!
+    @brief Interpolation function. Used internally by the public interface. 
+    @param[out] a_centroidData Centroid-centered data.
+    @param[in] a_cellData Cell-centered data.
+    @note T can be either a BaseIVFAB<Real> or an EBCellFAB.
+  */
+  template <typename T>
+  void
+  interpolate(T& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
 
   /*!
     @brief Minmod slope function. 
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
   */
-  Real
+  inline Real
   MinMod(const Real& a_dwl, const Real& a_dwr) const noexcept;
 
   /*!
@@ -197,7 +213,7 @@ protected:
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
   */
-  Real
+  inline Real
   MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) const noexcept;
 
   /*!
@@ -205,10 +221,12 @@ protected:
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
   */
-  Real
-  Superbee(const Real& a_dwl, const Real& a_dwr) const noexcept;  
+  inline Real
+  Superbee(const Real& a_dwl, const Real& a_dwr) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_CellCentroidInterpolationImplem.H>
 
 #endif
