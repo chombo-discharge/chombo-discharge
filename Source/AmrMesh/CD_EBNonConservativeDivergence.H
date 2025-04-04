@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EBNonConservativeDivergence.H
-  @brief  Declaration of conservative coarsening utility 
+  @brief  Declaration of a class for computing non-conservative divergences.
   @author Robert Marskar
 */
 
