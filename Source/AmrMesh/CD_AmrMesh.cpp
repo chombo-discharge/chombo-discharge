@@ -772,7 +772,7 @@ AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const
   const IntVect ghost = a_data[0]->ghostVect();
   const int     nComp = a_data[0]->nComp();
   const int
-            ignored = nComp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory.
+    ignored = nComp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory.
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
@@ -817,7 +817,7 @@ AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin) const
   const IntVect ghost = a_data[0]->ghostVect();
   const int     nComp = a_data[0]->nComp();
   const int
-            ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
+    ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
@@ -862,7 +862,7 @@ AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const
   const IntVect ghost = a_data[0]->ghostVect();
   const int     nComp = a_data[0]->nComp();
   const int
-            ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
+    ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
@@ -3252,6 +3252,49 @@ AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase
   return m_realms[a_realm]->getRedistributionOp(a_phase);
 }
 
+void
+AmrMesh::nonConservativeDivergence(EBAMRIVData&              a_nonConsDivF,
+                                   const EBAMRCellData&      a_kappaDivF,
+                                   const std::string&        a_realm,
+                                   const phase::which_phase& a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::nonConservativeDivergence(AMR)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::nonConservativeDivergence(AMR)" << endl;
+  }
+
+  if (!(this->queryRealm(a_realm))) {
+    const std::string str = "AmrMesh::nonConservativeDivergence(amr) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->nonConservativeDivergence(*a_nonConsDivF[lvl], *a_kappaDivF[lvl], lvl, a_realm, a_phase);
+  }
+}
+
+void
+AmrMesh::nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
+                                   const LevelData<EBCellFAB>& a_kappaDivF,
+                                   const int&                  a_level,
+                                   const std::string&          a_realm,
+                                   const phase::which_phase&   a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::nonConservativeDivergence(level)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::nonConservativeDivergence(level)" << endl;
+  }
+
+  const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_realms[a_realm]
+                                                                        ->getNonConservativeDivergenceStencils(a_phase);
+
+  stencils.apply(a_nonConsDivF, a_kappaDivF, a_level);
+}
+
+#if 1
+#warning "CD_AmrMesh.cpp -- code marked for removal"
+
 const IrregAmrStencil<CentroidInterpolationStencil>&
 AmrMesh::getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const
 {
@@ -3287,24 +3330,7 @@ AmrMesh::getEbCentroidInterpolationStencils(const std::string a_realm, const pha
 
   return m_realms[a_realm]->getEbCentroidInterpolationStencilStencils(a_phase);
 }
-
-const IrregAmrStencil<NonConservativeDivergenceStencil>&
-AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string
-      str = "AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase) - could not find realm '" +
-            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getNonConservativeDivergenceStencils(a_phase);
-}
+#endif
 
 bool
 AmrMesh::queryRealm(const std::string a_realm) const

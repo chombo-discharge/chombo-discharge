@@ -1596,25 +1596,6 @@ public:
                             const std::string&          a_realm,
                             const phase::which_phase&   a_phase) const noexcept;
 
-  /*!
-    @brief Compute a non-conservative divergence.
-    @details This computes divNC(F) = sum(kappa*divC(F))/sum(kappa), where kappa*divC(F) is the finite-volume approximation to
-    kappa*div(F) = int_A F*dA (and dA is in grid units, not physical units). 
-    @param[out] a_nonConsDivF The non-conservative divergence.
-    @param[in] a_level Grid level
-    @param[in] a_din Grid index
-    @param[in] a_kappaDivF Conservative divergence, not weighted by kappa.
-    @param[in] a_realm Realm where the data lives.    
-    @param[in] a_phase Phase where the data lives.
-  */
-  void
-  nonConservativeDivergence(BaseIVFAB<Real>&          a_nonConsDivF,
-                            const EBCellFAB&          a_kappaDivF,
-                            const int&                a_level,
-                            const DataIndex&          a_din,
-                            const std::string&        a_realm,
-                            const phase::which_phase& a_phase) const noexcept;
-
 #if 1
 #warning "CD_AmrMesh.H -- code marked for removal"
   /*!
@@ -1655,14 +1636,6 @@ public:
   */
   const IrregAmrStencil<EbCentroidInterpolationStencil>&
   getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get the nonconservative divergence stencils
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 #endif
 
   /*!

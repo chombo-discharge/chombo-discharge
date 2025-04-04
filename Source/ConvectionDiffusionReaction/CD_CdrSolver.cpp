@@ -1,3 +1,4 @@
+
 /* chombo-discharge
  * Copyright © 2021 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
@@ -1469,11 +1470,7 @@ CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, c
   //       AmrMesh's stencil in cut cells. The neighborhood consists of cells that can be reached with a monotone path.
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
-      m_realm,
-      m_phase);
-
-    stencils.apply(a_nonConservativeDivergence, a_divG);
+    m_amr->nonConservativeDivergence(a_nonConservativeDivergence, a_divG, m_realm, m_phase);
   }
   else { // Mostly for debugging.
     DataOps::setValue(a_nonConservativeDivergence, 0.0);
