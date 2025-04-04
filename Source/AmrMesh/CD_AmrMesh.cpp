@@ -3286,10 +3286,9 @@ AmrMesh::nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
     pout() << "AmrMesh::nonConservativeDivergence(level)" << endl;
   }
 
-  const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_realms[a_realm]
-                                                                        ->getNonConservativeDivergenceStencils(a_phase);
+  const auto& nonConsDiv = m_realms[a_realm]->getNonConservativeDivergence(a_phase)[a_level];
 
-  stencils.apply(a_nonConsDivF, a_kappaDivF, a_level);
+  nonConsDiv->nonConservativeDivergence(a_nonConsDivF, a_kappaDivF);
 }
 
 #if 1

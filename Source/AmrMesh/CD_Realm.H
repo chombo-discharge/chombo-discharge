@@ -277,11 +277,11 @@ public:
   getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get stencils for computing "non-conservative divergences"
+    @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+  getNonConservativeDivergence(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get data coarsening utility

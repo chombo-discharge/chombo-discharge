@@ -34,7 +34,7 @@
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_EBGhostCellInterpolator.H>
-#include <CD_NonConservativeDivergenceStencil.H>
+#include <CD_EBNonConservativeDivergence.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
 #include <CD_NamespaceHeader.H>
@@ -264,8 +264,8 @@ public:
   /*!
     @brief Get stencils for computing "non-conservative divergences"
   */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils() const;
+  const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+  getNonConservativeDivergence() const;
 
   /*!
     @brief Get gradient object
@@ -523,6 +523,11 @@ protected:
   mutable EBAMRSurfaceDeposition m_surfaceDeposition;
 
   /*!
+    @brief For computing non-conservative divergences
+  */
+  mutable Vector<RefCountedPtr<EBNonConservativeDivergence>> m_nonConservativeDivergence;  
+
+  /*!
     @brief Data recentering utility (center to centroid)
   */
   RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>> m_centroidInterpolationStencil;
@@ -531,11 +536,6 @@ protected:
     @brief Data recentering utility (center to eb centroid)
   */
   RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>> m_ebCentroidInterpolationStencil;
-
-  /*!
-    @brief Stencils for non-conservative divergences
-  */
-  RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>> m_NonConservativeDivergenceStencil;
 
   /*!
     @brief Define EBLevelGrids
@@ -646,7 +646,7 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */
   void
-  defineNonConsDivSten();
+  defineNonConservativeDivergence(const int a_lmin);
 
   /*!
     @brief Put the level-set on the mesh

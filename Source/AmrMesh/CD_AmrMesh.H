@@ -30,7 +30,6 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>

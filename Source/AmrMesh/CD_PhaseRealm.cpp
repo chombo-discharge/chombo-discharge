@@ -135,7 +135,6 @@ PhaseRealm::preRegrid()
 
   m_centroidInterpolationStencil     = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
   m_ebCentroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
-  m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(0);
 }
 
 void
@@ -293,7 +292,7 @@ PhaseRealm::regridOperators(const int a_lmin)
       MemoryReport::getMaxMinMemoryUsage();
     }
     timer.startEvent("Non-conservative stencil");
-    this->defineNonConsDivSten();
+    this->defineNonConservativeDivergence(a_lmin);
     timer.stopEvent("Non-conservative stencil");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
@@ -834,28 +833,22 @@ PhaseRealm::defineIrregSten()
 }
 
 void
-PhaseRealm::defineNonConsDivSten()
+PhaseRealm::defineNonConservativeDivergence(const int a_lmin)
 {
-  CH_TIME("PhaseRealm::defineNonConsDivSten");
+  CH_TIME("PhaseRealm::defineNonConservativeDivergence");
   if (m_verbose) {
-    pout() << "PhaseRealm::defineNonConsDivSten" << endl;
+    pout() << "PhaseRealm::defineNonConservativeDivergence" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_noncons_div);
 
-  if (doThisOperator) {
-    const int order = 1; // Dummy argument
+  m_nonConservativeDivergence.resize(1 + m_finestLevel);
 
-    m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(
-      new IrregAmrStencil<NonConservativeDivergenceStencil>(
-        m_grids,
-        m_ebisl,
-        m_domains,
-        m_dx,
-        m_finestLevel,
-        order, // Dummy argument
-        m_redistributionRadius,
-        m_centroidStencilType)); // Dummy argument, just use centroidStencilType.
+  if (doThisOperator) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      m_nonConservativeDivergence[lvl] = RefCountedPtr<EBNonConservativeDivergence>(
+        new EBNonConservativeDivergence(*m_eblg[lvl], m_redistributionRadius));
+    }
   }
 }
 
@@ -935,14 +928,14 @@ PhaseRealm::getGradientOp() const
   return m_gradientOp;
 }
 
-const IrregAmrStencil<NonConservativeDivergenceStencil>&
-PhaseRealm::getNonConservativeDivergenceStencils() const
+const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+PhaseRealm::getNonConservativeDivergence() const
 {
   if (!this->queryOperator(s_noncons_div)) {
-    MayDay::Error("PhaseRealm::getNonConservativeDivergenceStencils - operator not registered!");
+    MayDay::Error("PhaseRealm::getNonConservativeDivergence - operator not registered!");
   }
 
-  return *m_NonConservativeDivergenceStencil;
+  return m_nonConservativeDivergence;
 }
 
 Vector<RefCountedPtr<EBCoarAve>>&
