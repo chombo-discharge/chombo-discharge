@@ -2252,7 +2252,9 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 }
 
 void
-AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::interpToCentroids(EBAMRCellData&           a_data,
+                           const std::string        a_realm,
+                           const phase::which_phase a_phase) const noexcept
 {
   CH_TIME("AmrMesh::interpToCentroids(AMR)");
   if (m_verbosity > 3) {
@@ -2261,7 +2263,7 @@ AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, con
 
   if (!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::interpToCentroids(AMR) - could not find realm '" + a_realm + "'";
-    
+
     MayDay::Abort(str.c_str());
   }
 
@@ -2274,7 +2276,7 @@ void
 AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
                            const std::string        a_realm,
                            const phase::which_phase a_phase,
-                           const int                a_level) const
+                           const int                a_level) const noexcept
 {
   CH_TIME("AmrMesh::interpToCentroids(level)");
 
@@ -2289,6 +2291,50 @@ AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
   const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
 
   cellCentroidInterp->interpolate(a_data);
+}
+
+void
+AmrMesh::interpToCentroids(EBAMRIVData&             a_centroidData,
+                           const EBAMRCellData&     a_cellData,
+                           const std::string        a_realm,
+                           const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::interpToCentroids(ebamrivdata)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToCentroids(ebamirvdata)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(ebamirvdata) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->interpToCentroids(*a_centroidData[lvl], *a_cellData[lvl], a_realm, a_phase, lvl);
+  }
+}
+
+void
+AmrMesh::interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
+                           const LevelData<EBCellFAB>& a_cellData,
+                           const std::string           a_realm,
+                           const phase::which_phase    a_phase,
+                           const int                   a_level) const noexcept
+{
+  CH_TIME("AmrMesh::interpToCentroids(baseivfab, level)");
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_finestLevel);
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(baseivfab, level) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
+
+  cellCentroidInterp->interpolate(a_centroidData, a_cellData);
 }
 
 void
@@ -2662,20 +2708,20 @@ AmrMesh::parseCentroidStencils()
   m_centroidStencilRadius = 1;
   m_centroidStencilOrder  = 1;
 
-  if(str == "constant") {
+  if (str == "constant") {
     m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Constant;
   }
   else if (str == "linear") {
-    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Linear;    
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Linear;
   }
   else if (str == "taylor") {
-    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Taylor;        
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Taylor;
   }
   else if (str == "lsq") {
-    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::LeastSquares;            
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::LeastSquares;
   }
   else if (str == "pwl") {
-    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::PiecewiseLinear;                
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::PiecewiseLinear;
   }
   else if (str == "minmod") {
     m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::MinMod;
@@ -2685,7 +2731,7 @@ AmrMesh::parseCentroidStencils()
   }
   else if (str == "superbee") {
     m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Superbee;
-  }      
+  }
   else {
     MayDay::Abort("AmrMesh::parseCentroidStencils - unknown stencil requested");
   }

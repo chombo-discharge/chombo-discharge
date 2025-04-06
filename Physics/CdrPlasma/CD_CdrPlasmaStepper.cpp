@@ -236,7 +236,6 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
   DataOps::setValue(a_conductivityFace, std::numeric_limits<Real>::max());
   DataOps::setValue(a_conductivityEB, std::numeric_limits<Real>::max());
 
-#if 1
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids.
   const Average  average  = Average::Arithmetic;
@@ -250,14 +249,9 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              interv,
                              average);
-#else
-  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-#endif
 
 #if 1
-  // Now compute the conductivity on the EB.
-  const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, m_phase);
-  interpStencil.apply(a_conductivityEB, a_conductivityCell);
+  m_amr->interpToCentroids(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
 #else
   DataOps::setValue(a_conductivityEB, 0.0);
   DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);

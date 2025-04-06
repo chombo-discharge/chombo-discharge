@@ -1457,7 +1457,7 @@ public:
     @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
   */
   void
-  interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const noexcept;
 
   /*!
     @brief Interpolate data to centroids
@@ -1470,7 +1470,36 @@ public:
   interpToCentroids(LevelData<EBCellFAB>&    a_data,
                     const std::string        a_realm,
                     const phase::which_phase a_phase,
-                    const int                a_level) const;  
+                    const int                a_level) const noexcept;
+
+  /*!
+    @brief Interpolate data to centroids on realm and phase
+    @param[out] a_centroidData Centroid-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
+  */
+  void
+  interpToCentroids(EBAMRIVData&             a_centroidData,
+                    const EBAMRCellData&     a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase) const noexcept;
+
+  /*!
+    @brief Interpolate data to centroids
+    @param[out] a_centroidData Centroid-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @πaram[in]  a_level Grid level
+  */
+  void
+  interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const std::string           a_realm,
+                    const phase::which_phase    a_phase,
+                    const int                   a_level) const noexcept;
 
   /*!
     @brief Compute a non-conservative divergence.
