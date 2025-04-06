@@ -1233,9 +1233,7 @@ EddingtonSP1::writePlotFile()
                   CopyStrategy::ValidGhost);
 
   // Transform to centroid-centered
-  const IrregAmrStencil<CentroidInterpolationStencil>& sten = m_amr->getCentroidInterpolationStencils(m_realm,
-                                                                                                      phase::gas);
-  sten.apply(output);
+  m_amr->interpToCentroids(output, m_realm, phase::gas);
 
   // Alias this stuff
   Vector<LevelData<EBCellFAB>*> output_ptr;

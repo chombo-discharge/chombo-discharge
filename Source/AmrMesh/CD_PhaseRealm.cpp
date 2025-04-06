@@ -47,43 +47,43 @@ PhaseRealm::~PhaseRealm()
 {}
 
 void
-PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
-                   const Vector<ProblemDomain>&       a_domains,
-                   const Vector<int>&                 a_refRat,
-                   const Vector<Real>&                a_dx,
-                   const RealVect                     a_probLo,
-                   const int                          a_finestLevel,
-                   const int                          a_ebGhost,
-                   const int                          a_numGhost,
-                   const int                          a_lsfGhost,
-                   const int                          a_redistRad,
-                   const int                          a_mgInterpOrder,
-                   const int                          a_mgInterpRadius,
-                   const int                          a_mgInterpWeight,
-                   const IrregStencil::StencilType    a_centroidStencil,
-                   const IrregStencil::StencilType    a_ebStencil,
-                   const RefCountedPtr<BaseIF>&       a_baseif,
-                   const RefCountedPtr<EBIndexSpace>& a_ebis)
+PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
+                   const Vector<ProblemDomain>&          a_domains,
+                   const Vector<int>&                    a_refRat,
+                   const Vector<Real>&                   a_dx,
+                   const RealVect                        a_probLo,
+                   const int                             a_finestLevel,
+                   const int                             a_ebGhost,
+                   const int                             a_numGhost,
+                   const int                             a_lsfGhost,
+                   const int                             a_redistRad,
+                   const int                             a_mgInterpOrder,
+                   const int                             a_mgInterpRadius,
+                   const int                             a_mgInterpWeight,
+                   const CellCentroidInterpolation::Type a_centroidStencil,
+                   const IrregStencil::StencilType       a_ebStencil,
+                   const RefCountedPtr<BaseIF>&          a_baseif,
+                   const RefCountedPtr<EBIndexSpace>&    a_ebis)
 {
   CH_TIME("PhaseRealm::define");
 
-  m_grids                        = a_grids;
-  m_domains                      = a_domains;
-  m_refinementRatios             = a_refRat;
-  m_dx                           = a_dx;
-  m_probLo                       = a_probLo;
-  m_finestLevel                  = a_finestLevel;
-  m_numEbGhostsCells             = a_ebGhost;
-  m_numGhostCells                = a_numGhost;
-  m_numLsfGhostCells             = a_lsfGhost;
-  m_redistributionRadius         = a_redistRad;
-  m_multigridInterpolationOrder  = a_mgInterpOrder;
-  m_multigridInterpolationRadius = a_mgInterpRadius;
-  m_multigridInterpolationWeight = a_mgInterpWeight;
-  m_centroidStencilType          = a_centroidStencil;
-  m_ebCentroidStencilType        = a_ebStencil;
-  m_baseif                       = a_baseif;
-  m_ebis                         = a_ebis;
+  m_grids                         = a_grids;
+  m_domains                       = a_domains;
+  m_refinementRatios              = a_refRat;
+  m_dx                            = a_dx;
+  m_probLo                        = a_probLo;
+  m_finestLevel                   = a_finestLevel;
+  m_numEbGhostsCells              = a_ebGhost;
+  m_numGhostCells                 = a_numGhost;
+  m_numLsfGhostCells              = a_lsfGhost;
+  m_redistributionRadius          = a_redistRad;
+  m_multigridInterpolationOrder   = a_mgInterpOrder;
+  m_multigridInterpolationRadius  = a_mgInterpRadius;
+  m_multigridInterpolationWeight  = a_mgInterpWeight;
+  m_cellCentroidInterpolationType = a_centroidStencil;
+  m_ebCentroidStencilType         = a_ebStencil;
+  m_baseif                        = a_baseif;
+  m_ebis                          = a_ebis;
 
   if (!m_ebis.isNull()) {
     m_isDefined = true;
@@ -132,8 +132,9 @@ PhaseRealm::preRegrid()
   m_redistributionOp.resize(0);
   m_gradientOp.resize(0);
   m_levelset.resize(0);
+  m_cellCentroidInterpolation.resize(0);
+  m_nonConservativeDivergence.resize(0);  
 
-  m_centroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
   m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
 }
 
@@ -805,11 +806,9 @@ PhaseRealm::defineIrregSten()
   m_cellCentroidInterpolation.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
-
-#warning "CellCentroidInterpolation definition must parse the interpolation method"
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       m_cellCentroidInterpolation[lvl] = RefCountedPtr<CellCentroidInterpolation>(
-        new CellCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], CellCentroidInterpolation::Type::MinMod));
+        new CellCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], m_cellCentroidInterpolationType));
     }
 #if 1
 #warning "Marked for removal"
@@ -818,16 +817,6 @@ PhaseRealm::defineIrregSten()
 
     constexpr int order = 1;
     constexpr int rad   = 1;
-
-    m_centroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(
-      new IrregAmrStencil<CentroidInterpolationStencil>(m_grids,
-                                                        m_ebisl,
-                                                        m_domains,
-                                                        m_dx,
-                                                        m_finestLevel,
-                                                        order,
-                                                        rad,
-                                                        m_centroidStencilType));
 
     m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(
       new IrregAmrStencil<EbCentroidInterpolationStencil>(m_grids,
@@ -914,12 +903,6 @@ Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 PhaseRealm::getVofIterator() const
 {
   return m_vofIter;
-}
-
-const IrregAmrStencil<CentroidInterpolationStencil>&
-PhaseRealm::getCentroidInterpolationStencils() const
-{
-  return *m_centroidInterpolationStencil;
 }
 
 const IrregAmrStencil<EbCentroidInterpolationStencil>&

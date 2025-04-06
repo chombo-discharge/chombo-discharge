@@ -55,7 +55,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
               const int                                                 a_mgInterpOrder,
               const int                                                 a_mgInterpRadius,
               const int                                                 a_mgInterpWeight,
-              const IrregStencil::StencilType                           a_centroidStencil,
+              const CellCentroidInterpolation::Type                     a_centroidStencil,
               const IrregStencil::StencilType                           a_ebStencil,
               const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
               const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis)
@@ -625,12 +625,6 @@ Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 Realm::getVofIterator(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getVofIterator();
-}
-
-const IrregAmrStencil<CentroidInterpolationStencil>&
-Realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) const
-{
-  return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
 const IrregAmrStencil<EbCentroidInterpolationStencil>&

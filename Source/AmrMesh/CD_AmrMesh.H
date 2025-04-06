@@ -1506,16 +1506,6 @@ public:
 
 #if 1
 #warning "CD_AmrMesh.H -- code marked for removal"
-
-
-  /*!
-    @brief Get interpolation stencils for going from cell center to cell centroid
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
   /*!
     @brief Get interpolation stencils for going from cell center to cell boundary centroid
     @param[in] a_realm Realm name
@@ -1959,14 +1949,9 @@ protected:
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
-    @brief Stencil type
+    @brief Interpolation type for centroid
   */
-  IrregStencil::StencilType m_stencilType;
-
-  /*!
-    @brief Stencil type for centroid interpolation
-  */
-  IrregStencil::StencilType m_centroidStencilType;
+  CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
   /*!
     @brief Stencil type for EB interpolation

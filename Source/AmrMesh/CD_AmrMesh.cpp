@@ -2261,12 +2261,13 @@ AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, con
 
   if (!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::interpToCentroids(AMR) - could not find realm '" + a_realm + "'";
+    
     MayDay::Abort(str.c_str());
   }
 
-  const IrregAmrStencil<CentroidInterpolationStencil>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(
-    a_phase);
-  stencil.apply(a_data);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->interpToCentroids(*a_data[lvl], a_realm, a_phase, lvl);
+  }
 }
 
 void
@@ -2285,9 +2286,9 @@ AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
     MayDay::Abort(str.c_str());
   }
 
-  const auto& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
+  const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
 
-  stencil.apply(a_data, a_level);
+  cellCentroidInterp->interpolate(a_data);
 }
 
 void
@@ -2661,18 +2662,30 @@ AmrMesh::parseCentroidStencils()
   m_centroidStencilRadius = 1;
   m_centroidStencilOrder  = 1;
 
-  if (str == "linear") {
-    m_centroidStencilType = IrregStencil::StencilType::Linear;
+  if(str == "constant") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Constant;
+  }
+  else if (str == "linear") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Linear;    
   }
   else if (str == "taylor") {
-    m_centroidStencilType = IrregStencil::StencilType::TaylorExtrapolation;
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Taylor;        
   }
   else if (str == "lsq") {
-    m_centroidStencilType = IrregStencil::StencilType::LeastSquares;
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::LeastSquares;            
   }
   else if (str == "pwl") {
-    m_centroidStencilType = IrregStencil::StencilType::PiecewiseLinear;
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::PiecewiseLinear;                
   }
+  else if (str == "minmod") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::MinMod;
+  }
+  else if (str == "monotonized_central") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::MonotonizedCentral;
+  }
+  else if (str == "superbee") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Superbee;
+  }      
   else {
     MayDay::Abort("AmrMesh::parseCentroidStencils - unknown stencil requested");
   }
@@ -3293,25 +3306,6 @@ AmrMesh::nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
 
 #if 1
 #warning "CD_AmrMesh.cpp -- code marked for removal"
-
-const IrregAmrStencil<CentroidInterpolationStencil>&
-AmrMesh::getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string
-      str = "AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" + a_realm +
-            "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
-}
-
 const IrregAmrStencil<EbCentroidInterpolationStencil>&
 AmrMesh::getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const
 {
@@ -3428,7 +3422,7 @@ AmrMesh::defineRealms()
                      m_multigridInterpOrder,
                      m_multigridInterpRadius,
                      m_multigridInterpWeight,
-                     m_centroidStencilType,
+                     m_cellCentroidInterpolationType,
                      m_ebCentroidStencilType,
                      m_baseif,
                      m_multifluidIndexSpace);
@@ -3484,7 +3478,7 @@ AmrMesh::regridRealm(const std::string          a_realm,
                             m_multigridInterpOrder,
                             m_multigridInterpRadius,
                             m_multigridInterpWeight,
-                            m_centroidStencilType,
+                            m_cellCentroidInterpolationType,
                             m_ebCentroidStencilType,
                             m_baseif,
                             m_multifluidIndexSpace);

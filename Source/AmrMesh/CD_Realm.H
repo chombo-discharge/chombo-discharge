@@ -123,7 +123,7 @@ public:
          const int                                                 a_mgInterpOrder,
          const int                                                 a_mgInterpRadius,
          const int                                                 a_mgInterpWeight,
-         const IrregStencil::StencilType                           a_centroidStencil,
+         const CellCentroidInterpolation::Type                     a_centroidStencil,
          const IrregStencil::StencilType                           a_ebStencil,
          const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
          const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis);
@@ -263,13 +263,6 @@ public:
   getVofIterator(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to centroids (for specified phase)
-    @param[in] a_phase Phase
-  */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils(const phase::which_phase a_phase) const;
-
-  /*!
     @brief Get stencils for interpolating from cell center to eb centroids
     @param[in] a_phase Phase
   */
@@ -281,7 +274,7 @@ public:
     @param[in] a_phase Phase
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
-  getCellCentroidInterpolation(const phase::which_phase a_phase) const;  
+  getCellCentroidInterpolation(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get objects for computing "non-conservative divergences"

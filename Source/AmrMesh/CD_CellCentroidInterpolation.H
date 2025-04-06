@@ -107,6 +107,16 @@ public:
   virtual void
   interpolate(LevelData<EBCellFAB>& a_data) const noexcept;
 
+  /*!
+    @brief Interpolation function. Used internally by the public interface. 
+    @param[out] a_centroidData Centroid-centered data.
+    @param[in] a_cellData Cell-centered data.
+    @note T can be either a BaseIVFAB<Real> or an EBCellFAB.
+  */
+  template <typename T>
+  void
+  interpolate(T& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;  
+
 protected:
   /*!
     @brief Defined or not
@@ -189,16 +199,6 @@ protected:
                             const VolIndex&      a_vof,
                             const EBISBox&       a_ebisBox,
                             const ProblemDomain& a_domain) const noexcept;
-
-  /*!
-    @brief Interpolation function. Used internally by the public interface. 
-    @param[out] a_centroidData Centroid-centered data.
-    @param[in] a_cellData Cell-centered data.
-    @note T can be either a BaseIVFAB<Real> or an EBCellFAB.
-  */
-  template <typename T>
-  void
-  interpolate(T& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
 
   /*!
     @brief Minmod slope function. 

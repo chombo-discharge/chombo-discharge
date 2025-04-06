@@ -37,7 +37,6 @@
 #include <CD_EBNonConservativeDivergence.H>
 #include <CD_CellCentroidInterpolation.H>
 #include <CD_EbCentroidInterpolationStencil.H>
-#include <CD_CentroidInterpolationStencil.H>
 #include <CD_NamespaceHeader.H>
 
 // These are operator that can be defined.
@@ -123,23 +122,23 @@ public:
     @param[in] a_ebis             EBIndexSpace discrete information
   */
   void
-  define(const Vector<DisjointBoxLayout>&   a_grids,
-         const Vector<ProblemDomain>&       a_domains,
-         const Vector<int>&                 a_refRat,
-         const Vector<Real>&                a_dx,
-         const RealVect                     a_probLo,
-         const int                          a_finestLevel,
-         const int                          a_ebGhost,
-         const int                          a_numGhost,
-         const int                          a_lsfGhost,
-         const int                          a_redistRad,
-         const int                          a_mgInterpOrder,
-         const int                          a_mgInterpRadius,
-         const int                          a_mgInterpWeight,
-         const IrregStencil::StencilType    a_centroidStencil,
-         const IrregStencil::StencilType    a_ebStencil,
-         const RefCountedPtr<BaseIF>&       a_baseif,
-         const RefCountedPtr<EBIndexSpace>& a_ebis);
+  define(const Vector<DisjointBoxLayout>&      a_grids,
+         const Vector<ProblemDomain>&          a_domains,
+         const Vector<int>&                    a_refRat,
+         const Vector<Real>&                   a_dx,
+         const RealVect                        a_probLo,
+         const int                             a_finestLevel,
+         const int                             a_ebGhost,
+         const int                             a_numGhost,
+         const int                             a_lsfGhost,
+         const int                             a_redistRad,
+         const int                             a_mgInterpOrder,
+         const int                             a_mgInterpRadius,
+         const int                             a_mgInterpWeight,
+         const CellCentroidInterpolation::Type a_centroidStencil,
+         const IrregStencil::StencilType       a_ebStencil,
+         const RefCountedPtr<BaseIF>&          a_baseif,
+         const RefCountedPtr<EBIndexSpace>&    a_ebis);
 
   /*!
     @brief Set grid method
@@ -251,12 +250,6 @@ public:
   getVofIterator() const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to centroids
-  */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils() const;
-
-  /*!
     @brief Get stencils for interpolating from cell center to eb centroids
   */
   const IrregAmrStencil<EbCentroidInterpolationStencil>&
@@ -266,7 +259,7 @@ public:
     @brief Get objects for interpolation from cell centers to centroids. 
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
-  getCellCentroidInterpolation() const;  
+  getCellCentroidInterpolation() const;
 
   /*!
     @brief Get objects for computing non-conservative divergences.
@@ -408,9 +401,9 @@ protected:
   RealVect m_probLo;
 
   /*!
-    @brief Stencil recentering type
+    @brief Cell-center to cell-centroid interpolation method.
   */
-  IrregStencil::StencilType m_centroidStencilType;
+  CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
   /*!
     @brief Stencil recentering type
@@ -532,17 +525,12 @@ protected:
   /*!
     @brief For interpolating data from cell centers to cell centroids. 
   */
-  mutable Vector<RefCountedPtr<CellCentroidInterpolation>> m_cellCentroidInterpolation;    
+  mutable Vector<RefCountedPtr<CellCentroidInterpolation>> m_cellCentroidInterpolation;
 
   /*!
     @brief For computing non-conservative divergences
   */
-  mutable Vector<RefCountedPtr<EBNonConservativeDivergence>> m_nonConservativeDivergence;  
-
-  /*!
-    @brief Data recentering utility (center to centroid)
-  */
-  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>> m_centroidInterpolationStencil;
+  mutable Vector<RefCountedPtr<EBNonConservativeDivergence>> m_nonConservativeDivergence;
 
   /*!
     @brief Data recentering utility (center to eb centroid)
