@@ -678,18 +678,15 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       const int idx = solverIt.index();
 
       const EBCellFAB* cdrDensity  = &(*a_cdrDensities[idx])[din];
-      const EBCellFAB* cdrGradient = &(*a_cdrDensities[idx])[din];
+      const EBCellFAB* cdrGradient = &(*a_cdrGradients[idx])[din];
 
       // Define transient storage and copy data over
       cdrSources[idx]   = &(*a_cdrSources[idx])[din];
-      cdrDensities[idx] = new EBCellFAB(cdrDensity->getEBISBox(), cdrDensity->getRegion(), cdrDensity->nComp());
-      cdrGradients[idx] = new EBCellFAB(cdrGradient->getEBISBox(), cdrGradient->getRegion(), cdrGradient->nComp());
+      cdrDensities[idx] = new EBCellFAB();
+      cdrGradients[idx] = new EBCellFAB();
 
-      cdrDensities[idx]->setVal(0.0);
-      cdrGradients[idx]->setVal(0.0);
-
-      *cdrDensities[idx] += *cdrDensity;
-      *cdrGradients[idx] += *cdrGradient;
+      cdrDensities[idx]->clone(*cdrDensity);
+      cdrGradients[idx]->clone(*cdrGradient);
 
       // Interpolate density and gradient to cell centroid
       m_amr->interpToCentroids(*cdrDensities[idx], *cdrDensity, m_realm, m_phase, a_lvl, din);
@@ -717,11 +714,10 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       const EBCellFAB* rteDensity = &(*a_rteDensities[idx])[din];
 
       rteSources[idx]   = &(*a_rteSources[idx])[din];
-      rteDensities[idx] = new EBCellFAB(rteDensity->getEBISBox(), rteDensity->getRegion(), rteDensity->nComp());
+      rteDensities[idx] = new EBCellFAB();
 
       // Copy and interpolate
-      rteDensities[idx]->setVal(0.0);
-      *rteDensities[idx] += *rteDensity;
+      rteDensities[idx]->clone(*rteDensity);
 
       m_amr->interpToCentroids(*rteDensities[idx], *rteDensity, m_realm, m_phase, a_lvl, din);
 
@@ -731,9 +727,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
     }
 
     // Storage for E-field, interpolated to cell centroids
-    EBCellFAB E(a_E[din].getEBISBox(), a_E[din].getRegion(), a_E[din].nComp());
-    E.setVal(0.0);
-    E += a_E[din];
+    EBCellFAB E;
+    E.clone(a_E[din]);
     m_amr->interpToCentroids(E, a_E[din], m_realm, m_phase, a_lvl, din);
 
     // Do regular cells (actually also does irregular cells but those are redone using correct arithmetic in the call below).
@@ -1559,11 +1554,10 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    const EBCellFAB* cdrDensity = a_cdrDensities[idx];
-    tmp[idx]                    = new EBCellFAB(cdrDensity->getEBISBox(), cdrDensity->getRegion(), cdrDensity->nComp());
+    tmp[idx] = new EBCellFAB();
+    tmp[idx]->clone(*a_cdrDensities[idx]);
 
-    tmp[idx]->setVal(0.0);
-    *tmp[idx] += *cdrDensity;
+    m_amr->interpToCentroids(*tmp[idx], *a_cdrDensities[idx], m_realm, m_phase, a_lvl, a_dit);
   }
 
   // Irreegular kernel.
@@ -2074,11 +2068,10 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
-    const EBCellFAB* cdrDensity = a_cdrDensities[idx];
-    tmp[idx]                    = new EBCellFAB(cdrDensity->getEBISBox(), cdrDensity->getRegion(), cdrDensity->nComp());
+    tmp[idx] = new EBCellFAB();
+    tmp[idx]->clone(*a_cdrDensities[idx]);
 
-    tmp[idx]->setVal(0.0);
-    *tmp[idx] += *cdrDensity;
+    m_amr->interpToCentroids(*tmp[idx], *a_cdrDensities[idx], m_realm, m_phase, a_lvl, a_dit);
   }
 
   // Irregular kernel.
