@@ -2725,11 +2725,7 @@ AmrMesh::parseCentroidStencils()
 
   std::string str;
 
-  pp.get("centroid_sten", str);
-
-  // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_centroidStencilRadius = 1;
-  m_centroidStencilOrder  = 1;
+  pp.get("centroid_interp", str);
 
   if (str == "constant") {
     m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Constant;
