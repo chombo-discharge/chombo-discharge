@@ -1473,6 +1473,23 @@ public:
                     const int                a_level) const noexcept;
 
   /*!
+    @brief Interpolate data to centroids
+    @param[inout] a_centroidData Centroid-centered data
+    @param[in]    a_cellData Cell-centered data
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_level Grid level
+    @param[in]    a_din Grid index
+  */
+  void
+  interpToCentroids(EBCellFAB&               a_centroidData,
+                    const EBCellFAB&         a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level,
+                    const DataIndex&         a_din) const noexcept;
+
+  /*!
     @brief Interpolate data to centroids on realm and phase
     @param[out] a_centroidData Centroid-centered data
     @param[in]  a_cellData Cell-centered data to be interpolated
