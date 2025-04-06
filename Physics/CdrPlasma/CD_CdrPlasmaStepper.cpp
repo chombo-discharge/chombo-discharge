@@ -155,9 +155,11 @@ CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   DataOps::scale(a_rho, Units::Qe);
 
   // Above, we computed the cell-centered space charge. We must have centroid-centered.
-  m_amr->arithmeticAverage(a_rho, m_realm);
-  m_amr->interpGhost(a_rho, m_realm);
+  m_amr->conservativeAverage(a_rho, m_realm);
+  m_amr->interpGhostPwl(a_rho, m_realm);
   m_amr->interpToCentroids(rhoGas, m_realm, phase::gas);
+
+  DataOps::setCoveredValue(rhoGas, 0, 0.0);
 }
 
 void
@@ -216,6 +218,11 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   // Fill ghost cells.
   m_amr->arithmeticAverage(a_cellConductivity, m_realm, phase::gas);
   m_amr->interpGhostPwl(a_cellConductivity, m_realm, phase::gas);
+
+#if 1
+  // Interpolate to centroids
+  m_amr->interpToCentroids(a_cellConductivity, m_realm, m_phase);
+#endif
 }
 
 void
@@ -250,7 +257,7 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              average);
 
-#if 1
+#if 0 // Don't do this if the cell-centered values were interpolated to centroids
   m_amr->interpToCentroids(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
 #else
   DataOps::setValue(a_conductivityEB, 0.0);
