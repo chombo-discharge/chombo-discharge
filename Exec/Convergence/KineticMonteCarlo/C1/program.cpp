@@ -75,58 +75,15 @@ main(int argc, char* argv[])
   Random::setRandomSeed();
 
   // First, generate solutions using the SSA.
-  Vector<Real> ssaSoln;
-  Real         ssaMean;
-  Real         ssaVar;
-  for (int irun = 0; irun < numRuns; irun++) {
-    state[0] = (long long)initVal;
+  Real exactMean = 0.0;
+  Real exactVar  = 0.0;
 
-    Real curTime = 0.0;
-
-    while (curTime < stopTime) {
-      Real nextDt = kmcSolver.getCriticalTimeStep(state);
-
-      if (nextDt < stopTime - curTime) {
-        kmcSolver.stepSSA(state);
-      }
-      else {
-        nextDt = stopTime - curTime;
-      }
-
-      curTime += nextDt;
-    }
-
-    ssaSoln.push_back(1.0 * state[0]);
-  }
-
-  // Compute the mean value.
-  ssaMean = 0.0;
-  for (int irun = 0; irun < numRuns; irun++) {
-    ssaMean += ssaSoln[irun];
-  }
-#if CH_MPI
-  ssaMean = ParallelOps::sum(ssaMean);
-  ssaMean /= (numProc() * numRuns);
-#else
-  ssaMean /= numRuns;
-#endif
-
-  // Compute the variance.
-  for (int irun = 0; irun < numRuns; irun++) {
-    ssaVar += std::pow(ssaSoln[irun] - ssaMean, 2);
-  }
-#if CH_MPI
-  ssaVar = ParallelOps::sum(ssaVar);
-  ssaVar /= (numProc() * numRuns);
-#else
-  ssaVar /= numRuns;
-#endif
-  ssaVar = sqrt(ssaVar);
-
-  // Now advance problem using non-exact sampling algorithms.
+  // Advance problem using non-exact sampling algorithms. The solution with the finest time step is used as a
+  // proxy for the "exact" answer
   Vector<Real> algMean(numSteps.size(), 0.0);
   Vector<Real> algVar(numSteps.size(), 0.0);
-  for (int istep = 0; istep < numSteps.size(); istep++) {
+
+  for (int istep = numSteps.size() - 1; istep >= 0; istep--) {
     Vector<Real> algSoln;
 
     for (int irun = 0; irun < numRuns; irun++) {
@@ -163,7 +120,12 @@ main(int argc, char* argv[])
 
           kmcSolver.advanceTauMidpoint(state, nextDt);
         }
-        else if (alg == "hybrid_tau") {
+        else if (alg == "tau_prc") {
+          nextDt = stopTime / numSteps[istep];
+
+          kmcSolver.advanceTauPRC(state, nextDt);
+        }
+        else if (alg == "hybrid_plain") {
           nextDt = stopTime / numSteps[istep];
 
           kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauPlain);
@@ -173,8 +135,13 @@ main(int argc, char* argv[])
 
           kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauMidpoint);
         }
+        else if (alg == "hybrid_prc") {
+          nextDt = stopTime / numSteps[istep];
+
+          kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauPRC);
+        }
         else {
-          const std::string err = "Expected algorithm to be 'ssa', 'tau', 'heun', or 'hybrid' but got '" + alg + "'";
+          const std::string err = "Don't know the algoritm '" + alg + "'";
 
           MayDay::Error(err.c_str());
         }
@@ -201,10 +168,10 @@ main(int argc, char* argv[])
     algMean[istep] /= numRuns;
 #endif
 
-    // Compute the variance.
+    // Compute the variance -- i.e. the deviation from the "exact" solution.
     algVar[istep] = 0.0;
     for (int irun = 0; irun < numRuns; irun++) {
-      algVar[istep] += std::pow(algSoln[irun] - algMean[istep], 2);
+      algVar[istep] += std::pow(algSoln[irun] - algMean.back(), 2);
     }
 #if CH_MPI
     algVar[istep] = ParallelOps::sum(algVar[istep]);
@@ -215,13 +182,18 @@ main(int argc, char* argv[])
     algVar[istep] = sqrt(algVar[istep]);
   }
 
+  exactMean = algMean.back();
+  exactVar  = algVar.back();
+
   // Print the mean solution error and convergence rate. Oh, and this only makes sense for non-SSA runs
   // since the SSA algorithm does the time steps differently.
   if (procID() == 0 && alg != "ssa") {
     // clang-format off
     std::cout << std::left << std::setw(20) << "# dt"
-	      << std::left << std::setw(20) << "Mean error"
-	      << std::left << std::setw(20) << "Std error"
+	      << std::left << std::setw(20) << "num steps"
+	      << std::left << std::setw(20) << "Mean"      
+	      << std::left << std::setw(20) << "Rel. mean error"
+	      << std::left << std::setw(20) << "Rel. std error"
 	      << std::left << std::setw(20) << "Mean conv. order"
 	      << std::left << std::setw(20) << "Var conv. order"
 	      << "\n";
@@ -229,21 +201,23 @@ main(int argc, char* argv[])
 
     for (int istep = 0; istep < numSteps.size(); istep++) {
       const Real curDt   = stopTime / numSteps[istep];
-      const Real meanErr = std::abs(algMean[istep] - ssaMean);
-      const Real varErr  = std::abs(algVar[istep] - ssaVar);
+      const Real meanErr = std::abs(algMean[istep] - exactMean);
+      const Real varErr  = std::abs(algVar[istep] - exactVar);
 
       if (istep < numSteps.size() - 1) {
 
-        const Real finerErr = std::abs(algMean[istep + 1] - ssaMean);
-        const Real finerVar = std::abs(algVar[istep + 1] - ssaVar);
+        const Real finerErr = std::abs(algMean[istep + 1] - exactMean);
+        const Real finerVar = std::abs(algVar[istep + 1] - exactVar);
         const Real finerDt  = stopTime / numSteps[istep + 1];
         const Real meanConv = log(meanErr / finerErr) / log(curDt / finerDt);
         const Real varConv  = log(varErr / finerVar) / log(curDt / finerDt);
 
         // clang-format off
 	std::cout << std::left << std::setw(20) << curDt
-		  << std::left << std::setw(20) << meanErr
-		  << std::left << std::setw(20) << varErr
+		  << std::left << std::setw(20) << numSteps[istep]
+		  << std::left << std::setw(20) << algMean[istep]
+		  << std::left << std::setw(20) << meanErr/exactMean
+		  << std::left << std::setw(20) << varErr/exactMean
 		  << std::left << std::setw(20) << meanConv
 		  << std::left << std::setw(20) << varConv
 		  << "\n";
@@ -252,6 +226,8 @@ main(int argc, char* argv[])
       else {
         // clang-format off
 	std::cout << std::left << std::setw(20) << curDt
+		  << std::left << std::setw(20) << numSteps[istep]
+		  << std::left << std::setw(20) << algMean[istep]	  
 		  << std::left << std::setw(20) << meanErr
 		  << std::left << std::setw(20) << varErr
 		  << std::left << std::setw(20) << "*"

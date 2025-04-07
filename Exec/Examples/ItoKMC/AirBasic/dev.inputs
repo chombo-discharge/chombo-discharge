@@ -21,9 +21,9 @@ AmrMesh.blocking_factor  = 16          # Blocking factor.
 AmrMesh.max_box_size     = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
 AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
-AmrMesh.num_ghost        = 2           # Number of ghost cells. 
-AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stuff
+AmrMesh.num_ghost        = 4           # Number of ghost cells. 
+AmrMesh.lsf_ghost        = 4           # Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
@@ -81,7 +81,7 @@ FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars          = phi rho E perm         # Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes = true              # Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter_rho        = 0                 # Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_rho        = 2                 # Number of filterings of space charge before Poisson solve
 FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
@@ -248,7 +248,7 @@ ItoKMCGodunovStepper.load_balance_particles                = false          # Tu
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 8             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
@@ -282,7 +282,7 @@ ItoKMCJSON.chemistry_file     = simple_air_chemistry.json ## Chemistry file
 ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
 
 # Kinetic Monte Carlo solver settings. 
-ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_particles  = 8                      ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
@@ -298,10 +298,12 @@ ItoKMCStreamerTagger.plot              = false        # Turn on/off plotting of 
 ItoKMCStreamerTagger.num_tag_boxes     = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0  # Only allow tags that fall between
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0  # these two corners
-ItoKMCStreamerTagger.buffer            = 4            # Grow tagged cells
+ItoKMCStreamerTagger.buffer            = 8            # Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.0          # Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl   = 7            # Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl   = 10            # Set max coarsening depth
+
+poisson.num_filter=5

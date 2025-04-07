@@ -1,16 +1,20 @@
+# RNG seed. Set to a negative number to get a new seed every time
+Random.seed=0
+
 # Basic settings
-stop_time = 5.0
-nsteps = 5 10 20 40 80 160
-nruns = 1000
+stop_time = 20.0
+nsteps = 40 80 160 320 640 1280 2560 5120
+nruns = 2000
 ionization_rate = 2.0
 attachment_rate = 1.0
-initial_particles = 20
+initial_particles = 20000000
 
-# Algorithm to be used
-algorithm = tau_plain
+# Algorithm to be used. Valid selections are:
+# 'ssa', 'tau_plain', 'tau_midpoint', 'tau_prc', 'hybrid_plain', 'hybrid_midpoint', 'hybrid_prc'
+algorithm = tau_midpoint
 
 # Settings for hybrid SSA/tau algoriuhm (i.e., the Cao algorithm)
-num_crit = 5
-eps = 0.15
+num_crit = 10
+eps = 2.0
 num_ssa = 10
 ssa_lim = 5.0

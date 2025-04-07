@@ -5,7 +5,7 @@ AmrMesh.lo_corner        = -0.2  0.0   # Low corner of problem domain
 AmrMesh.hi_corner        =  0.2  0.1   # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 32      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.max_amr_depth    = 8           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -168,15 +168,24 @@ DischargeInceptionStepper.profile          = false                   ## Turn on/
 DischargeInceptionStepper.full_integration = true                    ## Turn on/off full integration
 DischargeInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
 DischargeInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
-DischargeInceptionStepper.inception_alg    = euler alpha 0.25        ## Integration algorithm for inception integral.
+DischargeInceptionStepper.inception_alg    = trapz              ## Integration algorithm. Either euler or trapz
 DischargeInceptionStepper.output_file      = report.txt              ## Output file
 DischargeInceptionStepper.K_inception      = 12                      ## User-specified inception value
 DischargeInceptionStepper.plt_vars         = K Uinc bg_rate emission field poisson tracer cdr ## Plot variables
 
+# Particle integration controls
+DischargeInceptionStepper.min_phys_dx      = 1.E-10		## Minimum permitted physical step size
+DischargeInceptionStepper.max_phys_dx      = 1.E99		## Maximum permitted physical step size
+DischargeInceptionStepper.min_grid_dx      = 0.5		## Minimum permitted grid step size
+DischargeInceptionStepper.max_grid_dx      = 5.0		## Maximum permitted grid step size
+DischargeInceptionStepper.alpha_dx         = 5.0		## Step size relative to avalanche length
+DischargeInceptionStepper.grad_alpha_dx    = 0.1		## Maximum step size relative to alpha/grad(alpha)
+DischargeInceptionStepper.townsend_grid_dx = 2.0		## Space step to use for Townsend tracking
+
 # Static mode
 DischargeInceptionStepper.voltage_lo       = 20E3                     # Low voltage multiplier
 DischargeInceptionStepper.voltage_hi       = 60E3                     # Highest voltage multiplier
-DischargeInceptionStepper.voltage_steps    = 20			                            # Number of voltage steps
+DischargeInceptionStepper.voltage_steps    = 19			                            # Number of voltage steps
 
 # Dynamic mode
 DischargeInceptionStepper.ion_transport = true                    # Turn on/off ion transport
@@ -192,8 +201,8 @@ DischargeInceptionStepper.max_dt_growth = 0.05                    # Maximum rela
 # DischargeInceptionTagger class options
 # ====================================================================================================
 DischargeInceptionTagger.verbosity   = -1    # Tagger chattiness. 
-DischargeInceptionTagger.buffer      = 0     # Grown buffer around flagged cells
-DischargeInceptionTagger.max_voltage = 40E3 # Maximum applied voltage 
+DischargeInceptionTagger.buffer      = 4     # Grown buffer around flagged cells
+DischargeInceptionTagger.max_voltage = 60E3 # Maximum applied voltage 
 DischargeInceptionTagger.ref_alpha   = 1.0   # Refinement curvature criterion. Lower => more mesh
 DischargeInceptionTagger.plot        = false # Plot tagging field or not.
 

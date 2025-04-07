@@ -334,14 +334,13 @@ ItoKMCJSON::initializeGasLaw()
 
     const Real T0   = m_json["gas"]["law"][curLaw]["temperature"].get<Real>();
     const Real P0   = m_json["gas"]["law"][curLaw]["pressure"].get<Real>();
-    const Real P    = P0 * Units::atm2pascal;
-    const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
+    const Real Rho0 = (P0 * Units::Na) / (T0 * Units::R);
 
     m_gasTemperature = [T0](const RealVect a_position) -> Real {
       return T0;
     };
-    m_gasPressure = [P](const RealVect a_position) -> Real {
-      return P;
+    m_gasPressure = [P0](const RealVect a_position) -> Real {
+      return P0;
     };
     m_gasNumberDensity = [Rho0](const RealVect a_position) -> Real {
       return Rho0;
@@ -614,14 +613,15 @@ ItoKMCJSON::initializePlasmaSpecies()
     m_allSpecies.emplace(speciesID);
 
     if (m_verbose) {
-      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:"
-             << "\n"
+      // clang-format off
+      pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:" << "\n"
              << "\tName             = " << speciesID << "\n"
              << "\tZ                = " << Z << "\n"
              << "\tMobile           = " << mobile << "\n"
              << "\tDiffusive        = " << diffusive << "\n"
              << "\tSolver type      = " << solver << "\n"
              << "\n";
+      // clang-format on
     }
   }
 
@@ -2918,6 +2918,17 @@ ItoKMCJSON::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Rea
   }
 
   return std::numeric_limits<Real>::infinity();
+}
+
+Real
+ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept
+{
+  CH_TIME("ItoKMCJSON::getNeutralDensity");
+  if (m_verbose) {
+    pout() << m_className + "::getNeutralDensity" << endl;
+  }
+
+  return m_gasNumberDensity(a_pos);
 }
 
 Real

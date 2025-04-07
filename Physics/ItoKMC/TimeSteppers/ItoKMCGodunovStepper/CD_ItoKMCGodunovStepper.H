@@ -168,6 +168,11 @@ namespace Physics {
       bool m_smoothConductivity;
 
       /*!
+	@brief If true, particles will be emitted before the reactive step
+      */
+      bool m_emitSecondaryParticlesBeforeReactions;
+
+      /*!
 	@brief Which advancement algorithm to use.
       */
       WhichAlgorithm m_algorithm;
@@ -176,6 +181,21 @@ namespace Physics {
 	@brief Timer used for run-time logging of routines
       */
       Timer m_timer;
+
+      /*!
+	@brief Number of filterings when computing the semi-implicit space charge density
+      */
+      int m_filterNum;
+
+      /*!
+	@brief Number of filterings when computing the semi-implicit space charge density
+      */
+      int m_filterMaxStride;
+
+      /*!
+	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
+      */
+      Real m_filterAlpha;
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
@@ -238,10 +258,22 @@ namespace Physics {
       parseAlgorithm() noexcept;
 
       /*!
+	@brief Parse filter settings
+      */
+      virtual void
+      parseFiltering() noexcept;
+
+      /*!
 	@brief Parse checkpoint-restart functionality.
       */
       virtual void
       parseCheckpointParticles() noexcept;
+
+      /*!
+	@brief Parse when secondary particles are emitted
+      */
+      virtual void
+      parseSecondaryEmissionSpecification() noexcept;
 
       /*!
 	@brief Set the starting positions for the ItoSolver particles

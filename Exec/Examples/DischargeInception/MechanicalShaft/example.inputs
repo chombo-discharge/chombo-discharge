@@ -193,10 +193,19 @@ DischargeInceptionStepper.profile          = false                   ## Turn on/
 DischargeInceptionStepper.full_integration = true                    ## Use full reconstruction of K-region or not
 DischargeInceptionStepper.mode             = stationary              ## Mode (stationary or transient)
 DischargeInceptionStepper.eval_townsend    = true                    ## Evaluate Townsend criterion or not (only for stationary)
-DischargeInceptionStepper.inception_alg    = trapz alpha 0.5         ## Integration algorithm and step size selection
+DischargeInceptionStepper.inception_alg    = trapz              ## Integration algorithm. Either euler or trapz
 DischargeInceptionStepper.output_file      = report.txt              ## Output file
 DischargeInceptionStepper.K_inception      = 12                      ## User-specified inception value
 DischargeInceptionStepper.plt_vars         = alpha eta K Uinc bg_rate emission poisson townsend ## Plot variables
+
+# Particle integration controls
+DischargeInceptionStepper.min_phys_dx      = 1.E-10		## Minimum permitted physical step size
+DischargeInceptionStepper.max_phys_dx      = 1.E99		## Maximum permitted physical step size
+DischargeInceptionStepper.min_grid_dx      = 0.5		## Minimum permitted grid step size
+DischargeInceptionStepper.max_grid_dx      = 5.0		## Maximum permitted grid step size
+DischargeInceptionStepper.alpha_dx         = 5.0		## Step size relative to avalanche length
+DischargeInceptionStepper.grad_alpha_dx    = 0.1		## Maximum step size relative to alpha/grad(alpha)
+DischargeInceptionStepper.townsend_grid_dx = 2.0		## Space step to use for Townsend tracking
 
 # Static mode
 DischargeInceptionStepper.voltage_lo       = 20E3                   ## Low voltage multiplier

@@ -296,6 +296,23 @@ public:
   const EBAMRCellData&
   getVelocityField() const;
 
+  /*!
+    @brief Get the deposition type. 
+  */
+  virtual DepositionType
+  getDepositionType() const;
+  /*!
+    @brief Get the coarse-fine deposition type. 
+  */
+  virtual CoarseFineDeposition
+  getCoarseFineDepositionType() const;
+
+  /*!
+    @brief Get the interpolation type.
+  */
+  virtual DepositionType
+  getInterpolationType() const;
+
 protected:
   /*!
     @brief Handle to AMR mesh. 

@@ -63,6 +63,8 @@ DischargeInceptionTagger::parseOptions()
   pp.get("ref_alpha", m_refAlpha);
   pp.get("max_voltage", m_maxVoltage);
   pp.get("plot", m_plot);
+
+  this->parseRefinementBoxes();
 }
 
 void
@@ -98,10 +100,13 @@ DischargeInceptionTagger::tagCells(EBAMRTags& a_tags)
   const int maxLevel       = m_amr->getMaxAmrDepth();
   const int finestTagLevel = (finestLevel == maxLevel) ? maxLevel - 1 : finestLevel;
 
+  const RealVect probLo = m_amr->getProbLo();
+
   for (int lvl = 0; lvl <= finestTagLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
     const DataIterator&      dit   = dbl.dataIterator();
     const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx    = m_amr->getDx()[lvl];
 
     const int nbox = dit.size();
 
@@ -118,6 +123,15 @@ DischargeInceptionTagger::tagCells(EBAMRTags& a_tags)
 
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && tracerFieldReg(iv, 0) >= m_refAlpha) {
+          foundTags = 1;
+
+          tags |= iv;
+        }
+
+        // Check for manual refinement
+        const RealVect physPos = probLo + (iv + 0.5 * RealVect::Unit) * dx;
+
+        if (this->getManualRefinementLevel(physPos) > lvl) {
           foundTags = 1;
 
           tags |= iv;
