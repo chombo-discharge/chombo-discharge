@@ -168,7 +168,7 @@ EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
   CH_TIME("EBCentroidInterpolation::getLinearStencil");
 
   const bool foundStencil = LinearStencil::getLinearInterpStencil(a_stencil,
-                                                                  a_ebisBox.centroid(a_vof),
+                                                                  a_ebisBox.bndryCentroid(a_vof),
                                                                   a_vof,
                                                                   a_domain,
                                                                   a_ebisBox);
@@ -185,7 +185,7 @@ EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_st
   CH_TIME("EBCentroidInterpolation::getTaylorExtrapolationStencil");
 
   const int order = EBArith::getFirstOrderExtrapolationStencil(a_stencil,
-                                                               a_ebisBox.centroid(a_vof) * m_dx,
+                                                               a_ebisBox.bndryCentroid(a_vof) * m_dx,
                                                                m_dx * RealVect::Unit,
                                                                a_vof,
                                                                a_ebisBox,
@@ -210,7 +210,7 @@ EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil,
 
   const bool useStartVoF = true;
 
-  a_stencil = LeastSquares::getInterpolationStencil(Location::Cell::Centroid,
+  a_stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
                                                     Location::Cell::Center,
                                                     LeastSquares::Connectivity::MonotonePath,
                                                     a_vof,
@@ -236,7 +236,7 @@ EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&          a_stenci
   a_stencil.add(a_vof, 1.0);
 
   const Real     tolerance = 1.E-8;
-  const RealVect centroid  = a_ebisBox.centroid(a_vof);
+  const RealVect centroid  = a_ebisBox.bndryCentroid(a_vof);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
 
@@ -405,7 +405,7 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
         }
         }
 
-        const Real dx = ebisBox.centroid(vof)[dir];
+        const Real dx = ebisBox.bndryCentroid(vof)[dir];
 
         a_centroidData(vof, comp) += slope * dx;
       }
