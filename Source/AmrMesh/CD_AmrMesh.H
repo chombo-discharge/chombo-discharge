@@ -23,7 +23,6 @@
 #include <CD_EBCoarAve.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBReflux.H>
@@ -1550,17 +1549,6 @@ public:
                             const std::string&          a_realm,
                             const phase::which_phase&   a_phase) const noexcept;
 
-#if 1
-#warning "CD_AmrMesh.H -- code marked for removal"
-  /*!
-    @brief Get interpolation stencils for going from cell center to cell boundary centroid
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>&
-  getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-#endif
-
   /*!
     @brief Sets multifluid index space. 
     @param[in] a_multiFluidIndexSpace Multifluid index space wrapper. 
@@ -1995,14 +1983,14 @@ protected:
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
-    @brief Interpolation type for centroid
+    @brief Interpolation type for cell to cell centroid interpolation
   */
   CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
   /*!
-    @brief Stencil type for EB interpolation
+    @brief Interpolation type for cell to EB centroid interpolation    
   */
-  IrregStencil::StencilType m_ebCentroidStencilType;
+  EBCentroidInterpolation::Type m_ebCentroidInterpolationType;
 
   /*!
     @brief Coarsest box where we compute
@@ -2108,36 +2096,6 @@ protected:
     @brief Redistribution radius
   */
   int m_redistributionRadius;
-
-  /*!
-    @brief Order for interpolation stencils to centroids
-  */
-  int m_centroidStencilOrder;
-
-  /*!
-    @brief Radius for centroid interpolation stencil
-  */
-  int m_centroidStencilRadius;
-
-  /*!
-    @brief Order for interpolation stencilst to EB
-  */
-  int m_ebCentroidStencilOrder;
-
-  /*!
-    @brief Radius for EB interpolation stencil
-  */
-  int m_ebCentroidStencilRadius;
-
-  /*!
-    @brief Stencil order for irregular stencils
-  */
-  int m_irregStenOrder;
-
-  /*!
-    @brief radius for irregular stencils
-  */
-  int m_irregStenRadius;
 
   /*!
     @brief Has grids or not
@@ -2293,13 +2251,13 @@ protected:
     @brief Parse centroid interpolation stencils
   */
   void
-  parseCentroidStencils();
+  parseCellCentroidInterpolation();
 
   /*!
     @brief Parse EB interpolation (or extrapolation) stencils
   */
   void
-  parseEbCentroidStencils();
+  parseEBCentroidInterpolation();
 
   /*!
     @brief Compute cell-centered gradient for a grid level.

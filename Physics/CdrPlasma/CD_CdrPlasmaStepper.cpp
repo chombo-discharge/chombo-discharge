@@ -219,7 +219,7 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   m_amr->arithmeticAverage(a_cellConductivity, m_realm, phase::gas);
   m_amr->interpGhostPwl(a_cellConductivity, m_realm, phase::gas);
 
-#if 1
+#if 0
   // Interpolate to centroids
   m_amr->interpToCentroids(a_cellConductivity, m_realm, m_phase);
 #endif
@@ -257,7 +257,8 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              average);
 
-#if 0 // Don't do this if the cell-centered values were interpolated to centroids
+#if 1 // Don't do this if the cell-centered values were interpolated to centroids
+#warning "CdrPlasmaStepper::computeFaceConductivity -- this should be interpolated to the EB centroid"
   m_amr->interpToCentroids(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
 #else
   DataOps::setValue(a_conductivityEB, 0.0);

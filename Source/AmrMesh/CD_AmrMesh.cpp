@@ -937,8 +937,8 @@ AmrMesh::parseOptions()
   this->parseNumGhostCells();
   this->parseEbGhostCells();
   this->parseProbLoHiCorners();
-  this->parseCentroidStencils();
-  this->parseEbCentroidStencils();
+  this->parseCellCentroidInterpolation();
+  this->parseEBCentroidInterpolation();
   this->parseMultigridInterpolator();
 
   this->sanityCheck();
@@ -2714,11 +2714,11 @@ AmrMesh::parseRedistributionRadius()
 }
 
 void
-AmrMesh::parseCentroidStencils()
+AmrMesh::parseCellCentroidInterpolation()
 {
-  CH_TIME("AmrMesh::parseCentroidStencils()");
+  CH_TIME("AmrMesh::parseCellCentroidInterpolation()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseCentroidStencils()" << endl;
+    pout() << "AmrMesh::parseCellCentroidInterpolation()" << endl;
   }
 
   ParmParse pp("AmrMesh");
@@ -2752,42 +2752,50 @@ AmrMesh::parseCentroidStencils()
     m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Superbee;
   }
   else {
-    MayDay::Abort("AmrMesh::parseCentroidStencils - unknown stencil requested");
+    MayDay::Abort("AmrMesh::parseCellCentroidInterpolation - unknown stencil requested");
   }
 }
 
 void
-AmrMesh::parseEbCentroidStencils()
+AmrMesh::parseEBCentroidInterpolation()
 {
-  CH_TIME("AmrMesh::parseEbCentroidStencils()");
+  CH_TIME("AmrMesh::parseEBCentroidInterpolation()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseEbCentroidStencils()" << endl;
+    pout() << "AmrMesh::parseEBCentroidInterpolation()" << endl;
   }
 
   ParmParse pp("AmrMesh");
 
   std::string str;
 
-  pp.get("eb_sten", str);
+  pp.get("eb_interp", str);
 
-  // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_ebCentroidStencilRadius = 1;
-  m_ebCentroidStencilOrder  = 1;
-
-  if (str == "linear") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::Linear;
+  if (str == "constant") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Constant;
+  }
+  else if (str == "linear") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Linear;
   }
   else if (str == "taylor") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::TaylorExtrapolation;
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Taylor;
   }
   else if (str == "lsq") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::LeastSquares;
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::LeastSquares;
   }
   else if (str == "pwl") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::PiecewiseLinear;
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::PiecewiseLinear;
+  }
+  else if (str == "minmod") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::MinMod;
+  }
+  else if (str == "monotonized_central") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::MonotonizedCentral;
+  }
+  else if (str == "superbee") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Superbee;
   }
   else {
-    MayDay::Abort("AmrMesh::parseEbCentroidStencils - unknown stencil requested");
+    MayDay::Abort("AmrMesh::parseCellCentroidInterpolation - unknown stencil requested");
   }
 }
 
@@ -3369,27 +3377,6 @@ AmrMesh::nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
   nonConsDiv->nonConservativeDivergence(a_nonConsDivF, a_kappaDivF);
 }
 
-#if 1
-#warning "CD_AmrMesh.cpp -- code marked for removal"
-const IrregAmrStencil<EbCentroidInterpolationStencil>&
-AmrMesh::getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string
-      str = "AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" +
-            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getEbCentroidInterpolationStencilStencils(a_phase);
-}
-#endif
-
 bool
 AmrMesh::queryRealm(const std::string a_realm) const
 {
@@ -3488,7 +3475,7 @@ AmrMesh::defineRealms()
                      m_multigridInterpRadius,
                      m_multigridInterpWeight,
                      m_cellCentroidInterpolationType,
-                     m_ebCentroidStencilType,
+                     m_ebCentroidInterpolationType,
                      m_baseif,
                      m_multifluidIndexSpace);
   }
@@ -3544,7 +3531,7 @@ AmrMesh::regridRealm(const std::string          a_realm,
                             m_multigridInterpRadius,
                             m_multigridInterpWeight,
                             m_cellCentroidInterpolationType,
-                            m_ebCentroidStencilType,
+                            m_ebCentroidInterpolationType,
                             m_baseif,
                             m_multifluidIndexSpace);
 

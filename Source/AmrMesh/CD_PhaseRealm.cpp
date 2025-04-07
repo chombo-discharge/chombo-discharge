@@ -61,7 +61,7 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
                    const int                             a_mgInterpRadius,
                    const int                             a_mgInterpWeight,
                    const CellCentroidInterpolation::Type a_centroidStencil,
-                   const IrregStencil::StencilType       a_ebStencil,
+                   const EBCentroidInterpolation::Type   a_ebStencil,
                    const RefCountedPtr<BaseIF>&          a_baseif,
                    const RefCountedPtr<EBIndexSpace>&    a_ebis)
 {
@@ -133,9 +133,8 @@ PhaseRealm::preRegrid()
   m_gradientOp.resize(0);
   m_levelset.resize(0);
   m_cellCentroidInterpolation.resize(0);
-  m_nonConservativeDivergence.resize(0);  
-
-  m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
+  m_ebCentroidInterpolation.resize(0);
+  m_nonConservativeDivergence.resize(0);
 }
 
 void
@@ -809,26 +808,11 @@ PhaseRealm::defineIrregSten()
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       m_cellCentroidInterpolation[lvl] = RefCountedPtr<CellCentroidInterpolation>(
         new CellCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], m_cellCentroidInterpolationType));
+
+      m_ebCentroidInterpolation[lvl] = RefCountedPtr<EBCentroidInterpolation>(
+        new EBCentroidInterpolation(*m_eblg[lvl], m_dx[lv], m_ebCentroidInterpolationType));
     }
-#if 1
-#warning "Marked for removal"
-    // I don't want these to be have a large radius or high order. The reason for that is simple: Only first-order stencils
-    // can be guaranteed to have non-negative interpolation weights.
-
-    constexpr int order = 1;
-    constexpr int rad   = 1;
-
-    m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(
-      new IrregAmrStencil<EbCentroidInterpolationStencil>(m_grids,
-                                                          m_ebisl,
-                                                          m_domains,
-                                                          m_dx,
-                                                          m_finestLevel,
-                                                          order,
-                                                          rad,
-                                                          m_ebCentroidStencilType));
   }
-#endif
 }
 
 void
@@ -905,12 +889,6 @@ PhaseRealm::getVofIterator() const
   return m_vofIter;
 }
 
-const IrregAmrStencil<EbCentroidInterpolationStencil>&
-PhaseRealm::getEbCentroidInterpolationStencilStencils() const
-{
-  return *m_ebCentroidInterpolationStencil;
-}
-
 const Vector<RefCountedPtr<EBGradient>>&
 PhaseRealm::getGradientOp() const
 {
@@ -929,6 +907,16 @@ PhaseRealm::getCellCentroidInterpolation() const
   }
 
   return m_cellCentroidInterpolation;
+}
+
+const Vector<RefCountedPtr<EBCentroidInterpolation>>&
+PhaseRealm::getEBCentroidInterpolation() const
+{
+  if (!this->queryOperator(s_eb_irreg_interp)) {
+    MayDay::Error("PhaseRealm::getEBCentroidInterpolation - operator not registered!");
+  }
+
+  return m_ebCentroidInterpolation;
 }
 
 const Vector<RefCountedPtr<EBNonConservativeDivergence>>&

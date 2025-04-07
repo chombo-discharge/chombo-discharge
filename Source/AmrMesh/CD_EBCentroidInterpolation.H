@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CellCentroidInterpolation.H
+  @file   CD_EBCentroidInterpolation.H
   @brief  Declaration of class for interpolating cell-centered data to cell centroids. 
   @author Robert Marskar
 */
 
-#ifndef CD_CellCentroidInterpolation_H
-#define CD_CellCentroidInterpolation_H
+#ifndef CD_EBCentroidInterpolation_H
+#define CD_EBCentroidInterpolation_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -25,7 +25,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for interpolating cell-centered data to the cell centroid.
+  @brief Class for interpolating cell-centered data to the EB centroid.
 
   @details Various interpolation methods are supported, where some are supported by explicitly
   expressable stencils and others through limiters. 
@@ -33,7 +33,7 @@
   This is a per-level class without AMR functionality. On coarse-fine interfaces near the EB the
   user must fill the ghost cells prior to the interpolation. 
 */
-class CellCentroidInterpolation
+class EBCentroidInterpolation
 {
 public:
   /*!
@@ -54,12 +54,12 @@ public:
   /*!
     @brief Default constructor. Must call the define function afterwards
   */
-  CellCentroidInterpolation() noexcept;
+  EBCentroidInterpolation() noexcept;
 
   /*!
     @brief Copy constructor. Not allowed.
   */
-  CellCentroidInterpolation(const CellCentroidInterpolation& a_other) = delete;
+  EBCentroidInterpolation(const EBCentroidInterpolation& a_other) = delete;
 
   /*!
     @brief Defining constructor. This calls the define function.
@@ -67,12 +67,12 @@ public:
     @param[in] a_dx Grid resolution
     @param[in] a_interpolationType Interpolation type
   */
-  CellCentroidInterpolation(const EBLevelGrid& a_eblg, const Real& a_dx, const Type& a_interpolationType) noexcept;
+  EBCentroidInterpolation(const EBLevelGrid& a_eblg, const Real& a_dx, const Type& a_interpolationType) noexcept;
 
   /*!
     @brief Destructor. Does nothing.
   */
-  virtual ~CellCentroidInterpolation() noexcept;
+  virtual ~EBCentroidInterpolation() noexcept;
 
   /*!
     @brief Define function. Puts object in usable state. 
@@ -92,30 +92,12 @@ public:
   interpolate(LevelData<BaseIVFAB<Real>>& a_centroidData, const LevelData<EBCellFAB>& a_cellData) const noexcept;
 
   /*!
-    @brief Function for interpolating data.
-    @details This version will copy the data from the regular cells and interpolate data in the cut-cells.
-    @param[out] a_centroidData Centroid-centered data.
-    @param[in] a_cellData Cell-centered data.
-  */
-  virtual void
-  interpolate(LevelData<EBCellFAB>& a_centroidData, const LevelData<EBCellFAB>& a_cellData) const noexcept;
-
-  /*!
-    @brief Function for interpolating data.
-    @param[inout] a_centroidData Cell-centered on input and centroid centered on output.
-  */
-  virtual void
-  interpolate(LevelData<EBCellFAB>& a_data) const noexcept;
-
-  /*!
     @brief Interpolation function. 
     @param[out] a_centroidData Centroid-centered data.
     @param[in] a_cellData Cell-centered data.
-    @note T can be either a BaseIVFAB<Real> or an EBCellFAB.
   */
-  template <typename T>
   void
-  interpolate(T& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;  
+  interpolate(BaseIVFAB<Real>& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
 
 protected:
   /*!
@@ -226,7 +208,5 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
-
-#include <CD_CellCentroidInterpolationImplem.H>
 
 #endif

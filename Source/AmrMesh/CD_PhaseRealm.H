@@ -19,7 +19,6 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBCoarAve.H>
@@ -36,7 +35,7 @@
 #include <CD_EBGhostCellInterpolator.H>
 #include <CD_EBNonConservativeDivergence.H>
 #include <CD_CellCentroidInterpolation.H>
-#include <CD_EbCentroidInterpolationStencil.H>
+#include <CD_EBCentroidInterpolation.H>
 #include <CD_NamespaceHeader.H>
 
 // These are operator that can be defined.
@@ -136,7 +135,7 @@ public:
          const int                             a_mgInterpRadius,
          const int                             a_mgInterpWeight,
          const CellCentroidInterpolation::Type a_centroidStencil,
-         const IrregStencil::StencilType       a_ebStencil,
+         const EBCentroidInterpolation::Type   a_ebStencil,
          const RefCountedPtr<BaseIF>&          a_baseif,
          const RefCountedPtr<EBIndexSpace>&    a_ebis);
 
@@ -250,16 +249,16 @@ public:
   getVofIterator() const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to eb centroids
-  */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>&
-  getEbCentroidInterpolationStencilStencils() const;
-
-  /*!
     @brief Get objects for interpolation from cell centers to centroids. 
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
   getCellCentroidInterpolation() const;
+
+  /*!
+    @brief Get objects for interpolation from cell centers to EB centroids
+  */
+  const Vector<RefCountedPtr<EBCentroidInterpolation>>&
+  getEBCentroidInterpolation() const;
 
   /*!
     @brief Get objects for computing non-conservative divergences.
@@ -406,9 +405,9 @@ protected:
   CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
   /*!
-    @brief Stencil recentering type
+    @brief Cell-center to cell-centroid interpolation method.
   */
-  IrregStencil::StencilType m_ebCentroidStencilType;
+  EBCentroidInterpolation::Type m_ebCentroidInterpolationType;
 
   /*!
     @brief Grid resolutions
@@ -528,14 +527,14 @@ protected:
   mutable Vector<RefCountedPtr<CellCentroidInterpolation>> m_cellCentroidInterpolation;
 
   /*!
+    @brief For interpolating data from cell centers to EB centroids. 
+  */
+  mutable Vector<RefCountedPtr<EBCentroidInterpolation>> m_ebCentroidInterpolation;
+
+  /*!
     @brief For computing non-conservative divergences
   */
   mutable Vector<RefCountedPtr<EBNonConservativeDivergence>> m_nonConservativeDivergence;
-
-  /*!
-    @brief Data recentering utility (center to eb centroid)
-  */
-  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>> m_ebCentroidInterpolationStencil;
 
   /*!
     @brief Define EBLevelGrids
