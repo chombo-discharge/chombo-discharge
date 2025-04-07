@@ -81,7 +81,7 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
   m_multigridInterpolationRadius  = a_mgInterpRadius;
   m_multigridInterpolationWeight  = a_mgInterpWeight;
   m_cellCentroidInterpolationType = a_centroidStencil;
-  m_ebCentroidStencilType         = a_ebStencil;
+  m_ebCentroidInterpolationType   = a_ebStencil;
   m_baseif                        = a_baseif;
   m_ebis                          = a_ebis;
 
@@ -810,7 +810,7 @@ PhaseRealm::defineIrregSten()
         new CellCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], m_cellCentroidInterpolationType));
 
       m_ebCentroidInterpolation[lvl] = RefCountedPtr<EBCentroidInterpolation>(
-        new EBCentroidInterpolation(*m_eblg[lvl], m_dx[lv], m_ebCentroidInterpolationType));
+        new EBCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], m_ebCentroidInterpolationType));
     }
   }
 }

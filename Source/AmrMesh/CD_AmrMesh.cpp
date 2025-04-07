@@ -2361,6 +2361,75 @@ AmrMesh::interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
 }
 
 void
+AmrMesh::interpToEB(EBAMRIVData&             a_centroidData,
+                    const EBAMRCellData&     a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::interpToEB(ebamrivdata)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToEB(ebamirvdata)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::interpToEB(ebamrivdata) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->interpToEB(*a_centroidData[lvl], *a_cellData[lvl], a_realm, a_phase, lvl);
+  }
+}
+
+void
+AmrMesh::interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const std::string           a_realm,
+                    const phase::which_phase    a_phase,
+                    const int                   a_level) const noexcept
+{
+  CH_TIME("AmrMesh::interpToEB(LD<BaseIVFAB<Real>>)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToEB(LD<BaseIVFAB<Real>>)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::interpToEB(LD<BaseIVFAB<Real>>) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& ebCentroidInterp = m_realms[a_realm]->getEBCentroidInterpolation(a_phase)[a_level];
+
+  ebCentroidInterp->interpolate(a_centroidData, a_cellData);
+}
+
+void
+AmrMesh::interpToEB(BaseIVFAB<Real>&         a_centroidData,
+                    const EBCellFAB&         a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level,
+                    const DataIndex&         a_din) const noexcept
+{
+  CH_TIME("AmrMesh::interpToEB(BaseIVFAB<Real>)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToEB(BaseIVFAB<Real>)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::interpToEB(BaseIVFAB<Real>) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& ebCentroidInterp = m_realms[a_realm]->getEBCentroidInterpolation(a_phase)[a_level];
+
+  ebCentroidInterp->interpolate(a_centroidData, a_cellData, a_din);
+}
+
+void
 AmrMesh::setCoarsestGrid(const IntVect& a_nCells)
 {
   CH_TIME("AmrMesh::setCoarsestGrid()");

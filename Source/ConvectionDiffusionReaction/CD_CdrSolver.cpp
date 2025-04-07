@@ -2741,9 +2741,7 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
     m_amr->interpGhost(flux, m_realm, m_phase);
 
     // Extrapolate to the EB.
-    const auto& interpStencils = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
-
-    interpStencils.apply(fluxEB, flux);
+    m_amr->interpToEB(fluxEB, flux, m_realm, m_phase);
 
     // Project along normal vector.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

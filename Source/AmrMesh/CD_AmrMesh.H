@@ -1508,7 +1508,7 @@ public:
     @param[in]  a_cellData Cell-centered data to be interpolated
     @param[in]  a_realm Realm name
     @param[in]  a_phase Phase (gas or solid)
-    @πaram[in]  a_level Grid level
+    @param[in]  a_level Grid level
   */
   void
   interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
@@ -1516,6 +1516,51 @@ public:
                     const std::string           a_realm,
                     const phase::which_phase    a_phase,
                     const int                   a_level) const noexcept;
+
+  /*!
+    @brief Interpolate data to EB centroids on realm and phase
+    @param[out] a_centroidData EB-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+  */
+  void
+  interpToEB(EBAMRIVData&             a_centroidData,
+             const EBAMRCellData&     a_cellData,
+             const std::string        a_realm,
+             const phase::which_phase a_phase) const noexcept;
+
+  /*!
+    @brief Interpolate data to EB centroids
+    @param[out] a_centroidData EB-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @param[in]  a_level Grid level
+  */
+  void
+  interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
+             const LevelData<EBCellFAB>& a_cellData,
+             const std::string           a_realm,
+             const phase::which_phase    a_phase,
+             const int                   a_level) const noexcept;
+
+  /*!
+    @brief Interpolate data to EB centroids
+    @param[out] a_centroidData EB-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @param[in]  a_level Grid level
+    @param[in]  a_din Grid index
+  */
+  void
+  interpToEB(BaseIVFAB<Real>&         a_centroidData,
+             const EBCellFAB&         a_cellData,
+             const std::string        a_realm,
+             const phase::which_phase a_phase,
+             const int                a_level,
+             const DataIndex&         a_din) const noexcept;
 
   /*!
     @brief Compute a non-conservative divergence.

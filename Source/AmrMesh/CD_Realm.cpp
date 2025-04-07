@@ -56,7 +56,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
               const int                                                 a_mgInterpRadius,
               const int                                                 a_mgInterpWeight,
               const CellCentroidInterpolation::Type                     a_centroidInterpType,
-              const EBCentroidInterpolation::StencilType                a_ebInterpType,
+              const EBCentroidInterpolation::Type                       a_ebInterpType,
               const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
               const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis)
 {
@@ -625,12 +625,6 @@ Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 Realm::getVofIterator(const phase::which_phase a_phase) const
 {
   return m_realms[a_phase]->getVofIterator();
-}
-
-const IrregAmrStencil<EbCentroidInterpolationStencil>&
-Realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const
-{
-  return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
 }
 
 const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
