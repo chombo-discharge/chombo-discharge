@@ -1293,11 +1293,7 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
     m_amr->allocate(*cdrDensitiesExtrap[idx], m_realm, m_cdr->getPhase(), numComp);
 
     // Extrapolate the cell-centered densities to the EB.
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(
-      m_realm,
-      m_cdr->getPhase());
-
-    stencil.apply(*cdrDensitiesExtrap[idx], *cdrDensities[idx]);
+    m_amr->interpToEB(*cdrDensitiesExtrap[idx], *cdrDensities[idx], m_realm, m_cdr->getPhase());
   }
 
   // 2b. Compute the diffusion coefficeints on the EB.
@@ -2579,11 +2575,6 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
   m_amr->allocate(ebVel, m_realm, a_phase, SpaceDim);
   m_amr->allocate(ebPhi, m_realm, a_phase, 1);
 
-  // This stencil takes cell centered data and puts it on the centroid.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(
-    m_realm,
-    a_phase);
-
   // Go through the CDR solvers.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
@@ -2594,8 +2585,8 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
     if (solver->isMobile()) {
 
       // Compute the velocity and density on the EB.
-      interpStencils.apply(ebVel, *a_cdrVelocities[idx]);
-      interpStencils.apply(ebPhi, *a_cdrDensities[idx]);
+      m_amr->interpToEB(ebVel, *a_cdrVelocities[idx], m_realm, a_phase);
+      m_amr->interpToEB(ebPhi, *a_cdrDensities[idx], m_realm, a_phase);      
 
       // No negative densities please.
       DataOps::floor(ebPhi, 0.0);
@@ -2609,7 +2600,7 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
       this->projectFlux(*a_extrapCdrFluxesEB[idx], ebFlux);
 
       // Synchronize with deeper levels.
-      m_amr->arithmeticAverage(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
+      m_amr->conservativeAverage(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
     }
     else {
       DataOps::setValue(*a_extrapCdrFluxesEB[idx], 0.0);
@@ -3008,10 +2999,7 @@ CdrPlasmaStepper::computeElectricField(EBAMRIVData&             a_electricFieldE
   CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
 
   // Interpolate to the EB centroid
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(
-    m_realm,
-    a_phase);
-  interpStencils.apply(a_electricFieldEB, a_electricFieldCell);
+  m_amr->interpToEB(a_electricFieldEB, a_electricFieldCell, m_realm, a_phase);
 }
 
 void
@@ -3100,11 +3088,7 @@ CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real>>& a_ebData,
   CH_assert(a_ebData.nComp() == a_cellData.nComp());
 
   // Get the stencil for movign cell-centered data to the EB.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm,
-                                                                                                              a_phase);
-
-  // Apply it.
-  stencils.apply(a_ebData, a_cellData, a_lvl);
+  m_amr->interpToEB(a_ebData, a_cellData, m_realm, a_phase, a_lvl);
 }
 
 void
