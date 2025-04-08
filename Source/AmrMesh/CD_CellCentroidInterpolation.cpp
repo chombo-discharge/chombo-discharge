@@ -289,7 +289,7 @@ CellCentroidInterpolation::interpolate(LevelData<BaseIVFAB<Real>>& a_centroidDat
   const Box&               domainBox = domain.domainBox();
   const DataIterator&      dit       = dbl.dataIterator();
 
-  const int nbox  = dit.size();
+  const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -318,7 +318,7 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>&       a_centroidDat
   const Box&               domainBox = domain.domainBox();
   const DataIterator&      dit       = dbl.dataIterator();
 
-  const int nbox  = dit.size();
+  const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
@@ -345,7 +345,7 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>& a_data) const noexc
   const Box&               domainBox = domain.domainBox();
   const DataIterator&      dit       = dbl.dataIterator();
 
-  const int nbox  = dit.size();
+  const int nbox = dit.size();
 
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nbox; mybox++) {
