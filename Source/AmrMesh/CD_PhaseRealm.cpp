@@ -803,7 +803,7 @@ PhaseRealm::defineIrregSten()
   const bool doThisOperator = this->queryOperator(s_eb_irreg_interp);
 
   m_cellCentroidInterpolation.resize(1 + m_finestLevel);
-  m_ebCentroidInterpolation.resize(1 + m_finestLevel);  
+  m_ebCentroidInterpolation.resize(1 + m_finestLevel);
 
   if (doThisOperator) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {

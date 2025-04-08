@@ -115,7 +115,7 @@ public:
   */
   template <typename T>
   void
-  interpolate(T& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;  
+  interpolate(T& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
 
 protected:
   /*!

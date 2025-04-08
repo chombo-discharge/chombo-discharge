@@ -257,7 +257,7 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              average);
 
-#if 1 // Don't do this if the cell-centered values were interpolated to centroids. 
+#if 1 // Don't do this if the cell-centered values were interpolated to centroids.
   m_amr->interpToEB(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
 #else
   DataOps::setValue(a_conductivityEB, 0.0);
@@ -2585,7 +2585,7 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
 
       // Compute the velocity and density on the EB.
       m_amr->interpToEB(ebVel, *a_cdrVelocities[idx], m_realm, a_phase);
-      m_amr->interpToEB(ebPhi, *a_cdrDensities[idx], m_realm, a_phase);      
+      m_amr->interpToEB(ebPhi, *a_cdrDensities[idx], m_realm, a_phase);
 
       // No negative densities please.
       DataOps::floor(ebPhi, 0.0);

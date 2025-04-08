@@ -769,11 +769,10 @@ AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int     nComp = a_data[0]->nComp();
-  const int
-    ignored = nComp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory.
-  const int nphases = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     nComp   = a_data[0]->nComp();
+  const int     ignored = nComp;
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 

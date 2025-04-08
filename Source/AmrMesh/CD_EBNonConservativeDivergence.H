@@ -88,7 +88,7 @@ protected:
   /*!
     @brief VoF iterator for iterating through the stencils
   */
-  mutable LayoutData<VoFIterator> m_vofIterator;  
+  mutable LayoutData<VoFIterator> m_vofIterator;
 
   /*!
     @brief Stencils.
