@@ -1824,10 +1824,7 @@ ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellDa
   }
 
   if (m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(
-      m_realm,
-      m_phase);
-    stencils.apply(a_depositionNC, a_depositionKappaC);
+    m_amr->nonConservativeDivergence(a_depositionNC, a_depositionKappaC, m_realm, m_phase);
   }
   else {
     DataOps::setValue(a_depositionNC, 0.0);

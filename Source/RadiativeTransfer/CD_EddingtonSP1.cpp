@@ -1056,12 +1056,7 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
 
   const int finestLevel = m_amr->getFinestLevel();
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm,
-                                                                                                          m_phase);
-  for (int lvl = 0; lvl <= finestLevel; lvl++) {
-    sten.apply(*a_ebFlux[lvl], *a_phi[lvl], lvl);
-  }
-
+  m_amr->interpToEB(a_ebFlux, a_phi, m_realm, m_phase);
   m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);
 
   DataOps::scale(a_ebFlux, 0.5 * Units::c);
@@ -1233,9 +1228,7 @@ EddingtonSP1::writePlotFile()
                   CopyStrategy::ValidGhost);
 
   // Transform to centroid-centered
-  const IrregAmrStencil<CentroidInterpolationStencil>& sten = m_amr->getCentroidInterpolationStencils(m_realm,
-                                                                                                      phase::gas);
-  sten.apply(output);
+  m_amr->interpToCentroids(output, m_realm, phase::gas);
 
   // Alias this stuff
   Vector<LevelData<EBCellFAB>*> output_ptr;

@@ -55,8 +55,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
               const int                                                 a_mgInterpOrder,
               const int                                                 a_mgInterpRadius,
               const int                                                 a_mgInterpWeight,
-              const IrregStencil::StencilType                           a_centroidStencil,
-              const IrregStencil::StencilType                           a_ebStencil,
+              const CellCentroidInterpolation::Type                     a_centroidInterpType,
+              const EBCentroidInterpolation::Type                       a_ebInterpType,
               const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
               const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis)
 {
@@ -91,8 +91,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
                                a_mgInterpOrder,
                                a_mgInterpRadius,
                                a_mgInterpWeight,
-                               a_centroidStencil,
-                               a_ebStencil,
+                               a_centroidInterpType,
+                               a_ebInterpType,
                                m_baseif.at(phase::gas),
                                ebis_gas);
 
@@ -109,8 +109,8 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
                                  a_mgInterpOrder,
                                  a_mgInterpRadius,
                                  a_mgInterpWeight,
-                                 a_centroidStencil,
-                                 a_ebStencil,
+                                 a_centroidInterpType,
+                                 a_ebInterpType,
                                  m_baseif.at(phase::solid),
                                  ebis_sol);
 
@@ -627,22 +627,22 @@ Realm::getVofIterator(const phase::which_phase a_phase) const
   return m_realms[a_phase]->getVofIterator();
 }
 
-const IrregAmrStencil<CentroidInterpolationStencil>&
-Realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) const
+const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+Realm::getNonConservativeDivergence(const phase::which_phase a_phase) const
 {
-  return m_realms[a_phase]->getCentroidInterpolationStencils();
+  return m_realms[a_phase]->getNonConservativeDivergence();
 }
 
-const IrregAmrStencil<EbCentroidInterpolationStencil>&
-Realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const
+const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+Realm::getCellCentroidInterpolation(const phase::which_phase a_phase) const
 {
-  return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
+  return m_realms[a_phase]->getCellCentroidInterpolation();
 }
 
-const IrregAmrStencil<NonConservativeDivergenceStencil>&
-Realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const
+const Vector<RefCountedPtr<EBCentroidInterpolation>>&
+Realm::getEBCentroidInterpolation(const phase::which_phase a_phase) const
 {
-  return m_realms[a_phase]->getNonConservativeDivergenceStencils();
+  return m_realms[a_phase]->getEBCentroidInterpolation();
 }
 
 Vector<RefCountedPtr<EBCoarAve>>&

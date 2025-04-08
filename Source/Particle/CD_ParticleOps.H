@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_ParticleContainer.H>
+#include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
