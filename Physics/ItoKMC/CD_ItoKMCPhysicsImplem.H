@@ -33,10 +33,11 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_kmcReactions.clear();
   m_photoReactions.clear();
 
-  // Some default settings in case user forgets to call the parsing algorithms.
+  // Some default settings (mostly in case user forgets to call the parsing algorithms).
   m_isDefined         = false;
   m_debug             = true;
   m_hasKMCSolver      = false;
+  m_downstreamSpecies = -1;
   m_maxNewParticles   = 32;
   m_maxNewPhotons     = 32;
   m_Ncrit             = 5;
@@ -46,14 +47,10 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_algorithm         = Algorithm::TauPlain;
   m_particlePlacement = ParticlePlacement::Random;
 
-  // Development code for switching to centroid for secondary emission. Will be removed.
-#if 0
-  bool      useCentroid = false;
-  ParmParse pp("ItoKMCPhysics");
-  pp.query("use_centroid", useCentroid);
-  if (useCentroid) {
-    m_particlePlacement = ParticlePlacement::Centroid;
-  }
+#if 1 // Development code -- should find its way into ItoKMCJSON
+#warning "CD_ItoKMCPhysicsImplem.H -- development code enabled"
+  m_downstreamSpecies = 0;
+  m_particlePlacement = ParticlePlacement::Downstream;
 #endif
 }
 
@@ -473,13 +470,18 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
         // Figure out where to place the particles.
         switch (m_particlePlacement) {
+        case ParticlePlacement::Centroid: {
+          x = a_cellPos + a_centroidPos * a_dx;
+
+          break;
+        }
         case ParticlePlacement::Random: {
           x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
           break;
         }
-        case ParticlePlacement::Centroid: {
-          x = a_cellPos + a_centroidPos * a_dx;
+        case ParticlePlacement::Downstream: {
+          x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
           break;
         }
