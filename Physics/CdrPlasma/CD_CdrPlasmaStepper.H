@@ -514,19 +514,19 @@ namespace Physics {
 	@note This will call one of the other versions. 
       */
       virtual void
-      advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
-                                  Vector<EBCellFAB*>&          a_rteSources,
-                                  const Vector<EBCellFAB*>&    a_cdrDensities,
-                                  const Vector<EBCellFAB*>&    a_cdrGradients,
-                                  const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                  const Vector<EBCellFAB*>&    a_rteDensities,
-                                  const EBCellFAB&             a_E,
-                                  const Real&                  a_time,
-                                  const Real&                  a_dt,
-                                  const Real&                  a_dx,
-                                  const Box&                   a_cellBox,
-                                  const int                    a_lvl,
-                                  const DataIndex&             a_dit);
+      advanceReactionNetworkIrreg(Vector<EBCellFAB*>&       a_cdrSources,
+                                  Vector<EBCellFAB*>&       a_rteSources,
+                                  const Vector<EBCellFAB*>& a_cdrDensities,
+                                  const Vector<EBCellFAB*>& a_cdrGradients,
+                                  const Vector<EBCellFAB*>& a_cdrVelocities,
+                                  const Vector<EBCellFAB*>& a_rteDensities,
+                                  const EBCellFAB&          a_E,
+                                  const Real&               a_time,
+                                  const Real&               a_dt,
+                                  const Real&               a_dx,
+                                  const Box&                a_cellBox,
+                                  const int                 a_lvl,
+                                  const DataIndex&          a_dit);
 
       /*!
 	@brief Compute reaction network sources. This version interpolates everything to the centroid and runs with that data. 
@@ -545,19 +545,19 @@ namespace Physics {
 	@param[in]  a_dit            Grid patch index
       */
       virtual void
-      advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_cdrSources,
-                                        Vector<EBCellFAB*>&          a_rteSources,
-                                        const Vector<EBCellFAB*>&    a_cdrDensities,
-                                        const Vector<EBCellFAB*>&    a_cdrGradients,
-                                        const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                        const Vector<EBCellFAB*>&    a_rteDensities,
-                                        const EBCellFAB&             a_E,
-                                        const Real&                  a_time,
-                                        const Real&                  a_dt,
-                                        const Real&                  a_dx,
-                                        const Box&                   a_box,
-                                        const int                    a_lvl,
-                                        const DataIndex&             a_dit);
+      advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_cdrSources,
+                                        Vector<EBCellFAB*>&       a_rteSources,
+                                        const Vector<EBCellFAB*>& a_cdrDensities,
+                                        const Vector<EBCellFAB*>& a_cdrGradients,
+                                        const Vector<EBCellFAB*>& a_cdrVelocities,
+                                        const Vector<EBCellFAB*>& a_rteDensities,
+                                        const EBCellFAB&          a_E,
+                                        const Real&               a_time,
+                                        const Real&               a_dt,
+                                        const Real&               a_dx,
+                                        const Box&                a_box,
+                                        const int                 a_lvl,
+                                        const DataIndex&          a_dit);
 
       /*!
 	@brief Compute reaction network sources. 
@@ -578,19 +578,19 @@ namespace Physics {
 	@param[in]  a_dit            Grid patch index
       */
       virtual void
-      advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_cdrSources,
-                                        Vector<EBCellFAB*>&          a_rteSources,
-                                        const Vector<EBCellFAB*>&    a_cdrDensities,
-                                        const Vector<EBCellFAB*>&    a_cdrGradients,
-                                        const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                        const Vector<EBCellFAB*>&    a_rteDensities,
-                                        const EBCellFAB&             a_E,
-                                        const Real&                  a_time,
-                                        const Real&                  a_dt,
-                                        const Real&                  a_dx,
-                                        const Box&                   a_box,
-                                        const int                    a_lvl,
-                                        const DataIndex&             a_dit);
+      advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&       a_cdrSources,
+                                        Vector<EBCellFAB*>&       a_rteSources,
+                                        const Vector<EBCellFAB*>& a_cdrDensities,
+                                        const Vector<EBCellFAB*>& a_cdrGradients,
+                                        const Vector<EBCellFAB*>& a_cdrVelocities,
+                                        const Vector<EBCellFAB*>& a_rteDensities,
+                                        const EBCellFAB&          a_E,
+                                        const Real&               a_time,
+                                        const Real&               a_dt,
+                                        const Real&               a_dx,
+                                        const Box&                a_box,
+                                        const int                 a_lvl,
+                                        const DataIndex&          a_dit);
 
       /*!
 	@brief Compute diffusion things using whatever is available in the solvers. 
