@@ -206,7 +206,7 @@ CdrPlasmaGodunovStepper.relax_time        = 1.E99          # Relaxation time. 10
 CdrPlasmaGodunovStepper.fast_poisson      = 1             # Solve Poisson every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fast_rte          = 1             # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd               = false         # Set to true if you want to add a stochastic diffusion flux
-CdrPlasmaGodunovStepper.source_comp       = interp        # Interpolated 'interp', 'interp2', or 'upwind X' for first species (X = integer).
+CdrPlasmaGodunovStepper.source_comp       = interp        # Interpolated interp, or upwind X for species X
 CdrPlasmaGodunovStepper.floor_cdr         = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug             = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
 CdrPlasmaGodunovStepper.profile           = true          # Turn on/off performance profiling.
