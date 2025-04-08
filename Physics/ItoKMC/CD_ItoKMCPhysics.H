@@ -323,6 +323,7 @@ namespace Physics {
 	@param[inout] a_particles Computational particles
 	@param[in]    a_newNumParticles New number of particles (i.e., after the KMC advance)
 	@param[in]    a_oldNumParticles Previous number of particles (i.e., before the KMC advance)
+	@param[in]    a_electricField   Electric field in cell
 	@param[in]    a_cellPos         Cell center position
 	@param[in]    a_centroidPos     Cell centroid position
 	@param[in]    a_loCorner        Low corner of minimum box enclosing the cut-cell
@@ -337,6 +338,7 @@ namespace Physics {
       reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                          const Vector<FPR>&          a_newNumParticles,
                          const Vector<FPR>&          a_oldNumParticles,
+                         const RealVect              a_electricField,
                          const RealVect              a_cellPos,
                          const RealVect              a_centroidPos,
                          const RealVect              a_lo,

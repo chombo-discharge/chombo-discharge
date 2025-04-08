@@ -422,6 +422,7 @@ inline void
 ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                                   const Vector<FPR>&          a_newNumParticles,
                                   const Vector<FPR>&          a_oldNumParticles,
+                                  const RealVect              a_electricField,
                                   const RealVect              a_cellPos,
                                   const RealVect              a_centroidPos,
                                   const RealVect              a_lo,
