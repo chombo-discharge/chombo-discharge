@@ -10,6 +10,5 @@ var searchData=
   ['speciesiteration_7',['speciesiteration',['../classCdrIterator.html#abfed0ae43a81afdd3d4cd47f01be3e50',1,'CdrIterator::SpeciesIteration'],['../classItoIterator.html#afb0a904899fd33c81278a80cd71cddf3',1,'ItoIterator::SpeciesIteration']]],
   ['speciessubset_8',['SpeciesSubset',['../CD__ItoKMCStepper_8H.html#accf761d0f0fb5024d561b4499c349967',1,'Physics::ItoKMC']]],
   ['speciestype_9',['SpeciesType',['../CD__ItoKMCPhysics_8H.html#ac739724a1bd29688091b459d5b183731',1,'Physics::ItoKMC']]],
-  ['stenciltype_10',['StencilType',['../classIrregStencil.html#ac2a71148a30087346575360af4cacd6f',1,'IrregStencil']]],
-  ['surface_11',['Surface',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html#a9225cc2e7ef96d7260fa2b7a2d8f772d',1,'Physics::ItoKMC::ItoKMCSurfaceReactionSet']]]
+  ['surface_10',['Surface',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html#a9225cc2e7ef96d7260fa2b7a2d8f772d',1,'Physics::ItoKMC::ItoKMCSurfaceReactionSet']]]
 ];

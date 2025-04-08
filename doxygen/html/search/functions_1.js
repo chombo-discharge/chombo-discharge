@@ -17,6 +17,5 @@ var searchData=
   ['buildgasgeometry_14',['buildGasGeometry',['../classComputationalGeometry.html#a83f08916559e0f2aa65c91c3ed16b98d',1,'ComputationalGeometry']]],
   ['buildgeometries_15',['buildGeometries',['../classComputationalGeometry.html#a74b29658259ef35165f7938d51022433',1,'ComputationalGeometry']]],
   ['buildgrids_16',['buildGrids',['../classAmrMesh.html#a69e4f0db7383a8a926a9bcb59defb67e',1,'AmrMesh']]],
-  ['buildsolidgeometry_17',['buildSolidGeometry',['../classComputationalGeometry.html#a65cfcafb7fe5ec45bed5e1c1992c0696',1,'ComputationalGeometry']]],
-  ['buildstencil_18',['buildstencil',['../classCentroidInterpolationStencil.html#adc555a7d9137eddf08d11d072c3b15f3',1,'CentroidInterpolationStencil::buildStencil()'],['../classEbCentroidInterpolationStencil.html#a3cb84ac9ac162c2d8dd21fae6b9133ac',1,'EbCentroidInterpolationStencil::buildStencil()'],['../classIrregStencil.html#a28295f8a5436107aaf1d9ef9008c6d18',1,'IrregStencil::buildStencil()'],['../classNonConservativeDivergenceStencil.html#a01dddfce0857c2a709d589831d4c7865',1,'NonConservativeDivergenceStencil::buildStencil()']]]
+  ['buildsolidgeometry_17',['buildSolidGeometry',['../classComputationalGeometry.html#a65cfcafb7fe5ec45bed5e1c1992c0696',1,'ComputationalGeometry']]]
 ];

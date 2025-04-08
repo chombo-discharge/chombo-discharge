@@ -46,5 +46,5 @@ var searchData=
   ['turnoncfinterp_43',['turnOnCFInterp',['../classEBHelmholtzOp.html#a12d12353fb23d282ce5dc66ca01c7c47',1,'EBHelmholtzOp']]],
   ['turnoncoarsening_44',['turnOnCoarsening',['../classEBHelmholtzOp.html#ad1421c86a5022532413b4320ccade732',1,'EBHelmholtzOp']]],
   ['turnonexchange_45',['turnOnExchange',['../classEBHelmholtzOp.html#ab901979aec1589777f2eebec85f7992e',1,'EBHelmholtzOp']]],
-  ['type_46',['type',['../classEBCoarAve.html#aaad02114b1d0b79431286efae54e7e83',1,'EBCoarAve::Type'],['../classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08',1,'EBCoarseToFineInterp::Type'],['../classEBGhostCellInterpolator.html#aea2afb631dec4374819351a62a36fb9b',1,'EBGhostCellInterpolator::Type']]]
+  ['type_46',['type',['../classCellCentroidInterpolation.html#a51e8eaf7c06392ee40a338709200b351',1,'CellCentroidInterpolation::Type'],['../classEBCentroidInterpolation.html#abd5aea8c85a0443f661e1b0c17a7bac6',1,'EBCentroidInterpolation::Type'],['../classEBCoarAve.html#aaad02114b1d0b79431286efae54e7e83',1,'EBCoarAve::Type'],['../classEBCoarseToFineInterp.html#a7da81d645a467200cc6ad9b2667c1c08',1,'EBCoarseToFineInterp::Type'],['../classEBGhostCellInterpolator.html#aea2afb631dec4374819351a62a36fb9b',1,'EBGhostCellInterpolator::Type']]]
 ];

@@ -92,6 +92,7 @@ $(function() {
 <code>#include &lt;BaseIF.H&gt;</code><br />
 <code>#include &lt;RealVect.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParticleContainer_8H_source.html">CD_ParticleContainer.H</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="CD__EBAMRData_8H_source.html">CD_EBAMRData.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__ParticleOpsImplem_8H_source.html">CD_ParticleOpsImplem.H</a>&gt;</code><br />
@@ -100,149 +101,154 @@ Include dependency graph for CD_ParticleOps.H:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__ParticleOps_8H__incl.png" border="0" usemap="#aSource_2Particle_2CD__ParticleOps_8H" alt=""/></div>
 <map name="aSource_2Particle_2CD__ParticleOps_8H" id="aSource_2Particle_2CD__ParticleOps_8H">
-<area shape="rect" title="Declaration of a static class containing some common useful particle routines that would otherwise be..." alt="" coords="1041,5,1183,45"/>
-<area shape="rect" title=" " alt="" coords="45,313,174,339"/>
-<area shape="poly" title=" " alt="" coords="1041,31,942,36,816,47,678,66,541,96,493,111,456,127,376,169,243,244,140,308,137,303,240,239,374,164,454,122,491,106,539,91,677,61,815,41,941,30,1041,25"/>
-<area shape="rect" title=" " alt="" coords="198,313,277,339"/>
-<area shape="poly" title=" " alt="" coords="1041,31,894,44,801,57,700,76,595,103,490,139,388,185,295,242,268,270,250,302,245,299,264,267,292,238,386,180,488,134,593,98,698,71,800,51,893,38,1041,26"/>
-<area shape="rect" title=" " alt="" coords="1251,313,1344,339"/>
-<area shape="poly" title=" " alt="" coords="1130,44,1171,97,1218,165,1259,238,1289,300,1284,302,1254,240,1214,168,1167,100,1126,47"/>
-<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="2697,93,2869,119"/>
-<area shape="poly" title=" " alt="" coords="1183,27,2683,97,2683,103,1183,33"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1615,387,1801,412"/>
-<area shape="poly" title=" " alt="" coords="1041,32,777,44,607,55,433,70,270,90,135,114,82,129,42,144,18,161,11,169,9,178,9,254,10,302,17,319,34,336,60,345,114,353,286,365,521,373,786,378,1554,384,1602,387,1602,392,1553,389,786,383,521,378,286,370,113,358,59,350,31,341,13,322,5,303,4,254,4,178,7,167,14,157,40,139,81,124,134,109,269,84,432,65,607,50,777,38,1041,26"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="2020,387,2199,412"/>
-<area shape="poly" title=" " alt="" coords="1183,27,1469,45,1659,64,1859,91,2054,128,2144,151,2227,176,2301,205,2364,237,2414,272,2449,312,2454,326,2449,340,2433,353,2411,364,2352,380,2283,390,2213,397,2213,391,2282,385,2351,375,2409,359,2430,349,2445,337,2449,326,2445,315,2411,276,2362,241,2299,210,2226,181,2143,156,2053,134,1858,97,1658,70,1468,51,1183,32"/>
-<area shape="rect" href="CD__ParticleOpsImplem_8H.html" title="Implementation of CD_ParticleOps.H." alt="" coords="1019,167,1205,192"/>
-<area shape="poly" title=" " alt="" coords="1109,46,1106,98,1108,153,1103,153,1100,98,1103,46"/>
-<area shape="rect" title=" " alt="" coords="3402,167,3486,192"/>
-<area shape="poly" title=" " alt="" coords="2869,111,3102,131,3383,164,3389,165,3388,170,3382,169,3101,136,2869,116"/>
-<area shape="rect" title=" " alt="" coords="2333,167,2448,192"/>
-<area shape="poly" title=" " alt="" coords="2720,121,2462,168,2461,163,2719,116"/>
-<area shape="rect" title=" " alt="" coords="2473,167,2634,192"/>
-<area shape="poly" title=" " alt="" coords="2747,121,2605,165,2603,160,2745,116"/>
-<area shape="rect" title=" " alt="" coords="2658,167,2745,192"/>
-<area shape="poly" title=" " alt="" coords="2771,121,2727,160,2723,156,2768,117"/>
-<area shape="rect" title=" " alt="" coords="2871,167,2950,192"/>
-<area shape="poly" title=" " alt="" coords="2805,116,2879,157,2876,162,2802,121"/>
-<area shape="rect" title=" " alt="" coords="2975,167,3116,192"/>
-<area shape="poly" title=" " alt="" coords="2826,116,2990,160,2989,166,2824,121"/>
-<area shape="rect" title=" " alt="" coords="3131,313,3285,339"/>
-<area shape="poly" title=" " alt="" coords="2869,111,3017,129,3084,144,3110,154,3130,165,3159,195,3181,231,3196,268,3206,299,3200,301,3191,270,3177,234,3155,198,3127,169,3108,159,3082,149,3016,134,2869,116"/>
-<area shape="rect" title=" " alt="" coords="3191,167,3326,192"/>
-<area shape="poly" title=" " alt="" coords="2860,116,3178,163,3178,169,2859,121"/>
-<area shape="rect" href="CD__OpenMP_8H.html" title="Declaration of various useful OpenMP&#45;related utilities." alt="" coords="3309,313,3424,339"/>
-<area shape="poly" title=" " alt="" coords="2869,108,3000,115,3147,127,3272,143,3316,153,3341,165,3362,196,3372,232,3375,268,3373,300,3368,299,3370,269,3367,233,3357,198,3337,169,3314,158,3271,148,3146,132,3000,121,2869,114"/>
-<area shape="poly" title=" " alt="" coords="2697,110,2596,114,2486,123,2387,141,2350,153,2323,169,2307,188,2299,209,2298,230,2299,253,2300,275,2299,298,2290,320,2272,341,2248,351,2207,361,2088,376,1815,396,1814,390,2087,371,2206,355,2247,346,2269,337,2286,317,2293,297,2295,275,2294,253,2292,230,2294,208,2302,185,2320,165,2347,148,2386,135,2485,118,2596,108,2697,105"/>
-<area shape="poly" title=" " alt="" coords="2784,119,2778,154,2770,175,2760,194,2722,225,2655,272,2543,341,2458,367,2371,384,2287,395,2212,400,2212,394,2286,389,2370,379,2457,362,2540,336,2652,268,2719,221,2755,190,2766,172,2772,153,2779,118"/>
-<area shape="rect" href="CD__LevelTiles_8H.html" title="Declaration of LevelTiles." alt="" coords="2784,240,2912,265"/>
-<area shape="poly" title=" " alt="" coords="2791,118,2840,226,2835,229,2786,120"/>
-<area shape="rect" href="CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="1895,167,2118,192"/>
-<area shape="poly" title=" " alt="" coords="2697,117,2133,169,2132,163,2696,112"/>
-<area shape="rect" title=" " alt="" coords="3081,387,3183,412"/>
-<area shape="poly" title=" " alt="" coords="3330,341,3184,385,3182,380,3328,336"/>
-<area shape="rect" title=" " alt="" coords="3337,387,3396,412"/>
-<area shape="poly" title=" " alt="" coords="3369,339,3369,373,3364,373,3364,339"/>
-<area shape="poly" title=" " alt="" coords="3310,340,3298,341,3102,359,2936,370,2654,379,2371,381,2008,389,1815,397,1814,391,2008,384,2371,375,2654,373,2936,365,3102,354,3297,336,3309,335"/>
-<area shape="poly" title=" " alt="" coords="3310,340,3298,341,3075,358,2770,374,2213,397,2212,392,2770,369,3075,353,3297,336,3309,335"/>
-<area shape="poly" title=" " alt="" coords="2906,263,3137,308,3136,313,2905,268"/>
-<area shape="poly" title=" " alt="" coords="2799,268,2614,309,2447,341,2274,363,2101,378,1815,396,1815,391,2101,373,2274,357,2446,336,2613,304,2798,263"/>
-<area shape="poly" title=" " alt="" coords="2805,268,2732,289,2650,316,2622,329,2593,341,2493,364,2392,380,2213,397,2212,391,2391,375,2492,359,2591,336,2620,324,2648,311,2730,284,2803,263"/>
-<area shape="rect" title=" " alt="" coords="2938,313,3001,339"/>
-<area shape="poly" title=" " alt="" coords="2869,263,2939,304,2937,309,2866,268"/>
-<area shape="rect" title=" " alt="" coords="2384,313,2435,339"/>
-<area shape="poly" title=" " alt="" coords="2784,264,2633,285,2454,316,2449,317,2448,312,2453,311,2632,280,2783,259"/>
-<area shape="rect" title=" " alt="" coords="3025,313,3106,339"/>
-<area shape="poly" title=" " alt="" coords="2884,263,3018,306,3016,312,2882,268"/>
-<area shape="rect" title=" " alt="" coords="2811,313,2914,339"/>
-<area shape="poly" title=" " alt="" coords="2853,265,2860,299,2855,300,2848,266"/>
-<area shape="poly" title=" " alt="" coords="1939,169,1196,44,1197,38,1940,164"/>
-<area shape="poly" title=" " alt="" coords="2118,166,2683,114,2683,120,2119,171"/>
-<area shape="poly" title=" " alt="" coords="2118,183,2543,207,2763,222,2924,237,3134,272,3305,308,3304,313,3133,277,2924,243,2763,228,2542,212,2118,189"/>
-<area shape="poly" title=" " alt="" coords="1895,184,1810,188,1723,198,1649,216,1622,227,1603,242,1594,259,1593,277,1599,295,1611,314,1644,349,1680,377,1677,381,1641,353,1606,317,1594,297,1588,277,1589,257,1599,238,1619,223,1647,211,1722,193,1809,183,1895,179"/>
-<area shape="poly" title=" " alt="" coords="2103,190,2164,207,2195,221,2223,238,2243,254,2256,270,2273,313,2276,326,2273,339,2259,360,2235,375,2206,386,2204,381,2233,370,2256,356,2269,337,2270,326,2268,314,2251,273,2239,258,2220,242,2192,225,2163,212,2101,195"/>
-<area shape="rect" title=" " alt="" coords="2151,240,2209,265"/>
-<area shape="poly" title=" " alt="" coords="2036,190,2140,232,2138,237,2034,194"/>
-<area shape="rect" title=" " alt="" coords="1043,387,1147,412"/>
-<area shape="poly" title=" " alt="" coords="1896,191,1747,210,1666,224,1586,243,1534,258,1495,274,1408,316,1383,329,1357,341,1255,371,1161,390,1160,385,1253,366,1355,336,1381,324,1406,311,1493,269,1533,253,1585,237,1665,219,1746,204,1895,186"/>
-<area shape="rect" title=" " alt="" coords="1291,240,1389,265"/>
-<area shape="poly" title=" " alt="" coords="1895,192,1670,213,1408,243,1403,243,1403,238,1408,237,1670,207,1895,187"/>
-<area shape="rect" title=" " alt="" coords="1613,240,1701,265"/>
-<area shape="poly" title=" " alt="" coords="1951,195,1716,242,1715,237,1950,189"/>
-<area shape="rect" title=" " alt="" coords="1726,240,1845,265"/>
-<area shape="poly" title=" " alt="" coords="1972,195,1835,238,1833,233,1970,189"/>
-<area shape="rect" href="CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="1869,240,2003,265"/>
-<area shape="poly" title=" " alt="" coords="1997,194,1959,232,1955,228,1993,190"/>
-<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="2028,240,2127,265"/>
-<area shape="poly" title=" " alt="" coords="2020,190,2058,228,2055,232,2017,194"/>
-<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="2661,313,2787,339"/>
-<area shape="poly" title=" " alt="" coords="2085,189,2217,210,2366,237,2531,274,2668,307,2667,313,2529,279,2365,243,2216,216,2085,195"/>
-<area shape="poly" title=" " alt="" coords="1869,266,1856,268,1358,321,1357,316,1856,263,1868,261"/>
-<area shape="poly" title=" " alt="" coords="1869,266,1736,289,1681,303,1654,315,1649,330,1654,346,1666,362,1682,376,1678,380,1662,365,1649,348,1644,330,1650,312,1680,298,1735,284,1868,261"/>
-<area shape="poly" title=" " alt="" coords="1940,265,1946,300,1954,320,1966,337,2000,363,2040,380,2038,385,1998,368,1962,341,1950,322,1941,302,1934,266"/>
-<area shape="rect" href="CD__ParallelOpsImplem_8H.html" title="Implementation of CD_ParallelOps.H." alt="" coords="1665,313,1850,339"/>
-<area shape="poly" title=" " alt="" coords="1908,268,1800,311,1798,306,1906,263"/>
-<area shape="poly" title=" " alt="" coords="1751,341,1726,377,1722,374,1747,337"/>
-<area shape="poly" title=" " alt="" coords="1815,336,2040,381,2039,387,1813,341"/>
-<area shape="poly" title=" " alt="" coords="2049,268,1862,341,1751,384,1749,379,1860,336,2047,263"/>
-<area shape="poly" title=" " alt="" coords="2098,264,2122,284,2141,312,2145,329,2143,346,2129,376,2124,374,2137,345,2139,329,2136,314,2118,287,2094,268"/>
-<area shape="poly" title=" " alt="" coords="2127,262,2371,314,2370,319,2126,267"/>
-<area shape="rect" title=" " alt="" coords="1475,387,1541,412"/>
-<area shape="poly" title=" " alt="" coords="2028,266,2015,268,1912,279,1831,282,1751,290,1706,300,1653,316,1588,346,1536,381,1533,376,1586,342,1651,311,1705,295,1751,284,1831,276,1912,273,2014,263,2027,261"/>
-<area shape="rect" title=" " alt="" coords="2203,313,2258,339"/>
-<area shape="poly" title=" " alt="" coords="2103,263,2195,305,2192,310,2101,268"/>
-<area shape="rect" title=" " alt="" coords="1419,313,1488,339"/>
-<area shape="poly" title=" " alt="" coords="2028,266,2015,268,1872,284,1761,291,1649,298,1507,316,1502,317,1501,312,1506,311,1649,293,1760,285,1872,278,2014,263,2028,261"/>
-<area shape="rect" href="CD__TimerImplem_8H.html" title="Implementation of CD_Timer.H." alt="" coords="1977,313,2127,339"/>
-<area shape="poly" title=" " alt="" coords="2069,267,2055,301,2050,299,2064,265"/>
-<area shape="poly" title=" " alt="" coords="1997,341,1778,386,1777,381,1996,336"/>
-<area shape="poly" title=" " alt="" coords="2064,337,2094,374,2089,378,2060,341"/>
-<area shape="poly" title=" " alt="" coords="2061,312,2075,278,2080,280,2066,314"/>
-<area shape="poly" title=" " alt="" coords="2787,336,3067,384,3066,389,2787,341"/>
-<area shape="poly" title=" " alt="" coords="2662,334,1815,393,1814,388,2661,329"/>
-<area shape="poly" title=" " alt="" coords="2661,339,2643,341,2213,390,2212,385,2642,336,2661,334"/>
-<area shape="rect" title=" " alt="" coords="2567,387,2628,412"/>
-<area shape="poly" title=" " alt="" coords="2705,341,2632,382,2629,377,2702,336"/>
-<area shape="rect" title=" " alt="" coords="2653,387,2795,412"/>
-<area shape="poly" title=" " alt="" coords="2727,339,2727,373,2721,373,2721,339"/>
-<area shape="rect" title=" " alt="" coords="2820,387,2927,412"/>
-<area shape="poly" title=" " alt="" coords="2749,336,2838,378,2836,383,2747,341"/>
-<area shape="poly" title=" " alt="" coords="1115,166,1118,117,1117,60,1122,59,1124,117,1120,167"/>
-<area shape="poly" title=" " alt="" coords="1117,192,1125,222,1140,262,1163,303,1178,321,1196,336,1245,347,1350,360,1602,386,1601,391,1350,365,1244,352,1194,341,1175,325,1159,306,1135,264,1120,224,1112,193"/>
-<area shape="poly" title=" " alt="" coords="1123,191,1185,274,1219,315,1240,336,1273,343,1342,350,1552,366,2007,391,2006,396,1551,371,1341,356,1272,348,1238,341,1215,319,1181,277,1118,194"/>
-<area shape="poly" title=" " alt="" coords="1150,189,1291,233,1289,238,1148,195"/>
-<area shape="rect" title=" " alt="" coords="971,240,1074,265"/>
-<area shape="poly" title=" " alt="" coords="1099,194,1050,233,1047,229,1096,190"/>
-<area shape="rect" href="CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="305,240,425,265"/>
-<area shape="poly" title=" " alt="" coords="1020,192,439,247,439,242,1019,187"/>
-<area shape="rect" href="CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="831,240,947,265"/>
-<area shape="poly" title=" " alt="" coords="1077,195,939,238,938,233,1076,189"/>
-<area shape="poly" title=" " alt="" coords="325,268,165,312,163,307,324,263"/>
-<area shape="poly" title=" " alt="" coords="346,268,272,309,269,304,344,263"/>
-<area shape="poly" title=" " alt="" coords="368,265,372,302,380,321,392,336,412,343,453,349,585,360,967,373,1554,384,1602,387,1602,392,1553,389,967,379,585,365,452,355,411,348,389,341,375,324,367,303,362,266"/>
-<area shape="poly" title=" " alt="" coords="426,254,501,259,594,269,696,286,796,311,822,324,847,336,998,346,1326,362,2006,391,2006,396,1326,367,998,351,846,341,819,329,794,316,695,291,594,275,501,264,426,259"/>
-<area shape="poly" title=" " alt="" coords="948,261,1237,312,1237,317,947,267"/>
-<area shape="poly" title=" " alt="" coords="920,263,1037,311,1065,325,1094,336,1170,347,1305,361,1602,387,1602,392,1304,367,1170,353,1093,341,1063,330,1035,316,918,268"/>
-<area shape="poly" title=" " alt="" coords="928,263,1068,304,1195,336,1358,354,1581,370,2006,391,2006,397,1581,376,1357,360,1194,341,1067,309,926,268"/>
-<area shape="poly" title=" " alt="" coords="948,261,959,263,1405,316,1405,322,958,268,947,266"/>
-<area shape="rect" title=" " alt="" coords="520,313,592,339"/>
-<area shape="poly" title=" " alt="" coords="833,268,606,316,605,310,832,263"/>
-<area shape="rect" title=" " alt="" coords="859,313,936,339"/>
-<area shape="poly" title=" " alt="" coords="893,265,897,300,892,300,888,266"/>
-<area shape="rect" title=" " alt="" coords="960,313,1024,339"/>
-<area shape="poly" title=" " alt="" coords="907,263,965,303,962,307,904,268"/>
-<area shape="rect" title=" " alt="" coords="403,313,495,339"/>
-<area shape="poly" title=" " alt="" coords="832,265,509,316,509,311,831,260"/>
-<area shape="rect" title=" " alt="" coords="477,387,539,412"/>
-<area shape="poly" title=" " alt="" coords="831,259,714,266,575,278,455,294,414,304,393,315,387,325,387,335,392,344,402,353,431,370,465,383,463,388,429,375,399,358,388,347,382,336,382,324,389,311,412,299,454,289,574,273,713,261,831,254"/>
-<area shape="rect" href="CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="617,313,783,339"/>
-<area shape="poly" title=" " alt="" coords="853,268,738,311,736,306,851,263"/>
-<area shape="poly" title=" " alt="" coords="784,334,803,336,1014,353,1178,362,1554,384,1602,387,1602,393,1553,389,1178,368,1013,358,803,341,783,340"/>
-<area shape="poly" title=" " alt="" coords="784,334,803,336,1341,362,2006,391,2006,396,1341,368,803,341,783,340"/>
-<area shape="poly" title=" " alt="" coords="764,336,1029,384,1029,389,763,341"/>
-<area shape="poly" title=" " alt="" coords="784,334,803,336,1183,370,1461,392,1461,397,1182,375,803,341,783,339"/>
-<area shape="poly" title=" " alt="" coords="737,311,852,268,854,273,739,316"/>
-<area shape="poly" title=" " alt="" coords="670,341,553,384,552,379,668,336"/>
+<area shape="rect" title="Declaration of a static class containing some common useful particle routines that would otherwise be..." alt="" coords="1904,5,2045,45"/>
+<area shape="rect" title=" " alt="" coords="4054,313,4183,339"/>
+<area shape="poly" title=" " alt="" coords="2046,28,2405,51,2882,91,2977,98,3067,100,3229,94,3375,81,3510,72,3576,70,3641,73,3707,81,3775,96,3845,117,3917,148,3993,187,4074,238,4088,251,4100,267,4114,299,4110,301,4095,269,4084,254,4070,242,3990,192,3915,152,3843,122,3774,101,3707,87,3641,79,3576,76,3510,77,3375,87,3229,99,3067,105,2977,103,2881,96,2404,57,2046,33"/>
+<area shape="rect" title=" " alt="" coords="2583,313,2662,339"/>
+<area shape="poly" title=" " alt="" coords="2046,35,2205,63,2399,107,2493,134,2577,165,2644,200,2669,219,2688,239,2693,257,2687,276,2672,293,2655,308,2651,303,2668,289,2682,273,2688,257,2683,241,2665,223,2641,205,2575,170,2491,139,2397,112,2204,68,2045,40"/>
+<area shape="rect" title=" " alt="" coords="1075,313,1168,339"/>
+<area shape="poly" title=" " alt="" coords="1904,31,1614,41,1207,65,996,83,800,106,632,134,564,151,509,169,441,194,416,211,394,241,390,253,394,263,421,272,482,281,671,297,1061,319,1061,325,671,303,482,286,420,277,390,267,384,253,390,239,413,207,439,189,507,164,563,146,631,129,799,100,995,77,1206,59,1613,36,1903,26"/>
+<area shape="rect" href="CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="1315,93,1487,119"/>
+<area shape="poly" title=" " alt="" coords="1904,39,1499,94,1498,89,1903,34"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1326,313,1511,339"/>
+<area shape="poly" title=" " alt="" coords="1904,33,1559,57,1325,76,1080,100,843,129,637,163,553,181,484,200,434,221,405,242,400,253,404,263,512,273,763,288,1312,317,1312,322,763,293,511,278,401,268,394,253,401,238,431,216,482,195,551,176,636,157,842,124,1079,95,1325,71,1558,52,1903,28"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1719,313,1897,339"/>
+<area shape="poly" title=" " alt="" coords="1969,46,1926,143,1894,205,1858,267,1830,304,1825,301,1854,264,1890,203,1921,141,1965,44"/>
+<area shape="rect" href="CD__EBAMRData_8H.html" title="Class for holding data across EBAMR hierarchies." alt="" coords="3209,167,3349,192"/>
+<area shape="poly" title=" " alt="" coords="2046,28,2364,49,2571,68,2780,91,3016,126,3208,161,3207,167,3015,132,2780,96,2571,73,2364,55,2045,33"/>
+<area shape="rect" href="CD__ParticleOpsImplem_8H.html" title="Implementation of CD_ParticleOps.H." alt="" coords="1947,167,2133,192"/>
+<area shape="poly" title=" " alt="" coords="1979,45,2000,98,2026,153,2021,156,1995,100,1974,47"/>
+<area shape="rect" title=" " alt="" coords="1649,167,1733,192"/>
+<area shape="poly" title=" " alt="" coords="1448,116,1636,162,1635,167,1447,121"/>
+<area shape="rect" title=" " alt="" coords="1757,167,1872,192"/>
+<area shape="poly" title=" " alt="" coords="1468,116,1744,163,1743,168,1467,121"/>
+<area shape="rect" title=" " alt="" coords="1049,167,1210,192"/>
+<area shape="poly" title=" " alt="" coords="1358,121,1187,166,1186,161,1357,116"/>
+<area shape="rect" title=" " alt="" coords="2227,240,2314,265"/>
+<area shape="poly" title=" " alt="" coords="1488,106,1645,111,1835,121,2015,138,2089,150,2145,164,2175,177,2203,194,2249,229,2246,233,2200,199,2173,182,2143,169,2088,155,2015,143,1834,126,1644,116,1487,111"/>
+<area shape="rect" title=" " alt="" coords="1234,167,1313,192"/>
+<area shape="poly" title=" " alt="" coords="1382,121,1308,162,1305,157,1379,116"/>
+<area shape="rect" title=" " alt="" coords="3119,313,3260,339"/>
+<area shape="poly" title=" " alt="" coords="1488,106,1872,113,2402,134,2663,151,2893,173,2988,187,3067,202,3127,219,3164,238,3176,251,3184,267,3191,299,3186,300,3179,269,3172,254,3161,242,3125,224,3066,207,2987,192,2892,178,2663,156,2401,139,1872,119,1488,111"/>
+<area shape="rect" title=" " alt="" coords="5,313,160,339"/>
+<area shape="poly" title=" " alt="" coords="1315,110,1056,115,889,122,713,133,540,150,380,173,247,203,193,222,151,242,134,255,119,270,97,302,93,299,115,267,130,251,148,238,191,217,245,198,379,168,539,144,713,128,889,116,1055,110,1315,105"/>
+<area shape="rect" title=" " alt="" coords="1490,167,1625,192"/>
+<area shape="poly" title=" " alt="" coords="1427,116,1520,158,1518,163,1425,121"/>
+<area shape="rect" href="CD__OpenMP_8H.html" title="Declaration of various useful OpenMP&#45;related utilities." alt="" coords="1557,240,1672,265"/>
+<area shape="poly" title=" " alt="" coords="1405,118,1414,154,1422,173,1435,190,1454,202,1483,214,1552,234,1550,239,1481,219,1451,207,1432,194,1418,176,1409,156,1400,120"/>
+<area shape="poly" title=" " alt="" coords="1394,121,1365,155,1326,194,1304,208,1285,215,1268,224,1254,241,1250,253,1254,264,1281,290,1316,307,1314,311,1278,294,1250,267,1245,253,1250,239,1265,220,1283,210,1302,203,1322,190,1361,151,1390,117"/>
+<area shape="poly" title=" " alt="" coords="1410,117,1437,154,1456,174,1479,190,1511,200,1555,204,1662,205,1716,206,1766,210,1807,220,1823,228,1835,238,1843,254,1842,271,1828,303,1823,301,1837,270,1838,255,1831,242,1820,232,1805,225,1765,215,1716,211,1662,210,1555,209,1510,205,1476,194,1453,178,1433,158,1406,121"/>
+<area shape="rect" href="CD__LevelTiles_8H.html" title="Declaration of LevelTiles." alt="" coords="161,240,289,265"/>
+<area shape="poly" title=" " alt="" coords="1315,117,1078,138,790,169,522,207,303,241,302,236,521,201,789,164,1078,133,1315,112"/>
+<area shape="rect" href="CD__ParticleContainerImplem_8H.html" title="Implementation of CD_ParticleContainer.H." alt="" coords="802,167,1025,192"/>
+<area shape="poly" title=" " alt="" coords="1316,121,999,167,998,162,1316,116"/>
+<area shape="rect" title=" " alt="" coords="1922,313,2025,339"/>
+<area shape="poly" title=" " alt="" coords="1673,263,1909,309,1908,314,1672,268"/>
+<area shape="rect" title=" " alt="" coords="1585,313,1644,339"/>
+<area shape="poly" title=" " alt="" coords="1617,266,1617,300,1612,300,1612,266"/>
+<area shape="poly" title=" " alt="" coords="1584,268,1464,311,1463,306,1582,263"/>
+<area shape="poly" title=" " alt="" coords="1647,263,1765,306,1763,311,1645,268"/>
+<area shape="poly" title=" " alt="" coords="204,268,119,309,117,305,201,263"/>
+<area shape="poly" title=" " alt="" coords="290,257,359,263,895,296,1313,317,1312,322,895,301,358,268,289,262"/>
+<area shape="poly" title=" " alt="" coords="289,256,403,263,755,278,1029,286,1304,294,1656,311,1705,314,1705,319,1656,316,1304,299,1029,291,755,283,403,268,289,261"/>
+<area shape="rect" title=" " alt="" coords="417,313,479,339"/>
+<area shape="poly" title=" " alt="" coords="262,263,405,308,403,313,260,268"/>
+<area shape="rect" title=" " alt="" coords="729,313,780,339"/>
+<area shape="poly" title=" " alt="" coords="290,260,308,263,716,317,715,322,308,268,289,265"/>
+<area shape="rect" title=" " alt="" coords="185,313,266,339"/>
+<area shape="poly" title=" " alt="" coords="228,266,228,300,223,300,223,266"/>
+<area shape="rect" title=" " alt="" coords="290,313,393,339"/>
+<area shape="poly" title=" " alt="" coords="245,263,312,304,309,308,243,268"/>
+<area shape="poly" title=" " alt="" coords="957,164,1110,128,1302,91,1465,68,1627,51,1890,29,1890,35,1628,56,1465,74,1303,96,1111,133,959,169"/>
+<area shape="poly" title=" " alt="" coords="998,164,1316,118,1317,123,999,169"/>
+<area shape="poly" title=" " alt="" coords="1025,188,1539,237,1544,238,1543,243,1538,243,1025,194"/>
+<area shape="poly" title=" " alt="" coords="913,193,908,228,911,247,921,263,938,273,972,282,1073,297,1312,317,1312,322,1073,302,971,287,937,278,917,267,906,249,903,228,907,192"/>
+<area shape="poly" title=" " alt="" coords="1025,189,1198,210,1392,237,1586,273,1745,308,1744,313,1585,279,1392,243,1198,215,1025,195"/>
+<area shape="rect" title=" " alt="" coords="557,240,616,265"/>
+<area shape="poly" title=" " alt="" coords="854,195,630,242,629,237,852,189"/>
+<area shape="rect" title=" " alt="" coords="640,240,744,265"/>
+<area shape="poly" title=" " alt="" coords="879,195,741,238,740,233,877,189"/>
+<area shape="rect" title=" " alt="" coords="2140,313,2239,339"/>
+<area shape="poly" title=" " alt="" coords="1025,188,1036,189,1261,201,1436,204,1611,212,1713,221,1834,237,1918,252,2002,271,2139,307,2138,312,2001,276,1917,258,1833,243,1712,227,1610,217,1436,209,1260,206,1036,195,1025,194"/>
+<area shape="rect" title=" " alt="" coords="768,240,856,265"/>
+<area shape="poly" title=" " alt="" coords="899,194,841,234,838,230,896,190"/>
+<area shape="rect" title=" " alt="" coords="415,240,534,265"/>
+<area shape="poly" title=" " alt="" coords="843,195,548,242,547,237,842,189"/>
+<area shape="rect" href="CD__ParallelOps_8H.html" title="Agglomeration of basic MPI reductions." alt="" coords="1054,240,1189,265"/>
+<area shape="poly" title=" " alt="" coords="948,189,1075,233,1074,238,946,195"/>
+<area shape="rect" href="CD__Timer_8H.html" title="Implementation of CD_Timer.H." alt="" coords="931,240,1029,265"/>
+<area shape="poly" title=" " alt="" coords="926,191,962,228,958,232,922,194"/>
+<area shape="rect" href="CD__BoxLoops_8H.html" title="Declaration of a namespace for proto&#45;typing grid and EB loops." alt="" coords="1696,240,1821,265"/>
+<area shape="poly" title=" " alt="" coords="1025,188,1036,189,1358,210,1500,220,1683,237,1682,243,1500,225,1357,215,1036,195,1025,194"/>
+<area shape="poly" title=" " alt="" coords="1124,266,1124,300,1119,300,1119,266"/>
+<area shape="poly" title=" " alt="" coords="1170,263,1358,307,1357,313,1168,268"/>
+<area shape="poly" title=" " alt="" coords="1189,258,1705,311,1705,317,1189,264"/>
+<area shape="poly" title=" " alt="" coords="1030,261,1042,263,1330,309,1329,314,1041,268,1029,266"/>
+<area shape="poly" title=" " alt="" coords="1030,261,1042,263,1705,314,1705,320,1041,268,1029,266"/>
+<area shape="poly" title=" " alt="" coords="945,268,794,315,792,310,943,263"/>
+<area shape="poly" title=" " alt="" coords="1794,263,1926,306,1925,311,1792,268"/>
+<area shape="poly" title=" " alt="" coords="1705,268,1487,313,1486,308,1703,263"/>
+<area shape="poly" title=" " alt="" coords="1769,264,1794,301,1790,304,1765,267"/>
+<area shape="poly" title=" " alt="" coords="3349,177,3508,178,3709,186,3809,193,3901,204,3979,219,4037,238,4058,250,4077,266,4105,300,4101,303,4073,270,4055,255,4035,242,3978,224,3900,209,3808,199,3708,191,3508,184,3349,183"/>
+<area shape="poly" title=" " alt="" coords="3208,184,3052,188,2836,198,2585,215,2328,243,2327,237,2585,210,2835,193,3052,183,3208,179"/>
+<area shape="poly" title=" " alt="" coords="3208,183,2842,186,2322,194,2061,202,1830,212,1650,225,1587,233,1546,243,1516,255,1488,271,1443,306,1439,302,1485,267,1514,250,1545,237,1587,228,1650,220,1830,206,2061,196,2322,189,2842,181,3208,178"/>
+<area shape="poly" title=" " alt="" coords="3209,189,3018,209,2902,224,2787,243,2737,256,2686,268,2570,284,2471,293,2301,301,2130,304,1911,316,1911,311,2130,298,2301,295,2470,288,2569,279,2685,263,2735,251,2786,237,2902,219,3017,203,3208,184"/>
+<area shape="rect" title=" " alt="" coords="3227,240,3330,265"/>
+<area shape="poly" title=" " alt="" coords="3281,192,3281,226,3276,226,3276,192"/>
+<area shape="rect" title=" " alt="" coords="3354,240,3457,265"/>
+<area shape="poly" title=" " alt="" coords="3300,190,3374,231,3371,235,3298,194"/>
+<area shape="rect" title=" " alt="" coords="3481,240,3586,265"/>
+<area shape="poly" title=" " alt="" coords="3320,189,3480,234,3479,239,3319,195"/>
+<area shape="rect" title=" " alt="" coords="3611,240,3717,265"/>
+<area shape="poly" title=" " alt="" coords="3341,189,3597,236,3596,242,3340,195"/>
+<area shape="rect" title=" " alt="" coords="2990,313,3095,339"/>
+<area shape="poly" title=" " alt="" coords="3349,179,3515,182,3718,191,3814,199,3897,209,3959,222,3979,229,3993,238,3999,253,3993,267,3973,280,3941,289,3846,303,3721,311,3580,315,3299,315,3109,316,3109,311,3299,309,3580,309,3721,306,3846,298,3939,284,3971,275,3989,264,3994,253,3989,242,3977,234,3957,227,3896,214,3814,204,3718,197,3515,187,3349,184"/>
+<area shape="rect" title=" " alt="" coords="3605,313,3709,339"/>
+<area shape="poly" title=" " alt="" coords="3349,178,3521,182,3730,190,3830,198,3916,208,3980,221,4002,229,4015,238,4022,253,4015,267,3996,282,3966,295,3890,312,3803,322,3723,326,3723,321,3802,316,3889,307,3965,290,3993,278,4011,264,4016,253,4011,242,3999,234,3978,226,3915,213,3830,203,3730,196,3521,187,3349,184"/>
+<area shape="rect" title=" " alt="" coords="3742,240,3847,265"/>
+<area shape="poly" title=" " alt="" coords="3349,186,3729,237,3728,243,3349,192"/>
+<area shape="rect" title=" " alt="" coords="3871,240,3979,265"/>
+<area shape="poly" title=" " alt="" coords="3349,184,3572,204,3858,237,3858,243,3571,210,3349,189"/>
+<area shape="rect" href="CD__DomainFluxIFFAB_8H.html" title="Declaration of a BaseIFFAB wrapper that holds domain fluxes." alt="" coords="2974,240,3151,265"/>
+<area shape="poly" title=" " alt="" coords="3245,195,3111,238,3110,233,3243,189"/>
+<area shape="rect" href="CD__MFBaseIVFAB_8H.html" title="Declaration of a multiphase BaseIVFAB&lt;Real&gt;" alt="" coords="2799,240,2950,265"/>
+<area shape="poly" title=" " alt="" coords="3214,195,2953,240,2953,235,3213,189"/>
+<area shape="rect" href="CD__EBAMRDataImplem_8H.html" title="Implementation of EBAMRData.H." alt="" coords="2338,240,2529,265"/>
+<area shape="poly" title=" " alt="" coords="3208,188,2919,210,2543,241,2542,236,2919,204,3208,183"/>
+<area shape="poly" title=" " alt="" coords="3084,263,3158,304,3155,309,3082,268"/>
+<area shape="poly" title=" " alt="" coords="2974,267,2962,268,2572,290,2268,296,1964,301,1573,316,1525,319,1525,314,1573,311,1964,295,2268,291,2571,284,2961,263,2974,262"/>
+<area shape="poly" title=" " alt="" coords="2974,267,2962,268,2668,286,2438,292,2207,298,1911,316,1911,311,2207,293,2438,287,2668,280,2961,263,2974,262"/>
+<area shape="poly" title=" " alt="" coords="3152,262,3592,314,3591,319,3151,267"/>
+<area shape="rect" title=" " alt="" coords="2856,313,2965,339"/>
+<area shape="poly" title=" " alt="" coords="3039,268,2949,310,2947,305,3037,263"/>
+<area shape="poly" title=" " alt="" coords="2799,263,2039,322,2038,317,2799,257"/>
+<area shape="poly" title=" " alt="" coords="2799,261,2685,268,2129,291,1886,300,1573,316,1525,319,1525,314,1573,311,1886,295,2129,285,2685,263,2799,256"/>
+<area shape="poly" title=" " alt="" coords="2799,263,2730,268,2501,282,2322,290,2142,299,1911,316,1911,311,2142,294,2322,284,2501,276,2729,263,2799,258"/>
+<area shape="poly" title=" " alt="" coords="2903,263,3004,305,3002,310,2901,268"/>
+<area shape="poly" title=" " alt="" coords="2883,264,2901,300,2896,302,2878,267"/>
+<area shape="rect" title=" " alt="" coords="2696,313,2832,339"/>
+<area shape="poly" title=" " alt="" coords="2858,268,2795,308,2792,303,2855,263"/>
+<area shape="poly" title=" " alt="" coords="2338,267,2326,268,1950,294,1574,316,1525,319,1525,314,1573,311,1949,289,2325,263,2338,262"/>
+<area shape="poly" title=" " alt="" coords="2338,267,1911,316,1911,310,2337,262"/>
+<area shape="poly" title=" " alt="" coords="2395,268,2243,312,2241,307,2393,263"/>
+<area shape="poly" title=" " alt="" coords="2529,240,2553,237,3195,185,3195,190,2554,243,2529,245"/>
+<area shape="poly" title=" " alt="" coords="2038,167,2020,117,1993,59,1998,57,2025,115,2043,165"/>
+<area shape="poly" title=" " alt="" coords="1947,190,1646,215,1514,230,1472,237,1452,242,1441,254,1433,269,1424,301,1419,299,1428,267,1437,251,1449,238,1470,231,1513,225,1646,210,1947,185"/>
+<area shape="poly" title=" " alt="" coords="2028,194,1985,229,1929,268,1848,310,1846,305,1927,263,1982,224,2025,190"/>
+<area shape="poly" title=" " alt="" coords="2085,190,2127,208,2147,222,2165,238,2181,268,2189,299,2184,300,2176,270,2161,242,2144,226,2124,213,2082,195"/>
+<area shape="rect" title=" " alt="" coords="2049,240,2151,265"/>
+<area shape="poly" title=" " alt="" coords="2052,191,2084,228,2079,231,2048,194"/>
+<area shape="rect" href="CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="2553,240,2673,265"/>
+<area shape="poly" title=" " alt="" coords="2133,188,2540,237,2541,237,2540,243,2540,243,2132,193"/>
+<area shape="rect" href="CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="1265,240,1381,265"/>
+<area shape="poly" title=" " alt="" coords="1947,190,1700,211,1400,243,1394,243,1394,238,1400,237,1699,206,1947,185"/>
+<area shape="poly" title=" " alt="" coords="2674,256,2787,263,3515,298,4040,319,4040,324,3515,303,2787,268,2673,261"/>
+<area shape="poly" title=" " alt="" coords="2618,265,2622,299,2617,300,2612,266"/>
+<area shape="poly" title=" " alt="" coords="2553,266,2540,268,2269,290,2057,298,1845,303,1573,316,1525,319,1525,314,1573,311,1845,298,2057,293,2269,285,2540,263,2553,261"/>
+<area shape="poly" title=" " alt="" coords="2553,266,2540,268,2365,285,2228,294,2089,302,1911,316,1911,311,2089,297,2227,289,2365,280,2540,263,2553,261"/>
+<area shape="poly" title=" " alt="" coords="1291,268,1168,311,1166,306,1289,263"/>
+<area shape="poly" title=" " alt="" coords="1340,263,1393,303,1390,307,1337,268"/>
+<area shape="poly" title=" " alt="" coords="1381,260,1717,309,1716,314,1380,265"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">

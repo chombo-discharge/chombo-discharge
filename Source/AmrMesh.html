@@ -224,7 +224,6 @@ See <a class="reference internal" href="Realm.html#chap-realm"><span class="std 
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_sim_depth</span></code>. Maximum simulation depth.
 Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means that grids can be generated with depths up to <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_amr_depth</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.fill_ratio</span></code>. Fill ratio for BR grid generation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.irreg_growth</span></code>. Buffer region around irregular tagged cells.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.buffer_size</span></code>. Buffer size for BR grid generation.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.grid_algorithm</span></code>. Grid generation algorithm. Valid options are <em>br</em> or <em>tiled</em>. See <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a> for details.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.box_sorting</span></code>. Box sorting algorithm. Valid options are <em>std</em>, <em>morton</em>, or <em>shuffle</em>.</p></li>
@@ -235,11 +234,9 @@ Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means that g
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.num_ghost</span></code>. Number of ghost cells for mesh data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lsf_ghost</span></code>. Number of ghost cells when allocating level-set function on the grid.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code>. Number of ghost cells for EB moments.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_sten</span></code>. Which centroid interpolation stencils to use. Valid options are <em>pwl</em>, <em>linear</em>, <em>taylor</em>, <em>lsq</em>. Only <em>linear</em> is guaranteed monotone.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_sten</span></code>. EB interpolation stencils.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_interp</span></code>. Which centroid interpolation stencils to use. Good options are <em>minmod</em>, <em>linear</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_interp</span></code>. EB interpolation stencils. Good options are <em>minmod</em>, <em>pwl</em></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.redist_radius</span></code>. Redistribution radius.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ghost_interp</span></code>. Default ghost cell interpolation type. Valid options are <em>pwl</em> or <em>quad</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ebcf</span></code>. Can be set to false if refinement boundaries do not cross the EB. Valid options are <em>true</em> and <em>false</em>.</p></li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -259,6 +256,8 @@ I.e. the user must specify consist domain sizes and resolutions.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.box_sorting</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_interp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_interp</span></code></p></li>
 </ul>
 <p>These options only affect the grid generation method and parameters, and are thus only effective after the next regrid.</p>
 </section>
