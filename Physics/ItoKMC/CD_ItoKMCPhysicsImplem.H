@@ -430,7 +430,10 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                                   const Real                  a_dx,
                                   const Real                  a_kappa) const noexcept
 {
-  CH_TIME("ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>, ...)");
+  CH_TIMERS("ItoKMCPhysics::reconcileParticles");
+  CH_TIMER("ItoKMCPhysics::reconcileParticles::compute_downstream", t1);
+  CH_TIMER("ItoKMCPhysics::reconcileParticles::particle_placement", t2);  
+
 
   CH_assert(m_isDefined);
   CH_assert(a_particles.size() == a_newNumParticles.size());
@@ -458,6 +461,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
   }
 
   // Can use downstream particle placement if there are downstream particles
+  CH_START(t1);
   RealVect downstreamPosition = RealVect::Zero;
   bool hasDownstream = (a_particles[0]->length() > 0) && (a_electricField.vectorLength() > 0.0);
 
@@ -497,7 +501,9 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
   }
 
   DataOps::computeMinValidBox(pLo, pHi, -E, downstreamPosition);
+  CH_STOP(t1);  
 
+  CH_START(t2);
   for (int i = 0; i < a_particles.size(); i++) {
     const long long diff = (long long)(a_newNumParticles[i] - a_oldNumParticles[i]);
 
@@ -530,13 +536,19 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 	    int numTries = 0;
 	    int maxTries = 10;
 
-	    x = Random::randomPosition(pLo, pHi, downstreamPosition, -E);	    
-	    while((x-a_bndryCentroid).dotProduct(a_bndryNormal) <= 0.0 && numTries < maxTries) {
-	      x = Random::randomPosition(pLo, pHi, downstreamPosition, -E);	    
-	      numTries++;
+	    x = Random::randomPosition(pLo, pHi, downstreamPosition, -E);
+
+	    // Rejection sampling 
+	    if(a_kappa < 1.0) {
+	      while((x-a_bndryCentroid).dotProduct(a_bndryNormal) <= 0.0 && numTries < maxTries) {
+		x = Random::randomPosition(pLo, pHi, downstreamPosition, -E);
+		
+		numTries++;
+	      }
 	    }
 
 	    if(numTries == maxTries) {
+	      std::cout << "exceeded max tries" << std::endl;
 	      x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 	    }
 	    else {
@@ -561,6 +573,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       this->removeParticles(*a_particles[i], -diff);
     }
   }
+  CH_STOP(t2);  
 }
 
 inline void
