@@ -18,6 +18,7 @@
 
 // Chombo includes
 #include <SPMD.H>
+#include <CH_Timer.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -99,6 +100,8 @@ template <typename T, typename>
 inline T
 Random::getPoisson(const Real a_mean)
 {
+  CH_TIME("Random::getPoisson");
+
   CH_assert(s_seeded);
 
   T ret = (T)0;
@@ -121,6 +124,8 @@ template <typename T, typename>
 inline T
 Random::getBinomial(const T a_N, const Real a_p) noexcept
 {
+  CH_TIME("Random::getBinomial");
+
   CH_assert(s_seeded);
 
   T ret = 0;
@@ -146,6 +151,8 @@ Random::getBinomial(const T a_N, const Real a_p) noexcept
 inline Real
 Random::getUniformReal01()
 {
+  CH_TIME("Random::getUniformReal01");
+
   CH_assert(s_seeded);
 
   return s_uniform01(s_rng);
@@ -154,6 +161,8 @@ Random::getUniformReal01()
 inline Real
 Random::getUniformReal11()
 {
+  CH_TIME("Random::getUniformReal11");
+
   CH_assert(s_seeded);
 
   return s_uniform11(s_rng);
@@ -162,6 +171,8 @@ Random::getUniformReal11()
 inline Real
 Random::getNormal01()
 {
+  CH_TIME("Random::getNormal01");
+
   CH_assert(s_seeded);
 
   return s_normal01(s_rng);
@@ -170,6 +181,8 @@ Random::getNormal01()
 inline RealVect
 Random::getDirection()
 {
+  CH_TIME("Random::getDirection");
+
   CH_assert(s_seeded);
 
   constexpr Real safety = 1.E-12;
@@ -207,6 +220,8 @@ template <typename T>
 inline Real
 Random::get(T& a_distribution)
 {
+  CH_TIME("Random::get");
+
   CH_assert(s_seeded);
 
   return a_distribution(s_rng);
@@ -216,6 +231,8 @@ template <typename T>
 inline size_t
 Random::getDiscrete(T& a_distribution)
 {
+  CH_TIME("Random::getDiscrete");
+
   CH_assert(s_seeded);
 
   return a_distribution(s_rng);
@@ -230,6 +247,7 @@ Random::randomPosition(const RealVect a_cellPos,
                        const Real     a_dx,
                        const Real     a_kappa) noexcept
 {
+  CH_TIME("Random::randomPosition(full)");
 
   RealVect pos;
 
@@ -252,6 +270,7 @@ Random::randomPosition(const RealVect a_lo,
                        const RealVect a_bndryCentroid,
                        const RealVect a_bndryNormal) noexcept
 {
+  CH_TIME("Random::randomPosition(partial)");
 
   // Draw a position.
   RealVect pos   = Random::randomPosition(a_lo, a_hi);
@@ -269,6 +288,8 @@ Random::randomPosition(const RealVect a_lo,
 inline RealVect
 Random::randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept
 {
+  CH_TIME("Random::randomPosition(box)");
+
   RealVect pos = RealVect::Zero;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
