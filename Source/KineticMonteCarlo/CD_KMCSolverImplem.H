@@ -416,7 +416,9 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauMidpoint(State&, const ReactionList&, const Real)");
+  CH_TIMERS("KMCSolver::stepTauMidpoint(State&, const ReactionList&, const Real)");
+  CH_TIMER("KMCSolver::stepTauMidPoint::first_loop", t1);
+  CH_TIMER("KMCSolver::stepTauMidPoint::second_loop", t2);
 
   const int numReactions = a_reactions.size();
 
@@ -426,18 +428,23 @@ KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const ReactionList& a_re
 
     State Xdagger = a_state;
 
+    CH_START(t1);
     for (size_t i = 0; i < numReactions; i++) {
       // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
       //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
       a_reactions[i]->advanceState(Xdagger, (T)std::ceil(0.5 * propensities[i] * a_dt));
     }
+    CH_STOP(t1);
 
     propensities = this->propensities(Xdagger, a_reactions);
+
+    CH_START(t2);
     for (size_t i = 0; i < numReactions; i++) {
       const T curReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
 
       a_reactions[i]->advanceState(a_state, curReactions);
     }
+    CH_STOP(t2);
   }
 }
 
@@ -506,7 +513,9 @@ template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauPRC(State&, const ReactionList&, const Real)");
+  CH_TIMERS("KMCSolver::stepTauPRC(State&, const ReactionList&, const Real)");
+  CH_TIMER("KMCSolver::stepTauPRC::first_loop", t1);
+  CH_TIMER("KMCSolver::stepTauPRC::second_loop", t2);
 
   const int numReactions = a_reactions.size();
 
@@ -516,6 +525,7 @@ KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactio
 
     const std::vector<Real> ak = aj;
 
+    CH_START(t1);
     for (int j = 0; j < numReactions; j++) {
       for (int k = 0; k < numReactions; k++) {
         State x = a_state;
@@ -527,12 +537,15 @@ KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactio
         aj[j] += 0.5 * a_dt * ak[k] * etajk;
       }
     }
+    CH_STOP(t1);
 
+    CH_START(t2);
     for (size_t i = 0; i < numReactions; i++) {
       const T nr = (T)Random::getPoisson<long long>(aj[i] * a_dt);
 
       a_reactions[i]->advanceState(a_state, nr);
     }
+    CH_STOP(t2);
   }
 }
 

@@ -3019,7 +3019,7 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities
                                              Vector<EBCellFAB*>& a_cdrMobilities,
                                              const EBCellFAB&    a_electricField,
                                              const int           a_level,
-                                             const DataIndex     a_dit,
+                                             const DataIndex     a_din,
                                              const Box           a_box,
                                              const Real          a_time) noexcept
 {
@@ -3036,7 +3036,7 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities
 
   const Real     dx      = m_amr->getDx()[a_level];
   const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_din];
 
   // Handles to regular data.
   const FArrayBox&   electricFieldReg = a_electricField.getFArrayBox();
@@ -3104,7 +3104,7 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities
     }
   };
 
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
   // Run the kernels.
   BoxLoops::loop(a_box, regularKernel);
@@ -3277,7 +3277,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
                                                         Vector<EBCellFAB*>& a_cdrDiffusionCoefficients,
                                                         const EBCellFAB&    a_electricField,
                                                         const int           a_level,
-                                                        const DataIndex     a_dit,
+                                                        const DataIndex     a_din,
                                                         const Box           a_box,
                                                         const Real          a_time) noexcept
 {
@@ -3297,7 +3297,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
   // Geometric information that we need.
   const Real     dx      = m_amr->getDx()[a_level];
   const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_din];
 
   // Handle to single-valued data.
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
@@ -3385,7 +3385,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
   };
 
   // Run kernels.
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
   BoxLoops::loop(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
@@ -3520,7 +3520,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_ppc,
                                                               const int       a_level,
-                                                              const DataIndex a_dit,
+                                                              const DataIndex a_din,
                                                               const Box       a_box,
                                                               const EBISBox&  a_ebisbox) noexcept
 {
@@ -3547,7 +3547,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
     // Get the cell-sorted particles. This will issue an error if the user has not
     // sorted the particles by cell before calling this routine.
     const ParticleContainer<ItoParticle>& particles     = solver->getParticles(ItoSolver::WhichContainer::Bulk);
-    const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
+    const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_din);
 
     // Regular cells kernel.
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3581,7 +3581,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
     };
 
     // Run the kernels.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_din];
 
     BoxLoops::loop(a_box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
@@ -3642,7 +3642,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_ppc,
                                                               const int       a_level,
-                                                              const DataIndex a_dit,
+                                                              const DataIndex a_din,
                                                               const Box       a_box,
                                                               const EBISBox&  a_ebisbox) noexcept
 {
@@ -3668,7 +3668,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     RefCountedPtr<CdrSolver>& solver = solverIt();
     const int                 idx    = solverIt.index();
 
-    const EBCellFAB& phi    = (*(solver->getPhi())[a_level])[a_dit];
+    const EBCellFAB& phi    = (*(solver->getPhi())[a_level])[a_din];
     const FArrayBox& phiReg = phi.getFArrayBox();
 
     // Regular cells kernel.
@@ -3686,7 +3686,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     };
 
     // Run the kernels.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
     BoxLoops::loop(a_box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
@@ -3746,7 +3746,7 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnergies,
                                                               const int       a_level,
-                                                              const DataIndex a_dit,
+                                                              const DataIndex a_din,
                                                               const Box       a_box,
                                                               const EBISBox&  a_ebisbox) noexcept
 {
@@ -3772,7 +3772,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
     // Get the cell-sorted particles. This will issue an error if the user has not
     // sorted the particles by cell before calling this routine.
     const ParticleContainer<ItoParticle>& particles     = solver->getParticles(ItoSolver::WhichContainer::Bulk);
-    const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
+    const BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_din);
 
     // Regular grid cells.
     auto regularKernel = [&](const IntVect& iv) -> void {
@@ -3821,7 +3821,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
     };
 
     // Run the kernels.
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_din];
 
     BoxLoops::loop(a_box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
@@ -3928,7 +3928,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
   // Reconcile the results -- for the discrete solvers we add/remove particles/photons and for the CDR solvers we update
   // the source terms.
-  this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC);
+  this->reconcileParticles(m_particleItoPPC, m_particleOldItoPPC, m_particleYPC, m_electricFieldParticle);
   CH_STOP(t4);
 
   // Deposited PointParticles on the mesh and add the result to m_fluidCdrPPC. This is a bit convoluted because
@@ -4012,7 +4012,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
                                                   EBCellFAB&       a_newPhotonsPerCell,
                                                   const EBCellFAB& a_electricField,
                                                   const int        a_level,
-                                                  const DataIndex  a_dit,
+                                                  const DataIndex  a_din,
                                                   const Box        a_box,
                                                   const Real       a_dx,
                                                   const Real       a_dt) const noexcept
@@ -4033,7 +4033,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
   // Geometric information that we require.
   const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_din];
 
   const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
@@ -4065,9 +4065,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
     const int i = it.index();
 
-    densitiesIto[i]           = &(*(m_fluidPhiIto[i])[a_level])[a_dit];
+    densitiesIto[i]           = &(*(m_fluidPhiIto[i])[a_level])[a_din];
     densitiesItoReg[i]        = &(densitiesIto[i]->getFArrayBox());
-    densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][a_level])[a_dit];
+    densityGradientsIto[i]    = &(*m_fluidGradPhiIto[i][a_level])[a_din];
     densityGradientsItoReg[i] = &(densityGradientsIto[i]->getFArrayBox());
   }
 
@@ -4077,14 +4077,14 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
     const int i = it.index();
 
-    densitiesCDR[i]           = &(*phi[a_level])[a_dit];
+    densitiesCDR[i]           = &(*phi[a_level])[a_din];
     densitiesCDRReg[i]        = &(densitiesCDR[i]->getFArrayBox());
-    densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_dit];
+    densityGradientsCDR[i]    = &(*m_fluidGradPhiCDR[i][a_level])[a_din];
     densityGradientsCDRReg[i] = &(densityGradientsCDR[i]->getFArrayBox());
   }
 
   // Handle to valid grid cells.
-  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_dit];
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_din];
 
   // Regular cells
   auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4178,7 +4178,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   };
 
   // Run the kernels.
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
   BoxLoops::loop(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
@@ -4188,7 +4188,8 @@ template <typename I, typename C, typename R, typename F>
 inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                                               const EBAMRCellData& a_oldParticlesPerCell,
-                                              const EBAMRCellData& a_newPhotonsPerCell) const noexcept
+                                              const EBAMRCellData& a_newPhotonsPerCell,
+                                              const EBAMRCellData& a_electricField) const noexcept
 {
   CH_TIME("ItoKMCStepper::reconcileParticles(EBAMRCellDatax3)");
   if (m_verbosity > 5) {
@@ -4198,9 +4199,14 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBAMRCellData& a_newParticle
   CH_assert(a_newParticlesPerCell.getRealm() == m_particleRealm);
   CH_assert(a_oldParticlesPerCell.getRealm() == m_particleRealm);
   CH_assert(a_newPhotonsPerCell.getRealm() == m_particleRealm);
+  CH_assert(a_electricField.getRealm() == m_particleRealm);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    this->reconcileParticles(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], *a_newPhotonsPerCell[lvl], lvl);
+    this->reconcileParticles(*a_newParticlesPerCell[lvl],
+                             *a_oldParticlesPerCell[lvl],
+                             *a_newPhotonsPerCell[lvl],
+                             *a_electricField[lvl],
+                             lvl);
   }
 }
 
@@ -4209,6 +4215,7 @@ inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                                               const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+                                              const LevelData<EBCellFAB>& a_electricField,
                                               const int                   a_level) const noexcept
 {
   CH_TIME("ItoKMCStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
@@ -4222,6 +4229,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
   CH_assert(a_newParticlesPerCell.nComp() == numItoSpecies);
   CH_assert(a_oldParticlesPerCell.nComp() == numItoSpecies);
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
+  CH_assert(a_electricField.nComp() == SpaceDim);
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
   const DataIterator&      dit = dbl.dataIterator();
@@ -4235,6 +4243,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const LevelData<EBCellFAB>& a_newP
     this->reconcileParticles(a_newParticlesPerCell[din],
                              a_oldParticlesPerCell[din],
                              a_newPhotonsPerCell[din],
+                             a_electricField[din],
                              a_level,
                              din,
                              dbl[din],
@@ -4247,8 +4256,9 @@ inline void
 ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                                               const EBCellFAB& a_oldParticlesPerCell,
                                               const EBCellFAB& a_newPhotonsPerCell,
+                                              const EBCellFAB& a_electricField,
                                               const int        a_level,
-                                              const DataIndex  a_dit,
+                                              const DataIndex  a_din,
                                               const Box        a_box,
                                               const Real       a_dx) const noexcept
 {
@@ -4272,21 +4282,24 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   CH_assert(a_newParticlesPerCell.nComp() == numItoSpecies);
   CH_assert(a_oldParticlesPerCell.nComp() == numItoSpecies);
   CH_assert(a_newPhotonsPerCell.nComp() == numPhotonSpecies);
+  CH_assert(a_electricField.nComp() == SpaceDim);
 
   // Geometric information that we need.
   const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_plasmaPhase)[a_level][a_din];
 
   // Number of computational particles to make on this level
   const int ppc = (a_level < m_particlesPerCell.size()) ? m_particlesPerCell[a_level] : m_particlesPerCell.back();
 
-  // List of valid grid cells
   CH_START(t1);
-  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_dit];
+  // List of valid grid cells
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_particleRealm)[a_level])[a_din];
+
+  // Regular electric field cells
+  const FArrayBox& electricFieldReg = a_electricField.getFArrayBox();
 
   // Pointers to cell-centered particle storages. Note that the BinFabs hold a list of particles/photons
   // on each grid cell. We will manipulate these lists.
-
   Vector<BinFab<ItoParticle>*>   itoParticlesFAB(numItoSpecies);
   Vector<BinFab<PointParticle>*> cdrParticlesFAB(numCdrSpecies);
   Vector<BinFab<Photon>*>        sourcePhotonsFAB(numPhotonSpecies);
@@ -4300,7 +4313,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
-    itoParticlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_dit));
+    itoParticlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_din));
   }
 
   // Get a handle to the cell-sorted particles for CDR photoionization products
@@ -4309,7 +4322,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
 
     ParticleContainer<PointParticle>& pointParticles = m_cdrPhotoiProducts[idx];
 
-    cdrParticlesFAB[idx] = &(pointParticles.getCellParticles(a_level, a_dit));
+    cdrParticlesFAB[idx] = &(pointParticles.getCellParticles(a_level, a_din));
   }
 
   // Get a handle to the cell-sorted photons from the Monte Carlo photon solvers.
@@ -4321,8 +4334,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
     ParticleContainer<Photon>& solverBulkPhotons   = solver->getBulkPhotons();
     ParticleContainer<Photon>& solverSourcePhotons = solver->getSourcePhotons();
 
-    bulkPhotonsFAB[idx]   = &(solverBulkPhotons.getCellParticles(a_level, a_dit));
-    sourcePhotonsFAB[idx] = &(solverSourcePhotons.getCellParticles(a_level, a_dit));
+    bulkPhotonsFAB[idx]   = &(solverBulkPhotons.getCellParticles(a_level, a_din));
+    sourcePhotonsFAB[idx] = &(solverSourcePhotons.getCellParticles(a_level, a_din));
   }
 
   // The physics interface takes the physical number of particles/photons as arguments
@@ -4343,6 +4356,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   // Regular cells
   auto regularKernel = [&](const IntVect& iv) -> void {
     if (ebisbox.isRegular(iv) && validCells(iv)) {
+      const RealVect electricField = RealVect(
+        D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
       const RealVect cellPos       = probLo + a_dx * (RealVect(iv) + 0.5 * RealVect::Unit);
       const RealVect centroidPos   = RealVect::Zero;
       const RealVect lo            = -0.5 * RealVect::Unit;
@@ -4380,6 +4395,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       m_physics->reconcileParticles(itoParticles,
                                     numNewParticles,
                                     numOldParticles,
+                                    electricField,
                                     cellPos,
                                     centroidPos,
                                     lo,
@@ -4422,11 +4438,13 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   auto irregularKernel = [&](const VolIndex& vof) -> void {
     const IntVect iv = vof.gridIndex();
     if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
-      const Real     kappa         = ebisbox.volFrac(vof);
+      const RealVect electricField = RealVect(
+        D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
       const RealVect cellPos       = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);
       const RealVect centroidPos   = ebisbox.centroid(vof);
       const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
       const RealVect bndryNormal   = ebisbox.normal(vof);
+      const Real     kappa         = ebisbox.volFrac(vof);
 
       // Compute the minimum bounding box that encloses this cut-cell.
       RealVect lo = -0.5 * RealVect::Unit;
@@ -4464,6 +4482,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       m_physics->reconcileParticles(itoParticles,
                                     numNewParticles,
                                     numOldParticles,
+                                    electricField,
                                     cellPos,
                                     centroidPos,
                                     lo,
@@ -4505,7 +4524,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   };
 
   // Run the kernels.
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_din];
 
   CH_START(t2);
   BoxLoops::loop(a_box, regularKernel);
@@ -4677,7 +4696,7 @@ void
 ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticlesPerCell,
                                                  const EBCellFAB& a_oldParticlesPerCell,
                                                  const int        a_level,
-                                                 const DataIndex  a_dit,
+                                                 const DataIndex  a_din,
                                                  const Box        a_box,
                                                  const Real       a_dx,
                                                  const Real       a_dt) noexcept
@@ -4698,8 +4717,8 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
     RefCountedPtr<CdrSolver>& solver = solverIt();
     const int                 index  = solverIt.index();
 
-    EBCellFAB& phi = (*(solver->getPhi()[a_level]))[a_dit];
-    EBCellFAB& src = (*(solver->getSource()[a_level]))[a_dit];
+    EBCellFAB& phi = (*(solver->getPhi()[a_level]))[a_din];
+    EBCellFAB& src = (*(solver->getSource()[a_level]))[a_din];
 
     // Source = (newParticles - oldParticles)/volume
     src.setVal(0.0);
@@ -5268,7 +5287,7 @@ Real
 ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBCellFAB& a_electricField,
                                             const EBCellFAB& a_particlesPerCell,
                                             const int        a_level,
-                                            const DataIndex  a_dit,
+                                            const DataIndex  a_din,
                                             const Box        a_box) noexcept
 {
   CH_TIME("ItoKMCStepper::computePhysicsDt(EBCellFAB, EBCellFAB, int, DataIndex, Box)");
@@ -5286,10 +5305,10 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBCellFAB& a_electricField,
   // Geometric information that we need.
   const Real     dx      = m_amr->getDx()[a_level];
   const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_dit];
+  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_din];
 
   // Valid grid cells.
-  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_dit];
+  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_din];
 
   // Handles to regular grid data.
   const FArrayBox& electricFieldReg    = a_electricField.getFArrayBox();
@@ -5336,7 +5355,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBCellFAB& a_electricField,
   };
 
   // Run the kernels.
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_dit];
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
   BoxLoops::loop(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);

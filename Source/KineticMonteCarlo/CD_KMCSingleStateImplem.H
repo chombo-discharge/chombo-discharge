@@ -12,6 +12,9 @@
 #ifndef CD_KMCSingleStateImplem_H
 #define CD_KMCSingleStateImplem_H
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_KMCSingleState.H>
 #include <CD_NamespaceHeader.H>
@@ -19,17 +22,23 @@
 template <typename T>
 KMCSingleState<T>::KMCSingleState(const size_t a_numSpecies) noexcept
 {
+  CH_TIME("KMCSingleState::KMCSingleState");
+
   m_state.resize(a_numSpecies);
 }
 
 template <typename T>
 inline KMCSingleState<T>::~KMCSingleState()
-{}
+{
+  CH_TIME("KMCSingleState::~KMCSingleState");
+}
 
 template <typename T>
 inline bool
 KMCSingleState<T>::isValidState() const noexcept
 {
+  CH_TIME("KMCSingleState::isValidState");
+
   bool isValid = true;
 
   for (const auto& p : m_state) {

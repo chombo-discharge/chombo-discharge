@@ -1200,7 +1200,7 @@ namespace Physics {
 	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
 	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level          Grid level
-	@param[in]  a_dit            Grid index
+	@param[in]  a_din            Grid index
 	@param[in]  a_cellBox        Computation box
 	@param[in]  a_time           Time      
       */
@@ -1209,7 +1209,7 @@ namespace Physics {
                         Vector<EBCellFAB*>& a_cdrMobilities,
                         const EBCellFAB&    a_electricField,
                         const int           a_level,
-                        const DataIndex     a_dit,
+                        const DataIndex     a_din,
                         const Box           a_cellBox,
                         const Real          a_time) noexcept;
 
@@ -1256,7 +1256,7 @@ namespace Physics {
 	@param[in]  a_level                    Grid level
 	@param[in]  a_time                     Time
 	@param[in]  a_level                    Grid level
-	@param[in]  a_dit                      Grid index
+	@param[in]  a_din                      Grid index
 	@param[in]  a_cellBox                  Computation box
 	@param[in]  a_time                     Time      
       */
@@ -1265,7 +1265,7 @@ namespace Physics {
                                    Vector<EBCellFAB*>& a_cdrDiffusionCoefficients,
                                    const EBCellFAB&    a_E,
                                    const int           a_level,
-                                   const DataIndex     a_dit,
+                                   const DataIndex     a_din,
                                    const Box           a_box,
                                    const Real          a_time) noexcept;
 
@@ -1303,7 +1303,7 @@ namespace Physics {
 	@brief Compute the number of reactive particles per cell
 	@param[out] a_ppc     Number of physical particles per grid cell for all species
 	@param[in]  a_level   Grid level
-	@param[in]  a_dit     Grid index
+	@param[in]  a_din     Grid index
 	@param[in]  a_box     Grid box
 	@param[in]  a_ebisbox EB grid box
 	@note a_ppc Must be defined over the particle realm and have the same number of components as the number of plasma species involved in the simulation. 
@@ -1311,7 +1311,7 @@ namespace Physics {
       virtual void
       computeReactiveItoParticlesPerCell(EBCellFAB&      a_ppc,
                                          const int       a_level,
-                                         const DataIndex a_dit,
+                                         const DataIndex a_din,
                                          const Box       a_box,
                                          const EBISBox&  a_ebisbox) noexcept;
 
@@ -1337,7 +1337,7 @@ namespace Physics {
 	@brief Compute the number of reactive particles per cell for the CDR solvers.
 	@param[out] a_ppc     Number of physical particles per grid cell for all CDR species
 	@param[in]  a_level   Grid level
-	@param[in]  a_dit     Grid index
+	@param[in]  a_din     Grid index
 	@param[in]  a_box     Grid box
 	@param[in]  a_ebisbox EB grid box
 	@note a_ppc Must be defined over the fluid realm and have the same number of components as the number of CDR species involved in the simulation. 
@@ -1345,7 +1345,7 @@ namespace Physics {
       virtual void
       computeReactiveCdrParticlesPerCell(EBCellFAB&      a_ppc,
                                          const int       a_level,
-                                         const DataIndex a_dit,
+                                         const DataIndex a_din,
                                          const Box       a_box,
                                          const EBISBox&  a_ebisbox) noexcept;
 
@@ -1370,7 +1370,7 @@ namespace Physics {
 	@brief Compute the mean particle energy in all grid cells. Patch version. 
 	@param[out] a_meanEnergies Number of physical particles per grid cell for all species
 	@param[in]  a_level        Grid level
-	@param[in]  a_dit          Grid index
+	@param[in]  a_din          Grid index
 	@param[in]  a_box          Grid box
 	@param[in]  a_ebisbox      EB grid box
 	@note a_meanEnergies must be defined over the particle realm and have the same number of components as the number of palsma species involved in the simulation. 
@@ -1378,7 +1378,7 @@ namespace Physics {
       virtual void
       computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_meanEnergies,
                                          const int       a_level,
-                                         const DataIndex a_dit,
+                                         const DataIndex a_din,
                                          const Box       a_box,
                                          const EBISBox&  a_ebisbox) noexcept;
 
@@ -1422,7 +1422,7 @@ namespace Physics {
 	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
 	@param[in]    a_electricField         Electric field. 
 	@param[in]    a_level                 Grid level
-	@param[in]    a_dit                   Grid index.
+	@param[in]    a_din                   Grid index.
 	@param[in]    a_box                   Grid box
 	@param[in]    a_dx                    Grid resolution.
 	@param[in]    a_dt                    Time increment
@@ -1434,7 +1434,7 @@ namespace Physics {
                              EBCellFAB&       a_newPhotonsPerCell,
                              const EBCellFAB& a_electricField,
                              const int        a_level,
-                             const DataIndex  a_dit,
+                             const DataIndex  a_din,
                              const Box        a_box,
                              const Real       a_dx,
                              const Real       a_dt) const noexcept;
@@ -1443,19 +1443,22 @@ namespace Physics {
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_electricField        Electric field
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
       inline void
       reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                          const EBAMRCellData& a_oldParticlesPerCell,
-                         const EBAMRCellData& a_newPhotonsPerCell) const noexcept;
+                         const EBAMRCellData& a_newPhotonsPerCell,
+			 const EBAMRCellData& a_electricField) const noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_electricField        Electric field	
 	@param[in] a_level                Grid level
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
@@ -1463,15 +1466,17 @@ namespace Physics {
       reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                          const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                          const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+			 const LevelData<EBCellFAB>& a_electricField,
                          const int                   a_level) const noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance. 
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_electricField        Electric field				 	
 	@param[in] a_level                Grid level
-	@param[in] a_dit                  Grid index
+	@param[in] a_din                  Grid index
 	@param[in] a_box                  Grid box
 	@param[in] a_dx                   Grid resolution. 
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
@@ -1480,8 +1485,9 @@ namespace Physics {
       reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                          const EBCellFAB& a_oldParticlesPerCell,
                          const EBCellFAB& a_newPhotonsPerCell,
+			 const EBCellFAB& a_electricField,
                          const int        a_level,
-                         const DataIndex  a_dit,
+                         const DataIndex  a_din,
                          const Box        a_box,
                          const Real       a_dx) const noexcept;
 
@@ -1526,7 +1532,7 @@ namespace Physics {
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
 	@param[in] a_level                Grid level
-	@param[in] a_dit                  Grid index
+	@param[in] a_din                  Grid index
 	@param[in] a_box                  Grid box
 	@param[in] a_dx                   Grid resolution. 
 	@param[in] a_dt                   Time step
@@ -1535,7 +1541,7 @@ namespace Physics {
       reconcileCdrDensities(const EBCellFAB& a_newParticlesPerCell,
                             const EBCellFAB& a_oldParticlesPerCell,
                             const int        a_level,
-                            const DataIndex  a_dit,
+                            const DataIndex  a_din,
                             const Box        a_box,
                             const Real       a_dx,
                             const Real       a_dt) noexcept;
@@ -1637,7 +1643,7 @@ namespace Physics {
 	@param[in] a_electricField    Electric field. 
 	@param[in] a_particlesPerCell Number of particles per grid cell
 	@param[in] a_level            Grid level
-	@param[in] a_dit              Grid index
+	@param[in] a_din              Grid index
 	@param[in] a_box              Grid box
 	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
       */
@@ -1645,7 +1651,7 @@ namespace Physics {
       computePhysicsDt(const EBCellFAB& a_electricField,
                        const EBCellFAB& a_particlesPercCell,
                        const int        a_level,
-                       const DataIndex  a_dit,
+                       const DataIndex  a_din,
                        const Box        a_box) noexcept;
 
       /*!

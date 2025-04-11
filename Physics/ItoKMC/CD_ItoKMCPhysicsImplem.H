@@ -20,6 +20,7 @@
 #include <CD_ParticleManagement.H>
 #include <CD_Random.H>
 #include <CD_Units.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoKMC;
@@ -33,10 +34,11 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_kmcReactions.clear();
   m_photoReactions.clear();
 
-  // Some default settings in case user forgets to call the parsing algorithms.
+  // Some default settings (mostly in case user forgets to call the parsing algorithms).
   m_isDefined         = false;
   m_debug             = true;
   m_hasKMCSolver      = false;
+  m_downstreamSpecies = -1;
   m_maxNewParticles   = 32;
   m_maxNewPhotons     = 32;
   m_Ncrit             = 5;
@@ -46,14 +48,10 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_algorithm         = Algorithm::TauPlain;
   m_particlePlacement = ParticlePlacement::Random;
 
-  // Development code for switching to centroid for secondary emission. Will be removed.
-#if 0
-  bool      useCentroid = false;
-  ParmParse pp("ItoKMCPhysics");
-  pp.query("use_centroid", useCentroid);
-  if (useCentroid) {
-    m_particlePlacement = ParticlePlacement::Centroid;
-  }
+#if 1 // Development code -- should find its way into ItoKMCJSON
+#warning "CD_ItoKMCPhysicsImplem.H -- development code enabled"
+  m_downstreamSpecies = 0;
+  m_particlePlacement = ParticlePlacement::Downstream;
 #endif
 }
 
@@ -422,6 +420,7 @@ inline void
 ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                                   const Vector<FPR>&          a_newNumParticles,
                                   const Vector<FPR>&          a_oldNumParticles,
+                                  const RealVect              a_electricField,
                                   const RealVect              a_cellPos,
                                   const RealVect              a_centroidPos,
                                   const RealVect              a_lo,
@@ -431,7 +430,10 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
                                   const Real                  a_dx,
                                   const Real                  a_kappa) const noexcept
 {
-  CH_TIME("ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>, ...)");
+  CH_TIMERS("ItoKMCPhysics::reconcileParticles");
+  CH_TIMER("ItoKMCPhysics::reconcileParticles::compute_downstream", t1);
+  CH_TIMER("ItoKMCPhysics::reconcileParticles::particle_placement", t2);  
+
 
   CH_assert(m_isDefined);
   CH_assert(a_particles.size() == a_newNumParticles.size());
@@ -458,6 +460,52 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
     }
   }
 
+  // Can use downstream particle placement if there are downstream particles
+  CH_START(t1);
+  RealVect upstreamPosition = RealVect::Zero;
+  bool hasDownstream = (a_particles[0]->length() > 0) && (a_electricField.vectorLength() > 0.0);
+
+  const RealVect E = a_electricField/a_electricField.vectorLength();  
+  if(hasDownstream) {
+    ListIterator<ItoParticle> lit = a_particles[0]->first();
+    
+    upstreamPosition = (lit().position() - a_cellPos)/a_dx;
+    Real normalDistance = upstreamPosition.dotProduct(E);
+    
+    ++lit;
+    
+    for (; lit.ok(); ++lit) {
+      const ItoParticle& p = lit();
+      const RealVect x = (p.position() - a_cellPos)/a_dx;
+      const Real curDist = x.dotProduct(E);
+
+      if(curDist > normalDistance) {
+	normalDistance = curDist;
+	upstreamPosition = x;
+      }
+    }
+  }
+
+  RealVect pLo = +RealVect::Unit;
+  RealVect pHi = -RealVect::Unit;
+
+  if(hasDownstream) {
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if(upstreamPosition[dir] > 0.5 || upstreamPosition[dir] < -0.5){
+      MayDay::Abort("logic bust in downstream position");
+    }
+    else {
+      //      std::cout << downstreamPosition << std::endl;
+    }
+  }
+  }
+
+  DataOps::computeMinValidBox(pLo, pHi, -E, upstreamPosition);
+  // pLo = max(pLo, a_lo);
+  // pHi = min(pHi, a_hi);
+  CH_STOP(t1);  
+
+  CH_START(t2);
   for (int i = 0; i < a_particles.size(); i++) {
     const long long diff = (long long)(a_newNumParticles[i] - a_oldNumParticles[i]);
 
@@ -472,13 +520,45 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
         // Figure out where to place the particles.
         switch (m_particlePlacement) {
+        case ParticlePlacement::Centroid: {
+          x = a_cellPos + a_centroidPos * a_dx;
+
+          break;
+        }
         case ParticlePlacement::Random: {
           x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
           break;
         }
-        case ParticlePlacement::Centroid: {
-          x = a_cellPos + a_centroidPos * a_dx;
+        case ParticlePlacement::Downstream: {
+	  if(!hasDownstream){ //|| (a_electricField.dotProduct(a_bndryNormal) >= 0.0 && a_kappa < 1.0)) {
+	    x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+	  }
+	  else {
+	    // int numTries = 0;
+	    // int maxTries = 10;
+
+	    x = Random::randomPosition(pLo, pHi, upstreamPosition, -E);
+	    if((x-a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
+	      x = upstreamPosition;
+	    }
+
+	    // Rejection sampling 
+	    // if(a_kappa < 1.0) {
+	    //   while((x-a_bndryCentroid).dotProduct(a_bndryNormal) <= 0.0 && numTries < maxTries) {
+	    // 	x = Random::randomPosition(pLo, pHi, upstreamPosition, -E);
+		
+	    // 	numTries++;
+	    //   }
+	    // }
+
+	    // if(numTries == maxTries) {
+	    //   std::cout << "exceeded max tries" << std::endl;
+	    //   x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+	    // }
+	    
+	    x = a_cellPos + x*a_dx;
+	  }
 
           break;
         }
@@ -497,6 +577,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       this->removeParticles(*a_particles[i], -diff);
     }
   }
+  CH_STOP(t2);  
 }
 
 inline void
