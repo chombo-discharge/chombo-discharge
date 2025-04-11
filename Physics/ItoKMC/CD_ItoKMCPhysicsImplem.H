@@ -462,15 +462,15 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
   // Can use downstream particle placement if there are downstream particles
   CH_START(t1);
-  RealVect downstreamPosition = RealVect::Zero;
+  RealVect upstreamPosition = RealVect::Zero;
   bool hasDownstream = (a_particles[0]->length() > 0) && (a_electricField.vectorLength() > 0.0);
 
   const RealVect E = a_electricField/a_electricField.vectorLength();  
   if(hasDownstream) {
     ListIterator<ItoParticle> lit = a_particles[0]->first();
     
-    downstreamPosition = (lit().position() - a_cellPos)/a_dx;
-    Real normalDistance = downstreamPosition.dotProduct(E);
+    upstreamPosition = (lit().position() - a_cellPos)/a_dx;
+    Real normalDistance = upstreamPosition.dotProduct(E);
     
     ++lit;
     
@@ -481,7 +481,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
       if(curDist > normalDistance) {
 	normalDistance = curDist;
-	downstreamPosition = x;
+	upstreamPosition = x;
       }
     }
   }
@@ -491,7 +491,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
   if(hasDownstream) {
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if(downstreamPosition[dir] > 0.5 || downstreamPosition[dir] < -0.5){
+    if(upstreamPosition[dir] > 0.5 || upstreamPosition[dir] < -0.5){
       MayDay::Abort("logic bust in downstream position");
     }
     else {
@@ -500,7 +500,9 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
   }
   }
 
-  DataOps::computeMinValidBox(pLo, pHi, -E, downstreamPosition);
+  DataOps::computeMinValidBox(pLo, pHi, -E, upstreamPosition);
+  // pLo = max(pLo, a_lo);
+  // pHi = min(pHi, a_hi);
   CH_STOP(t1);  
 
   CH_START(t2);
@@ -529,31 +531,33 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
           break;
         }
         case ParticlePlacement::Downstream: {
-	  if(!hasDownstream) {
+	  if(!hasDownstream){ //|| (a_electricField.dotProduct(a_bndryNormal) >= 0.0 && a_kappa < 1.0)) {
 	    x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 	  }
 	  else {
-	    int numTries = 0;
-	    int maxTries = 10;
+	    // int numTries = 0;
+	    // int maxTries = 10;
 
-	    x = Random::randomPosition(pLo, pHi, downstreamPosition, -E);
+	    x = Random::randomPosition(pLo, pHi, upstreamPosition, -E);
+	    if((x-a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
+	      x = upstreamPosition;
+	    }
 
 	    // Rejection sampling 
-	    if(a_kappa < 1.0) {
-	      while((x-a_bndryCentroid).dotProduct(a_bndryNormal) <= 0.0 && numTries < maxTries) {
-		x = Random::randomPosition(pLo, pHi, downstreamPosition, -E);
+	    // if(a_kappa < 1.0) {
+	    //   while((x-a_bndryCentroid).dotProduct(a_bndryNormal) <= 0.0 && numTries < maxTries) {
+	    // 	x = Random::randomPosition(pLo, pHi, upstreamPosition, -E);
 		
-		numTries++;
-	      }
-	    }
+	    // 	numTries++;
+	    //   }
+	    // }
 
-	    if(numTries == maxTries) {
-	      std::cout << "exceeded max tries" << std::endl;
-	      x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-	    }
-	    else {
-	      x = a_cellPos + x*a_dx;
-	    }
+	    // if(numTries == maxTries) {
+	    //   std::cout << "exceeded max tries" << std::endl;
+	    //   x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+	    // }
+	    
+	    x = a_cellPos + x*a_dx;
 	  }
 
           break;
