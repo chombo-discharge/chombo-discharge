@@ -44,13 +44,17 @@
 	    }
 	}
     },
-    "alpha": {
-	"type": "auto",
-	"species": "e"
+    "particle placement": {     // Particle placement algorithm. 
+	"method": "downstream"	// Method. Must be either 'centroid', 'random', or 'downstream'
+	"species": "e"		// Species. Must be one of the plasma species. 
+    },    
+    "alpha": {		// Specification of the Townsend ionization coefficient.
+	"type": "auto", // Automatic computation from reaction list.
+	"species": "e"	// Specification of the ionizing species.
     },
-    "eta": {
-	"type": "auto",
-	"species": "e"
+    "eta": {		// Specification of the Townsend attachment coefficient. 
+	"type": "auto", // Automatic computation from reaction list. 
+	"species": "e"	// Specification of the ionizing species. 
     },    
     "plasma species" :
     [
