@@ -1,52 +1,53 @@
 <map id="Source/KineticMonteCarlo/CD_KMCSolver.H" name="Source/KineticMonteCarlo/CD_KMCSolver.H">
-<area shape="rect" id="Node000001" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="184,5,375,45"/>
+<area shape="rect" id="Node000001" title="Class for running Kinetic Monte Carlo functionality." alt="" coords="112,5,303,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,93,68,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,48,82,93,81,88,220,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="143,240,221,265"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="274,46,195,228,190,226,269,44"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="245,240,314,265"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="282,45,282,226,277,226,277,45"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="284,313,469,339"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="253,48,202,89,174,115,150,144,130,174,119,205,120,235,133,264,154,278,186,291,271,309,270,315,185,296,151,283,129,267,114,236,114,204,125,172,145,141,171,111,198,85,250,43"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1049,313,1227,339"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="375,33,504,48,665,74,840,112,927,136,1012,164,1089,188,1119,205,1146,239,1152,254,1153,270,1149,300,1144,300,1148,270,1146,255,1141,241,1115,209,1087,193,1011,169,926,141,839,117,664,79,503,53,375,38"/>
-<area shape="rect" id="Node000007" href="$CD__KMCSolverImplem_8H.html" title="Implementation of CD_KMCSolver.H." alt="" coords="420,93,603,119"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="328,43,459,87,457,92,326,48"/>
-<area shape="poly" id="edge28_Node000007_Node000001" title=" " alt="" coords="483,96,355,52,356,47,485,91"/>
-<area shape="poly" id="edge29_Node000007_Node000005" title=" " alt="" coords="481,121,446,140,430,153,416,168,399,201,388,236,379,300,374,299,382,235,394,199,412,165,426,149,444,136,479,116"/>
-<area shape="poly" id="edge30_Node000007_Node000006" title=" " alt="" coords="603,112,739,127,893,152,966,169,1031,188,1084,211,1120,238,1130,252,1136,268,1141,299,1136,300,1131,269,1125,255,1116,242,1081,216,1029,193,965,174,892,157,738,132,603,117"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="426,167,485,192"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="504,121,475,157,471,154,500,117"/>
-<area shape="rect" id="Node000009" title=" " alt="" coords="650,167,765,192"/>
-<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="544,116,663,159,662,164,542,121"/>
-<area shape="rect" id="Node000010" title=" " alt="" coords="789,167,887,192"/>
-<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="564,116,776,162,774,167,563,121"/>
-<area shape="rect" id="Node000011" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="509,167,625,192"/>
-<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="523,117,552,154,548,157,518,121"/>
-<area shape="poly" id="edge12_Node000011_Node000003" title=" " alt="" coords="510,193,235,242,234,237,509,188"/>
-<area shape="poly" id="edge16_Node000011_Node000004" title=" " alt="" coords="522,195,328,242,327,237,520,189"/>
-<area shape="poly" id="edge18_Node000011_Node000005" title=" " alt="" coords="523,195,475,213,451,226,429,242,405,271,388,302,384,299,401,268,426,238,448,222,473,208,521,190"/>
-<area shape="poly" id="edge19_Node000011_Node000006" title=" " alt="" coords="626,188,638,189,738,195,868,198,934,202,996,209,1049,220,1089,238,1104,251,1116,266,1133,299,1128,301,1112,269,1100,254,1086,242,1047,225,995,214,934,207,868,203,738,200,638,195,625,193"/>
-<area shape="rect" id="Node000012" title=" " alt="" coords="439,240,511,265"/>
-<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="554,194,503,234,499,229,551,190"/>
-<area shape="rect" id="Node000013" title=" " alt="" coords="535,240,599,265"/>
-<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="570,192,570,226,565,226,565,192"/>
-<area shape="rect" id="Node000014" title=" " alt="" coords="865,240,957,265"/>
-<area shape="poly" id="edge14_Node000011_Node000014" title=" " alt="" coords="623,189,852,237,851,242,622,195"/>
-<area shape="rect" id="Node000015" title=" " alt="" coords="605,313,668,339"/>
-<area shape="poly" id="edge15_Node000011_Node000015" title=" " alt="" coords="580,190,597,212,614,239,626,270,634,299,629,301,621,271,609,241,593,215,576,194"/>
-<area shape="rect" id="Node000016" title=" " alt="" coords="982,240,1075,265"/>
-<area shape="poly" id="edge17_Node000011_Node000016" title=" " alt="" coords="626,187,638,189,802,212,969,237,968,243,801,217,638,195,625,193"/>
-<area shape="rect" id="Node000017" href="$CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="675,240,841,265"/>
-<area shape="poly" id="edge20_Node000011_Node000017" title=" " alt="" coords="592,190,708,233,707,238,590,195"/>
-<area shape="poly" id="edge26_Node000017_Node000005" title=" " alt="" coords="697,268,452,313,451,308,696,263"/>
-<area shape="poly" id="edge27_Node000017_Node000006" title=" " alt="" coords="820,263,1064,308,1063,313,819,268"/>
-<area shape="poly" id="edge25_Node000017_Node000011" title=" " alt="" coords="733,242,617,199,618,194,735,237"/>
-<area shape="poly" id="edge22_Node000017_Node000015" title=" " alt="" coords="740,268,669,309,667,304,737,263"/>
-<area shape="rect" id="Node000018" title=" " alt="" coords="693,313,759,339"/>
-<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="755,267,739,302,734,300,750,265"/>
-<area shape="rect" id="Node000019" title=" " alt="" coords="783,313,858,339"/>
-<area shape="poly" id="edge23_Node000017_Node000019" title=" " alt="" coords="770,264,803,301,799,305,766,267"/>
-<area shape="rect" id="Node000020" title=" " alt="" coords="882,313,986,339"/>
-<area shape="poly" id="edge24_Node000017_Node000020" title=" " alt="" coords="787,263,893,306,891,310,785,268"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,48,75,90,73,85,165,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="245,240,322,265"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,45,278,226,273,228,211,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="397,240,466,265"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="221,44,267,113,299,153,336,190,366,213,397,231,394,236,363,217,332,194,295,156,263,116,216,47"/>
+<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="116,313,301,339"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="210,46,211,300,206,300,205,46"/>
+<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="429,313,607,339"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="205,46,198,90,196,149,198,180,205,210,217,239,235,263,262,281,307,295,415,313,414,319,305,300,260,286,231,267,212,241,200,212,193,181,190,149,193,90,200,45"/>
+<area shape="rect" id="Node000007" href="$CD__KMCSolverImplem_8H.html" title="Implementation of CD_KMCSolver.H." alt="" coords="371,93,553,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="261,43,406,87,405,92,260,48"/>
+<area shape="poly" id="edge29_Node000007_Node000001" title=" " alt="" coords="431,96,289,52,290,47,432,91"/>
+<area shape="poly" id="edge30_Node000007_Node000005" title=" " alt="" coords="423,121,378,138,327,163,276,198,254,218,235,241,221,271,214,301,209,299,216,269,230,239,250,215,273,193,324,159,376,133,421,116"/>
+<area shape="poly" id="edge31_Node000007_Node000006" title=" " alt="" coords="493,116,522,130,547,148,563,169,563,181,557,194,533,214,502,224,435,230,406,232,387,236,382,240,380,245,387,264,413,290,446,306,443,311,410,294,382,267,374,245,377,237,384,232,405,226,434,225,501,219,531,209,553,190,558,180,558,171,544,152,519,135,491,121"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="346,167,405,192"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="450,121,402,160,398,156,446,117"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="429,167,543,192"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="468,118,480,153,475,154,463,120"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="1151,313,1250,339"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="554,106,727,114,830,123,935,135,1035,152,1124,174,1195,203,1222,219,1243,238,1250,255,1246,273,1225,305,1221,302,1242,271,1244,256,1238,242,1219,224,1193,207,1122,179,1034,157,934,140,830,128,727,120,553,111"/>
+<area shape="rect" id="Node000011" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="688,167,804,192"/>
+<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="508,116,688,161,686,166,507,121"/>
+<area shape="poly" id="edge12_Node000011_Node000003" title=" " alt="" coords="688,192,336,246,335,241,687,187"/>
+<area shape="poly" id="edge16_Node000011_Node000004" title=" " alt="" coords="696,195,480,243,479,238,695,189"/>
+<area shape="poly" id="edge18_Node000011_Node000005" title=" " alt="" coords="693,195,615,215,530,242,505,255,479,268,386,295,298,314,296,308,385,290,477,263,502,251,528,238,614,210,692,190"/>
+<area shape="poly" id="edge19_Node000011_Node000006" title=" " alt="" coords="756,191,771,227,773,248,765,267,743,283,708,297,622,315,621,310,707,292,741,279,761,264,768,247,766,228,751,193"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="1069,240,1141,265"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="805,189,1051,237,1056,238,1055,244,1049,243,804,194"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="1165,240,1229,265"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="805,185,958,205,1152,237,1151,243,957,210,804,190"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="541,240,633,265"/>
+<area shape="poly" id="edge14_Node000011_Node000014" title=" " alt="" coords="722,194,627,237,625,232,719,190"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="1000,313,1063,339"/>
+<area shape="poly" id="edge15_Node000011_Node000015" title=" " alt="" coords="805,185,919,204,972,219,1006,238,1017,252,1025,267,1033,299,1027,300,1020,269,1013,254,1003,242,970,224,918,210,804,190"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="658,240,751,265"/>
+<area shape="poly" id="edge17_Node000011_Node000016" title=" " alt="" coords="741,194,721,229,716,227,737,191"/>
+<area shape="rect" id="Node000017" href="$CD__RandomImplem_8H.html" title="Implementation of CD_Random.H." alt="" coords="827,240,993,265"/>
+<area shape="poly" id="edge20_Node000011_Node000017" title=" " alt="" coords="767,190,865,232,863,237,764,194"/>
+<area shape="poly" id="edge27_Node000017_Node000005" title=" " alt="" coords="827,265,316,317,315,311,826,260"/>
+<area shape="poly" id="edge28_Node000017_Node000006" title=" " alt="" coords="847,268,595,313,594,308,847,263"/>
+<area shape="poly" id="edge24_Node000017_Node000010" title=" " alt="" coords="957,263,1141,307,1140,313,956,268"/>
+<area shape="poly" id="edge26_Node000017_Node000011" title=" " alt="" coords="889,242,791,200,793,195,891,237"/>
+<area shape="poly" id="edge22_Node000017_Node000015" title=" " alt="" coords="931,263,1001,304,999,309,928,268"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="909,313,975,339"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="918,265,934,300,929,302,913,267"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="682,313,757,339"/>
+<area shape="poly" id="edge23_Node000017_Node000019" title=" " alt="" coords="880,268,764,311,762,306,878,263"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="781,313,885,339"/>
+<area shape="poly" id="edge25_Node000017_Node000020" title=" " alt="" coords="899,267,857,306,854,302,896,263"/>
 </map>

@@ -102,7 +102,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 </ul>
 </li>
@@ -161,11 +162,12 @@
 <li class="toctree-l4"><a class="reference internal" href="#printing-rates">Printing rates</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id12">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id13">Townsend coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">Townsend coefficients</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +262,21 @@ The algorithmic concepts are given in <a class="reference internal" href="../Sol
 <h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h2>
 <section id="time-stepping">
 <h3>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h3>
+</section>
+<section id="particle-placement">
+<h3>Particle placement<a class="headerlink" href="#particle-placement" title="Permalink to this heading"></a></h3>
+<p>The KMC algorithm resolves the number of particles that are generated or lost within each grid cell, leaving substantial freedom in how one distributes new particles (or remove older ones). We currently support three methods for placing new particles:</p>
+<ol class="arabic simple">
+<li><p>Place all particles on the cell centroid.</p></li>
+<li><p>Randomly distribute the new particles within the grid cell.</p></li>
+<li><p>Compute an upstream position within the grid cell and randomly distribute the particles in the downstream region.</p></li>
+</ol>
+<p>The methods each have their advantages and disadvantages.
+Placing all new particles on the cell centroid has the advantage that there will be no spurious space charge effects arising in the grid cell.
+Randomly distributing the new particles has the advantage that it generates secondary particles more evenly over the reaction region.
+Both these methods (<code class="docutils literal notranslate"><span class="pre">centroid</span></code> and <code class="docutils literal notranslate"><span class="pre">random</span></code>) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
+The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
+See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON 0D chemistry interface</span></a> for instructions on how to assign the particle placement method.</p>
 <section id="spatial-filtering">
 <h4>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h4>
 <p>It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
@@ -626,6 +643,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@param[inout] a_particles Computational particles</span>
 <span class="cm">	@param[in]    a_newNumParticles New number of particles (i.e., after the KMC advance)</span>
 <span class="cm">	@param[in]    a_oldNumParticles Previous number of particles (i.e., before the KMC advance)</span>
+<span class="cm">	@param[in]    a_electricField   Electric field in cell</span>
 <span class="cm">	@param[in]    a_cellPos         Cell center position</span>
 <span class="cm">	@param[in]    a_centroidPos     Cell centroid position</span>
 <span class="cm">	@param[in]    a_loCorner        Low corner of minimum box enclosing the cut-cell</span>
@@ -640,6 +658,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="nf">reconcileParticles</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;*&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_newNumParticles</span><span class="p">,</span>
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_oldNumParticles</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_electricField</span><span class="p">,</span>
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_cellPos</span><span class="p">,</span>
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_centroidPos</span><span class="p">,</span>
 <span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">              </span><span class="n">a_lo</span><span class="p">,</span>
@@ -710,7 +729,8 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="k">enum</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">ParticlePlacement</span>
 <span class="w">      </span><span class="p">{</span>
 <span class="w">        </span><span class="n">Random</span><span class="p">,</span>
-<span class="w">        </span><span class="n">Centroid</span>
+<span class="w">        </span><span class="n">Centroid</span><span class="p">,</span>
+<span class="w">        </span><span class="n">Downstream</span>
 <span class="w">      </span><span class="p">};</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
@@ -802,6 +822,13 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@brief List of solver-tracked photon species. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_rtSpecies</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief An internal integer describing which species is the &quot;ionizing&quot; species.</span>
+<span class="cm">	@details This is used by the particle reconciliation routine when only placing secondary particles</span>
+<span class="cm">	in the downstream region of the primary particles. </span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="kt">int</span><span class="w"> </span><span class="n">m_downstreamSpecies</span><span class="p">;</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Maximum new number of particles generated by the chemistry advance</span>
@@ -902,6 +929,31 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">removeParticles</span><span class="p">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">a_numToRemove</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">	@brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.</span>
+<span class="cm">	@details This routine will compute the position of the &quot;most upstream&quot; particle in the input list.</span>
+<span class="cm">	For all particles we assume that they advect in the direction of Z*E, where Z is the charge number.</span>
+<span class="cm">	This routine also computes the minimum bounding box (in unit coordinates) that encloses the downstreamn</span>
+<span class="cm">	region within the grid cell.</span>
+<span class="cm">	@param[out] a_pos Upstream position.</span>
+<span class="cm">	@param[out] a_lo  Minimum coordinate of the downstream region (relative to the unit cell)</span>
+<span class="cm">	@param[out] a_hi  Maximum coordinate of the downstream region (relative to the unit cell)</span>
+<span class="cm">	@param[in] a_Z Particle charge number</span>
+<span class="cm">	@param[in] a_particles Particles where we look for an upstream position.</span>
+<span class="cm">	@param[in] a_electricField Electric field vector</span>
+<span class="cm">	@param[in] a_cellPos Physical location of the cell center</span>
+<span class="cm">	@param[in] a_dx Grid resolution</span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">      </span><span class="nf">computeUpstreamPosition</span><span class="p">(</span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                </span><span class="n">a_lo</span><span class="p">,</span>
+<span class="w">                              </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">                </span><span class="n">a_hi</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w">               </span><span class="n">a_Z</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">ItoParticle</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_electricField</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_cellPos</span><span class="p">,</span>
+<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_dx</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 <span class="w">    </span><span class="p">};</span>
 <span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="c1">// namespace ItoKMC</span>
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace Physics</span>
@@ -2343,7 +2395,32 @@ This feature is mostly used for debugging or development efforts.</p>
 </section>
 </section>
 <section id="id12">
-<h3>Photoionization<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+<h3>Particle placement<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+<p>Specification of secondary particle placement is done through the JSON file by specifying the <code class="docutils literal notranslate"><span class="pre">particle</span> <span class="pre">placement</span></code> field.
+Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
+The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
+If specifying <code class="docutils literal notranslate"><span class="pre">downstream</span></code>, one must also include a species specifier (which must correspond to one of the plasma species).
+The following three specifies are all valid:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;centroid&quot;</span>
+<span class="p">}</span>
+
+<span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;random&quot;</span>
+<span class="p">}</span>
+
+<span class="nt">&quot;particle placement&quot;</span><span class="p">:</span>
+<span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;downstream&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;species&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id13">
+<h3>Photoionization<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
 <p>Photoionization reactions are specified by including a <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> array of JSON entries that specify each reaction.
 The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
 Each entry <em>must</em> contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
@@ -2462,8 +2539,8 @@ This is particularly the case for three-body reactions with BOLSIG+ that may req
 <p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
 </div>
 </section>
-<section id="id13">
-<h4>Townsend coefficients<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h4>
+<section id="id14">
+<h4>Townsend coefficients<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
 <p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
 For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
 <div class="admonition warning">
