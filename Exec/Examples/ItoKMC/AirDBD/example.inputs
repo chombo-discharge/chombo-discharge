@@ -11,7 +11,7 @@ AmrMesh.lo_corner        =  -4E-2    0 -4E-2     # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-2 4E-2  4E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64 128     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 7           # Maximum amr depth
+AmrMesh.max_amr_depth    = 9           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -222,7 +222,7 @@ DiskProfiledPlane.box_translate         = 0 5.0123E-3 0           # Box translat
 DiskProfiledPlane.box_permittivity      = 4.0                     # Dielectric box permittivity
 DiskProfiledPlane.box_curvature         = 100E-6                  # Corner curvatures
 
-DiskProfiledPlane.profile_type          = square                    # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_type          = none                    # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
 DiskProfiledPlane.profile_translate     = 0 0 0                   # Profile translation
 DiskProfiledPlane.profile_repetition_lo = 36 0 0                  # Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi = 36 0 0                  # Repetition pattern in high coordinate direction
@@ -288,7 +288,7 @@ ItoKMCJSON.Ncrit              = -1                       ## How many firings awa
 ItoKMCJSON.prop_eps           = 5.0                   ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 5                      ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSAlim             = 5.0                     ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = hybrid_midpoint         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.algorithm          = tau_plain         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS

@@ -195,9 +195,9 @@
 	    // Definition of O2+ plasma species.
             "id": "O2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : true,       // Mobile or not
-	    "diffusive" : true,    // Diffusive or not
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : false,       // Mobile or not
+	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
 		"type": "constant", // Mobility is constant 
 		"value": 2E-4       // Mobility value is 2E-4
@@ -227,9 +227,9 @@
 	    // Definition of N2+ plasma species.
 	    "id": "N2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : true,       // Mobile or not
-	    "diffusive" : true,    // Diffusive or not
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : false,       // Mobile or not
+	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
 		"type": "constant", // Mobility is constant 
 		"value": 2E-4       // Mobility value is 2E-4
@@ -281,7 +281,7 @@
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r1.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-	    //            "gradient correction": "e",                      // Use gradient correction to rate
+	    "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},
 	{
@@ -300,7 +300,7 @@
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r2.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-	    //            "gradient correction": "e",                      // Use gradient correction to rate
+	    "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},
 	{
@@ -319,7 +319,7 @@
 	    "scale E/N" : 1.0,                   // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r3.dat",           // Optional dump of internalized table to file. Useful for debugging.
-	    //            "gradient correction": "e",          // Use gradient correction to rate
+	    "gradient correction": "e",          // Use gradient correction to rate
 	    "plot": true                         // Optional. If true, the reaction rate will be plotted.
 	},	
 	{
@@ -338,7 +338,7 @@
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r4.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-	    //            "gradient correction": "e",                      // Use gradient correction to rate
+	    "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true,                                    // Optional. If true, the reaction rate will be plotted.
 	    "efficiency": 0.06,                              // Reaction efficiency, assuming the number of photoionization events per ionization event
 	    "quenching pressure": 4000.0                     // Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
