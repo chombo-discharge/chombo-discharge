@@ -637,6 +637,12 @@ namespace Physics {
       initializeSurfaceEmission(const std::string a_surface);
 
       /*!
+	@brief Initialize the particle placement algorithm
+      */
+      virtual void
+      initializeParticlePlacement();
+
+      /*!
 	@brief Parses a reaction string into reactangs and products
 	@param[out] a_reactants Left-hand side of reaction
 	@param[out] a_products  Right-hand side of reaction

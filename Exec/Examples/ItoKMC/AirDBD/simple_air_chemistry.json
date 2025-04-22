@@ -44,6 +44,10 @@
 	    }
 	}
     },
+    "particle placement": {
+	"method": "downstream",	// Particle placement algorithm. Either 'centroid', 'random', or 'downstream'
+	"species": "e"		// Species. Must be one of the plasma species. 
+    },
     "alpha": {
 	// Definition of the alpha coefficient. This can be done by specifying the 'type' field
 	// as 'constant' or 'table alpha/N vs E/N'. If you use 'constant', then only the 'value' field is required
@@ -207,7 +211,7 @@
 	    // Definition of O- plasma species.
             "id": "O-",            // Species ID
 	    "Z" : -1,               // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -277,7 +281,7 @@
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r1.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-            "gradient correction": "e",                      // Use gradient correction to rate
+	    "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},
 	{
@@ -296,7 +300,7 @@
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r2.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-            "gradient correction": "e",                      // Use gradient correction to rate
+	    "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},
 	{
@@ -315,7 +319,7 @@
 	    "scale E/N" : 1.0,                   // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r3.dat",           // Optional dump of internalized table to file. Useful for debugging.
-            "gradient correction": "e",          // Use gradient correction to rate
+	    "gradient correction": "e",          // Use gradient correction to rate
 	    "plot": true                         // Optional. If true, the reaction rate will be plotted.
 	},	
 	{
@@ -334,7 +338,7 @@
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
 	    //"dump" : "debug_r4.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-            "gradient correction": "e",                      // Use gradient correction to rate
+	    "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true,                                    // Optional. If true, the reaction rate will be plotted.
 	    "efficiency": 0.06,                              // Reaction efficiency, assuming the number of photoionization events per ionization event
 	    "quenching pressure": 4000.0                     // Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
