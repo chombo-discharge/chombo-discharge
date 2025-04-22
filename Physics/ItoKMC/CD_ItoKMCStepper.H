@@ -1451,7 +1451,7 @@ namespace Physics {
       reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
                          const EBAMRCellData& a_oldParticlesPerCell,
                          const EBAMRCellData& a_newPhotonsPerCell,
-			 const EBAMRCellData& a_electricField) const noexcept;
+                         const EBAMRCellData& a_electricField) const noexcept;
 
       /*!
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
@@ -1466,7 +1466,7 @@ namespace Physics {
       reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
                          const LevelData<EBCellFAB>& a_oldParticlesPerCell,
                          const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-			 const LevelData<EBCellFAB>& a_electricField,
+                         const LevelData<EBCellFAB>& a_electricField,
                          const int                   a_level) const noexcept;
 
       /*!
@@ -1485,7 +1485,7 @@ namespace Physics {
       reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
                          const EBCellFAB& a_oldParticlesPerCell,
                          const EBCellFAB& a_newPhotonsPerCell,
-			 const EBCellFAB& a_electricField,
+                         const EBCellFAB& a_electricField,
                          const int        a_level,
                          const DataIndex  a_din,
                          const Box        a_box,
