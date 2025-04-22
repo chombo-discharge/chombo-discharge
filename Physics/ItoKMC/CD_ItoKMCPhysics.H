@@ -609,6 +609,31 @@ namespace Physics {
       */
       inline void
       removeParticles(List<ItoParticle>& a_particles, const long long a_numToRemove) const;
+
+      /*!
+	@brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.
+	@details This routine will compute the position of the "most upstream" particle in the input list.
+	For all particles we assume that they advect in the direction of Z*E, where Z is the charge number.
+	This routine also computes the minimum bounding box (in unit coordinates) that encloses the downstreamn
+	region within the grid cell.
+	@param[out] a_pos Upstream position.
+	@param[out] a_lo  Minimum coordinate of the downstream region (relative to the unit cell)
+	@param[out] a_hi  Maximum coordinate of the downstream region (relative to the unit cell)
+	@param[in] a_Z Particle charge number
+	@param[in] a_particles Particles where we look for an upstream position.
+	@param[in] a_electricField Electric field vector
+	@param[in] a_cellPos Physical location of the cell center
+	@param[in] a_dx Grid resolution
+      */
+      inline bool
+      computeUpstreamPosition(RealVect&                a_pos,
+                              RealVect&                a_lo,
+                              RealVect&                a_hi,
+                              const int&               a_Z,
+                              const List<ItoParticle>& a_particles,
+                              const RealVect&          a_electricField,
+                              const RealVect&          a_cellPos,
+                              const Real&              a_dx) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

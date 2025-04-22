@@ -42,17 +42,11 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_maxNewParticles   = 32;
   m_maxNewPhotons     = 32;
   m_Ncrit             = 5;
-  m_eps               = 0.1;
-  m_NSSA              = 10;
+  m_eps               = 2.0;
+  m_NSSA              = 5;
   m_SSAlim            = 5.0;
   m_algorithm         = Algorithm::TauPlain;
   m_particlePlacement = ParticlePlacement::Random;
-
-#if 1 // Development code -- should find its way into ItoKMCJSON
-#warning "CD_ItoKMCPhysicsImplem.H -- development code enabled"
-  m_downstreamSpecies = 0;
-  m_particlePlacement = ParticlePlacement::Downstream;
-#endif
 }
 
 inline ItoKMCPhysics::~ItoKMCPhysics() noexcept
@@ -432,8 +426,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 {
   CH_TIMERS("ItoKMCPhysics::reconcileParticles");
   CH_TIMER("ItoKMCPhysics::reconcileParticles::compute_downstream", t1);
-  CH_TIMER("ItoKMCPhysics::reconcileParticles::particle_placement", t2);  
-
+  CH_TIMER("ItoKMCPhysics::reconcileParticles::particle_placement", t2);
 
   CH_assert(m_isDefined);
   CH_assert(a_particles.size() == a_newNumParticles.size());
@@ -460,50 +453,33 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
     }
   }
 
-  // Can use downstream particle placement if there are downstream particles
-  CH_START(t1);
+  // Compute the upstream position of the particles (which is usually the electrons).
+  bool     hasDownstream    = false;
   RealVect upstreamPosition = RealVect::Zero;
-  bool hasDownstream = (a_particles[0]->length() > 0) && (a_electricField.vectorLength() > 0.0);
+  RealVect upstreamLo       = -0.5 * RealVect::Unit;
+  RealVect upstreamHi       = +0.5 * RealVect::Unit;
+  RealVect v                = RealVect::Zero;
+  int      Z                = 0;
 
-  const RealVect E = a_electricField/a_electricField.vectorLength();  
-  if(hasDownstream) {
-    ListIterator<ItoParticle> lit = a_particles[0]->first();
-    
-    upstreamPosition = (lit().position() - a_cellPos)/a_dx;
-    Real normalDistance = upstreamPosition.dotProduct(E);
-    
-    ++lit;
-    
-    for (; lit.ok(); ++lit) {
-      const ItoParticle& p = lit();
-      const RealVect x = (p.position() - a_cellPos)/a_dx;
-      const Real curDist = x.dotProduct(E);
+  if (m_particlePlacement == ParticlePlacement::Downstream) {
+    CH_assert(m_downstreamSpecies >= 0);
 
-      if(curDist > normalDistance) {
-	normalDistance = curDist;
-	upstreamPosition = x;
-      }
+    Z = m_itoSpecies[m_downstreamSpecies]->getChargeNumber();
+
+    if (Z != 0) {
+      v = Z * a_electricField;
+      v = v / v.vectorLength();
     }
-  }
 
-  RealVect pLo = +RealVect::Unit;
-  RealVect pHi = -RealVect::Unit;
-
-  if(hasDownstream) {
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    if(upstreamPosition[dir] > 0.5 || upstreamPosition[dir] < -0.5){
-      MayDay::Abort("logic bust in downstream position");
-    }
-    else {
-      //      std::cout << downstreamPosition << std::endl;
-    }
+    hasDownstream = this->computeUpstreamPosition(upstreamPosition,
+                                                  upstreamLo,
+                                                  upstreamHi,
+                                                  Z,
+                                                  *a_particles[m_downstreamSpecies],
+                                                  a_electricField,
+                                                  a_cellPos,
+                                                  a_dx);
   }
-  }
-
-  DataOps::computeMinValidBox(pLo, pHi, -E, upstreamPosition);
-  // pLo = max(pLo, a_lo);
-  // pHi = min(pHi, a_hi);
-  CH_STOP(t1);  
 
   CH_START(t2);
   for (int i = 0; i < a_particles.size(); i++) {
@@ -531,34 +507,19 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
           break;
         }
         case ParticlePlacement::Downstream: {
-	  if(!hasDownstream){ //|| (a_electricField.dotProduct(a_bndryNormal) >= 0.0 && a_kappa < 1.0)) {
-	    x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-	  }
-	  else {
-	    // int numTries = 0;
-	    // int maxTries = 10;
+          if (hasDownstream) {
+            x = Random::randomPosition(upstreamLo, upstreamHi, upstreamPosition, v);
 
-	    x = Random::randomPosition(pLo, pHi, upstreamPosition, -E);
-	    if((x-a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
-	      x = upstreamPosition;
-	    }
+            if ((x - a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
+              x = upstreamPosition;
+            }
 
-	    // Rejection sampling 
-	    // if(a_kappa < 1.0) {
-	    //   while((x-a_bndryCentroid).dotProduct(a_bndryNormal) <= 0.0 && numTries < maxTries) {
-	    // 	x = Random::randomPosition(pLo, pHi, upstreamPosition, -E);
-		
-	    // 	numTries++;
-	    //   }
-	    // }
+            x = a_cellPos + x * a_dx;
+          }
+          else {
 
-	    // if(numTries == maxTries) {
-	    //   std::cout << "exceeded max tries" << std::endl;
-	    //   x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-	    // }
-	    
-	    x = a_cellPos + x*a_dx;
-	  }
+            x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+          }
 
           break;
         }
@@ -577,7 +538,65 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       this->removeParticles(*a_particles[i], -diff);
     }
   }
-  CH_STOP(t2);  
+  CH_STOP(t2);
+}
+
+inline bool
+ItoKMCPhysics::computeUpstreamPosition(RealVect&                a_pos,
+                                       RealVect&                a_lo,
+                                       RealVect&                a_hi,
+                                       const int&               a_Z,
+                                       const List<ItoParticle>& a_particles,
+                                       const RealVect&          a_electricField,
+                                       const RealVect&          a_cellPos,
+                                       const Real&              a_dx) const noexcept
+{
+  CH_TIME("ItoKMCPhysics::computeUpstreamPosition");
+
+  CH_assert(a_dx > 0.0);
+
+  a_pos = RealVect::Zero;
+  a_lo  = -0.5 * RealVect::Unit;
+  a_hi  = +0.5 * RealVect::Unit;
+
+  // Quick lambda for turning physical position into unit cell position.
+  auto unitCellPosition = [&](const ItoParticle& p) -> RealVect {
+    return (p.position() - a_cellPos) / a_dx;
+  };
+
+  const int      Z = (a_Z > 0) ? 1 : (a_Z < 0) ? -1 : 0;
+  const RealVect E = a_electricField / a_electricField.vectorLength();
+  const RealVect v = Z * E;
+
+  // Upstream can only exist if there is a velocity direction and there are particles.
+  const bool hasDownstream = (a_particles.length() > 0) && (v.vectorLength() > 0.0);
+
+  if (hasDownstream) {
+
+    Real D = std::numeric_limits<Real>::max();
+
+    for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+      const RealVect x = unitCellPosition(lit());
+      const Real     d = x.dotProduct(v);
+
+      if (d < D) {
+        D     = d;
+        a_pos = x;
+      }
+    }
+
+    DataOps::computeMinValidBox(a_lo, a_hi, v, a_pos);
+  }
+
+  if (m_debug) {
+    for (int dir = 0; dir < SpaceDim; dir++) {
+      if (a_pos[dir] > 0.5 || a_pos[dir] < -0.5) {
+        MayDay::Abort("ItoKMCPhysics::computeUpstreamPosition - logic bust");
+      }
+    }
+  }
+
+  return hasDownstream;
 }
 
 inline void

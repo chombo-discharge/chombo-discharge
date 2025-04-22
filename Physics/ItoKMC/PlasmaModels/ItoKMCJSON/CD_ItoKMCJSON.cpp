@@ -66,6 +66,9 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializeSurfaceEmission("dielectric");
   this->initializeSurfaceEmission("electrode");
 
+  // Initialize the particle placement algorithm
+  this->initializeParticlePlacement();
+
   // Initialize automatic Townsend coefficients. Triggers only if
   // user asked for it.
   this->initializeAutomaticTownsend("alpha");
@@ -737,6 +740,57 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
   }
   else {
     this->throwParserError(baseError + " but input argument 'a_coeff' was not 'alpha' or 'eta'");
+  }
+}
+
+void
+ItoKMCJSON::initializeParticlePlacement()
+{
+  CH_TIME("ItoKMCJSON::initializeParticlePlacement");
+  if (m_verbose) {
+    pout() << m_className + "::initializeParticlePlacement" << endl;
+  }
+
+  const std::string field     = "particle placement";
+  const std::string baseError = "ItoKMCJSON::initializeParticlePlacement";
+
+  if (!(m_json.contains(field))) {
+    this->throwParserError(baseError + " but field '" + field + "' is missing");
+  }
+  else {
+    if (!(m_json[field].contains("method"))) {
+      this->throwParserError(baseError + " but field '" + "method" + "' is missing");
+    }
+    else {
+      const std::string method = m_json[field]["method"].get<std::string>();
+
+      if (method == "centroid") {
+        m_particlePlacement = ParticlePlacement::Centroid;
+      }
+      else if (method == "random") {
+        m_particlePlacement = ParticlePlacement::Random;
+      }
+      else if (method == "downstream") {
+        m_particlePlacement = ParticlePlacement::Downstream;
+        m_downstreamSpecies = -1;
+
+        if (!(m_json[field].contains("species"))) {
+          this->throwParserError(baseError + " but field '" + "species" + "' is missing");
+        }
+        else {
+          const std::string species = m_json[field]["species"].get<std::string>();
+
+          if (m_plasmaSpeciesTypes.count(species) == 0) {
+            this->throwParserError(baseError + " but species '" + species + " is not a plasma species");
+          }
+
+          m_downstreamSpecies = m_plasmaIndexMap.at(species);
+        }
+      }
+      else {
+        this->throwParserError(baseError + " but method '" + method + "' is not supported");
+      }
+    }
   }
 }
 
