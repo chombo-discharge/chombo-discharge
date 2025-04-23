@@ -279,9 +279,6 @@ ItoKMCJSON.verbose            = false                   ## Turn on/off verbosity
 ItoKMCJSON.debug              = true                    ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = simple_air_chemistry.json ## Chemistry file
 
-# For controlling the time step
-ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
-
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	

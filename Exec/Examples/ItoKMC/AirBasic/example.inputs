@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = +40E3
+ItoKMC.potential = 40E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -39,7 +39,7 @@ Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
+Driver.output_dt                       = 0.1E-9           # Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 50               # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
@@ -48,7 +48,7 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 3                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 5E-9             # Stop time
+Driver.stop_time                       = 15E-9            # Stop time
 Driver.max_steps                       = 1000             # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
@@ -85,15 +85,15 @@ FieldSolverMultigrid.filter_rho        = 0                 # Number of filtering
 FieldSolverMultigrid.filter_potential  = 0                 # Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity     = 10                # GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth    = 16                # Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth   = 16                # Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth   = 16                # Number of at bottom level (before dropping to bottom solver)
+FieldSolverMultigrid.gmg_pre_smooth    = 24                # Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth   = 24                # Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth   = 24                # Number of at bottom level (before dropping to bottom solver)
 FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 4                 # Bottom drop
-FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_min_cells     = 8                 # Bottom drop
+FieldSolverMultigrid.gmg_drop_order    = 128                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2                 # Boundary condition order for jump conditions
@@ -107,7 +107,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
-ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
+ItoSolver.merge_algorithm     = equal_weight_kd  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-3         # Bisection step length for intersection tests
@@ -252,16 +252,16 @@ ItoKMCGodunovStepper.particles_per_cell                    = 16             # Ma
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.physics_dt_factor                     = 1.0                  ## Physics-based time step factor
-ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
-ItoKMCGodunovStepper.max_particle_advection_cfl            = 2.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.5            # Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl            = 5.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99          # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                       = 500.0          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                                = 10.E-12        # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 10.E-12        # Maximum permitted time step
+ItoKMCGodunovStepper.min_dt                                = 1.E-12         # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 100.E-12       # Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
@@ -279,17 +279,14 @@ ItoKMCJSON.verbose            = false                   ## Turn on/off verbosity
 ItoKMCJSON.debug              = true                    ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = simple_air_chemistry.json ## Chemistry file
 
-# For controlling the time step
-ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
-
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.Ncrit              = 5                       ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps           = 1.E99                   ## Maximum relative change in propensity function
-ItoKMCJSON.NSSA               = 10                      ## How many SSA steps to run when tau-leaping is inefficient
-ItoKMCJSON.SSAlim             = 1.0                     ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = tau_plain         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.prop_eps           = 2.0                   ## Maximum relative change in propensity function
+ItoKMCJSON.NSSA               = 5                      ## How many SSA steps to run when tau-leaping is inefficient
+ItoKMCJSON.SSAlim             = 5.0                     ## When to enter SSA instead of tau-leaping
+ItoKMCJSON.algorithm          = hybrid_midpoint         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
