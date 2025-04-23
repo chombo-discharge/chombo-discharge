@@ -489,6 +489,8 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   this->computeDiffusionCoefficients();
   m_timer.stopEvent("Post-compute D");
 
+  this->computePhysicsDt();
+
   if ((this->m_profile)) {
     m_timer.eventReport(pout(), false);
   }
@@ -1609,6 +1611,7 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointHeader(HDF5HeaderData& a_header
   }
 
   a_header.m_real["prev_dt"]             = this->m_prevDt;
+  a_header.m_real["physics_dt"]          = this->m_physicsDt;
   a_header.m_int["checkpoint_particles"] = m_writeCheckpointParticles ? 1 : 0;
 }
 #endif
@@ -1623,7 +1626,9 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
     pout() << this->m_name + "::readCheckpointHeader" << endl;
   }
 
-  this->m_prevDt            = a_header.m_real["prev_dt"];
+  this->m_prevDt    = a_header.m_real["prev_dt"];
+  this->m_physicsDt = a_header.m_real["physicsDt_dt"];
+
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
   m_canRegridOnRestart      = m_readCheckpointParticles;
 }
