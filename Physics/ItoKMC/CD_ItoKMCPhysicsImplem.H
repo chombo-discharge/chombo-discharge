@@ -332,6 +332,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 {
   CH_TIME("ItoKMCPhysics::advanceKMC");
 
+#warning "ItoKMCPhysics::advanceKMC -- should investigate if very small non-critical time steps become possibly and ways to rectify them. Use the HighPressureAir example as a test bed"
+
   // Note: This is called PER GRID CELL, i.e. within OpenMP parallel regions. For this reason the KMC solver
   //       must be defined through defineKMC() (which must be later killed).
   CH_assert(m_isDefined);
