@@ -2964,17 +2964,6 @@ ItoKMCJSON::parseReactionWildcards(const std::vector<std::string>& a_reactants,
 }
 
 Real
-ItoKMCJSON::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept
-{
-  CH_TIME("ItoKMCJSON::computeDt");
-  if (m_verbose) {
-    pout() << m_className + "::computeDt" << endl;
-  }
-
-  return std::numeric_limits<Real>::infinity();
-}
-
-Real
 ItoKMCJSON::getNeutralDensity(const RealVect a_pos) const noexcept
 {
   CH_TIME("ItoKMCJSON::getNeutralDensity");

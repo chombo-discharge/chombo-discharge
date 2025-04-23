@@ -99,16 +99,6 @@ namespace Physics {
       killKMC() const noexcept;
 
       /*!
-	@brief Compute a time step to use. 
-	@param[in] a_E            Electric field. 
-	@param[in] a_pos          Position
-	@param[in] a_numParticles Number of reactive particles of each species
-	@return Default returns infinity but user can implement a physics based time step. 
-      */
-      inline virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept;
-
-      /*!
 	@brief Get the neutral density at a position in space
 	@param[in] a_pos Physical position
 	@return Neutral density

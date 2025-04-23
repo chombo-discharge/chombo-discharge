@@ -197,16 +197,6 @@ ItoKMCPhysics::getSpeciesMap() const noexcept
   return m_speciesMap;
 }
 
-inline Real
-ItoKMCPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept
-{
-  CH_TIME("ItoKMCPhysics::computeDt");
-
-  CH_assert(m_isDefined);
-
-  return std::numeric_limits<Real>::max();
-}
-
 inline void
 ItoKMCPhysics::parseRuntimeOptions() noexcept
 {
