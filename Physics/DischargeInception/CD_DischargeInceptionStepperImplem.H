@@ -4762,7 +4762,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real&
           const Real alpha = m_alpha(E, x);
           const Real eta   = m_eta(E, x);
           if (alpha >= eta) {
-            Vion = ebisbox.volFrac(vof) * vol;
+            Vion += ebisbox.volFrac(vof) * vol;
           }
         }
       };

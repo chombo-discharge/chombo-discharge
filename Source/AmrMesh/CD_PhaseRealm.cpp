@@ -47,43 +47,43 @@ PhaseRealm::~PhaseRealm()
 {}
 
 void
-PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
-                   const Vector<ProblemDomain>&       a_domains,
-                   const Vector<int>&                 a_refRat,
-                   const Vector<Real>&                a_dx,
-                   const RealVect                     a_probLo,
-                   const int                          a_finestLevel,
-                   const int                          a_ebGhost,
-                   const int                          a_numGhost,
-                   const int                          a_lsfGhost,
-                   const int                          a_redistRad,
-                   const int                          a_mgInterpOrder,
-                   const int                          a_mgInterpRadius,
-                   const int                          a_mgInterpWeight,
-                   const IrregStencil::StencilType    a_centroidStencil,
-                   const IrregStencil::StencilType    a_ebStencil,
-                   const RefCountedPtr<BaseIF>&       a_baseif,
-                   const RefCountedPtr<EBIndexSpace>& a_ebis)
+PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
+                   const Vector<ProblemDomain>&          a_domains,
+                   const Vector<int>&                    a_refRat,
+                   const Vector<Real>&                   a_dx,
+                   const RealVect                        a_probLo,
+                   const int                             a_finestLevel,
+                   const int                             a_ebGhost,
+                   const int                             a_numGhost,
+                   const int                             a_lsfGhost,
+                   const int                             a_redistRad,
+                   const int                             a_mgInterpOrder,
+                   const int                             a_mgInterpRadius,
+                   const int                             a_mgInterpWeight,
+                   const CellCentroidInterpolation::Type a_centroidStencil,
+                   const EBCentroidInterpolation::Type   a_ebStencil,
+                   const RefCountedPtr<BaseIF>&          a_baseif,
+                   const RefCountedPtr<EBIndexSpace>&    a_ebis)
 {
   CH_TIME("PhaseRealm::define");
 
-  m_grids                        = a_grids;
-  m_domains                      = a_domains;
-  m_refinementRatios             = a_refRat;
-  m_dx                           = a_dx;
-  m_probLo                       = a_probLo;
-  m_finestLevel                  = a_finestLevel;
-  m_numEbGhostsCells             = a_ebGhost;
-  m_numGhostCells                = a_numGhost;
-  m_numLsfGhostCells             = a_lsfGhost;
-  m_redistributionRadius         = a_redistRad;
-  m_multigridInterpolationOrder  = a_mgInterpOrder;
-  m_multigridInterpolationRadius = a_mgInterpRadius;
-  m_multigridInterpolationWeight = a_mgInterpWeight;
-  m_centroidStencilType          = a_centroidStencil;
-  m_ebCentroidStencilType        = a_ebStencil;
-  m_baseif                       = a_baseif;
-  m_ebis                         = a_ebis;
+  m_grids                         = a_grids;
+  m_domains                       = a_domains;
+  m_refinementRatios              = a_refRat;
+  m_dx                            = a_dx;
+  m_probLo                        = a_probLo;
+  m_finestLevel                   = a_finestLevel;
+  m_numEbGhostsCells              = a_ebGhost;
+  m_numGhostCells                 = a_numGhost;
+  m_numLsfGhostCells              = a_lsfGhost;
+  m_redistributionRadius          = a_redistRad;
+  m_multigridInterpolationOrder   = a_mgInterpOrder;
+  m_multigridInterpolationRadius  = a_mgInterpRadius;
+  m_multigridInterpolationWeight  = a_mgInterpWeight;
+  m_cellCentroidInterpolationType = a_centroidStencil;
+  m_ebCentroidInterpolationType   = a_ebStencil;
+  m_baseif                        = a_baseif;
+  m_ebis                          = a_ebis;
 
   if (!m_ebis.isNull()) {
     m_isDefined = true;
@@ -132,10 +132,9 @@ PhaseRealm::preRegrid()
   m_redistributionOp.resize(0);
   m_gradientOp.resize(0);
   m_levelset.resize(0);
-
-  m_centroidInterpolationStencil     = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(0);
-  m_ebCentroidInterpolationStencil   = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(0);
-  m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(0);
+  m_cellCentroidInterpolation.resize(0);
+  m_ebCentroidInterpolation.resize(0);
+  m_nonConservativeDivergence.resize(0);
 }
 
 void
@@ -293,7 +292,7 @@ PhaseRealm::regridOperators(const int a_lmin)
       MemoryReport::getMaxMinMemoryUsage();
     }
     timer.startEvent("Non-conservative stencil");
-    this->defineNonConsDivSten();
+    this->defineNonConservativeDivergence(a_lmin);
     timer.stopEvent("Non-conservative stencil");
     if (m_profile) {
       MemoryReport::getMaxMinMemoryUsage();
@@ -803,59 +802,37 @@ PhaseRealm::defineIrregSten()
 
   const bool doThisOperator = this->queryOperator(s_eb_irreg_interp);
 
+  m_cellCentroidInterpolation.resize(1 + m_finestLevel);
+  m_ebCentroidInterpolation.resize(1 + m_finestLevel);
+
   if (doThisOperator) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      m_cellCentroidInterpolation[lvl] = RefCountedPtr<CellCentroidInterpolation>(
+        new CellCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], m_cellCentroidInterpolationType));
 
-    // I don't want these to be have a large radius or high order. The reason for that is simple: Only first-order stencils
-    // can be guaranteed to have non-negative interpolation weights.
-
-    constexpr int order = 1;
-    constexpr int rad   = 1;
-
-    m_centroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>>(
-      new IrregAmrStencil<CentroidInterpolationStencil>(m_grids,
-                                                        m_ebisl,
-                                                        m_domains,
-                                                        m_dx,
-                                                        m_finestLevel,
-                                                        order,
-                                                        rad,
-                                                        m_centroidStencilType));
-
-    m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>>(
-      new IrregAmrStencil<EbCentroidInterpolationStencil>(m_grids,
-                                                          m_ebisl,
-                                                          m_domains,
-                                                          m_dx,
-                                                          m_finestLevel,
-                                                          order,
-                                                          rad,
-                                                          m_ebCentroidStencilType));
+      m_ebCentroidInterpolation[lvl] = RefCountedPtr<EBCentroidInterpolation>(
+        new EBCentroidInterpolation(*m_eblg[lvl], m_dx[lvl], m_ebCentroidInterpolationType));
+    }
   }
 }
 
 void
-PhaseRealm::defineNonConsDivSten()
+PhaseRealm::defineNonConservativeDivergence(const int a_lmin)
 {
-  CH_TIME("PhaseRealm::defineNonConsDivSten");
+  CH_TIME("PhaseRealm::defineNonConservativeDivergence");
   if (m_verbose) {
-    pout() << "PhaseRealm::defineNonConsDivSten" << endl;
+    pout() << "PhaseRealm::defineNonConservativeDivergence" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_noncons_div);
 
-  if (doThisOperator) {
-    const int order = 1; // Dummy argument
+  m_nonConservativeDivergence.resize(1 + m_finestLevel);
 
-    m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>>(
-      new IrregAmrStencil<NonConservativeDivergenceStencil>(
-        m_grids,
-        m_ebisl,
-        m_domains,
-        m_dx,
-        m_finestLevel,
-        order, // Dummy argument
-        m_redistributionRadius,
-        m_centroidStencilType)); // Dummy argument, just use centroidStencilType.
+  if (doThisOperator) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      m_nonConservativeDivergence[lvl] = RefCountedPtr<EBNonConservativeDivergence>(
+        new EBNonConservativeDivergence(*m_eblg[lvl], m_redistributionRadius));
+    }
   }
 }
 
@@ -913,18 +890,6 @@ PhaseRealm::getVofIterator() const
   return m_vofIter;
 }
 
-const IrregAmrStencil<CentroidInterpolationStencil>&
-PhaseRealm::getCentroidInterpolationStencils() const
-{
-  return *m_centroidInterpolationStencil;
-}
-
-const IrregAmrStencil<EbCentroidInterpolationStencil>&
-PhaseRealm::getEbCentroidInterpolationStencilStencils() const
-{
-  return *m_ebCentroidInterpolationStencil;
-}
-
 const Vector<RefCountedPtr<EBGradient>>&
 PhaseRealm::getGradientOp() const
 {
@@ -935,14 +900,34 @@ PhaseRealm::getGradientOp() const
   return m_gradientOp;
 }
 
-const IrregAmrStencil<NonConservativeDivergenceStencil>&
-PhaseRealm::getNonConservativeDivergenceStencils() const
+const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+PhaseRealm::getCellCentroidInterpolation() const
 {
-  if (!this->queryOperator(s_noncons_div)) {
-    MayDay::Error("PhaseRealm::getNonConservativeDivergenceStencils - operator not registered!");
+  if (!this->queryOperator(s_eb_irreg_interp)) {
+    MayDay::Error("PhaseRealm::getCellCentroidInterpolation - operator not registered!");
   }
 
-  return *m_NonConservativeDivergenceStencil;
+  return m_cellCentroidInterpolation;
+}
+
+const Vector<RefCountedPtr<EBCentroidInterpolation>>&
+PhaseRealm::getEBCentroidInterpolation() const
+{
+  if (!this->queryOperator(s_eb_irreg_interp)) {
+    MayDay::Error("PhaseRealm::getEBCentroidInterpolation - operator not registered!");
+  }
+
+  return m_ebCentroidInterpolation;
+}
+
+const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+PhaseRealm::getNonConservativeDivergence() const
+{
+  if (!this->queryOperator(s_noncons_div)) {
+    MayDay::Error("PhaseRealm::getNonConservativeDivergence - operator not registered!");
+  }
+
+  return m_nonConservativeDivergence;
 }
 
 Vector<RefCountedPtr<EBCoarAve>>&

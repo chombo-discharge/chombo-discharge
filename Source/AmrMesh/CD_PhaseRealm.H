@@ -19,7 +19,6 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBCoarAve.H>
@@ -34,9 +33,9 @@
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_EBCoarseToFineInterp.H>
 #include <CD_EBGhostCellInterpolator.H>
-#include <CD_NonConservativeDivergenceStencil.H>
-#include <CD_EbCentroidInterpolationStencil.H>
-#include <CD_CentroidInterpolationStencil.H>
+#include <CD_EBNonConservativeDivergence.H>
+#include <CD_CellCentroidInterpolation.H>
+#include <CD_EBCentroidInterpolation.H>
 #include <CD_NamespaceHeader.H>
 
 // These are operator that can be defined.
@@ -122,23 +121,23 @@ public:
     @param[in] a_ebis             EBIndexSpace discrete information
   */
   void
-  define(const Vector<DisjointBoxLayout>&   a_grids,
-         const Vector<ProblemDomain>&       a_domains,
-         const Vector<int>&                 a_refRat,
-         const Vector<Real>&                a_dx,
-         const RealVect                     a_probLo,
-         const int                          a_finestLevel,
-         const int                          a_ebGhost,
-         const int                          a_numGhost,
-         const int                          a_lsfGhost,
-         const int                          a_redistRad,
-         const int                          a_mgInterpOrder,
-         const int                          a_mgInterpRadius,
-         const int                          a_mgInterpWeight,
-         const IrregStencil::StencilType    a_centroidStencil,
-         const IrregStencil::StencilType    a_ebStencil,
-         const RefCountedPtr<BaseIF>&       a_baseif,
-         const RefCountedPtr<EBIndexSpace>& a_ebis);
+  define(const Vector<DisjointBoxLayout>&      a_grids,
+         const Vector<ProblemDomain>&          a_domains,
+         const Vector<int>&                    a_refRat,
+         const Vector<Real>&                   a_dx,
+         const RealVect                        a_probLo,
+         const int                             a_finestLevel,
+         const int                             a_ebGhost,
+         const int                             a_numGhost,
+         const int                             a_lsfGhost,
+         const int                             a_redistRad,
+         const int                             a_mgInterpOrder,
+         const int                             a_mgInterpRadius,
+         const int                             a_mgInterpWeight,
+         const CellCentroidInterpolation::Type a_centroidStencil,
+         const EBCentroidInterpolation::Type   a_ebStencil,
+         const RefCountedPtr<BaseIF>&          a_baseif,
+         const RefCountedPtr<EBIndexSpace>&    a_ebis);
 
   /*!
     @brief Set grid method
@@ -250,22 +249,22 @@ public:
   getVofIterator() const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to centroids
+    @brief Get objects for interpolation from cell centers to centroids. 
   */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils() const;
+  const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+  getCellCentroidInterpolation() const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to eb centroids
+    @brief Get objects for interpolation from cell centers to EB centroids
   */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>&
-  getEbCentroidInterpolationStencilStencils() const;
+  const Vector<RefCountedPtr<EBCentroidInterpolation>>&
+  getEBCentroidInterpolation() const;
 
   /*!
-    @brief Get stencils for computing "non-conservative divergences"
+    @brief Get objects for computing non-conservative divergences.
   */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils() const;
+  const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+  getNonConservativeDivergence() const;
 
   /*!
     @brief Get gradient object
@@ -401,14 +400,14 @@ protected:
   RealVect m_probLo;
 
   /*!
-    @brief Stencil recentering type
+    @brief Cell-center to cell-centroid interpolation method.
   */
-  IrregStencil::StencilType m_centroidStencilType;
+  CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
   /*!
-    @brief Stencil recentering type
+    @brief Cell-center to cell-centroid interpolation method.
   */
-  IrregStencil::StencilType m_ebCentroidStencilType;
+  EBCentroidInterpolation::Type m_ebCentroidInterpolationType;
 
   /*!
     @brief Grid resolutions
@@ -523,19 +522,19 @@ protected:
   mutable EBAMRSurfaceDeposition m_surfaceDeposition;
 
   /*!
-    @brief Data recentering utility (center to centroid)
+    @brief For interpolating data from cell centers to cell centroids. 
   */
-  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil>> m_centroidInterpolationStencil;
+  mutable Vector<RefCountedPtr<CellCentroidInterpolation>> m_cellCentroidInterpolation;
 
   /*!
-    @brief Data recentering utility (center to eb centroid)
+    @brief For interpolating data from cell centers to EB centroids. 
   */
-  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil>> m_ebCentroidInterpolationStencil;
+  mutable Vector<RefCountedPtr<EBCentroidInterpolation>> m_ebCentroidInterpolation;
 
   /*!
-    @brief Stencils for non-conservative divergences
+    @brief For computing non-conservative divergences
   */
-  RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil>> m_NonConservativeDivergenceStencil;
+  mutable Vector<RefCountedPtr<EBNonConservativeDivergence>> m_nonConservativeDivergence;
 
   /*!
     @brief Define EBLevelGrids
@@ -646,7 +645,7 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */
   void
-  defineNonConsDivSten();
+  defineNonConservativeDivergence(const int a_lmin);
 
   /*!
     @brief Put the level-set on the mesh

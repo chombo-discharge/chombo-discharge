@@ -84,7 +84,6 @@ The class options below control ``AmrMesh``:
 * ``AmrMesh.max_sim_depth``. Maximum simulation depth.
   Values :math:`< 0` means that grids can be generated with depths up to ``AmrMesh.max_amr_depth``. 
 * ``AmrMesh.fill_ratio``. Fill ratio for BR grid generation
-* ``AmrMesh.irreg_growth``. Buffer region around irregular tagged cells. 
 * ``AmrMesh.buffer_size``. Buffer size for BR grid generation. 
 * ``AmrMesh.grid_algorithm``. Grid generation algorithm. Valid options are *br* or *tiled*. See :ref:`Chap:MeshGeneration` for details. 
 * ``AmrMesh.box_sorting``. Box sorting algorithm. Valid options are *std*, *morton*, or *shuffle*. 
@@ -95,11 +94,9 @@ The class options below control ``AmrMesh``:
 * ``AmrMesh.num_ghost``. Number of ghost cells for mesh data. 
 * ``AmrMesh.lsf_ghost``. Number of ghost cells when allocating level-set function on the grid. 
 * ``AmrMesh.eb_ghost``. Number of ghost cells for EB moments. 
-* ``AmrMesh.centroid_sten``. Which centroid interpolation stencils to use. Valid options are *pwl*, *linear*, *taylor*, *lsq*. Only *linear* is guaranteed monotone. 
-* ``AmrMesh.eb_sten``. EB interpolation stencils. 
+* ``AmrMesh.centroid_interp``. Which centroid interpolation stencils to use. Good options are *minmod*, *linear*.
+* ``AmrMesh.eb_interp``. EB interpolation stencils. Good options are *minmod*, *pwl*
 * ``AmrMesh.redist_radius``. Redistribution radius. 
-* ``AmrMesh.ghost_interp``. Default ghost cell interpolation type. Valid options are *pwl* or *quad*. 
-* ``AmrMesh.ebcf``. Can be set to false if refinement boundaries do not cross the EB. Valid options are *true* and *false*.
 
 .. warning::
 
@@ -118,7 +115,9 @@ The following options are runtime options for ``AmrMesh``:
 * ``AmrMesh.grid_algorithm``. 
 * ``AmrMesh.box_sorting``. 
 * ``AmrMesh.blocking_factor``. 
-* ``AmrMesh.max_box_size``. 
+* ``AmrMesh.max_box_size``.
+* ``AmrMesh.centroid_interp``
+* ``AmrMesh.eb_interp``  
 
 These options only affect the grid generation method and parameters, and are thus only effective after the next regrid.
 

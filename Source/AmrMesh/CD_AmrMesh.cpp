@@ -769,11 +769,10 @@ AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int     nComp = a_data[0]->nComp();
-  const int
-            ignored = nComp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory.
-  const int nphases = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     nComp   = a_data[0]->nComp();
+  const int     ignored = nComp;
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -814,11 +813,10 @@ AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin) const
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int     nComp = a_data[0]->nComp();
-  const int
-            ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
-  const int nphases = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     nComp   = a_data[0]->nComp();
+  const int     ignored = nComp;
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -859,11 +857,10 @@ AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int     nComp = a_data[0]->nComp();
-  const int
-            ignored = nComp; // Strange but true thing, for multifluid data the number of components come in through the factory.
-  const int nphases = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     nComp   = a_data[0]->nComp();
+  const int     ignored = nComp;
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -937,8 +934,8 @@ AmrMesh::parseOptions()
   this->parseNumGhostCells();
   this->parseEbGhostCells();
   this->parseProbLoHiCorners();
-  this->parseCentroidStencils();
-  this->parseEbCentroidStencils();
+  this->parseCellCentroidInterpolation();
+  this->parseEBCentroidInterpolation();
   this->parseMultigridInterpolator();
 
   this->sanityCheck();
@@ -2252,7 +2249,9 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 }
 
 void
-AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const
+AmrMesh::interpToCentroids(EBAMRCellData&           a_data,
+                           const std::string        a_realm,
+                           const phase::which_phase a_phase) const noexcept
 {
   CH_TIME("AmrMesh::interpToCentroids(AMR)");
   if (m_verbosity > 3) {
@@ -2261,19 +2260,20 @@ AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, con
 
   if (!this->queryRealm(a_realm)) {
     std::string str = "AmrMesh::interpToCentroids(AMR) - could not find realm '" + a_realm + "'";
+
     MayDay::Abort(str.c_str());
   }
 
-  const IrregAmrStencil<CentroidInterpolationStencil>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(
-    a_phase);
-  stencil.apply(a_data);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->interpToCentroids(*a_data[lvl], a_realm, a_phase, lvl);
+  }
 }
 
 void
 AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
                            const std::string        a_realm,
                            const phase::which_phase a_phase,
-                           const int                a_level) const
+                           const int                a_level) const noexcept
 {
   CH_TIME("AmrMesh::interpToCentroids(level)");
 
@@ -2285,9 +2285,145 @@ AmrMesh::interpToCentroids(LevelData<EBCellFAB>&    a_data,
     MayDay::Abort(str.c_str());
   }
 
-  const auto& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
+  const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
 
-  stencil.apply(a_data, a_level);
+  cellCentroidInterp->interpolate(a_data);
+}
+
+void
+AmrMesh::interpToCentroids(EBCellFAB&               a_centroidData,
+                           const EBCellFAB&         a_cellData,
+                           const std::string        a_realm,
+                           const phase::which_phase a_phase,
+                           const int                a_level,
+                           const DataIndex&         a_din) const noexcept
+{
+  CH_TIME("AmrMesh::interpToCentroids(patch)");
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_finestLevel);
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(level) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
+
+  cellCentroidInterp->interpolate<EBCellFAB>(a_centroidData, a_cellData, a_din);
+}
+
+void
+AmrMesh::interpToCentroids(EBAMRIVData&             a_centroidData,
+                           const EBAMRCellData&     a_cellData,
+                           const std::string        a_realm,
+                           const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::interpToCentroids(ebamrivdata)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToCentroids(ebamirvdata)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(ebamirvdata) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->interpToCentroids(*a_centroidData[lvl], *a_cellData[lvl], a_realm, a_phase, lvl);
+  }
+}
+
+void
+AmrMesh::interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
+                           const LevelData<EBCellFAB>& a_cellData,
+                           const std::string           a_realm,
+                           const phase::which_phase    a_phase,
+                           const int                   a_level) const noexcept
+{
+  CH_TIME("AmrMesh::interpToCentroids(baseivfab, level)");
+
+  CH_assert(a_level >= 0);
+  CH_assert(a_level <= m_finestLevel);
+
+  if (!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::interpToCentroids(baseivfab, level) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& cellCentroidInterp = m_realms[a_realm]->getCellCentroidInterpolation(a_phase)[a_level];
+
+  cellCentroidInterp->interpolate(a_centroidData, a_cellData);
+}
+
+void
+AmrMesh::interpToEB(EBAMRIVData&             a_centroidData,
+                    const EBAMRCellData&     a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase) const noexcept
+{
+  CH_TIME("AmrMesh::interpToEB(ebamrivdata)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToEB(ebamirvdata)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::interpToEB(ebamrivdata) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->interpToEB(*a_centroidData[lvl], *a_cellData[lvl], a_realm, a_phase, lvl);
+  }
+}
+
+void
+AmrMesh::interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const std::string           a_realm,
+                    const phase::which_phase    a_phase,
+                    const int                   a_level) const noexcept
+{
+  CH_TIME("AmrMesh::interpToEB(LD<BaseIVFAB<Real>>)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToEB(LD<BaseIVFAB<Real>>)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::interpToEB(LD<BaseIVFAB<Real>>) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& ebCentroidInterp = m_realms[a_realm]->getEBCentroidInterpolation(a_phase)[a_level];
+
+  ebCentroidInterp->interpolate(a_centroidData, a_cellData);
+}
+
+void
+AmrMesh::interpToEB(BaseIVFAB<Real>&         a_centroidData,
+                    const EBCellFAB&         a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level,
+                    const DataIndex&         a_din) const noexcept
+{
+  CH_TIME("AmrMesh::interpToEB(BaseIVFAB<Real>)");
+  if (m_verbosity > 3) {
+    pout() << "AmrMesh::interpToEB(BaseIVFAB<Real>)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::interpToEB(BaseIVFAB<Real>) - could not find realm '" + a_realm + "'";
+
+    MayDay::Abort(str.c_str());
+  }
+
+  const auto& ebCentroidInterp = m_realms[a_realm]->getEBCentroidInterpolation(a_phase)[a_level];
+
+  ebCentroidInterp->interpolate(a_centroidData, a_cellData, a_din);
 }
 
 void
@@ -2644,72 +2780,88 @@ AmrMesh::parseRedistributionRadius()
 }
 
 void
-AmrMesh::parseCentroidStencils()
+AmrMesh::parseCellCentroidInterpolation()
 {
-  CH_TIME("AmrMesh::parseCentroidStencils()");
+  CH_TIME("AmrMesh::parseCellCentroidInterpolation()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseCentroidStencils()" << endl;
+    pout() << "AmrMesh::parseCellCentroidInterpolation()" << endl;
   }
 
   ParmParse pp("AmrMesh");
 
   std::string str;
 
-  pp.get("centroid_sten", str);
+  pp.get("centroid_interp", str);
 
-  // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_centroidStencilRadius = 1;
-  m_centroidStencilOrder  = 1;
-
-  if (str == "linear") {
-    m_centroidStencilType = IrregStencil::StencilType::Linear;
+  if (str == "constant") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Constant;
+  }
+  else if (str == "linear") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Linear;
   }
   else if (str == "taylor") {
-    m_centroidStencilType = IrregStencil::StencilType::TaylorExtrapolation;
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Taylor;
   }
   else if (str == "lsq") {
-    m_centroidStencilType = IrregStencil::StencilType::LeastSquares;
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::LeastSquares;
   }
   else if (str == "pwl") {
-    m_centroidStencilType = IrregStencil::StencilType::PiecewiseLinear;
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::PiecewiseLinear;
+  }
+  else if (str == "minmod") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::MinMod;
+  }
+  else if (str == "monotonized_central") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::MonotonizedCentral;
+  }
+  else if (str == "superbee") {
+    m_cellCentroidInterpolationType = CellCentroidInterpolation::Type::Superbee;
   }
   else {
-    MayDay::Abort("AmrMesh::parseCentroidStencils - unknown stencil requested");
+    MayDay::Abort("AmrMesh::parseCellCentroidInterpolation - unknown stencil requested");
   }
 }
 
 void
-AmrMesh::parseEbCentroidStencils()
+AmrMesh::parseEBCentroidInterpolation()
 {
-  CH_TIME("AmrMesh::parseEbCentroidStencils()");
+  CH_TIME("AmrMesh::parseEBCentroidInterpolation()");
   if (m_verbosity > 3) {
-    pout() << "AmrMesh::parseEbCentroidStencils()" << endl;
+    pout() << "AmrMesh::parseEBCentroidInterpolation()" << endl;
   }
 
   ParmParse pp("AmrMesh");
 
   std::string str;
 
-  pp.get("eb_sten", str);
+  pp.get("eb_interp", str);
 
-  // Maybe, in the future, we can change these but the user should not care about these (yet)
-  m_ebCentroidStencilRadius = 1;
-  m_ebCentroidStencilOrder  = 1;
-
-  if (str == "linear") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::Linear;
+  if (str == "constant") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Constant;
+  }
+  else if (str == "linear") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Linear;
   }
   else if (str == "taylor") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::TaylorExtrapolation;
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Taylor;
   }
   else if (str == "lsq") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::LeastSquares;
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::LeastSquares;
   }
   else if (str == "pwl") {
-    m_ebCentroidStencilType = IrregStencil::StencilType::PiecewiseLinear;
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::PiecewiseLinear;
+  }
+  else if (str == "minmod") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::MinMod;
+  }
+  else if (str == "monotonized_central") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::MonotonizedCentral;
+  }
+  else if (str == "superbee") {
+    m_ebCentroidInterpolationType = EBCentroidInterpolation::Type::Superbee;
   }
   else {
-    MayDay::Abort("AmrMesh::parseEbCentroidStencils - unknown stencil requested");
+    MayDay::Abort("AmrMesh::parseCellCentroidInterpolation - unknown stencil requested");
   }
 }
 
@@ -3252,58 +3404,43 @@ AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase
   return m_realms[a_realm]->getRedistributionOp(a_phase);
 }
 
-const IrregAmrStencil<CentroidInterpolationStencil>&
-AmrMesh::getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const
+void
+AmrMesh::nonConservativeDivergence(EBAMRIVData&              a_nonConsDivF,
+                                   const EBAMRCellData&      a_kappaDivF,
+                                   const std::string&        a_realm,
+                                   const phase::which_phase& a_phase) const noexcept
 {
-  CH_TIME("AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase)");
+  CH_TIME("AmrMesh::nonConservativeDivergence(AMR)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase)" << endl;
+    pout() << "AmrMesh::nonConservativeDivergence(AMR)" << endl;
   }
 
-  if (!this->queryRealm(a_realm)) {
-    const std::string
-      str = "AmrMesh::getCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" + a_realm +
-            "'";
+  if (!(this->queryRealm(a_realm))) {
+    const std::string str = "AmrMesh::nonConservativeDivergence(amr) - could not find realm '" + a_realm + "'";
+
     MayDay::Abort(str.c_str());
   }
 
-  return m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    this->nonConservativeDivergence(*a_nonConsDivF[lvl], *a_kappaDivF[lvl], lvl, a_realm, a_phase);
+  }
 }
 
-const IrregAmrStencil<EbCentroidInterpolationStencil>&
-AmrMesh::getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const
+void
+AmrMesh::nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
+                                   const LevelData<EBCellFAB>& a_kappaDivF,
+                                   const int&                  a_level,
+                                   const std::string&          a_realm,
+                                   const phase::which_phase&   a_phase) const noexcept
 {
-  CH_TIME("AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase)");
+  CH_TIME("AmrMesh::nonConservativeDivergence(level)");
   if (m_verbosity > 1) {
-    pout() << "AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase)" << endl;
+    pout() << "AmrMesh::nonConservativeDivergence(level)" << endl;
   }
 
-  if (!this->queryRealm(a_realm)) {
-    const std::string
-      str = "AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase) - could not find realm '" +
-            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
+  const auto& nonConsDiv = m_realms[a_realm]->getNonConservativeDivergence(a_phase)[a_level];
 
-  return m_realms[a_realm]->getEbCentroidInterpolationStencilStencils(a_phase);
-}
-
-const IrregAmrStencil<NonConservativeDivergenceStencil>&
-AmrMesh::getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const
-{
-  CH_TIME("AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase)");
-  if (m_verbosity > 1) {
-    pout() << "AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase)" << endl;
-  }
-
-  if (!this->queryRealm(a_realm)) {
-    const std::string
-      str = "AmrMesh::getNonConservativeDivergenceStencil(string, phase::which_phase) - could not find realm '" +
-            a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  return m_realms[a_realm]->getNonConservativeDivergenceStencils(a_phase);
+  nonConsDiv->nonConservativeDivergence(a_nonConsDivF, a_kappaDivF);
 }
 
 bool
@@ -3403,8 +3540,8 @@ AmrMesh::defineRealms()
                      m_multigridInterpOrder,
                      m_multigridInterpRadius,
                      m_multigridInterpWeight,
-                     m_centroidStencilType,
-                     m_ebCentroidStencilType,
+                     m_cellCentroidInterpolationType,
+                     m_ebCentroidInterpolationType,
                      m_baseif,
                      m_multifluidIndexSpace);
   }
@@ -3459,8 +3596,8 @@ AmrMesh::regridRealm(const std::string          a_realm,
                             m_multigridInterpOrder,
                             m_multigridInterpRadius,
                             m_multigridInterpWeight,
-                            m_centroidStencilType,
-                            m_ebCentroidStencilType,
+                            m_cellCentroidInterpolationType,
+                            m_ebCentroidInterpolationType,
                             m_baseif,
                             m_multifluidIndexSpace);
 

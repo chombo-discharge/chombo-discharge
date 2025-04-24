@@ -155,9 +155,11 @@ CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<E
   DataOps::scale(a_rho, Units::Qe);
 
   // Above, we computed the cell-centered space charge. We must have centroid-centered.
-  m_amr->arithmeticAverage(a_rho, m_realm);
-  m_amr->interpGhost(a_rho, m_realm);
+  m_amr->conservativeAverage(a_rho, m_realm);
+  m_amr->interpGhostPwl(a_rho, m_realm);
   m_amr->interpToCentroids(rhoGas, m_realm, phase::gas);
+
+  DataOps::setCoveredValue(rhoGas, 0, 0.0);
 }
 
 void
@@ -216,6 +218,11 @@ CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) con
   // Fill ghost cells.
   m_amr->arithmeticAverage(a_cellConductivity, m_realm, phase::gas);
   m_amr->interpGhostPwl(a_cellConductivity, m_realm, phase::gas);
+
+#if 0
+  // Interpolate to centroids
+  m_amr->interpToCentroids(a_cellConductivity, m_realm, m_phase);
+#endif
 }
 
 void
@@ -236,7 +243,6 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
   DataOps::setValue(a_conductivityFace, std::numeric_limits<Real>::max());
   DataOps::setValue(a_conductivityEB, std::numeric_limits<Real>::max());
 
-#if 1
   // Average the cell-centered conductivity to faces. Note that this includes one "ghost face", which we need
   // because the multigrid solver will interpolate face-centered conductivities to face centroids.
   const Average  average  = Average::Arithmetic;
@@ -250,14 +256,9 @@ CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFac
                              interv,
                              interv,
                              average);
-#else
-  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
-#endif
 
-#if 1
-  // Now compute the conductivity on the EB.
-  const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, m_phase);
-  interpStencil.apply(a_conductivityEB, a_conductivityCell);
+#if 1 // Don't do this if the cell-centered values were interpolated to centroids.
+  m_amr->interpToEB(a_conductivityEB, a_conductivityCell, m_realm, m_phase);
 #else
   DataOps::setValue(a_conductivityEB, 0.0);
   DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
@@ -647,11 +648,6 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
   CH_assert(a_cdrGradients.size() == numCdrSpecies);
   CH_assert(a_rteDensities.size() == numRteSpecies);
 
-  // Stencils for putting cell-centered data on cell centroids.
-  const IrregAmrStencil<CentroidInterpolationStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(
-    m_realm,
-    m_cdr->getPhase());
-
   // Grids and EBIS information for this grid level.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const DataIterator&      dit = dbl.dataIterator();
@@ -688,10 +684,22 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
 
       const int idx = solverIt.index();
 
-      cdrSources[idx]   = &(*a_cdrSources[idx])[din];
-      cdrDensities[idx] = &(*a_cdrDensities[idx])[din];
-      cdrGradients[idx] = &(*a_cdrGradients[idx])[din];
+      const EBCellFAB* cdrDensity  = &(*a_cdrDensities[idx])[din];
+      const EBCellFAB* cdrGradient = &(*a_cdrGradients[idx])[din];
 
+      // Define transient storage and copy data over
+      cdrSources[idx]   = &(*a_cdrSources[idx])[din];
+      cdrDensities[idx] = new EBCellFAB();
+      cdrGradients[idx] = new EBCellFAB();
+
+      cdrDensities[idx]->clone(*cdrDensity);
+      cdrGradients[idx]->clone(*cdrGradient);
+
+      // Interpolate density and gradient to cell centroid
+      m_amr->interpToCentroids(*cdrDensities[idx], *cdrDensity, m_realm, m_phase, a_lvl, din);
+      m_amr->interpToCentroids(*cdrGradients[idx], *cdrGradient, m_realm, m_phase, a_lvl, din);
+
+      // Handle to regular data for source, density, and gradient
       cdrSourcesFAB[idx]   = &(cdrSources[idx]->getFArrayBox());
       cdrDensitiesFAB[idx] = &(cdrDensities[idx]->getFArrayBox());
       cdrGradientsFAB[idx] = &(cdrGradients[idx]->getFArrayBox());
@@ -710,12 +718,25 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      rteSources[idx]   = &(*a_rteSources[idx])[din];
-      rteDensities[idx] = &(*a_rteDensities[idx])[din];
+      const EBCellFAB* rteDensity = &(*a_rteDensities[idx])[din];
 
+      rteSources[idx]   = &(*a_rteSources[idx])[din];
+      rteDensities[idx] = new EBCellFAB();
+
+      // Copy and interpolate
+      rteDensities[idx]->clone(*rteDensity);
+
+      m_amr->interpToCentroids(*rteDensities[idx], *rteDensity, m_realm, m_phase, a_lvl, din);
+
+      // Handle to regular data.
       rteSourcesFAB[idx]   = &(rteSources[idx]->getFArrayBox());
       rteDensitiesFAB[idx] = &(rteDensities[idx]->getFArrayBox());
     }
+
+    // Storage for E-field, interpolated to cell centroids
+    EBCellFAB E;
+    E.clone(a_E[din]);
+    m_amr->interpToCentroids(E, a_E[din], m_realm, m_phase, a_lvl, din);
 
     // Do regular cells (actually also does irregular cells but those are redone using correct arithmetic in the call below).
     this->advanceReactionNetworkRegularCells(cdrSourcesFAB,
@@ -723,7 +744,7 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
                                              cdrDensitiesFAB,
                                              cdrGradientsFAB,
                                              rteDensitiesFAB,
-                                             a_E[din].getFArrayBox(),
+                                             E.getFArrayBox(),
                                              a_time,
                                              a_dt,
                                              dx,
@@ -736,8 +757,7 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
                                       cdrGradients,
                                       cdrVelocities,
                                       rteDensities,
-                                      interpStencils[a_lvl][din],
-                                      a_E[din],
+                                      E,
                                       a_time,
                                       a_dt,
                                       dx,
@@ -750,6 +770,9 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       const int idx = solverIt.index();
 
       cdrSources[idx]->setCoveredCellVal(0.0, comp);
+
+      delete cdrDensities[idx];
+      delete cdrGradients[idx];
     }
 
     // Covered cells are bogus.
@@ -757,6 +780,8 @@ CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_
       const int idx = solverIt.index();
 
       rteSources[idx]->setCoveredCellVal(0.0, comp);
+
+      delete rteDensities[idx];
     };
   }
 }
@@ -891,20 +916,19 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
 }
 
 void
-CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
-                                              Vector<EBCellFAB*>&          a_rteSources,
-                                              const Vector<EBCellFAB*>&    a_cdrDensities,
-                                              const Vector<EBCellFAB*>&    a_cdrGradients,
-                                              const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                              const Vector<EBCellFAB*>&    a_rteDensities,
-                                              const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                              const EBCellFAB&             a_E,
-                                              const Real&                  a_time,
-                                              const Real&                  a_dt,
-                                              const Real&                  a_dx,
-                                              const Box&                   a_cellBox,
-                                              const int                    a_lvl,
-                                              const DataIndex&             a_dit)
+CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&       a_cdrSources,
+                                              Vector<EBCellFAB*>&       a_rteSources,
+                                              const Vector<EBCellFAB*>& a_cdrDensities,
+                                              const Vector<EBCellFAB*>& a_cdrGradients,
+                                              const Vector<EBCellFAB*>& a_cdrVelocities,
+                                              const Vector<EBCellFAB*>& a_rteDensities,
+                                              const EBCellFAB&          a_E,
+                                              const Real&               a_time,
+                                              const Real&               a_dt,
+                                              const Real&               a_dx,
+                                              const Box&                a_cellBox,
+                                              const int                 a_lvl,
+                                              const DataIndex&          a_dit)
 {
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>x6, ...)");
   if (m_verbosity > 5) {
@@ -924,7 +948,6 @@ CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdr
                                             a_cdrGradients,
                                             a_cdrVelocities,
                                             a_rteDensities,
-                                            a_interpStencils,
                                             a_E,
                                             a_time,
                                             a_dt,
@@ -932,40 +955,6 @@ CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdr
                                             a_cellBox,
                                             a_lvl,
                                             a_dit);
-    break;
-  }
-  case SourceTermComputation::InterpolatedStable: {
-    this->advanceReactionNetworkIrregUpwind(a_cdrSources,
-                                            a_rteSources,
-                                            a_cdrDensities,
-                                            a_cdrGradients,
-                                            a_cdrVelocities,
-                                            a_rteDensities,
-                                            a_interpStencils,
-                                            a_E,
-                                            a_time,
-                                            a_dt,
-                                            a_dx,
-                                            a_cellBox,
-                                            a_lvl,
-                                            a_dit);
-    break;
-  }
-  case SourceTermComputation::CellAverage: {
-    this->advanceReactionNetworkIrregKappa(a_cdrSources,
-                                           a_rteSources,
-                                           a_cdrDensities,
-                                           a_cdrGradients,
-                                           a_rteDensities,
-                                           a_interpStencils,
-
-                                           a_E,
-                                           a_time,
-                                           a_dt,
-                                           a_dx,
-                                           a_cellBox,
-                                           a_lvl,
-                                           a_dit);
     break;
   }
   case SourceTermComputation::Upwind: {
@@ -975,7 +964,6 @@ CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdr
                                             a_cdrGradients,
                                             a_cdrVelocities,
                                             a_rteDensities,
-                                            a_interpStencils,
                                             a_E,
                                             a_time,
                                             a_dt,
@@ -994,20 +982,19 @@ CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdr
 }
 
 void
-CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_cdrSources,
-                                                    Vector<EBCellFAB*>&          a_rteSources,
-                                                    const Vector<EBCellFAB*>&    a_cdrDensities,
-                                                    const Vector<EBCellFAB*>&    a_cdrGradients,
-                                                    const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                                    const Vector<EBCellFAB*>&    a_rteDensities,
-                                                    const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                                    const EBCellFAB&             a_E,
-                                                    const Real&                  a_time,
-                                                    const Real&                  a_dt,
-                                                    const Real&                  a_dx,
-                                                    const Box&                   a_cellBox,
-                                                    const int                    a_lvl,
-                                                    const DataIndex&             a_dit)
+CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_cdrSources,
+                                                    Vector<EBCellFAB*>&       a_rteSources,
+                                                    const Vector<EBCellFAB*>& a_cdrDensities,
+                                                    const Vector<EBCellFAB*>& a_cdrGradients,
+                                                    const Vector<EBCellFAB*>& a_cdrVelocities,
+                                                    const Vector<EBCellFAB*>& a_rteDensities,
+                                                    const EBCellFAB&          a_E,
+                                                    const Real&               a_time,
+                                                    const Real&               a_dt,
+                                                    const Real&               a_dx,
+                                                    const Box&                a_cellBox,
+                                                    const int                 a_lvl,
+                                                    const DataIndex&          a_dit)
 {
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>x6, ...)");
   if (m_verbosity > 5) {
@@ -1047,61 +1034,30 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&         
 
   // Irregular grid kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real        kappa   = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interpStencils(vof, comp);
-    const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
-    const RealVect    normal  = ebisbox.normal(vof);
+    const Real     kappa  = ebisbox.volFrac(vof);
+    const RealVect pos    = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+    const RealVect normal = ebisbox.normal(vof);
 
-    // I assume that the electric field is on the cell center (which is what FieldSolverMultigrid currently does), but we do want the field on the centroid.
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++) {
+    // Electric field
+    const RealVect E = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
-      // Do all components.
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += stencil.weight(i) * a_E(stencil.vof(i), dir);
-      }
+    // CDR species densities
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+      const int idx = solverIt.index();
+
+      cdrDensities[idx] = (*a_cdrDensities[idx])(vof, comp);
+      cdrDensities[idx] = std::max(cdrDensities[idx], zero);
+
+      cdrGradients[idx] = RealVect(
+        D_DECL((*a_cdrGradients[idx])(vof, 0), (*a_cdrGradients[idx])(vof, 1), (*a_cdrGradients[idx])(vof, 2)));
     }
 
-    // Compute RTE densities on the centroids. Again, I sort of assume that the solver being used
-    // is a cell-centered solver so we interpolate the isotropic term to the centroid.
+    // RTE densities
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      rteDensities[idx] = 0.0;
-
-      for (int i = 0; i < stencil.size(); i++) {
-        rteDensities[idx] += stencil.weight(i) * (*a_rteDensities[idx])(stencil.vof(i), comp);
-      }
-
+      rteDensities[idx] = (*a_rteDensities[idx])(vof, 0);
       rteDensities[idx] = std::max(zero, rteDensities[idx]);
-    }
-
-    // Compute plasma species densities on the cell centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrDensities[idx] = 0.0;
-
-      for (int i = 0; i < stencil.size(); i++) {
-        cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-      }
-
-      cdrDensities[idx] = std::max(cdrDensities[idx], zero);
-    }
-
-    // Compute plasma species gradients on the cell centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrGradients[idx] = RealVect::Zero;
-
-      for (int i = 0; i < stencil.size(); i++) {
-
-        // Do all components.
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
-        }
-      }
     }
 
     // Call the plasma-kinetics framework and have it fill the source terms over a time step a_dt.
@@ -1140,145 +1096,19 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&         
 }
 
 void
-CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_cdrSources,
-                                                   Vector<EBCellFAB*>&          a_rteSources,
-                                                   const Vector<EBCellFAB*>&    a_cdrDensities,
-                                                   const Vector<EBCellFAB*>&    a_cdrGradients,
-                                                   const Vector<EBCellFAB*>&    a_rteDensities,
-                                                   const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                                   const EBCellFAB&             a_E,
-                                                   const Real&                  a_time,
-                                                   const Real&                  a_dt,
-                                                   const Real&                  a_dx,
-                                                   const Box&                   a_cellBox,
-                                                   const int                    a_lvl,
-                                                   const DataIndex&             a_dit)
-{
-  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>x6, ...)");
-  if (m_verbosity > 5) {
-    pout() << "CdrPlasmaStepper::advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>x6, ...)" << endl;
-  }
-
-  CH_assert(a_E.nComp() == SpaceDim);
-  CH_assert(a_dt >= 0.0);
-  CH_assert(a_dx >= 0.0);
-  CH_assert(a_cellBox.cellCentered());
-
-  constexpr int  comp = 0;
-  constexpr Real zero = 0.0;
-
-  // Number of CDR and RTE solvers.
-  const int numRteSpecies = m_physics->getNumRtSpecies();
-  const int numCdrSpecies = m_physics->getNumCdrSpecies();
-
-  CH_assert(a_cdrSources.size() == numCdrSpecies);
-  CH_assert(a_rteSources.size() == numRteSpecies);
-  CH_assert(a_cdrDensities.size() == numCdrSpecies);
-  CH_assert(a_cdrGradients.size() == numCdrSpecies);
-  CH_assert(a_rteDensities.size() == numRteSpecies);
-
-  // EB box.
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl][a_dit];
-
-  // Lower-left corner in physical coordinates.
-  const RealVect probLo = m_amr->getProbLo();
-
-  // Things that are passed into CdrPlasmaPhysics
-  Vector<Real>     cdrSources(numCdrSpecies, 0.);
-  Vector<Real>     cdrDensities(numCdrSpecies, 0.);
-  Vector<Real>     rteSources(numRteSpecies, 0.);
-  Vector<Real>     rteDensities(numRteSpecies, 0.);
-  Vector<RealVect> cdrGradients(numCdrSpecies, RealVect::Zero);
-
-  // Definition of the irregular kernel.
-  auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real        kappa   = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interpStencils(vof, comp);
-    const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
-
-    // Input E is on cell center but we need centroid.
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += a_E(stencil.vof(i), dir) * stencil.weight(i);
-      }
-    }
-
-    // On input the CDR densities are on the centroid so just make sure they are positive.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrDensities[idx] = std::max(zero, (*a_cdrDensities[idx])(vof, comp));
-    }
-
-    // On input we assume that the CDR gradients are on the cell center so we interpolate to centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrGradients[idx] = RealVect::Zero;
-      for (int i = 0; i < stencil.size(); i++) {
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          cdrGradients[idx][dir] += (*a_cdrGradients[idx])(stencil.vof(i), dir) * stencil.weight(i);
-        }
-      }
-    }
-
-    // On input the RTE densities are on the centroid, so just make sure it's positive.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx     = solverIt.index();
-      rteDensities[idx] = std::max(zero, (*a_rteDensities[idx])(vof, comp));
-    }
-
-    // Compute source terms
-    m_physics->advanceReactionNetwork(cdrSources,
-                                      rteSources,
-                                      cdrDensities,
-                                      cdrGradients,
-                                      rteDensities,
-                                      E,
-                                      pos,
-                                      a_dx,
-                                      a_dt,
-                                      a_time,
-                                      kappa);
-
-    // Put the CDR source term where it belongs.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      (*a_cdrSources[idx])(vof, comp) = cdrSources[idx];
-    }
-
-    // Put the RTE source term where it belongs.
-    for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      (*a_rteSources[idx])(vof, comp) = rteSources[idx];
-    }
-  };
-
-  // Kernel region.
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
-
-  // Run the kernel
-  BoxLoops::loop(vofit, irregularKernel);
-}
-
-void
-CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_cdrSources,
-                                                    Vector<EBCellFAB*>&          a_rteSources,
-                                                    const Vector<EBCellFAB*>&    a_cdrDensities,
-                                                    const Vector<EBCellFAB*>&    a_cdrGradients,
-                                                    const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                                    const Vector<EBCellFAB*>&    a_rteDensities,
-                                                    const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                                    const EBCellFAB&             a_E,
-                                                    const Real&                  a_time,
-                                                    const Real&                  a_dt,
-                                                    const Real&                  a_dx,
-                                                    const Box&                   a_cellBox,
-                                                    const int                    a_lvl,
-                                                    const DataIndex&             a_dit)
+CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&       a_cdrSources,
+                                                    Vector<EBCellFAB*>&       a_rteSources,
+                                                    const Vector<EBCellFAB*>& a_cdrDensities,
+                                                    const Vector<EBCellFAB*>& a_cdrGradients,
+                                                    const Vector<EBCellFAB*>& a_cdrVelocities,
+                                                    const Vector<EBCellFAB*>& a_rteDensities,
+                                                    const EBCellFAB&          a_E,
+                                                    const Real&               a_time,
+                                                    const Real&               a_dt,
+                                                    const Real&               a_dx,
+                                                    const Box&                a_cellBox,
+                                                    const int                 a_lvl,
+                                                    const DataIndex&          a_dit)
 {
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>x6, ...)");
   if (m_verbosity > 5) {
@@ -1313,17 +1143,11 @@ CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&         
 
   // This is the kernel that we run.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real        kappa   = ebisbox.volFrac(vof);
-    const VoFStencil& stencil = a_interpStencils(vof, comp);
-    const RealVect    pos     = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+    const Real     kappa = ebisbox.volFrac(vof);
+    const RealVect pos   = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
 
     // The input electric field is on the cell center but we need it on the centroid.
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < stencil.size(); i++) {
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += stencil.weight(i) * a_E(stencil.vof(i), dir);
-      }
-    }
+    const RealVect E = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
     // Project the electric field on the EB normal (recall, it points inwards into the plasma)
     const Real EdotN = E.dotProduct(ebisbox.normal(vof));
@@ -1349,43 +1173,22 @@ CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&         
       // If it's not an inflow face, interpolate the data to the cell centroid. Otherwise, set the
       // species density to zero.
       if (!inflow) {
-        cdrDensities[idx] = zero;
-
-        for (int i = 0; i < stencil.size(); i++) {
-          cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-        }
-
-        // Enforce positivity in reaction kernel (interpolation stencils might have negative weights).
+        cdrDensities[idx] = (*a_cdrDensities[idx])(vof, comp);
         cdrDensities[idx] = std::max(zero, cdrDensities[idx]);
       }
       else {
         cdrDensities[idx] = zero;
       }
-    }
 
-    // Interpolate cell-centered gradients to centroid.
-    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
-      const int idx = solverIt.index();
-
-      cdrGradients[idx] = RealVect::Zero;
-      for (int i = 0; i < stencil.size(); i++) {
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
-        }
-      }
+      cdrGradients[idx] = RealVect(
+        D_DECL((*a_cdrGradients[idx])(vof, 0), (*a_cdrGradients[idx])(vof, 1), (*a_cdrGradients[idx])(vof, 2)));
     }
 
     // Interpolate the RTE densities to the centroid.
     for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
 
-      // Apply the stencil but always leave a positive number of photons (interpolators might not always have non-negative weights).
-      rteDensities[idx] = 0.0;
-
-      for (int i = 0; i < stencil.size(); i++) {
-        rteDensities[idx] += stencil.weight(i) * (*a_rteDensities[idx])(stencil.vof(i), comp);
-      }
-
+      rteDensities[idx] = (*a_rteDensities[idx])(vof, comp);
       rteDensities[idx] = std::max(zero, rteDensities[idx]);
     }
 
@@ -1489,11 +1292,7 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
     m_amr->allocate(*cdrDensitiesExtrap[idx], m_realm, m_cdr->getPhase(), numComp);
 
     // Extrapolate the cell-centered densities to the EB.
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(
-      m_realm,
-      m_cdr->getPhase());
-
-    stencil.apply(*cdrDensitiesExtrap[idx], *cdrDensities[idx]);
+    m_amr->interpToEB(*cdrDensitiesExtrap[idx], *cdrDensities[idx], m_realm, m_cdr->getPhase());
   }
 
   // 2b. Compute the diffusion coefficeints on the EB.
@@ -1748,45 +1547,33 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
   // Things that are passed into CdrPlasmaPhysics
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
-  // Interpolation stencils
-  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(
-    m_realm,
-    m_cdr->getPhase())[a_lvl][a_dit];
+  // Electric field -- will be populated on the cell centroid
+  EBCellFAB Efield;
+  Efield.clone(a_electricFieldCell);
+  m_amr->interpToCentroids(Efield, a_electricFieldCell, m_realm, m_phase, a_lvl, a_dit);
+
+  // Some copies of the CDR densities so we can put them on the centroid
+  Vector<EBCellFAB*> tmp(numCdrSpecies, nullptr);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    tmp[idx] = new EBCellFAB();
+    tmp[idx]->clone(*a_cdrDensities[idx]);
+
+    m_amr->interpToCentroids(*tmp[idx], *a_cdrDensities[idx], m_realm, m_phase, a_lvl, a_dit);
+  }
 
   // Irreegular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    // Physical position.
     const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisbox, a_dx);
+    const RealVect E   = RealVect(D_DECL(Efield(vof, 0), Efield(vof, 1), Efield(vof, 2)));
 
-    // Interpolation stencil.
-    const VoFStencil& sten = interpStencils(vof, 0);
-
+    // Get CDR densities. They should also be on the centroid.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
-#if 0
-      const Real phi = (*a_cdrDensities[idx])(vof, comp);
-#else
-      Real phi = 0.0;
-      for (int i = 0; i < sten.size(); i++) {
-        phi += sten.weight(i) * (*a_cdrDensities[idx])(sten.vof(i), comp);
-      }
-#endif
-      cdrDensities[idx] = std::max(zero, phi);
-    }
 
-#if 0
-    const RealVect E = RealVect(D_DECL(a_electricFieldCell(vof, 0), a_electricFieldCell(vof, 1), a_electricFieldCell(vof, 2)));
-#else
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < sten.size(); i++) {
-      const VolIndex& ivof    = sten.vof(i);
-      const Real&     iweight = sten.weight(i);
-
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += a_electricFieldCell(ivof, dir) * iweight;
-      }
+      cdrDensities[idx] = std::max(zero, (*tmp[idx])(vof, comp));
     }
-#endif
 
     // Let our nifty plasma physics framework take care of the diffusion coefficients.
     const Vector<Real> Dcos = m_physics->computeCdrDiffusionCoefficients(a_time, pos, E, cdrDensities);
@@ -1807,6 +1594,13 @@ CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&       a_c
 
   // Launch the kernel.
   BoxLoops::loop(vofit, irregularKernel);
+
+  // Delete storage
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    delete tmp[idx];
+  }
 }
 
 void
@@ -2248,7 +2042,6 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
   }
 
   // TLDR: This will compute the drift velocities in each irregular grid cell. This also includes multi-valued cells if they are there.
-
   constexpr int  comp = 0;
   constexpr Real zero = 0.0;
 
@@ -2268,46 +2061,32 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
   // CDR densities -- will be populated in each grid cell
   Vector<Real> cdrDensities(numCdrSpecies, 0.0);
 
-  // Interpolation stencils
-  const BaseIVFAB<VoFStencil>& interpStencils = m_amr->getCentroidInterpolationStencils(
-    m_realm,
-    m_cdr->getPhase())[a_lvl][a_dit];
+  // Electric field -- will be populated on the cell centroid
+  EBCellFAB Efield;
+  Efield.clone(a_electricField);
+  m_amr->interpToCentroids(Efield, a_electricField, m_realm, m_phase, a_lvl, a_dit);
+
+  // Some copies of the CDR densities so we can put them on the centroid
+  Vector<EBCellFAB*> tmp(numCdrSpecies, nullptr);
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    tmp[idx] = new EBCellFAB();
+    tmp[idx]->clone(*a_cdrDensities[idx]);
+
+    m_amr->interpToCentroids(*tmp[idx], *a_cdrDensities[idx], m_realm, m_phase, a_lvl, a_dit);
+  }
 
   // Irregular kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    // Position.
     const RealVect pos = probLo + Location::position(Location::Cell::Center, vof, ebisBox, a_dx);
-
-    // Interpolation stencil.
-    const VoFStencil& sten = interpStencils(vof, 0);
-
-#if 0
-    const RealVect E    = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
-#else
-    RealVect E = RealVect::Zero;
-    for (int i = 0; i < sten.size(); i++) {
-      const VolIndex& ivof    = sten.vof(i);
-      const Real&     iweight = sten.weight(i);
-
-      for (int dir = 0; dir < SpaceDim; dir++) {
-        E[dir] += a_electricField(ivof, dir) * iweight;
-      }
-    }
-
-#endif
+    const RealVect E   = RealVect(D_DECL(Efield(vof, 0), Efield(vof, 1), Efield(vof, 2)));
 
     // Get CDR densities. They should also be on the centroid.
     for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
       const int idx = solverIt.index();
-#if 0
-      const Real phi = (*a_cdrDensities[idx])(vof, comp);
-#else
-      Real phi = 0.0;
-      for (int i = 0; i < sten.size(); i++) {
-        phi += sten.weight(i) * (*a_cdrDensities[idx])(sten.vof(i), comp);
-      }
-#endif
-      cdrDensities[idx] = std::max(zero, phi);
+
+      cdrDensities[idx] = std::max(zero, (*tmp[idx])(vof, comp));
     }
 
     // Plasma physics framework computes the velocities.
@@ -2331,6 +2110,13 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a
 
   // Launch the kernel
   BoxLoops::loop(vofit, irregularKernel);
+
+  // Delete storage
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
+    const int idx = solverIt.index();
+
+    delete tmp[idx];
+  }
 }
 
 void
@@ -2788,11 +2574,6 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
   m_amr->allocate(ebVel, m_realm, a_phase, SpaceDim);
   m_amr->allocate(ebPhi, m_realm, a_phase, 1);
 
-  // This stencil takes cell centered data and puts it on the centroid.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(
-    m_realm,
-    a_phase);
-
   // Go through the CDR solvers.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
@@ -2803,8 +2584,8 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
     if (solver->isMobile()) {
 
       // Compute the velocity and density on the EB.
-      interpStencils.apply(ebVel, *a_cdrVelocities[idx]);
-      interpStencils.apply(ebPhi, *a_cdrDensities[idx]);
+      m_amr->interpToEB(ebVel, *a_cdrVelocities[idx], m_realm, a_phase);
+      m_amr->interpToEB(ebPhi, *a_cdrDensities[idx], m_realm, a_phase);
 
       // No negative densities please.
       DataOps::floor(ebPhi, 0.0);
@@ -2818,7 +2599,7 @@ CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_extra
       this->projectFlux(*a_extrapCdrFluxesEB[idx], ebFlux);
 
       // Synchronize with deeper levels.
-      m_amr->arithmeticAverage(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
+      m_amr->conservativeAverage(*a_extrapCdrFluxesEB[idx], m_realm, a_phase);
     }
     else {
       DataOps::setValue(*a_extrapCdrFluxesEB[idx], 0.0);
@@ -3217,10 +2998,7 @@ CdrPlasmaStepper::computeElectricField(EBAMRIVData&             a_electricFieldE
   CH_assert(a_electricFieldCell[0]->nComp() == SpaceDim);
 
   // Interpolate to the EB centroid
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interpStencils = m_amr->getEbCentroidInterpolationStencils(
-    m_realm,
-    a_phase);
-  interpStencils.apply(a_electricFieldEB, a_electricFieldCell);
+  m_amr->interpToEB(a_electricFieldEB, a_electricFieldCell, m_realm, a_phase);
 }
 
 void
@@ -3309,11 +3087,7 @@ CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real>>& a_ebData,
   CH_assert(a_ebData.nComp() == a_cellData.nComp());
 
   // Get the stencil for movign cell-centered data to the EB.
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm,
-                                                                                                              a_phase);
-
-  // Apply it.
-  stencils.apply(a_ebData, a_cellData, a_lvl);
+  m_amr->interpToEB(a_ebData, a_cellData, m_realm, a_phase, a_lvl);
 }
 
 void
@@ -3995,12 +3769,6 @@ CdrPlasmaStepper::parseSourceComputation()
 
     if (str == "interp") {
       m_whichSourceTermComputation = SourceTermComputation::Interpolated;
-    }
-    else if (str == "interp2") {
-      m_whichSourceTermComputation = SourceTermComputation::InterpolatedStable;
-    }
-    else if (str == "cell_ave") {
-      m_whichSourceTermComputation = SourceTermComputation::CellAverage;
     }
     else {
       MayDay::Abort("CdrPlasmaStepper::parseSourceComputation -- logic bust. Expected 'interp' or 'cell_ave'");

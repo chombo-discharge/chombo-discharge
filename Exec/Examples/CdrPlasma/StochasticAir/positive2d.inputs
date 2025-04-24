@@ -27,8 +27,8 @@ AmrMesh.eb_ghost         = 2           # Set number of of ghost cells for EB stu
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
 AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_sten    = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
-AmrMesh.eb_sten          = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
+AmrMesh.centroid_interp  = minmod	     ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp        = minmod            ## EB interp stencils. linear, taylor, minmod, etc
 AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
 
 # ====================================================================================================
@@ -220,7 +220,7 @@ CdrPlasmaGodunovStepper.relax_time       = 1000          # Relaxation time const
 CdrPlasmaGodunovStepper.fast_poisson     = 1             # Solve Poisson every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fast_rte         = 1             # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd              = false         # Set to true if you want to add a stochastic diffusion flux
-CdrPlasmaGodunovStepper.source_comp      = interp        # Interpolated 'interp', 'interp2', or 'upwind X' for first species (X = integer).
+CdrPlasmaGodunovStepper.source_comp       = interp        # Interpolated interp, or upwind X for species X
 CdrPlasmaGodunovStepper.floor_cdr        = true          # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = false         # Turn on debugging messages. Also monitors mass if it was injected into the system. 
 CdrPlasmaGodunovStepper.profile          = true          # Turn on/off performance profiling.

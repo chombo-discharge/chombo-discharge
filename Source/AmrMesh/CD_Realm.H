@@ -103,8 +103,8 @@ public:
     @param[in] a_mgInterpOrder    Multigrid ghost cell interpolation order
     @param[in] a_mgInterpRadius   Multigrid ghost cell interpolation radius
     @param[in] a_mgInterpWeight   Multigrid ghost cell interpolation weight (for least squares)
-    @param[in] a_centroidStencil  Stencil type for interpolation from cell centers to cell centroids
-    @param[in] a_ebStencil        Stencil type for interpolation from cell centers to eb centroids
+    @param[in] a_centroidInterpType  Stencil type for interpolation from cell centers to cell centroids
+    @param[in] a_ebInterpType     Stencil type for interpolation from cell centers to eb centroids
     @param[in] a_baseif           Implicit/signed distance function 
     @param[in] a_mfis             EBIndexSpace discrete information
   */
@@ -123,8 +123,8 @@ public:
          const int                                                 a_mgInterpOrder,
          const int                                                 a_mgInterpRadius,
          const int                                                 a_mgInterpWeight,
-         const IrregStencil::StencilType                           a_centroidStencil,
-         const IrregStencil::StencilType                           a_ebStencil,
+         const CellCentroidInterpolation::Type                     a_centroidInterpType,
+         const EBCentroidInterpolation::Type                       a_ebInterpType,
          const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
          const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis);
 
@@ -263,25 +263,25 @@ public:
   getVofIterator(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to centroids (for specified phase)
+    @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
+  getNonConservativeDivergence(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get stencils for interpolating from cell center to eb centroids
+    @brief Get objects for computing interpolation of cell-centered data to cell centroids.
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>&
-  getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<CellCentroidInterpolation>>&
+  getCellCentroidInterpolation(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get stencils for computing "non-conservative divergences"
+    @brief Get objects for computing interpolation of cell-centered data to EB centroids
     @param[in] a_phase Phase
   */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBCentroidInterpolation>>&
+  getEBCentroidInterpolation(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get data coarsening utility

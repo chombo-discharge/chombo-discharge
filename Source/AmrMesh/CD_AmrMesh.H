@@ -23,14 +23,12 @@
 #include <CD_EBCoarAve.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EBReflux.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
 #include <CD_CopyStrategy.H>
 #include <CD_LoadBalancing.H>
@@ -1458,7 +1456,7 @@ public:
     @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
   */
   void
-  interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const noexcept;
 
   /*!
     @brief Interpolate data to centroids
@@ -1471,7 +1469,130 @@ public:
   interpToCentroids(LevelData<EBCellFAB>&    a_data,
                     const std::string        a_realm,
                     const phase::which_phase a_phase,
-                    const int                a_level) const;
+                    const int                a_level) const noexcept;
+
+  /*!
+    @brief Interpolate data to centroids
+    @param[inout] a_centroidData Centroid-centered data
+    @param[in]    a_cellData Cell-centered data
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+    @param[in]    a_level Grid level
+    @param[in]    a_din Grid index
+  */
+  void
+  interpToCentroids(EBCellFAB&               a_centroidData,
+                    const EBCellFAB&         a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase,
+                    const int                a_level,
+                    const DataIndex&         a_din) const noexcept;
+
+  /*!
+    @brief Interpolate data to centroids on realm and phase
+    @param[out] a_centroidData Centroid-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
+  */
+  void
+  interpToCentroids(EBAMRIVData&             a_centroidData,
+                    const EBAMRCellData&     a_cellData,
+                    const std::string        a_realm,
+                    const phase::which_phase a_phase) const noexcept;
+
+  /*!
+    @brief Interpolate data to centroids
+    @param[out] a_centroidData Centroid-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @param[in]  a_level Grid level
+  */
+  void
+  interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
+                    const LevelData<EBCellFAB>& a_cellData,
+                    const std::string           a_realm,
+                    const phase::which_phase    a_phase,
+                    const int                   a_level) const noexcept;
+
+  /*!
+    @brief Interpolate data to EB centroids on realm and phase
+    @param[out] a_centroidData EB-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+  */
+  void
+  interpToEB(EBAMRIVData&             a_centroidData,
+             const EBAMRCellData&     a_cellData,
+             const std::string        a_realm,
+             const phase::which_phase a_phase) const noexcept;
+
+  /*!
+    @brief Interpolate data to EB centroids
+    @param[out] a_centroidData EB-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @param[in]  a_level Grid level
+  */
+  void
+  interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
+             const LevelData<EBCellFAB>& a_cellData,
+             const std::string           a_realm,
+             const phase::which_phase    a_phase,
+             const int                   a_level) const noexcept;
+
+  /*!
+    @brief Interpolate data to EB centroids
+    @param[out] a_centroidData EB-centered data
+    @param[in]  a_cellData Cell-centered data to be interpolated
+    @param[in]  a_realm Realm name
+    @param[in]  a_phase Phase (gas or solid)
+    @param[in]  a_level Grid level
+    @param[in]  a_din Grid index
+  */
+  void
+  interpToEB(BaseIVFAB<Real>&         a_centroidData,
+             const EBCellFAB&         a_cellData,
+             const std::string        a_realm,
+             const phase::which_phase a_phase,
+             const int                a_level,
+             const DataIndex&         a_din) const noexcept;
+
+  /*!
+    @brief Compute a non-conservative divergence.
+    @details This computes divNC(F) = sum(kappa*divC(F))/sum(kappa), where kappa*divC(F) is the finite-volume approximation to
+    kappa*div(F) = int_A F*dA (and dA is in grid units, not physical units). 
+    @param[out] a_nonConsDivF The non-conservative divergence. 
+    @param[in] a_kappaDivF Conservative divergence, not weighted by kappa.
+    @param[in] a_realm Realm where the data lives.    
+    @param[in] a_phase Phase where the data lives.
+  */
+  void
+  nonConservativeDivergence(EBAMRIVData&              a_nonConsDivF,
+                            const EBAMRCellData&      a_kappaDivF,
+                            const std::string&        a_realm,
+                            const phase::which_phase& a_phase) const noexcept;
+
+  /*!
+    @brief Compute a non-conservative divergence.
+    @details This computes divNC(F) = sum(kappa*divC(F))/sum(kappa), where kappa*divC(F) is the finite-volume approximation to
+    kappa*div(F) = int_A F*dA (and dA is in grid units, not physical units). 
+    @param[out] a_nonConsDivF The non-conservative divergence.
+    @param[in] a_level Grid level
+    @param[in] a_kappaDivF Conservative divergence, not weighted by kappa.
+    @param[in] a_realm Realm where the data lives.    
+    @param[in] a_phase Phase where the data lives.
+  */
+  void
+  nonConservativeDivergence(LevelData<BaseIVFAB<Real>>& a_nonConsDivF,
+                            const LevelData<EBCellFAB>& a_kappaDivF,
+                            const int&                  a_level,
+                            const std::string&          a_realm,
+                            const phase::which_phase&   a_phase) const noexcept;
 
   /*!
     @brief Sets multifluid index space. 
@@ -1807,30 +1928,6 @@ public:
   getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get interpolation stencils for going from cell center to cell centroid
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<CentroidInterpolationStencil>&
-  getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get interpolation stencils for going from cell center to cell boundary centroid
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>&
-  getEbCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get the nonconservative divergence stencils
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  const IrregAmrStencil<NonConservativeDivergenceStencil>&
-  getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
     @brief Get the name of all Realms
     @return Names of all Realms
   */
@@ -1931,19 +2028,14 @@ protected:
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
-    @brief Stencil type
+    @brief Interpolation type for cell to cell centroid interpolation
   */
-  IrregStencil::StencilType m_stencilType;
+  CellCentroidInterpolation::Type m_cellCentroidInterpolationType;
 
   /*!
-    @brief Stencil type for centroid interpolation
+    @brief Interpolation type for cell to EB centroid interpolation    
   */
-  IrregStencil::StencilType m_centroidStencilType;
-
-  /*!
-    @brief Stencil type for EB interpolation
-  */
-  IrregStencil::StencilType m_ebCentroidStencilType;
+  EBCentroidInterpolation::Type m_ebCentroidInterpolationType;
 
   /*!
     @brief Coarsest box where we compute
@@ -2049,36 +2141,6 @@ protected:
     @brief Redistribution radius
   */
   int m_redistributionRadius;
-
-  /*!
-    @brief Order for interpolation stencils to centroids
-  */
-  int m_centroidStencilOrder;
-
-  /*!
-    @brief Radius for centroid interpolation stencil
-  */
-  int m_centroidStencilRadius;
-
-  /*!
-    @brief Order for interpolation stencilst to EB
-  */
-  int m_ebCentroidStencilOrder;
-
-  /*!
-    @brief Radius for EB interpolation stencil
-  */
-  int m_ebCentroidStencilRadius;
-
-  /*!
-    @brief Stencil order for irregular stencils
-  */
-  int m_irregStenOrder;
-
-  /*!
-    @brief radius for irregular stencils
-  */
-  int m_irregStenRadius;
 
   /*!
     @brief Has grids or not
@@ -2234,13 +2296,13 @@ protected:
     @brief Parse centroid interpolation stencils
   */
   void
-  parseCentroidStencils();
+  parseCellCentroidInterpolation();
 
   /*!
     @brief Parse EB interpolation (or extrapolation) stencils
   */
   void
-  parseEbCentroidStencils();
+  parseEBCentroidInterpolation();
 
   /*!
     @brief Compute cell-centered gradient for a grid level.

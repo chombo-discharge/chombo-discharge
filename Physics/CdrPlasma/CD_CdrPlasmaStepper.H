@@ -504,7 +504,6 @@ namespace Physics {
 	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
 	@param[in]  a_cdrVelocities  Cell-centered velocities for the CDR solvers. 
 	@param[in]  a_rteDensities   Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
-	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
 	@param[in]  a_E              Cell-centered electric field. 
 	@param[in]  a_time           Time
 	@param[in]  a_dt             Time step.
@@ -515,20 +514,19 @@ namespace Physics {
 	@note This will call one of the other versions. 
       */
       virtual void
-      advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_cdrSources,
-                                  Vector<EBCellFAB*>&          a_rteSources,
-                                  const Vector<EBCellFAB*>&    a_cdrDensities,
-                                  const Vector<EBCellFAB*>&    a_cdrGradients,
-                                  const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                  const Vector<EBCellFAB*>&    a_rteDensities,
-                                  const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                  const EBCellFAB&             a_E,
-                                  const Real&                  a_time,
-                                  const Real&                  a_dt,
-                                  const Real&                  a_dx,
-                                  const Box&                   a_cellBox,
-                                  const int                    a_lvl,
-                                  const DataIndex&             a_dit);
+      advanceReactionNetworkIrreg(Vector<EBCellFAB*>&       a_cdrSources,
+                                  Vector<EBCellFAB*>&       a_rteSources,
+                                  const Vector<EBCellFAB*>& a_cdrDensities,
+                                  const Vector<EBCellFAB*>& a_cdrGradients,
+                                  const Vector<EBCellFAB*>& a_cdrVelocities,
+                                  const Vector<EBCellFAB*>& a_rteDensities,
+                                  const EBCellFAB&          a_E,
+                                  const Real&               a_time,
+                                  const Real&               a_dt,
+                                  const Real&               a_dx,
+                                  const Box&                a_cellBox,
+                                  const int                 a_lvl,
+                                  const DataIndex&          a_dit);
 
       /*!
 	@brief Compute reaction network sources. This version interpolates everything to the centroid and runs with that data. 
@@ -538,7 +536,6 @@ namespace Physics {
 	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
 	@param[in]  a_cdrVelocities  Cell-centered velocities for the CDR solvers. 
 	@param[in]  a_rteDensities   Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
-	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
 	@param[in]  a_E              Cell-centered electric field. 
 	@param[in]  a_time           Time
 	@param[in]  a_dt             Time step.
@@ -548,50 +545,19 @@ namespace Physics {
 	@param[in]  a_dit            Grid patch index
       */
       virtual void
-      advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_cdrSources,
-                                        Vector<EBCellFAB*>&          a_rteSources,
-                                        const Vector<EBCellFAB*>&    a_cdrDensities,
-                                        const Vector<EBCellFAB*>&    a_cdrGradients,
-                                        const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                        const Vector<EBCellFAB*>&    a_rteDensities,
-                                        const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                        const EBCellFAB&             a_E,
-                                        const Real&                  a_time,
-                                        const Real&                  a_dt,
-                                        const Real&                  a_dx,
-                                        const Box&                   a_box,
-                                        const int                    a_lvl,
-                                        const DataIndex&             a_dit);
-      /*!
-	@brief Compute reaction network sources. This version assumes that some of the inputs are on the centroid. 
-	@param[out] a_cdrSources     Source terms for the CDR solvers. 
-	@param[out] a_rteSources     Source terms for the radiative transfer solvers. 
-	@param[in]  a_cdrDensities   Centroid-centered densities for the plasma species (i.e., CDR solvers).
-	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
-	@param[in]  a_rteDensities   Centroid-centered densities for the radiative transfer equations (i.e., RTE solvers).
-	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
-	@param[in]  a_E              Cell-centered electric field. 
-	@param[in]  a_time           Time
-	@param[in]  a_dt             Time step.
-	@param[in]  a_dx             Grid resolution.
-	@param[in]  a_cellBox        Cell-centered computational region. 
-	@param[in]  a_lvl            Grid level
-	@param[in]  a_dit            Grid patch index      
-      */
-      virtual void
-      advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_cdrSources,
-                                       Vector<EBCellFAB*>&          a_rteSources,
-                                       const Vector<EBCellFAB*>&    a_cdrDensities,
-                                       const Vector<EBCellFAB*>&    a_cdrGradients,
-                                       const Vector<EBCellFAB*>&    a_rteDensities,
-                                       const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                       const EBCellFAB&             a_E,
-                                       const Real&                  a_time,
-                                       const Real&                  a_dt,
-                                       const Real&                  a_dx,
-                                       const Box&                   a_box,
-                                       const int                    a_lvl,
-                                       const DataIndex&             a_dit);
+      advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_cdrSources,
+                                        Vector<EBCellFAB*>&       a_rteSources,
+                                        const Vector<EBCellFAB*>& a_cdrDensities,
+                                        const Vector<EBCellFAB*>& a_cdrGradients,
+                                        const Vector<EBCellFAB*>& a_cdrVelocities,
+                                        const Vector<EBCellFAB*>& a_rteDensities,
+                                        const EBCellFAB&          a_E,
+                                        const Real&               a_time,
+                                        const Real&               a_dt,
+                                        const Real&               a_dx,
+                                        const Box&                a_box,
+                                        const int                 a_lvl,
+                                        const DataIndex&          a_dit);
 
       /*!
 	@brief Compute reaction network sources. 
@@ -603,7 +569,6 @@ namespace Physics {
 	@param[in]  a_cdrGradients   Cell-centered gradients for the plasma species (i.e., CDR solvers).
 	@param[in]  a_cdrVelocities  Cell-centered velocities for the CDR solvers. 
 	@param[in]  a_rteDensities   Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
-	@param[in]  a_interpStencils Interpolation stencils for putting cell-centered data on the centroid. 
 	@param[in]  a_E              Cell-centered electric field. 
 	@param[in]  a_time           Time
 	@param[in]  a_dt             Time step.
@@ -613,20 +578,19 @@ namespace Physics {
 	@param[in]  a_dit            Grid patch index
       */
       virtual void
-      advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_cdrSources,
-                                        Vector<EBCellFAB*>&          a_rteSources,
-                                        const Vector<EBCellFAB*>&    a_cdrDensities,
-                                        const Vector<EBCellFAB*>&    a_cdrGradients,
-                                        const Vector<EBCellFAB*>&    a_cdrVelocities,
-                                        const Vector<EBCellFAB*>&    a_rteDensities,
-                                        const BaseIVFAB<VoFStencil>& a_interpStencils,
-                                        const EBCellFAB&             a_E,
-                                        const Real&                  a_time,
-                                        const Real&                  a_dt,
-                                        const Real&                  a_dx,
-                                        const Box&                   a_box,
-                                        const int                    a_lvl,
-                                        const DataIndex&             a_dit);
+      advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&       a_cdrSources,
+                                        Vector<EBCellFAB*>&       a_rteSources,
+                                        const Vector<EBCellFAB*>& a_cdrDensities,
+                                        const Vector<EBCellFAB*>& a_cdrGradients,
+                                        const Vector<EBCellFAB*>& a_cdrVelocities,
+                                        const Vector<EBCellFAB*>& a_rteDensities,
+                                        const EBCellFAB&          a_E,
+                                        const Real&               a_time,
+                                        const Real&               a_dt,
+                                        const Real&               a_dx,
+                                        const Box&                a_box,
+                                        const int                 a_lvl,
+                                        const DataIndex&          a_dit);
 
       /*!
 	@brief Compute diffusion things using whatever is available in the solvers. 
@@ -1253,8 +1217,6 @@ namespace Physics {
       enum class SourceTermComputation
       {
         Interpolated,
-        InterpolatedStable,
-        CellAverage,
         Upwind
       };
 
