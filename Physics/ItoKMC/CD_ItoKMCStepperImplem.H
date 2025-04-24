@@ -54,6 +54,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_minParticleAdvectionCFL          = 0.0;
   m_maxParticleAdvectionCFL          = 1.0;
   m_minParticleDiffusionCFL          = 0.0;
+  m_physicsDtFactor                  = 1.0;
   m_maxParticleDiffusionCFL          = std::numeric_limits<Real>::max();
   m_minParticleAdvectionDiffusionCFL = std::numeric_limits<Real>::max();
   m_maxParticleAdvectionDiffusionCFL = std::numeric_limits<Real>::max();
@@ -61,6 +62,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_relaxTimeFactor                  = std::numeric_limits<Real>::max();
   m_minDt                            = std::numeric_limits<Real>::min();
   m_maxDt                            = std::numeric_limits<Real>::max();
+  m_physicsDt                        = std::numeric_limits<Real>::max();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -327,6 +329,7 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
   pp.get("max_dt", m_maxDt);
   pp.get("max_growth_dt", m_maxGrowthDt);
   pp.get("max_shrink_dt", m_maxShrinkDt);
+  pp.get("physics_dt_factor", m_physicsDtFactor);
 
   if (m_maxGrowthDt <= 1.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have max_growth_dt > 1.0");
@@ -374,6 +377,10 @@ ItoKMCStepper<I, C, R, F>::parseTimeStepRestrictions() noexcept
 
   if (m_fluidAdvectionDiffusionCFL <= 0.0) {
     MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have fluid_advection_diffusion_cfl > 0.0");
+  }
+
+  if (m_physicsDtFactor <= 0.0) {
+    MayDay::Error("ItoKMCStepper::parseTimeStepRestrictions() - must have physics_dft_factor > 0.0");
   }
 }
 
@@ -599,6 +606,10 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   // Current density.
   m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
+  // Storage for the critical and non-critical time steps
+  m_amr->allocate(m_criticalDt, m_fluidRealm, m_plasmaPhase, 1);
+  m_amr->allocate(m_nonCriticalDt, m_fluidRealm, m_plasmaPhase, 1);
+
   // Storage required for the reaction network.
   m_amr->allocate(m_fluidPPC, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
 
@@ -630,6 +641,9 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(m_particleYPC, m_particleRealm, m_plasmaPhase, 1);
     m_amr->allocate(m_fluidYPC, m_fluidRealm, m_plasmaPhase, 1);
   }
+
+  DataOps::setValue(m_criticalDt, std::numeric_limits<Real>::max());
+  DataOps::setValue(m_nonCriticalDt, std::numeric_limits<Real>::max());
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1435,10 +1449,6 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   m_fluidAdvectionDiffusionDt = m_cdr->computeAdvectionDiffusionDt();
   timer.stopEvent("AdvectionDiffusion (CDR)");
 
-  timer.startEvent("Physics");
-  m_physicsDt = this->computePhysicsDt();
-  timer.stopEvent("Physics");
-
   timer.startEvent("Relaxation");
   m_relaxationTime = this->computeRelaxationTime();
   timer.stopEvent("Relaxation");
@@ -1472,8 +1482,8 @@ ItoKMCStepper<I, C, R, F>::computeDt()
     m_timeCode = TimeCode::RelaxationTime;
   }
 
-  if (m_physicsDt < dt) {
-    dt         = m_physicsDt;
+  if (m_physicsDtFactor * m_physicsDt < dt) {
+    dt         = m_physicsDtFactor * m_physicsDt;
     m_timeCode = TimeCode::Physics;
   }
 
@@ -4060,6 +4070,16 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<const FArrayBox*> densitiesCDRReg(numCdrSpecies);
   Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
 
+  // Handle to critical and non-critical time step containers.
+  EBCellFAB& criticalDt    = (*m_criticalDt[a_level])[a_din];
+  EBCellFAB& nonCriticalDt = (*m_nonCriticalDt[a_level])[a_din];
+
+  FArrayBox& criticalDtReg    = criticalDt.getFArrayBox();
+  FArrayBox& nonCriticalDtReg = nonCriticalDt.getFArrayBox();
+
+  criticalDt.setVal(std::numeric_limits<Real>::max());
+  nonCriticalDt.setVal(std::numeric_limits<Real>::max());
+
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
 
@@ -4117,7 +4137,11 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance.
-      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, pos, a_dx, 1.0);
+      Real critDt    = std::numeric_limits<Real>::max();
+      Real nonCritDt = std::numeric_limits<Real>::max();
+
+      m_physics
+        ->advanceKMC(particles, newPhotons, critDt, nonCritDt, densities, densityGradients, a_dt, E, pos, a_dx, 1.0);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -4127,6 +4151,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       for (int i = 0; i < numPhotonSpecies; i++) {
         newPhotonsReg(iv, i) = 1.0 * newPhotons[i];
       }
+
+      criticalDtReg(iv, 0)    = critDt;
+      nonCriticalDtReg(iv, 0) = nonCritDt;
     }
   };
 
@@ -4164,7 +4191,11 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance
-      m_physics->advanceKMC(particles, newPhotons, densities, densityGradients, a_dt, E, pos, a_dx, kappa);
+      Real critDt    = std::numeric_limits<Real>::max();
+      Real nonCritDt = std::numeric_limits<Real>::max();
+
+      m_physics
+        ->advanceKMC(particles, newPhotons, critDt, nonCritDt, densities, densityGradients, a_dt, E, pos, a_dx, kappa);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -4174,6 +4205,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       for (int i = 0; i < numPhotonSpecies; i++) {
         a_newPhotonsPerCell(vof, i) = 1.0 * newPhotons[i];
       }
+
+      criticalDt(vof, 0)    = critDt;
+      nonCriticalDt(vof, 0) = nonCritDt;
     }
   };
 
@@ -5185,7 +5219,7 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
 }
 
 template <typename I, typename C, typename R, typename F>
-Real
+void
 ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
 {
   CH_TIME("ItoKMCStepper::computePhysicsDt()");
@@ -5193,174 +5227,12 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
     pout() << m_name + "::computePhysicsDt()" << endl;
   }
 
-  const Real dt = this->computePhysicsDt(m_electricFieldFluid);
-
-  return dt;
-}
-
-template <typename I, typename C, typename R, typename F>
-Real
-ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBAMRCellData& a_electricField) noexcept
-{
-  CH_TIME("ItoKMCStepper::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
-  }
-
-  CH_assert(a_electricField.getRealm() == m_fluidRealm);
-
-  const int numItoSpecies = m_physics->getNumItoSpecies();
-  const int numCdrSpecies = m_physics->getNumCdrSpecies();
-
+  Real maxDt = std::numeric_limits<Real>::max();
   Real minDt = std::numeric_limits<Real>::max();
 
-  // Sort by cell so we can compute the number of particles.
-  m_ito->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  DataOps::getMaxMin(maxDt, minDt, m_nonCriticalDt, 0);
 
-  // Compute the number of reactive particles for both Ito and CDR species.
-  if (numItoSpecies > 0) {
-    this->computeReactiveItoParticlesPerCell(m_particleItoPPC);
-
-    const Interval srcInterv(0, numItoSpecies - 1);
-    const Interval dstInterv(0, numItoSpecies - 1);
-
-    m_amr->copyData(m_fluidPPC, m_particleItoPPC, dstInterv, srcInterv);
-  }
-  if (numCdrSpecies > 0) {
-    this->computeReactiveCdrParticlesPerCell(m_fluidCdrPPC);
-
-    const Interval srcInterv(0, numCdrSpecies - 1);
-    const Interval dstInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
-
-    m_amr->copyData(m_fluidPPC, m_fluidCdrPPC, dstInterv, srcInterv);
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real levelDt = this->computePhysicsDt(*a_electricField[lvl], *m_fluidPPC[lvl], lvl);
-
-    minDt = std::min(minDt, levelDt);
-  }
-
-  // Sort by patch.
-  m_ito->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
-
-  return minDt;
-}
-
-template <typename I, typename C, typename R, typename F>
-Real
-ItoKMCStepper<I, C, R, F>::computePhysicsDt(const LevelData<EBCellFAB>& a_electricField,
-                                            const LevelData<EBCellFAB>& a_particlesPerCell,
-                                            const int                   a_level) noexcept
-{
-  CH_TIME("ItoKMCStepper::computePhysicsDt(LD<EBCellFAB>, LD<EBCellFAB>, int)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computePhysicsDt(LD<EBCellFAB>, LD<EBCellFAB>, int)" << endl;
-  }
-
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-
-  CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
-  CH_assert(a_electricField.nComp() == SpaceDim);
-
-  Real minDt = std::numeric_limits<Real>::max();
-
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluidRealm)[a_level];
-  const DataIterator&      dit = dbl.dataIterator();
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime) reduction(min : minDt)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    const Real patchDt = this->computePhysicsDt(a_electricField[din], a_particlesPerCell[din], a_level, din, dbl[din]);
-
-    minDt = std::min(minDt, patchDt);
-  }
-
-  return ParallelOps::min(minDt);
-}
-
-template <typename I, typename C, typename R, typename F>
-Real
-ItoKMCStepper<I, C, R, F>::computePhysicsDt(const EBCellFAB& a_electricField,
-                                            const EBCellFAB& a_particlesPerCell,
-                                            const int        a_level,
-                                            const DataIndex  a_din,
-                                            const Box        a_box) noexcept
-{
-  CH_TIME("ItoKMCStepper::computePhysicsDt(EBCellFAB, EBCellFAB, int, DataIndex, Box)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::computePhysicsDt(EBCellFAB, EBCellFAB, int, DataIndex, Box)" << endl;
-  }
-
-  Real minDt = std::numeric_limits<Real>::max();
-
-  const int numPlasmaSpecies = m_physics->getNumPlasmaSpecies();
-
-  CH_assert(a_electricField.nComp() == SpaceDim);
-  CH_assert(a_particlesPerCell.nComp() == numPlasmaSpecies);
-
-  // Geometric information that we need.
-  const Real     dx      = m_amr->getDx()[a_level];
-  const RealVect probLo  = m_amr->getProbLo();
-  const EBISBox& ebisbox = m_amr->getEBISLayout(m_fluidRealm, m_plasmaPhase)[a_level][a_din];
-
-  // Valid grid cells.
-  const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_fluidRealm)[a_level])[a_din];
-
-  // Handles to regular grid data.
-  const FArrayBox& electricFieldReg    = a_electricField.getFArrayBox();
-  const FArrayBox& particlesPerCellReg = a_particlesPerCell.getFArrayBox();
-
-  // The kernel require storage for the per-cell number of particles. This is
-  // the storage we use for that
-  Vector<Physics::ItoKMC::FPR> ppc(numPlasmaSpecies);
-
-  // Regular grid kernel.
-  auto regularKernel = [&](const IntVect& iv) -> void {
-    // Only regular cells not covered by a finer grid.
-    if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
-      const RealVect E   = RealVect(D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
-      const RealVect pos = m_amr->getProbLo() + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
-
-      for (int i = 0; i < numPlasmaSpecies; i++) {
-        ppc[i] = particlesPerCellReg(iv, i);
-      }
-
-      const Real cellDt = m_physics->computeDt(E, pos, ppc);
-
-      minDt = std::min(minDt, cellDt);
-    }
-  };
-
-  // Irregular grid kernel.
-  auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const IntVect& iv = vof.gridIndex();
-
-    // Only irregular cells not covered by a finer grid.
-    if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
-      const RealVect E   = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
-      const RealVect pos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-
-      for (int i = 0; i < numPlasmaSpecies; i++) {
-        ppc[i] = a_particlesPerCell(vof, i);
-      }
-
-      const Real cellDt = m_physics->computeDt(E, pos, ppc);
-
-      minDt = std::min(minDt, cellDt);
-    }
-  };
-
-  // Run the kernels.
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
-
-  BoxLoops::loop(a_box, regularKernel);
-  BoxLoops::loop(vofit, irregularKernel);
-
-  return minDt;
+  m_physicsDt = minDt;
 }
 
 template <typename I, typename C, typename R, typename F>

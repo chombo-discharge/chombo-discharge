@@ -105,15 +105,6 @@ namespace Physics {
       parseRuntimeOptions() noexcept override;
 
       /*!
-	@brief Compute a physics-based time step. 
-	@param[in] a_E            Electric field. 
-	@param[in] a_pos          Position
-	@param[in] a_numParticles Number of particles per cell
-      */
-      virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_densities) const noexcept override;
-
-      /*!
 	@brief Get the neutral density at a position in space
 	@param[in] a_pos Physical position
 	@return Neutral density

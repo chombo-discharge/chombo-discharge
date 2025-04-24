@@ -604,6 +604,11 @@ namespace Physics {
       Real m_physicsDt;
 
       /*!
+	@brief Relative factor for controlling
+      */
+      Real m_physicsDtFactor;
+
+      /*!
 	@brief For holding the number of computational particles per cell when load balancing
       */
       Vector<EBAMRCellData> m_loadBalancePPC;
@@ -734,6 +739,18 @@ namespace Physics {
 	@brief Storage for holding the plasma phase electric field on the particle realm
       */
       EBAMRCellData m_electricFieldParticle;
+
+      /*!
+	@brief Storage for the critical time step computed by ItoKMCPhysics.
+	@note Defined on the fluid realm. 
+      */
+      EBAMRCellData m_criticalDt;
+
+      /*!
+	@brief Storage for the non-critical time step computed by ItoKMCPhysics
+	@note Defined on the fluid realm. 	
+      */
+      EBAMRCellData m_nonCriticalDt;
 
       /*!
 	@brief Storage for holding the energy sources for each species.
@@ -1610,49 +1627,15 @@ namespace Physics {
                                  const Real                               a_dt) noexcept;
 
       /*!
-	@brief Compute a maximum time step from the physics interface.
-	@note Calls the other version with m_electricFieldParticle and the ItoSolver densities. The kernels are only
-	called on the valid region.
+	@brief Compute a physics-based maximum time step.
+	@details This routine simply returns the non-critical KMC time step. Note that this time step
+	is the one computed AFTER advanceReactionNetwork has been called. I.e., this routine sets
+	m_physicsDt based on m_nonCriticalTimeStep (which is filled in advanceReactionNetwork).
+	@note Calling this routine without first calling advanceReactionNetwork is sure to lead to 
+	unintended side effects.
       */
-      virtual Real
+      virtual void
       computePhysicsDt() noexcept;
-
-      /*!
-	@brief Compute a maximum time step from the physics interface.
-	@param[in] a_electricField Electric field. 
-	@param[in] a_densities     ItoSolver mesh densities. 
-	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
-      */
-      virtual Real
-      computePhysicsDt(const EBAMRCellData& a_electricField) noexcept;
-
-      /*!
-	@brief Compute a maximum time step from the physics interface.
-	@param[in] a_electricField    Electric field. 
-	@param[in] a_particlesPerCell Number of particles per grid cell
-	@param[in] a_level            Grid level
-	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
-      */
-      virtual Real
-      computePhysicsDt(const LevelData<EBCellFAB>& a_electricField,
-                       const LevelData<EBCellFAB>& a_particlesPerCell,
-                       const int                   a_level) noexcept;
-
-      /*!
-	@brief Compute a maximum time step from the physics interface.
-	@param[in] a_electricField    Electric field. 
-	@param[in] a_particlesPerCell Number of particles per grid cell
-	@param[in] a_level            Grid level
-	@param[in] a_din              Grid index
-	@param[in] a_box              Grid box
-	@note Input data must be defined on the fluid realms. Kernels are only called on the valid region. 
-      */
-      virtual Real
-      computePhysicsDt(const EBCellFAB& a_electricField,
-                       const EBCellFAB& a_particlesPercCell,
-                       const int        a_level,
-                       const DataIndex  a_din,
-                       const Box        a_box) noexcept;
 
       /*!
 	@brief Compute total charge

@@ -240,6 +240,7 @@ ItoKMCGodunovStepper.box_sorting                           = morton         # Bo
 ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
+ItoKMCGodunovStepper.physics_dt_factor                     = 1.E99                  ## Physics-based time step factor
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
@@ -267,9 +268,6 @@ ItoKMCGodunovStepper.algorithm                             = euler_maruyama # In
 ItoKMCJSON.verbose            = false          ## Turn on/off verbosity
 ItoKMCJSON.debug              = false          ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = chemistry.json ## Chemistry file. Must be supplied by the user. 
-
-# For controlling the time step
-ItoKMCJSON.dX                 = 2.0            ## Maximum relative change Xnew/Xold during one time step.
 
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 32             ## Maximum number of computational particles to produce in reaction step

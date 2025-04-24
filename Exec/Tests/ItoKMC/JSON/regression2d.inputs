@@ -10,7 +10,7 @@ ItoKMC.basename  = pout
 AmrMesh.lo_corner        = -4E-3 -4E-3 -4E-3    # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-3  4E-3  4E-3  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 64 64 64    # Number of cells on coarsest domain
+AmrMesh.coarsest_domain  = 32 32 32    # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 2           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
@@ -251,6 +251,7 @@ ItoKMCGodunovStepper.box_sorting                           = morton         # Bo
 ItoKMCGodunovStepper.particles_per_cell                    = 16             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
+ItoKMCGodunovStepper.physics_dt_factor                     = 1.E99           ## Physics-based time step factor
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl            = 2.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
@@ -277,9 +278,6 @@ ItoKMCGodunovStepper.algorithm                             = euler_maruyama # In
 ItoKMCJSON.verbose            = false                   ## Turn on/off verbosity
 ItoKMCJSON.debug              = true                    ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = simple_air_chemistry.json ## Chemistry file
-
-# For controlling the time step
-ItoKMCJSON.dX                 = 2.0                     ## Maximum relative change Xnew/Xold during one time step.
 
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 32                      ## Maximum number of computational particles to produce in reaction step

@@ -99,16 +99,6 @@ namespace Physics {
       killKMC() const noexcept;
 
       /*!
-	@brief Compute a time step to use. 
-	@param[in] a_E            Electric field. 
-	@param[in] a_pos          Position
-	@param[in] a_numParticles Number of reactive particles of each species
-	@return Default returns infinity but user can implement a physics based time step. 
-      */
-      inline virtual Real
-      computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept;
-
-      /*!
 	@brief Get the neutral density at a position in space
 	@param[in] a_pos Physical position
 	@return Neutral density
@@ -298,6 +288,8 @@ namespace Physics {
 	@brief Advance particles. 
 	@param[inout] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
+	@param[out]   a_criticalDt    Critical KMC time step computed at end of integration
+	@param[out]   a_nonCriticalDt Non-critical KMC time step computed at end of integration	
 	@param[in]    a_phi           Plasma species densities. 
 	@param[in]    a_gradPhi       Plasma species density gradients. 
 	@param[in]    a_dt            Time step
@@ -309,6 +301,8 @@ namespace Physics {
       inline void
       advanceKMC(Vector<FPR>&            a_numParticles,
                  Vector<FPR>&            a_numNewPhotons,
+                 Real&                   a_criticalDt,
+                 Real&                   a_nonCriticalDt,
                  const Vector<Real>&     a_phi,
                  const Vector<RealVect>& a_gradPhi,
                  const Real              a_dt,

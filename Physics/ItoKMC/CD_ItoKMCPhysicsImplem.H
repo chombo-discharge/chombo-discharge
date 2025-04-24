@@ -197,16 +197,6 @@ ItoKMCPhysics::getSpeciesMap() const noexcept
   return m_speciesMap;
 }
 
-inline Real
-ItoKMCPhysics::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<FPR> a_numParticles) const noexcept
-{
-  CH_TIME("ItoKMCPhysics::computeDt");
-
-  CH_assert(m_isDefined);
-
-  return std::numeric_limits<Real>::max();
-}
-
 inline void
 ItoKMCPhysics::parseRuntimeOptions() noexcept
 {
@@ -330,6 +320,8 @@ ItoKMCPhysics::initialSigma(const Real a_time, const RealVect a_pos) const
 inline void
 ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
                           Vector<FPR>&            a_numNewPhotons,
+                          Real&                   a_criticalDt,
+                          Real&                   a_nonCriticalDt,
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dt,
@@ -408,6 +400,18 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
   }
+
+  // Compute the critical and non-critical time steps
+  const auto partitionedReactions = m_kmcSolver.partitionReactions(m_kmcState);
+
+  const auto& criticalReactions    = partitionedReactions.first;
+  const auto& nonCriticalReactions = partitionedReactions.second;
+
+  const auto criticalPropensities    = m_kmcSolver.propensities(m_kmcState, criticalReactions);
+  const auto nonCriticalPropensities = m_kmcSolver.propensities(m_kmcState, nonCriticalReactions);
+
+  a_criticalDt    = m_kmcSolver.getCriticalTimeStep(criticalPropensities);
+  a_nonCriticalDt = m_kmcSolver.getNonCriticalTimeStep(m_kmcState, nonCriticalReactions, nonCriticalPropensities);
 }
 
 inline void
