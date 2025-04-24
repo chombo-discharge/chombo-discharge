@@ -47,6 +47,36 @@ Algorithms
 Time stepping
 -------------
 
+The Îto-KMC model has adaptive time step controls and no fundamental CFL limitation.
+Currently, the time step can be restricted through several means:
+
+#. A physics-based time step, which is proportional to the non-critical time step from the KMC integrator. 
+#. A particle advective, diffusive, or advective-diffusive CFL limitation, both upper and lower bounds.
+#. A CFL-condition on the convection-diffusion-reaction solvers.
+#. A limit that restricts the time step to a factor proportional to the dielectric relaxation time.
+#. Hard limits, placing upper and lower bounds on the time step.
+
+In addition, the user can specify the maximum permitted growth or reduction in the time step.
+
+These limits are given by the following input variables:
+
+.. code-block:: txt
+
+   ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
+   ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
+   ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0     ## Advective time step CFL restriction
+   ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0     ## Diffusive time step CFL restriction
+   ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99   ## Diffusive time step CFL restriction
+   ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0     ## Advection-diffusion time step CFL restriction
+   ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99   ## Advection-diffusion time step CFL restriction
+   ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5     ## Advection-diffusion time step CFL restriction
+   ItoKMCGodunovStepper.relax_dt_factor                       = 100.0   ## Relaxation time step restriction.
+   ItoKMCGodunovStepper.min_dt                                = 0.0     ## Minimum permitted time step
+   ItoKMCGodunovStepper.max_dt                                = 1.E99   ## Maximum permitted time step
+   ItoKMCGodunovStepper.max_growth_dt                         = 1.E99   ## Maximum permitted time step increase (dt * factor)
+   ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99   ## Maximum permissible time step reduction (dt/factor)
+
+
 Particle placement
 ------------------
 
@@ -87,7 +117,9 @@ Users can apply this filtering by adjusting the following input options:
 
    Spatial filtering of the space-charge density is a work-in-progress which may yield unexpected results.
    Bugs may or may not be present. 
-   Users should exercise caution when using this feature. 
+   Users should exercise caution when using this feature.
+
+
 
 Reaction network
 ----------------

@@ -488,18 +488,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a989274946d637dd8b68bb50f9a9caa18" id="r_a989274946d637dd8b68bb50f9a9caa18"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a989274946d637dd8b68bb50f9a9caa18">resolveSecondaryEmissionEB</a> (<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_secondaryParticles</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; * &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_primaryParticles</a>, <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classEBAMRData.html">EBAMRIVData</a> * &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_cdrFluxes</a>, <a class="el" href="classEBAMRData.html">EBAMRIVData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_surfaceChargeDensity</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dt</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a989274946d637dd8b68bb50f9a9caa18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resolve secondary emission at the EB.  <br /></td></tr>
 <tr class="separator:a989274946d637dd8b68bb50f9a9caa18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a699e65acc20c6a5249a7891f354b6f12" id="r_a699e65acc20c6a5249a7891f354b6f12"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a699e65acc20c6a5249a7891f354b6f12">computePhysicsDt</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a699e65acc20c6a5249a7891f354b6f12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a maximum time step from the physics interface.  <br /></td></tr>
-<tr class="separator:a699e65acc20c6a5249a7891f354b6f12"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0608123abd384e9fca120b020b56831" id="r_ab0608123abd384e9fca120b020b56831"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab0608123abd384e9fca120b020b56831">computePhysicsDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_electricField</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ab0608123abd384e9fca120b020b56831"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a maximum time step from the physics interface.  <br /></td></tr>
-<tr class="separator:ab0608123abd384e9fca120b020b56831"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab93f82d87af0d22cf789fc7d04933552" id="r_ab93f82d87af0d22cf789fc7d04933552"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab93f82d87af0d22cf789fc7d04933552">computePhysicsDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_electricField</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particlesPerCell</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:ab93f82d87af0d22cf789fc7d04933552"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a maximum time step from the physics interface.  <br /></td></tr>
-<tr class="separator:ab93f82d87af0d22cf789fc7d04933552"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70fecb723fe74b89ac6751deb9f156e9" id="r_a70fecb723fe74b89ac6751deb9f156e9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a70fecb723fe74b89ac6751deb9f156e9">computePhysicsDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_electricField</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_particlesPercCell</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> <a class="el" href="classTracerParticleSolver.html">a_din</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a> <a class="el" href="classTracerParticleSolver.html">a_box</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:a70fecb723fe74b89ac6751deb9f156e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a maximum time step from the physics interface.  <br /></td></tr>
-<tr class="separator:a70fecb723fe74b89ac6751deb9f156e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f2ff3044d33797d8b9f7149cc4b08fd" id="r_a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0f2ff3044d33797d8b9f7149cc4b08fd">computePhysicsDt</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a physics-based maximum time step.  <br /></td></tr>
+<tr class="separator:a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90eb59616f7bdf40384d9c807e3917f1" id="r_a90eb59616f7bdf40384d9c807e3917f1"><td class="memItemLeft" align="right" valign="top"><a id="a90eb59616f7bdf40384d9c807e3917f1" name="a90eb59616f7bdf40384d9c807e3917f1"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>computeTotalCharge</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a90eb59616f7bdf40384d9c807e3917f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute total charge. <br /></td></tr>
@@ -765,6 +756,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_physicsDt</b></td></tr>
 <tr class="memdesc:a24670ae30603a18f655d8184e11a54cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The physics-based time step. <br /></td></tr>
 <tr class="separator:a24670ae30603a18f655d8184e11a54cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bdf15f0aedbc063222fcbd2d029d9d1" id="r_a3bdf15f0aedbc063222fcbd2d029d9d1"><td class="memItemLeft" align="right" valign="top"><a id="a3bdf15f0aedbc063222fcbd2d029d9d1" name="a3bdf15f0aedbc063222fcbd2d029d9d1"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_physicsDtFactor</b></td></tr>
+<tr class="memdesc:a3bdf15f0aedbc063222fcbd2d029d9d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative factor for controlling. <br /></td></tr>
+<tr class="separator:a3bdf15f0aedbc063222fcbd2d029d9d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71eb936c6c97546b95ea5de1458c576e" id="r_a71eb936c6c97546b95ea5de1458c576e"><td class="memItemLeft" align="right" valign="top"><a id="a71eb936c6c97546b95ea5de1458c576e" name="a71eb936c6c97546b95ea5de1458c576e"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_loadBalancePPC</b></td></tr>
 <tr class="memdesc:a71eb936c6c97546b95ea5de1458c576e"><td class="mdescLeft">&#160;</td><td class="mdescRight">For holding the number of computational particles per cell when load balancing. <br /></td></tr>
@@ -841,6 +836,12 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_electricFieldParticle</b></td></tr>
 <tr class="memdesc:a24faea7c8117158679ae47f6bbc7a59b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the plasma phase electric field on the particle realm. <br /></td></tr>
 <tr class="separator:a24faea7c8117158679ae47f6bbc7a59b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a628a19991f2f3ba7b35d5b200a510836" id="r_a628a19991f2f3ba7b35d5b200a510836"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a628a19991f2f3ba7b35d5b200a510836">m_criticalDt</a></td></tr>
+<tr class="memdesc:a628a19991f2f3ba7b35d5b200a510836"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>.  <br /></td></tr>
+<tr class="separator:a628a19991f2f3ba7b35d5b200a510836"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8299c491c46388f49614e1b7ea602908" id="r_a8299c491c46388f49614e1b7ea602908"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a8299c491c46388f49614e1b7ea602908">m_nonCriticalDt</a></td></tr>
+<tr class="memdesc:a8299c491c46388f49614e1b7ea602908"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>.  <br /></td></tr>
+<tr class="separator:a8299c491c46388f49614e1b7ea602908"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2bade8aae81b93de860fa59265fb2c2" id="r_ae2bade8aae81b93de860fa59265fb2c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ae2bade8aae81b93de860fa59265fb2c2">m_energySources</a></td></tr>
 <tr class="memdesc:ae2bade8aae81b93de860fa59265fb2c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the energy sources for each species.  <br /></td></tr>
 <tr class="separator:ae2bade8aae81b93de860fa59265fb2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2138,8 +2139,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="a699e65acc20c6a5249a7891f354b6f12" name="a699e65acc20c6a5249a7891f354b6f12"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a699e65acc20c6a5249a7891f354b6f12">&#9670;&#160;</a></span>computePhysicsDt() <span class="overload">[1/4]</span></h2>
+<a id="a0f2ff3044d33797d8b9f7149cc4b08fd" name="a0f2ff3044d33797d8b9f7149cc4b08fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f2ff3044d33797d8b9f7149cc4b08fd">&#9670;&#160;</a></span>computePhysicsDt()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2150,7 +2151,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ItoKMCStepper::computePhysicsDt </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoKMCStepper::computePhysicsDt </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -2163,170 +2164,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 </table>
 </div><div class="memdoc">
 
-<p>Compute a maximum time step from the physics interface. </p>
-<dl class="section note"><dt>Note</dt><dd>Calls the other version with m_electricFieldParticle and the <a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> densities. The kernels are only called on the valid region. </dd></dl>
-
-</div>
-</div>
-<a id="ab0608123abd384e9fca120b020b56831" name="ab0608123abd384e9fca120b020b56831"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab0608123abd384e9fca120b020b56831">&#9670;&#160;</a></span>computePhysicsDt() <span class="overload">[2/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> R , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ItoKMCStepper::computePhysicsDt </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_electricField</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute a maximum time step from the physics interface. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_densities</td><td><a class="el" href="classItoSolver.html" title="Base class for Ito diffusion particle models.">ItoSolver</a> mesh densities. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>Input data must be defined on the fluid realms. Kernels are only called on the valid region. </dd></dl>
-
-</div>
-</div>
-<a id="a70fecb723fe74b89ac6751deb9f156e9" name="a70fecb723fe74b89ac6751deb9f156e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a70fecb723fe74b89ac6751deb9f156e9">&#9670;&#160;</a></span>computePhysicsDt() <span class="overload">[3/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> R , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ItoKMCStepper::computePhysicsDt </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_electricField</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_particlesPercCell</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_level</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a>&#160;</td>
-          <td class="paramname"><em>a_din</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Box</a>&#160;</td>
-          <td class="paramname"><em>a_box</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute a maximum time step from the physics interface. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Number of particles per grid cell </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_box</td><td>Grid box </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>Input data must be defined on the fluid realms. Kernels are only called on the valid region. </dd></dl>
-
-</div>
-</div>
-<a id="ab93f82d87af0d22cf789fc7d04933552" name="ab93f82d87af0d22cf789fc7d04933552"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab93f82d87af0d22cf789fc7d04933552">&#9670;&#160;</a></span>computePhysicsDt() <span class="overload">[4/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> R , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> ItoKMCStepper::computePhysicsDt </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_electricField</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>a_particlesPerCell</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
-          <td class="paramname"><em>a_level</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute a maximum time step from the physics interface. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_electricField</td><td>Electric field. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Number of particles per grid cell </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>Input data must be defined on the fluid realms. Kernels are only called on the valid region. </dd></dl>
+<p>Compute a physics-based maximum time step. </p>
+<p>This routine simply returns the non-critical KMC time step. Note that this time step is the one computed AFTER advanceReactionNetwork has been called. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>., this routine sets m_physicsDt based on m_nonCriticalTimeStep (which is filled in advanceReactionNetwork). </p><dl class="section note"><dt>Note</dt><dd>Calling this routine without first calling advanceReactionNetwork is sure to lead to unintended side effects. </dd></dl>
 
 </div>
 </div>
@@ -6062,6 +5901,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="a628a19991f2f3ba7b35d5b200a510836" name="a628a19991f2f3ba7b35d5b200a510836"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a628a19991f2f3ba7b35d5b200a510836">&#9670;&#160;</a></span>m_criticalDt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">I</a>, <a class="el" href="classTracerParticleSolver.html">C</a>, R, <a class="el" href="classTracerParticleSolver.html">F</a> &gt;::m_criticalDt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for the critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>. </p>
+<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm. </dd></dl>
+
+</div>
+</div>
 <a id="a643cd82cfa5a81f7f6cb51e08bbe0ded" name="a643cd82cfa5a81f7f6cb51e08bbe0ded"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a643cd82cfa5a81f7f6cb51e08bbe0ded">&#9670;&#160;</a></span>m_currentDensity</h2>
 
@@ -6356,6 +6222,34 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 <p>How often to merge superparticles. </p>
 <p>If &lt;= 1 we merge every time step. </p>
+
+</div>
+</div>
+<a id="a8299c491c46388f49614e1b7ea602908" name="a8299c491c46388f49614e1b7ea602908"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8299c491c46388f49614e1b7ea602908">&#9670;&#160;</a></span>m_nonCriticalDt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">I</a>, <a class="el" href="classTracerParticleSolver.html">C</a>, R, <a class="el" href="classTracerParticleSolver.html">F</a> &gt;::m_nonCriticalDt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>. </p>
+<dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm. <br  />
+ </dd></dl>
 
 </div>
 </div>

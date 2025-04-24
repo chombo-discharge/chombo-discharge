@@ -262,6 +262,32 @@ The algorithmic concepts are given in <a class="reference internal" href="../Sol
 <h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h2>
 <section id="time-stepping">
 <h3>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h3>
+<p>The Îto-KMC model has adaptive time step controls and no fundamental CFL limitation.
+Currently, the time step can be restricted through several means:</p>
+<ol class="arabic simple">
+<li><p>A physics-based time step, which is proportional to the non-critical time step from the KMC integrator.</p></li>
+<li><p>A particle advective, diffusive, or advective-diffusive CFL limitation, both upper and lower bounds.</p></li>
+<li><p>A CFL-condition on the convection-diffusion-reaction solvers.</p></li>
+<li><p>A limit that restricts the time step to a factor proportional to the dielectric relaxation time.</p></li>
+<li><p>Hard limits, placing upper and lower bounds on the time step.</p></li>
+</ol>
+<p>In addition, the user can specify the maximum permitted growth or reduction in the time step.</p>
+<p>These limits are given by the following input variables:</p>
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
+ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0     ## Advective time step CFL restriction
+ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0     ## Diffusive time step CFL restriction
+ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99   ## Diffusive time step CFL restriction
+ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0     ## Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99   ## Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5     ## Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.relax_dt_factor                       = 100.0   ## Relaxation time step restriction.
+ItoKMCGodunovStepper.min_dt                                = 0.0     ## Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 1.E99   ## Maximum permitted time step
+ItoKMCGodunovStepper.max_growth_dt                         = 1.E99   ## Maximum permitted time step increase (dt * factor)
+ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99   ## Maximum permissible time step reduction (dt/factor)
+</pre></div>
+</div>
 </section>
 <section id="particle-placement">
 <h3>Particle placement<a class="headerlink" href="#particle-placement" title="Permalink to this heading"></a></h3>
@@ -417,16 +443,6 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">      */</span>
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">killKMC</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Compute a time step to use. </span>
-<span class="cm">	@param[in] a_E            Electric field. </span>
-<span class="cm">	@param[in] a_pos          Position</span>
-<span class="cm">	@param[in] a_numParticles Number of reactive particles of each species</span>
-<span class="cm">	@return Default returns infinity but user can implement a physics based time step. </span>
-<span class="cm">      */</span>
-<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
-<span class="w">      </span><span class="nf">computeDt</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_numParticles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Get the neutral density at a position in space</span>
@@ -618,6 +634,8 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@brief Advance particles. </span>
 <span class="cm">	@param[inout] a_numParticles  Number of physical particles</span>
 <span class="cm">	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)</span>
+<span class="cm">	@param[out]   a_criticalDt    Critical KMC time step computed at end of integration</span>
+<span class="cm">	@param[out]   a_nonCriticalDt Non-critical KMC time step computed at end of integration	</span>
 <span class="cm">	@param[in]    a_phi           Plasma species densities. </span>
 <span class="cm">	@param[in]    a_gradPhi       Plasma species density gradients. </span>
 <span class="cm">	@param[in]    a_dt            Time step</span>
@@ -629,6 +647,8 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">advanceKMC</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_numParticles</span><span class="p">,</span>
 <span class="w">                 </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_numNewPhotons</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_criticalDt</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_nonCriticalDt</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_gradPhi</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span>
