@@ -13,7 +13,7 @@ To compile:
 
 To run with MPI:
 
-```mpirun -np <num_proc> program2d.*ex example.inputs```
+```mpirun -np <num_proc> program2d.*ex convergence.inputs```
 
 The user can select between different algorithms and initial conditions in the input script. 
 

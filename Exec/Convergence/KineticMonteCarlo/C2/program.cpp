@@ -97,28 +97,38 @@ main(int argc, char* argv[])
 
       kmcSolver.stepSSA(state);
     }
-    else if (alg == "tau_plain") {
+    else if (alg == "explicit_euler") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTauPlain(state, nextDt);
+      kmcSolver.advanceExplicitEuler(state, nextDt);
     }
-    else if (alg == "tau_midpoint") {
+    else if (alg == "midpoint") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTauMidpoint(state, nextDt);
+      kmcSolver.advanceMidpoint(state, nextDt);
     }
-    else if (alg == "hybrid_plain") {
+    else if (alg == "prc") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauPlain);
+      kmcSolver.advancePRC(state, nextDt);
+    }
+    else if (alg == "hybrid_explicit_euler") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
     else if (alg == "hybrid_midpoint") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauMidpoint);
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Midpoint);
+    }
+    else if (alg == "hybrid_prc") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
     }
     else {
-      const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";
+      const std::string err = "Don't know the algoritm '" + alg + "'";
 
       MayDay::Error(err.c_str());
     }

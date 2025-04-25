@@ -25,17 +25,15 @@
 /*!
   @brief Supported propagators for hybrid tau leaping.
   @details These leap propagators are as follows:
-  TauPlain = Regular tau leaping.
-  TauMidpoint = Gillespie's midpoint method
-  TauPRC = Hu and Li's Poisson random correction leap method
-  TauGRC1 = Hu and Li's Gaussian random correction leap method  
+  ExplicitEuler = Regular tau leaping.
+  Midpoint = Gillespie's midpoint method
+  PRC = Hu and Li's Poisson random correction leap method
 */
 enum class KMCLeapPropagator
 {
-  TauPlain,
-  TauMidpoint,
-  TauPRC,
-  TauGRC1
+  ExplicitEuler,
+  Midpoint,
+  PRC,
 };
 
 /*!
@@ -228,7 +226,7 @@ public:
     @note Calls the other version with m_reactions
   */
   inline void
-  stepTauPlain(State& a_state, const Real a_dt) const noexcept;
+  stepExplicitEuler(State& a_state, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one plain tau-leaping step over the input reactions using a time step a_dt
@@ -238,7 +236,7 @@ public:
     @note Computes propensities and calls the other version. 
   */
   inline void
-  stepTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  stepExplicitEuler(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one plain tau-leaping step over the input reactions using a time step a_dt
@@ -248,10 +246,10 @@ public:
     @param[in]    a_dt           Time increment
   */
   inline void
-  stepTauPlain(State&                   a_state,
-               const ReactionList&      a_reactions,
-               const std::vector<Real>& a_propensities,
-               const Real               a_dt) const noexcept;
+  stepExplicitEuler(State&                   a_state,
+                    const ReactionList&      a_reactions,
+                    const std::vector<Real>& a_propensities,
+                    const Real               a_dt) const noexcept;
 
   /*!
     @brief Advance with plain tau-leaping step over the input time. This can end up using substepping.
@@ -260,7 +258,7 @@ public:
     @note Calls the other version with m_reactions.
   */
   inline void
-  advanceTauPlain(State& a_state, const Real a_dt) const noexcept;
+  advanceExplicitEuler(State& a_state, const Real a_dt) const noexcept;
 
   /*!
     @brief Advance with plain tau-leaping step over the input time. This can end up using substepping
@@ -269,7 +267,7 @@ public:
     @param[in]    a_dt        Time increment
   */
   inline void
-  advanceTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  advanceExplicitEuler(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt
@@ -278,7 +276,7 @@ public:
     @note Calls the other version with m_reactions
   */
   inline void
-  stepTauMidpoint(State& a_state, const Real a_dt) const noexcept;
+  stepMidpoint(State& a_state, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
@@ -287,7 +285,7 @@ public:
     @param[in]    a_dt           Time increment
   */
   inline void
-  stepTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  stepMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the midpoint method all reactions over a time step a_dt
@@ -296,7 +294,7 @@ public:
     @note Calls the other version with m_reactions.
   */
   inline void
-  advanceTauMidpoint(State& a_state, const Real a_dt) const noexcept;
+  advanceMidpoint(State& a_state, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
@@ -305,7 +303,7 @@ public:
     @param[in]    a_dt        Time increment
   */
   inline void
-  advanceTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  advanceMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the PRC method for ALL reactions over a time step a_dt
@@ -314,7 +312,7 @@ public:
     @note Calls the other version with m_reactions
   */
   inline void
-  stepTauPRC(State& a_state, const Real a_dt) const noexcept;
+  stepPRC(State& a_state, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
@@ -323,7 +321,7 @@ public:
     @param[in]    a_dt           Time increment
   */
   inline void
-  stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  stepPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the PRC method all reactions over a time step a_dt
@@ -332,7 +330,7 @@ public:
     @note Calls the other version with m_reactions.
   */
   inline void
-  advanceTauPRC(State& a_state, const Real a_dt) const noexcept;
+  advancePRC(State& a_state, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
@@ -341,7 +339,7 @@ public:
     @param[in]    a_dt        Time increment
   */
   inline void
-  advanceTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+  advancePRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
     @brief Perform a single SSA step.
@@ -397,7 +395,7 @@ public:
   inline void
   advanceHybrid(State&                   a_state,
                 const Real               a_dt,
-                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::TauPlain) const noexcept;
+                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
@@ -411,7 +409,7 @@ public:
   advanceHybrid(State&                   a_state,
                 const ReactionList&      a_reactions,
                 const Real               a_dt,
-                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::TauPlain) const noexcept;
+                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. 

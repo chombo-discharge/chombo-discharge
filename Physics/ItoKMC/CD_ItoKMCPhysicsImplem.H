@@ -45,7 +45,7 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_eps               = 2.0;
   m_NSSA              = 5;
   m_SSAlim            = 5.0;
-  m_algorithm         = Algorithm::TauPlain;
+  m_algorithm         = Algorithm::ExplicitEuler;
   m_particlePlacement = ParticlePlacement::Random;
 }
 
@@ -247,16 +247,16 @@ ItoKMCPhysics::parseAlgorithm() noexcept
     m_algorithm = Algorithm::SSA;
   }
   else if (str == "tau_plain") {
-    m_algorithm = Algorithm::TauPlain;
+    m_algorithm = Algorithm::ExplicitEuler;
   }
   else if (str == "tau_midpoint") {
-    m_algorithm = Algorithm::TauMidpoint;
+    m_algorithm = Algorithm::Midpoint;
   }
   else if (str == "tau_prc") {
-    m_algorithm = Algorithm::TauPRC;
+    m_algorithm = Algorithm::PRC;
   }
   else if (str == "hybrid_plain") {
-    m_algorithm = Algorithm::HybridPlain;
+    m_algorithm = Algorithm::HybridExplicitEuler;
   }
   else if (str == "hybrid_midpoint") {
     m_algorithm = Algorithm::HybridMidpoint;
@@ -358,33 +358,33 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
     break;
   }
-  case Algorithm::TauPlain: {
-    m_kmcSolver.advanceTauPlain(m_kmcState, a_dt);
+  case Algorithm::ExplicitEuler: {
+    m_kmcSolver.advanceExplicitEuler(m_kmcState, a_dt);
 
     break;
   }
-  case Algorithm::TauMidpoint: {
-    m_kmcSolver.advanceTauMidpoint(m_kmcState, a_dt);
+  case Algorithm::Midpoint: {
+    m_kmcSolver.advanceMidpoint(m_kmcState, a_dt);
 
     break;
   }
-  case Algorithm::TauPRC: {
-    m_kmcSolver.advanceTauPRC(m_kmcState, a_dt);
+  case Algorithm::PRC: {
+    m_kmcSolver.advancePRC(m_kmcState, a_dt);
 
     break;
   }
-  case Algorithm::HybridPlain: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
+  case Algorithm::HybridExplicitEuler: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::ExplicitEuler);
 
     break;
   }
   case Algorithm::HybridMidpoint: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::Midpoint);
 
     break;
   }
   case Algorithm::HybridPRC: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPRC);
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::PRC);
 
     break;
   }

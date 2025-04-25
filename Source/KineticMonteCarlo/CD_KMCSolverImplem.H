@@ -312,32 +312,34 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauPlain(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepExplicitEuler(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauPlain(State, Real)");
+  CH_TIME("KMCSolver::stepExplicitEuler(State, Real)");
 
-  this->stepTauPlain(a_state, m_reactions, a_dt);
+  this->stepExplicitEuler(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepExplicitEuler(State&              a_state,
+                                          const ReactionList& a_reactions,
+                                          const Real          a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauPlain(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::stepExplicitEuler(State, ReactionList, Real)");
 
   const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
 
-  this->stepTauPlain(a_state, a_reactions, propensities, a_dt);
+  this->stepExplicitEuler(a_state, a_reactions, propensities, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauPlain(State&                   a_state,
-                                     const ReactionList&      a_reactions,
-                                     const std::vector<Real>& a_propensities,
-                                     const Real               a_dt) const noexcept
+KMCSolver<R, State, T>::stepExplicitEuler(State&                   a_state,
+                                          const ReactionList&      a_reactions,
+                                          const std::vector<Real>& a_propensities,
+                                          const Real               a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauPlain(State, ReactionList, std::vector<Real>, Real)");
+  CH_TIME("KMCSolver::stepExplicitEuler(State, ReactionList, std::vector<Real>, Real)");
 
   CH_assert(a_reactions.size() == a_propensities.size());
 
@@ -355,18 +357,20 @@ KMCSolver<R, State, T>::stepTauPlain(State&                   a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauPlain(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceExplicitEuler(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTauPlain(State, ReactionList)");
+  CH_TIME("KMCSolver::advanceExplicitEuler(State, ReactionList)");
 
-  this->advanceTauPlain(a_state, m_reactions, a_dt);
+  this->advanceExplicitEuler(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceExplicitEuler(State&              a_state,
+                                             const ReactionList& a_reactions,
+                                             const Real          a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTauPlain(State, ReactionList, Real)");
+  CH_TIME("KMCSolver::advanceExplicitEuler(State, ReactionList, Real)");
 
   if (a_reactions.size() > 0) {
     Real curTime = 0.0;
@@ -385,7 +389,7 @@ KMCSolver<R, State, T>::advanceTauPlain(State& a_state, const ReactionList& a_re
         State state = a_state;
 
         // Do a tau-leaping step.
-        this->stepTauPlain(state, a_reactions, curDt);
+        this->stepExplicitEuler(state, a_reactions, curDt);
 
         // If this was a valid step, accept it. Else reduce dt.
         valid = state.isValidState();
@@ -405,18 +409,18 @@ KMCSolver<R, State, T>::advanceTauPlain(State& a_state, const ReactionList& a_re
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepMidpoint(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauMidpoint(State&, const Real)");
+  CH_TIME("KMCSolver::stepMidpoint(State&, const Real)");
 
-  this->stepTauMidpoint(a_state, m_reactions, a_dt);
+  this->stepMidpoint(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIMERS("KMCSolver::stepTauMidpoint(State&, const ReactionList&, const Real)");
+  CH_TIMERS("KMCSolver::stepMidpoint(State&, const ReactionList&, const Real)");
   CH_TIMER("KMCSolver::stepTauMidPoint::first_loop", t1);
   CH_TIMER("KMCSolver::stepTauMidPoint::second_loop", t2);
 
@@ -450,20 +454,18 @@ KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const ReactionList& a_re
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauMidpoint(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advanceMidpoint(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTauMidpoint(State&, const Real)");
+  CH_TIME("KMCSolver::advanceMidpoint(State&, const Real)");
 
-  this->advanceTauMidpoint(a_state, m_reactions, a_dt);
+  this->advanceMidpoint(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
-                                           const ReactionList& a_reactions,
-                                           const Real          a_dt) const noexcept
+KMCSolver<R, State, T>::advanceMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTauMidpoint(State&, const ReactionList&, const Real)");
+  CH_TIME("KMCSolver::advanceMidpoint(State&, const ReactionList&, const Real)");
 
   if (a_reactions.size() > 0) {
     Real curTime = 0.0;
@@ -482,7 +484,7 @@ KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
         State state = a_state;
 
         // Do a tau-leaping step.
-        this->stepTauMidpoint(state, a_reactions, curDt);
+        this->stepMidpoint(state, a_reactions, curDt);
 
         // If this was a valid step, accept it. Else reduce dt.
         valid = state.isValidState();
@@ -502,20 +504,20 @@ KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauPRC(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepPRC(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepTauPRC(State&, const Real)");
+  CH_TIME("KMCSolver::stepPRC(State&, const Real)");
 
-  this->stepTauPRC(a_state, m_reactions, a_dt);
+  this->stepPRC(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIMERS("KMCSolver::stepTauPRC(State&, const ReactionList&, const Real)");
-  CH_TIMER("KMCSolver::stepTauPRC::first_loop", t1);
-  CH_TIMER("KMCSolver::stepTauPRC::second_loop", t2);
+  CH_TIMERS("KMCSolver::stepPRC(State&, const ReactionList&, const Real)");
+  CH_TIMER("KMCSolver::stepPRC::first_loop", t1);
+  CH_TIMER("KMCSolver::stepPRC::second_loop", t2);
 
   const int numReactions = a_reactions.size();
 
@@ -551,18 +553,18 @@ KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactio
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advancePRC(State& a_state, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTauPRC(State&, const Real)");
+  CH_TIME("KMCSolver::advancePRC(State&, const Real)");
 
-  this->advanceTauPRC(a_state, m_reactions, a_dt);
+  this->advancePRC(a_state, m_reactions, a_dt);
 }
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+KMCSolver<R, State, T>::advancePRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::advanceTauPRC(State&, const ReactionList&, const Real)");
+  CH_TIME("KMCSolver::advancePRC(State&, const ReactionList&, const Real)");
 
   if (a_reactions.size() > 0) {
     Real curTime = 0.0;
@@ -581,7 +583,7 @@ KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const ReactionList& a_reac
         State state = a_state;
 
         // Do a tau-leaping step.
-        this->stepTauPRC(state, a_reactions, curDt);
+        this->stepPRC(state, a_reactions, curDt);
 
         // If this was a valid step, accept it. Else reduce dt.
         valid = state.isValidState();
@@ -724,23 +726,23 @@ KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
   CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, KMCLeapPropagator)");
 
   switch (a_leapPropagator) {
-  case KMCLeapPropagator::TauPlain: {
+  case KMCLeapPropagator::ExplicitEuler: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
-      this->stepTauPlain(s, r, dt);
+      this->stepExplicitEuler(s, r, dt);
     });
 
     break;
   }
-  case KMCLeapPropagator::TauMidpoint: {
+  case KMCLeapPropagator::Midpoint: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
-      this->stepTauMidpoint(s, r, dt);
+      this->stepMidpoint(s, r, dt);
     });
 
     break;
   }
-  case KMCLeapPropagator::TauPRC: {
+  case KMCLeapPropagator::PRC: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
-      this->stepTauPRC(s, r, dt);
+      this->stepPRC(s, r, dt);
     });
 
     break;

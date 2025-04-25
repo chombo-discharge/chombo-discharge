@@ -1,5 +1,8 @@
-# Algorithm to be used
-algorithm = tau_plain
+# Algorithm to be used.
+# SSA : 'ssa'
+# Tau-leaping algorithms: 'explicit_euler', 'midpoint', 'prc'
+# Hybrid algorithms: 'hybrid_explicit_euler', 'hybrid_midpoint', 'hybrid_prc',
+algorithm = explicit_euler
 
 # Number of steps
 nsteps = 100

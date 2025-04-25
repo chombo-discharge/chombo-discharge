@@ -87,15 +87,25 @@ main(int argc, char* argv[])
     else if (alg == "tau") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTauPlain(state, nextDt);
+      kmcSolver.advanceExplicitEuler(state, nextDt);
     }
-    else if (alg == "hybrid") {
+    else if (alg == "hybrid_plain") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt);
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ExplicitEuler);
+    }
+    else if (alg == "hybrid_midpoint") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Midpoint);
+    }
+    else if (alg == "hybrid_prc") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
     }
     else {
-      const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";
+      const std::string err = "algorithm '" + alg + "' is not supported";
 
       MayDay::Error(err.c_str());
     }

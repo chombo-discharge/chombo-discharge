@@ -100,7 +100,7 @@ main(int argc, char* argv[])
     else if (alg == "tau") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTauPlain(state, nextDt);
+      kmcSolver.advanceExplicitEuler(state, nextDt);
     }
     else if (alg == "hybrid") {
       nextDt = stopTime / numSteps;
