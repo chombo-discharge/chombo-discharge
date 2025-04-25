@@ -543,6 +543,26 @@ KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions,
 
 template <typename R, typename State, typename T>
 inline void
+KMCSolver<R, State, T>::stepImplicitEuler(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepImplicitEuler(State, a_dt)");
+
+  this->stepImplicitEuler(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
+                                          const ReactionList& a_reactions,
+                                          const Real          a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepImplicitEuler(State, ReactionList, a_dt)");
+
+  return;
+}
+
+template <typename R, typename State, typename T>
+inline void
 KMCSolver<R, State, T>::advanceTau(State&                   a_state,
                                    const Real&              a_dt,
                                    const KMCLeapPropagator& a_leapPropagator) const noexcept
@@ -591,6 +611,11 @@ KMCSolver<R, State, T>::advanceTau(State&                   a_state,
         }
         case KMCLeapPropagator::PRC: {
           this->stepPRC(state, a_reactions, curDt);
+
+          break;
+        }
+        case KMCLeapPropagator::ImplicitEuler: {
+          this->stepImplicitEuler(state, a_reactions, curDt);
 
           break;
         }

@@ -34,6 +34,7 @@ enum class KMCLeapPropagator
   ExplicitEuler,
   Midpoint,
   PRC,
+  ImplicitEuler
 };
 
 /*!
@@ -317,7 +318,6 @@ public:
   inline void
   stepPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
-#if 0
   /*!
     @brief Perform one implicit Euler tau-leaping step using ALL reactions.
     @param[inout] a_state State vector to be advanced
@@ -332,25 +332,9 @@ public:
     @param[inout] a_state     State vector to be advanced
     @param[in]    a_reactions List of reactions to advance with
     @param[in]    a_dt        Time increment
-    @note Computes propensities and calls the other version. 
   */
   inline void
   stepImplicitEuler(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform implicit Euler tau-leaping step over the input reactions using a time step a_dt
-    @details Uses the implicit Euler algorithm.         
-    @param[inout] a_state        State vector to be advanced
-    @param[in]    a_reactions    List of reactions to advance with
-    @param[in]    a_propensities Pre-computed propensities for the input reactions
-    @param[in]    a_dt           Time increment
-  */
-  inline void
-  stepImplicitEuler(State&                   a_state,
-                    const ReactionList&      a_reactions,
-                    const std::vector<Real>& a_propensities,
-                    const Real               a_dt) const noexcept;
-#endif
 
   /*!
     @brief Advance using a specified tau-leaping algorithm.
