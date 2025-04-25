@@ -100,12 +100,12 @@ main(int argc, char* argv[])
     else if (alg == "tau") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceExplicitEuler(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
     else if (alg == "hybrid") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt);
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
     else {
       const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";

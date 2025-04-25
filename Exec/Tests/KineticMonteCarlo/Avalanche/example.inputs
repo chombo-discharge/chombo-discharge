@@ -6,7 +6,7 @@ attachment_rate = 1.0
 initial_particles = 10
 
 # Algorithm to be used
-algorithm = hybrid
+algorithm = hybrid_explicit_euler
 
 # Settings for hybrid SSA/tau algorithm (i.e., the Cao algorithm)
 num_crit = 5

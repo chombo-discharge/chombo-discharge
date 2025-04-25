@@ -1,5 +1,5 @@
 # Algorithm to be used
-algorithm = hybrid
+algorithm = hybrid_explicit_euler
 
 # Number of steps
 nsteps = 100

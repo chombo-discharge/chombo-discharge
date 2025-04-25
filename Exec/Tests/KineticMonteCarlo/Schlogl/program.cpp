@@ -97,18 +97,38 @@ main(int argc, char* argv[])
 
       kmcSolver.stepSSA(state);
     }
-    else if (alg == "tau") {
+    else if (alg == "explicit_euler") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceExplicitEuler(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
-    else if (alg == "hybrid") {
+    else if (alg == "midpoint") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::Midpoint);
+    }
+    else if (alg == "prc") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::PRC);
+    }
+    else if (alg == "hybrid_explicit_euler") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ExplicitEuler);
+    }
+    else if (alg == "hybrid_midpoint") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Midpoint);
+    }
+    else if (alg == "hybrid_prc") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
     }
     else {
-      const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";
+      const std::string err = "algorithm '" + alg + "' is not supported";
 
       MayDay::Error(err.c_str());
     }

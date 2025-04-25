@@ -84,12 +84,22 @@ main(int argc, char* argv[])
 
       kmcSolver.stepSSA(state);
     }
-    else if (alg == "tau") {
+    else if (alg == "explicit_euler") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceExplicitEuler(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
-    else if (alg == "hybrid_plain") {
+    else if (alg == "midpoint") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::Midpoint);
+    }
+    else if (alg == "prc") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::PRC);
+    }        
+    else if (alg == "hybrid_explicit_euler") {
       nextDt = stopTime / numSteps;
 
       kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ExplicitEuler);

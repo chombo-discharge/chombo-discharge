@@ -359,17 +359,17 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     break;
   }
   case Algorithm::ExplicitEuler: {
-    m_kmcSolver.advanceExplicitEuler(m_kmcState, a_dt);
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::ExplicitEuler);
 
     break;
   }
   case Algorithm::Midpoint: {
-    m_kmcSolver.advanceMidpoint(m_kmcState, a_dt);
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::Midpoint);
 
     break;
   }
   case Algorithm::PRC: {
-    m_kmcSolver.advancePRC(m_kmcState, a_dt);
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::PRC);
 
     break;
   }

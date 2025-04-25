@@ -113,17 +113,17 @@ main(int argc, char* argv[])
         else if (alg == "explicit_euler") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceExplicitEuler(state, nextDt);
+          kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ExplicitEuler);
         }
         else if (alg == "midpoint") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advanceMidpoint(state, nextDt);
+          kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::Midpoint);
         }
         else if (alg == "prc") {
           nextDt = stopTime / numSteps[istep];
 
-          kmcSolver.advancePRC(state, nextDt);
+          kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::PRC);
         }
         else if (alg == "hybrid_explicit_euler") {
           nextDt = stopTime / numSteps[istep];
