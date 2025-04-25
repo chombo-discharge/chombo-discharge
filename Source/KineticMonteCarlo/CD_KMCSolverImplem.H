@@ -558,6 +558,39 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 {
   CH_TIME("KMCSolver::stepImplicitEuler(State, ReactionList, a_dt)");
 
+  // TLDR: The implicit Euler tau-leaping scheme is equivalent to the solution of
+  //
+  // F(X) = X - (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) - dt*sum_j nu_j a_j(X)
+  //      = X - c - dt*sum_j a_j(X),
+  //      = 0
+  //
+  // where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This term is presampled
+  // before the Newton iterations begin.
+  const int M = m_reactions.size();
+
+  // Compute the input propensities times tau, which are used for the Poisson sampling.
+  std::vector<Real> at = this->propensities(a_state);
+
+  for (int j = 0; j < M; j++) {
+    at[j] *= a_dt;
+  }
+
+  // Linearize input state onto something understandable to LAPACK
+  const std::vector<T> inputState = a_state.linearOut();
+
+  const int N = inputState.size();
+
+  // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
+  double* J = new double[N * N];
+  double* X = new double[N];
+  double* F = new double[N];
+  double* c = new double[N];
+
+  delete[] J;
+  delete[] X;
+  delete[] F;
+  delete[] c;
+
   return;
 }
 

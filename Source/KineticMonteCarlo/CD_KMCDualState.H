@@ -111,7 +111,33 @@ public:
   inline const State&
   getNonReactiveState() const noexcept;
 
+  /*!
+    @brief Linearize the state onto an output vector.
+    @details This is mostly by KMCSolver when computing the necessary Jacobians for implicit updates
+  */
+  inline std::vector<T>
+  linearOut() const noexcept;
+
+  /*!
+    @brief Linearize the input buffer.
+    @details This routine should take the input vector and linearize it onto the current state. This is mostly used
+    by KMCSolver when computing the Jacobians for implicit updates.
+    @param[in] a_linearizedState Linearized state vector
+  */
+  inline void
+  linearIn(const std::vector<T>& a_linearizedState) noexcept;
+
 protected:
+  /*!
+    @brief Number of reactive species
+  */
+  int m_numReactiveSpecies;
+
+  /*!
+    @brief Number of non-reactive species
+  */
+  int m_numNonReactiveSpecies;
+
   /*!
     @brief Reactive state.
   */
