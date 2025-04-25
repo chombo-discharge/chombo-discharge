@@ -429,30 +429,18 @@ KMCSolver<R, State, T>::stepExplicitEuler(State&              a_state,
                                           const ReactionList& a_reactions,
                                           const Real          a_dt) const noexcept
 {
-  CH_TIME("KMCSolver::stepExplicitEuler(State, ReactionList, Real)");
-
-  const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
-
-  this->stepExplicitEuler(a_state, a_reactions, propensities, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepExplicitEuler(State&                   a_state,
-                                          const ReactionList&      a_reactions,
-                                          const std::vector<Real>& a_propensities,
-                                          const Real               a_dt) const noexcept
-{
   CH_TIME("KMCSolver::stepExplicitEuler(State, ReactionList, std::vector<Real>, Real)");
 
-  CH_assert(a_reactions.size() == a_propensities.size());
+  CH_assert(a_dt > 0.0);
 
   if (a_reactions.size() > 0) {
+    const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
+
     for (size_t i = 0; i < a_reactions.size(); i++) {
 
       // Number of reactions is always an integer -- draw from a Poisson distribution in long long. I'm just
       // using a large integer type to avoid potential overflows.
-      const T numReactions = (T)Random::getPoisson<long long>(a_propensities[i] * a_dt);
+      const T numReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
 
       a_reactions[i]->advanceState(a_state, numReactions);
     }
