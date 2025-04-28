@@ -52,22 +52,29 @@ KMCSolver<R, State, T>::define(const ReactionList& a_reactions) noexcept
   m_reactions = a_reactions;
 
   // Default settings. These are equivalent to ALWAYS using tau-leaping.
-  this->setSolverParameters(0, 0, std::numeric_limits<Real>::max(), 0.0);
+  this->setSolverParameters(0, 0, 100, std::numeric_limits<Real>::max(), 0.0, 1.E-6);
 }
 
 template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
                                             const T    a_numSSA,
+                                            const T    a_maxIter,
                                             const Real a_eps,
-                                            const Real a_SSAlim) noexcept
+                                            const Real a_SSAlim,
+                                            const Real a_exitTol) noexcept
 {
   CH_TIME("KMCSolver::setSolverParameters");
+
+#warning "KMCSolver::setSolverParameters -- must have max iter and exit tolerance for implicit solvers"
 
   m_Ncrit  = a_Ncrit;
   m_numSSA = a_numSSA;
   m_eps    = a_eps;
   m_SSAlim = a_SSAlim;
+
+  m_maxIter = 10;
+  m_exitTol = 1E-6;
 }
 
 template <typename R, typename State, typename T>
@@ -691,7 +698,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 #warning "KMCSolver::implicitEuler -- Jacobian loop needs lots of work!"
 #warning "KMCSolver::implicitEuler -- must have max iter"
 #warning "KMCSolver::implicitEuler -- must have convergence exit (in all variables?)"
-  for (int k = 0; k < 10; k++) {
+  for (int k = 0; k < m_maxIter; k++) {
 
     // Numerically computed the Jacobian using finite differences. The Jacobian is given by
     // Jij = dF_i/dx_j

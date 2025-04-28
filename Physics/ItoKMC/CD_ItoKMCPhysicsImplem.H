@@ -44,7 +44,9 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_Ncrit             = 5;
   m_eps               = 2.0;
   m_NSSA              = 5;
+  m_maxIter           = 10;
   m_SSAlim            = 5.0;
+  m_exitTol           = 1.E-6;
   m_algorithm         = Algorithm::ExplicitEuler;
   m_particlePlacement = ParticlePlacement::Random;
 }
@@ -116,7 +118,7 @@ ItoKMCPhysics::defineKMC() const noexcept
   }
 
   m_kmcSolver.define(m_kmcReactionsThreadLocal);
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, m_eps, m_SSAlim, m_exitTol);
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
 
   m_hasKMCSolver = true;
@@ -242,6 +244,8 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   pp.get("NSSA", m_NSSA);
   pp.get("prop_eps", m_eps);
   pp.get("SSAlim", m_SSAlim);
+  pp.get("max_iter", m_maxIter);
+  pp.get("exit_tolerance", m_exitTol);
 
   if (str == "ssa") {
     m_algorithm = Algorithm::SSA;

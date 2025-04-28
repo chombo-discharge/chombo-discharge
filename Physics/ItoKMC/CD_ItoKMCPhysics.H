@@ -529,6 +529,11 @@ namespace Physics {
       int m_NSSA;
 
       /*!
+	@brief Maximum number of iterations for implicit KMC-leaping algorithms
+      */
+      int m_maxIter;
+
+      /*!
 	@brief Solver setting for the Cao et. al. algorithm. 
 	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
       */
@@ -539,6 +544,11 @@ namespace Physics {
 	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
       */
       Real m_eps;
+
+      /*!
+	@brief Exit tolerance for implicit KMC-leaping algorithms
+      */
+      Real m_exitTol;
 
       /*!
 	@brief Define method -- defines all the internal machinery

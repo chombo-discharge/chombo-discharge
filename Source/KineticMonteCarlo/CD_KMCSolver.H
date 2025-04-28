@@ -104,12 +104,19 @@ public:
   /*!
     @brief Set solver parameters
     @param[in] a_numCrit Determines critical reactions. This is the number of reactions that need to fire before depleting a reactant.
-    @param[in] a_numSSA  Maximum number of SSA steps to run when switching from tau-leaping to SSA (hybrid algorithm only). 
+    @param[in] a_numSSA  Maximum number of SSA steps to run when switching from tau-leaping to SSA (hybrid algorithm only).
+    @param[in] a_maxIter Maximum permitted number of iterations for the implicit solver    
     @param[in] a_eps     Maximum permitted change in propensities when performing tau-leaping for non-critical reactions.
     @param[in] a_SSAlim  Threshold for switching from tau-leaping of non-critical reactions to SSA for all reactions (hybrid algorithm only)
+    @param[in] a_exitTol Exit tolerance for implicit solvres. 
   */
   inline void
-  setSolverParameters(const T a_numCrit, const T a_numSSA, const Real a_eps, const Real a_SSAlim) noexcept;
+  setSolverParameters(const T    a_numCrit,
+                      const T    a_numSSA,
+                      const T    a_maxIter,		      
+                      const Real a_eps,
+                      const Real a_SSAlim,
+                      const Real a_exitTol) noexcept;
 
   /*!
     @brief Compute the state vector changes for all reactions.
@@ -428,6 +435,11 @@ protected:
     @brief Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. 
   */
   T m_numSSA;
+  
+  /*!
+    @brief Maximum number of iterations for implicit solvers
+  */
+  T m_maxIter;  
 
   /*!
     @brief Maximum permitted change in propensities for non-critical reactions. 
@@ -438,6 +450,12 @@ protected:
     @brief Threshold for switching to SSA-based algorithm within the Cao algorithm. 
   */
   Real m_SSAlim;
+
+
+  /*!
+    @brief Exit tolerance for implicit solvers
+  */
+  Real m_exitTol;
 
   /*!
     @brief List of state changes for each reaction.
