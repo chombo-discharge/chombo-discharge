@@ -112,6 +112,11 @@ main(int argc, char* argv[])
 
       kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::PRC);
     }
+    else if (alg == "implicit_euler") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ImplicitEuler);
+    }    
     else if (alg == "hybrid_explicit_euler") {
       nextDt = stopTime / numSteps;
 
@@ -127,6 +132,11 @@ main(int argc, char* argv[])
 
       kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
     }
+    else if (alg == "hybrid_implicit_euler") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ImplicitEuler);
+    }    
     else {
       const std::string err = "algorithm '" + alg + "' is not supported";
 
