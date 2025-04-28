@@ -43,7 +43,7 @@ public:
   /*!
     @brief Disallowed move constructor
   */
-  inline KMCSingleState(KMCSingleState&&) = delete;
+  inline KMCSingleState(const KMCSingleState&&) = delete;
 
   /*!
     @brief Full constructor. 

@@ -22,6 +22,7 @@
 // Our includes
 #include <CD_Random.H>
 #include <CD_KMCSolver.H>
+#include <CD_LaPackUtils.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename R, typename State, typename T>
@@ -67,6 +68,43 @@ KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
   m_numSSA = a_numSSA;
   m_eps    = a_eps;
   m_SSAlim = a_SSAlim;
+}
+
+template <typename R, typename State, typename T>
+inline std::vector<std::vector<T>>
+KMCSolver<R, State, T>::getNu(const State& a_state, const ReactionList& a_reactions) const noexcept
+{
+  CH_TIME("KMCSolver::getNu(State)");
+
+  std::vector<std::vector<T>> ret(a_reactions.size());
+
+  for (int j = 0; j < a_reactions.size(); j++) {
+    std::vector<T>& nu = ret[j];
+
+    // Linearize a trivial state
+    State state = a_state;
+
+    std::vector<T> preState = state.linearOut();
+    for (auto& x : preState) {
+      x = static_cast<T>(100);
+    }
+    state.linearIn(preState);
+
+    // Advance with exactly one reaction.
+    a_reactions[j]->advanceState(state, static_cast<T>(1));
+
+    std::vector<T> postState = state.linearOut();
+
+    // Compute the state change vector.
+    nu.resize(preState.size());
+    if (procID() == 0) {
+      for (int i = 0; i < preState.size(); i++) {
+        nu[i] = postState[i] - preState[i];
+      }
+    }
+  }
+
+  return ret;
 }
 
 template <typename R, typename State, typename T>
@@ -561,35 +599,150 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   // TLDR: The implicit Euler tau-leaping scheme is equivalent to the solution of
   //
   // F(X) = X - (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) - dt*sum_j nu_j a_j(X)
-  //      = X - c - dt*sum_j a_j(X),
+  //      = X - c - dt*sum_j nu_j * a_j(X),
   //      = 0
   //
   // where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This term is presampled
   // before the Newton iterations begin.
-  const int M = m_reactions.size();
-
-  // Compute the input propensities times tau, which are used for the Poisson sampling.
-  std::vector<Real> at = this->propensities(a_state);
-
-  for (int j = 0; j < M; j++) {
-    at[j] *= a_dt;
-  }
 
   // Linearize input state onto something understandable to LAPACK
-  const std::vector<T> inputState = a_state.linearOut();
+  const std::vector<T>              inputState = a_state.linearOut();
+  const std::vector<std::vector<T>> nu         = this->getNu(a_state, a_reactions);
+  const std::vector<Real>           ajX        = this->propensities(a_state, a_reactions);
 
+  // Number of equations and number of reactions.
   const int N = inputState.size();
+  const int M = a_reactions.size();
+
+  // Lambda that computes the constant term c and the initial guess.
+  auto compConstantTerm = [&](double* C, double* X, const State& state, const Real a_dt) -> void {
+    // TLDR: To compute the constant term we perform a Poisson sampling and then linearize the output
+    // state.
+
+    State explicitEulerState = state;
+
+    this->advanceTau(explicitEulerState, a_reactions, a_dt, KMCLeapPropagator::ExplicitEuler);
+
+    const std::vector<T> eulerOut = explicitEulerState.linearOut();
+
+    // Make c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)])
+    for (int i = 0; i < N; i++) {
+      C[i] = 1.0 * eulerOut[i];
+      X[i] = 1.0 * eulerOut[i];
+    }
+
+    // Subtract the mean.
+    for (int j = 0; j < M; j++) {
+      const std::vector<T>& nuj = nu[j];
+
+      for (int i = 0; i < N; i++) {
+        C[i] -= nuj[i] * ajX[j] * a_dt;
+      }
+    }
+  };
+
+  // Lambda that computes the each equation.
+  auto computeF = [&](double* F, const double* Xit, const double* C) -> void {
+    // Compute the propensities for the input state. This requires us to round to the nearest integer.
+    std::vector<T> linState(N);
+    for (int i = 0; i < N; i++) {
+      linState[i] = static_cast<T>(llround(Xit[i]));
+    }
+
+    State state = a_state;
+    state.linearIn(linState);
+
+    const std::vector<Real> ajXit = this->propensities(state);
+
+    // Compute Xit - c - dt * sum_j nu_j * aj(round(Xit))
+    for (int i = 0; i < N; i++) {
+      F[i] = Xit[i] - C[i];
+    }
+
+    for (int j = 0; j < M; j++) {
+      const std::vector<T>& nuj = nu[j];
+
+      for (int i = 0; i < N; i++) {
+        F[i] -= a_dt * nuj[i] * ajXit[j];
+      }
+    }
+  };
 
   // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
-  double* J = new double[N * N];
-  double* X = new double[N];
-  double* F = new double[N];
-  double* c = new double[N];
+  double* J  = new double[N * N];
+  double* X  = new double[N];
+  double* dX = new double[N];
+  double* F  = new double[N];
+  double* C  = new double[N];
 
+  // Temporary storage used for computing the Jacobian matrix.
+  double* X1 = new double[N];
+  double* X2 = new double[N];
+  double* F1 = new double[N];
+  double* F2 = new double[N];
+
+  // Things that are required by LAPACK
+  int  INFO = 0;
+  int* IPIV = new int[N];
+
+  // Compute the constant term.
+  compConstantTerm(C, X, a_state, a_dt);
+
+// Iteration loop.
+#warning "KMCSolver::implicitEuler -- must exit when converged"
+  for (int k = 0; k < 100; k++) {
+
+    // Compute the Jacobian.
+    for (int i = 0; i < N; i++) {
+      X1[i] = X[i];
+      X2[i] = X[i] + 1.0;
+
+      computeF(F1, X1, C);
+      computeF(F2, X2, C);
+
+      for (int j = 0; j < N; j++) {
+        const int k = j * k + i;
+
+        J[i + j * k] = F2[j] - F1[j];
+      }
+    }
+
+    // Compute F
+    computeF(F, X, C);
+
+    // Solve J*dX = F
+    dgesv_((int*)&N, (int*)&M, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
+
+    if (INFO != 0) {
+      pout() << "CD_KMCSolverImplem.H in KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b" << endl;
+    }
+
+    // Increment and move on to next iteration.
+    for (int i = 0; i < N; i++) {
+      X[i] = X[i] + F[i];
+    }
+  }
+
+  // Turn X into an integer state.
+  std::vector<T> outputState(N, 0);
+
+  for (int i = 0; i < N; i++) {
+    outputState[i] = static_cast<T>(llround(X[i]));
+  }
+
+  a_state.linearIn(outputState);
+
+  // Cleanup
   delete[] J;
   delete[] X;
+  delete[] dX;
   delete[] F;
-  delete[] c;
+  delete[] C;
+
+  delete[] X1;
+  delete[] X2;
+  delete[] F1;
+  delete[] F2;
 
   return;
 }

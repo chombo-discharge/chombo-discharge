@@ -38,12 +38,12 @@ public:
   /*!
     @brief Copy constructor
   */
-  inline KMCDualState(KMCDualState&) = default;
+  inline KMCDualState(const KMCDualState&) = default;
 
   /*!
     @brief Disallowed move constructor
   */
-  inline KMCDualState(KMCDualState&&) = delete;
+  inline KMCDualState(const KMCDualState&&) = delete;
 
   /*!
     @brief Full constructor. 

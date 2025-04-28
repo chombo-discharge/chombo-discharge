@@ -112,6 +112,15 @@ public:
   setSolverParameters(const T a_numCrit, const T a_numSSA, const Real a_eps, const Real a_SSAlim) noexcept;
 
   /*!
+    @brief Compute the state vector changes for all reactions.
+    @param[in] a_state Input state.
+    @param[in] a_reactions Reaction list.
+    @note The input parameter a_state can be a dummy state because the state change vector does not depend on it. 
+  */
+  inline std::vector<std::vector<T>>
+  getNu(const State& a_state, const ReactionList& a_reactions) const noexcept;
+
+  /*!
     @brief Compute propensities for ALL reactions
     @param[in] a_state State vector
     @note Calls the other version with m_reactions.
@@ -429,6 +438,13 @@ protected:
     @brief Threshold for switching to SSA-based algorithm within the Cao algorithm. 
   */
   Real m_SSAlim;
+
+  /*!
+    @brief List of state changes for each reaction.
+    @note The outer vector corresponds to the reactive index. The inner vector describes the change in the population of the
+    state vector, with an indexing given by the State's linearIn/linearOut functions. 
+  */
+  std::vector<std::vector<int>> m_nu;
 };
 
 #include <CD_NamespaceFooter.H>
