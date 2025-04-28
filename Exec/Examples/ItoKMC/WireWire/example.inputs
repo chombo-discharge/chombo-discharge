@@ -276,7 +276,7 @@ ItoKMCJSON.Ncrit              = 5              ## How many firings away from a N
 ItoKMCJSON.prop_eps           = 1.E99          ## Maximum relative change in propensity function
 ItoKMCJSON.NSSA               = 10             ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSAlim             = 1.0            ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = tau_plain      ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.algorithm          = explicit_euler ## Integration algorithm
 
 
 # ====================================================================================================

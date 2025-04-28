@@ -694,7 +694,8 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 #warning "KMCSolver::implicitEuler -- must have convergence exit (in all variables?)"
   for (int k = 0; k < 10; k++) {
 
-    // Numerically computed the Jacobian using finite differences.
+    // Numerically computed the Jacobian using finite differences. The Jacobian is given by
+    // Jij = dF_i/dx_j
     for (int j = 0; j < N; j++) {
 
       for (int s = 0; s < N; s++) {
@@ -749,6 +750,8 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   delete[] X2;
   delete[] F1;
   delete[] F2;
+
+  delete[] IPIV;
 
   return;
 }

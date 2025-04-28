@@ -389,12 +389,14 @@ namespace Physics {
       enum class Algorithm
       {
         SSA,
-	ExplicitEuler,
+        ExplicitEuler,
         Midpoint,
         PRC,
+        ImplicitEuler,
         HybridExplicitEuler,
         HybridMidpoint,
-        HybridPRC
+        HybridPRC,
+        HybridImplicitEuler
       };
 
       /*!

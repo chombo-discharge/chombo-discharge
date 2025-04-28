@@ -111,6 +111,7 @@ The following forms of tau-leaping are also supported:
 
 #. Midpoint tau-leaping.
 #. Poisson random-corrections tau-leaping.
+#. Implicit Euler-type tau-leaping. 
 
 These methods can be used either as standalone methods or together with the hybrid algorithm.
 

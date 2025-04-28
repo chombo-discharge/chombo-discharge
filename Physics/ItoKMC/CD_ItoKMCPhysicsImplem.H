@@ -246,16 +246,19 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   if (str == "ssa") {
     m_algorithm = Algorithm::SSA;
   }
-  else if (str == "tau_plain") {
+  else if (str == "explicit_euler") {
     m_algorithm = Algorithm::ExplicitEuler;
   }
-  else if (str == "tau_midpoint") {
+  else if (str == "midpoint") {
     m_algorithm = Algorithm::Midpoint;
   }
-  else if (str == "tau_prc") {
+  else if (str == "prc") {
     m_algorithm = Algorithm::PRC;
   }
-  else if (str == "hybrid_plain") {
+  else if (str == "implicit_euler") {
+    m_algorithm = Algorithm::ImplicitEuler;
+  }
+  else if (str == "hybrid_explicit_euler") {
     m_algorithm = Algorithm::HybridExplicitEuler;
   }
   else if (str == "hybrid_midpoint") {
@@ -263,6 +266,9 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   }
   else if (str == "hybrid_prc") {
     m_algorithm = Algorithm::HybridPRC;
+  }
+  else if (str == "hybrid_implicit_euler") {
+    m_algorithm = Algorithm::HybridImplicitEuler;
   }
   else {
     MayDay::Error("ItoKMCPhysics::parseAlgorithm - unknown algorithm requested");
