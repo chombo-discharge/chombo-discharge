@@ -689,20 +689,26 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
 // Iteration loop.
 #warning "KMCSolver::implicitEuler -- must exit when converged"
-  for (int k = 0; k < 50; k++) {
+#warning "KMCSolver::implicitEuler -- Jacobian loop needs lots of work!"
+#warning "KMCSolver::implicitEuler -- must have max iter"
+#warning "KMCSolver::implicitEuler -- must have convergence exit (in all variables?)"
+  for (int k = 0; k < 10; k++) {
 
-    // Compute the Jacobian.
-    for (int i = 0; i < N; i++) {
-      X1[i] = X[i];
-      X2[i] = X[i] + 1.0;
+    // Numerically computed the Jacobian using finite differences.
+    for (int j = 0; j < N; j++) {
+
+      for (int s = 0; s < N; s++) {
+        X1[s] = X[s];
+        X2[s] = X[s];
+      }
+
+      X2[j] += std::max(0.05 * X[j], 1.0);
 
       computeF(F1, X1, C);
       computeF(F2, X2, C);
 
-      for (int j = 0; j < N; j++) {
-        const int k = j * k + i;
-
-        J[i + j * k] = F2[j] - F1[j];
+      for (int i = 0; i < N; i++) {
+        J[i + j * N] = F2[i] - F1[i];
       }
     }
 
@@ -718,7 +724,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
       MayDay::Abort(err);
     }
 
-    // Increment and move on to next iteration.
+    // Increment and move on to next iteration if necessary.
     for (int i = 0; i < N; i++) {
       X[i] = X[i] + F[i];
     }
@@ -864,6 +870,13 @@ KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
   case KMCLeapPropagator::PRC: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
       this->stepPRC(s, r, dt);
+    });
+
+    break;
+  }
+  case KMCLeapPropagator::ImplicitEuler: {
+    this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
+      this->stepImplicitEuler(s, r, dt);
     });
 
     break;
