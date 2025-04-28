@@ -379,6 +379,11 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
     break;
   }
+  case Algorithm::ImplicitEuler: {
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::ImplicitEuler);
+
+    break;
+  }
   case Algorithm::HybridExplicitEuler: {
     m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::ExplicitEuler);
 
@@ -391,6 +396,11 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   }
   case Algorithm::HybridPRC: {
     m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::PRC);
+
+    break;
+  }
+  case Algorithm::HybridImplicitEuler: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::ImplicitEuler);
 
     break;
   }
