@@ -680,12 +680,13 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
   // Things that are required by LAPACK
   int  INFO = 0;
+  int  NRHS = 1;
   int* IPIV = new int[N];
 
   // Compute the constant term.
   compConstantTerm(C, X, a_state, a_dt);
 
-// Iteration loop.
+  // Newton iteration loop
 #warning "KMCSolver::implicitEuler -- must exit when converged"
 #warning "KMCSolver::implicitEuler -- Jacobian loop needs lots of work!"
 #warning "KMCSolver::implicitEuler -- must have max iter"
@@ -715,7 +716,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
     computeF(F, X, C);
 
     // Solve J*dX = F
-    dgesv_((int*)&N, (int*)&N, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
+    dgesv_((int*)&N, (int*)&NRHS, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
 
     if (INFO != 0) {
       const auto err = "CD_KMCSolverImplem.H in KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b";
@@ -730,7 +731,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   }
 
   // Turn X into an integer state.
-  std::vector<T> outputState(N, 0);
+  std::vector<T> outputState(N, T(0));
 
   for (int i = 0; i < N; i++) {
     outputState[i] = static_cast<T>(llround(X[i]));
