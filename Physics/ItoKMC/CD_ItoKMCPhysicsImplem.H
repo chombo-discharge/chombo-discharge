@@ -343,6 +343,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   CH_assert(m_isDefined);
   CH_assert(m_hasKMCSolver);
 
+#warning "ItoKMCPhysics::advanceKMC -- this routine should have a debug hook which checks for charge conservation"
+
   std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
   std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
 
