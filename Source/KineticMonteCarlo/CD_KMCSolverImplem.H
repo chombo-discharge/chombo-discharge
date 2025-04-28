@@ -27,7 +27,11 @@
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver() noexcept
-{}
+{
+  CH_TIME("KMCSolver::KMCSolver");
+
+  this->setSolverParameters(0, 0, 100, std::numeric_limits<Real>::max(), 0.0, 1.E-6);
+}
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver(const ReactionList& a_reactions) noexcept
@@ -66,15 +70,12 @@ KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
 {
   CH_TIME("KMCSolver::setSolverParameters");
 
-#warning "KMCSolver::setSolverParameters -- must have max iter and exit tolerance for implicit solvers"
-
-  m_Ncrit  = a_Ncrit;
-  m_numSSA = a_numSSA;
-  m_eps    = a_eps;
-  m_SSAlim = a_SSAlim;
-
-  m_maxIter = 10;
-  m_exitTol = 1E-6;
+  m_Ncrit   = a_Ncrit;
+  m_numSSA  = a_numSSA;
+  m_maxIter = a_maxIter;
+  m_eps     = a_eps;
+  m_SSAlim  = a_SSAlim;
+  m_exitTol = a_exitTol;
 }
 
 template <typename R, typename State, typename T>
@@ -648,16 +649,17 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
   // Lambda that computes the each equation.
   auto computeF = [&](double* F, const double* Xit, const double* C) -> void {
-    // Compute the propensities for the input state. This requires us to round to the nearest integer.
+    // Compute the propensities for the Xit state. This requires us to round to the nearest integer.
+    State stateXit = a_state;
+
     std::vector<T> linState(N);
     for (int i = 0; i < N; i++) {
       linState[i] = static_cast<T>(llround(Xit[i]));
     }
 
-    State state = a_state;
-    state.linearIn(linState);
+    stateXit.linearIn(linState);
 
-    const std::vector<Real> ajXit = this->propensities(state);
+    const std::vector<Real> ajXit = this->propensities(stateXit);
 
     // Compute Xit - c - dt * sum_j nu_j * aj(round(Xit))
     for (int i = 0; i < N; i++) {
@@ -672,6 +674,21 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
       }
     }
   };
+
+  // Compute the max-norm
+  auto computeNorm = [&](double* F, const double* X, const double* C) -> Real {
+    computeF(F, X, C);
+
+    Real norm = 0.0;
+
+    for (int i = 0; i < N; i++) {
+      norm = std::max(norm, std::abs(F[i]));
+    }
+
+    return norm;
+  };
+
+#warning "Implicit Euler needs step rejection!"
 
   // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
   double* J = new double[N * N];
@@ -693,11 +710,15 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   // Compute the constant term.
   compConstantTerm(C, X, a_state, a_dt);
 
-  // Newton iteration loop
-#warning "KMCSolver::implicitEuler -- must exit when converged"
-#warning "KMCSolver::implicitEuler -- Jacobian loop needs lots of work!"
-#warning "KMCSolver::implicitEuler -- must have max iter"
-#warning "KMCSolver::implicitEuler -- must have convergence exit (in all variables?)"
+  // Compute the max-norm of F(0) to use as an exit criterion.
+  for (int i = 0; i < N; i++) {
+    X1[i] = 0.0;
+  }
+
+  const Real initNorm = computeNorm(F, X1, C);
+
+  bool converged = true;
+
   for (int k = 0; k < m_maxIter; k++) {
 
     // Numerically computed the Jacobian using finite differences. The Jacobian is given by
@@ -709,39 +730,61 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
         X2[s] = X[s];
       }
 
-      X2[j] += std::max(0.05 * X[j], 1.0);
+      X2[j] += std::max(0.01 * X[j], 1.0);
 
       computeF(F1, X1, C);
       computeF(F2, X2, C);
 
       for (int i = 0; i < N; i++) {
-        J[i + j * N] = F2[i] - F1[i];
+        J[i + j * N] = (F2[i] - F1[i]) / (X2[j] - X1[j]);
       }
     }
 
     // Compute F
     computeF(F, X, C);
 
-    // Solve J*dX = F
+    // Solve J*dX = F, but note that the true system is J*dX = -F, so we invert the
+    // dX vector below.
     dgesv_((int*)&N, (int*)&NRHS, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
 
     if (INFO != 0) {
+#if 1 // Could not solve
       const auto err = "CD_KMCSolverImplem.H in KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b";
 
-      MayDay::Abort(err);
+      pout << err << endl;
+#endif
+      converged = false;
+
+      break;
+    }
+    else {
+      // Increment and move on to next iteration if necessary. Note that F = -dX as per the comment above.
+      for (int i = 0; i < N; i++) {
+        X[i] = X[i] - F[i];
+      }
     }
 
-    // Increment and move on to next iteration if necessary.
-    for (int i = 0; i < N; i++) {
-      X[i] = X[i] + F[i];
+    // Recompute the norm and exit if necessary.
+    const Real norm = computeNorm(F, X, C);
+
+    if (norm / initNorm < m_exitTol) {
+      break;
     }
   }
 
   // Turn X into an integer state.
-  std::vector<T> outputState(N, T(0));
+  std::vector<T> outputState(N);
 
-  for (int i = 0; i < N; i++) {
-    outputState[i] = static_cast<T>(llround(X[i]));
+  if (converged) {
+    for (int i = 0; i < N; i++) {
+      outputState[i] = static_cast<T>(llround(X[i]));
+    }
+  }
+  else {
+    // Set X to (what is hopefully) an invalid state and rely on step rejection.
+    for (int i = 0; i < N; i++) {
+      outputState[i] = static_cast<T>(-1);
+    }
   }
 
   a_state.linearIn(outputState);

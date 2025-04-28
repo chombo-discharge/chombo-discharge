@@ -113,7 +113,7 @@ public:
   inline void
   setSolverParameters(const T    a_numCrit,
                       const T    a_numSSA,
-                      const T    a_maxIter,		      
+                      const T    a_maxIter,
                       const Real a_eps,
                       const Real a_SSAlim,
                       const Real a_exitTol) noexcept;
@@ -435,11 +435,11 @@ protected:
     @brief Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. 
   */
   T m_numSSA;
-  
+
   /*!
     @brief Maximum number of iterations for implicit solvers
   */
-  T m_maxIter;  
+  T m_maxIter;
 
   /*!
     @brief Maximum permitted change in propensities for non-critical reactions. 
@@ -450,7 +450,6 @@ protected:
     @brief Threshold for switching to SSA-based algorithm within the Cao algorithm. 
   */
   Real m_SSAlim;
-
 
   /*!
     @brief Exit tolerance for implicit solvers
