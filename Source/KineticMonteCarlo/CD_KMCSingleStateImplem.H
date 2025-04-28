@@ -72,13 +72,15 @@ KMCSingleState<T>::operator[](const size_t a_idx) const noexcept
 
 template <typename T>
 inline std::vector<T>
-KMCSingleState<T>::linearOut() const noexcept {
+KMCSingleState<T>::linearOut() const noexcept
+{
   return m_state;
 }
 
 template <typename T>
 inline void
-KMCSingleState<T>::linearIn(const std::vector<T>& a_linearizedState) noexcept {
+KMCSingleState<T>::linearIn(const std::vector<T>& a_linearizedState) noexcept
+{
   m_state = a_linearizedState;
 }
 
