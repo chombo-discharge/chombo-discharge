@@ -86,7 +86,7 @@ KMCSolver<R, State, T>::getNu(const State& a_state, const ReactionList& a_reacti
 
     std::vector<T> preState = state.linearOut();
     for (auto& x : preState) {
-      x = static_cast<T>(100);
+      x = static_cast<T>(0);
     }
     state.linearIn(preState);
 
@@ -97,10 +97,8 @@ KMCSolver<R, State, T>::getNu(const State& a_state, const ReactionList& a_reacti
 
     // Compute the state change vector.
     nu.resize(preState.size());
-    if (procID() == 0) {
-      for (int i = 0; i < preState.size(); i++) {
-        nu[i] = postState[i] - preState[i];
-      }
+    for (int i = 0; i < preState.size(); i++) {
+      nu[i] = postState[i] - preState[i];
     }
   }
 

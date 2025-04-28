@@ -86,7 +86,6 @@ template <typename T>
 inline void
 KMCDualState<T>::linearIn(const std::vector<T>& a_linearizedState) noexcept
 {
-
   for (size_t i = 0; i < m_numReactiveSpecies; i++) {
     m_reactiveState[i] = a_linearizedState[i];
   }
