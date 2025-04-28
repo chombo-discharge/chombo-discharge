@@ -669,11 +669,10 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   };
 
   // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
-  double* J  = new double[N * N];
-  double* X  = new double[N];
-  double* dX = new double[N];
-  double* F  = new double[N];
-  double* C  = new double[N];
+  double* J = new double[N * N];
+  double* X = new double[N];
+  double* F = new double[N];
+  double* C = new double[N];
 
   // Temporary storage used for computing the Jacobian matrix.
   double* X1 = new double[N];
@@ -690,7 +689,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
 // Iteration loop.
 #warning "KMCSolver::implicitEuler -- must exit when converged"
-  for (int k = 0; k < 10; k++) {
+  for (int k = 0; k < 50; k++) {
 
     // Compute the Jacobian.
     for (int i = 0; i < N; i++) {
@@ -711,10 +710,12 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
     computeF(F, X, C);
 
     // Solve J*dX = F
-    dgesv_((int*)&N, (int*)&M, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
+    dgesv_((int*)&N, (int*)&N, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
 
     if (INFO != 0) {
-      pout() << "CD_KMCSolverImplem.H in KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b" << endl;
+      const auto err = "CD_KMCSolverImplem.H in KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b";
+
+      MayDay::Abort(err);
     }
 
     // Increment and move on to next iteration.
@@ -735,7 +736,6 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   // Cleanup
   delete[] J;
   delete[] X;
-  delete[] dX;
   delete[] F;
   delete[] C;
 
