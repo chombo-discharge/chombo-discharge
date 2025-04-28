@@ -67,9 +67,11 @@ main(int argc, char* argv[])
   // Read input variables
   Real SSAlim   = 0.1;
   Real eps      = 0.3;
+  Real exitTol  = 1.E-6;
   int  numSteps = 100;
   int  numCrit  = 5;
   int  numSSA   = 5;
+  int  maxIter  = 5;
 
   std::string alg;
 
@@ -79,11 +81,13 @@ main(int argc, char* argv[])
   pp.get("num_ssa", numSSA);
   pp.get("eps", eps);
   pp.get("ssa_lim", SSAlim);
+  pp.get("max_iter", maxIter);
+  pp.get("exit_tol", exitTol);
 
   // Define the Kinetic Monte Carlo solver and run it until the stop time.
   KMCSolverType kmcSolver(reactionList);
 
-  kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
+  kmcSolver.setSolverParameters(numCrit, numSSA, maxIter, eps, SSAlim, exitTol);
 
   // Run the SSA algorithm
   Real curDt    = 0.0;
@@ -116,7 +120,7 @@ main(int argc, char* argv[])
       nextDt = stopTime / numSteps;
 
       kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ImplicitEuler);
-    }    
+    }
     else if (alg == "hybrid_explicit_euler") {
       nextDt = stopTime / numSteps;
 
@@ -136,7 +140,7 @@ main(int argc, char* argv[])
       nextDt = stopTime / numSteps;
 
       kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ImplicitEuler);
-    }    
+    }
     else {
       const std::string err = "algorithm '" + alg + "' is not supported";
 

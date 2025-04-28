@@ -8,7 +8,9 @@ algorithm = explicit_euler
 nsteps = 100
 
 # Settings for hybrid SSA/tau algorithm (i.e., the Cao algorithm)
-num_crit = 5
-eps = 0.03
-num_ssa = 10
-ssa_lim = 5.0
+num_crit	= 5
+eps		= 0.03
+num_ssa		= 10
+ssa_lim		= 5.0
+max_iter	= 15
+exit_tol	= 1.E-6

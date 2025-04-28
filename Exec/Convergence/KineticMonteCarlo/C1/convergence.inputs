@@ -16,7 +16,9 @@ initial_particles = 20000000
 algorithm = explicit_euler
 
 # Settings for hybrid SSA/tau algoriuhm (i.e., the Cao algorithm)
-num_crit = 10
-eps = 2.0
-num_ssa = 10
-ssa_lim = 5.0
+num_crit	= 10
+eps		= 2.0
+num_ssa		= 10
+ssa_lim		= 5.0
+max_iter	= 15
+exit_tol	= 1.E-6

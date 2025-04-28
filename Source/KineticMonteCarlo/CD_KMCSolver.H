@@ -48,7 +48,7 @@ enum class KMCLeapPropagator
   4. std::<some_container> getReactants() const -> Get reactants involved in the reactions.
   5. T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
 
-  The template parameter T should agree across both both R, State, and KMCSolver. 
+  The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.
 */
 template <typename R, typename State, typename T = long long>
 class KMCSolver

@@ -43,10 +43,12 @@ main(int argc, char* argv[])
   Real stopTime = 0.0;
   Real SSAlim   = 0.1;
   Real eps      = 0.3;
+  Real exitTol  = 1.E-6;
   int  numRuns  = 1;
   int  initVal  = 0;
   int  numCrit  = 5;
   int  numSSA   = 5;
+  int  maxIter  = 15;
 
   Vector<int> numSteps;
 
@@ -61,14 +63,16 @@ main(int argc, char* argv[])
   pp.get("algorithm", alg);
   pp.get("num_crit", numCrit);
   pp.get("num_ssa", numSSA);
+  pp.get("max_iter", maxIter);
   pp.get("eps", eps);
   pp.get("ssa_lim", SSAlim);
+  pp.get("exit_tol", exitTol);
   pp.getarr("nsteps", numSteps, 0, pp.countval("nsteps"));
 
   // Define the Kinetic Monte Carlo solver and run it until time = 10.
   KMCSolverType kmcSolver(reactionList);
 
-  kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
+  kmcSolver.setSolverParameters(numCrit, numSSA, maxIter, eps, SSAlim, exitTol);
 
   const Real effRate = ionizationRate - attachmentRate;
 

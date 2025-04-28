@@ -240,10 +240,10 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   std::string str;
 
   pp.get("algorithm", str);
-  pp.get("Ncrit", m_Ncrit);
-  pp.get("NSSA", m_NSSA);
+  pp.get("crit_num", m_Ncrit);
+  pp.get("SSA_num", m_NSSA);
   pp.get("prop_eps", m_eps);
-  pp.get("SSAlim", m_SSAlim);
+  pp.get("SSA_lim", m_SSAlim);
   pp.get("max_iter", m_maxIter);
   pp.get("exit_tolerance", m_exitTol);
 
