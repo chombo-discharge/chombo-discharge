@@ -690,7 +690,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
 // Iteration loop.
 #warning "KMCSolver::implicitEuler -- must exit when converged"
-  for (int k = 0; k < 100; k++) {
+  for (int k = 0; k < 10; k++) {
 
     // Compute the Jacobian.
     for (int i = 0; i < N; i++) {
