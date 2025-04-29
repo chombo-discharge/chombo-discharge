@@ -688,8 +688,6 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
     return norm;
   };
 
-#warning "Implicit Euler needs step rejection!"
-
   // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
   double* J = new double[N * N];
   double* X = new double[N];

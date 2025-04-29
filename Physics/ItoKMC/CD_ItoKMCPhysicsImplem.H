@@ -347,8 +347,6 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   CH_assert(m_isDefined);
   CH_assert(m_hasKMCSolver);
 
-#warning "ItoKMCPhysics::advanceKMC -- this routine should have a debug hook which checks for charge conservation"
-
   std::vector<FPR>& kmcParticles = m_kmcState.getReactiveState();
   std::vector<FPR>& kmcPhotons   = m_kmcState.getNonReactiveState();
 
@@ -359,6 +357,43 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   for (auto& p : kmcPhotons) {
     p = 0LL;
   }
+
+  // Lambda function used for computing charge before and after reactions. Used only in debug mode
+  // for ensuring that nothing goes wrong with charge conservation in the chemistry integration.
+  auto computeCharge = [&]() -> long long {
+    long long Q = 0.0;
+    for (int i = 0; i < kmcParticles.size(); i++) {
+      const SpeciesType& speciesType  = m_speciesMap.at(i).first;
+      const int&         speciesIndex = m_speciesMap.at(i).second;
+
+      int Z = 0;
+
+      switch (speciesType) {
+      case SpeciesType::Ito: {
+        Z = m_itoSpecies[speciesIndex]->getChargeNumber();
+
+        break;
+      }
+      case SpeciesType::CDR: {
+        Z = m_cdrSpecies[speciesIndex]->getChargeNumber();
+
+        break;
+      }
+      default: {
+        MayDay::Abort("ItoKMCPhysics::advanceKMC -- logic bust in computeCharge()");
+
+        break;
+      }
+      }
+
+      Q += llround(kmcParticles[i]) * Z;
+    }
+
+    return Q;
+  };
+
+  // In debug mode, compute the total charge.
+  const long long chargeBefore = m_debug ? computeCharge() : 0LL;
 
   // Update the reaction rates to be used by the KMC solver.
   this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
@@ -421,6 +456,12 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
+  }
+
+  const long long chargeAfter = m_debug ? computeCharge() : 0LL;
+
+  if (chargeAfter != chargeBefore) {
+    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
   // Compute the critical and non-critical time steps
