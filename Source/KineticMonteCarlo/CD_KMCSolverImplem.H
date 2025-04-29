@@ -749,9 +749,9 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
     if (INFO != 0) {
 #if 1 // Could not solve
-      const auto err = "CD_KMCSolverImplem.H in KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b";
+      const std::string err = "KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b";
 
-      pout << err << endl;
+      pout() << err << endl;
 #endif
       converged = false;
 
