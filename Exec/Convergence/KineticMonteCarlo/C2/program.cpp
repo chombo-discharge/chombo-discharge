@@ -67,9 +67,11 @@ main(int argc, char* argv[])
   // Read input variables
   Real SSAlim   = 0.1;
   Real eps      = 0.3;
+  Real exitTol  = 1.E-6;
   int  numSteps = 100;
   int  numCrit  = 5;
   int  numSSA   = 5;
+  int  maxIter  = 15;
 
   std::string alg;
 
@@ -77,13 +79,15 @@ main(int argc, char* argv[])
   pp.get("algorithm", alg);
   pp.get("num_crit", numCrit);
   pp.get("num_ssa", numSSA);
+  pp.get("max_iter", maxIter);
   pp.get("eps", eps);
   pp.get("ssa_lim", SSAlim);
+  pp.get("exit_tol", exitTol);
 
   // Define the Kinetic Monte Carlo solver and run it until the stop time.
   KMCSolverType kmcSolver(reactionList);
 
-  kmcSolver.setSolverParameters(numCrit, numSSA, eps, SSAlim);
+  kmcSolver.setSolverParameters(numCrit, numSSA, maxIter, eps, SSAlim, exitTol);
 
   // Run the SSA algorithm
   Real curDt    = 0.0;
@@ -97,28 +101,38 @@ main(int argc, char* argv[])
 
       kmcSolver.stepSSA(state);
     }
-    else if (alg == "tau_plain") {
+    else if (alg == "explicit_euler") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTauPlain(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
-    else if (alg == "tau_midpoint") {
+    else if (alg == "midpoint") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceTauMidpoint(state, nextDt);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::Midpoint);
     }
-    else if (alg == "hybrid_plain") {
+    else if (alg == "prc") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauPlain);
+      kmcSolver.advanceTau(state, nextDt, KMCLeapPropagator::PRC);
+    }
+    else if (alg == "hybrid_explicit_euler") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::ExplicitEuler);
     }
     else if (alg == "hybrid_midpoint") {
       nextDt = stopTime / numSteps;
 
-      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::TauMidpoint);
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::Midpoint);
+    }
+    else if (alg == "hybrid_prc") {
+      nextDt = stopTime / numSteps;
+
+      kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
     }
     else {
-      const std::string err = "Expected algorithm to be 'ssa', 'tau', or 'hybrid' but got '" + alg + "'";
+      const std::string err = "Don't know the algoritm '" + alg + "'";
 
       MayDay::Error(err.c_str());
     }

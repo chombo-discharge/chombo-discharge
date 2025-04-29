@@ -282,11 +282,13 @@ ItoKMCJSON.chemistry_file     = simple_air_chemistry.json ## Chemistry file
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 16                      ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons    = 32                      ## Maximum number of computational photons to produce in reaction step	
-ItoKMCJSON.Ncrit              = -1                       ## How many firings away from a Negative particle number?
+ItoKMCJSON.crit_num           = -1                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 5.0                   ## Maximum relative change in propensity function
-ItoKMCJSON.NSSA               = 5                      ## How many SSA steps to run when tau-leaping is inefficient
-ItoKMCJSON.SSAlim             = 5.0                     ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.algorithm          = tau_plain         ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
+ItoKMCJSON.SSA_num            = 5                      ## How many SSA steps to run when tau-leaping is inefficient
+ItoKMCJSON.SSA_lim            = 5.0                     ## When to enter SSA instead of tau-leaping
+ItoKMCJSON.max_iter           = 50              ## Maximum number of iterations for implicit algorithms
+ItoKMCJSON.exit_tolerance     = 1.E-6           ## Exit tolerance for implicit algorithms
+ItoKMCJSON.algorithm          = explicit_euler         ## Integration algorithm
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS

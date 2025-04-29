@@ -22,11 +22,16 @@
 // Our includes
 #include <CD_Random.H>
 #include <CD_KMCSolver.H>
+#include <CD_LaPackUtils.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver() noexcept
-{}
+{
+  CH_TIME("KMCSolver::KMCSolver");
+
+  this->setSolverParameters(0, 0, 100, std::numeric_limits<Real>::max(), 0.0, 1.E-6);
+}
 
 template <typename R, typename State, typename T>
 inline KMCSolver<R, State, T>::KMCSolver(const ReactionList& a_reactions) noexcept
@@ -51,22 +56,61 @@ KMCSolver<R, State, T>::define(const ReactionList& a_reactions) noexcept
   m_reactions = a_reactions;
 
   // Default settings. These are equivalent to ALWAYS using tau-leaping.
-  this->setSolverParameters(0, 0, std::numeric_limits<Real>::max(), 0.0);
+  this->setSolverParameters(0, 0, 100, std::numeric_limits<Real>::max(), 0.0, 1.E-6);
 }
 
 template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
                                             const T    a_numSSA,
+                                            const T    a_maxIter,
                                             const Real a_eps,
-                                            const Real a_SSAlim) noexcept
+                                            const Real a_SSAlim,
+                                            const Real a_exitTol) noexcept
 {
   CH_TIME("KMCSolver::setSolverParameters");
 
-  m_Ncrit  = a_Ncrit;
-  m_numSSA = a_numSSA;
-  m_eps    = a_eps;
-  m_SSAlim = a_SSAlim;
+  m_Ncrit   = a_Ncrit;
+  m_numSSA  = a_numSSA;
+  m_maxIter = a_maxIter;
+  m_eps     = a_eps;
+  m_SSAlim  = a_SSAlim;
+  m_exitTol = a_exitTol;
+}
+
+template <typename R, typename State, typename T>
+inline std::vector<std::vector<T>>
+KMCSolver<R, State, T>::getNu(const State& a_state, const ReactionList& a_reactions) const noexcept
+{
+  CH_TIME("KMCSolver::getNu(State)");
+
+  std::vector<std::vector<T>> ret(a_reactions.size());
+
+  for (int j = 0; j < a_reactions.size(); j++) {
+    std::vector<T>& nu = ret[j];
+
+    // Linearize a trivial state
+    State state = a_state;
+
+    std::vector<T> preState = state.linearOut();
+    for (auto& x : preState) {
+      x = static_cast<T>(0);
+    }
+    state.linearIn(preState);
+
+    // Advance with exactly one reaction.
+    a_reactions[j]->advanceState(state, static_cast<T>(1));
+
+    std::vector<T> postState = state.linearOut();
+
+    // Compute the state change vector.
+    nu.resize(preState.size());
+    for (int i = 0; i < preState.size(); i++) {
+      nu[i] = postState[i] - preState[i];
+    }
+  }
+
+  return ret;
 }
 
 template <typename R, typename State, typename T>
@@ -312,295 +356,6 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::stepTauPlain(State& a_state, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::stepTauPlain(State, Real)");
-
-  this->stepTauPlain(a_state, m_reactions, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::stepTauPlain(State, ReactionList, Real)");
-
-  const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
-
-  this->stepTauPlain(a_state, a_reactions, propensities, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepTauPlain(State&                   a_state,
-                                     const ReactionList&      a_reactions,
-                                     const std::vector<Real>& a_propensities,
-                                     const Real               a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::stepTauPlain(State, ReactionList, std::vector<Real>, Real)");
-
-  CH_assert(a_reactions.size() == a_propensities.size());
-
-  if (a_reactions.size() > 0) {
-    for (size_t i = 0; i < a_reactions.size(); i++) {
-
-      // Number of reactions is always an integer -- draw from a Poisson distribution in long long. I'm just
-      // using a large integer type to avoid potential overflows.
-      const T numReactions = (T)Random::getPoisson<long long>(a_propensities[i] * a_dt);
-
-      a_reactions[i]->advanceState(a_state, numReactions);
-    }
-  }
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::advanceTauPlain(State& a_state, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::advanceTauPlain(State, ReactionList)");
-
-  this->advanceTauPlain(a_state, m_reactions, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::advanceTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::advanceTauPlain(State, ReactionList, Real)");
-
-  if (a_reactions.size() > 0) {
-    Real curTime = 0.0;
-    Real curDt   = a_dt;
-
-    while (curTime < a_dt) {
-
-      // Try big time step first.
-      curDt = a_dt - curTime;
-
-      bool valid = false;
-
-      // Substepping so we end up with a valid state.
-      while (!valid) {
-
-        State state = a_state;
-
-        // Do a tau-leaping step.
-        this->stepTauPlain(state, a_reactions, curDt);
-
-        // If this was a valid step, accept it. Else reduce dt.
-        valid = state.isValidState();
-
-        if (valid) {
-          a_state = state;
-
-          curTime += curDt;
-        }
-        else {
-          curDt *= 0.5;
-        }
-      }
-    }
-  }
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::stepTauMidpoint(State&, const Real)");
-
-  this->stepTauMidpoint(a_state, m_reactions, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
-{
-  CH_TIMERS("KMCSolver::stepTauMidpoint(State&, const ReactionList&, const Real)");
-  CH_TIMER("KMCSolver::stepTauMidPoint::first_loop", t1);
-  CH_TIMER("KMCSolver::stepTauMidPoint::second_loop", t2);
-
-  const int numReactions = a_reactions.size();
-
-  if (numReactions > 0) {
-
-    std::vector<Real> propensities = this->propensities(a_state, a_reactions);
-
-    State Xdagger = a_state;
-
-    CH_START(t1);
-    for (size_t i = 0; i < numReactions; i++) {
-      // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
-      //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
-      a_reactions[i]->advanceState(Xdagger, (T)std::ceil(0.5 * propensities[i] * a_dt));
-    }
-    CH_STOP(t1);
-
-    propensities = this->propensities(Xdagger, a_reactions);
-
-    CH_START(t2);
-    for (size_t i = 0; i < numReactions; i++) {
-      const T curReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
-
-      a_reactions[i]->advanceState(a_state, curReactions);
-    }
-    CH_STOP(t2);
-  }
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::advanceTauMidpoint(State& a_state, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::advanceTauMidpoint(State&, const Real)");
-
-  this->advanceTauMidpoint(a_state, m_reactions, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::advanceTauMidpoint(State&              a_state,
-                                           const ReactionList& a_reactions,
-                                           const Real          a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::advanceTauMidpoint(State&, const ReactionList&, const Real)");
-
-  if (a_reactions.size() > 0) {
-    Real curTime = 0.0;
-    Real curDt   = a_dt;
-
-    while (curTime < a_dt) {
-
-      // Try big time step first.
-      curDt = a_dt - curTime;
-
-      bool valid = false;
-
-      // Substepping so we end up with a valid state.
-      while (!valid) {
-
-        State state = a_state;
-
-        // Do a tau-leaping step.
-        this->stepTauMidpoint(state, a_reactions, curDt);
-
-        // If this was a valid step, accept it. Else reduce dt.
-        valid = state.isValidState();
-
-        if (valid) {
-          a_state = state;
-
-          curTime += curDt;
-        }
-        else {
-          curDt *= 0.5;
-        }
-      }
-    }
-  }
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepTauPRC(State& a_state, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::stepTauPRC(State&, const Real)");
-
-  this->stepTauPRC(a_state, m_reactions, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
-{
-  CH_TIMERS("KMCSolver::stepTauPRC(State&, const ReactionList&, const Real)");
-  CH_TIMER("KMCSolver::stepTauPRC::first_loop", t1);
-  CH_TIMER("KMCSolver::stepTauPRC::second_loop", t2);
-
-  const int numReactions = a_reactions.size();
-
-  if (numReactions > 0) {
-
-    std::vector<Real> aj = this->propensities(a_state, a_reactions);
-
-    const std::vector<Real> ak = aj;
-
-    CH_START(t1);
-    for (int j = 0; j < numReactions; j++) {
-      for (int k = 0; k < numReactions; k++) {
-        State x = a_state;
-
-        a_reactions[k]->advanceState(x, (T)1);
-
-        const Real etajk = a_reactions[j]->propensity(x) - ak[j];
-
-        aj[j] += 0.5 * a_dt * ak[k] * etajk;
-      }
-    }
-    CH_STOP(t1);
-
-    CH_START(t2);
-    for (size_t i = 0; i < numReactions; i++) {
-      const T nr = (T)Random::getPoisson<long long>(aj[i] * a_dt);
-
-      a_reactions[i]->advanceState(a_state, nr);
-    }
-    CH_STOP(t2);
-  }
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::advanceTauPRC(State&, const Real)");
-
-  this->advanceTauPRC(a_state, m_reactions, a_dt);
-}
-
-template <typename R, typename State, typename T>
-inline void
-KMCSolver<R, State, T>::advanceTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
-{
-  CH_TIME("KMCSolver::advanceTauPRC(State&, const ReactionList&, const Real)");
-
-  if (a_reactions.size() > 0) {
-    Real curTime = 0.0;
-    Real curDt   = a_dt;
-
-    while (curTime < a_dt) {
-
-      // Try big time step first.
-      curDt = a_dt - curTime;
-
-      bool valid = false;
-
-      // Substepping so we end up with a valid state.
-      while (!valid) {
-
-        State state = a_state;
-
-        // Do a tau-leaping step.
-        this->stepTauPRC(state, a_reactions, curDt);
-
-        // If this was a valid step, accept it. Else reduce dt.
-        valid = state.isValidState();
-
-        if (valid) {
-          a_state = state;
-
-          curTime += curDt;
-        }
-        else {
-          curDt *= 0.5;
-        }
-      }
-    }
-  }
-}
-
-template <typename R, typename State, typename T>
-inline void
 KMCSolver<R, State, T>::stepSSA(State& a_state) const noexcept
 {
   CH_TIME("KMCSolver::stepSSA(State, Real)");
@@ -705,6 +460,430 @@ KMCSolver<R, State, T>::advanceSSA(State& a_state, const ReactionList& a_reactio
 
 template <typename R, typename State, typename T>
 inline void
+KMCSolver<R, State, T>::stepExplicitEuler(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepExplicitEuler(State, Real)");
+
+  this->stepExplicitEuler(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepExplicitEuler(State&              a_state,
+                                          const ReactionList& a_reactions,
+                                          const Real          a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepExplicitEuler(State, ReactionList, std::vector<Real>, Real)");
+
+  CH_assert(a_dt > 0.0);
+
+  if (a_reactions.size() > 0) {
+    const std::vector<Real> propensities = this->propensities(a_state, a_reactions);
+
+    for (size_t i = 0; i < a_reactions.size(); i++) {
+
+      // Number of reactions is always an integer -- draw from a Poisson distribution in long long. I'm just
+      // using a large integer type to avoid potential overflows.
+      const T numReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
+
+      a_reactions[i]->advanceState(a_state, numReactions);
+    }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepMidpoint(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepMidpoint(State&, const Real)");
+
+  this->stepMidpoint(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+{
+  CH_TIMERS("KMCSolver::stepMidpoint(State&, const ReactionList&, const Real)");
+  CH_TIMER("KMCSolver::stepTauMidPoint::first_loop", t1);
+  CH_TIMER("KMCSolver::stepTauMidPoint::second_loop", t2);
+
+  const int numReactions = a_reactions.size();
+
+  if (numReactions > 0) {
+
+    std::vector<Real> propensities = this->propensities(a_state, a_reactions);
+
+    State Xdagger = a_state;
+
+    CH_START(t1);
+    for (size_t i = 0; i < numReactions; i++) {
+      // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
+      //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
+      a_reactions[i]->advanceState(Xdagger, (T)std::ceil(0.5 * propensities[i] * a_dt));
+    }
+    CH_STOP(t1);
+
+    propensities = this->propensities(Xdagger, a_reactions);
+
+    CH_START(t2);
+    for (size_t i = 0; i < numReactions; i++) {
+      const T curReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
+
+      a_reactions[i]->advanceState(a_state, curReactions);
+    }
+    CH_STOP(t2);
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepPRC(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepPRC(State&, const Real)");
+
+  this->stepPRC(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept
+{
+  CH_TIMERS("KMCSolver::stepPRC(State&, const ReactionList&, const Real)");
+  CH_TIMER("KMCSolver::stepPRC::first_loop", t1);
+  CH_TIMER("KMCSolver::stepPRC::second_loop", t2);
+
+  const int numReactions = a_reactions.size();
+
+  if (numReactions > 0) {
+
+    std::vector<Real> aj = this->propensities(a_state, a_reactions);
+
+    const std::vector<Real> ak = aj;
+
+    CH_START(t1);
+    for (int j = 0; j < numReactions; j++) {
+      for (int k = 0; k < numReactions; k++) {
+        State x = a_state;
+
+        a_reactions[k]->advanceState(x, (T)1);
+
+        const Real etajk = a_reactions[j]->propensity(x) - ak[j];
+
+        aj[j] += 0.5 * a_dt * ak[k] * etajk;
+      }
+    }
+    CH_STOP(t1);
+
+    CH_START(t2);
+    for (size_t i = 0; i < numReactions; i++) {
+      const T nr = (T)Random::getPoisson<long long>(aj[i] * a_dt);
+
+      a_reactions[i]->advanceState(a_state, nr);
+    }
+    CH_STOP(t2);
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepImplicitEuler(State& a_state, const Real a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepImplicitEuler(State, a_dt)");
+
+  this->stepImplicitEuler(a_state, m_reactions, a_dt);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
+                                          const ReactionList& a_reactions,
+                                          const Real          a_dt) const noexcept
+{
+  CH_TIME("KMCSolver::stepImplicitEuler(State, ReactionList, a_dt)");
+
+  // TLDR: The implicit Euler tau-leaping scheme is equivalent to the solution of
+  //
+  // F(X) = X - (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) - dt*sum_j nu_j a_j(X)
+  //      = X - c - dt*sum_j nu_j * a_j(X),
+  //      = 0
+  //
+  // where c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)]) is a constant term throughout the Newton iterations. This term is presampled
+  // before the Newton iterations begin.
+
+  // Linearize input state onto something understandable to LAPACK
+  const std::vector<T>              inputState = a_state.linearOut();
+  const std::vector<std::vector<T>> nu         = this->getNu(a_state, a_reactions);
+  const std::vector<Real>           ajX        = this->propensities(a_state, a_reactions);
+
+  // Number of equations and number of reactions.
+  const int N = inputState.size();
+  const int M = a_reactions.size();
+
+  // Lambda that computes the constant term c and the initial guess.
+  auto compConstantTerm = [&](double* C, double* X, const State& state, const Real a_dt) -> void {
+    // TLDR: To compute the constant term we perform a Poisson sampling and then linearize the output
+    // state.
+
+    State explicitEulerState = state;
+
+    this->advanceTau(explicitEulerState, a_reactions, a_dt, KMCLeapPropagator::ExplicitEuler);
+
+    const std::vector<T> eulerOut = explicitEulerState.linearOut();
+
+    // Make c = (x + sum_j (nu_j * (P(a(x)*dt) - a(x)*dt)])
+    for (int i = 0; i < N; i++) {
+      C[i] = 1.0 * eulerOut[i];
+      X[i] = 1.0 * eulerOut[i];
+    }
+
+    // Subtract the mean.
+    for (int j = 0; j < M; j++) {
+      const std::vector<T>& nuj = nu[j];
+
+      for (int i = 0; i < N; i++) {
+        C[i] -= nuj[i] * ajX[j] * a_dt;
+      }
+    }
+  };
+
+  // Lambda that computes the each equation.
+  auto computeF = [&](double* F, const double* Xit, const double* C) -> void {
+    // Compute the propensities for the Xit state. This requires us to round to the nearest integer.
+    State stateXit = a_state;
+
+    std::vector<T> linState(N);
+    for (int i = 0; i < N; i++) {
+      linState[i] = static_cast<T>(llround(Xit[i]));
+    }
+
+    stateXit.linearIn(linState);
+
+    const std::vector<Real> ajXit = this->propensities(stateXit);
+
+    // Compute Xit - c - dt * sum_j nu_j * aj(round(Xit))
+    for (int i = 0; i < N; i++) {
+      F[i] = Xit[i] - C[i];
+    }
+
+    for (int j = 0; j < M; j++) {
+      const std::vector<T>& nuj = nu[j];
+
+      for (int i = 0; i < N; i++) {
+        F[i] -= a_dt * nuj[i] * ajXit[j];
+      }
+    }
+  };
+
+  // Compute the max-norm
+  auto computeNorm = [&](double* F, const double* X, const double* C) -> Real {
+    computeF(F, X, C);
+
+    Real norm = 0.0;
+
+    for (int i = 0; i < N; i++) {
+      norm = std::max(norm, std::abs(F[i]));
+    }
+
+    return norm;
+  };
+
+  // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
+  double* J = new double[N * N];
+  double* X = new double[N];
+  double* F = new double[N];
+  double* C = new double[N];
+
+  // Temporary storage used for computing the Jacobian matrix.
+  double* X1 = new double[N];
+  double* X2 = new double[N];
+  double* F1 = new double[N];
+  double* F2 = new double[N];
+
+  // Things that are required by LAPACK
+  int  INFO = 0;
+  int  NRHS = 1;
+  int* IPIV = new int[N];
+
+  // Compute the constant term.
+  compConstantTerm(C, X, a_state, a_dt);
+
+  // Compute the max-norm of F(0) to use as an exit criterion.
+  for (int i = 0; i < N; i++) {
+    X1[i] = 0.0;
+  }
+
+  const Real initNorm = computeNorm(F, X1, C);
+
+  bool converged = true;
+
+  for (int k = 0; k < m_maxIter; k++) {
+
+    // Numerically computed the Jacobian using finite differences. The Jacobian is given by
+    // Jij = dF_i/dx_j
+    for (int j = 0; j < N; j++) {
+
+      for (int s = 0; s < N; s++) {
+        X1[s] = X[s];
+        X2[s] = X[s];
+      }
+
+      X2[j] += std::max(0.01 * X[j], 1.0);
+
+      computeF(F1, X1, C);
+      computeF(F2, X2, C);
+
+      for (int i = 0; i < N; i++) {
+        J[i + j * N] = (F2[i] - F1[i]) / (X2[j] - X1[j]);
+      }
+    }
+
+    // Compute F
+    computeF(F, X, C);
+
+    // Solve J*dX = F, but note that the true system is J*dX = -F, so we invert the
+    // dX vector below.
+    dgesv_((int*)&N, (int*)&NRHS, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
+
+    if (INFO != 0) {
+#if 1 // Could not solve
+      const std::string err = "KMCSolver<R, State, T>::stepImplicitEuler -- could not solve A*x = b";
+
+      pout() << err << endl;
+#endif
+      converged = false;
+
+      break;
+    }
+    else {
+      // Increment and move on to next iteration if necessary. Note that F = -dX as per the comment above.
+      for (int i = 0; i < N; i++) {
+        X[i] = X[i] - F[i];
+      }
+    }
+
+    // Recompute the norm and exit if necessary.
+    const Real norm = computeNorm(F, X, C);
+
+    if (norm / initNorm < m_exitTol) {
+      break;
+    }
+  }
+
+  // Turn X into an integer state.
+  std::vector<T> outputState(N);
+
+  if (converged) {
+    for (int i = 0; i < N; i++) {
+      outputState[i] = static_cast<T>(llround(X[i]));
+    }
+  }
+  else {
+    // Set X to (what is hopefully) an invalid state and rely on step rejection.
+    for (int i = 0; i < N; i++) {
+      outputState[i] = static_cast<T>(-1);
+    }
+  }
+
+  a_state.linearIn(outputState);
+
+  // Cleanup
+  delete[] J;
+  delete[] X;
+  delete[] F;
+  delete[] C;
+
+  delete[] X1;
+  delete[] X2;
+  delete[] F1;
+  delete[] F2;
+
+  delete[] IPIV;
+
+  return;
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceTau(State&                   a_state,
+                                   const Real&              a_dt,
+                                   const KMCLeapPropagator& a_leapPropagator) const noexcept
+{
+  CH_TIME("KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)");
+
+  this->advanceTau(a_state, m_reactions, a_dt, a_leapPropagator);
+}
+
+template <typename R, typename State, typename T>
+inline void
+KMCSolver<R, State, T>::advanceTau(State&                   a_state,
+                                   const ReactionList&      a_reactions,
+                                   const Real&              a_dt,
+                                   const KMCLeapPropagator& a_leapPropagator) const noexcept
+{
+  CH_TIME("KMCSolver::advanceTau(State, ReactionList, Real, KMCLeapPropagator)");
+
+  if (a_reactions.size() > 0) {
+    Real curTime = 0.0;
+    Real curDt   = a_dt;
+
+    while (curTime < a_dt) {
+
+      // Try big time step first.
+      curDt = a_dt - curTime;
+
+      bool valid = false;
+
+      // Substepping so we end up with a valid state.
+      while (!valid) {
+
+        State state = a_state;
+
+        // Do a tau-leaping step.
+        switch (a_leapPropagator) {
+        case KMCLeapPropagator::ExplicitEuler: {
+          this->stepExplicitEuler(state, a_reactions, curDt);
+
+          break;
+        }
+        case KMCLeapPropagator::Midpoint: {
+          this->stepMidpoint(state, a_reactions, curDt);
+
+          break;
+        }
+        case KMCLeapPropagator::PRC: {
+          this->stepPRC(state, a_reactions, curDt);
+
+          break;
+        }
+        case KMCLeapPropagator::ImplicitEuler: {
+          this->stepImplicitEuler(state, a_reactions, curDt);
+
+          break;
+        }
+        default: {
+          break;
+        }
+        }
+
+        // If this was a valid step, accept it. Else reduce dt.
+        valid = state.isValidState();
+
+        if (valid) {
+          a_state = state;
+
+          curTime += curDt;
+        }
+        else {
+          curDt *= 0.5;
+        }
+      }
+    }
+  }
+}
+
+template <typename R, typename State, typename T>
+inline void
 KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
                                       const Real               a_dt,
                                       const KMCLeapPropagator& a_leapPropagator) const noexcept
@@ -724,23 +903,30 @@ KMCSolver<R, State, T>::advanceHybrid(State&                   a_state,
   CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, KMCLeapPropagator)");
 
   switch (a_leapPropagator) {
-  case KMCLeapPropagator::TauPlain: {
+  case KMCLeapPropagator::ExplicitEuler: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
-      this->stepTauPlain(s, r, dt);
+      this->stepExplicitEuler(s, r, dt);
     });
 
     break;
   }
-  case KMCLeapPropagator::TauMidpoint: {
+  case KMCLeapPropagator::Midpoint: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
-      this->stepTauMidpoint(s, r, dt);
+      this->stepMidpoint(s, r, dt);
     });
 
     break;
   }
-  case KMCLeapPropagator::TauPRC: {
+  case KMCLeapPropagator::PRC: {
     this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
-      this->stepTauPRC(s, r, dt);
+      this->stepPRC(s, r, dt);
+    });
+
+    break;
+  }
+  case KMCLeapPropagator::ImplicitEuler: {
+    this->advanceHybrid(a_state, a_reactions, a_dt, [this](State& s, const ReactionList& r, const Real dt) {
+      this->stepImplicitEuler(s, r, dt);
     });
 
     break;

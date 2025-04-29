@@ -44,8 +44,10 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_Ncrit             = 5;
   m_eps               = 2.0;
   m_NSSA              = 5;
+  m_maxIter           = 10;
   m_SSAlim            = 5.0;
-  m_algorithm         = Algorithm::TauPlain;
+  m_exitTol           = 1.E-6;
+  m_algorithm         = Algorithm::ExplicitEuler;
   m_particlePlacement = ParticlePlacement::Random;
 }
 
@@ -116,7 +118,7 @@ ItoKMCPhysics::defineKMC() const noexcept
   }
 
   m_kmcSolver.define(m_kmcReactionsThreadLocal);
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_eps, m_SSAlim);
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, m_eps, m_SSAlim, m_exitTol);
   m_kmcState.define(m_itoSpecies.size() + m_cdrSpecies.size(), m_rtSpecies.size());
 
   m_hasKMCSolver = true;
@@ -238,31 +240,39 @@ ItoKMCPhysics::parseAlgorithm() noexcept
   std::string str;
 
   pp.get("algorithm", str);
-  pp.get("Ncrit", m_Ncrit);
-  pp.get("NSSA", m_NSSA);
+  pp.get("crit_num", m_Ncrit);
+  pp.get("SSA_num", m_NSSA);
   pp.get("prop_eps", m_eps);
-  pp.get("SSAlim", m_SSAlim);
+  pp.get("SSA_lim", m_SSAlim);
+  pp.get("max_iter", m_maxIter);
+  pp.get("exit_tolerance", m_exitTol);
 
   if (str == "ssa") {
     m_algorithm = Algorithm::SSA;
   }
-  else if (str == "tau_plain") {
-    m_algorithm = Algorithm::TauPlain;
+  else if (str == "explicit_euler") {
+    m_algorithm = Algorithm::ExplicitEuler;
   }
-  else if (str == "tau_midpoint") {
-    m_algorithm = Algorithm::TauMidpoint;
+  else if (str == "midpoint") {
+    m_algorithm = Algorithm::Midpoint;
   }
-  else if (str == "tau_prc") {
-    m_algorithm = Algorithm::TauPRC;
+  else if (str == "prc") {
+    m_algorithm = Algorithm::PRC;
   }
-  else if (str == "hybrid_plain") {
-    m_algorithm = Algorithm::HybridPlain;
+  else if (str == "implicit_euler") {
+    m_algorithm = Algorithm::ImplicitEuler;
+  }
+  else if (str == "hybrid_explicit_euler") {
+    m_algorithm = Algorithm::HybridExplicitEuler;
   }
   else if (str == "hybrid_midpoint") {
     m_algorithm = Algorithm::HybridMidpoint;
   }
   else if (str == "hybrid_prc") {
     m_algorithm = Algorithm::HybridPRC;
+  }
+  else if (str == "hybrid_implicit_euler") {
+    m_algorithm = Algorithm::HybridImplicitEuler;
   }
   else {
     MayDay::Error("ItoKMCPhysics::parseAlgorithm - unknown algorithm requested");
@@ -348,6 +358,43 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     p = 0LL;
   }
 
+  // Lambda function used for computing charge before and after reactions. Used only in debug mode
+  // for ensuring that nothing goes wrong with charge conservation in the chemistry integration.
+  auto computeCharge = [&]() -> long long {
+    long long Q = 0.0;
+    for (int i = 0; i < kmcParticles.size(); i++) {
+      const SpeciesType& speciesType  = m_speciesMap.at(i).first;
+      const int&         speciesIndex = m_speciesMap.at(i).second;
+
+      int Z = 0;
+
+      switch (speciesType) {
+      case SpeciesType::Ito: {
+        Z = m_itoSpecies[speciesIndex]->getChargeNumber();
+
+        break;
+      }
+      case SpeciesType::CDR: {
+        Z = m_cdrSpecies[speciesIndex]->getChargeNumber();
+
+        break;
+      }
+      default: {
+        MayDay::Abort("ItoKMCPhysics::advanceKMC -- logic bust in computeCharge()");
+
+        break;
+      }
+      }
+
+      Q += llround(kmcParticles[i]) * Z;
+    }
+
+    return Q;
+  };
+
+  // In debug mode, compute the total charge.
+  const long long chargeBefore = m_debug ? computeCharge() : 0LL;
+
   // Update the reaction rates to be used by the KMC solver.
   this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
 
@@ -358,33 +405,43 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
     break;
   }
-  case Algorithm::TauPlain: {
-    m_kmcSolver.advanceTauPlain(m_kmcState, a_dt);
+  case Algorithm::ExplicitEuler: {
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::ExplicitEuler);
 
     break;
   }
-  case Algorithm::TauMidpoint: {
-    m_kmcSolver.advanceTauMidpoint(m_kmcState, a_dt);
+  case Algorithm::Midpoint: {
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::Midpoint);
 
     break;
   }
-  case Algorithm::TauPRC: {
-    m_kmcSolver.advanceTauPRC(m_kmcState, a_dt);
+  case Algorithm::PRC: {
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::PRC);
 
     break;
   }
-  case Algorithm::HybridPlain: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPlain);
+  case Algorithm::ImplicitEuler: {
+    m_kmcSolver.advanceTau(m_kmcState, a_dt, KMCLeapPropagator::ImplicitEuler);
+
+    break;
+  }
+  case Algorithm::HybridExplicitEuler: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::ExplicitEuler);
 
     break;
   }
   case Algorithm::HybridMidpoint: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauMidpoint);
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::Midpoint);
 
     break;
   }
   case Algorithm::HybridPRC: {
-    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::TauPRC);
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::PRC);
+
+    break;
+  }
+  case Algorithm::HybridImplicitEuler: {
+    m_kmcSolver.advanceHybrid(m_kmcState, a_dt, KMCLeapPropagator::ImplicitEuler);
 
     break;
   }
@@ -399,6 +456,12 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
+  }
+
+  const long long chargeAfter = m_debug ? computeCharge() : 0LL;
+
+  if (chargeAfter != chargeBefore) {
+    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
   // Compute the critical and non-critical time steps

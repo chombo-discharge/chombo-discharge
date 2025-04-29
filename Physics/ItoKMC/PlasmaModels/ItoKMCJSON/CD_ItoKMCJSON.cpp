@@ -783,6 +783,9 @@ ItoKMCJSON::initializeParticlePlacement()
           if (m_plasmaSpeciesTypes.count(species) == 0) {
             this->throwParserError(baseError + " but species '" + species + " is not a plasma species");
           }
+          if (m_plasmaSpeciesTypes.at(species) != SpeciesType::Ito) {
+            this->throwParserError(baseError + " but species '" + species + " is not a particle species");
+          }
 
           m_downstreamSpecies = m_plasmaIndexMap.at(species);
         }
@@ -2412,7 +2415,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
   if (type == "constant") {
     if (!(a_reactionJSON.contains("value"))) {
-      this->throwParserError(baseError + " and got constant rate but 'rate' is not specified");
+      this->throwParserError(baseError + " and got constant rate but 'value' is not specified");
     }
 
     const Real value = a_reactionJSON["value"].get<Real>(); // * propensityFactor;

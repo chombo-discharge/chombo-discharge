@@ -25,17 +25,16 @@
 /*!
   @brief Supported propagators for hybrid tau leaping.
   @details These leap propagators are as follows:
-  TauPlain = Regular tau leaping.
-  TauMidpoint = Gillespie's midpoint method
-  TauPRC = Hu and Li's Poisson random correction leap method
-  TauGRC1 = Hu and Li's Gaussian random correction leap method  
+  ExplicitEuler = Regular tau leaping.
+  Midpoint = Gillespie's midpoint method
+  PRC = Hu and Li's Poisson random correction leap method
 */
 enum class KMCLeapPropagator
 {
-  TauPlain,
-  TauMidpoint,
-  TauPRC,
-  TauGRC1
+  ExplicitEuler,
+  Midpoint,
+  PRC,
+  ImplicitEuler
 };
 
 /*!
@@ -49,7 +48,7 @@ enum class KMCLeapPropagator
   4. std::<some_container> getReactants() const -> Get reactants involved in the reactions.
   5. T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
 
-  The template parameter T should agree across both both R, State, and KMCSolver. 
+  The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.
 */
 template <typename R, typename State, typename T = long long>
 class KMCSolver
@@ -105,12 +104,28 @@ public:
   /*!
     @brief Set solver parameters
     @param[in] a_numCrit Determines critical reactions. This is the number of reactions that need to fire before depleting a reactant.
-    @param[in] a_numSSA  Maximum number of SSA steps to run when switching from tau-leaping to SSA (hybrid algorithm only). 
+    @param[in] a_numSSA  Maximum number of SSA steps to run when switching from tau-leaping to SSA (hybrid algorithm only).
+    @param[in] a_maxIter Maximum permitted number of iterations for the implicit solver    
     @param[in] a_eps     Maximum permitted change in propensities when performing tau-leaping for non-critical reactions.
     @param[in] a_SSAlim  Threshold for switching from tau-leaping of non-critical reactions to SSA for all reactions (hybrid algorithm only)
+    @param[in] a_exitTol Exit tolerance for implicit solvres. 
   */
   inline void
-  setSolverParameters(const T a_numCrit, const T a_numSSA, const Real a_eps, const Real a_SSAlim) noexcept;
+  setSolverParameters(const T    a_numCrit,
+                      const T    a_numSSA,
+                      const T    a_maxIter,
+                      const Real a_eps,
+                      const Real a_SSAlim,
+                      const Real a_exitTol) noexcept;
+
+  /*!
+    @brief Compute the state vector changes for all reactions.
+    @param[in] a_state Input state.
+    @param[in] a_reactions Reaction list.
+    @note The input parameter a_state can be a dummy state because the state change vector does not depend on it. 
+  */
+  inline std::vector<std::vector<T>>
+  getNu(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
     @brief Compute propensities for ALL reactions
@@ -222,128 +237,6 @@ public:
                          const std::vector<Real>& a_nonCriticalPropensities) const noexcept;
 
   /*!
-    @brief Perform one plain tau-leaping step using ALL reactions. 
-    @param[inout] a_state State vector to be advanced
-    @param[in]    a_dt    Time increment
-    @note Calls the other version with m_reactions
-  */
-  inline void
-  stepTauPlain(State& a_state, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one plain tau-leaping step over the input reactions using a time step a_dt
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_reactions List of reactions to advance with
-    @param[in]    a_dt        Time increment
-    @note Computes propensities and calls the other version. 
-  */
-  inline void
-  stepTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one plain tau-leaping step over the input reactions using a time step a_dt
-    @param[inout] a_state        State vector to be advanced
-    @param[in]    a_reactions    List of reactions to advance with
-    @param[in]    a_propensities Pre-computed propensities for the input reactions
-    @param[in]    a_dt           Time increment
-  */
-  inline void
-  stepTauPlain(State&                   a_state,
-               const ReactionList&      a_reactions,
-               const std::vector<Real>& a_propensities,
-               const Real               a_dt) const noexcept;
-
-  /*!
-    @brief Advance with plain tau-leaping step over the input time. This can end up using substepping.
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_dt        Time increment
-    @note Calls the other version with m_reactions.
-  */
-  inline void
-  advanceTauPlain(State& a_state, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Advance with plain tau-leaping step over the input time. This can end up using substepping
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_reactions List of reactions to advance with
-    @param[in]    a_dt        Time increment
-  */
-  inline void
-  advanceTauPlain(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt
-    @param[inout] a_state State vector to be advanced
-    @param[in]    a_dt    Time increment
-    @note Calls the other version with m_reactions
-  */
-  inline void
-  stepTauMidpoint(State& a_state, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
-    @param[inout] a_state        State vector to be advanced
-    @param[in]    a_reactions    List of reactions to advance with
-    @param[in]    a_dt           Time increment
-  */
-  inline void
-  stepTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the midpoint method all reactions over a time step a_dt
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_dt        Time increment
-    @note Calls the other version with m_reactions.
-  */
-  inline void
-  advanceTauMidpoint(State& a_state, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_reactions List of reactions to advance with
-    @param[in]    a_dt        Time increment
-  */
-  inline void
-  advanceTauMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the PRC method for ALL reactions over a time step a_dt
-    @param[inout] a_state State vector to be advanced
-    @param[in]    a_dt    Time increment
-    @note Calls the other version with m_reactions
-  */
-  inline void
-  stepTauPRC(State& a_state, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
-    @param[inout] a_state        State vector to be advanced
-    @param[in]    a_reactions    List of reactions to advance with
-    @param[in]    a_dt           Time increment
-  */
-  inline void
-  stepTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the PRC method all reactions over a time step a_dt
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_dt        Time increment
-    @note Calls the other version with m_reactions.
-  */
-  inline void
-  advanceTauPRC(State& a_state, const Real a_dt) const noexcept;
-
-  /*!
-    @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
-    @param[inout] a_state     State vector to be advanced
-    @param[in]    a_reactions List of reactions to advance with
-    @param[in]    a_dt        Time increment
-  */
-  inline void
-  advanceTauPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
-
-  /*!
     @brief Perform a single SSA step.
     @param[inout] a_state State vector to advance
     @note Calls the other version with m_reactions
@@ -388,6 +281,105 @@ public:
   advanceSSA(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
 
   /*!
+    @brief Perform one plain tau-leaping step using ALL reactions. 
+    @param[inout] a_state State vector to be advanced
+    @param[in]    a_dt    Time increment
+    @note Calls the other version with m_reactions
+  */
+  inline void
+  stepExplicitEuler(State& a_state, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one plain tau-leaping step over the input reactions using a time step a_dt
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_reactions List of reactions to advance with
+    @param[in]    a_dt        Time increment
+  */
+  inline void
+  stepExplicitEuler(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt
+    @param[inout] a_state State vector to be advanced
+    @param[in]    a_dt    Time increment
+    @note Calls the other version with m_reactions
+  */
+  inline void
+  stepMidpoint(State& a_state, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
+    @param[inout] a_state        State vector to be advanced
+    @param[in]    a_reactions    List of reactions to advance with
+    @param[in]    a_dt           Time increment
+  */
+  inline void
+  stepMidpoint(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the PRC method for ALL reactions over a time step a_dt
+    @param[inout] a_state State vector to be advanced
+    @param[in]    a_dt    Time increment
+    @note Calls the other version with m_reactions
+  */
+  inline void
+  stepPRC(State& a_state, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
+    @param[inout] a_state        State vector to be advanced
+    @param[in]    a_reactions    List of reactions to advance with
+    @param[in]    a_dt           Time increment
+  */
+  inline void
+  stepPRC(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one implicit Euler tau-leaping step using ALL reactions.
+    @param[inout] a_state State vector to be advanced
+    @param[in]    a_dt    Time increment
+    @note Calls the other version with m_reactions
+  */
+  inline void
+  stepImplicitEuler(State& a_state, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Perform one implicit Euler tau-leaping step over the input reactions using a time step a_dt
+    @param[inout] a_state     State vector to be advanced
+    @param[in]    a_reactions List of reactions to advance with
+    @param[in]    a_dt        Time increment
+  */
+  inline void
+  stepImplicitEuler(State& a_state, const ReactionList& a_reactions, const Real a_dt) const noexcept;
+
+  /*!
+    @brief Advance using a specified tau-leaping algorithm.
+    @param[inout] a_state          State vector to advance
+    @param[in]    a_dt             Time increment
+    @param[in]    a_leapPropagator Which leap propagator to use.     
+    @note Calls the other version with m_reactions
+  */
+  inline void
+  advanceTau(State&                   a_state,
+             const Real&              a_dt,
+             const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
+
+  /*!
+    @brief Advance using a specified tau-leaping algorithm.
+    @param[inout] a_state          State vector to advance.
+    @param[in]    a_reactions      Reactions to advance. 
+    @param[in]    a_dt             Time increment.
+    @param[in]    a_leapPropagator Which leap propagator to use. 
+    @note Calls the other version with stepTau as the leap propagator.
+    
+  */
+  inline void
+  advanceTau(State&                   a_state,
+             const ReactionList&      a_reactions,
+             const Real&              a_dt,
+             const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
+
+  /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
     @param[inout] a_state          State vector to advance
     @param[in]    a_dt             Time increment
@@ -397,7 +389,7 @@ public:
   inline void
   advanceHybrid(State&                   a_state,
                 const Real               a_dt,
-                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::TauPlain) const noexcept;
+                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
@@ -411,7 +403,7 @@ public:
   advanceHybrid(State&                   a_state,
                 const ReactionList&      a_reactions,
                 const Real               a_dt,
-                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::TauPlain) const noexcept;
+                const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. 
@@ -445,6 +437,11 @@ protected:
   T m_numSSA;
 
   /*!
+    @brief Maximum number of iterations for implicit solvers
+  */
+  T m_maxIter;
+
+  /*!
     @brief Maximum permitted change in propensities for non-critical reactions. 
   */
   Real m_eps;
@@ -453,6 +450,18 @@ protected:
     @brief Threshold for switching to SSA-based algorithm within the Cao algorithm. 
   */
   Real m_SSAlim;
+
+  /*!
+    @brief Exit tolerance for implicit solvers
+  */
+  Real m_exitTol;
+
+  /*!
+    @brief List of state changes for each reaction.
+    @note The outer vector corresponds to the reactive index. The inner vector describes the change in the population of the
+    state vector, with an indexing given by the State's linearIn/linearOut functions. 
+  */
+  std::vector<std::vector<int>> m_nu;
 };
 
 #include <CD_NamespaceFooter.H>
