@@ -681,7 +681,7 @@ ItoKMCPhysics::removeParticles(List<ItoParticle>& a_particles, const long long a
     long long W = zero;
 
     for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
-      W += (long long)lit().weight();
+      W += llround(lit().weight());
 
       if (lit().weight() < 1.0) {
         MayDay::Error("ItoKMCPhysics::removeParticles -- bad particle mass!");
