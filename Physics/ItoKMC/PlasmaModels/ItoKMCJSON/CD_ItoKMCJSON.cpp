@@ -2362,7 +2362,7 @@ ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReact
   }
 }
 
-std::pair<std::function<Real(const Real E, const Real V, const RealVect x)>,
+std::pair<std::function<Real(const Real E, const Real V, const Real dx, const RealVect x, const Vector<Real>& phi)>,
           std::function<Real(const Real E, const RealVect x)>>
 ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                     const std::list<size_t>& a_backgroundReactants,
@@ -2386,6 +2386,10 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
   FunctionEX fluidRate = [](const Real E, const RealVect x) -> Real {
     return 0.0;
+  };
+
+  FunctionDXP gridFactor = [](const Real dx, const Vector<Real>& phi) -> Real {
+    return 1.0;
   };
 
   // Count the number of times each reactant appears on the left hand side.
@@ -2688,14 +2692,65 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return fluidRate(E, x) * (kr / (kr + kp + kq));
     };
   }
+  if (a_reactionJSON.contains("ppc threshold")) {
+    const std::string derivedError = baseError + " and got 'grid factor' but ";
+
+    if (!(a_reactionJSON["ppc threshold"].contains("species"))) {
+      this->throwParserError(derivedError + "array 'species' is missing");
+    }
+    if (!(a_reactionJSON["ppc threshold"].contains("ppc"))) {
+      this->throwParserError(derivedError + "field 'ppc' is missing");
+    }
+
+    const auto species = a_reactionJSON["ppc threshold"]["species"].get<std::vector<std::string>>();
+    const auto thresh  = a_reactionJSON["ppc threshold"]["ppc"].get<long long>();
+
+    if (species.size() == 0) {
+      this->throwParserError(derivedError + "but array 'species' is empty");
+    }
+    else {
+      for (const auto& s : species) {
+        if (m_plasmaIndexMap.count(s) == 0) {
+          this->throwParserError(derivedError + "but I do not know species '" + s + "'");
+        }
+      }
+    }
+    if (thresh < 0LL) {
+      this->throwParserError(derivedError + "'thresh' can not be < 0");
+    }
+
+    // Build the species index array
+    std::vector<int> speciesIndices;
+    for (const auto& s : species) {
+      speciesIndices.emplace_back(m_plasmaIndexMap.at(s));
+    }
+
+    gridFactor = [speciesIndices, thresh](const Real dx, const Vector<Real>& phi) -> Real {
+      Real sumPhi = 0.0;
+      for (const auto& idx : speciesIndices) {
+        sumPhi += phi[idx];
+      }
+
+      const long long PPC = llround(sumPhi * std::pow(dx, 3));
+
+      return (PPC > thresh) ? 1.0 : 0.0;
+    };
+  }
+
+#warning "ItoKMCJSON -- need to inverse rate to turn fluid into particles! So, must be an above/below threshold"
 
   // This is the KMC rate -- note that it absorbs the background species.
-  FunctionEVX kmcRate = [fluidRate,
-                         volumeFactor,
-                         propensityFactor,
-                         a_backgroundReactants,
-                         &S = this->m_backgroundSpecies,
-                         &N = this->m_gasNumberDensity](const Real E, const Real V, const RealVect x) -> Real {
+  FunctionEVXP kmcRate = [fluidRate,
+                          volumeFactor,
+                          propensityFactor,
+                          gridFactor,
+                          a_backgroundReactants,
+                          &S = this->m_backgroundSpecies,
+                          &N = this->m_gasNumberDensity](const Real          E,
+                                                         const Real          V,
+                                                         const Real          dx,
+                                                         const RealVect      x,
+                                                         const Vector<Real>& phi) -> Real {
     Real k = fluidRate(E, x);
 
     // Multiply by neutral densities
@@ -2707,6 +2762,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     // Multiply by propensity factor (because of ItoKMCDualStateReaction)
     k *= propensityFactor;
+
+    // Multiply by the grid factor
+    k *= gridFactor(dx, phi);
 
     // Multiply by volume factor (for higher-order reactions)
     if (volumeFactor > 0) {
@@ -3058,7 +3116,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
   const Real V = std::pow(a_dx, SpaceDim);
 
   for (int i = 0; i < a_kmcReactions.size(); i++) {
-    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_pos);
+    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_pos, a_phi);
 
     // Add gradient correction if the user has asked for it.
     const std::pair<bool, std::string> gradientCorrection = m_kmcReactionGradientCorrections[i];
