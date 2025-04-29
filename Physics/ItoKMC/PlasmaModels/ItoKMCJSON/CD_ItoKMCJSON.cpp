@@ -783,6 +783,9 @@ ItoKMCJSON::initializeParticlePlacement()
           if (m_plasmaSpeciesTypes.count(species) == 0) {
             this->throwParserError(baseError + " but species '" + species + " is not a plasma species");
           }
+          if (m_plasmaSpeciesTypes.at(species).second != SpeciesType::Ito) {
+            this->throwParserError(baseError + " but species '" + species + " is not a particle species");
+          }
 
           m_downstreamSpecies = m_plasmaIndexMap.at(species);
         }
