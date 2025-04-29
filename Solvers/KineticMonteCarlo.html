@@ -243,8 +243,27 @@ Note that tau leaping may fail to give a thermodynamically valid state, and shou
 <ol class="arabic simple">
 <li><p>Midpoint tau-leaping.</p></li>
 <li><p>Poisson random-corrections tau-leaping.</p></li>
+<li><p>Implicit Euler-type tau-leaping.</p></li>
 </ol>
 <p>These methods can be used either as standalone methods or together with the hybrid algorithm.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We do not recommend implicit methods for reactive problems.
+The reason for this is that exponential growth follows the equation</p>
+<div class="math notranslate nohighlight">
+\[\partial_t X = k X,\]</div>
+<p>where <span class="math notranslate nohighlight">\(X\)</span> is the number of electrons and <span class="math notranslate nohighlight">\(k&gt;0\)</span> is a growth rate.
+Application of the implicit Euler rule to this system yields</p>
+<div class="math notranslate nohighlight">
+\[X^{n+1} = \frac{X^n}{1 - k\Delta t},\]</div>
+<p>which has a pole at <span class="math notranslate nohighlight">\(\Delta t = k^{-1}\)</span>, and which is only non-negative for <span class="math notranslate nohighlight">\(k\Delta t &lt; 1\)</span>.
+Similarly, the discretization can then lead to a large overshoot.
+In practice, the time step then has to be limited to <span class="math notranslate nohighlight">\(\Delta t &lt; k^{-1}\)</span>.</p>
+<p>On the other hand, an explicit Euler update would yield</p>
+<div class="math notranslate nohighlight">
+\[X^{n+1} = \left(1+k\Delta t\right) X^n,\]</div>
+<p>which is stable for any <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p>
+</div>
 </section>
 </section>
 <section id="hybrid-algorithm">

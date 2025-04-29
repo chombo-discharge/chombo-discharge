@@ -93,7 +93,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:af27c7d34a25348d08726f6fdba4c0b76" id="r_af27c7d34a25348d08726f6fdba4c0b76"><td class="memItemLeft" align="right" valign="top"><a id="af27c7d34a25348d08726f6fdba4c0b76" name="af27c7d34a25348d08726f6fdba4c0b76"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>State</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;</td></tr>
+<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>State</b> = <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; T &gt;</td></tr>
 <tr class="separator:af27c7d34a25348d08726f6fdba4c0b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -105,10 +105,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b9f5e64ef0404d96584519d8fa811c8" id="r_a0b9f5e64ef0404d96584519d8fa811c8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a0b9f5e64ef0404d96584519d8fa811c8">KMCSingleState</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_state</a>)=<a class="el" href="classTracerParticleSolver.html">default</a></td></tr>
 <tr class="memdesc:a0b9f5e64ef0404d96584519d8fa811c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <br /></td></tr>
 <tr class="separator:a0b9f5e64ef0404d96584519d8fa811c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8982ee1b3683d70c1be6a48afc4b73ae" id="r_a8982ee1b3683d70c1be6a48afc4b73ae"><td class="memItemLeft" align="right" valign="top"><a id="a8982ee1b3683d70c1be6a48afc4b73ae" name="a8982ee1b3683d70c1be6a48afc4b73ae"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>KMCSingleState</b> (<a class="el" href="classKMCSingleState.html">KMCSingleState</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
-<tr class="memdesc:a8982ee1b3683d70c1be6a48afc4b73ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor. <br /></td></tr>
-<tr class="separator:a8982ee1b3683d70c1be6a48afc4b73ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05ae0a7076c1bcb3f4cdf776f63e4fdd" id="r_a05ae0a7076c1bcb3f4cdf776f63e4fdd"><td class="memItemLeft" align="right" valign="top"><a id="a05ae0a7076c1bcb3f4cdf776f63e4fdd" name="a05ae0a7076c1bcb3f4cdf776f63e4fdd"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>KMCSingleState</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
+<tr class="memdesc:a05ae0a7076c1bcb3f4cdf776f63e4fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move constructor. <br /></td></tr>
+<tr class="separator:a05ae0a7076c1bcb3f4cdf776f63e4fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8793ef75688640adb744b91b15bd6571" id="r_a8793ef75688640adb744b91b15bd6571"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a8793ef75688640adb744b91b15bd6571">KMCSingleState</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_numSpecies</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a8793ef75688640adb744b91b15bd6571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full constructor.  <br /></td></tr>
 <tr class="separator:a8793ef75688640adb744b91b15bd6571"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,15 +124,21 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classKMCSingleState.html">KMCSingleState</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a> &amp;&amp;)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
 <tr class="memdesc:a350be2db3528ca2cff2f63ccfdad3919"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed move assignement. <br /></td></tr>
 <tr class="separator:a350be2db3528ca2cff2f63ccfdad3919"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a336f62b995be4a5a07ad351dbbec2025" id="r_a336f62b995be4a5a07ad351dbbec2025"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">T</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a336f62b995be4a5a07ad351dbbec2025">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_idx</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a336f62b995be4a5a07ad351dbbec2025" id="r_a336f62b995be4a5a07ad351dbbec2025"><td class="memItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a336f62b995be4a5a07ad351dbbec2025">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_idx</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a336f62b995be4a5a07ad351dbbec2025"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the population of the input index.  <br /></td></tr>
 <tr class="separator:a336f62b995be4a5a07ad351dbbec2025"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75f76014f16c945a4ced234b3295d88c" id="r_a75f76014f16c945a4ced234b3295d88c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">T</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a75f76014f16c945a4ced234b3295d88c">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_idx</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memitem:a75f76014f16c945a4ced234b3295d88c" id="r_a75f76014f16c945a4ced234b3295d88c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a75f76014f16c945a4ced234b3295d88c">operator[]</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_idx</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a75f76014f16c945a4ced234b3295d88c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the population of the input index.  <br /></td></tr>
 <tr class="separator:a75f76014f16c945a4ced234b3295d88c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae998349294c7726d4da240668ba8a0d1" id="r_ae998349294c7726d4da240668ba8a0d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#ae998349294c7726d4da240668ba8a0d1">isValidState</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ae998349294c7726d4da240668ba8a0d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if state is a valid state.  <br /></td></tr>
 <tr class="separator:ae998349294c7726d4da240668ba8a0d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6ff02b353b031d77ef72d41ecd11266" id="r_ae6ff02b353b031d77ef72d41ecd11266"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#ae6ff02b353b031d77ef72d41ecd11266">linearOut</a> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ae6ff02b353b031d77ef72d41ecd11266"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize the state onto an output vector.  <br /></td></tr>
+<tr class="separator:ae6ff02b353b031d77ef72d41ecd11266"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87fef33283a231153babd48f72f734eb" id="r_a87fef33283a231153babd48f72f734eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#a87fef33283a231153babd48f72f734eb">linearIn</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; T &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_linearizedState</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a87fef33283a231153babd48f72f734eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize the input buffer.  <br /></td></tr>
+<tr class="separator:a87fef33283a231153babd48f72f734eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa3dc829d621a559e17443bbb4bfaf7d6" id="r_aa3dc829d621a559e17443bbb4bfaf7d6"><td class="memItemLeft" align="right" valign="top">State &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classKMCSingleState.html#aa3dc829d621a559e17443bbb4bfaf7d6">getState</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa3dc829d621a559e17443bbb4bfaf7d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get modifiable state.  <br /></td></tr>
 <tr class="separator:aa3dc829d621a559e17443bbb4bfaf7d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,7 +154,7 @@ State&#160;</td><td class="memItemRight" valign="bottom"><b>m_state</b></td></tr
 <tr class="separator:a854e5fd59afaa6ef79f3242c590d1c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> = long long&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T = long long&gt;<br />
 class KMCSingleState&lt; T &gt;</div><p>Declaration of a straightforward state for advancing with the Kinetic Monte Carlo module. </p>
 <p>The state is simply a vector of integers (default long long type ints). </p><dl class="section note"><dt>Note</dt><dd>The template parameter indicates the integer type used for tracking the state. </dd></dl>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -158,15 +164,15 @@ class KMCSingleState&lt; T &gt;</div><p>Declaration of a straightforward state f
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a>  = long long&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T  = long long&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classKMCSingleState.html">::KMCSingleState</a> </td>
+          <td class="memname"><a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;<a class="el" href="classKMCSingleState.html">::KMCSingleState</a> </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_state</em></td><td>)</td>
           <td></td>
         </tr>
@@ -194,13 +200,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classKMCSingleState.html">::KMCSingleState</a> </td>
+          <td class="memname"><a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;<a class="el" href="classKMCSingleState.html">::KMCSingleState</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td>
           <td class="paramname"><em>a_numSpecies</em></td><td>)</td>
@@ -231,13 +237,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::State &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getState </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::State &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::getState </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -261,13 +267,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::State &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::getState </td>
+          <td class="memname"><a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::State &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::getState </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -291,13 +297,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;::isValidState </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::isValidState </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -315,19 +321,85 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="a87fef33283a231153babd48f72f734eb" name="a87fef33283a231153babd48f72f734eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87fef33283a231153babd48f72f734eb">&#9670;&#160;</a></span>linearIn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::linearIn </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_linearizedState</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Linearize the input buffer. </p>
+<p>This routine should take the input vector and linearize it onto the current state. This is mostly used by <a class="el" href="classKMCSolver.html" title="Class for running Kinetic Monte-Carlo simulations.">KMCSolver</a> when computing the Jacobians for implicit updates. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_linearizedState</td><td>Linearized state vector </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae6ff02b353b031d77ef72d41ecd11266" name="ae6ff02b353b031d77ef72d41ecd11266"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6ff02b353b031d77ef72d41ecd11266">&#9670;&#160;</a></span>linearOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; T &gt; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;::linearOut </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Linearize the state onto an output vector. </p>
+<p>This is mostly by <a class="el" href="classKMCSolver.html" title="Class for running Kinetic Monte-Carlo simulations.">KMCSolver</a> when computing the necessary Jacobians for implicit updates </p>
+
+</div>
+</div>
 <a id="a75f76014f16c945a4ced234b3295d88c" name="a75f76014f16c945a4ced234b3295d88c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a75f76014f16c945a4ced234b3295d88c">&#9670;&#160;</a></span>operator[]() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">T</a> &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">const</a> T &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td>
           <td class="paramname"><em>a_idx</em></td><td>)</td>
@@ -357,13 +429,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">T</a> &gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">T</a> &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a> &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
+          <td class="memname">T &amp; <a class="el" href="classKMCSingleState.html">KMCSingleState</a>&lt; T &gt;<a class="el" href="classTracerParticleSolver.html">::operator</a>[] </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a>&#160;</td>
           <td class="paramname"><em>a_idx</em></td><td>)</td>

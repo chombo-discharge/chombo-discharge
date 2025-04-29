@@ -111,8 +111,37 @@ The following forms of tau-leaping are also supported:
 
 #. Midpoint tau-leaping.
 #. Poisson random-corrections tau-leaping.
+#. Implicit Euler-type tau-leaping. 
 
 These methods can be used either as standalone methods or together with the hybrid algorithm.
+
+.. warning::
+
+   We do not recommend implicit methods for reactive problems.
+   The reason for this is that exponential growth follows the equation
+
+   .. math::
+
+      \partial_t X = k X,
+
+   where :math:`X` is the number of electrons and :math:`k>0` is a growth rate.
+   Application of the implicit Euler rule to this system yields
+
+   .. math::
+
+      X^{n+1} = \frac{X^n}{1 - k\Delta t},
+
+   which has a pole at :math:`\Delta t = k^{-1}`, and which is only non-negative for :math:`k\Delta t < 1`.
+   Similarly, the discretization can then lead to a large overshoot.   
+   In practice, the time step then has to be limited to :math:`\Delta t < k^{-1}`.
+
+   On the other hand, an explicit Euler update would yield
+
+   .. math::
+
+      X^{n+1} = \left(1+k\Delta t\right) X^n,
+
+   which is stable for any :math:`\Delta t`.
 
 .. _Chap:KMCHybridAdvance:
 

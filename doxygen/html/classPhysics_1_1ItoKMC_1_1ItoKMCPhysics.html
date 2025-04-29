@@ -220,13 +220,16 @@ Public Member Functions</h2></td></tr>
 Protected Types</h2></td></tr>
 <tr class="memitem:a988145ba22d311afbd51d4fa10d1cc6b" id="r_a988145ba22d311afbd51d4fa10d1cc6b"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6b">Algorithm</a> { <br />
 &#160;&#160;<b>SSA</b>
-, <b>TauPlain</b>
-, <b>TauMidpoint</b>
-, <b>TauPRC</b>
+, <b>ExplicitEuler</b>
+, <b>Midpoint</b>
+, <b>PRC</b>
 , <br />
-&#160;&#160;<b>HybridPlain</b>
+&#160;&#160;<b>ImplicitEuler</b>
+, <b>HybridExplicitEuler</b>
 , <b>HybridMidpoint</b>
 , <b>HybridPRC</b>
+, <br />
+&#160;&#160;<b>HybridImplicitEuler</b>
 <br />
  }</td></tr>
 <tr class="memdesc:a988145ba22d311afbd51d4fa10d1cc6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enum for switching between KMC algorithms.  <a href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a988145ba22d311afbd51d4fa10d1cc6b">More...</a><br /></td></tr>
@@ -343,12 +346,20 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a0b2f0c5551591ace1918487e6fa300af" id="r_a0b2f0c5551591ace1918487e6fa300af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a0b2f0c5551591ace1918487e6fa300af">m_NSSA</a></td></tr>
 <tr class="memdesc:a0b2f0c5551591ace1918487e6fa300af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver setting for the Cao et. al algorithm.  <br /></td></tr>
 <tr class="separator:a0b2f0c5551591ace1918487e6fa300af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76d20f5655c15ad2cd1e40bd18c36b01" id="r_a76d20f5655c15ad2cd1e40bd18c36b01"><td class="memItemLeft" align="right" valign="top"><a id="a76d20f5655c15ad2cd1e40bd18c36b01" name="a76d20f5655c15ad2cd1e40bd18c36b01"></a>
+<a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxIter</b></td></tr>
+<tr class="memdesc:a76d20f5655c15ad2cd1e40bd18c36b01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of iterations for implicit KMC-leaping algorithms. <br /></td></tr>
+<tr class="separator:a76d20f5655c15ad2cd1e40bd18c36b01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b04912243e76a95f5a8b4877078e002" id="r_a6b04912243e76a95f5a8b4877078e002"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a6b04912243e76a95f5a8b4877078e002">m_SSAlim</a></td></tr>
 <tr class="memdesc:a6b04912243e76a95f5a8b4877078e002"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver setting for the Cao et. al. algorithm.  <br /></td></tr>
 <tr class="separator:a6b04912243e76a95f5a8b4877078e002"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2561afabc953eea1235231e154325cde" id="r_a2561afabc953eea1235231e154325cde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a2561afabc953eea1235231e154325cde">m_eps</a></td></tr>
 <tr class="memdesc:a2561afabc953eea1235231e154325cde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solver setting for the Cao et. al. algorithm.  <br /></td></tr>
 <tr class="separator:a2561afabc953eea1235231e154325cde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c9ef5c1f572b6cdae91b6d392da00a2" id="r_a5c9ef5c1f572b6cdae91b6d392da00a2"><td class="memItemLeft" align="right" valign="top"><a id="a5c9ef5c1f572b6cdae91b6d392da00a2" name="a5c9ef5c1f572b6cdae91b6d392da00a2"></a>
+<a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_exitTol</b></td></tr>
+<tr class="memdesc:a5c9ef5c1f572b6cdae91b6d392da00a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exit tolerance for implicit KMC-leaping algorithms. <br /></td></tr>
+<tr class="separator:a5c9ef5c1f572b6cdae91b6d392da00a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>

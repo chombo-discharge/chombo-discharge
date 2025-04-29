@@ -125,120 +125,154 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>{</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>  <a class="code hl_class" href="classTracerParticleSolver.html">CH_TIME</a>(<span class="stringliteral">&quot;KMCDualState::define&quot;</span>);</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  m_reactiveState.resize(<a class="code hl_class" href="classTracerParticleSolver.html">a_numReactiveSpecies</a>);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  m_nonReactiveState.resize(<a class="code hl_class" href="classTracerParticleSolver.html">a_numNonReactiveSpecies</a>);</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>  m_numReactiveSpecies    = <a class="code hl_class" href="classTracerParticleSolver.html">a_numReactiveSpecies</a>;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>  m_numNonReactiveSpecies = <a class="code hl_class" href="classTracerParticleSolver.html">a_numNonReactiveSpecies</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>  m_reactiveState.resize(<a class="code hl_class" href="classTracerParticleSolver.html">a_numReactiveSpecies</a>);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>  m_nonReactiveState.resize(<a class="code hl_class" href="classTracerParticleSolver.html">a_numNonReactiveSpecies</a>);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
 </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
-<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">   45</a></span><a class="code hl_function" href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">KMCDualState&lt;T&gt;::isValidState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>{</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">CH_TIME</a>(<span class="stringliteral">&quot;KMCDualState::isValidState&quot;</span>);</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="keywordtype">bool</span> <a class="code hl_class" href="classTracerParticleSolver.html">isValid</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : m_reactiveState) {</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">if</span> (p &lt; 0) {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>      <a class="code hl_class" href="classTracerParticleSolver.html">isValid</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>  }</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : m_nonReactiveState) {</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">if</span> (p &lt; 0) {</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>      <a class="code hl_class" href="classTracerParticleSolver.html">isValid</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>      <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    }</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>  }</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">isValid</a>;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
-</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">inline</span> <span class="keywordtype">bool</span></div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">   48</a></span><a class="code hl_function" href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">KMCDualState&lt;T&gt;::isValidState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">CH_TIME</a>(<span class="stringliteral">&quot;KMCDualState::isValidState&quot;</span>);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>  <span class="keywordtype">bool</span> <a class="code hl_class" href="classTracerParticleSolver.html">isValid</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : m_reactiveState) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">if</span> (p &lt; 0) {</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>      <a class="code hl_class" href="classTracerParticleSolver.html">isValid</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    }</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>  }</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : m_nonReactiveState) {</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordflow">if</span> (p &lt; 0) {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>      <a class="code hl_class" href="classTracerParticleSolver.html">isValid</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>      <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    }</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>  }</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">inline</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
-<div class="foldopen" id="foldopen00072" data-start="{" data-end="}">
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">   72</a></span><a class="code hl_function" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">KMCDualState&lt;T&gt;::getReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>{</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>  <span class="keywordflow">return</span> m_reactiveState;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">isValid</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}</div>
 </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
-<div class="foldopen" id="foldopen00079" data-start="{" data-end="}">
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a8e78936cd4068d6df3b4b056ce4ac08d">   79</a></span><a class="code hl_function" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">KMCDualState&lt;T&gt;::getReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>{</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>  <span class="keywordflow">return</span> m_reactiveState;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="keyword">inline</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;T&gt;</a></div>
+<div class="foldopen" id="foldopen00075" data-start="{" data-end="}">
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a92d5e46e8dddb65e2f661a261e9a5f06">   75</a></span><a class="code hl_function" href="classKMCDualState.html#a92d5e46e8dddb65e2f661a261e9a5f06">KMCDualState&lt;T&gt;::linearOut</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>{</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;T&gt;</a> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">out</a>(0);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>  <a class="code hl_class" href="classTracerParticleSolver.html">out</a>.insert(<a class="code hl_class" href="classTracerParticleSolver.html">out</a>.end(), m_reactiveState.begin(), m_reactiveState.end());</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>  <a class="code hl_class" href="classTracerParticleSolver.html">out</a>.insert(<a class="code hl_class" href="classTracerParticleSolver.html">out</a>.end(), m_nonReactiveState.begin(), m_nonReactiveState.end());</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">out</a>;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>}</div>
 </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keyword">inline</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
-<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">   86</a></span><a class="code hl_function" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState&lt;T&gt;::getNonReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>  <span class="keywordflow">return</span> m_nonReactiveState;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
-</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
-<div class="foldopen" id="foldopen00093" data-start="{" data-end="}">
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="classKMCDualState.html#aa62ed0b7c73316ec659dba28046d2816">   93</a></span><a class="code hl_function" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState&lt;T&gt;::getNonReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>{</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  <span class="keywordflow">return</span> m_nonReactiveState;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00087" data-start="{" data-end="}">
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a41c4f2767a8f554f092693749d0d7cb9">   87</a></span><a class="code hl_function" href="classKMCDualState.html#a41c4f2767a8f554f092693749d0d7cb9">KMCDualState&lt;T&gt;::linearIn</a>(<span class="keyword">const</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;T&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_linearizedState</a>) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>{</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; m_numReactiveSpecies; <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    m_reactiveState[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>] = <a class="code hl_class" href="classTracerParticleSolver.html">a_linearizedState</a>[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>];</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>  }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; m_numNonReactiveSpecies; <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    m_nonReactiveState[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>] = <a class="code hl_class" href="classTracerParticleSolver.html">a_linearizedState</a>[m_numReactiveSpecies + <a class="code hl_class" href="classTracerParticleSolver.html">i</a>];</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>  }</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}</div>
 </div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00099" data-start="{" data-end="}">
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="CD__KMCDualState_8H.html#a69b4d2689dd9620e4c38c6d742b7e1cc">   99</a></span><span class="keyword">inline</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::ostream</a>&amp;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><a class="code hl_function" href="CD__KMCDualStateImplem_8H.html#a69b4d2689dd9620e4c38c6d742b7e1cc">operator&lt;&lt;</a>(<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::ostream</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a>, <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">KMCDualState&lt;T&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keyword">inline</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">  100</a></span><a class="code hl_function" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">KMCDualState&lt;T&gt;::getReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>{</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;KMCDualState : \n&quot;</span>;</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  <span class="comment">// Print position.</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>    = <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>.getReactiveState();</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a> = <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>.getNonReactiveState();</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;\t Reactive     = (&quot;</span>;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>.size(); <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>];</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>.size() - 1) {</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>      <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    }</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  }</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;)\n&quot;</span>;</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;\t Non-reactive = (&quot;</span>;</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a>.size(); <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a>[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>];</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a>.size() - 1) {</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>      <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    }</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  }</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;)\n&quot;</span>;</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>  <span class="keywordflow">return</span> <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a>;</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>}</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordflow">return</span> m_reactiveState;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}</div>
 </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aCD__KMCDualStateImplem_8H_html_a69b4d2689dd9620e4c38c6d742b7e1cc"><div class="ttname"><a href="CD__KMCDualStateImplem_8H.html#a69b4d2689dd9620e4c38c6d742b7e1cc">operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;ostr, const KMCDualState&lt; T &gt; &amp;a_state)</div><div class="ttdoc">State printing function.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:100</div></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a8e78936cd4068d6df3b4b056ce4ac08d">  107</a></span><a class="code hl_function" href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">KMCDualState&lt;T&gt;::getReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>{</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>  <span class="keywordflow">return</span> m_reactiveState;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}</div>
+</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="keyword">inline</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">  114</a></span><a class="code hl_function" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState&lt;T&gt;::getNonReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>{</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  <span class="keywordflow">return</span> m_nonReactiveState;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>}</div>
+</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="keyword">inline</span> <span class="keyword">const</span> <span class="keyword">typename</span> KMCDualState&lt;T&gt;::State&amp;</div>
+<div class="foldopen" id="foldopen00121" data-start="{" data-end="}">
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="classKMCDualState.html#aa62ed0b7c73316ec659dba28046d2816">  121</a></span><a class="code hl_function" href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState&lt;T&gt;::getNonReactiveState</a>() <a class="code hl_class" href="classTracerParticleSolver.html">const</a> <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>{</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>  <span class="keywordflow">return</span> m_nonReactiveState;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>}</div>
+</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00127" data-start="{" data-end="}">
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="CD__KMCDualState_8H.html#a69b4d2689dd9620e4c38c6d742b7e1cc">  127</a></span><span class="keyword">inline</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::ostream</a>&amp;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><a class="code hl_function" href="CD__KMCDualStateImplem_8H.html#a69b4d2689dd9620e4c38c6d742b7e1cc">operator&lt;&lt;</a>(<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::ostream</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a>, <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">KMCDualState&lt;T&gt;</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>)</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>{</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;KMCDualState : \n&quot;</span>;</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>  <span class="comment">// Print position.</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>    = <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>.getReactiveState();</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>  <span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a> = <a class="code hl_class" href="classTracerParticleSolver.html">a_state</a>.getNonReactiveState();</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;\t Reactive     = (&quot;</span>;</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>.size(); <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>];</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">reactiveState</a>.size() - 1) {</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>      <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    }</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>  }</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;)\n&quot;</span>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;\t Non-reactive = (&quot;</span>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>  <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a>.size(); <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a>[<a class="code hl_class" href="classTracerParticleSolver.html">i</a>];</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_class" href="classTracerParticleSolver.html">nonReactiveState</a>.size() - 1) {</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>      <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;,&quot;</span>;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    }</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  }</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>  <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a> &lt;&lt; <span class="stringliteral">&quot;)\n&quot;</span>;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>  <span class="keywordflow">return</span> <a class="code hl_class" href="classTracerParticleSolver.html">ostr</a>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>}</div>
+</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="preprocessor">#include &lt;CD_NamespaceFooter.H&gt;</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aCD__KMCDualStateImplem_8H_html_a69b4d2689dd9620e4c38c6d742b7e1cc"><div class="ttname"><a href="CD__KMCDualStateImplem_8H.html#a69b4d2689dd9620e4c38c6d742b7e1cc">operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;ostr, const KMCDualState&lt; T &gt; &amp;a_state)</div><div class="ttdoc">State printing function.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:128</div></div>
 <div class="ttc" id="aCD__KMCDualState_8H_html"><div class="ttname"><a href="CD__KMCDualState_8H.html">CD_KMCDualState.H</a></div><div class="ttdoc">Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems.</div></div>
-<div class="ttc" id="aclassKMCDualState_html_a0f7e2fd463b920b6b0e3acf29ec27719"><div class="ttname"><a href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState::getNonReactiveState</a></div><div class="ttdeci">State &amp; getNonReactiveState() noexcept</div><div class="ttdoc">Get modifiable non-reactive state.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:86</div></div>
+<div class="ttc" id="aclassKMCDualState_html_a0f7e2fd463b920b6b0e3acf29ec27719"><div class="ttname"><a href="classKMCDualState.html#a0f7e2fd463b920b6b0e3acf29ec27719">KMCDualState::getNonReactiveState</a></div><div class="ttdeci">State &amp; getNonReactiveState() noexcept</div><div class="ttdoc">Get modifiable non-reactive state.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:114</div></div>
 <div class="ttc" id="aclassKMCDualState_html_a1d99f364ebd2b1f66ad6ee0d5b773745"><div class="ttname"><a href="classKMCDualState.html#a1d99f364ebd2b1f66ad6ee0d5b773745">KMCDualState::KMCDualState</a></div><div class="ttdeci">KMCDualState()=default</div><div class="ttdoc">Default constructor.</div></div>
-<div class="ttc" id="aclassKMCDualState_html_a2cbd96a45ba26876564cca1c597aa4f9"><div class="ttname"><a href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">KMCDualState::isValidState</a></div><div class="ttdeci">bool isValidState() const noexcept</div><div class="ttdoc">Check if state is a valid state. An invalid state will have a negative number of reactants/non-reacta...</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:45</div></div>
+<div class="ttc" id="aclassKMCDualState_html_a2cbd96a45ba26876564cca1c597aa4f9"><div class="ttname"><a href="classKMCDualState.html#a2cbd96a45ba26876564cca1c597aa4f9">KMCDualState::isValidState</a></div><div class="ttdeci">bool isValidState() const noexcept</div><div class="ttdoc">Check if state is a valid state. An invalid state will have a negative number of reactants/non-reacta...</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:48</div></div>
 <div class="ttc" id="aclassKMCDualState_html_a2d58d535a6b2e4412225b2b45882db24"><div class="ttname"><a href="classKMCDualState.html#a2d58d535a6b2e4412225b2b45882db24">KMCDualState::define</a></div><div class="ttdeci">void define(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept</div><div class="ttdoc">Define function constructor.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:35</div></div>
+<div class="ttc" id="aclassKMCDualState_html_a41c4f2767a8f554f092693749d0d7cb9"><div class="ttname"><a href="classKMCDualState.html#a41c4f2767a8f554f092693749d0d7cb9">KMCDualState::linearIn</a></div><div class="ttdeci">void linearIn(const std::vector&lt; T &gt; &amp;a_linearizedState) noexcept</div><div class="ttdoc">Linearize the input buffer.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:87</div></div>
 <div class="ttc" id="aclassKMCDualState_html_a525f8d12dad942a975fd4f989d5cce88"><div class="ttname"><a href="classKMCDualState.html#a525f8d12dad942a975fd4f989d5cce88">KMCDualState::~KMCDualState</a></div><div class="ttdeci">virtual ~KMCDualState()</div><div class="ttdoc">Destructor.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:30</div></div>
-<div class="ttc" id="aclassKMCDualState_html_ad5f041499b23a73fcd06b44b91d00b41"><div class="ttname"><a href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">KMCDualState::getReactiveState</a></div><div class="ttdeci">State &amp; getReactiveState() noexcept</div><div class="ttdoc">Get modifiable reactive state.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:72</div></div>
+<div class="ttc" id="aclassKMCDualState_html_a92d5e46e8dddb65e2f661a261e9a5f06"><div class="ttname"><a href="classKMCDualState.html#a92d5e46e8dddb65e2f661a261e9a5f06">KMCDualState::linearOut</a></div><div class="ttdeci">std::vector&lt; T &gt; linearOut() const noexcept</div><div class="ttdoc">Linearize the state onto an output vector.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:75</div></div>
+<div class="ttc" id="aclassKMCDualState_html_ad5f041499b23a73fcd06b44b91d00b41"><div class="ttname"><a href="classKMCDualState.html#ad5f041499b23a73fcd06b44b91d00b41">KMCDualState::getReactiveState</a></div><div class="ttdeci">State &amp; getReactiveState() noexcept</div><div class="ttdoc">Get modifiable reactive state.</div><div class="ttdef"><b>Definition</b> CD_KMCDualStateImplem.H:100</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html"><div class="ttname"><a href="classTracerParticleSolver.html">TracerParticleSolver</a></div><div class="ttdoc">Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity ...</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolver.H:37</div></div>
 <div class="ttc" id="aclassTracerParticleSolver_html_a4fa2ba84feb2e79304ef1d8c0aafd77d"><div class="ttname"><a href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">TracerParticleSolver::TracerParticleSolver</a></div><div class="ttdeci">TracerParticleSolver()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition</b> CD_TracerParticleSolverImplem.H:25</div></div>
 </div><!-- fragment --></div><!-- contents -->
