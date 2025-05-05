@@ -2704,6 +2704,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     const auto species = a_reactionJSON["ppc threshold"]["species"].get<std::vector<std::string>>();
     const auto thresh  = a_reactionJSON["ppc threshold"]["ppc"].get<long long>();
+    const auto cutoff  = a_reactionJSON["ppc threshold"]["valid region"].get<std::string>();
 
     if (species.size() == 0) {
       this->throwParserError(derivedError + "but array 'species' is empty");
@@ -2718,6 +2719,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     if (thresh < 0LL) {
       this->throwParserError(derivedError + "'thresh' can not be < 0");
     }
+    if ((cutoff != "above") && (cutoff != "below")) {
+      this->throwParserError(derivedError + "'valid region' must be 'above' or 'below'");
+    }
 
     // Build the species index array
     std::vector<int> speciesIndices;
@@ -2725,16 +2729,30 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       speciesIndices.emplace_back(m_plasmaIndexMap.at(s));
     }
 
-    gridFactor = [speciesIndices, thresh](const Real dx, const Vector<Real>& phi) -> Real {
-      Real sumPhi = 0.0;
-      for (const auto& idx : speciesIndices) {
-        sumPhi += phi[idx];
-      }
+    if (cutoff == "above") {
+      gridFactor = [speciesIndices, thresh](const Real dx, const Vector<Real>& phi) -> Real {
+        Real sumPhi = 0.0;
+        for (const auto& idx : speciesIndices) {
+          sumPhi += phi[idx];
+        }
 
-      const long long PPC = llround(sumPhi * std::pow(dx, 3));
+        const long long PPC = llround(sumPhi * std::pow(dx, 3));
 
-      return (PPC > thresh) ? 1.0 : 0.0;
-    };
+        return (PPC > thresh) ? 1.0 : 0.0;
+      };
+    }
+    else if (cutoff == "below") {
+      gridFactor = [speciesIndices, thresh](const Real dx, const Vector<Real>& phi) -> Real {
+        Real sumPhi = 0.0;
+        for (const auto& idx : speciesIndices) {
+          sumPhi += phi[idx];
+        }
+
+        const long long PPC = llround(sumPhi * std::pow(dx, 3));
+
+        return (PPC < thresh) ? 1.0 : 0.0;
+      };
+    }
   }
 
 #warning "ItoKMCJSON -- need to inverse rate to turn fluid into particles! So, must be an above/below threshold"
