@@ -71,9 +71,19 @@ namespace Physics {
 	V is a grid cell volume.
 	@param[in] E Electric field magnitude in SI units. 
 	@param[in] V Volume
-	@param[in] x Physical coordinates
+	@param[in] dx Grid resolution
+	@param[in] x Physical coordinate
+	@param[in] phi List of plasma species densities
       */
-      using FunctionEVX = std::function<Real(const Real E, const Real V, const RealVect x)>;
+      using FunctionEVXP = std::function<
+        Real(const Real E, const Real V, const Real dx, const RealVect x, const Vector<Real>& phi)>;
+
+      /*!
+	@brief Function which encapsulates 
+	@param[in] dx Grid resolution
+	@param[in] dx List of plasma species densities.
+      */
+      using FunctionDXP = std::function<Real(const Real dx, const Vector<Real>& phi)>;
 
       /*!
 	@brief Function for encapsulating a function f = f(T) where T is the temperature of some species
@@ -343,7 +353,7 @@ namespace Physics {
       /*!
 	@brief Function-based plasma reaction rates. Same index as the actual reactions.
       */
-      std::vector<FunctionEVX> m_kmcReactionRates;
+      std::vector<FunctionEVXP> m_kmcReactionRates;
 
       /*!
 	@brief Function-based plasma reaction rates as if they appeared in the reaction rate equation. Same index as actual reactions. 
@@ -673,7 +683,7 @@ namespace Physics {
 	@return This should return a tuple of KMC and fluid rates. The KMC rate will also be multiplied by background species on the 
 	left hand side of the reaction.
       */
-      virtual std::pair<FunctionEVX, FunctionEX>
+      virtual std::pair<FunctionEVXP, FunctionEX>
       parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                               const std::list<size_t>& a_backgroundReactants,
                               const std::list<size_t>& a_plasmaReactants) const;
