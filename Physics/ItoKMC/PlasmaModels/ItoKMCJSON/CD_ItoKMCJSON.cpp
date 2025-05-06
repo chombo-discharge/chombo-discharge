@@ -2755,8 +2755,6 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
   }
 
-#warning "ItoKMCJSON -- need to inverse rate to turn fluid into particles! So, must be an above/below threshold"
-
   // This is the KMC rate -- note that it absorbs the background species.
   FunctionEVXP kmcRate = [fluidRate,
                           volumeFactor,
