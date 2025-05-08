@@ -58,7 +58,7 @@ main(int argc, char* argv[])
     pout() << endl;
   };
 
-  physics->defineKMC();  
+  physics->defineKMC();
   while (t < stopTime) {
     printToFile();
 
