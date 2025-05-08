@@ -53,7 +53,7 @@ main(int argc, char* argv[])
   auto printToFile = [&]() -> void {
     pout() << t << "\t";
     for (int i = 0; i < numPlasmaSpecies; i++) {
-      pout() << particles[i] << "\t";
+      pout() << llround(particles[i]) << "\t";
     }
     pout() << endl;
   };

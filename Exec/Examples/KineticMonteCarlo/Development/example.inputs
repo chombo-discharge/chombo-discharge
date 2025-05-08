@@ -2,7 +2,7 @@
 # ----------------------------
 ItoKMCJSON.verbose            = false			## Turn on/off verbosity
 ItoKMCJSON.debug              = true			## Turn on/off debugging
-ItoKMCJSON.chemistry_file     = energy_sharing.json  	## Chemistry file
+ItoKMCJSON.chemistry_file     = no_energy_sharing.json  	## Chemistry file
 
 # Kinetic Monte Carlo solver settings.
 # --------------------------------------
@@ -20,6 +20,6 @@ ItoKMCJSON.algorithm          = prc			## Integration algorithm to use
 # --------------------------
 Random.seed		= -1				## Initial random seed
 num_initial_electrons	= 100				## Number of initial electrons
-E			= 1E7				## Background field
+E			= 1E8				## Background field
 dt			= 10E-12			## Time step
-stop_time		= 100E-12			## Stop time
+stop_time		= 10E-12			## Stop time
