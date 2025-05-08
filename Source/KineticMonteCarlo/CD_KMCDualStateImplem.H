@@ -12,6 +12,8 @@
 #ifndef CD_KMCDualStateImplem_H
 #define CD_KMCDualStateImplem_H
 
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_KMCDualState.H>
 #include <CD_NamespaceHeader.H>
