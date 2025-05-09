@@ -520,7 +520,7 @@ KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_react
     for (size_t i = 0; i < numReactions; i++) {
       // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
       //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
-      a_reactions[i]->advanceState(Xdagger, (T)std::ceil(0.5 * propensities[i] * a_dt));
+      a_reactions[i]->advanceState(Xdagger, (T)std::round(0.5 * propensities[i] * a_dt));
     }
     CH_STOP(t1);
 

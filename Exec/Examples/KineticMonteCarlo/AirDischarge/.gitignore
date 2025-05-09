@@ -1,0 +1,9 @@
+ssa.*
+explicit_euler.*
+implicit_euler.*
+prc.*
+midpoint.*
+hybrid_explicit_euler.*
+hybrid_midpoint_euler.*
+hybrid_prc.*
+hybrid_implicit_euler.*
