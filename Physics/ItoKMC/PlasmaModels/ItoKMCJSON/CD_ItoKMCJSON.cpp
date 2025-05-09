@@ -3154,7 +3154,14 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 
       a_kmcReactions[i]->rate() *= fcorr;
     }
+
+
   }
+
+    if(a_phi[2] + a_phi[3] > 1.E24) {
+      a_kmcReactions[1]->rate() = 0.0;
+      a_kmcReactions[2]->rate() = 0.0;      
+    }  
 }
 
 void
@@ -3187,6 +3194,32 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   RealVect hi = +0.5 * RealVect::Unit;
 
   DataOps::computeMinValidBox(lo, hi, a_bndryNormal, a_bndryCentroid);
+
+  // Field emission expression for Fowler-Nordheim, tunneling
+  auto JFN = [=](const Real E) -> Real {
+    const Real ef  = 7.0;
+    const Real phi = 4.4;
+    const Real chi = 1.0;
+
+    Real J = 6.2E-6 * sqrt(ef / phi) * E * E / (ef + phi);
+
+    J *= exp(-6.85E7 * std::pow(phi, 1.5) * chi / E);
+
+    return J / Units::Qe;
+  };
+
+  if (isCathode) {
+    const Real JdAdt = JFN(a_E.vectorLength()) * a_bndryArea * std::pow(a_dx, SpaceDim-1) * a_dt;
+
+    const long long numEmission = Random::getPoisson<long long>(JdAdt);
+
+    if(numEmission > 0LL) {
+      //      std::cout << "emitting " << numEmission << " electrons" << std::endl;
+      const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
+      
+      a_secondaryParticles[1].add(ItoParticle(1.0*numEmission, x));
+    }
+  }
 
   // Outflow for all CDR fluxes.
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
