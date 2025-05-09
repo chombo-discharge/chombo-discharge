@@ -3154,7 +3154,14 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 
       a_kmcReactions[i]->rate() *= fcorr;
     }
+
+
   }
+
+    if(a_phi[2] + a_phi[3] > 1.E24) {
+      a_kmcReactions[1]->rate() = 0.0;
+      a_kmcReactions[2]->rate() = 0.0;      
+    }  
 }
 
 void
