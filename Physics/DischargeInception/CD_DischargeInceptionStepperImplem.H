@@ -4841,7 +4841,9 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     output << lineBreak << "\n";
     output << left << setw(15) << setfill(' ') << "# +/- Voltage";
     output << left << setw(15) << setfill(' ') << "Max K(+)";
+    output << left << setw(15) << setfill(' ') << "Pos. max K(+)";    
     output << left << setw(15) << setfill(' ') << "Max K(-)";
+    output << left << setw(15) << setfill(' ') << "Pos. max K(+)";        
     output << left << setw(20) << setfill(' ') << "Max T(+)";
     output << left << setw(20) << setfill(' ') << "Max T(-)";    
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
@@ -4854,7 +4856,9 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
       output << left << setw(15) << setfill(' ') << m_maxKPlus[i];
+      output << left << setw(15) << setfill(' ') << 1.0;
       output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
+      output << left << setw(15) << setfill(' ') << 1.0;      
       output << left << setw(20) << setfill(' ') << m_maxTPlus[i];
       output << left << setw(20) << setfill(' ') << m_maxTMinu[i];      
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
