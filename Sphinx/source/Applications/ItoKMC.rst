@@ -2010,14 +2010,76 @@ The above example can be compressed by using a wildcard and an ``efficiencies`` 
    "dielectric emission":
    [
       {
-         "reaction": "Y -> @",
+      "reaction": "Y -> @",
 	 "@": ["e", "(null)"],
 	 "efficiencies": [1,9]
       }
    ]
 
 where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
-This has no effect on the probabilities :math:`p(i)` given above. 
+This has no effect on the probabilities :math:`p(i)` given above.
+
+Field emission
+--------------
+
+Field emission for a specified species is supported by including a ``field emission`` specifier.
+Currently supported expressions are:
+
+#. Fowler-Nordheim emission:
+
+   .. math::
+
+      J(E) &= \frac{a F^2}{\phi}\exp\left(-v(f) b \phi^{3/2} F\right),\\
+      F &= \left(\beta E\right)\times 10^9,\\
+      a &= 1.541434\times 10^{-6}\,\text{AeV}/\text{V}^2, \\
+      b &= 6.830890\,\text{eV}^{-3/2}\text{V}\text{nm}^{-1},\\
+      v(f) &= 1 - f + \left(1/6\right)f\log(f),\\
+      f &\approx 1.439964\,\text{eV}^2\text{V}^{-1}\text{nm}\times \frac{F}{\phi^2}.
+
+   Here, :math:`\phi` is the work function (in electron volts) and :math:`\beta` is an empirical factor that describes local field amplifications.
+      
+
+#. Schottky emission:
+
+   .. math::
+
+      J(E) &= \lambda A_0 T^2\exp\left(-\frac{\left(\phi-\Delta\phi\right)q_\text{e}}{k_{\text{B}}T}\right), \\
+      F &= \beta E, \\
+      A_0 &\approx 1.201736\times 10^6\,\text{A}\text{m}^{-2}\text{K}^{-2}, \\
+      \Delta \phi &= \sqrt{\frac{q_\text{e} F}{4\pi\epsilon_0}}.
+
+   Here, :math:`T` is the cathode temperature and :math:`\phi` is the work function (in electron volts).
+   The value :math:`\lambda` is typically around :math:`0.5`.
+   As for the Fowler-Nordheim equation, a factor that describes local field amplifications is given in :math:`\beta`. 
+
+.. warning::
+      
+   The expressions above both use a correction factor :math:`\beta` that describes local field amplifications.
+   Note, however, that the number of emitted electrons is proportional to the area of the emitter, and there are no current models in ``chombo-discharge`` that can compute this effective area.
+
+Below, we show an example that includes both Schottky and Fowler-Nordheim emission
+
+.. code-block:: json
+
+    "field emission":
+    [
+	{
+	    "species": "e",
+	    "surface": "electrode",
+	    "type": "fowler-nordheim",
+	    "work": 5.0,
+	    "beta": 1
+	},
+	{
+	    "species": "e",
+	    "surface": "electrode",
+	    "type": "schottky",
+	    "lambda": 0.5	    
+	    "temperature": 300,
+	    "work": 5.0,
+	    "beta": 1,
+	}
+    ]		
 
 
 .. _Chap:ItoKMCWarnings:

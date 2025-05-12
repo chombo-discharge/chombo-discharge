@@ -165,6 +165,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id12">Particle placement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id13">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id14">Townsend coefficients</a></li>
@@ -2549,7 +2550,7 @@ The above example can be compressed by using a wildcard and an <code class="docu
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;dielectric emission&quot;</span><span class="p">:</span>
 <span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y -&gt; @&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Y -&gt; @&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;@&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;(null)&quot;</span><span class="p">],</span>
 <span class="w">      </span><span class="nt">&quot;efficiencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">9</span><span class="p">]</span>
 <span class="w">   </span><span class="p">}</span>
@@ -2558,6 +2559,60 @@ The above example can be compressed by using a wildcard and an <code class="docu
 </div>
 <p>where for the sake of demonstration the efficiencies are set to 1 and 9 (rather than 0.1 and 0.9).
 This has no effect on the probabilities <span class="math notranslate nohighlight">\(p(i)\)</span> given above.</p>
+</section>
+<section id="field-emission">
+<h3>Field emission<a class="headerlink" href="#field-emission" title="Permalink to this heading"></a></h3>
+<p>Field emission for a specified species is supported by including a <code class="docutils literal notranslate"><span class="pre">field</span> <span class="pre">emission</span></code> specifier.
+Currently supported expressions are:</p>
+<ol class="arabic">
+<li><p>Fowler-Nordheim emission:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}J(E) &amp;= \frac{a F^2}{\phi}\exp\left(-v(f) b \phi^{3/2} F\right),\\
+F &amp;= \left(\beta E\right)\times 10^9,\\
+a &amp;= 1.541434\times 10^{-6}\,\text{AeV}/\text{V}^2, \\
+b &amp;= 6.830890\,\text{eV}^{-3/2}\text{V}\text{nm}^{-1},\\
+v(f) &amp;= 1 - f + \left(1/6\right)f\log(f),\\
+f &amp;\approx 1.439964\,\text{eV}^2\text{V}^{-1}\text{nm}\times \frac{F}{\phi^2}.\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\phi\)</span> is the work function (in electron volts) and <span class="math notranslate nohighlight">\(\beta\)</span> is an empirical factor that describes local field amplifications.</p>
+</li>
+<li><p>Schottky emission:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}J(E) &amp;= \lambda A_0 T^2\exp\left(-\frac{\left(\phi-\Delta\phi\right)q_\text{e}}{k_{\text{B}}T}\right), \\
+F &amp;= \beta E, \\
+A_0 &amp;\approx 1.201736\times 10^6\,\text{A}\text{m}^{-2}\text{K}^{-2}, \\
+\Delta \phi &amp;= \sqrt{\frac{q_\text{e} F}{4\pi\epsilon_0}}.\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(T\)</span> is the cathode temperature and <span class="math notranslate nohighlight">\(\phi\)</span> is the work function (in electron volts).
+The value <span class="math notranslate nohighlight">\(\lambda\)</span> is typically around <span class="math notranslate nohighlight">\(0.5\)</span>.
+As for the Fowler-Nordheim equation, a factor that describes local field amplifications is given in <span class="math notranslate nohighlight">\(\beta\)</span>.</p>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The expressions above both use a correction factor <span class="math notranslate nohighlight">\(\beta\)</span> that describes local field amplifications.
+Note, however, that the number of emitted electrons is proportional to the area of the emitter, and there are no current models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> that can compute this effective area.</p>
+</div>
+<p>Below, we show an example that includes both Schottky and Fowler-Nordheim emission</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;field emission&quot;</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;species&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;surface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fowler-nordheim&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;work&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;beta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;species&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;surface&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;electrode&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schottky&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;lambda&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="w">        </span><span class="nt">&quot;temperature&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;work&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;beta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
 </section>
 <section id="warnings-and-caveats">
 <span id="chap-itokmcwarnings"></span><h3>Warnings and caveats<a class="headerlink" href="#warnings-and-caveats" title="Permalink to this heading"></a></h3>
