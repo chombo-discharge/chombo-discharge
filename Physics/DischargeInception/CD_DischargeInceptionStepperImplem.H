@@ -495,8 +495,8 @@ DischargeInceptionStepper<P, F, C>::parseVoltages() noexcept
   }
 
   m_voltageSweeps.push_back(voltageHi);
-  m_maxTPlus.resize(m_voltageSweeps.size(), 0.0);
-  m_maxTMinu.resize(m_voltageSweeps.size(), 0.0);
+  m_maxTPlus.resize(m_voltageSweeps.size(), std::make_pair(0.0, RealVect::Zero));
+  m_maxTMinu.resize(m_voltageSweeps.size(), std::make_pair(0.0, RealVect::Zero));
 }
 
 template <typename P, typename F, typename C>
@@ -2522,6 +2522,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
       // Deposit particles on mesh and copy to relevant data holder.
       if (p > 0.0) {
+#warning "Get position of Max(K+)"	
         m_tracerParticleSolver->deposit(Kplus);
 
         m_amr->conservativeAverage(Kplus, m_realm, m_phase);
@@ -2538,9 +2539,10 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
           maxK = std::min(maxK, m_inceptionK);
         }
 
-        m_maxKPlus.push_back(maxK);
+        m_maxKPlus.push_back(std::make_pair(maxK, RealVect::Zero));
       }
       else {
+#warning "Get position of Max(K-)"	
         m_tracerParticleSolver->deposit(Kminu);
 
         m_amr->conservativeAverage(Kminu, m_realm, m_phase);
@@ -2557,7 +2559,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
           maxK = std::min(maxK, m_inceptionK);
         }
 
-        m_maxKMinu.push_back(maxK);
+        m_maxKMinu.push_back(std::make_pair(maxK, RealVect::Zero));
       }
     }
   }
@@ -3087,6 +3089,7 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
       };
 
       if (p > 0.0) {
+#warning "Must get maxT+"
         EBAMRCellData Kplus = m_amr->slice(m_inceptionIntegralPlus, Interval(i, i));
         DataOps::copy(expK, Kplus);
         DataOps::compute(expK, exponentiate);
@@ -3106,9 +3109,10 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
 
         DataOps::getMaxMin(maxT, minT, gamma, 0);
 
-        m_maxTPlus[i] = maxT;
+        m_maxTPlus[i] = std::make_pair(maxT, RealVect::Zero);
       }
       else {
+#warning "Must get maxT-"	
         EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
         DataOps::copy(expK, Kminu);
         DataOps::compute(expK, exponentiate);
@@ -3128,7 +3132,7 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
 
         DataOps::getMaxMin(maxT, minT, gamma, 0);
 
-        m_maxTMinu[i] = maxT;
+        m_maxTMinu[i] = std::make_pair(maxT, RealVect::Zero);
       }
     }
   }
@@ -4807,7 +4811,7 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
 
     std::ofstream output(m_outputFile, std::ofstream::out);
 
-    const std::string lineBreak = "# " + std::string(178, '=');
+    const std::string lineBreak = "# " + std::string(248, '=');
 
     // clang-format off
     output << lineBreak << "\n";
@@ -4841,26 +4845,32 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     output << lineBreak << "\n";
     output << left << setw(15) << setfill(' ') << "# +/- Voltage";
     output << left << setw(15) << setfill(' ') << "Max K(+)";
-    output << left << setw(15) << setfill(' ') << "Pos. max K(+)";    
     output << left << setw(15) << setfill(' ') << "Max K(-)";
-    output << left << setw(15) << setfill(' ') << "Pos. max K(+)";        
+    output << left << setw(35) << setfill(' ') << "Pos. max K(+)";        
+    output << left << setw(35) << setfill(' ') << "Pos. max K(-)";                
     output << left << setw(20) << setfill(' ') << "Max T(+)";
-    output << left << setw(20) << setfill(' ') << "Max T(-)";    
+    output << left << setw(20) << setfill(' ') << "Max T(-)";
+    output << left << setw(35) << setfill(' ') << "Pos. max T(+)";        
+    output << left << setw(35) << setfill(' ') << "Pos. max T(-)";            
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
     output << left << setw(20) << setfill(' ') << "Crit. area(+)";
     output << left << setw(20) << setfill(' ') << "Crit. area(-)";
     output << left << setw(20) << setfill(' ') << "Ionization vol." << "\n";
-    output << lineBreak << "\n";        
+    output << lineBreak << "\n";
+
+#warning "Need new output operator because RealVect << breaks"
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
-      output << left << setw(15) << setfill(' ') << m_maxKPlus[i];
-      output << left << setw(15) << setfill(' ') << 1.0;
-      output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
-      output << left << setw(15) << setfill(' ') << 1.0;      
-      output << left << setw(20) << setfill(' ') << m_maxTPlus[i];
-      output << left << setw(20) << setfill(' ') << m_maxTMinu[i];      
+      output << left << setw(15) << setfill(' ') << m_maxKPlus[i].first;
+      output << left << setw(15) << setfill(' ') << m_maxKMinu[i].first;
+      output << left << setw(35) << setfill(' ') << m_maxKPlus[i].second;
+      output << left << setw(35) << setfill(' ') << m_maxKMinu[i].second;
+      output << left << setw(20) << setfill(' ') << m_maxTPlus[i].first;
+      output << left << setw(20) << setfill(' ') << m_maxTMinu[i].first;
+      output << left << setw(35) << setfill(' ') << m_maxTPlus[i].second;
+      output << left << setw(35) << setfill(' ') << m_maxTMinu[i].second;
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];

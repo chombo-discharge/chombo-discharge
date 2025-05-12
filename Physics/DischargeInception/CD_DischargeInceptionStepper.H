@@ -587,25 +587,25 @@ namespace Physics {
 	@brief Max K value for every voltage
 	@note Stationary mode, positive polarity
       */
-      std::vector<Real> m_maxKPlus;
+      std::vector<std::pair<Real, RealVect>> m_maxKPlus;
 
       /*! 
 	@brief Max K value for every voltage
 	@note Stationary mode, negative polarity
       */
-      std::vector<Real> m_maxKMinu;
+      std::vector<std::pair<Real, RealVect>> m_maxKMinu;
 
       /*! 
 	@brief Max Townsend value (exp(K)/gamma) for every voltage
 	@note Stationary mode, positive polarity
       */
-      std::vector<Real> m_maxTPlus;
+      std::vector<std::pair<Real, RealVect>> m_maxTPlus;
 
       /*! 
 	@brief Max Townsend value (exp(K)/gamma) for every voltage
 	@note Stationary mode, negative polarity
       */
-      std::vector<Real> m_maxTMinu;
+      std::vector<std::pair<Real, RealVect>> m_maxTMinu;
 
       /*!
 	@brief Max K value for every time step
