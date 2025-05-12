@@ -407,6 +407,16 @@ namespace Physics {
       std::pair<bool, std::string> m_autoEta;
 
       /*!
+	@brief List of dielectric field emission reactions.
+      */
+      std::vector<std::pair<int, FunctionEN>> m_dielectricFieldEmission;
+
+      /*!
+	@brief List of electrode field emission reactions.
+      */
+      std::vector<std::pair<int, FunctionEN>> m_electrodeFieldEmission;
+
+      /*!
 	@brief Townsend ionization coefficient. Defined during parseAlpha
       */
       FunctionEX m_alpha;
@@ -636,6 +646,12 @@ namespace Physics {
       */
       virtual void
       initializeSurfaceEmission(const std::string a_surface);
+
+      /*!
+	@brief Initialize field emission reactions
+      */
+      virtual void
+      initializeFieldEmission();
 
       /*!
 	@brief Initialize the particle placement algorithm

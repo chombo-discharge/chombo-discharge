@@ -65,6 +65,7 @@ ItoKMCJSON::ItoKMCJSON()
   this->initializePhotoReactions();
   this->initializeSurfaceEmission("dielectric");
   this->initializeSurfaceEmission("electrode");
+  this->initializeFieldEmission();
 
   // Initialize the particle placement algorithm
   this->initializeParticlePlacement();
@@ -2067,6 +2068,147 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
 }
 
 void
+ItoKMCJSON::initializeFieldEmission()
+{
+  CH_TIME("ItoKMCJSON::initializeFieldEmission");
+  if (m_verbose) {
+    pout() << m_className + "::initializeFieldEmission" << endl;
+  }
+
+  // Field emission expression for Fowler-Nordheim tunneling. a and b are constants, phi is the work function
+  // and E is the field given in V/m.
+  auto FowlerNordheim = [](const Real phi, const Real beta, const Real E) -> Real {
+    const Real a = 1.541434E-6;
+    const Real b = 6.830890;
+    const Real F = beta * E * 1.E-9;
+    const Real f = 1.439964 * F / (phi * phi);
+    const Real v = 1.0 - f + 1.0 / 6.0 * f * log(f);
+
+    const Real J = (a * F * F / phi) * exp(-v * b * std::pow(phi, 1.5) / F);
+
+    return J;
+  };
+
+  // Field emission expression for Schottky emission. T is the cathode temperature, phi is the work function, lamdba
+  // is a correction factor, and beta is a field amplification factor.
+  auto Schottky = [](const Real T, const Real phi, const Real lambda, const Real beta, const Real E) -> Real {
+    const Real F  = beta * E;
+    const Real A0 = 1.20173E6;
+    const Real dW = sqrt(Units::Qe * F / (4 * Units::pi * Units::eps0)); // Given in eV
+
+    const Real J = lambda * A0 * T * T * exp(-(phi - dW) * Units::Qe / (Units::kb * T));
+
+    return J;
+  };
+
+  const std::string baseError = "ItoKMCJSON::initializeFieldEmission";
+
+  for (const auto& reactionJSON : m_json["field emission"]) {
+    if (!(reactionJSON.contains("species"))) {
+      this->throwParserError(baseError + " but the field 'species' is missing");
+    }
+    if (!(reactionJSON.contains("surface"))) {
+      this->throwParserError(baseError + " but the field 'surface' is missing");
+    }
+    if (!(reactionJSON.contains("type"))) {
+      this->throwParserError(baseError + " but the field 'type' is missing");
+    }
+
+    const std::string species = this->trim(reactionJSON["species"].get<std::string>());
+    const std::string surface = this->trim(reactionJSON["surface"].get<std::string>());
+    const std::string type    = this->trim(reactionJSON["type"].get<std::string>());
+
+    if (!(this->isPlasmaSpecies(species))) {
+      this->throwParserError(baseError + " but 'species' is not a plasma species");
+    }
+    else {
+      if (m_plasmaSpeciesTypes.at(species) != SpeciesType::Ito) {
+        this->throwParserError(baseError + " but 'species' is not an Ito species");
+      }
+    }
+
+    if (surface == "electrode") {
+      m_electrodeFieldEmission.emplace_back(m_itoSpeciesMap.at(species), [](const Real E, const Real N) -> Real {
+        return 0.0;
+      });
+    }
+    else if (surface == "dielectric") {
+      m_dielectricFieldEmission.emplace_back(m_itoSpeciesMap.at(species), [](const Real E, const Real N) -> Real {
+        return 0.0;
+      });
+    }
+    else {
+      this->throwParserError(baseError + " but 'surface' must be either 'dielectric' or 'electrode'");
+    }
+
+    FunctionEN& J = (surface == "electrode") ? m_electrodeFieldEmission.back().second
+                                             : m_dielectricFieldEmission.back().second;
+
+    if (type == "fowler-nordheim") {
+      if (!(reactionJSON.contains("work"))) {
+        this->throwParserError(baseError + " but field 'work' is missing");
+      }
+      if (!(reactionJSON.contains("beta"))) {
+        this->throwParserError(baseError + " but field 'beta' is missing");
+      }
+
+      const Real work = reactionJSON["work"].get<Real>();
+      const Real beta = reactionJSON["beta"].get<Real>();
+
+      if (work <= 0.0) {
+        this->throwParserError(baseError + "but 'work' must be real-valued and > 0");
+      }
+      if (beta <= 0.0) {
+        this->throwParserError(baseError + "but 'beta' must be real-valued and > 0");
+      }
+
+      J = [=](const Real E, const Real N) -> Real {
+        return FowlerNordheim(work, beta, E) / Units::Qe;
+      };
+    }
+    else if (type == "schottky") {
+      if (!(reactionJSON.contains("work"))) {
+        this->throwParserError(baseError + " but field 'work' is missing");
+      }
+      if (!(reactionJSON.contains("beta"))) {
+        this->throwParserError(baseError + " but field 'beta' is missing");
+      }
+      if (!(reactionJSON.contains("temperature"))) {
+        this->throwParserError(baseError + " but field 'temperature' is missing");
+      }
+      if (!(reactionJSON.contains("lambda"))) {
+        this->throwParserError(baseError + " but field 'lambda' is missing");
+      }
+
+      const Real work   = reactionJSON["work"].get<Real>();
+      const Real beta   = reactionJSON["beta"].get<Real>();
+      const Real T      = reactionJSON["temperature"].get<Real>();
+      const Real lambda = reactionJSON["lambda"].get<Real>();
+
+      if (work <= 0.0) {
+        this->throwParserError(baseError + "but 'work' must be real-valued and > 0");
+      }
+      if (beta <= 0.0) {
+        this->throwParserError(baseError + "but 'beta' must be real-valued and > 0");
+      }
+      if (T <= 0.0) {
+        this->throwParserError(baseError + "but 'temperature' must be real-valued and > 0");
+      }
+      if (lambda <= 0.0) {
+        this->throwParserError(baseError + "but 'lambda' must be real-valued and > 0");
+      }
+
+      J = [=](const Real E, const Real N) -> Real {
+        return Schottky(T, work, lambda, beta, E) / Units::Qe;
+      };
+    }
+    else {
+      this->throwParserError(baseError + " but 'type' specifier = '" + type + "' is not supported");
+    }
+  }
+}
+
+void
 ItoKMCJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactants,
                                    const std::vector<std::string>& a_products,
                                    const std::string&              a_reaction) const noexcept
@@ -3154,14 +3296,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 
       a_kmcReactions[i]->rate() *= fcorr;
     }
-
-
   }
-
-    if(a_phi[2] + a_phi[3] > 1.E24) {
-      a_kmcReactions[1]->rate() = 0.0;
-      a_kmcReactions[2]->rate() = 0.0;      
-    }  
 }
 
 void
@@ -3194,32 +3329,6 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
   RealVect hi = +0.5 * RealVect::Unit;
 
   DataOps::computeMinValidBox(lo, hi, a_bndryNormal, a_bndryCentroid);
-
-  // Field emission expression for Fowler-Nordheim, tunneling
-  auto JFN = [=](const Real E) -> Real {
-    const Real ef  = 7.0;
-    const Real phi = 4.4;
-    const Real chi = 1.0;
-
-    Real J = 6.2E-6 * sqrt(ef / phi) * E * E / (ef + phi);
-
-    J *= exp(-6.85E7 * std::pow(phi, 1.5) * chi / E);
-
-    return J / Units::Qe;
-  };
-
-  if (isCathode) {
-    const Real JdAdt = JFN(a_E.vectorLength()) * a_bndryArea * std::pow(a_dx, SpaceDim-1) * a_dt;
-
-    const long long numEmission = Random::getPoisson<long long>(JdAdt);
-
-    if(numEmission > 0LL) {
-      //      std::cout << "emitting " << numEmission << " electrons" << std::endl;
-      const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
-      
-      a_secondaryParticles[1].add(ItoParticle(1.0*numEmission, x));
-    }
-  }
 
   // Outflow for all CDR fluxes.
   for (int i = 0; i < a_primaryCDRFluxes.size(); i++) {
@@ -3300,6 +3409,30 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
               a_secondaryParticles[p].add(ItoParticle(1.0 * X[i], releasePosition));
             }
           }
+        }
+      }
+    }
+  }
+
+  // Field emission functions.
+  if (isCathode) {
+    const auto& fieldEmissionFunctions = a_isDielectric ? m_dielectricFieldEmission : m_electrodeFieldEmission;
+
+    for (const auto& fieldEmissionFunction : fieldEmissionFunctions) {
+      const auto& species = fieldEmissionFunction.first;
+      const auto& J       = fieldEmissionFunction.second;
+
+      if (m_itoSpecies[species]->getChargeNumber() < 0) {
+
+        const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
+        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_dt;
+
+        const long long numEmission = Random::getPoisson<long long>(JdAdt);
+
+        if (numEmission > 0LL) {
+          const RealVect x = a_cellCenter + a_bndryCentroid * a_dx;
+
+          a_secondaryParticles[species].add(ItoParticle(1.0 * numEmission, x));
         }
       }
     }
