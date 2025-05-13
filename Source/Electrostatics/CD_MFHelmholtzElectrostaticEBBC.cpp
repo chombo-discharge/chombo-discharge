@@ -118,7 +118,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
 
       // Try semi-circle first.
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
@@ -135,7 +135,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
 
       // Try quadrant if that didn't work.
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
@@ -152,7 +152,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
 
       // Last ditch effort: Try a full radius
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
