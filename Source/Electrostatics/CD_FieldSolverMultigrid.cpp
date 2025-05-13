@@ -112,7 +112,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   pp.get("gmg_bc_weight", m_multigridBcWeight);
   pp.get("gmg_jump_order", m_multigridJumpOrder);
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
-  pp.get("gmg_drop_order", m_multigridDropOrder);
+  pp.get("gmg_reduce_order", m_multigridDropOrder);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
