@@ -136,22 +136,41 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         }
 
         // If the stencil consists of only irregular cells, drop order.
-        bool allIrregular = true;
+            // If the stencil consists of only irregular cells, drop order.
+	    bool allIrregular = true;
 
-        const VoFStencil& sten = pairSten.second;
-        for (int i = 0; i < sten.size(); i++) {
-          const VolIndex& vof = sten.vof(i);
+            const VoFStencil& sten = pairSten.second;
+            for (int i = 0; i < sten.size(); i++) {
+              const VolIndex& vof = sten.vof(i);
 
-          if (ebisbox.isRegular(vof.gridIndex())) {
-            allIrregular = false;
-          }
-        }
+              if (ebisbox.isRegular(vof.gridIndex())) {
+		allIrregular = false;
+              }
+            }
 
-        if (allIrregular) {
-          if (order > 1) {
-            foundStencil = false;
-          }
-        }
+	    //            const bool tooIrregular = numIrregular > 0;
+
+            if (foundStencil && allIrregular && order > 0) {
+              //	  std::cout << "dropping that motherfucking order" << std::endl;
+              foundStencil = false;
+            }	
+        // int               numIrregular = 0;
+	
+        // const VoFStencil& sten         = pairSten.second;
+        // for (int i = 0; i < sten.size(); i++) {
+        //   const VolIndex& vof = sten.vof(i);
+
+        //   if (ebisbox.isIrregular(vof.gridIndex())) {
+	//     numIrregular++;
+        //   }
+        // }
+
+        // const bool tooIrregular = numIrregular > 0;
+
+        // if (foundStencil && tooIrregular && order> 0) {
+	//   //	  std::cout << "dropping that motherfucking order" << std::endl;
+        //   foundStencil = false;
+        // }
       }
 
       // Try quadrant if that didn't work.

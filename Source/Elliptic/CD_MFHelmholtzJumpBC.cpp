@@ -231,22 +231,41 @@ MFHelmholtzJumpBC::defineStencils()
             }
 
             // If the stencil consists of only irregular cells, drop order.
-            bool allIrregular = true;
+	    bool allIrregular = true;
 
             const VoFStencil& sten = pairSten.second;
             for (int i = 0; i < sten.size(); i++) {
               const VolIndex& vof = sten.vof(i);
 
               if (ebisbox.isRegular(vof.gridIndex())) {
-                allIrregular = false;
+		allIrregular = false;
               }
             }
 
-            if (allIrregular) {
-              if (order > 1) {
-                foundStencil = false;
-              }
+	    //            const bool tooIrregular = numIrregular > 0;
+
+            if (foundStencil && allIrregular && order > 0) {
+              //	  std::cout << "dropping that motherfucking order" << std::endl;
+              foundStencil = false;
             }
+
+            // If the stencil consists of only irregular cells, drop order.
+            // bool allIrregular = true;
+
+            // const VoFStencil& sten = pairSten.second;
+            // for (int i = 0; i < sten.size(); i++) {
+            //   const VolIndex& vof = sten.vof(i);
+
+            //   if (ebisbox.isRegular(vof.gridIndex())) {
+            //     allIrregular = false;
+            //   }
+            // }
+
+            // if (allIrregular) {
+            //   if (order > 1) {
+            //     foundStencil = false;
+            //   }
+            // }
           }
 
           // Try quadrant if that didn't work.
