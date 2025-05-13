@@ -147,7 +147,8 @@ EBHelmholtzDirichletEBBC::define()
 
       std::pair<Real, VoFStencil> pairSten;
 
-      // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+#if 0 // Development code \
+  // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
 #warning "Dev code in MFHelmholtzJumpBC in stencil drop order"
       if (!(m_validCells.isNull())) {
         if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
@@ -157,6 +158,7 @@ EBHelmholtzDirichletEBBC::define()
       else {
         dropOrder = true;
       }
+#endif
 
       // Try semi-circles first first.
       order = dropOrder ? 1 : m_order;

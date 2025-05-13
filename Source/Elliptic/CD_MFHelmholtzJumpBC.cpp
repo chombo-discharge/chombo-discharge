@@ -204,16 +204,18 @@ MFHelmholtzJumpBC::defineStencils()
 
           std::pair<Real, VoFStencil> pairSten;
 
-          // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+#if 0 // Development code \
+  // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
 #warning "Dev code in MFHelmholtzJumpBC in stencil drop order"
           if (!(m_validCells.isNull())) {
             if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
-              dropOrder = false;
+              dropOrder = true;
             }
           }
           else {
-            dropOrder = false;
+            dropOrder = true;
           }
+#endif
 
           // Try semi-circle first.
           order = dropOrder ? 1 : m_order;
@@ -229,43 +231,6 @@ MFHelmholtzJumpBC::defineStencils()
             if (foundStencil) {
               foundStencil = this->isStencilValidCF(pairSten.second, din);
             }
-
-            // If the stencil consists of only irregular cells, drop order.
-	    bool allIrregular = true;
-
-            const VoFStencil& sten = pairSten.second;
-            for (int i = 0; i < sten.size(); i++) {
-              const VolIndex& vof = sten.vof(i);
-
-              if (ebisbox.isRegular(vof.gridIndex())) {
-		allIrregular = false;
-              }
-            }
-
-	    //            const bool tooIrregular = numIrregular > 0;
-
-            if (foundStencil && allIrregular && order > 0) {
-              //	  std::cout << "dropping that motherfucking order" << std::endl;
-              foundStencil = false;
-            }
-
-            // If the stencil consists of only irregular cells, drop order.
-            // bool allIrregular = true;
-
-            // const VoFStencil& sten = pairSten.second;
-            // for (int i = 0; i < sten.size(); i++) {
-            //   const VolIndex& vof = sten.vof(i);
-
-            //   if (ebisbox.isRegular(vof.gridIndex())) {
-            //     allIrregular = false;
-            //   }
-            // }
-
-            // if (allIrregular) {
-            //   if (order > 1) {
-            //     foundStencil = false;
-            //   }
-            // }
           }
 
           // Try quadrant if that didn't work.

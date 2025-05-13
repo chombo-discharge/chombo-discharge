@@ -140,7 +140,8 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 
       std::pair<Real, VoFStencil> pairSten;
 
-      // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+#if 0 // Development code \
+  // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
       if (!(m_validCells.isNull())) {
         if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
           dropOrder = true;
@@ -149,6 +150,7 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
       else {
         dropOrder = true;
       }
+#endif
 
       // Try semi-circle first.
       order = dropOrder ? 1 : m_order;

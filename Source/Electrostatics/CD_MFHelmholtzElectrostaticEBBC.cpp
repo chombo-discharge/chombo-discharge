@@ -107,7 +107,8 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
 
       std::pair<Real, VoFStencil> pairSten;
 
-      // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+#if 0 // Development code \
+  // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
       if (!(m_validCells.isNull())) {
         if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
           dropOrder = false;
@@ -116,8 +117,8 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       else {
         dropOrder = false;
       }
+#endif
 
-#warning "Dev code in MFHelmholtzElectrostaticBC in stencil drop order"
 #warning "Must remove dev2d.inputs and dev3d.inputs"
       // Try semi-circle first.
       order = dropOrder ? 1 : m_order;
@@ -134,43 +135,6 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         if (foundStencil) {
           foundStencil = this->isStencilValidCF(pairSten.second, din);
         }
-
-        // If the stencil consists of only irregular cells, drop order.
-            // If the stencil consists of only irregular cells, drop order.
-	    bool allIrregular = true;
-
-            const VoFStencil& sten = pairSten.second;
-            for (int i = 0; i < sten.size(); i++) {
-              const VolIndex& vof = sten.vof(i);
-
-              if (ebisbox.isRegular(vof.gridIndex())) {
-		allIrregular = false;
-              }
-            }
-
-	    //            const bool tooIrregular = numIrregular > 0;
-
-            if (foundStencil && allIrregular && order > 0) {
-              //	  std::cout << "dropping that motherfucking order" << std::endl;
-              foundStencil = false;
-            }	
-        // int               numIrregular = 0;
-	
-        // const VoFStencil& sten         = pairSten.second;
-        // for (int i = 0; i < sten.size(); i++) {
-        //   const VolIndex& vof = sten.vof(i);
-
-        //   if (ebisbox.isIrregular(vof.gridIndex())) {
-	//     numIrregular++;
-        //   }
-        // }
-
-        // const bool tooIrregular = numIrregular > 0;
-
-        // if (foundStencil && tooIrregular && order> 0) {
-	//   //	  std::cout << "dropping that motherfucking order" << std::endl;
-        //   foundStencil = false;
-        // }
       }
 
       // Try quadrant if that didn't work.
