@@ -26,6 +26,7 @@ constexpr int MFHelmholtzJumpBC::m_nComp;
 MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                                      const MFLevelGrid&   a_mflg,
                                      const BcoefPtr&      a_Bcoef,
+				     const AmrMask&       a_validCells,
                                      const Real           a_dx,
                                      const int            a_order,
                                      const int            a_weight,
@@ -42,6 +43,7 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_dataLocation = a_dataLocation;
   m_mflg         = a_mflg;
   m_Bcoef        = a_Bcoef;
+  m_validCells   = a_validCells;
   m_dx           = a_dx;
   m_weight       = a_weight;
   m_order        = a_order;

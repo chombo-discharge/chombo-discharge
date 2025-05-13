@@ -17,13 +17,23 @@ MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC(const phase
                                                                      const Location::Cell     a_dataLocation,
                                                                      const MFLevelGrid&       a_mflg,
                                                                      const BcoefPtr&          a_Bcoef,
+                                                                     const AmrMask&           a_validCells,
                                                                      const Real               a_dx,
                                                                      const int                a_order,
                                                                      const int                a_weight,
                                                                      const int                a_radius,
                                                                      const int                a_ghostCF,
                                                                      const IntVect            a_ghostPhi)
-  : MFHelmholtzJumpBC(a_dataLocation, a_mflg, a_Bcoef, a_dx, a_order, a_weight, a_radius, a_ghostCF, a_ghostPhi)
+  : MFHelmholtzJumpBC(a_dataLocation,
+                      a_mflg,
+                      a_Bcoef,
+                      a_validCells,
+                      a_dx,
+                      a_order,
+                      a_weight,
+                      a_radius,
+                      a_ghostCF,
+                      a_ghostPhi)
 {
   CH_TIME("MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC");
 

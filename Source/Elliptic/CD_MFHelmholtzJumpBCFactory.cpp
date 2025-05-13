@@ -38,6 +38,7 @@ RefCountedPtr<MFHelmholtzJumpBC>
 MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
                                  const MFLevelGrid&   a_mflg,
                                  const BcoefPtr&      a_Bcoef,
+                                 const AmrMask&       a_validCells,
                                  const Real           a_dx,
                                  const int            a_order,
                                  const int            a_weight,
@@ -47,15 +48,23 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
 {
   int order = a_order;
 
-  // Drop order if we must
+  // Drop order if we mustn
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_mflg.getDomain().size()[dir] <= m_domainDropOrder) {
       order = 1;
     }
   }
 
-  return RefCountedPtr<MFHelmholtzJumpBC>(
-    new MFHelmholtzJumpBC(a_dataLocation, a_mflg, a_Bcoef, a_dx, order, a_weight, a_radius, a_ghostCF, a_ghostPhi));
+  return RefCountedPtr<MFHelmholtzJumpBC>(new MFHelmholtzJumpBC(a_dataLocation,
+                                                                a_mflg,
+                                                                a_Bcoef,
+                                                                a_validCells,								
+                                                                a_dx,
+                                                                order,
+                                                                a_weight,
+                                                                a_radius,
+                                                                a_ghostCF,
+                                                                a_ghostPhi));
 }
 
 #include <CD_NamespaceFooter.H>

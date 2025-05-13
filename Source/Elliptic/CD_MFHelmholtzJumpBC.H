@@ -47,6 +47,11 @@ public:
   using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB>>;
 
   /*!
+    @brief Alias to cut down on typing
+  */
+  using AmrMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
+
+  /*!
     @brief Disallowed weak construction
   */
   MFHelmholtzJumpBC() = delete;
@@ -56,6 +61,7 @@ public:
     @param[in] a_dataLocation Data centering
     @param[in] a_mflg         Grids
     @param[in] a_Bcoef        Helmholtz B-coefficient
+    @param[in] a_validCells   Valid grid cells (might be nullptr)    
     @param[in] a_dx           Grid resolution
     @param[in] a_order        Stencil approximation order
     @param[in] a_weight       Weighting factor for least squares
@@ -66,6 +72,7 @@ public:
   MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                     const MFLevelGrid&   a_mflg,
                     const BcoefPtr&      a_Bcoef,
+                    const AmrMask&       a_validCells,		    
                     const Real           a_dx,
                     const int            a_order,
                     const int            a_weight,
@@ -207,6 +214,11 @@ protected:
     @brief B-coefficient
   */
   RefCountedPtr<LevelData<MFBaseIVFAB>> m_Bcoef;
+
+  /*!
+    @brief Valid grid cells
+  */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;  
 
   /*!
     @brief Grid resolution

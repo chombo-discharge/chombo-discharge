@@ -599,7 +599,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   RefCountedPtr<LevelData<MFFluxFAB>>       Bcoef;
   RefCountedPtr<LevelData<MFBaseIVFAB>>     BcoefIrreg;
   RefCountedPtr<LevelData<BaseIVFAB<Real>>> jump;
-  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells;
+  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells(NULL);
 
   bool foundMgLevel = false;
 
