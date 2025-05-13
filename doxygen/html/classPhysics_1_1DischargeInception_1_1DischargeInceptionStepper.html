@@ -459,6 +459,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ac063c06caaaaebbd006cc3bc131bf3bf" id="r_ac063c06caaaaebbd006cc3bc131bf3bf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ac063c06caaaaebbd006cc3bc131bf3bf">writeData</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_output</a>, <a class="el" href="classTracerParticleSolver.html">int</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_comp</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_outputRealm</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_level</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpToCentroids</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_interpGhost</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ac063c06caaaaebbd006cc3bc131bf3bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write data to output. Convenience function used for IO.  <br /></td></tr>
 <tr class="separator:ac063c06caaaaebbd006cc3bc131bf3bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e0694190b0e5d88f90ee97db2b3b849" id="r_a4e0694190b0e5d88f90ee97db2b3b849"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a4e0694190b0e5d88f90ee97db2b3b849">getMaxValueAndLocation</a> (<a class="el" href="classTracerParticleSolver.html">Real</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_maxVal</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_maxPos</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_data</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a4e0694190b0e5d88f90ee97db2b3b849"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum value and location corresponding to the maximum value in the input data holder.  <br /></td></tr>
+<tr class="separator:a4e0694190b0e5d88f90ee97db2b3b849"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -583,18 +586,18 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_gradAlpha</b></td></tr>
 <tr class="memdesc:a26490d34b435797293a780a2625ef428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculated version of alpha/(|grad(alpha)|) on the mesh. <br /></td></tr>
 <tr class="separator:a26490d34b435797293a780a2625ef428"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa972f35b1c16353b6d38ebabb0677a05" id="r_aa972f35b1c16353b6d38ebabb0677a05"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#aa972f35b1c16353b6d38ebabb0677a05">m_maxKPlus</a></td></tr>
-<tr class="memdesc:aa972f35b1c16353b6d38ebabb0677a05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every voltage.  <br /></td></tr>
-<tr class="separator:aa972f35b1c16353b6d38ebabb0677a05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9df03ca6b7514108d52acbc54f2820cb" id="r_a9df03ca6b7514108d52acbc54f2820cb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a9df03ca6b7514108d52acbc54f2820cb">m_maxKMinu</a></td></tr>
-<tr class="memdesc:a9df03ca6b7514108d52acbc54f2820cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every voltage.  <br /></td></tr>
-<tr class="separator:a9df03ca6b7514108d52acbc54f2820cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a813b0063e8bb97d7022f95a8a4194c9f" id="r_a813b0063e8bb97d7022f95a8a4194c9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a813b0063e8bb97d7022f95a8a4194c9f">m_maxTPlus</a></td></tr>
-<tr class="memdesc:a813b0063e8bb97d7022f95a8a4194c9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max Townsend value (exp(K)/gamma) for every voltage.  <br /></td></tr>
-<tr class="separator:a813b0063e8bb97d7022f95a8a4194c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f562ac38a5d691ffebcb644d839469d" id="r_a3f562ac38a5d691ffebcb644d839469d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a3f562ac38a5d691ffebcb644d839469d">m_maxTMinu</a></td></tr>
-<tr class="memdesc:a3f562ac38a5d691ffebcb644d839469d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max Townsend value (exp(K)/gamma) for every voltage.  <br /></td></tr>
-<tr class="separator:a3f562ac38a5d691ffebcb644d839469d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43369f5112ae52737290e54b220d589d" id="r_a43369f5112ae52737290e54b220d589d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a43369f5112ae52737290e54b220d589d">m_maxKPlus</a></td></tr>
+<tr class="memdesc:a43369f5112ae52737290e54b220d589d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every voltage.  <br /></td></tr>
+<tr class="separator:a43369f5112ae52737290e54b220d589d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e22c7e3ffa25442cac563625dd2f9ba" id="r_a5e22c7e3ffa25442cac563625dd2f9ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a5e22c7e3ffa25442cac563625dd2f9ba">m_maxKMinu</a></td></tr>
+<tr class="memdesc:a5e22c7e3ffa25442cac563625dd2f9ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every voltage.  <br /></td></tr>
+<tr class="separator:a5e22c7e3ffa25442cac563625dd2f9ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1769dca28f490e40a3be94ade65c21f" id="r_ad1769dca28f490e40a3be94ade65c21f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ad1769dca28f490e40a3be94ade65c21f">m_maxTPlus</a></td></tr>
+<tr class="memdesc:ad1769dca28f490e40a3be94ade65c21f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max Townsend value (exp(K)/gamma) for every voltage.  <br /></td></tr>
+<tr class="separator:ad1769dca28f490e40a3be94ade65c21f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f69d88d8696dc504bfcd1d72cc16576" id="r_a8f69d88d8696dc504bfcd1d72cc16576"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a8f69d88d8696dc504bfcd1d72cc16576">m_maxTMinu</a></td></tr>
+<tr class="memdesc:a8f69d88d8696dc504bfcd1d72cc16576"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max Townsend value (exp(K)/gamma) for every voltage.  <br /></td></tr>
+<tr class="separator:a8f69d88d8696dc504bfcd1d72cc16576"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40c2eebbcdcaa6b85ba0c5bf9f6fdda4" id="r_a40c2eebbcdcaa6b85ba0c5bf9f6fdda4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a40c2eebbcdcaa6b85ba0c5bf9f6fdda4">m_maxK</a></td></tr>
 <tr class="memdesc:a40c2eebbcdcaa6b85ba0c5bf9f6fdda4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max K value for every time step.  <br /></td></tr>
 <tr class="separator:a40c2eebbcdcaa6b85ba0c5bf9f6fdda4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1701,6 +1704,60 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>For plotting the emission rate in transient simulations. </dd></dl>
+
+</div>
+</div>
+<a id="a4e0694190b0e5d88f90ee97db2b3b849" name="a4e0694190b0e5d88f90ee97db2b3b849"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e0694190b0e5d88f90ee97db2b3b849">&#9670;&#160;</a></span>getMaxValueAndLocation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> DischargeInceptionStepper::getMaxValueAndLocation </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">Real</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maxVal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_maxPos</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the maximum value and location corresponding to the maximum value in the input data holder. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_maxVal</td><td>Maximum value. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_maxPos</td><td>Position where maximum value was found </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_data</td><td>Mesh data </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -3854,8 +3911,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="a9df03ca6b7514108d52acbc54f2820cb" name="a9df03ca6b7514108d52acbc54f2820cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9df03ca6b7514108d52acbc54f2820cb">&#9670;&#160;</a></span>m_maxKMinu</h2>
+<a id="a5e22c7e3ffa25442cac563625dd2f9ba" name="a5e22c7e3ffa25442cac563625dd2f9ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e22c7e3ffa25442cac563625dd2f9ba">&#9670;&#160;</a></span>m_maxKMinu</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3866,7 +3923,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>&gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxKMinu</td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a>&gt; &gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxKMinu</td>
         </tr>
       </table>
   </td>
@@ -3881,8 +3938,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="aa972f35b1c16353b6d38ebabb0677a05" name="aa972f35b1c16353b6d38ebabb0677a05"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa972f35b1c16353b6d38ebabb0677a05">&#9670;&#160;</a></span>m_maxKPlus</h2>
+<a id="a43369f5112ae52737290e54b220d589d" name="a43369f5112ae52737290e54b220d589d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43369f5112ae52737290e54b220d589d">&#9670;&#160;</a></span>m_maxKPlus</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3893,7 +3950,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>&gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxKPlus</td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a>&gt; &gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxKPlus</td>
         </tr>
       </table>
   </td>
@@ -3935,8 +3992,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="a3f562ac38a5d691ffebcb644d839469d" name="a3f562ac38a5d691ffebcb644d839469d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3f562ac38a5d691ffebcb644d839469d">&#9670;&#160;</a></span>m_maxTMinu</h2>
+<a id="a8f69d88d8696dc504bfcd1d72cc16576" name="a8f69d88d8696dc504bfcd1d72cc16576"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f69d88d8696dc504bfcd1d72cc16576">&#9670;&#160;</a></span>m_maxTMinu</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3947,7 +4004,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>&gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxTMinu</td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a>&gt; &gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxTMinu</td>
         </tr>
       </table>
   </td>
@@ -3962,8 +4019,8 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
-<a id="a813b0063e8bb97d7022f95a8a4194c9f" name="a813b0063e8bb97d7022f95a8a4194c9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a813b0063e8bb97d7022f95a8a4194c9f">&#9670;&#160;</a></span>m_maxTPlus</h2>
+<a id="ad1769dca28f490e40a3be94ade65c21f" name="ad1769dca28f490e40a3be94ade65c21f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1769dca28f490e40a3be94ade65c21f">&#9670;&#160;</a></span>m_maxTPlus</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3974,7 +4031,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>&gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxTPlus</td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt;<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt;<a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">RealVect</a>&gt; &gt; <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_maxTPlus</td>
         </tr>
       </table>
   </td>
