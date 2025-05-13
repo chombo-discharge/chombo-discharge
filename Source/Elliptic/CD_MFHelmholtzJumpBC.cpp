@@ -26,7 +26,7 @@ constexpr int MFHelmholtzJumpBC::m_nComp;
 MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                                      const MFLevelGrid&   a_mflg,
                                      const BcoefPtr&      a_Bcoef,
-				     const AmrMask&       a_validCells,
+                                     const AmrMask&       a_validCells,
                                      const Real           a_dx,
                                      const int            a_order,
                                      const int            a_weight,
@@ -197,12 +197,25 @@ MFHelmholtzJumpBC::defineStencils()
 
         // Kernel
         auto kernel = [&](const VolIndex& vof) -> void {
-          int                         order;
-          bool                        foundStencil = false;
+          int order = -1;
+
+          bool foundStencil = false;
+          bool dropOrder    = false;
+
           std::pair<Real, VoFStencil> pairSten;
 
+          // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+          if (!(m_validCells.isNull())) {
+            if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+              dropOrder = true;
+            }
+          }
+          else {
+            dropOrder = true;
+          }
+
           // Try semi-circle first.
-          order = m_order;
+          order = dropOrder ? 1 : m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                     vof,
@@ -218,7 +231,7 @@ MFHelmholtzJumpBC::defineStencils()
           }
 
           // Try quadrant if that didn't work.
-          order = m_order;
+          order = dropOrder ? 1 : m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                     vof,
@@ -234,7 +247,7 @@ MFHelmholtzJumpBC::defineStencils()
           }
 
           // Last ditch effort: Try a full radius
-          order = m_order;
+          order = dropOrder ? 1 : m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                     vof,
