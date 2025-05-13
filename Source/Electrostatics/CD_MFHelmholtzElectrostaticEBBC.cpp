@@ -100,9 +100,22 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
-      int                         order;
-      bool                        foundStencil = false;
+      int order = -1;
+
+      bool foundStencil = false;
+      bool dropOrder    = false;
+
       std::pair<Real, VoFStencil> pairSten;
+
+      // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+      if (!(m_validCells.isNull())) {
+        if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+          dropOrder = true;
+        }
+      }
+      else {
+        dropOrder = true;
+      }
 
       // Try semi-circle first.
       order = m_order;

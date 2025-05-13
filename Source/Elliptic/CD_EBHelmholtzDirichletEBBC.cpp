@@ -140,12 +140,37 @@ EBHelmholtzDirichletEBBC::define()
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
-      int                         order;
-      bool                        foundStencil = false;
+      int order = -1;
+
+      bool foundStencil = false;
+      bool dropOrder    = false;
+
       std::pair<Real, VoFStencil> pairSten;
 
-      // Try quadrants first.
-      order = m_order;
+      // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
+      if (!(m_validCells.isNull())) {
+        if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+          dropOrder = true;
+        }
+      }
+      else {
+        dropOrder = true;
+      }
+
+      // Try semi-circles first first.
+      order = dropOrder ? 1 : m_order;
+      while (!foundStencil && order > 0) {
+        foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::SemiCircle, din, order);
+        order--;
+
+        // Check if stencil reaches too far across CF
+        if (foundStencil) {
+          foundStencil = this->isStencilValidCF(pairSten.second, din);
+        }
+      }
+
+      // Try quadrants next.
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, din, order);
         order--;
@@ -157,7 +182,7 @@ EBHelmholtzDirichletEBBC::define()
       }
 
       // If we couldn't find in a quadrant, try a larger neighborhood
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, din, order);
         order--;
