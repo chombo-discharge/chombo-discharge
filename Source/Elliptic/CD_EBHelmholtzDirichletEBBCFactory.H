@@ -84,7 +84,7 @@ public:
     @param[in] a_dropOrder
   */
   virtual void
-  setCoarseGridDropOrder(const bool a_dropOrder);      
+  setCoarseGridDropOrder(const bool a_dropOrder);
 
   /*!
     @brief Set the spatially varying value on the EB. 
@@ -128,7 +128,7 @@ protected:
   /*!
     @brief Special flag for dropping stencil order if the cell is a coarsened cell
   */
-  bool m_dropOrder;    
+  bool m_dropOrder;
 
   /*!
     @brief Value on EB

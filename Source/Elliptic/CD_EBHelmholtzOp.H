@@ -104,7 +104,7 @@ public:
                 const EBLevelGrid&                               a_eblgCoFi,
                 const EBLevelGrid&                               a_eblgCoar,
                 const EBLevelGrid&                               a_eblgCoarMG,
-		const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
+                const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                 const RefCountedPtr<EBReflux>&                   a_fluxReg,
                 const RefCountedPtr<EBCoarAve>&                  a_coarAve,

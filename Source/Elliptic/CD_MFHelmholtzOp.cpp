@@ -106,7 +106,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_jumpBC = a_jumpBcFactory->create(m_dataLocation,
                                      m_mflg,
                                      a_BcoefIrreg,
-				     m_validCells,				     
+                                     m_validCells,
                                      a_dx,
                                      a_jumpOrder,
                                      a_jumpWeight,

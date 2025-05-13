@@ -73,7 +73,7 @@ public:
     @param[in] a_dropOrder
   */
   virtual void
-  setCoarseGridDropOrder(const bool a_dropOrder);  
+  setCoarseGridDropOrder(const bool a_dropOrder);
 
 protected:
   /*!

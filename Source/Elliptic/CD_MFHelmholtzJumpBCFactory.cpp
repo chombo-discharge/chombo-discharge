@@ -63,18 +63,18 @@ MFHelmholtzJumpBCFactory::create(const Location::Cell a_dataLocation,
   }
 
   auto jump = RefCountedPtr<MFHelmholtzJumpBC>(new MFHelmholtzJumpBC(a_dataLocation,
-                                                                a_mflg,
-                                                                a_Bcoef,
-                                                                a_validCells,
-                                                                a_dx,
-                                                                order,
-                                                                a_weight,
-                                                                a_radius,
-                                                                a_ghostCF,
-                                                                a_ghostPhi));
+                                                                     a_mflg,
+                                                                     a_Bcoef,
+                                                                     a_validCells,
+                                                                     a_dx,
+                                                                     order,
+                                                                     a_weight,
+                                                                     a_radius,
+                                                                     a_ghostCF,
+                                                                     a_ghostPhi));
 
   jump->setCoarseGridDropOrder(m_dropOrder);
-  
+
   return jump;
 }
 

@@ -608,7 +608,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          eblgCoFi,
                          eblgCoar,
                          eblgCoarMG,
-			 m_validCells[amrLevel],
+                         m_validCells[amrLevel],
                          m_amrInterpolators[amrLevel],
                          m_amrFluxRegisters[amrLevel],
                          m_amrCoarseners[amrLevel],

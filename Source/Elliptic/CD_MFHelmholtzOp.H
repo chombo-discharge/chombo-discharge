@@ -110,7 +110,7 @@ public:
                 const MFMultigridInterpolator&                   a_interpolator,
                 const MFReflux&                                  a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
-		const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
+                const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
                 const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
                 const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,

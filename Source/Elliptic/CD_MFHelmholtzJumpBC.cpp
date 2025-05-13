@@ -212,7 +212,7 @@ MFHelmholtzJumpBC::defineStencils()
           std::pair<Real, VoFStencil> pairSten;
 
           // Drop stencil order if this cell is not a valid grid cell. I.e., one that lies on the AMR grids and
-	  // is not covered by a finer grid
+          // is not covered by a finer grid
           if (m_dropOrder) {
             if (!(m_validCells.isNull())) {
               if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
