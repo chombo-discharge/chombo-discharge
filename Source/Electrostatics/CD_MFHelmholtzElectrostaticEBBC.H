@@ -100,7 +100,7 @@ public:
     @param[in] a_dropOrder
   */
   void
-  setCoarseGridDropOrder(const bool a_dropOrder);      
+  setCoarseGridDropOrder(const bool a_dropOrder);
 
 protected:
   /*!
@@ -121,7 +121,7 @@ protected:
   /*!
     @brief Special flag for dropping stencil order if the cell is a coarsened cell
   */
-  bool m_dropOrder;    
+  bool m_dropOrder;
 
   /*!
     @brief Electrostatic boundary conditions

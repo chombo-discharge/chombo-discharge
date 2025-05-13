@@ -61,7 +61,7 @@ public:
   create(const Location::Cell a_dataLocation,
          const MFLevelGrid&   a_mflg,
          const BcoefPtr&      a_Bcoef,
-         const AmrMask&       a_validCells,	 
+         const AmrMask&       a_validCells,
          const Real           a_dx,
          const int            a_order,
          const int            a_weight,
