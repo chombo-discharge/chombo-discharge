@@ -1302,6 +1302,15 @@ namespace Physics {
                 const int             a_level,
                 const bool            a_interpToCentroids,
                 const bool            a_interpGhost) const noexcept;
+
+      /*!
+	@brief Get the maximum value and location corresponding to the maximum value in the input data holder.
+	@param[out] a_maxVal Maximum value.
+	@param[out] a_maxPos Position where maximum value was found
+	@param[in]  a_data   Mesh data
+      */
+      virtual void
+      getMaxValueAndLocation(Real& a_maxVal, RealVect& a_maxPos, const EBAMRCellData& a_data) const noexcept;
     };
   } // namespace DischargeInception
 } // namespace Physics
