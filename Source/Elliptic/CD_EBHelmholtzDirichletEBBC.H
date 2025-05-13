@@ -73,6 +73,13 @@ public:
   setDomainDropOrder(const int a_domainSize);
 
   /*!
+    @brief Signal that we should drop the stencil order if the cell is a coarsened cell
+    @param[in] a_dropOrder
+  */
+  virtual void
+  setCoarseGridDropOrder(const bool a_dropOrder);
+
+  /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
     @param[inout] a_vofit             Iterator for cut-cells
     @param[in]    a_Lphi              Operator kappa*L(phi)
@@ -116,6 +123,11 @@ protected:
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
   int m_domainDropOrder;
+
+  /*!
+    @brief Special flag for dropping stencil order if the cell is a coarsened cell
+  */
+  bool m_dropOrder;
 
   /*!
     @brief Value on EB

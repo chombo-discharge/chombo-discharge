@@ -73,11 +73,23 @@ public:
   virtual void
   setDomainDropOrder(const int a_domainSize);
 
+  /*!
+    @brief Drop to a first-order approximation if the cut-cell is a coarsened cell
+  */
+  virtual void
+  setCoarseGridDropOrder(const bool a_dropOrder);
+
 protected:
   /*!
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
   int m_domainDropOrder;
+
+  /*!
+    @brief Special flag for signalling MFHelmholtzJumpBC that it should drop the stencil order to 1 if
+    the cut-cell is a coarsened cell
+  */
+  bool m_dropOrder;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -112,6 +112,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   pp.get("gmg_bc_weight", m_multigridBcWeight);
   pp.get("gmg_jump_order", m_multigridJumpOrder);
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
+  pp.get("gmg_drop_order", m_multigridDropOrder);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -634,6 +635,15 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   // on deeper multigrid levels.
   ebbcFactory->setDomainDropOrder(m_domainDropOrder);
   jumpBcFactory->setDomainDropOrder(m_domainDropOrder);
+
+  if (m_multigridDropOrder) {
+    ebbcFactory->setCoarseGridDropOrder(true);
+    jumpBcFactory->setCoarseGridDropOrder(true);
+  }
+  else {
+    ebbcFactory->setCoarseGridDropOrder(false);
+    jumpBcFactory->setCoarseGridDropOrder(false);
+  }
 
   // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
   // so there is no diagonal term in the operator after all.

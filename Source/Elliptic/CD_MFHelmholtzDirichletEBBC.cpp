@@ -29,6 +29,7 @@ MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefC
 
   m_useConstant = false;
   m_useFunction = false;
+  m_dropOrder   = false;
 }
 
 MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC()
@@ -87,6 +88,12 @@ MFHelmholtzDirichletEBBC::setDomainDropOrder(const int a_domainSize)
 }
 
 void
+MFHelmholtzDirichletEBBC::setCoarseGridDropOrder(const bool a_dropOrder)
+{
+  m_dropOrder = a_dropOrder;
+}
+
+void
 MFHelmholtzDirichletEBBC::defineSinglePhase()
 {
   CH_TIME("MFHelmholtzDirichletEBBC::defineSinglePhase()");
@@ -140,17 +147,18 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 
       std::pair<Real, VoFStencil> pairSten;
 
-#if 0 // Development code \
-  // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
-      if (!(m_validCells.isNull())) {
-        if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+      // Drop stencil order if this cell is not a valid grid cell. I.e., one that lies on the AMR grids and is
+      // not covered by a finer grid)
+      if (m_dropOrder) {
+        if (!(m_validCells.isNull())) {
+          if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+            dropOrder = true;
+          }
+        }
+        else {
           dropOrder = true;
         }
       }
-      else {
-        dropOrder = true;
-      }
-#endif
 
       // Try semi-circle first.
       order = dropOrder ? 1 : m_order;

@@ -55,6 +55,7 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
 
   this->defineIterators();
   this->defineStencils();
+  this->setCoarseGridDropOrder(false);
 }
 
 MFHelmholtzJumpBC::~MFHelmholtzJumpBC()
@@ -78,6 +79,12 @@ int
 MFHelmholtzJumpBC::getRadius() const
 {
   return m_radius;
+}
+
+void
+MFHelmholtzJumpBC::setCoarseGridDropOrder(const bool a_dropOrder)
+{
+  m_dropOrder = a_dropOrder;
 }
 
 const BaseIVFAB<Real>&
@@ -204,18 +211,18 @@ MFHelmholtzJumpBC::defineStencils()
 
           std::pair<Real, VoFStencil> pairSten;
 
-#if 0 // Development code \
-  // Drop stencil order if this cell is not a valid grid cell (i.e., one that lies on the AMR grids and is not covered by a finer grid)
-#warning "Dev code in MFHelmholtzJumpBC in stencil drop order"
-          if (!(m_validCells.isNull())) {
-            if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+          // Drop stencil order if this cell is not a valid grid cell. I.e., one that lies on the AMR grids and
+	  // is not covered by a finer grid
+          if (m_dropOrder) {
+            if (!(m_validCells.isNull())) {
+              if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+                dropOrder = true;
+              }
+            }
+            else {
               dropOrder = true;
             }
           }
-          else {
-            dropOrder = true;
-          }
-#endif
 
           // Try semi-circle first.
           order = dropOrder ? 1 : m_order;

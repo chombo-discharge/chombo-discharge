@@ -72,7 +72,7 @@ public:
   MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                     const MFLevelGrid&   a_mflg,
                     const BcoefPtr&      a_Bcoef,
-                    const AmrMask&       a_validCells,		    
+                    const AmrMask&       a_validCells,
                     const Real           a_dx,
                     const int            a_order,
                     const int            a_weight,
@@ -127,6 +127,13 @@ public:
   */
   int
   getRadius() const;
+
+  /*!
+    @brief Signal MFHelmholtzJumpBC that it should drop the stencil order if the cell is a coarsened cell
+    @param[in] a_dropOrder
+  */
+  void
+  setCoarseGridDropOrder(const bool a_dropOrder);
 
   /*!
     @brief Match the BC
@@ -218,7 +225,7 @@ protected:
   /*!
     @brief Valid grid cells
   */
-  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;  
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;
 
   /*!
     @brief Grid resolution
@@ -259,6 +266,11 @@ protected:
     @brief Multiphase or not
   */
   bool m_multiPhase;
+
+  /*!
+    @brief Drop order or not
+  */
+  bool m_dropOrder;
 
   /*!
     @brief Value of phi on the boundary. 
