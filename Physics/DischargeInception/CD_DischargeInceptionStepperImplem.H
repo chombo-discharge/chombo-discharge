@@ -495,8 +495,8 @@ DischargeInceptionStepper<P, F, C>::parseVoltages() noexcept
   }
 
   m_voltageSweeps.push_back(voltageHi);
-  m_maxTPlus.resize(m_voltageSweeps.size(), 0.0);
-  m_maxTMinu.resize(m_voltageSweeps.size(), 0.0);
+  m_maxTPlus.resize(m_voltageSweeps.size(), std::make_pair(0.0, RealVect::Zero));
+  m_maxTMinu.resize(m_voltageSweeps.size(), std::make_pair(0.0, RealVect::Zero));
 }
 
 template <typename P, typename F, typename C>
@@ -2529,16 +2529,17 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
         DataOps::copy(m_inceptionIntegralPlus, Kplus, Interval(i, i), Interval(0, 0));
 
-        // Get max K-value
-        Real maxK = -std::numeric_limits<Real>::max();
-        Real minK = +std::numeric_limits<Real>::max();
+        Real     maxK   = -std::numeric_limits<Real>::max();
+        RealVect maxPos = RealVect::Zero;
 
-        DataOps::getMaxMin(maxK, minK, Kplus, 0);
+        // Get max K-value and position corresponding to this value.
+        this->getMaxValueAndLocation(maxK, maxPos, Kplus);
+
         if (!m_fullIntegration) {
           maxK = std::min(maxK, m_inceptionK);
         }
 
-        m_maxKPlus.push_back(maxK);
+        m_maxKPlus.push_back(std::make_pair(maxK, maxPos));
       }
       else {
         m_tracerParticleSolver->deposit(Kminu);
@@ -2548,16 +2549,17 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
         DataOps::copy(m_inceptionIntegralMinu, Kminu, Interval(i, i), Interval(0, 0));
 
-        // Get max K-value
-        Real maxK = -std::numeric_limits<Real>::max();
-        Real minK = +std::numeric_limits<Real>::max();
+        Real     maxK   = -std::numeric_limits<Real>::max();
+        RealVect maxPos = RealVect::Zero;
 
-        DataOps::getMaxMin(maxK, minK, Kminu, 0);
+        // Get max K-value and corresponding to this value.
+        this->getMaxValueAndLocation(maxK, maxPos, Kminu);
+
         if (!m_fullIntegration) {
           maxK = std::min(maxK, m_inceptionK);
         }
 
-        m_maxKMinu.push_back(maxK);
+        m_maxKMinu.push_back(std::make_pair(maxK, maxPos));
       }
     }
   }
@@ -3101,12 +3103,12 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
 
         DataOps::copy(m_townsendCriterionPlus, gamma, Interval(i, i), Interval(0, 0));
 
-        Real minT = 0.0;
-        Real maxT = 0.0;
+        Real     maxT   = 0.0;
+        RealVect maxPos = RealVect::Zero;
 
-        DataOps::getMaxMin(maxT, minT, gamma, 0);
+        this->getMaxValueAndLocation(maxT, maxPos, gamma);
 
-        m_maxTPlus[i] = maxT;
+        m_maxTPlus[i] = std::make_pair(maxT, maxPos);
       }
       else {
         EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
@@ -3123,12 +3125,12 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
 
         DataOps::copy(m_townsendCriterionMinu, gamma, Interval(i, i), Interval(0, 0));
 
-        Real minT = 0.0;
-        Real maxT = 0.0;
+        Real     maxT = 0.0;
+        RealVect maxPos;
 
-        DataOps::getMaxMin(maxT, minT, gamma, 0);
+        this->getMaxValueAndLocation(maxT, maxPos, gamma);
 
-        m_maxTMinu[i] = maxT;
+        m_maxTMinu[i] = std::make_pair(maxT, maxPos);
       }
     }
   }
@@ -4807,7 +4809,9 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
 
     std::ofstream output(m_outputFile, std::ofstream::out);
 
-    const std::string lineBreak = "# " + std::string(178, '=');
+    const int ww = (SpaceDim == 2) ? 24 : 36;
+
+    const std::string lineBreak = "# " + std::string(178 + 4 * ww, '=');
 
     // clang-format off
     output << lineBreak << "\n";
@@ -4834,29 +4838,51 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
 	output << "# \n";
 	output << "# Townsend inception voltage(+) >= " << townsendUIncPlus.first << ",\t x = " << townsendUIncPlus.second << "\n";
 	output << "# Townsend inception voltage(-) >= " << townsendUIncMinu.first << ",\t x = " << townsendUIncMinu.second << "\n";			
-      }      
+      }
     }
-
 
     output << lineBreak << "\n";
     output << left << setw(15) << setfill(' ') << "# +/- Voltage";
     output << left << setw(15) << setfill(' ') << "Max K(+)";
     output << left << setw(15) << setfill(' ') << "Max K(-)";
+    output << left << setw(ww) << setfill(' ') << "Pos. max K(+)";        
+    output << left << setw(ww) << setfill(' ') << "Pos. max K(-)";                
     output << left << setw(20) << setfill(' ') << "Max T(+)";
-    output << left << setw(20) << setfill(' ') << "Max T(-)";    
+    output << left << setw(20) << setfill(' ') << "Max T(-)";
+    output << left << setw(ww) << setfill(' ') << "Pos. max T(+)";        
+    output << left << setw(ww) << setfill(' ') << "Pos. max T(-)";            
     output << left << setw(20) << setfill(' ') << "Crit. vol(+)";
     output << left << setw(20) << setfill(' ') << "Crit. vol(-)";
     output << left << setw(20) << setfill(' ') << "Crit. area(+)";
     output << left << setw(20) << setfill(' ') << "Crit. area(-)";
     output << left << setw(20) << setfill(' ') << "Ionization vol." << "\n";
-    output << lineBreak << "\n";        
+    output << lineBreak << "\n";
+
+    auto RealVectToString = [=](const RealVect x) -> std::string {
+      std::string ret = "(";
+      for (int dir = 0; dir < SpaceDim; dir++) {
+	ret += std::to_string(x[dir]);
+	if(dir < SpaceDim -1) {
+	  ret += ", ";
+	}
+      }
+
+      ret += ")";
+      
+      return ret;
+    };
+
 
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
-      output << left << setw(15) << setfill(' ') << m_maxKPlus[i];
-      output << left << setw(15) << setfill(' ') << m_maxKMinu[i];
-      output << left << setw(20) << setfill(' ') << m_maxTPlus[i];
-      output << left << setw(20) << setfill(' ') << m_maxTMinu[i];      
+      output << left << setw(15) << setfill(' ') << m_maxKPlus[i].first;
+      output << left << setw(15) << setfill(' ') << m_maxKMinu[i].first;
+      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxKPlus[i].second);
+      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxKMinu[i].second);
+      output << left << setw(20) << setfill(' ') << m_maxTPlus[i].first;
+      output << left << setw(20) << setfill(' ') << m_maxTMinu[i].first;
+      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxTPlus[i].second);
+      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxTMinu[i].second);
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
@@ -5168,6 +5194,74 @@ DischargeInceptionStepper<P, F, C>::superposition(EBAMRCellData& a_sumField, con
 
 template <typename P, typename F, typename C>
 void
+DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                a_maxVal,
+                                                           RealVect&            a_maxPos,
+                                                           const EBAMRCellData& a_data) const noexcept
+{
+  CH_TIME("DischargeInceptionStepper::getMaxValueAndLocation");
+  if (m_verbosity > 5) {
+    pout() << "DischargeInceptionStepper::getMaxValueAndLocation" << endl;
+  }
+
+  a_maxVal = -std::numeric_limits<Real>::max();
+  a_maxPos = RealVect::Zero;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+    const RealVect           probLo = m_amr->getProbLo();
+
+    const LevelData<BaseFab<bool>>& validCellsLD = (*m_amr->getValidCells(m_realm)[lvl]);
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box&       cellbox = dbl[din];
+      const EBISBox&   ebisbox = ebisl[din];
+
+      const EBCellFAB&     data       = (*a_data[lvl])[din];
+      const FArrayBox&     dataReg    = data.getFArrayBox();
+      const BaseFab<bool>& validCells = validCellsLD[din];
+
+      CH_assert(data.nComp() == 1);
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          if (dataReg(iv, 0) > a_maxVal) {
+            a_maxVal = dataReg(iv, 0);
+            a_maxPos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        if (validCells(vof.gridIndex(), 0) && ebisbox.isIrregular(vof.gridIndex())) {
+          if (data(vof, 0) > a_maxVal) {
+            a_maxVal = data(vof, 0);
+            a_maxPos = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
+          }
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+
+      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
+
+  const std::pair<Real, RealVect> globalMaxValAndPos = ParallelOps::max(a_maxVal, a_maxPos);
+
+  a_maxVal = globalMaxValAndPos.first;
+  a_maxPos = globalMaxValAndPos.second;
+}
+
+template <typename P, typename F, typename C>
+void
 DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
                                               int&                  a_comp,
                                               const EBAMRCellData&  a_data,
@@ -5176,7 +5270,6 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
                                               const bool            a_interpToCentroids,
                                               const bool            a_interpGhost) const noexcept
 {
-
   CH_TIMERS("DischargeInceptionStepper::writeData");
   CH_TIMER("DischargeInceptionStepper::writeData::allocate", t1);
   CH_TIMER("DischargeInceptionStepper::writeData::local_copy", t2);
