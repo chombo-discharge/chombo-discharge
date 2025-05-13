@@ -611,10 +611,10 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(
     new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
 
-  if (m_multigridBcOrder < m_amr->getNumberOfGhostCells() || m_multigridBcOrder < m_amr->getNumberOfEbGhostCells()) {
+  if (m_multigridBcOrder > m_amr->getNumberOfGhostCells() || m_multigridBcOrder > m_amr->getNumberOfEbGhostCells()) {
     MayDay::Abort("CD_FieldMultigrid::setupHelmholtzFactory -- not enough ghost cells!");
   }
-  
+
   // Set the BC jump factory. This is either the "natural" factory or the saturation charge BC.
   RefCountedPtr<MFHelmholtzJumpBCFactory> jumpBcFactory;
   switch (m_jumpBcType) {
