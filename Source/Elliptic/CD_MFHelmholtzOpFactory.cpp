@@ -33,6 +33,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const Real&             a_beta,
                                            const RealVect&         a_probLo,
                                            const AmrLevelGrids&    a_amrLevelGrids,
+                                           const AmrMask&          a_validCells,
                                            const AmrInterpolators& a_amrInterpolators,
                                            const AmrFluxRegisters& a_amrFluxRegisters,
                                            const AmrCoarseners&    a_amrCoarseners,
@@ -63,6 +64,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_probLo = a_probLo;
 
   m_amrLevelGrids    = a_amrLevelGrids;
+  m_validCells       = a_validCells;
   m_amrInterpolators = a_amrInterpolators;
   m_amrFluxRegisters = a_amrFluxRegisters;
   m_amrCoarseners    = a_amrCoarseners;
@@ -597,6 +599,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   RefCountedPtr<LevelData<MFFluxFAB>>       Bcoef;
   RefCountedPtr<LevelData<MFBaseIVFAB>>     BcoefIrreg;
   RefCountedPtr<LevelData<BaseIVFAB<Real>>> jump;
+  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells;
 
   bool foundMgLevel = false;
 
@@ -606,6 +609,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
     Bcoef      = m_amrBcoef[amrLevel];
     BcoefIrreg = m_amrBcoefIrreg[amrLevel];
     jump       = m_amrJump[amrLevel];
+    validCells = m_validCells[amrLevel];
 
     interpolator = m_amrInterpolators[amrLevel];
     fluxReg      = m_amrFluxRegisters[amrLevel];
@@ -673,6 +677,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              interpolator,
                              fluxReg,
                              coarsener,
+                             validCells,
                              m_domainBcFactory,
                              m_ebBcFactory,
                              m_jumpBcFactory,
@@ -755,6 +760,7 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                                         m_amrInterpolators[amrLevel],
                                         m_amrFluxRegisters[amrLevel],
                                         m_amrCoarseners[amrLevel],
+                                        m_validCells[amrLevel],
                                         m_domainBcFactory,
                                         m_ebBcFactory,
                                         m_jumpBcFactory,

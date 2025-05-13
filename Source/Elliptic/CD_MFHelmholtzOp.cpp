@@ -37,6 +37,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const MFMultigridInterpolator&                   a_interpolator,
                              const MFReflux&                                  a_fluxReg,
                              const MFCoarAve&                                 a_coarAve,
+                             const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                              const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
                              const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
                              const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,
@@ -67,6 +68,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   m_dataLocation = a_dataLocation;
   m_mflg         = a_mflg;
+  m_validCells   = a_validCells;
   m_numPhases    = m_mflg.numPhases();
   m_multifluid   = m_numPhases > 1;
   m_hasMGObjects = a_hasMGObjects;
@@ -100,7 +102,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Instantiate jump bc object.
   const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
-  m_jumpBC          = a_jumpBcFactory->create(m_dataLocation,
+
+  m_jumpBC = a_jumpBcFactory->create(m_dataLocation,
                                      m_mflg,
                                      a_BcoefIrreg,
                                      a_dx,
@@ -179,6 +182,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        eblgCoFi,
                                                                                        eblgCoar,
                                                                                        eblgCoarMG,
+                                                                                       m_validCells,
                                                                                        interpolator,
                                                                                        fluxRegister,
                                                                                        coarsener,

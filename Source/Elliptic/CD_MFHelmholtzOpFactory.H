@@ -47,6 +47,7 @@ public:
   using AmrCoarseners    = Vector<MFCoarAve>;
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;
+  using AmrMask          = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
   using AmrCellData = Vector<RefCountedPtr<LevelData<MFCellFAB>>>;
   using AmrFluxData = Vector<RefCountedPtr<LevelData<MFFluxFAB>>>;
@@ -75,6 +76,7 @@ public:
     @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
     @param[in] a_beta             beta-coefficient in Helmholtz operator.
     @param[in] a_probLo           Lower-left corner of domain
+    @param[in] a_validCells       Valid grid cells
     @param[in] a_amrInterpolators Interpolator objects between AMR levels. 
     @param[in] a_amrCoarseners    Conservative coarseners between AMR levels. 
     @param[in] a_amrFluxRegisters Flux registers between AMR levels. 
@@ -99,6 +101,7 @@ public:
                        const Real&             a_beta,
                        const RealVect&         a_probLo,
                        const AmrLevelGrids&    a_amrLevelGrids,
+                       const AmrMask&          a_validCells,
                        const AmrInterpolators& a_amrInterpolators,
                        const AmrFluxRegisters& a_amrFluxRegisters,
                        const AmrCoarseners&    a_amrCoarseners,
@@ -122,7 +125,7 @@ public:
   /*!
     @brief Destructor. Does nothing. 
   */
-  ~MFHelmholtzOpFactory();
+  virtual ~MFHelmholtzOpFactory();
 
   /*!
     @brief Set jump condition. This is passed to the operators by reference. 
@@ -239,6 +242,11 @@ protected:
     @brief AMR grids
   */
   AmrLevelGrids m_amrLevelGrids;
+
+  /*!
+    @brief Valid cells
+  */
+  AmrMask m_validCells;
 
   /*!
     @brief Multigrid interpolators

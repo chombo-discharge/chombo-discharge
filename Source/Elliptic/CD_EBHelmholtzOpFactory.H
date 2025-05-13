@@ -44,6 +44,7 @@ public:
   using Smoother = EBHelmholtzOp::Smoother;
 
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid>>;
+  using AmrMask          = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;  
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
   using AmrFluxRegisters = Vector<RefCountedPtr<EBReflux>>;
   using AmrCoarseners    = Vector<RefCountedPtr<EBCoarAve>>;
@@ -103,6 +104,7 @@ public:
                        const Real&             a_beta,
                        const RealVect&         a_probLo,
                        const AmrLevelGrids&    a_amrLevelGrids,
+		       const AmrMask&          a_validCells,
                        const AmrInterpolators& a_amrInterpolators,
                        const AmrFluxRegisters& a_amrFluxRegisters,
                        const AmrCoarseners&    a_amrCoarseners,
@@ -123,7 +125,7 @@ public:
   /*!
     @brief Destructor. Does nothing.
   */
-  ~EBHelmholtzOpFactory();
+  virtual ~EBHelmholtzOpFactory();
 
   /*!
     @brief Disallowed assignment operator
@@ -222,6 +224,11 @@ protected:
     @brief AMR grids
   */
   AmrLevelGrids m_amrLevelGrids;
+
+  /*!
+    @brief Valid cells
+  */
+  AmrMask m_validCells;
 
   /*!
     @brief Ghost cell interpolations
