@@ -29,6 +29,11 @@ class EBHelmholtzEBBC
 {
 public:
   /*!
+    @brief Alias to cut down on typing
+  */
+  using AmrMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
+
+  /*!
     @brief Default constructor. 
   */
   EBHelmholtzEBBC();
@@ -52,7 +57,8 @@ public:
   /*!
     @brief Define function that is called by EBHelmholtzOp
     @param[in] a_dataLocation Specification of data centering
-    @param[in] a_eblg         Grid where this object is defined. 
+    @param[in] a_eblg         Grid where this object is defined.
+    @param[in] a_validCells   Valid grid cells (might be null pointer)
     @param[in] a_probLo       Lower-left corner of computational domain. Required if BC objects needs physical position. 
     @param[in] a_dx           Grid resolution. 
     @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
@@ -60,6 +66,7 @@ public:
   void
   define(const Location::Cell a_dataLocation,
          const EBLevelGrid&   a_eblg,
+         const AmrMask&       a_validCells,
          const RealVect&      a_probLo,
          const Real&          a_dx,
          const int            a_ghostCF);
@@ -128,6 +135,11 @@ protected:
     @brief Level grid
   */
   EBLevelGrid m_eblg;
+
+  /*!
+    @brief Valid grid cells
+  */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;
 
   /*!
     @brief Stencils for computing the flux on a single level. This is a single-level object. 

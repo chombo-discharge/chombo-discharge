@@ -76,6 +76,7 @@ public:
     @param[in] a_eblgCoFi      Coarsening of fine level grids
     @param[in] a_eblgCoar      Coarse grids
     @param[in] a_eblgCoarMG    Multigrid-grids
+    @param[in] a_validCells    Valid grid cells
     @param[in] a_interpolator  Interpolator
     @param[in] a_fluxReg       Flux register
     @param[in] a_coarAve       Coarsener
@@ -103,6 +104,7 @@ public:
                 const EBLevelGrid&                               a_eblgCoFi,
                 const EBLevelGrid&                               a_eblgCoar,
                 const EBLevelGrid&                               a_eblgCoarMG,
+                const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                 const RefCountedPtr<EBReflux>&                   a_fluxReg,
                 const RefCountedPtr<EBCoarAve>&                  a_coarAve,
@@ -1011,6 +1013,11 @@ protected:
     @brief Prolongation operator for MG levels
   */
   EBMGProlong m_prolongOpMG;
+
+  /*!
+    @brief Valid grid cells (might be nullptr on MG levels)
+  */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;
 
   /*!
     @brief Domain bc object

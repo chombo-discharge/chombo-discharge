@@ -92,6 +92,7 @@ FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order fo
 FieldSolverMultigrid.gmg_bc_weight     = 1         # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight   = 1         # Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_reduce_order  = false             # If true, always use order=1 EB stencils in coarsened cells
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'

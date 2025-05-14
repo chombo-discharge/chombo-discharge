@@ -75,6 +75,7 @@ public:
     @param[in] a_mflgCoFi      Coarsening of fine level grids
     @param[in] a_mflgCoar      Coarse grids
     @param[in] a_mflgCoarMG    Multigrid-grids
+    @param[in] a_validCells    Valid grid cells (will be null on MG levels)
     @param[in] a_interpolator  Interpolator
     @param[in] a_fluxReg       Flux register
     @param[in] a_coarAve       Coarsener
@@ -109,6 +110,7 @@ public:
                 const MFMultigridInterpolator&                   a_interpolator,
                 const MFReflux&                                  a_fluxReg,
                 const MFCoarAve&                                 a_coarAve,
+                const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                 const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
                 const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
                 const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,
@@ -134,7 +136,7 @@ public:
   /*!
     @brief Destructor. 
   */
-  ~MFHelmholtzOp();
+  virtual ~MFHelmholtzOp();
 
   /*!
     @brief No copy assigment allowed
@@ -607,6 +609,11 @@ protected:
     @brief Actual BC jump in data-based format. This is the right-hand side of dphi/dn1 + dphi/dn2 = jump
   */
   RefCountedPtr<LevelData<BaseIVFAB<Real>>> m_jump;
+
+  /*!
+    @brief Valid grid cells (will be nullpointer on MG levels)
+  */
+  RefCountedPtr<LevelData<BaseFab<bool>>> m_validCells;
 
   /*!
     @brief Dirichlet BC values for each phase
