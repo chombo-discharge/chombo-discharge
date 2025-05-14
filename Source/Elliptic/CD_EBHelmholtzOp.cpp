@@ -36,6 +36,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const EBLevelGrid&                               a_eblgCoFi,
                              const EBLevelGrid&                               a_eblgCoar,
                              const EBLevelGrid&                               a_eblgCoarMG,
+                             const RefCountedPtr<LevelData<BaseFab<bool>>>&   a_validCells,
                              const RefCountedPtr<EBMultigridInterpolator>&    a_interpolator,
                              const RefCountedPtr<EBReflux>&                   a_fluxReg,
                              const RefCountedPtr<EBCoarAve>&                  a_coarAve,
@@ -77,6 +78,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_eblgCoarMG(),
     m_domainBc(a_domainBc),
     m_ebBc(a_ebBc),
+    m_validCells(a_validCells),
     m_interpolator(a_interpolator),
     m_fluxReg(a_fluxReg),
     m_coarAve(a_coarAve),
@@ -148,7 +150,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
   // Define BC objects.
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_dataLocation, m_eblg, m_probLo, m_dx);
-  m_ebBc->define(m_dataLocation, m_eblg, m_probLo, m_dx, ghostCF);
+  m_ebBc->define(m_dataLocation, m_eblg, m_validCells, m_probLo, m_dx, ghostCF);
 
   // Define stencils and compute relaxation terms.
   this->defineStencils();

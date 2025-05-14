@@ -28,6 +28,11 @@ public:
   using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB>>;
 
   /*!
+    @brief Alias to cut down on typing
+  */
+  using AmrMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
+
+  /*!
     @brief Weak constructor. 
   */
   MFHelmholtzJumpBCFactory();
@@ -42,6 +47,7 @@ public:
     @param[in] a_dataLocation Data centering
     @param[in] a_mflg         Grids
     @param[in] a_Bcoef        Helmholtz B-coefficient
+    @param[in] a_validCells   Valid grid cells (might be null pointer)
     @param[in] a_dx           Grid resolution
     @param[in] a_order        Stencil approximation order
     @param[in] a_weight       Weighting factor for least squares
@@ -53,6 +59,7 @@ public:
   create(const Location::Cell a_dataLocation,
          const MFLevelGrid&   a_mflg,
          const BcoefPtr&      a_Bcoef,
+         const AmrMask&       a_validCells,
          const Real           a_dx,
          const int            a_order,
          const int            a_weight,
@@ -66,11 +73,23 @@ public:
   virtual void
   setDomainDropOrder(const int a_domainSize);
 
+  /*!
+    @brief Drop to a first-order approximation if the cut-cell is a coarsened cell
+  */
+  virtual void
+  setCoarseGridDropOrder(const bool a_dropOrder);
+
 protected:
   /*!
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
   int m_domainDropOrder;
+
+  /*!
+    @brief Special flag for signalling MFHelmholtzJumpBC that it should drop the stencil order to 1 if
+    the cut-cell is a coarsened cell
+  */
+  bool m_dropOrder;
 };
 
 #include <CD_NamespaceFooter.H>

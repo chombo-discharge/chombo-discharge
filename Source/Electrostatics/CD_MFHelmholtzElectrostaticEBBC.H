@@ -95,6 +95,13 @@ public:
   void
   setDomainDropOrder(const int a_domainSize);
 
+  /*!
+    @brief Signal that it should drop the stencil order if the cell is a coarsened cell
+    @param[in] a_dropOrder
+  */
+  void
+  setCoarseGridDropOrder(const bool a_dropOrder);
+
 protected:
   /*!
     @brief Stencil order
@@ -110,6 +117,11 @@ protected:
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
   int m_domainDropOrder;
+
+  /*!
+    @brief Special flag for dropping stencil order if the cell is a coarsened cell
+  */
+  bool m_dropOrder;
 
   /*!
     @brief Electrostatic boundary conditions

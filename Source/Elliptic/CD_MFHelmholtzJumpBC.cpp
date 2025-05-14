@@ -26,6 +26,7 @@ constexpr int MFHelmholtzJumpBC::m_nComp;
 MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
                                      const MFLevelGrid&   a_mflg,
                                      const BcoefPtr&      a_Bcoef,
+                                     const AmrMask&       a_validCells,
                                      const Real           a_dx,
                                      const int            a_order,
                                      const int            a_weight,
@@ -42,6 +43,7 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
   m_dataLocation = a_dataLocation;
   m_mflg         = a_mflg;
   m_Bcoef        = a_Bcoef;
+  m_validCells   = a_validCells;
   m_dx           = a_dx;
   m_weight       = a_weight;
   m_order        = a_order;
@@ -53,6 +55,7 @@ MFHelmholtzJumpBC::MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
 
   this->defineIterators();
   this->defineStencils();
+  this->setCoarseGridDropOrder(false);
 }
 
 MFHelmholtzJumpBC::~MFHelmholtzJumpBC()
@@ -76,6 +79,12 @@ int
 MFHelmholtzJumpBC::getRadius() const
 {
   return m_radius;
+}
+
+void
+MFHelmholtzJumpBC::setCoarseGridDropOrder(const bool a_dropOrder)
+{
+  m_dropOrder = a_dropOrder;
 }
 
 const BaseIVFAB<Real>&
@@ -195,12 +204,28 @@ MFHelmholtzJumpBC::defineStencils()
 
         // Kernel
         auto kernel = [&](const VolIndex& vof) -> void {
-          int                         order;
-          bool                        foundStencil = false;
+          int order = -1;
+
+          bool foundStencil = false;
+          bool dropOrder    = false;
+
           std::pair<Real, VoFStencil> pairSten;
 
+          // Drop stencil order if this cell is not a valid grid cell. I.e., one that lies on the AMR grids and
+          // is not covered by a finer grid
+          if (m_dropOrder) {
+            if (!(m_validCells.isNull())) {
+              if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+                dropOrder = true;
+              }
+            }
+            else {
+              dropOrder = true;
+            }
+          }
+
           // Try semi-circle first.
-          order = m_order;
+          order = dropOrder ? 1 : m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                     vof,
@@ -216,7 +241,7 @@ MFHelmholtzJumpBC::defineStencils()
           }
 
           // Try quadrant if that didn't work.
-          order = m_order;
+          order = dropOrder ? 1 : m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                     vof,
@@ -232,7 +257,7 @@ MFHelmholtzJumpBC::defineStencils()
           }
 
           // Last ditch effort: Try a full radius
-          order = m_order;
+          order = dropOrder ? 1 : m_order;
           while (!foundStencil && order > 0) {
             foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                     vof,

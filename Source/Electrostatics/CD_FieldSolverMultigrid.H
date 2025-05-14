@@ -255,6 +255,11 @@ protected:
   bool m_isSolverSetup;
 
   /*!
+    @brief Drop order in coarsened grid cells
+  */
+  bool m_multigridDropOrder;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;

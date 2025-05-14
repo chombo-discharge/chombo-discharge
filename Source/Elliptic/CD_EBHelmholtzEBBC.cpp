@@ -33,18 +33,19 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC()
 void
 EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
                         const EBLevelGrid&   a_eblg,
+                        const AmrMask&       a_validCells,
                         const RealVect&      a_probLo,
                         const Real&          a_dx,
                         const int            a_ghostCF)
 {
-  CH_TIME(
-    "EBHelmholtzEBBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<BaseIVFAB<Real> > >, RealVect, Real, int)");
+  CH_TIME("EBHelmholtzEBBC::define");
 
   CH_assert(a_dx > 0.0);
   CH_assert(a_ghostCF >= 0);
 
   m_dataLocation = a_dataLocation;
   m_eblg         = a_eblg;
+  m_validCells   = a_validCells;
   m_probLo       = a_probLo;
   m_dx           = a_dx;
   m_ghostCF      = a_ghostCF;

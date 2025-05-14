@@ -80,6 +80,13 @@ public:
   setDomainDropOrder(const int a_domainSize);
 
   /*!
+    @brief Signal that it should drop the stencil order if the cell is a coarsened cell
+    @param[in] a_dropOrder
+  */
+  virtual void
+  setCoarseGridDropOrder(const bool a_dropOrder);
+
+  /*!
     @brief Set the spatially varying value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
@@ -117,6 +124,11 @@ protected:
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
   int m_domainDropOrder;
+
+  /*!
+    @brief Special flag for dropping stencil order if the cell is a coarsened cell
+  */
+  bool m_dropOrder;
 
   /*!
     @brief Value on EB

@@ -112,6 +112,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   pp.get("gmg_bc_weight", m_multigridBcWeight);
   pp.get("gmg_jump_order", m_multigridJumpOrder);
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
+  pp.get("gmg_reduce_order", m_multigridDropOrder);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -611,6 +612,10 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(
     new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
 
+  if (m_multigridBcOrder > m_amr->getNumberOfGhostCells() || m_multigridBcOrder > m_amr->getNumberOfEbGhostCells()) {
+    MayDay::Abort("CD_FieldMultigrid::setupHelmholtzFactory -- not enough ghost cells!");
+  }
+
   // Set the BC jump factory. This is either the "natural" factory or the saturation charge BC.
   RefCountedPtr<MFHelmholtzJumpBCFactory> jumpBcFactory;
   switch (m_jumpBcType) {
@@ -631,6 +636,15 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   ebbcFactory->setDomainDropOrder(m_domainDropOrder);
   jumpBcFactory->setDomainDropOrder(m_domainDropOrder);
 
+  if (m_multigridDropOrder) {
+    ebbcFactory->setCoarseGridDropOrder(true);
+    jumpBcFactory->setCoarseGridDropOrder(true);
+  }
+  else {
+    ebbcFactory->setCoarseGridDropOrder(false);
+    jumpBcFactory->setCoarseGridDropOrder(false);
+  }
+
   // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
   // so there is no diagonal term in the operator after all.
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(
@@ -640,6 +654,7 @@ FieldSolverMultigrid::setupHelmholtzFactory()
                              m_beta,
                              m_amr->getProbLo(),
                              mflg,
+                             m_amr->getValidCells(m_realm),
                              mfInterp,
                              mfFluxReg,
                              mfCoarAve,

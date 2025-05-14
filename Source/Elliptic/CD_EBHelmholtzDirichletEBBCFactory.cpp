@@ -112,6 +112,12 @@ EBHelmholtzDirichletEBBCFactory::setDomainDropOrder(const int a_domainSize)
   m_domainDropOrder = a_domainSize;
 }
 
+void
+EBHelmholtzDirichletEBBCFactory::setCoarseGridDropOrder(const bool a_dropOrder)
+{
+  m_dropOrder = a_dropOrder;
+}
+
 RefCountedPtr<EBHelmholtzEBBC>
 EBHelmholtzDirichletEBBCFactory::create()
 {
@@ -131,6 +137,7 @@ EBHelmholtzDirichletEBBCFactory::create()
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
   bc->setDomainDropOrder(m_domainDropOrder);
+  bc->setCoarseGridDropOrder(m_domainDropOrder);
   if (m_useConstant) {
     bc->setValue(m_constantValue);
   }

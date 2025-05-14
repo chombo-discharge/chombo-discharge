@@ -26,6 +26,7 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int            
   m_weight = -1;
 
   this->setDomainDropOrder(-1);
+  this->setCoarseGridDropOrder(false);
 
   m_electrostaticBCs = a_electrostaticBCs;
 }
@@ -61,6 +62,12 @@ MFHelmholtzElectrostaticEBBC::setDomainDropOrder(const int a_domainSize)
   CH_TIME("MFHelmholtzElectrostaticEBBC::setDomainDropOrder()");
 
   m_domainDropOrder = a_domainSize;
+}
+
+void
+MFHelmholtzElectrostaticEBBC::setCoarseGridDropOrder(const bool a_dropOrder)
+{
+  m_dropOrder = a_dropOrder;
 }
 
 void
@@ -100,12 +107,31 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
     auto kernel = [&](const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
 
-      int                         order;
-      bool                        foundStencil = false;
+      int order = -1;
+
+      bool foundStencil = false;
+      bool dropOrder    = false;
+
       std::pair<Real, VoFStencil> pairSten;
 
+      // Drop stencil order if this cell is not a valid grid cell. I.e., one that lies on the AMR grids and
+      // is not covered by a finer grid)
+      if (m_dropOrder) {
+        if (!(m_validCells.isNull())) {
+          if ((*m_validCells)[din](vof.gridIndex(), 0) == false) {
+            dropOrder = true;
+          }
+        }
+        else {
+          dropOrder = true;
+        }
+      }
+
+#warning "Must remove dev2d.inputs and dev3d.inputs"
+#warning "Should probably add the drop order stuff to EBHelmholtzDirichletEBBC too"
+
       // Try semi-circle first.
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
@@ -122,7 +148,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
 
       // Try quadrant if that didn't work.
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,
@@ -139,7 +165,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
 
       // Last ditch effort: Try a full radius
-      order = m_order;
+      order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
         foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten,
                                                                 vof,

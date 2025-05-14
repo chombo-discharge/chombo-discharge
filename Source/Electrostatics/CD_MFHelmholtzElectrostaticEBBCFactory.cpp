@@ -26,6 +26,7 @@ MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const i
   this->setOrder(a_order);
   this->setWeight(a_weight);
   this->setDomainDropOrder(-1);
+  this->setCoarseGridDropOrder(false);
 
   m_electrostaticBCs = a_electrostaticBCs;
 }
@@ -63,6 +64,12 @@ MFHelmholtzElectrostaticEBBCFactory::setDomainDropOrder(const int a_domainSize)
   m_domainDropOrder = a_domainSize;
 }
 
+void
+MFHelmholtzElectrostaticEBBCFactory::setCoarseGridDropOrder(const bool a_dropOrder)
+{
+  m_dropOrder = a_dropOrder;
+}
+
 RefCountedPtr<EBHelmholtzEBBC>
 MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const
 {
@@ -76,6 +83,7 @@ MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCounted
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
   bc->setDomainDropOrder(m_domainDropOrder);
+  bc->setCoarseGridDropOrder(m_dropOrder);
 
   return RefCountedPtr<EBHelmholtzEBBC>(bc);
 }
