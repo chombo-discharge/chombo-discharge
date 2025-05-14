@@ -106,6 +106,10 @@ Public Types</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>BcoefPtr</b> = <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classMFBaseIVFAB.html">MFBaseIVFAB</a> &gt; &gt;</td></tr>
 <tr class="memdesc:a6850045e2e7821d844989ef19ce9cf05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias to cut down on typing. <br /></td></tr>
 <tr class="separator:a6850045e2e7821d844989ef19ce9cf05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f72c525b90818d18360fd3a19fd3827" id="r_a1f72c525b90818d18360fd3a19fd3827"><td class="memItemLeft" align="right" valign="top"><a id="a1f72c525b90818d18360fd3a19fd3827" name="a1f72c525b90818d18360fd3a19fd3827"></a>
+<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>AmrMask</b> = <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &gt;</td></tr>
+<tr class="memdesc:a1f72c525b90818d18360fd3a19fd3827"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias to cut down on typing. <br /></td></tr>
+<tr class="separator:a1f72c525b90818d18360fd3a19fd3827"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -117,13 +121,17 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~MFHelmholtzJumpBCFactory</b> ()</td></tr>
 <tr class="memdesc:a978d5770c56293d5c81c18900c9ca5fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. <br /></td></tr>
 <tr class="separator:a978d5770c56293d5c81c18900c9ca5fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bddf944d66be1b1be567c79d4e20f7d" id="r_a1bddf944d66be1b1be567c79d4e20f7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a1bddf944d66be1b1be567c79d4e20f7d">create</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> <a class="el" href="classTracerParticleSolver.html">a_dataLocation</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_mflg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_Bcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_order</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_weight</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_radius</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ghostCF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> <a class="el" href="classTracerParticleSolver.html">a_ghostPhi</a>)</td></tr>
-<tr class="memdesc:a1bddf944d66be1b1be567c79d4e20f7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for creating <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> objects.  <br /></td></tr>
-<tr class="separator:a1bddf944d66be1b1be567c79d4e20f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22bec5586b95b39dbca7e53fc55b5da5" id="r_a22bec5586b95b39dbca7e53fc55b5da5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzJumpBCFactory.html#a22bec5586b95b39dbca7e53fc55b5da5">create</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="namespaceLocation.html#a54eced96f7ad5684263391a0b726c163">Location::Cell</a> <a class="el" href="classTracerParticleSolver.html">a_dataLocation</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_mflg</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_Bcoef</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a1f72c525b90818d18360fd3a19fd3827">AmrMask</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_validCells</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classTracerParticleSolver.html">a_dx</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_order</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_weight</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_radius</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_ghostCF</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> <a class="el" href="classTracerParticleSolver.html">a_ghostPhi</a>)</td></tr>
+<tr class="memdesc:a22bec5586b95b39dbca7e53fc55b5da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method for creating <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> objects.  <br /></td></tr>
+<tr class="separator:a22bec5586b95b39dbca7e53fc55b5da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5615c25221efb81f32b78e598089e03" id="r_ab5615c25221efb81f32b78e598089e03"><td class="memItemLeft" align="right" valign="top"><a id="ab5615c25221efb81f32b78e598089e03" name="ab5615c25221efb81f32b78e598089e03"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setDomainDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
 <tr class="memdesc:ab5615c25221efb81f32b78e598089e03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
 <tr class="separator:ab5615c25221efb81f32b78e598089e03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cb98bf1c887dc19b4011af84c919865" id="r_a0cb98bf1c887dc19b4011af84c919865"><td class="memItemLeft" align="right" valign="top"><a id="a0cb98bf1c887dc19b4011af84c919865" name="a0cb98bf1c887dc19b4011af84c919865"></a>
+<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setCoarseGridDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_dropOrder</a>)</td></tr>
+<tr class="memdesc:a0cb98bf1c887dc19b4011af84c919865"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop to a first-order approximation if the cut-cell is a coarsened cell. <br /></td></tr>
+<tr class="separator:a0cb98bf1c887dc19b4011af84c919865"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -131,12 +139,16 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainDropOrder</b></td></tr>
 <tr class="memdesc:adb14c0b2025bdd6d02c8ba9a7c776040"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
 <tr class="separator:adb14c0b2025bdd6d02c8ba9a7c776040"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae358c49813fca8edfd6acdac61ce6940" id="r_ae358c49813fca8edfd6acdac61ce6940"><td class="memItemLeft" align="right" valign="top"><a id="ae358c49813fca8edfd6acdac61ce6940" name="ae358c49813fca8edfd6acdac61ce6940"></a>
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dropOrder</b></td></tr>
+<tr class="memdesc:ae358c49813fca8edfd6acdac61ce6940"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for signalling <a class="el" href="classMFHelmholtzJumpBC.html" title="Class for computing &quot;jump interface&quot; boundary conditions for multifluid code.">MFHelmholtzJumpBC</a> that it should drop the stencil order to 1 if the cut-cell is a coarsened cell. <br /></td></tr>
+<tr class="separator:ae358c49813fca8edfd6acdac61ce6940"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Factory class for making jump boundary condition objects in a multifluid <a class="el" href="classMFHelmholtzOp.html" title="Operator for solving multifluid Helmholtz on a grid level.">MFHelmholtzOp</a> context. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1bddf944d66be1b1be567c79d4e20f7d" name="a1bddf944d66be1b1be567c79d4e20f7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1bddf944d66be1b1be567c79d4e20f7d">&#9670;&#160;</a></span>create()</h2>
+<a id="a22bec5586b95b39dbca7e53fc55b5da5" name="a22bec5586b95b39dbca7e53fc55b5da5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22bec5586b95b39dbca7e53fc55b5da5">&#9670;&#160;</a></span>create()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -161,6 +173,12 @@ Protected Attributes</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a6850045e2e7821d844989ef19ce9cf05">BcoefPtr</a> &amp;&#160;</td>
           <td class="paramname"><em>a_Bcoef</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classMFHelmholtzJumpBCFactory.html#a1f72c525b90818d18360fd3a19fd3827">AmrMask</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_validCells</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -217,6 +235,7 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dataLocation</td><td>Data centering </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_mflg</td><td>Grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_Bcoef</td><td>Helmholtz B-coefficient </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_validCells</td><td>Valid grid cells (might be null pointer) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dx</td><td>Grid resolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_order</td><td>Stencil approximation order </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_weight</td><td>Weighting factor for least squares </td></tr>
@@ -227,7 +246,7 @@ Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a511e2486aeea331853fd91b0f2b06af5">MFHelmholtzSaturationChargeJumpBCFactory</a>.</p>
+<p>Reimplemented in <a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a04292526c0a1863371e03d8db8d78dc2">MFHelmholtzSaturationChargeJumpBCFactory</a>.</p>
 
 </div>
 </div>

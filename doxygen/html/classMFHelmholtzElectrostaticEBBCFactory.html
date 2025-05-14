@@ -146,6 +146,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>setDomainDropOrder</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_domainSize</a>)</td></tr>
 <tr class="memdesc:a9d5fc427b6b4f845496a24de7168f71c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop BC order if domain size is equal or below this. <br /></td></tr>
 <tr class="separator:a9d5fc427b6b4f845496a24de7168f71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bdfd7dbfc86a962761c65292b501eeb" id="r_a6bdfd7dbfc86a962761c65292b501eeb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a6bdfd7dbfc86a962761c65292b501eeb">setCoarseGridDropOrder</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a> <a class="el" href="classTracerParticleSolver.html">a_dropOrder</a>)</td></tr>
+<tr class="memdesc:a6bdfd7dbfc86a962761c65292b501eeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signal that it should drop the stencil order if the cell is a coarsened cell.  <br /></td></tr>
+<tr class="separator:a6bdfd7dbfc86a962761c65292b501eeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23a2e0c59bd302a591c968a2e04bec33" id="r_a23a2e0c59bd302a591c968a2e04bec33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classEBHelmholtzEBBC.html">EBHelmholtzEBBC</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a23a2e0c59bd302a591c968a2e04bec33">create</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_iphase</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFHelmholtzJumpBC.html">MFHelmholtzJumpBC</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_jumpBC</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">override</a></td></tr>
 <tr class="memdesc:a23a2e0c59bd302a591c968a2e04bec33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Factory method.  <br /></td></tr>
 <tr class="separator:a23a2e0c59bd302a591c968a2e04bec33"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -173,6 +176,10 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_domainDropOrder</b></td></tr>
 <tr class="memdesc:a2862c0f044796b9abcf93e3981e2919d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order when domains become coarser than this. <br /></td></tr>
 <tr class="separator:a2862c0f044796b9abcf93e3981e2919d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a706c1e9e97d08bd64739b17cabd03110" id="r_a706c1e9e97d08bd64739b17cabd03110"><td class="memItemLeft" align="right" valign="top"><a id="a706c1e9e97d08bd64739b17cabd03110" name="a706c1e9e97d08bd64739b17cabd03110"></a>
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dropOrder</b></td></tr>
+<tr class="memdesc:a706c1e9e97d08bd64739b17cabd03110"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special flag for dropping stencil order if the cell is a coarsened cell. <br /></td></tr>
+<tr class="separator:a706c1e9e97d08bd64739b17cabd03110"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7db31753dcdef1865b34a88f4e0adc52" id="r_a7db31753dcdef1865b34a88f4e0adc52"><td class="memItemLeft" align="right" valign="top"><a id="a7db31753dcdef1865b34a88f4e0adc52" name="a7db31753dcdef1865b34a88f4e0adc52"></a>
 <a class="el" href="classElectrostaticEbBc.html">ElectrostaticEbBc</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_electrostaticBCs</b></td></tr>
 <tr class="memdesc:a7db31753dcdef1865b34a88f4e0adc52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Electrostatic boundary conditions. <br /></td></tr>
@@ -405,6 +412,40 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_other</td><td>Other factory </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6bdfd7dbfc86a962761c65292b501eeb" name="a6bdfd7dbfc86a962761c65292b501eeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bdfd7dbfc86a962761c65292b501eeb">&#9670;&#160;</a></span>setCoarseGridDropOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> MFHelmholtzElectrostaticEBBCFactory::setCoarseGridDropOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td>
+          <td class="paramname"><em>a_dropOrder</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Signal that it should drop the stencil order if the cell is a coarsened cell. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dropOrder</td><td></td></tr>
   </table>
   </dd>
 </dl>
