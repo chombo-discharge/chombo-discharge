@@ -127,9 +127,6 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
         }
       }
 
-#warning "Must remove dev2d.inputs and dev3d.inputs"
-#warning "Should probably add the drop order stuff to EBHelmholtzDirichletEBBC too"
-
       // Try semi-circle first.
       order = dropOrder ? 1 : m_order;
       while (!foundStencil && order > 0) {
