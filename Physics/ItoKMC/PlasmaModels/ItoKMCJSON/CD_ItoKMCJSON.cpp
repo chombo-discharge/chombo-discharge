@@ -3040,7 +3040,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
 
   const std::string fileName = this->trim(a_tableEntry["file"].get<std::string>());
   if (!(this->doesFileExist(fileName))) {
-    this->throwParserError(preError + " but file '" + fileName + "' " + postError + " was not found");
+    this->throwParserError(preError + " but file '" + fileName + "' was not found");
   }
 
   int columnEbyN  = 0;
