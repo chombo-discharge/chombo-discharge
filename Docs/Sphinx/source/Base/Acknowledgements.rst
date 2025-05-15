@@ -21,15 +21,3 @@ Currently, if you use ``chombo-discharge`` you should cite the following method 
       volume = {8},
       year = {2023}
    }
-
-.. only:: html
-
-   We maintain a list of publications (see :ref:`Chap:Publications`) that use ``chombo-discharge`` for scientific research.
-   If you use the code for research, please let us know so we can update this list.
-   
-   .. tip::
-
-      You can update the bibliography file yourself.
-      It is found in :file:`$DISCHARGE_HOME/Docs/Sphinx/source/publications.bib`, simply update it and contribute by creating a pull request on GitHub.
-
-

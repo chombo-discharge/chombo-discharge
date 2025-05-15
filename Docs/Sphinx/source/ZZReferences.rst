@@ -7,20 +7,22 @@
    References
    **********
 
-.. only:: html
-	  
-   .. rubric:: Scientific references
+..
+   .. only:: html
+
+      .. rubric:: Scientific references
 
 .. bibliography:: references.bib
    :cited:
    :labelprefix: R
 
-.. only:: html
-	  
-   .. rubric:: Publications using ``chombo-discharge``
+..
+   .. only:: html
 
-.. bibliography:: publications.bib
-   :all:
-   :labelprefix: P
+      .. rubric:: Publications using ``chombo-discharge``
+
+   .. bibliography:: publications.bib
+      :all:
+      :labelprefix: P
 
 		 

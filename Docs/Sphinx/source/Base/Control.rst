@@ -8,7 +8,7 @@ In this chapter we give a brief overview of how to run a ``chombo-discharge`` si
 Running ``chombo-discharge``
 ----------------------------
 
-How one runs ``chombo-discharge`` depends on the type of parallelism one compiled with.
+How one runs ``chombo-discharge`` depends on the type of parallelism.
 Below, we consider basic examples for serial and parallel execution.
 
 Serial
@@ -21,12 +21,18 @@ If the application was compiled for serial execution one runs it with:
    ./<application_executable> <input_file>
 
 where <input_file> is your input file.
+Output from ``chombo-discharge`` will then be given directly to the terminal, or alternatively can be redirected to a file using ``>& status.dat``, e.g.,
+
+.. code-block:: bash
+
+   ./<application_executable> <input_file> >& status.dat
 
 Parallel with OpenMP
 ____________________
 
-When running with OpenMP one must specify the number of threads, and possibly also the binding of threads.
-``chombo-discharge`` is compiled with run-time thread scheduling (which defaults to static), which can be specified.
+When running with OpenMP one must specify the number of threads, and possibly also pin threads to CPUs.
+``chombo-discharge`` is compiled with run-time thread scheduling (which defaults to static scheduling).
+Prior to running with OpenMP, one should define the number of threads, thread palcement, and the scheduling.
 For example
 
 .. code-block:: bash
@@ -50,17 +56,22 @@ If the executable was compiled with MPI, one executes with e.g. ``mpirun`` (or o
 
 On clusters, this is a little bit different and usually requires passing the above command through a batch system.
 Normally, the MPI installation will map processes to cores.
-With OpenMP one can use ``--report-bindings`` to verify the mapping.
+One can use ``--report-bindings`` to verify the mapping.
+E.g.,
+
+.. code-block:: bash
+	     
+   mpirun --report-bindings -np 8 <application_executable> <input_file>
 
 Parallel with MPI+OpenMP
 ________________________
 
 When running with both MPI and OpenMP the user must
 
-#. Bind each MPI rank to a specified resource (e.g., a node, socket, or list of CPUs)
+#. Bind each MPI rank to a specified resource (e.g., a node, socket, or list of CPUs).
 #. Bind OpenMP threads to resources available to each MPI rank.
 
-For example, the following may not work as expected:
+For example, the following may not work as expected (because threads may bind to the same CPUs):
 
 .. code-block:: bash
 
@@ -68,7 +79,7 @@ For example, the following may not work as expected:
    mpiexec -n 2 ./<application_executable> <input_file>
 
 Each MPI rank may spawn threads on the same physical cores.
-With e.g. OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
+With OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
 For example, on a local workstation one might do
 
 .. code-block:: bash
@@ -90,7 +101,7 @@ It is often useful to verify this by reporting the bindings as follows:
 
 .. important::
 
-   More sophisticated architectures (e.g., clusters with NUMA nodes) require careful specification of MPI and thread placement (e.g. binding of MPI ranks to sockets).
+   More sophisticated architectures (e.g., clusters with NUMA nodes) require careful specification of MPI and thread placement (e.g., binding of MPI ranks to sockets).
 
 
 Simulation I/O
@@ -123,20 +134,20 @@ You may also pass input parameters through the command line. For example, runnin
 
 will set the ``Driver.max_steps`` parameter to 10.
 Command-line parameters override definitions in the input file.
-Moreover, parameters parsed through the command line become static parameters, i.e. they are not run-time configurable (see :ref:`Chap:RuntimeConfig`).
+Moreover, parameters parsed through the command line become static parameters, i.e., they are not run-time configurable (see :ref:`Chap:RuntimeConfig`).
 Also note that if you define a parameter multiple times in the input file, the last definition is canon. 		
 
 Simulation outputs
 __________________
 
 Mesh data from ``chombo-discharge`` simulations is by default written to HDF5 files, and if HDF5 is disabled ``chombo-discharge`` will not write any plot or checkpoint files. 
-In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.
+In addition to plot files, MPI ranks can output simulation meta-information to separate files so that the simulation progress can be individually for each rank. 
 
 ``chombo-discharge`` comes with controls for adjusting output.
 Through the :ref:`Chap:Driver` class the user may adjust the option ``Driver.output_directory`` to specify where output files will be placed.
 This directory is relative to the location where the application is run.
 If this directory does not exist, ``chombo-discharge`` will create it. 
-It will also create the following subdirectories given in :ref:`Tab:OutputDirectories`.
+It will also create the following subdirectories given in :numref:`Tab:OutputDirectories`.
 
 .. _Tab:OutputDirectories:
 .. list-table:: Simulation output organization.
@@ -173,11 +184,14 @@ For example, one of our convection-diffusion-reaction solver classes have the fo
 
 .. code-block:: text
 
-   CdrGodunov.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
+   CdrCTU.plt_vars = phi vel dco src ebflux # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
 
 where ``phi`` is the state density, ``vel`` is the drift velocity, ``dco`` is the diffusion coefficient, ``src`` is the source term, and ``ebflux`` is the flux at embedded boundaries.
-If you only want to plot the density, then you should put ``CdrGodunov.plt_vars = phi``.
-An empty entry like ``CdrGodunov.plt_vars =`` may lead to run-time errors, so if you do not want a class to provide plot data you may put ``CdrGodunov.plt_vars = none``. 
+If you only want to plot the density, then you should put ``CdrCTU.plt_vars = phi``.
+
+.. warning::
+   
+   An empty entry like ``CdrCTU.plt_vars =`` will lead to run-time errors, so if you do not want a class to provide plot data you should put ``CdrCTU.plt_vars = none``. 
 
 
 .. _Chap:pout:
@@ -243,7 +257,7 @@ This is useful when your simulation waited 5 days in the queue on a cluster befo
 ``Driver`` re-reads the simulation input parameters after every time step.
 The new options are parsed by the core classes ``Driver``, ``TimeStepper``, ``AmrMesh``, and ``CellTagger`` through special routines ``parseRuntimeOptions()``.
 Note that not all input configurations are suitable for run-time configuration.
-For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
+For example, increasing the size of the simulation domain does not make any sense from a run-time perspective, but changing the blocking factor, refinement criteria, or plot intervals do.
 To see which options are run-time configurable, see :ref:`Chap:Driver`, :ref:`Chap:AmrMesh`, or the :ref:`Chap:TimeStepper` and :ref:`Chap:CellTagger` that you use.
 
 .. _Chap:Visualization:
