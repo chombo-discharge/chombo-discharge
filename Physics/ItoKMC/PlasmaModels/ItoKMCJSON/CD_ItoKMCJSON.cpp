@@ -1228,6 +1228,11 @@ ItoKMCJSON::initializeParticles()
           }
 
           const std::string f = this->trim(jsonEntry["file"].get<std::string>());
+          if (!(this->doesFileExist(f))) {
+            const std::string parseError = baseError + " but file '" + f + "' does not exist";
+
+            this->throwParserError(parseError.c_str());
+          }
 
           unsigned int xcol = 0;
           unsigned int ycol = 1;
@@ -3036,7 +3041,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
 
   const std::string fileName = this->trim(a_tableEntry["file"].get<std::string>());
   if (!(this->doesFileExist(fileName))) {
-    this->throwParserError(preError + " but file '" + fileName + "' " + postError + " was not found");
+    this->throwParserError(preError + " but file '" + fileName + "' was not found");
   }
 
   int columnEbyN  = 0;

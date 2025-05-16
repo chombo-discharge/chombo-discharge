@@ -2883,6 +2883,30 @@ AmrMesh::sanityCheck() const
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
 
+  bool badRes = false;
+
+  Vector<Real> dx(SpaceDim);
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    dx[dir] = (m_probHi[dir] - m_probLo[dir]) / m_numCells[dir];
+  }
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (std::abs(dx[dir] / dx[(dir + 1) % SpaceDim] - 1.0) > std::numeric_limits<Real>::epsilon()) {
+      badRes = true;
+    }
+  }
+
+  if (badRes) {
+    pout() << "Bad resolution request - I got:" << endl;
+    pout() << "dx = " + std::to_string(dx[0]) << endl;
+    pout() << "dy = " + std::to_string(dx[1]) << endl;
+#if CH_SPACEDIM == 3
+    pout() << "dz = " + std::to_string(dx[2]) << endl;
+#endif
+
+    MayDay::Abort("AmrMesh::sanityCheck -- non-uniform resolution detected but I must have dx = dy = dz");
+  }
+
   if (m_maxAmrDepth > 0) {
     for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
       if (m_refinementRatios[lvl] > 2 && m_blockingFactor < 8) {
