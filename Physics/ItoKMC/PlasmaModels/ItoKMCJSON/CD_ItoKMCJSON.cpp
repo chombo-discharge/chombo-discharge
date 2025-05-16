@@ -1555,7 +1555,7 @@ ItoKMCJSON::initializeTemperatures()
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
-          return eVToKelvin * tabulatedCoeff.interpolate<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+          return eVToKelvin * tabulatedCoeff.interpolate<1>(Etd);
         };
       }
       else {
@@ -2647,7 +2647,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const bool isBackground = this->isBackgroundSpecies(species);
     const bool isPlasma     = this->isPlasmaSpecies(species);
 
-    if (!isBackground || !isPlasma) {
+    if (!isBackground && !isPlasma) {
       this->throwParserError(baseError + " but species '" + species + "' is not a background or plasma species");
     }
 
