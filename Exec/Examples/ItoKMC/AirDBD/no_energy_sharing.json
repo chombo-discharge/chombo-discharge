@@ -7,7 +7,7 @@
 		    "type" : "constant",
 		    "value" : 0.2       
 		},
-		"plot" : false          
+		"plot" : true          
 	    },
 	    {
 		"id": "N2",             
@@ -15,7 +15,7 @@
 		    "type" : "constant",
 		    "value" : 0.8
 		},
-		"plot" : false  
+		"plot" : true  
 	    }
 	],
 	"law" : {
@@ -77,7 +77,8 @@
 		"E/N scale": 1.0,
 		"eV scale": 1.0,
 		"spacing" : "exponential",
-		"points" : 1000
+		"points" : 1000,
+		"plot" : true
 	    },	    
 	    "mobility" : {
 		"type" : "table vs E/N",      
@@ -108,59 +109,20 @@
 	    "initial particles" : [
 		{
 		    "sphere distribution" : {
-			"center" : [ 0, 0, 0 ],
+			"center" : [ 0, 7E-3, 0 ],
 			"radius" : 1E-3,       
-			"num particles": 0,  
-			"weight" : 1000           
-		    }
-		},
-		{
-		    "single particle": {
-			"position": [0, -10E-6, 0],
-			"weight": 100
+			"num particles": 100,  
+			"weight" : 1           
 		    }
 		}
 	    ]
         },
 	{
-            "id": "e_low",          
-	    "Z" : -1,           
-	    "solver" : "ito",   
-	    "mobile" : true,    
-	    "diffusive" : true, 
-	    "mobility" : {
-		"type" : "table vs E/N",      
-		"file" : "transport_data.dat",
-		"dump": "debug_mobility.dat",  		
-		"E/N column" : 0,             
-		"mu*N column" : 2,            
-		"min E/N" : 10,               
-		"max E/N" : 1E6,              
-		"points" : 1000,              
-		"spacing" : "exponential",    
-		"E/N scale" : 1.0,            
-		"mu*N scale" : 0.01
-	    },
-	    "diffusion" : {
-		"type" : "table vs E/N",
-		"file" : "transport_data.dat",
-		"dump": "debug_diffusion.dat",						
-		"E/N column" : 0,
-		"D*N column" : 3,
-		"min E/N" : 10,
-		"max E/N" : 1E6,
-		"spacing" : "exponential",
-		"points" : 1000,
-		"E/N scale" : 1.0, 
-		"D*N scale" : 1.0
-	    }
-        },	
-	{
 	    "id": "N2+",            
 	    "Z" : 1,                
 	    "solver" : "ito",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -174,8 +136,8 @@
             "id": "O2+",            
 	    "Z" : 1,                
 	    "solver" : "ito",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -185,6 +147,36 @@
 		"value": 5.175E-6        
 	    }		
 	},
+	{
+            "id": "O4+",            
+	    "Z" : 1,                
+	    "solver" : "ito",       
+	    "mobile" : false,       
+	    "diffusive" : false,    
+	    "mobility": {           
+		"type": "constant", 
+		"value": 2E-4       
+	    },
+	    "diffusion": {          
+		"type": "constant", 
+		"value": 5.175E-6        
+	    }		
+	},
+	{
+            "id": "N4+",            
+	    "Z" : 1,                
+	    "solver" : "ito",       
+	    "mobile" : false,       
+	    "diffusive" : false,    
+	    "mobility": {           
+		"type": "constant", 
+		"value": 2E-4       
+	    },
+	    "diffusion": {          
+		"type": "constant", 
+		"value": 5.175E-6        
+	    }		
+	},		
 	{
             "id": "O2-",            
 	    "Z" : -1,               
@@ -230,13 +222,6 @@
 		"value": 5.175E-6        
 	    }		
 	},
-	{ 
-            "id": "IR",            
-	    "Z" : 0,               
-	    "solver" : "ito",       
-	    "mobile" : false,       
-	    "diffusive" : false
-	},
 	{
 	    "id": "2PN2",
 	    "Z": 0,
@@ -260,24 +245,7 @@
     "plasma reactions":
     [
 	{
-	    // Electron thermalization
-	    "reaction": "e_low -> e", 
-	    "description": "Rate/Thermalization",
-	    "type": "table vs E/N",              
-	    "file" : "relax_rate.txt",           
-	    "header" : "# x y type", 
-	    "E/N column" : 0,        
-	    "rate/N column" : 1,     
-	    "min E/N" : 1.0,         
-	    "max E/N" : 1000.0,      
-	    "num points" : 1000,     
-	    "spacing" : "exponential",
-	    "scale E/N" : 1.0,        
-	    "scale rate/N" : 1.0,     
-	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
-	},
-	{
-	    "reaction": "e + N2 -> e_low + e_low + N2+",
+	    "reaction": "e + N2 -> e + e + N2+",           
 	    "description": "N2 ionization",           
 	    "type": "table vs E/N",                        
 	    "file" : "transport_data.dat",
@@ -290,10 +258,10 @@
 	    "spacing" : "exponential",                     
 	    "scale E/N" : 1.0,                             
 	    "scale rate/N" : 1.0,                          
-	    "plot": false                                 	    
+	    "plot": true                                 	    
 	},
 	{
-	    "reaction": "e + O2 -> e_low + e_low + O2+",
+	    "reaction": "e + O2 -> e + e + O2+",             
 	    "description": "O2 ionization",             
 	    "type": "table vs E/N",                          
 	    "file" : "transport_data.dat",
@@ -306,24 +274,10 @@
 	    "spacing" : "exponential",                       
 	    "scale E/N" : 1.0,                               
 	    "scale rate/N" : 1.0,
-	    "plot": false                                  
+	    "plot": true                                  
 	},
 	{
-	    "reaction": "@ + N2+ -> (N2)",
-	    "@": ["e", "e_low"],
-	    "description": "N2 recombination",
-	    "type": "constant",
-	    "value": 1E-14
-	},
-	{
-	    "reaction": "@ + O2+ -> (O2)",
-	    "@": ["e", "e_low"],	    
-	    "description": "O2 recombination",
-	    "type": "constant",
-	    "value": 1E-14
-	},		
-	{
-	    "reaction": "e + O2 -> O- + (O)",
+	    "reaction": "e + O2 -> O- + (O)",       
 	    "description": "Dissociative attachment", 
 	    "type": "table vs E/N",              
 	    "file" : "transport_data.dat",
@@ -336,10 +290,10 @@
 	    "spacing" : "exponential",     
 	    "scale E/N" : 1.0,             
 	    "scale rate/N" : 1.0,
-	    "plot": false                   
+	    "plot": true                   
 	},
 	{
-	    "reaction": "e + O2 -> O2-exc",
+	    "reaction": "e + O2 -> O2-exc", 
 	    "description": "O2 attachment", 
 	    "type": "table vs E/N",         
 	    "file" : "transport_data.dat",
@@ -352,10 +306,10 @@
 	    "spacing" : "exponential", 
 	    "scale E/N" : 1.0,         
 	    "scale rate/N" : 1.0,      
-	    "plot": false     
+	    "plot": true     
 	},
 	{
-	    "reaction": "O2-exc -> e_low + (O2)", 
+	    "reaction": "O2-exc -> e + (O2)", 
 	    "description": "Autodetachment", 
 	    "type": "table vs E/N",         
 	    "file" : "transport_data.dat",
@@ -368,7 +322,7 @@
 	    "spacing" : "exponential", 
 	    "scale E/N" : 1.0,         
 	    "scale rate/N" : 1.0,      
-	    "plot": false     
+	    "plot": true     
 	},
 	{
 	    "reaction": "O2-exc + O2 -> O2- + (O2)", 
@@ -384,11 +338,78 @@
 	    "spacing" : "exponential", 
 	    "scale E/N" : 1.0,         
 	    "scale rate/N" : 1.0,      
-	    "plot": false     
+	    "plot": true     
 	},
 	{
-	    "reaction": "e + N2 -> e_low + Y + (N2)",
-	    "description": "IR generation", 
+	    "reaction": "N2+ + N2 + @ -> N4+",
+	    "@": ["O2", "N2"],
+	    "description": "N2+-N4+ conversion",
+	    "type": "constant",
+	    "value": 5E-41,
+	    "plot" : true
+	},
+	{
+	    "reaction": "N4+ + O2 -> O2+ + (N2) + (N2)",
+	    "description": "N4+-O2+ conversion",
+	    "type": "constant",
+	    "value": 2.5E-16,
+	    "plot" : true
+	},
+	{
+	    "reaction": "N2+ + O2 -> O2+ + (N2)",
+	    "description": "N2+-O2+ conversion",
+	    "type": "constant",
+	    "value": 6E-17,
+	    "plot" : true
+	},			
+	{
+	    "reaction": "O2+ + O2 + @ -> O4+",
+	    "@": ["O2", "N2"],
+	    "description": "O2+ conversion",
+	    "type": "constant",
+	    "value": 2.4E-42
+	},	
+	{
+	    "reaction": "e + N2+ -> (N2)",
+	    "description": "e-N2+ recombination",
+	    "type": "function T A",
+	    "c1": 4.8E-12,
+	    "c2": -0.5,
+	    "T": "e",
+	    "plot" : true
+	},
+	{
+	    "reaction": "e + O2+ -> (O2)",
+	    "description": "e-O2+ recombination",
+	    "type": "function T A",
+	    "c1": 4.8E-12,
+	    "c2": -0.5,
+	    "T": "e",
+	    "plot" : true
+	},
+	{
+	    "reaction": "e + O4+ -> (O2) + (O2)",
+	    "description": "e-O4+ recombination",
+	    "type": "function T1T2 A",
+	    "c1": 1.4E-12,
+	    "c2": 0.5,
+	    "T1": "O2",
+	    "T2": "e",	    
+	    "plot" : true
+	},
+	{
+	    "reaction": "e + N4+ -> (N2) + (N2)",
+	    "description": "e-N4+ recombination",
+	    "type": "function T1T2 A",
+	    "c1": 2E-12,
+	    "c2": 0.5,
+	    "T1": "N2",
+	    "T2": "e",	    
+	    "plot" : true
+	},					
+	{
+	    "reaction": "e + N2 -> e + Y + (N2)",
+	    "description": "EUV generation", 
 	    "type": "table vs E/N",        
 	    "file" : "transport_data.dat",
 	    "dump": "debug_ir.dat",	    
@@ -402,15 +423,7 @@
 	    "scale rate/N" : 1.0,       
 	    "efficiency": 0.06,         
 	    "quenching pressure": 4000.0,
-	    "plot": true,
-	    "scale": 1.0
-	},
-	{
-	    "reaction": "IR -> Y + (N2)",
-	    "description": "Photon generation", 
-	    "type": "constant",
-	    "value": 2E9,
-	    "plot": false
+	    "plot": true
 	},
 	{
 	    // Note: Quenching pressure is 2.76mbar but the quenching
@@ -442,36 +455,24 @@
     "photoionization":
     [
 	{
-	    "reaction": "Y + (O2) -> e_low + O2+"
+	    "reaction": "Y + (O2) -> e + O2+"
 	}
-    ]
+    ]// ,
     // "electrode emission":
     // [
     // 	{
-    // 	    "reaction": "Y -> e_low",
+    // 	    "reaction": "Y -> e",
     // 	    "efficiency": 1.0
     // 	},
     // 	{
     // 	    "reaction": "O2+ -> @",
-    // 	    "@": ["e_low", "(null)"],
+    // 	    "@": ["e", "(null)"],
     // 	    "efficiencies": [1E-3, 1]
     // 	},
     // 	{
     // 	    "reaction": "N2+ -> @",
-    // 	    "@": ["e_low", "(null)"],
+    // 	    "@": ["e", "(null)"],
     // 	    "efficiencies": [1E-3, 1]
-    // 	}
-    // ],
-    // "field emission":
-    // [
-    // 	{
-    // 	    "species": "e_low",
-    // 	    "surface": "electrode",
-    // 	    "type": "fowler-nordheim",
-    // 	    "temperature": 300,
-    // 	    "work": 5.0,
-    // 	    "beta": 50,
-    // 	    "lambda": 0.5
-    // 	}
+    // 	}	
     // ]
 }

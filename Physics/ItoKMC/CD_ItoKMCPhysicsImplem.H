@@ -352,6 +352,10 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
+
+    if(a_numParticles[i] < 0.0) {
+      MayDay::Abort("negative particles on the way in");
+    }
   }
 
   for (auto& p : kmcPhotons) {
@@ -453,6 +457,10 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // Put KMC back into ItoKMC
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     a_numParticles[i] = (FPR)kmcParticles[i];
+
+    if(a_numParticles[i] < 0.0) {
+      MayDay::Abort("negative particles on the way out");
+    }    
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
@@ -461,6 +469,9 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   const long long chargeAfter = m_debug ? computeCharge() : 0LL;
 
   if (chargeAfter != chargeBefore) {
+
+    pout() << "charge before = " << chargeBefore << endl;
+    pout() << "charge after = " << chargeAfter << endl;    
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
@@ -504,14 +515,14 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       const FPR& numNew = a_newNumParticles[i];
       const FPR& numOld = a_oldNumParticles[i];
 
-      if (numNew < (FPR)0) {
+      if (numNew < (FPR)0.0) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - new number of particles is < 0 (overflow issue?)");
       }
       else if ((long long)numNew < 0LL) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - integer overflow!");
       }
 
-      if (numOld < 0) {
+      if (numOld < (FPR)0.0) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - old number of particles is < 0");
       }
       else if ((long long)numOld < 0LL) {
