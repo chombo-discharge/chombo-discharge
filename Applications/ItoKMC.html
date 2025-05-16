@@ -2144,7 +2144,7 @@ An example specification is</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p><strong>function TT A</strong></p>
+<p><strong>function T1T2 A</strong></p>
 <p>This specification is equivalent to a fluid rate</p>
 <div class="math notranslate nohighlight">
 \[k = c_1\left(\frac{T_1}{T_2}\right)^{c_2}.\]</div>
@@ -2153,12 +2153,12 @@ This can correspond to one of the background species.
 An example specification is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">   </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;A + B -&gt; &quot;</span><span class="w">  </span><span class="c1">// Example reaction string.</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;function TT A&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Function based rate.</span>
-<span class="w">      </span><span class="nt">&quot;c1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">               </span><span class="c1">// c1-coefficient</span>
-<span class="w">      </span><span class="nt">&quot;c2&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">               </span><span class="c1">// c2-coefficient</span>
-<span class="w">      </span><span class="nt">&quot;T1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="w">               </span><span class="c1">// Which species temperature for T1</span>
-<span class="w">      </span><span class="nt">&quot;T2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="w">                </span><span class="c1">// Which species temperature for T2</span>
+<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;A + B -&gt; &quot;</span><span class="w">    </span><span class="c1">// Example reaction string.</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;function T1T2 A&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Function based rate.</span>
+<span class="w">      </span><span class="nt">&quot;c1&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                 </span><span class="c1">// c1-coefficient</span>
+<span class="w">      </span><span class="nt">&quot;c2&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w">                 </span><span class="c1">// c2-coefficient</span>
+<span class="w">      </span><span class="nt">&quot;T1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="w">                 </span><span class="c1">// Which species temperature for T1</span>
+<span class="w">      </span><span class="nt">&quot;T2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="w">                  </span><span class="c1">// Which species temperature for T2</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">]</span>
 </pre></div>
