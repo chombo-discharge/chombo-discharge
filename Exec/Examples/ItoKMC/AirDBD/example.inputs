@@ -289,7 +289,7 @@ ItoKMCJSON.SSA_num            = 5                      ## How many SSA steps to 
 ItoKMCJSON.SSA_lim            = 5.0                     ## When to enter SSA instead of tau-leaping
 ItoKMCJSON.max_iter           = 50              ## Maximum number of iterations for implicit algorithms
 ItoKMCJSON.exit_tolerance     = 1.E-6           ## Exit tolerance for implicit algorithms
-ItoKMCJSON.algorithm          = hybrid_explicit_euler         ## Integration algorithm
+ItoKMCJSON.algorithm          = hybrid_prc         ## Integration algorithm
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS

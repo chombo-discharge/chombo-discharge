@@ -464,6 +464,10 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
+
+    if(a_numNewPhotons[i] < 0.0) {
+      MayDay::Abort("Cannot have < 0 photons");
+    }
   }
 
   const long long chargeAfter = m_debug ? computeCharge() : 0LL;
