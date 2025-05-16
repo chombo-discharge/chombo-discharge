@@ -2665,7 +2665,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return c1 * std::pow(T(E, x), c2);
     };
   }
-  else if (type == "function TT A") {
+  else if (type == "function T1T2 A") {
     if (!(a_reactionJSON.contains("T1"))) {
       this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'T1' was not found");
     }
@@ -2708,6 +2708,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     else {
       speciesTemperature1 = m_plasmaTemperatures[m_plasmaIndexMap.at(speciesT1)];
     }
+
     if (isBackgroundT2) {
       speciesTemperature2 = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
         return backgroundTemperature(x);
@@ -2718,7 +2719,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
 
     const Real c1 = a_reactionJSON["c1"].get<Real>();
-    const Real c2 = a_reactionJSON["c1"].get<Real>();
+    const Real c2 = a_reactionJSON["c2"].get<Real>();
 
     fluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2](const Real E, const RealVect x) -> Real {
       return c1 * std::pow(T1(E, x) / T2(E, x), c2);
