@@ -249,7 +249,7 @@ ItoKMCGodunovStepper.load_balance_particles                = false           # T
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                    = 256             # Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                    = 32             # Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = false          # Make superparticles during regrids
 ItoKMCGodunovStepper.physics_dt_factor                     = 1.E99           ## Physics-based time step factor
