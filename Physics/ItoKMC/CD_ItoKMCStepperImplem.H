@@ -3668,7 +3668,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
   CH_assert(a_ppc.nComp() == numCdrSpecies);
 
   const Real     dx     = m_amr->getDx()[a_level];
-  const Real     vol    = std::pow(dx, SpaceDim);
+  const Real     vol    = std::pow(dx, SpaceDim) * 1.E-4;
   const RealVect probLo = m_amr->getProbLo();
 
   // TLDR: We go through each solver and add the number of PHYSICAL particles per cell to a_ppc.
@@ -4674,7 +4674,7 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
             auto kernel = [&](const VolIndex& vof) -> void {
               const Real kappa = ebisbox.volFrac(vof);
 
-              deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / std::pow(dx, SpaceDim);
+              deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / (std::pow(dx, SpaceDim)*1.E-4);
             };
 
             VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
@@ -4745,7 +4745,7 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
   CH_assert(a_newParticlesPerCell.nComp() == numCdrSpecies);
   CH_assert(a_oldParticlesPerCell.nComp() == numCdrSpecies);
 
-  const Real volume = std::pow(a_dx, SpaceDim);
+  const Real volume = std::pow(a_dx, SpaceDim) * 1.E-4;
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<CdrSolver>& solver = solverIt();

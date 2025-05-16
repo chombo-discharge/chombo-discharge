@@ -180,7 +180,7 @@
 	{
             "id": "O2-",            
 	    "Z" : -1,               
-	    "solver" : "cdr",       
+	    "solver" : "ito",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -195,7 +195,7 @@
 	{
             "id": "O2-exc",            
 	    "Z" : -1,               
-	    "solver" : "cdr",       
+	    "solver" : "ito",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -210,7 +210,7 @@
 	{
             "id": "O-",            
 	    "Z" : -1,               
-	    "solver" : "cdr",       
+	    "solver" : "ito",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -225,7 +225,7 @@
 	{
 	    "id": "2PN2",
 	    "Z": 0,
-	    "solver": "cdr",
+	    "solver": "ito",
 	    "mobile": false,
 	    "diffusive": false
 	}	
