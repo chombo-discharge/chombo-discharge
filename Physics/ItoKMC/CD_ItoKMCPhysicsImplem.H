@@ -364,8 +364,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   // Lambda function used for computing charge before and after reactions. Used only in debug mode
   // for ensuring that nothing goes wrong with charge conservation in the chemistry integration.
-  auto computeCharge = [&]() -> long long {
-    long long Q = 0.0;
+  auto computeCharge = [&]() -> Real {
+    Real Q = 0.0;
     for (int i = 0; i < kmcParticles.size(); i++) {
       const SpeciesType& speciesType  = m_speciesMap.at(i).first;
       const int&         speciesIndex = m_speciesMap.at(i).second;
@@ -390,14 +390,14 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
       }
       }
 
-      Q += llround(kmcParticles[i]) * Z;
+      Q += kmcParticles[i] * Z;
     }
 
     return Q;
   };
 
   // In debug mode, compute the total charge.
-  const long long chargeBefore = m_debug ? computeCharge() : 0LL;
+  const Real chargeBefore = m_debug ? computeCharge() : 0LL;
 
   // Update the reaction rates to be used by the KMC solver.
   this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
@@ -470,13 +470,16 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     }
   }
 
-  const long long chargeAfter = m_debug ? computeCharge() : 0LL;
+  const Real chargeAfter = m_debug ? computeCharge() : 0LL;
 
   if (chargeAfter != chargeBefore) {
 
-    pout() << "charge before = " << chargeBefore << endl;
-    pout() << "charge after = " << chargeAfter << endl;    
-    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
+    std::cout << "charge before = " << chargeBefore << std::endl;
+    std::cout << "charge after = " << chargeAfter << std::endl;
+    std::cout << "diff = " << chargeAfter - chargeBefore << std::endl;
+    std::cout << "rel diff = " << (chargeAfter/chargeBefore - 1.0) << std::endl;
+    std::cout << kmcParticles[0] << std::endl;
+    //    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
   // Compute the critical and non-critical time steps
