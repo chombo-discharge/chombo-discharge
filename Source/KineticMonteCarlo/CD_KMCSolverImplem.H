@@ -317,7 +317,7 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
       // the underlying state.
       const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
 
-      if (Xi > (T)0) {
+      if (Xi > static_cast<T>(0LL)) {
         Real mu     = 0.0;
         Real sigma2 = 0.0;
 
@@ -391,7 +391,7 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
   const size_t numReactions = a_reactions.size();
 
   if (numReactions > 0) {
-    constexpr T one = (T)1;
+    constexpr T one = static_cast<T>(1);
 
     // Determine the reaction type as per Gillespie algorithm.
     Real A = 0.0;
@@ -482,9 +482,10 @@ KMCSolver<R, State, T>::stepExplicitEuler(State&              a_state,
 
     for (size_t i = 0; i < a_reactions.size(); i++) {
 
-      // Number of reactions is always an integer -- draw from a Poisson distribution in long long. I'm just
+      // Number of reactions is always an integer -- draw from a Poisson distribution in unsigned long long. I'm just
       // using a large integer type to avoid potential overflows.
-      const T numReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
+      const T numReactions = static_cast<T>(
+        std::max(0ULL, Random::getPoisson<unsigned long long>(propensities[i] * a_dt)));
 
       a_reactions[i]->advanceState(a_state, numReactions);
     }
@@ -520,7 +521,7 @@ KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_react
     for (size_t i = 0; i < numReactions; i++) {
       // TLDR: Predict a midpoint state -- unfortunately this means that as a_dt->0 we end up with plain
       //       tau-leaping. I don't know of a way to fix this without introducing double fluctuations (yet).
-      a_reactions[i]->advanceState(Xdagger, (T)std::round(0.5 * propensities[i] * a_dt));
+      a_reactions[i]->advanceState(Xdagger, static_cast<T>(std::max(0LL, llround(0.5 * propensities[i] * a_dt))));
     }
     CH_STOP(t1);
 
@@ -528,7 +529,7 @@ KMCSolver<R, State, T>::stepMidpoint(State& a_state, const ReactionList& a_react
 
     CH_START(t2);
     for (size_t i = 0; i < numReactions; i++) {
-      const T curReactions = (T)Random::getPoisson<long long>(propensities[i] * a_dt);
+      const T curReactions = static_cast<T>(Random::getPoisson<unsigned long long>(propensities[i] * a_dt));
 
       a_reactions[i]->advanceState(a_state, curReactions);
     }
@@ -566,7 +567,7 @@ KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions,
       for (int k = 0; k < numReactions; k++) {
         State x = a_state;
 
-        a_reactions[k]->advanceState(x, (T)1);
+        a_reactions[k]->advanceState(x, static_cast<T>(1LL));
 
         const Real etajk = a_reactions[j]->propensity(x) - ak[j];
 
@@ -577,7 +578,7 @@ KMCSolver<R, State, T>::stepPRC(State& a_state, const ReactionList& a_reactions,
 
     CH_START(t2);
     for (size_t i = 0; i < numReactions; i++) {
-      const T nr = (T)Random::getPoisson<long long>(aj[i] * a_dt);
+      const T nr = static_cast<T>(Random::getPoisson<unsigned long long>(aj[i] * a_dt));
 
       a_reactions[i]->advanceState(a_state, nr);
     }
@@ -947,7 +948,7 @@ KMCSolver<R, State, T>::advanceHybrid(
 {
   CH_TIME("KMCSolver::advanceHybrid(State, ReactionList, Real, std::function)");
 
-  constexpr T one = (T)1;
+  constexpr T one = static_cast<T>(1);
 
   // Simulated time within the advancement algorithm.
   Real curTime = 0.0;
