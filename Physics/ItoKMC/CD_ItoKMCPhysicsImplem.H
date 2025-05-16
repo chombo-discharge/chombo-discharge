@@ -352,6 +352,10 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
+
+    if(a_numParticles[i] < 0.0) {
+      MayDay::Abort("negative particles on the way in");
+    }
   }
 
   for (auto& p : kmcPhotons) {
@@ -360,8 +364,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   // Lambda function used for computing charge before and after reactions. Used only in debug mode
   // for ensuring that nothing goes wrong with charge conservation in the chemistry integration.
-  auto computeCharge = [&]() -> long long {
-    long long Q = 0.0;
+  auto computeCharge = [&]() -> Real {
+    Real Q = 0.0;
     for (int i = 0; i < kmcParticles.size(); i++) {
       const SpeciesType& speciesType  = m_speciesMap.at(i).first;
       const int&         speciesIndex = m_speciesMap.at(i).second;
@@ -386,14 +390,14 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
       }
       }
 
-      Q += llround(kmcParticles[i]) * Z;
+      Q += kmcParticles[i] * Z;
     }
 
     return Q;
   };
 
   // In debug mode, compute the total charge.
-  const long long chargeBefore = m_debug ? computeCharge() : 0LL;
+  const Real chargeBefore = m_debug ? computeCharge() : 0LL;
 
   // Update the reaction rates to be used by the KMC solver.
   this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
@@ -453,15 +457,29 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // Put KMC back into ItoKMC
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     a_numParticles[i] = (FPR)kmcParticles[i];
+
+    if(a_numParticles[i] < 0.0) {
+      MayDay::Abort("negative particles on the way out");
+    }    
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
+
+    if(a_numNewPhotons[i] < 0.0) {
+      MayDay::Abort("Cannot have < 0 photons");
+    }
   }
 
-  const long long chargeAfter = m_debug ? computeCharge() : 0LL;
+  const Real chargeAfter = m_debug ? computeCharge() : 0LL;
 
   if (chargeAfter != chargeBefore) {
-    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
+
+    std::cout << "charge before = " << chargeBefore << std::endl;
+    std::cout << "charge after = " << chargeAfter << std::endl;
+    std::cout << "diff = " << chargeAfter - chargeBefore << std::endl;
+    std::cout << "rel diff = " << (chargeAfter/chargeBefore - 1.0) << std::endl;
+    std::cout << kmcParticles[0] << std::endl;
+    //    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
   // Compute the critical and non-critical time steps
@@ -504,14 +522,14 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       const FPR& numNew = a_newNumParticles[i];
       const FPR& numOld = a_oldNumParticles[i];
 
-      if (numNew < (FPR)0) {
+      if (numNew < (FPR)0.0) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - new number of particles is < 0 (overflow issue?)");
       }
       else if ((long long)numNew < 0LL) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - integer overflow!");
       }
 
-      if (numOld < 0) {
+      if (numOld < (FPR)0.0) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - old number of particles is < 0");
       }
       else if ((long long)numOld < 0LL) {

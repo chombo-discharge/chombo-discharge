@@ -3587,7 +3587,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
         }
       }
 
-      ppcRegular(iv, idx) = num;
+      a_ppc(vof, idx) = num;
     };
 
     // Run the kernels.
