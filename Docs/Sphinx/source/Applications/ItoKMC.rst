@@ -1515,7 +1515,7 @@ An example specification is
       }
    ]
 
-**function TT A**
+**function T1T2 A**
 
 This specification is equivalent to a fluid rate
 
@@ -1531,12 +1531,12 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> "  // Example reaction string. 
-	 "type": "function TT A", // Function based rate.
-	 "c1": 1.0,               // c1-coefficient
-	 "c2": 1.0,               // c2-coefficient
-	 "T1": "A",               // Which species temperature for T1
-	 "T2": "B"                // Which species temperature for T2	 
+         "reaction": "A + B -> "    // Example reaction string. 
+	 "type": "function T1T2 A", // Function based rate.
+	 "c1": 1.0,                 // c1-coefficient
+	 "c2": 1.0,                 // c2-coefficient
+	 "T1": "A",                 // Which species temperature for T1
+	 "T2": "B"                  // Which species temperature for T2	 
       }
    ]   
 
