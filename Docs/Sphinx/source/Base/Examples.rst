@@ -29,7 +29,8 @@ First, compile the application by
    make -s -j4 DIM=2 program
 
 This will provide an executable named ``program2d.<bunch_of_options>.ex``.
-If one compiles for 3D, i.e. ``DIM=3``, the executable will be named ``program3d.<bunch_of_options>.ex``.
+If one compiles for 3D, use ``DIM=3`` either on the command-line or in the configuration file.
+The executable will be named ``program3d.<bunch_of_options>.ex``.
 
 To run the application do:
 

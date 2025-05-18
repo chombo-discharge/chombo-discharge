@@ -69,7 +69,7 @@ Using benchmark files
 _____________________
 
 The test suite can generate benchmark files which can later be compared against new test suite output files.
-This is often a good idea if one wants to ensure that changes the ``chombo-discharge`` code does not unintentionally change simulations. 
+This is often a good idea if one wants to ensure that modifications to the ``chombo-discharge`` source code does not unintentionally change the output of computer simulations. 
 In this case one can run the test suite and generate benchmark files *before* adding changes to ``chombo-discharge``.
 Once the code development is completed, the benchmark files can later be bit-wise (using `h5diff <https://support.hdfgroup.org/HDF5/doc/RM/Tools/h5diff.htm>`_) compared against the results of a later test suite.
 
@@ -79,7 +79,7 @@ This consists of the following steps:
 
    .. code-block:: text
 
-      python3 tests.py --compile --clean --silent --benchmark -mpi=true -hdf=true -cores X		   
+      python3 tests.py --compile --clean --silent --benchmark -mpi=true -hdf=true -cores 8
 
 #. Make the required changes to the ``chombo-discharge`` code.
 
@@ -87,7 +87,7 @@ This consists of the following steps:
 
    .. code-block:: text
 
-      python3 tests.py --compile --clean --silent --compare -mpi=true -hdf=true -cores X		   
+      python3 tests.py --compile --clean --silent --compare -mpi=true -hdf=true -cores 8
 
 When running the tests this way, the output files are bit-wise compared and a warning is issued if the files do not exactly match. 
 
@@ -99,8 +99,8 @@ Automated testing
 On `GitHub <https://github.com/chombo-discharge/chombo-discharge>`_, the test suite is integrated with GitHub actions and are automatically run when opening a pull request for review. 
 In general, all tests must pass before a pull request can be merged.
 The test status can be observed either in the pull request, or at `<https://github.com/chombo-discharge/chombo-discharge/actions>`_.
-The automated tests run ``chombo-discharge`` with ``DEBUG=TRUE`` and ``OPT=FALSE`` in order to catch assertion errors or other code breaks.
-They usually take 1-2 hours to complete.
+The automated tests run ``chombo-discharge`` with ``DEBUG=TRUE`` and ``OPT=FALSE`` in order to catch assertion errors or other places where the code might break.
+They usually take around 1 hour to complete.
 
 The automated tests will clone, build, and run the ``chombo-discharge`` test suite for various configurations:
 
@@ -138,13 +138,17 @@ There are two ways to run performance profiling of ``chombo-discharge``:
 
      export CH_TIMER=1
 
+  The ``Chombo`` will not only compute the time spent in each function, but also figure out the parent-child relation between function, and present the output as a hierarchical structure.
+  This is often useful when optimizing functions at the development stage. 
+
   .. warning::
 
      ``Chombo``'s timers are not meant to use with many time steps.
      For efficient use, it is best to use it for a single time step.
 
-* In-place profiling using the ``chombo-discharge`` Timer class.
-  Some classes in ``chombo-discharge`` use the ``Timer`` class, which also computes on-the-fly calculations of potential load imbalance.
+* In-place profiling using the ``chombo-discharge`` ``Timer`` class (see `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTimer.html>`_ for the C++ API).
+  
+  Some classes in ``chombo-discharge`` use the ``Timer`` class, and can be used for run-time evaluations of function costs and load imbalance.
 
   .. warning::
 

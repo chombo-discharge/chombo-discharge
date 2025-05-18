@@ -25,20 +25,21 @@ Optional packages are
 
 * A serial or parallel version of HDF5, which is used for writing plot and checkpoint files.
 * An MPI installation, which is used for parallelization.
-* `<https://visit-dav.github.io/visit-website/>`_ visualization, which used for visualization.
+* VisIt (`<https://visit-dav.github.io/visit-website>`_), which used for visualization and analysis.
 
 
 Cloning ``chombo-discharge``
 ----------------------------
 
-When compiling ``chombo-discharge``, makefiles must be able to find both ``chombo-discharge`` and ``Chombo``.
+``chombo-discharge`` is compiled using GNUmake.
+When compiling ``chombo-discharge``, the makefiles must be able to find both ``chombo-discharge`` and ``Chombo``.
 In our makefiles the paths to these are supplied through the environment variables
 
 * ``DISCHARGE_HOME``, pointing to the ``chombo-discharge`` root directory.
-* ``CHOMBO_HOME``, pointing to your ``Chombo`` library  
+* ``CHOMBO_HOME``, pointing to your ``Chombo`` library. 
 
 Note that ``DISCHARGE_HOME`` must point to the root folder in the ``chombo-discharge`` source code, while ``CHOMBO_HOME`` must point to the :file:`lib/` folder in your ``Chombo`` root directory.
-When cloning with submodules, both ``Chombo`` and ``nlohmann/json`` will be placed in the :file:`Submodules` folder in ``$DISCHARGE_HOME``.  
+When cloning recursively with submodules, both ``Chombo`` and ``nlohmann/json`` will be placed in the :file:`Submodules` folder in ``$DISCHARGE_HOME``.  
 
 .. tip::
    
@@ -112,7 +113,7 @@ Full configuration
 Typically, a full configuration consists of specifying
 
 * Fortran and C++ compilers
-* Specifying configurations. E.g., serial or parallel builds, and compiler flags. 
+* Specifying build configurations. E.g., serial or parallel builds, and compiler flags for optimized and debug builds.
 * Library paths (in particular for HDF5).
 
 .. _Chap:MainSettings:
@@ -125,18 +126,18 @@ The main variables that the user needs to set are
 * ``DIM = 2/3`` The dimensionality (must be 2 or 3). 
 * ``DEBUG = TRUE/FALSE``
   This enables or disables debugging flags and code checks/assertions.
+  ``chombo-discharge`` will run substantially slower with ``DEBUG=TRUE``.
 * ``OPT = FALSE/TRUE/HIGH``.
-  Setting ``OPT=TRUE/HIGH`` enables optimization flags that will speed up ``Chombo`` and ``chombo-discharge``.
+  Setting ``OPT=TRUE/HIGH`` enables optimized builds.
 * ``PRECISION = DOUBLE``
   Currently, ``chombo-discharge`` has not been wetted with single precision.
   Many algorithms (like conjugate gradient) depend on the use of double precision.
 * ``CXX = <C++ compiler>``
 * ``FC = <Fortran compiler>``
 * ``MPI = TRUE/FALSE``
-  This enables/disables MPI.
+  This enables or disables MPI.
 * ``MPICXX = <MPI compiler>`` This sets the MPI compiler.
 * ``CXXSTD = 14`` For specifying the C++ standard. We are currently at C++14.
-  Sets the C++ standard - we are currently at C++14.
 * ``USE_EB=TRUE``
   Configures ``Chombo`` with embedded boundary functionality.
   This is a requirement. 
@@ -145,11 +146,11 @@ The main variables that the user needs to set are
   This is a requirement.
 * ``USE_MT=TRUE/FALSE``
   Configures ``Chombo`` with memory tracking functionality.
-  Not supported with OpenMP. 
+  Not supported with OpenMP, and enabling memory tracking together with OpenMP will trigger a preprocessor error.
 * ``USE_HDF5 = TRUE/FALSE``
-  This enables and disables HDF5 code.
+  This enables or disables HDF5 output.
 * ``OPENMPCC = TRUE/FALSE``
-  Turn on/off OpenMP threading. 
+  Turn on or off OpenMP threading. 
   
 
 MPI
@@ -190,11 +191,10 @@ When compiled with OpenMP all loops over grid patches uses threading in the form
 
    }
 
-
 .. warning::
 
    Memory tracking is currently not supported together with threading.
-   When compiling ``chombo-discharge`` make sure that memory tracking is turned off (see :ref:`MainSettings`).    
+   When compiling ``chombo-discharge`` make sure that memory tracking is turned off (see :ref:`MainSettings`).
 
 
 Compiler flags
@@ -210,15 +210,17 @@ Note that LAPACK and BLAS are requirements in ``chombo-discharge``.
 Linking to these can often be done using
 
 * ``syslibflag = -llapack -lblas`` (for GNU compilers)
-* ``syslibflag = -mkl=sequential`` (for Intel compilers)  
+* ``syslibflag = -mkl=sequential`` (for Intel compilers)
+
+Finally, note that the ``cxxoptflags`` and ``foptflags`` are enabled when using optimized builds.
+Corresponding flags exist for builds with ``DEBUG=TRUE`` in the form of ``cxxdbgflags`` and ``foptdbgflags``. 
   
 
 Pre-defined configuration files
 _______________________________
 
-Some commonly used configuration files are found in ``$DISCHARGE_HOME/Lib/Local``.
-``chombo-discharge`` can be compiled in serial or with MPI, and with or without HDF5.
-The user need to configure the ``Chombo`` makefile to ensure that the ``chombo-discharge`` is properly configured.
+Some commonly used configuration files are found in ``$DISCHARGE_HOME/Lib/Local``, and most of these are given as both serial and MPI versions, and with or without HDF5.
+The user needs to further configure the ``Chombo`` makefile to ensure that the ``chombo-discharge`` is properly configured for the system being compiled for.
 Below, we include brief instructions for compilation on a Linux workstation and for a cluster. 
 
 
@@ -244,8 +246,8 @@ If you already have installed MPI and/or HDF5, the steps below might require mod
 
    This will install
 
-      * LAPACK and BLAS
-      * GNU compilers for Fortran and C++   
+      * LAPACK and BLAS.
+      * GNU compilers for Fortran and C++.
 
 #. To also install OpenMPI and HDF5:
 
@@ -255,15 +257,13 @@ If you already have installed MPI and/or HDF5, the steps below might require mod
 
    This will install
 
-      * OpenMPI
-      * HDF5, both serial and parallel.
+      * OpenMPI.
+      * Serial and parallel versions of HDF5.
 
-   Both serial and parallel HDF5 will be installed, and these are *usually* found in folders
+   The serial and parallel HDF5 are normally installed in different locations, and these are *usually* found in folders
 
      * ``/usr/lib/x86_64-linux-gnu/hdf5/serial/`` for serial HDF5
      * ``/usr/lib/x86_64-linux-gnu/hdf5/openmpi/`` for parallel HDF5 (using OpenMPI). 
-     
-   Before proceeding further, the user need to locate the HDF5 libraries (if building with HDF5). 
 
 #. After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/mk``:
 
@@ -328,7 +328,7 @@ If the prerequisites are in place, compilation of ``chombo-discharge`` is usuall
 However, due to dependencies on ``Chombo`` and HDF5, compilation can sometimes be an issue.
 Our experience is that if ``Chombo`` compiles, so does ``chombo-discharge``.
 
-If experiencing issues, try cleaning ``chombo-discharge`` by
+If experiencing issues, try remove the ``chombo-discharge`` installation first by running
 
 .. code-block:: bash
 
