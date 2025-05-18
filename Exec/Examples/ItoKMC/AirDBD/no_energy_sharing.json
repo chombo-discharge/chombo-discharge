@@ -120,7 +120,7 @@
 	{
 	    "id": "N2+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -135,7 +135,7 @@
 	{
             "id": "O2+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -150,7 +150,7 @@
 	{
             "id": "O4+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -165,7 +165,7 @@
 	{
             "id": "N4+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -257,8 +257,9 @@
 	    "num points" : 1000,                           
 	    "spacing" : "exponential",                     
 	    "scale E/N" : 1.0,                             
-	    "scale rate/N" : 1.0,                          
-	    "plot": true                                 	    
+	    "scale rate/N" : 1.0,
+            "gradient correction": "e",
+	    "plot": true
 	},
 	{
 	    "reaction": "e + O2 -> e + e + O2+",             
@@ -274,6 +275,7 @@
 	    "spacing" : "exponential",                       
 	    "scale E/N" : 1.0,                               
 	    "scale rate/N" : 1.0,
+            "gradient correction": "e",	    
 	    "plot": true                                  
 	},
 	{

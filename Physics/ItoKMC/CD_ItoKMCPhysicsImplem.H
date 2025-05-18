@@ -19,6 +19,7 @@
 #include <CD_ItoKMCPhysics.H>
 #include <CD_ParticleManagement.H>
 #include <CD_Random.H>
+#include <CD_EBParticleMesh.H>
 #include <CD_Units.H>
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
@@ -352,10 +353,6 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     kmcParticles[i] = a_numParticles[i];
-
-    if(a_numParticles[i] < 0.0) {
-      MayDay::Abort("negative particles on the way in");
-    }
   }
 
   for (auto& p : kmcPhotons) {
@@ -364,8 +361,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
   // Lambda function used for computing charge before and after reactions. Used only in debug mode
   // for ensuring that nothing goes wrong with charge conservation in the chemistry integration.
-  auto computeCharge = [&]() -> Real {
-    Real Q = 0.0;
+  auto computeCharge = [&]() -> long long {
+    long long Q = 0.0;
     for (int i = 0; i < kmcParticles.size(); i++) {
       const SpeciesType& speciesType  = m_speciesMap.at(i).first;
       const int&         speciesIndex = m_speciesMap.at(i).second;
@@ -397,7 +394,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   };
 
   // In debug mode, compute the total charge.
-  const Real chargeBefore = m_debug ? computeCharge() : 0LL;
+  const long long chargeBefore = m_debug ? computeCharge() : 0LL;
 
   // Update the reaction rates to be used by the KMC solver.
   this->updateReactionRates(m_kmcReactionsThreadLocal, a_E, a_pos, a_phi, a_gradPhi, a_dx, a_kappa);
@@ -457,29 +454,24 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // Put KMC back into ItoKMC
   for (size_t i = 0; i < a_numParticles.size(); i++) {
     a_numParticles[i] = (FPR)kmcParticles[i];
-
-    if(a_numParticles[i] < 0.0) {
-      MayDay::Abort("negative particles on the way out");
-    }    
   }
   for (size_t i = 0; i < a_numNewPhotons.size(); i++) {
     a_numNewPhotons[i] = (FPR)kmcPhotons[i];
-
-    if(a_numNewPhotons[i] < 0.0) {
-      MayDay::Abort("Cannot have < 0 photons");
-    }
   }
 
-  const Real chargeAfter = m_debug ? computeCharge() : 0LL;
+  const long long chargeAfter = m_debug ? computeCharge() : 0LL;
 
-  if (chargeAfter != chargeBefore) {
+  if(m_debug) {
+    if (chargeAfter != chargeBefore) {
 
-    std::cout << "charge before = " << chargeBefore << std::endl;
-    std::cout << "charge after = " << chargeAfter << std::endl;
-    std::cout << "diff = " << chargeAfter - chargeBefore << std::endl;
-    std::cout << "rel diff = " << (chargeAfter/chargeBefore - 1.0) << std::endl;
-    std::cout << kmcParticles[0] << std::endl;
-    //    MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
+      std::cout << "charge before = " << chargeBefore << std::endl;
+      std::cout << "charge after = " << chargeAfter << std::endl;
+      std::cout << "diff = " << chargeAfter - chargeBefore << std::endl;
+      std::cout << "rel diff = " << (chargeAfter/chargeBefore - 1.0) << std::endl;
+      std::cout << kmcParticles[0] << std::endl;
+      
+      MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
+    }
   }
 
   // Compute the critical and non-critical time steps

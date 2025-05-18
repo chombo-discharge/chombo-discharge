@@ -11,10 +11,14 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <ParmParse.H> 
 
 // Our includes
 #include <CD_EBParticleMesh.H>
 #include <CD_NamespaceHeader.H>
+
+// Default "depth" of a grid cell in 2D is 1 meter.
+Real EBParticleMesh::s_depth2D = 1.0;
 
 EBParticleMesh::EBParticleMesh()
 {
@@ -46,6 +50,11 @@ EBParticleMesh::define(const ProblemDomain& a_domain,
   m_ebisbox = a_ebisbox;
   m_probLo  = a_probLo;
   m_dx      = a_dx;
+
+  // Read in the effective 2D depth. This is an optional parameter.
+  ParmParse pp("EBParticleMesh");
+
+  pp.query("depth_2d", s_depth2D);
 
   CH_assert(m_domain.contains(m_region));
 }

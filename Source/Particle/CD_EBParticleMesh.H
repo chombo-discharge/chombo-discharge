@@ -33,6 +33,12 @@
 class EBParticleMesh
 {
 public:
+
+  /*!
+    @brief Effective 2D depth of particle 
+  */
+  static Real s_depth2D;
+  
   /*!
     @brief Default constructor. Must subsequently call define. 
   */

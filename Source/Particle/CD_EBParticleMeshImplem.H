@@ -491,7 +491,11 @@ EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
   // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real invVol = 1. / std::pow(a_dx[0], SpaceDim);
+#if CH_SPACEDIM==2
+  const Real invVol = 1. / (std::pow(a_dx[0], 2) * EBParticleMesh::s_depth2D);
+#elif CH_SPACEDIM==3
+  const Real invVol = 1. / (std::pow(a_dx[0], 3));
+#endif
 
   auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
@@ -653,7 +657,11 @@ EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
   // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real invVol = 1. / std::pow(a_dx[0], SpaceDim);
+#if CH_SPACEDIM==2
+  const Real invVol = 1. / (std::pow(a_dx[0], 2) * EBParticleMesh::s_depth2D);
+#elif CH_SPACEDIM==3
+  const Real invVol = 1. / (std::pow(a_dx[0], 3));
+#endif  
 
   auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
@@ -756,7 +764,11 @@ EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
   // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real invVol = 1.0 / std::pow(a_dx[0], SpaceDim);
+#if CH_SPACEDIM==2
+  const Real invVol = 1. / (std::pow(a_dx[0], 2) * EBParticleMesh::s_depth2D);
+#elif CH_SPACEDIM==3
+  const Real invVol = 1. / (std::pow(a_dx[0], 3));
+#endif    
 
   auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;

@@ -3277,10 +3277,20 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 
   // Update basic reaction rates.
   const Real E = a_E.vectorLength();
-  const Real V = std::pow(a_dx, SpaceDim);
+#if CH_SPACEDIM == 2
+  const Real V = std::pow(a_dx, 2) * EBParticleMesh::s_depth2D;
+#elif CH_SPACEDIM == 3
+  const Real V = std::pow(a_dx, 3);
+#endif
 
   for (int i = 0; i < a_kmcReactions.size(); i++) {
     a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_pos, a_phi);
+
+    if(i == 0 || i == 1) {
+      if(a_kappa < 1.0) {
+	a_kmcReactions[i]->rate() = 0.0;
+      }
+    }
 
     // Add gradient correction if the user has asked for it.
     const std::pair<bool, std::string> gradientCorrection = m_kmcReactionGradientCorrections[i];

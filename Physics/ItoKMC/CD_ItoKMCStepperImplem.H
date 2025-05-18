@@ -3668,8 +3668,12 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
   CH_assert(a_ppc.nComp() == numCdrSpecies);
 
   const Real     dx     = m_amr->getDx()[a_level];
-  const Real     vol    = std::pow(dx, SpaceDim);
   const RealVect probLo = m_amr->getProbLo();
+#if CH_SPACEDIM == 2
+  const Real vol = std::pow(dx, 2) * EBParticleMesh::s_depth2D;
+#elif CH_SPACEDIM == 3
+  const Real vol = std::pow(dx, 3);
+#endif
 
   // TLDR: We go through each solver and add the number of PHYSICAL particles per cell to a_ppc.
   FArrayBox& ppcRegular = a_ppc.getFArrayBox();
@@ -3957,6 +3961,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
+#if CH_SPACEDIM == 2
+    DataOps::scale(m_fluidScratch1, EBParticleMesh::s_depth2D);
+#endif
 
     EBAMRCellData fluidCdrPPC = m_amr->slice(m_fluidCdrPPC, Interval(i, i));
 
@@ -4673,8 +4680,12 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBAMRCellData& a_newParti
 
             auto kernel = [&](const VolIndex& vof) -> void {
               const Real kappa = ebisbox.volFrac(vof);
-
-              deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / std::pow(dx, SpaceDim);
+#if CH_SPACEDIM == 2
+              const Real volume = (std::pow(dx, 2) * EBParticleMesh::s_depth2D);
+#elif CH_SPACEDIM == 3
+              const Real volume = std::pow(dx, 3);
+#endif
+              deltaMass(vof, 0) = (newPPC(vof, idx) - oldPPC(vof, idx)) * (1.0 - kappa) / volume;
             };
 
             VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
@@ -4745,7 +4756,11 @@ ItoKMCStepper<I, C, R, F>::reconcileCdrDensities(const EBCellFAB& a_newParticles
   CH_assert(a_newParticlesPerCell.nComp() == numCdrSpecies);
   CH_assert(a_oldParticlesPerCell.nComp() == numCdrSpecies);
 
-  const Real volume = std::pow(a_dx, SpaceDim);
+#if CH_SPACEDIM==2
+  const Real volume = std::pow(a_dx, 2) * EBParticleMesh::s_depth2D;
+#elif CH_SPACEDIM==3
+  const Real volume = std::pow(a_dx, 3);
+#endif
 
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     RefCountedPtr<CdrSolver>& solver = solverIt();
