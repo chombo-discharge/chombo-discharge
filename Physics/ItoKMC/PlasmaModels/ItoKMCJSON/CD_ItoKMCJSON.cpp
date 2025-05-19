@@ -3431,12 +3431,12 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       if (m_itoSpecies[species]->getChargeNumber() < 0) {
 
         const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
-        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_dt;
+        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_bndryArea * a_dt;
 
         const long long numEmission = Random::getPoisson<long long>(JdAdt);
 
         if (numEmission > 0LL) {
-          const RealVect x = a_cellCenter + a_bndryCentroid * a_dx;
+          const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
 
           a_secondaryParticles[species].add(ItoParticle(1.0 * numEmission, x));
         }
