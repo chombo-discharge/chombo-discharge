@@ -507,14 +507,14 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
       if (numNew < (FPR)0) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - new number of particles is < 0 (overflow issue?)");
       }
-      else if ((long long)numNew < 0LL) {
+      else if (static_cast<long long>(numNew) < 0LL) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - integer overflow!");
       }
 
       if (numOld < 0) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - old number of particles is < 0");
       }
-      else if ((long long)numOld < 0LL) {
+      else if (static_cast<long long>(numOld) < 0LL) {
         MayDay::Warning("ItoKMCPhysics::reconcileParticles - integer overflow for old particles!");
       }
     }
@@ -550,54 +550,69 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
 
   CH_START(t2);
   for (int i = 0; i < a_particles.size(); i++) {
-    const long long diff = (long long)(a_newNumParticles[i] - a_oldNumParticles[i]);
+    const long long diff = static_cast<long long>(a_newNumParticles[i] - a_oldNumParticles[i]);
 
     if (diff > 0LL) {
-      // Adding particles, which is fairly simple. Just choose weights for the particles and go.
-      const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(
-        diff,
-        (long long)m_maxNewParticles);
+      const long long numParticles = static_cast<long long>(a_particles[i]->length());
 
-      for (const auto& w : particleWeights) {
-        RealVect x = RealVect::Zero;
+      if (numParticles > 0LL) {
+        // If the cell already contains particles, partition the new particle weights and increment the existing particles
+        const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, numParticles);
 
-        // Figure out where to place the particles.
-        switch (m_particlePlacement) {
-        case ParticlePlacement::Centroid: {
-          x = a_cellPos + a_centroidPos * a_dx;
+        // Increment weights directly.
+        ListIterator<ItoParticle> lit(*a_particles[i]);
 
-          break;
+        for (int j = 0; lit.ok() && j < particleWeights.size(); ++lit, j++) {
+          lit().weight() += 1.0 * particleWeights[j];
         }
-        case ParticlePlacement::Random: {
-          x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+      }
+      else {
+        // Adding new particles, which is fairly simple. Just choose weights for the particles and go with one of the placement algorithms.
+        const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(
+          diff,
+          static_cast<long long>(m_maxNewParticles));
 
-          break;
-        }
-        case ParticlePlacement::Downstream: {
-          if (hasDownstream) {
-            x = Random::randomPosition(upstreamLo, upstreamHi, upstreamPosition, v);
+        for (const auto& w : particleWeights) {
+          RealVect x = RealVect::Zero;
 
-            if ((x - a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
-              x = upstreamPosition;
+          // Figure out where to place the particles.
+          switch (m_particlePlacement) {
+          case ParticlePlacement::Centroid: {
+            x = a_cellPos + a_centroidPos * a_dx;
+
+            break;
+          }
+          case ParticlePlacement::Random: {
+            x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+
+            break;
+          }
+          case ParticlePlacement::Downstream: {
+            if (hasDownstream) {
+              x = Random::randomPosition(upstreamLo, upstreamHi, upstreamPosition, v);
+
+              if ((x - a_bndryCentroid).dotProduct(a_bndryNormal) < 0.0) {
+                x = upstreamPosition;
+              }
+
+              x = a_cellPos + x * a_dx;
+            }
+            else {
+
+              x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
             }
 
-            x = a_cellPos + x * a_dx;
+            break;
           }
-          else {
+          default: {
+            MayDay::Error("ItoKMCPhysics::reconcileParticles - logic bust");
 
-            x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+            break;
+          }
           }
 
-          break;
+          a_particles[i]->add(ItoParticle(1.0 * w, x));
         }
-        default: {
-          MayDay::Error("ItoKMCPhysics::reconcileParticles - logic bust");
-
-          break;
-        }
-        }
-
-        a_particles[i]->add(ItoParticle(1.0 * w, x));
       }
     }
     else if (diff < 0LL) {
@@ -751,8 +766,8 @@ ItoKMCPhysics::reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
     if (a_numNewPhotons[i] > 0LL) {
 
       const std::vector<long long> photonWeights = ParticleManagement::partitionParticleWeights(
-        (long long)a_numNewPhotons[i],
-        (long long)m_maxNewPhotons);
+        static_cast<long long>(a_numNewPhotons[i]),
+        static_cast<long long>(m_maxNewPhotons));
 
       for (const auto& w : photonWeights) {
         const RealVect x = Random::randomPosition(a_cellPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
