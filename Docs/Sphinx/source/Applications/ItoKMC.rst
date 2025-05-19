@@ -1787,6 +1787,19 @@ A JSON specification that includes this
 	}	
     ]
 
+This is equivalent to a source term
+
+.. math::
+
+   S &= \alpha n_e\left|\mathbf{v}_e\right|\left(1 + \frac{\mathbf{E}\cdot \left(D_e\nabla n_e\right)}{n_e\mu_eE^2}\right) \\
+   &=\alpha\left[n_e\left|\mathbf{v}_e\right| + \hat{\mathbf{E}}\cdot\left(D_e\nabla n_e\right)\right].
+
+One can recognize this term as a regular electron impact ionization source term (typically written as :math:`\alpha \mu n_e E`).
+With the gradient correction, the ionization source term is essentially computed using the full electron flux, i.e., including the diffusive electron flux.
+Note that the full electron flux has a preferential direction, and the physical interpretation of this direction is that if there is net diffusion against the electric field, electrons lose energy and the impact ionization source term is correspondingly lower.
+
+
+
 Understanding reaction rates
 ____________________________
 
