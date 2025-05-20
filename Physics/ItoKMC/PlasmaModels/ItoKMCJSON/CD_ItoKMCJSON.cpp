@@ -2091,7 +2091,7 @@ ItoKMCJSON::initializeFieldEmission()
 
     const Real J = (a * F * F / phi) * exp(-v * b * std::pow(phi, 1.5) / F);
 
-    return J;
+    return J * 1E18; // Because in the above, F is given in V/nm
   };
 
   // Field emission expression for Schottky emission. T is the cathode temperature, phi is the work function, lamdba

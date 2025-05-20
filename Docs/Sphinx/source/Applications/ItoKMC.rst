@@ -93,9 +93,17 @@ Both these methods (``centroid`` and ``random``) are, however, sources of numeri
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See :ref:`Chap:ItoKMCJSON` for instructions on how to assign the particle placement method.
 
+Parallel diffusion
+------------------
+
+``ItoKMCGodunovStepper`` can limit diffusion against the electric field (or strictly speaking, the particle drift direction) by setting the flag ``ItoKMCGodunovStepper.limit_parallel_diffusion`` to ``true``.
+The logic behind this functionality is that in a drift-diffusion approximation, and regardless of whether or one uses particles or fluids, electrons that back-diffuse against the electric field will rapidly lose their energy and can then no longer ionize the gas.
+When limiting parallel diffusion, the diffusion hop of the particles is restricted to being along or transverse to the drift direction.
+In practice, this leads to greatly enhanced stability in, especially in cathode sheaths.
+
 
 Spatial filtering
-_________________
+-----------------
 
 It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
 Filters are applied as follows:
@@ -2050,6 +2058,7 @@ Currently supported expressions are:
       f &\approx 1.439964\,\text{eV}^2\text{V}^{-1}\text{nm}\times \frac{F}{\phi^2}.
 
    Here, :math:`\phi` is the work function (in electron volts) and :math:`\beta` is an empirical factor that describes local field amplifications.
+   Note that the above expression gives :math:`J` in units of :math:`\text{A}/\text{nm}^2`.
       
 
 #. Schottky emission:
