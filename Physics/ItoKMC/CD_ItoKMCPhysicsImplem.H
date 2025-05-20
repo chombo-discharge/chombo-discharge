@@ -559,7 +559,6 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
         // If the cell already contains particles, partition the new particle weights and increment the existing particles
         const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, numParticles);
 
-        // Increment weights directly.
         ListIterator<ItoParticle> lit(*a_particles[i]);
 
         for (int j = 0; lit.ok() && j < particleWeights.size(); ++lit, j++) {
