@@ -241,6 +241,7 @@ ItoKMCGodunovStepper.verbosity                             = -1             # Ve
 ItoKMCGodunovStepper.secondary_emission                    = after_reactions # When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true           # Turn on/off reactive redistribution
+ItoKMCGodunovStepper.limit_parallel_diffusion              = true                 ## If true, particles do not diffuse against their drift direction
 ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = none           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                             = false          # Turn on/off dual-grid functionality
