@@ -108,7 +108,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
-ItoSolver.merge_algorithm     = equal_weight_kd  # Particle merging algorithm (see documentation)
+ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
@@ -262,7 +262,7 @@ ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Ad
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                                = 10.E-12        # Minimum permitted time step
+ItoKMCGodunovStepper.min_dt                                = 100.E-12        # Minimum permitted time step
 ItoKMCGodunovStepper.max_dt                                = 100E-12        # Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
@@ -285,7 +285,7 @@ ItoKMCJSON.chemistry_file     = no_energy_sharing.json ## Chemistry file
 ItoKMCJSON.max_new_particles  = 16                      ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons    = 16                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.crit_num           = 5                       ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps           = 50.0                   ## Maximum relative change in propensity function
+ItoKMCJSON.prop_eps           = 5000.0                   ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num            = 1                      ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSA_lim            = 1.0                     ## When to enter SSA instead of tau-leaping
 ItoKMCJSON.max_iter           = 50              ## Maximum number of iterations for implicit algorithms
