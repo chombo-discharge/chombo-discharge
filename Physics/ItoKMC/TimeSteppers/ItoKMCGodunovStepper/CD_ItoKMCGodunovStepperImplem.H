@@ -1382,7 +1382,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   const bool converged = this->solvePoisson();
   if (!converged) {
     const std::string
-      errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge after regrid";
+      errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge";
 
     pout() << errMsg << endl;
 
