@@ -273,7 +273,8 @@
 	    "num points" : 1000,     
 	    "spacing" : "exponential",
 	    "scale E/N" : 1.0,        
-	    "scale rate/N" : 1.0,     
+	    "scale rate/N" : 1.0,
+	    "gradient correction": "e",
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
 	},		
 	{
@@ -288,7 +289,8 @@
 	    "max E/N" : 10000.0,                            
 	    "num points" : 1000,                           
 	    "spacing" : "exponential",                     
-	    "scale E/N" : 1.0,                             
+	    "scale E/N" : 1.0,
+	    "gradient correction": "e",	    
 	    "scale rate/N" : 1.0,                          
 	    "plot": false                                 	    
 	},

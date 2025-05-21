@@ -120,9 +120,9 @@
 	{
 	    "id": "N2+",            
 	    "Z" : 1,                
-	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "solver" : "ito",       
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -135,9 +135,9 @@
 	{
             "id": "O2+",            
 	    "Z" : 1,                
-	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "solver" : "ito",       
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -151,8 +151,8 @@
             "id": "O4+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -166,8 +166,8 @@
             "id": "N4+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -181,8 +181,8 @@
             "id": "O2-",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -196,8 +196,8 @@
             "id": "O2-exc",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -211,8 +211,8 @@
             "id": "O-",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -265,7 +265,8 @@
 	    "spacing" : "exponential",                     
 	    "scale E/N" : 1.0,                             
 	    "scale rate/N" : 1.0,
-	    "lim_max_k_dt": 2.0,	    
+	    "lim_max_k_dt": 1.0,
+	    //"gradient correction": "e",	    
 	    "plot": true                                 	    
 	},
 	{
@@ -282,7 +283,8 @@
 	    "spacing" : "exponential",                       
 	    "scale E/N" : 1.0,                               
 	    "scale rate/N" : 1.0,
-	    "lim_max_k_dt": 2.0,	    	    
+	    "lim_max_k_dt": 1.0,
+	    //"gradient correction": "e",	    
 	    "plot": true                                  
 	},
 	{
@@ -433,7 +435,9 @@
 	    "efficiency": 0.06,         
 	    "quenching pressure": 4000.0,
 	    "plot": true,
-	    "lim_max_k_dt": 2.0
+	    //"gradient correction": "e",	    
+	    "lim_max_k_dt": 1.0
+	    
 	},
 	{
 	    "reaction": "IR -> Y + (N2)",
