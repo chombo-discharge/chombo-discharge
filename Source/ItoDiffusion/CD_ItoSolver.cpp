@@ -3199,8 +3199,8 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
   const Real     kappa         = a_cellInfo.getVolFrac();
   const RealVect probLo        = m_amr->getProbLo();
   const RealVect cellPos       = probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
-  RealVect validLo       = a_cellInfo.getValidLo();
-  RealVect validHi       = a_cellInfo.getValidHi();
+  const RealVect validLo       = a_cellInfo.getValidLo();
+  const RealVect validHi       = a_cellInfo.getValidHi();
   const RealVect bndryCentroid = a_cellInfo.getBndryCentroid();
   const RealVect bndryNormal   = a_cellInfo.getBndryNormal();
 
@@ -3220,12 +3220,20 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
   a_particles.clear();
 
   //  newValidLo = validLo;
-  //  newValidHi = validHi;  
+  //  newValidHi = validHi;
+
+  // for (int dir = 0; dir < SpaceDim; dir++) {
+  //   newValidLo[dir] = std::max(newValidLo
+  // }
 
   for (int i = 0; i < weights.size(); i++) {
     const Real     w = weights[i];
     //    const RealVect x = Random::randomPosition(cellPos, newValidLo, newValidHi, bndryCentroid, bndryNormal, dx, kappa);
     RealVect x = Random::randomPosition(newValidLo, newValidHi);
+
+    if(x.dotProduct(bndryNormal) < 0.0 && kappa < 1.0) {
+      x = bndryCentroid;
+    }
 
     x = cellPos + x*dx;
 

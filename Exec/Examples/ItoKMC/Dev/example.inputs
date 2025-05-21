@@ -11,7 +11,7 @@ AmrMesh.lo_corner        =  -4E-2    0 -4E-2     # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-2 4E-2  4E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 64 128     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 4           # Maximum amr depth
+AmrMesh.max_amr_depth    = 5           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -108,7 +108,7 @@ FieldSolverMultigrid.gmg_smoother      = red_black         # Relaxation type. 'j
 # ItoSolver class options
 # ====================================================================================================
 ItoSolver.verbosity           = -1            # Class verbosity
-ItoSolver.merge_algorithm     = reinitialize  # Particle merging algorithm (see documentation)
+ItoSolver.merge_algorithm     = equal_weight_kd  # Particle merging algorithm (see documentation)
 ItoSolver.plt_vars            = phi mu vel dco   # 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
 ItoSolver.intersection_alg    = bisection     # Intersection algorithm for EB-particle intersections.
 ItoSolver.bisect_step         = 1.E-4         # Bisection step length for intersection tests
@@ -306,4 +306,4 @@ ItoKMCStreamerTagger.refine_curvature  = 1.E99        # Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature = 1.E99        # Curvature coarsening	
 ItoKMCStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha     = 0.1         # Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl   = 3            # Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
