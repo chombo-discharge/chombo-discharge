@@ -104,7 +104,7 @@
 		"spacing" : "exponential",
 		"points" : 1000,
 		"E/N scale" : 1.0, 
-		"D*N scale" : 1.0
+		"D*N scale" : 0.1
 	    },
 	    "initial particles" : [
 		{
@@ -120,9 +120,9 @@
 	{
 	    "id": "N2+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "solver" : "cdr",       
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -135,9 +135,9 @@
 	{
             "id": "O2+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "solver" : "cdr",       
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -151,8 +151,8 @@
             "id": "O4+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -166,8 +166,8 @@
             "id": "N4+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -181,8 +181,8 @@
             "id": "O2-",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -196,8 +196,8 @@
             "id": "O2-exc",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -211,8 +211,8 @@
             "id": "O-",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
+	    "mobile" : false,       
+	    "diffusive" : false,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -225,7 +225,7 @@
 	{ 
             "id": "IR",            
 	    "Z" : 0,               
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false
 	},	
@@ -478,32 +478,32 @@
 	{
 	    "reaction": "Y + (O2) -> e + O2+"
 	}
-    ] ,
-    "electrode emission":
-    [
-	{
-	    "reaction": "Y -> e",
-	    "efficiency": 0.0
-	},
-	{
-	    "reaction": "O2+ -> @",
-	    "@": ["e", "(null)"],
-	    "efficiencies": [1E-2, 1]
-	},
-	{
-	    "reaction": "N2+ -> @",
-	    "@": ["e", "(null)"],
-	    "efficiencies": [1E-2, 1]
-	}// ,
-	// {
-	//     "reaction": "N4+ -> @",
-	//     "@": ["e", "(null)"],
-	//     "efficiencies": [1E-2, 1]
-	// },
-	// {
-	//     "reaction": "O4+ -> @",
-	//     "@": ["e", "(null)"],
-	//     "efficiencies": [1E-2, 1]
-	// }
-    ]
+    ]// ,
+    // "electrode emission":
+    // [
+    // 	{
+    // 	    "reaction": "Y -> e",
+    // 	    "efficiency": 0.0
+    // 	},
+    // 	{
+    // 	    "reaction": "O2+ -> @",
+    // 	    "@": ["e", "(null)"],
+    // 	    "efficiencies": [1E-2, 1]
+    // 	},
+    // 	{
+    // 	    "reaction": "N2+ -> @",
+    // 	    "@": ["e", "(null)"],
+    // 	    "efficiencies": [1E-2, 1]
+    // 	},
+    // 	{
+    // 	    "reaction": "N4+ -> @",
+    // 	    "@": ["e", "(null)"],
+    // 	    "efficiencies": [1E-2, 1]
+    // 	},
+    // 	{
+    // 	    "reaction": "O4+ -> @",
+    // 	    "@": ["e", "(null)"],
+    // 	    "efficiencies": [1E-2, 1]
+    // 	}
+    // ]
 }

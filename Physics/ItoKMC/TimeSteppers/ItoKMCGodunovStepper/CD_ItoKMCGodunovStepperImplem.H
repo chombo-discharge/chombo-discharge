@@ -109,6 +109,7 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
 
   this->m_amr->allocate(m_semiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_semiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
+  this->m_amr->allocate(m_semiImplicitSigma, this->m_fluidRealm, this->m_plasmaPhase, 1);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -528,9 +529,11 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
 
   this->m_amr->allocate(m_scratchSemiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_scratchSemiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
+  this->m_amr->allocate(m_scratchSemiImplicitSigma, this->m_fluidRealm, this->m_plasmaPhase, 1);
 
   DataOps::copy(m_scratchSemiImplicitRhoCDR, m_semiImplicitRhoCDR);
   DataOps::copy(m_scratchSemiImplicitConductivityCDR, m_semiImplicitConductivityCDR);
+  DataOps::copy(m_scratchSemiImplicitSigma, m_semiImplicitSigma);
 
   // Release unecessary storage.
   for (int i = 0; i < numCdrSpecies; i++) {
@@ -539,6 +542,7 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
 
   m_semiImplicitRhoCDR.clear();
   m_semiImplicitConductivityCDR.clear();
+  m_semiImplicitSigma.clear();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -677,8 +681,10 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
 
   m_timer.eventReport(pout(), false);
 
-  // No reason to have this lying around.
-  this->m_amr->deallocate(m_scratchSemiImplicitRhoCDR);
+  // No reason to have these lying around.
+  m_scratchSemiImplicitRhoCDR.clear();
+  m_scratchSemiImplicitConductivityCDR.clear();
+  m_scratchSemiImplicitSigma.clear();
 
   // Fill the neutral density on the mesh
   this->fillNeutralDensity();
@@ -1327,6 +1333,46 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
       }
     }
   }
+}
+
+template <typename I, typename C, typename R, typename F>
+bool
+ItoKMCGodunovStepper<I, C, R, F>::solvePoisson() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::solvePoisson()");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::solvePoisson()" << endl;
+  }
+
+  // Solve the Poisson equation and compute the cell-centered electric field.
+  MFAMRCellData& phi   = this->m_fieldSolver->getPotential();
+  MFAMRCellData& rho   = this->m_fieldSolver->getRho();
+  EBAMRIVData&   sigma = this->m_sigmaSolver->getPhi();
+
+  const bool converged = (this->m_fieldSolver)->solve(phi, rho, sigma, false);
+
+  (this->m_fieldSolver)->computeElectricField();
+
+  // Copy the electric field to appropriate data holders and perform center-to-centroid
+  // interpolation.
+  EBAMRCellData E;
+  (this->m_amr)->allocatePointer(E, this->m_fluidRealm);
+  (this->m_amr)->alias(E, this->m_plasmaPhase, (this->m_fieldSolver)->getElectricField());
+
+  // Fluid realm
+  (this->m_amr)->copyData(this->m_electricFieldFluid, E);
+  (this->m_amr)->conservativeAverage(this->m_electricFieldFluid, this->m_fluidRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpGhostPwl(this->m_electricFieldFluid, this->m_fluidRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpToCentroids(this->m_electricFieldFluid, this->m_fluidRealm, this->m_plasmaPhase);
+
+  // Particle realm
+  (this->m_amr)->copyData(this->m_electricFieldParticle, E);
+  (this->m_amr)->conservativeAverage(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpGhostPwl(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpToCentroids(this->m_electricFieldParticle, this->m_particleRealm, this->
+				   m_plasmaPhase);
+
+  return converged;
 }
 
 template <typename I, typename C, typename R, typename F>

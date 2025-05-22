@@ -246,6 +246,17 @@ namespace Physics {
       EBAMRCellData m_scratchSemiImplicitConductivityCDR;
 
       /*!
+	@brief Storage for the semi-implicit approximation to the surface charge
+      */
+      EBAMRIVData m_semiImplicitSigma;
+
+      /*!
+	@brief Scratch for the semi-implicit approximation to the surface charge
+	@note Only used during regrids
+      */
+      EBAMRIVData m_scratchSemiImplicitSigma;
+
+      /*!
 	@brief Storage for the finite-volume approximation of div(D*grad(phi)) for the CDR equations.
       */
       Vector<EBAMRCellData> m_cdrDivD;
@@ -358,6 +369,15 @@ namespace Physics {
       */
       virtual void
       setupSemiImplicitPoisson(const Real a_dt) noexcept;
+
+      /*!
+	@brief Solve the electrostatic problem
+	@details This calls the other version with all lhs/rhs taken from the field solver. Space charge density is computed
+	in this routine. 
+	@return Returns true if the solver converged. 
+      */
+      virtual bool
+      solvePoisson() noexcept override;
 
       /*!
 	@brief Remove covered particles
