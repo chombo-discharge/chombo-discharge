@@ -265,7 +265,7 @@
 	    "spacing" : "exponential",                     
 	    "scale E/N" : 1.0,                             
 	    "scale rate/N" : 1.0,
-	    "lim_max_k_dt": 1.0,
+	    "limit max k*dt": 1.0,
 	    //"gradient correction": "e",	    
 	    "plot": true                                 	    
 	},
@@ -283,7 +283,7 @@
 	    "spacing" : "exponential",                       
 	    "scale E/N" : 1.0,                               
 	    "scale rate/N" : 1.0,
-	    "lim_max_k_dt": 1.0,
+	    "limit max k*dt": 1.0,
 	    //"gradient correction": "e",	    
 	    "plot": true                                  
 	},
@@ -436,7 +436,7 @@
 	    "quenching pressure": 4000.0,
 	    "plot": true,
 	    //"gradient correction": "e",	    
-	    "lim_max_k_dt": 1.0
+	    "limit max k*dt": 1.0
 	    
 	},
 	{

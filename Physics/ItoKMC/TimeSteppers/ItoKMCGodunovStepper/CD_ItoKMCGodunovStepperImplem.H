@@ -1381,8 +1381,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("Solve Poisson");
   const bool converged = this->solvePoisson();
   if (!converged) {
-    const std::string
-      errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge";
+    const std::string errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge";
 
     pout() << errMsg << endl;
 

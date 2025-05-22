@@ -2907,8 +2907,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   }
 
   // Hook for limiting the maximum fluid-based rate. Use with caution.
-  if (a_reactionJSON.contains("lim_max_k_dt")) {
-    maxRateDt = a_reactionJSON["lim_max_k_dt"].get<Real>();
+  if (a_reactionJSON.contains("limit max k*dt")) {
+    maxRateDt = a_reactionJSON["limit max k*dt"].get<Real>();
   }
 
   // This is the KMC rate -- note that it absorbs the background species.
