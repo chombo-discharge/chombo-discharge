@@ -2129,7 +2129,66 @@ For example, some care might be required when using the Townsend attachment coef
 
 .. warning::
 
-   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible. 
+   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
+
+Tips and tricks
+---------------
+
+As with fluid drift-diffusion models, numerical instabilities can also occur due to unbounded growth in the plasma density.
+This is a process which has been linked both to the local field approximation and also to the presence of numerical diffusion.
+Simulations that fail to stabilize, i.e., where the field strength diverges, may benefit from the following stabilizing features:
+
+#. **Turn off parallel diffusion.**
+   
+   With the ``ItoKMCGodunovStepper`` class, this option is given by ``ItoKMCGodunovStepper.limit_parallel_diffusion``.
+   Using this option will ensure that particles do not diffuse against their drift direction.
+   Note that this also modifies the amount of *physical* diffusion in this direction.
+
+#. **Use gradient corrections.**
+
+   As discussed earlier, using a gradient correction can help limit non-physical ionization due to backwards-diffusing electrons.
+
+#. **Use downstream particle placement.**
+
+   Because the KMC algorithm solves for the number of particles in a grid cell, distributing new particles uniformly over a grid cell can lead to numerical diffusion where secondary electrons are placed in the wake of primary electrons.
+   Using downstream particle placement often leads to slightly more stable simulations.
+
+#. **Describe the primary species using an Ito solver.**
+
+   Similar to the point above, using a fluid solver for the ions may lead to upstream placement of the resulting positive charge.   
+
+#. **Use kd-tree particle merging.**
+
+   Currently particle merging strategies are reinitialization and merging based on bounding volume hierarchies.
+   If using reinitialization, new particles can be generated in the wake of old ones and can thus upset the charge distribution and cause numerical backwards diffusion (e.g., of electrons).
+
+#. **Numerically limit reaction rates.**
+
+   It is possible to specify that reaction rates will be numerically limited so that the rate does not exceed a specified threshold of :math:`\Delta t^{-1}`.
+   This is done through the JSON interface by setting ``limit max k*dt`` to some value.
+   Note that this changes the physics of the model, but usually enhances stability at larger time steps.
+   An example is given below:
+
+.. code-block:: json
+
+   "plasma reactions": [
+      {
+         "reaction": "e + N2 -> e + e + N2+"
+	 "type": "constant",
+	 "value": 1.E-30,
+	 "limit max k*dt" : 2.0
+      }
+   ]
+
+   This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
+   I.e., all background species are first absorbed into the rate calculation before the rate is limited.
+   We point out that limiting is not possible if both species on the left hand side are solver variables.
+
+
+.. important::
+   
+   The above features have been implemented in order to push the algorithm towards coarser grids and larger time steps.
+   It is essential that the user checks that the model converges when these features are applied.
       
 Example programs
 ================

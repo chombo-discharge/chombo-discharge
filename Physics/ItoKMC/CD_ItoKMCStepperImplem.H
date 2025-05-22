@@ -4165,7 +4165,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       const Real     kappa = ebisbox.volFrac(vof);
       const RealVect pos   = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
       const RealVect E = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
-      
+
       // Initialize for this cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
         particles[i] = llround(a_particlesPerCell(vof, i));
