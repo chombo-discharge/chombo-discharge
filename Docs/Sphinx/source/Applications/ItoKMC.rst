@@ -2175,7 +2175,7 @@ Simulations that fail to stabilize, i.e., where the field strength diverges, may
       {
          "reaction": "e + N2 -> e + e + N2+"
 	 "type": "constant",
-	 "value": 1.E-30,
+	 "value": 1.E-12,
 	 "limit max k*dt" : 2.0
       }
    ]
