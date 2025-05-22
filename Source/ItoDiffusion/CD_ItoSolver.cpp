@@ -3204,38 +3204,11 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
   const RealVect bndryCentroid = a_cellInfo.getBndryCentroid();
   const RealVect bndryNormal   = a_cellInfo.getBndryNormal();
 
-  RealVect newValidLo = +0.5*RealVect::Unit;
-  RealVect newValidHi = -0.5*RealVect::Unit;
-
-  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
-    const RealVect& physPosition = lit().position();
-    const RealVect& gridPosition = (physPosition - cellPos)/dx;
-
-    for (int dir = 0; dir < SpaceDim; dir++) {
-      newValidLo[dir] = std::min(gridPosition[dir], newValidLo[dir]);
-      newValidHi[dir] = std::max(gridPosition[dir], newValidHi[dir]);      
-    }
-  }
-
   a_particles.clear();
-
-  //  newValidLo = validLo;
-  //  newValidHi = validHi;
-
-  // for (int dir = 0; dir < SpaceDim; dir++) {
-  //   newValidLo[dir] = std::max(newValidLo
-  // }
 
   for (int i = 0; i < weights.size(); i++) {
     const Real     w = weights[i];
-    //    const RealVect x = Random::randomPosition(cellPos, newValidLo, newValidHi, bndryCentroid, bndryNormal, dx, kappa);
-    RealVect x = Random::randomPosition(newValidLo, newValidHi);
-
-    if(x.dotProduct(bndryNormal) < 0.0 && kappa < 1.0) {
-      x = bndryCentroid;
-    }
-
-    x = cellPos + x*dx;
+    const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, averageEnergy));
   }
