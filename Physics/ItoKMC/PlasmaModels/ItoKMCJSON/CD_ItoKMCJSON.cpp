@@ -2091,7 +2091,7 @@ ItoKMCJSON::initializeFieldEmission()
 
     const Real J = (a * F * F / phi) * exp(-v * b * std::pow(phi, 1.5) / F);
 
-    return J;
+    return J * 1E18; // Because in the above, F is given in V/nm
   };
 
   // Field emission expression for Schottky emission. T is the cathode temperature, phi is the work function, lamdba
@@ -2509,7 +2509,8 @@ ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReact
   }
 }
 
-std::pair<std::function<Real(const Real E, const Real V, const Real dx, const RealVect x, const Vector<Real>& phi)>,
+std::pair<std::function<
+            Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect x, const Vector<Real>& phi)>,
           std::function<Real(const Real E, const RealVect x)>>
 ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                     const std::list<size_t>& a_backgroundReactants,
@@ -2559,6 +2560,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     volumeFactor += rn.second;
   }
+
+  Real maxRateDt = std::numeric_limits<Real>::max();
 
   const std::string type      = this->trim(a_reactionJSON["type"].get<std::string>());
   const std::string reaction  = this->trim(a_reactionJSON["reaction"].get<std::string>());
@@ -2903,18 +2906,25 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
   }
 
+  // Hook for limiting the maximum fluid-based rate. Use with caution.
+  if (a_reactionJSON.contains("limit max k*dt")) {
+    maxRateDt = a_reactionJSON["limit max k*dt"].get<Real>();
+  }
+
   // This is the KMC rate -- note that it absorbs the background species.
-  FunctionEVXP kmcRate = [fluidRate,
-                          volumeFactor,
-                          propensityFactor,
-                          gridFactor,
-                          a_backgroundReactants,
-                          &S = this->m_backgroundSpecies,
-                          &N = this->m_gasNumberDensity](const Real          E,
-                                                         const Real          V,
-                                                         const Real          dx,
-                                                         const RealVect      x,
-                                                         const Vector<Real>& phi) -> Real {
+  FunctionEVXTP kmcRate = [fluidRate,
+                           volumeFactor,
+                           propensityFactor,
+                           gridFactor,
+                           maxRateDt,
+                           a_backgroundReactants,
+                           &S = this->m_backgroundSpecies,
+                           &N = this->m_gasNumberDensity](const Real          E,
+                                                          const Real          V,
+                                                          const Real          dx,
+                                                          const Real          dt,
+                                                          const RealVect      x,
+                                                          const Vector<Real>& phi) -> Real {
     Real k = fluidRate(E, x);
 
     // Multiply by neutral densities
@@ -2923,6 +2933,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
       k *= n;
     }
+
+    // Limit the rate if the user calls for it.
+    k = std::min(k, maxRateDt / dt);
 
     // Multiply by propensity factor (because of ItoKMCDualStateReaction)
     k *= propensityFactor;
@@ -3263,6 +3276,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
                                 const RealVect                                   a_pos,
                                 const Vector<Real>&                              a_phi,
                                 const Vector<RealVect>&                          a_gradPhi,
+                                const Real                                       a_dt,
                                 const Real                                       a_dx,
                                 const Real                                       a_kappa) const noexcept
 {
@@ -3280,7 +3294,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
   const Real V = std::pow(a_dx, SpaceDim);
 
   for (int i = 0; i < a_kmcReactions.size(); i++) {
-    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_pos, a_phi);
+    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_dt, a_pos, a_phi);
 
     // Add gradient correction if the user has asked for it.
     const std::pair<bool, std::string> gradientCorrection = m_kmcReactionGradientCorrections[i];
@@ -3431,12 +3445,12 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       if (m_itoSpecies[species]->getChargeNumber() < 0) {
 
         const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
-        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_dt;
+        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_bndryArea * a_dt;
 
         const long long numEmission = Random::getPoisson<long long>(JdAdt);
 
         if (numEmission > 0LL) {
-          const RealVect x = a_cellCenter + a_bndryCentroid * a_dx;
+          const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
 
           a_secondaryParticles[species].add(ItoParticle(1.0 * numEmission, x));
         }

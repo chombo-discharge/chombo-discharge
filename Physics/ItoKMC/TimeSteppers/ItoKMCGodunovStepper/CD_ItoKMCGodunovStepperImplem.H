@@ -39,6 +39,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
   this->m_smoothConductivity       = false;
+  this->m_limitParallelDiffusion   = false;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
 
@@ -172,6 +173,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
 
   pp.get("extend_conductivity", m_extendConductivityEB);
   pp.get("smooth_conductivity", m_smoothConductivity);
+  pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
 
   // Get algorithm
@@ -1379,8 +1381,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("Solve Poisson");
   const bool converged = this->solvePoisson();
   if (!converged) {
-    const std::string
-      errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge after regrid";
+    const std::string errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge";
 
     pout() << errMsg << endl;
 
@@ -1432,6 +1433,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
     const int idx = solverIt.index();
 
+    const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const int  Z         = species->getChargeNumber();
 
@@ -1462,6 +1464,15 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           }
           else {
             hop = RealVect::Zero;
+          }
+
+          // If the user asks for it, diffusion against the drift direction is not permitted
+          if ((mobile && diffusive) && m_limitParallelDiffusion) {
+            const RealVect& vel = lit().velocity();
+            const RealVect& u   = vel / vel.vectorLength();
+            const Real      n   = hop.dotProduct(u);
+
+            hop -= std::min(0.0, n) * u;
           }
 
           if (Z != 0) {

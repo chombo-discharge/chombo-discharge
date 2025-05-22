@@ -3587,7 +3587,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
         }
       }
 
-      ppcRegular(iv, idx) = num;
+      a_ppc(vof, idx) = num;
     };
 
     // Run the kernels.
@@ -4114,7 +4114,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
 
       // Populate the data holders that the physics interface requires.
       for (int i = 0; i < numPlasmaSpecies; i++) {
-        particles[i] = (long long)particlesPerCellReg(iv, i);
+        particles[i] = llround(particlesPerCellReg(iv, i));
       }
 
       for (int i = 0; i < numPhotonSpecies; i++) {
@@ -4161,14 +4161,14 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   auto irregularKernel = [&](const VolIndex& vof) -> void {
     const IntVect iv = vof.gridIndex();
 
-    if (validCells(iv, 0)) {
+    if (ebisbox.isIrregular(iv) && validCells(iv, 0)) {
       const Real     kappa = ebisbox.volFrac(vof);
       const RealVect pos   = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
       const RealVect E = RealVect(D_DECL(a_electricField(vof, 0), a_electricField(vof, 1), a_electricField(vof, 2)));
 
       // Initialize for this cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
-        particles[i] = (long long)a_particlesPerCell(vof, i);
+        particles[i] = llround(a_particlesPerCell(vof, i));
       }
 
       for (int i = 0; i < numPhotonSpecies; i++) {
@@ -4403,8 +4403,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Populate the per-cell Ito data
       for (int i = 0; i < numItoSpecies; i++) {
         itoParticles[i]    = &((*itoParticlesFAB[i])(iv, 0));
-        numNewParticles[i] = (long long)(a_newParticlesPerCell.getSingleValuedFAB()(iv, i));
-        numOldParticles[i] = (long long)(a_oldParticlesPerCell.getSingleValuedFAB()(iv, i));
+        numNewParticles[i] = llround(a_newParticlesPerCell.getSingleValuedFAB()(iv, i));
+        numOldParticles[i] = llround(a_oldParticlesPerCell.getSingleValuedFAB()(iv, i));
       }
 
       // Populate the per-cell CDR data
@@ -4417,7 +4417,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
         bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
         sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
 
-        numNewPhotons[i] = (long long)(a_newPhotonsPerCell.getSingleValuedFAB()(iv, i));
+        numNewPhotons[i] = llround(a_newPhotonsPerCell.getSingleValuedFAB()(iv, i));
 
         // sourcePhotons will hold the NEW number of photons to be generated -- it should already
         // have been cleared in upstream code but I'm leaving this in for safety.
@@ -4490,8 +4490,8 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
       // Populate the per-cell particle data.
       for (int i = 0; i < numItoSpecies; i++) {
         itoParticles[i]    = &((*itoParticlesFAB[i])(iv, 0));
-        numNewParticles[i] = (long long)(a_newParticlesPerCell(vof, i));
-        numOldParticles[i] = (long long)(a_oldParticlesPerCell(vof, i));
+        numNewParticles[i] = llround(a_newParticlesPerCell(vof, i));
+        numOldParticles[i] = llround(a_oldParticlesPerCell(vof, i));
       }
 
       // Populate the per-cell CDR data
@@ -4504,7 +4504,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
         bulkPhotons[i]   = &((*bulkPhotonsFAB[i])(iv, 0));
         sourcePhotons[i] = &((*sourcePhotonsFAB[i])(iv, 0));
 
-        numNewPhotons[i] = (long long)(a_newPhotonsPerCell(vof, i));
+        numNewPhotons[i] = llround(a_newPhotonsPerCell(vof, i));
 
         // sourcePhotons will hold the NEW number of photons to be generated -- it should already
         // have been cleared in upstream code but I'm leaving this in for safety.
