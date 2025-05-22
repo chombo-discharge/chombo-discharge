@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 30E3
+ItoKMC.potential = -30E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -238,7 +238,7 @@ DiskProfiledPlane.cylinder_radius       = 1E-3                    # Radius for c
 # ====================================================================================================
 ItoKMCGodunovStepper.checkpoint_particles                  = true           # If true, regrid on restart is supported (otherwise it's not)
 ItoKMCGodunovStepper.verbosity                             = -1             # Verbosity
-ItoKMCGodunovStepper.secondary_emission                    = after_reactions # When to emit secondary particles. Either 'before_reactions' or 'after_reactions
+ItoKMCGodunovStepper.secondary_emission                    = before_reactions # When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true          # Turn on/off reactive redistribution
 ItoKMCGodunovStepper.limit_parallel_diffusion              = true                 ## If true, particles do not diffuse against their drift direction
@@ -254,16 +254,16 @@ ItoKMCGodunovStepper.particles_per_cell                    = 16             # Ma
 ItoKMCGodunovStepper.merge_interval                        = 1              # Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                 = true          # Make superparticles during regrids
 ItoKMCGodunovStepper.physics_dt_factor                     = 1.E99           ## Physics-based time step factor
-ItoKMCGodunovStepper.min_particle_advection_cfl            = 5.0            # Advective time step CFL restriction
-ItoKMCGodunovStepper.max_particle_advection_cfl            = 5.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.min_particle_advection_cfl            = 2.0            # Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl            = 2.0            # Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0            # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99          # Diffusive time step CFL restriction
 ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                                = 150.E-12       # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 150.E-12       # Maximum permitted time step
+ItoKMCGodunovStepper.min_dt                                = 00.E-12       # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 150.E12       # Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
