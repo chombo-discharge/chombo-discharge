@@ -120,7 +120,7 @@
 	{
 	    "id": "N2+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -135,7 +135,7 @@
 	{
             "id": "O2+",            
 	    "Z" : 1,                
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -147,40 +147,40 @@
 		"value": 5.175E-6        
 	    }		
 	},
-	{
-            "id": "O4+",            
-	    "Z" : 1,                
-	    "solver" : "ito",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
-	    "mobility": {           
-		"type": "constant", 
-		"value": 2E-4       
-	    },
-	    "diffusion": {          
-		"type": "constant", 
-		"value": 5.175E-6        
-	    }		
-	},
-	{
-            "id": "N4+",            
-	    "Z" : 1,                
-	    "solver" : "ito",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
-	    "mobility": {           
-		"type": "constant", 
-		"value": 2E-4       
-	    },
-	    "diffusion": {          
-		"type": "constant", 
-		"value": 5.175E-6        
-	    }		
-	},		
+	// {
+        //     "id": "O4+",            
+	//     "Z" : 1,                
+	//     "solver" : "cdr",       
+	//     "mobile" : false,       
+	//     "diffusive" : false,    
+	//     "mobility": {           
+	// 	"type": "constant", 
+	// 	"value": 2E-4       
+	//     },
+	//     "diffusion": {          
+	// 	"type": "constant", 
+	// 	"value": 5.175E-6        
+	//     }		
+	// },
+	// {
+        //     "id": "N4+",            
+	//     "Z" : 1,                
+	//     "solver" : "cdr",       
+	//     "mobile" : false,       
+	//     "diffusive" : false,    
+	//     "mobility": {           
+	// 	"type": "constant", 
+	// 	"value": 2E-4       
+	//     },
+	//     "diffusion": {          
+	// 	"type": "constant", 
+	// 	"value": 5.175E-6        
+	//     }		
+	// },		
 	{
             "id": "O2-",            
 	    "Z" : -1,               
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -195,7 +195,7 @@
 	{
             "id": "O2-exc",            
 	    "Z" : -1,               
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           
@@ -210,7 +210,7 @@
 	{
             "id": "O-",            
 	    "Z" : -1,               
-	    "solver" : "ito",       
+	    "solver" : "cdr",       
 	    "mobile" : false,       
 	    "diffusive" : false,    
 	    "mobility": {           

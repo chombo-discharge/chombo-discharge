@@ -1555,6 +1555,12 @@ ItoKMCStepper<I, C, R, F>::registerOperators() noexcept
   m_fieldSolver->registerOperators();
   m_rte->registerOperators();
   m_sigmaSolver->registerOperators();
+
+#warning "ItoKMCStepper::registerOperators -- development code enabled"
+#if 1
+    m_amr->registerOperator(s_particle_mesh, m_fluidRealm, phase::solid);
+    m_amr->registerOperator(s_particle_mesh, m_particleRealm, phase::solid);    
+#endif  
 }
 
 template <typename I, typename C, typename R, typename F>

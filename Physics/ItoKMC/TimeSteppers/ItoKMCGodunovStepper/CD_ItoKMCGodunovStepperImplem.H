@@ -398,6 +398,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong side of
   // the EB are put on the EB.
+  int sumLost = 0;  
   for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
 
@@ -405,11 +406,43 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     ParticleContainer<ItoParticle>& bulkParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
+
+#warning "Debug code in intersect particles"
+#if 1 // Debug code
+
+    int sum = 0;
+    for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl   = (this->m_amr)->getGrids(this->m_fluidRealm)[lvl];
+      const EBISLayout&        ebisl = (this->m_amr)->getEBISLayout(this->m_fluidRealm, this->m_plasmaPhase)[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
+        const EBISBox&             ebisbox   = ebisl[dit()];
+        const List<ItoParticle>& particles = bulkParticles[lvl][dit()].listItems();
+	
+        for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit) {
+          const ItoParticle& p = lit();
+          const RealVect&      x = p.position();
+          const IntVect iv = ParticleOps::getParticleCellIndex(x, this->m_amr->getProbLo(), this->m_amr->getDx()[lvl]);
+
+          if (ebisbox.isCovered(iv)) {
+	    sum += 1;
+          }
+        }
+      }
+    }
+
+    sumLost += ParallelOps::sum(sum);
+
+
   }
+
+    if(procID() == 0 && sumLost > 0) {
+      std::cout << "Lost = " << sumLost << "\n";
+    }  
+#endif
 
   m_timer.stopEvent("EB/Particle intersection");
 
-  // Remove the run-time configurable particle storage. It is no longer needed.
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
@@ -1153,7 +1186,14 @@ ItoKMCGodunovStepper<I, C, R, F>::computeFaceConductivity() noexcept
                              average);
 
   // Set the EB conductivity.
+#warning "ItoKMCGodunovStepper::computeFaceConductivity -- dev code"
+#if 0
+  // Development code
+  (this->m_amr)->interpToEB(this->m_conductivityEB, this->m_conductivityCell, this->m_fluidRealm, this->m_plasmaPhase);
+#else
+  // Original code
   DataOps::incr((this->m_conductivityEB), (this->m_conductivityCell), 1.0);
+#endif
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1183,6 +1223,38 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
     }
   }
 
+#warning "ItoKMCGodunovStepper::computeSemiImplicitRho - logic bust"
+#if 1 // This is a debug hook which goes through all the m_rhoDaggerParticles that would up on the other phase and adds them in therem.
+  EBAMRCellData rhoSolid = (this->m_amr)->alias(phase::solid, (this->m_fieldSolver)->getRho());
+
+  DataOps::setValue(rhoSolid, 0.0);
+#if 0
+  EBAMRCellData scratch;
+  (this->m_amr)->allocate(scratch, this->m_fluidRealm, phase::solid, 1);
+
+  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const int                        Z       = species->getChargeNumber();
+
+    if (Z != 0) {
+      DataOps::setValue(scratch, 0.0);
+
+      (this->m_amr)
+        ->template depositParticles<PointParticle, &PointParticle::weight>(scratch,
+                                                                           this->m_fluidRealm,
+                                                                           phase::solid,
+                                                                           *m_rhoDaggerParticles[solverIt.index()],
+                                                                           DepositionType::NGP,
+                                                                           CoarseFineDeposition::Halo,
+                                                                           true);
+
+      DataOps::incr(rhoSolid, scratch, 1.0 * Z * Units::Qe);
+    }
+  }
+#endif
+#endif
+
   // Contribution from CDR equations
   DataOps::incr(rhoPhase, m_semiImplicitRhoCDR, 1.0);
 
@@ -1204,6 +1276,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   }
 
   this->m_amr->interpToCentroids(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+  this->m_amr->interpToCentroids(rhoSolid, this->m_fluidRealm, phase::solid);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1219,7 +1292,6 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
   (this->m_fieldSolver)->setPermittivities();
 
   // Get the permittivities
-  // Get the permittivities on the faces.
   MFAMRCellData& permCell = (this->m_fieldSolver)->getPermittivityCell();
   MFAMRFluxData& permFace = (this->m_fieldSolver)->getPermittivityFace();
   MFAMRIVData&   permEB   = (this->m_fieldSolver)->getPermittivityEB();
@@ -1369,8 +1441,7 @@ ItoKMCGodunovStepper<I, C, R, F>::solvePoisson() noexcept
   (this->m_amr)->copyData(this->m_electricFieldParticle, E);
   (this->m_amr)->conservativeAverage(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
   (this->m_amr)->interpGhostPwl(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
-  (this->m_amr)->interpToCentroids(this->m_electricFieldParticle, this->m_particleRealm, this->
-				   m_plasmaPhase);
+  (this->m_amr)->interpToCentroids(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
 
   return converged;
 }
@@ -1393,6 +1464,47 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("Diffuse particles");
   this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
   this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::ChargedDiffusive);
+
+#warning "advanceEulerMaruyama -- dev code here"
+#if 0 // Debug hook check
+  Real sumCovered   = 0.0;
+  Real sumUncovered = 0.0;
+  for (int lvl = 0; lvl <= this->m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl   = (this->m_amr)->getGrids(this->m_fluidRealm)[lvl];
+    const EBISLayout&        ebisl = (this->m_amr)->getEBISLayout(this->m_fluidRealm, this->m_plasmaPhase)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      const EBISBox&             ebisbox   = ebisl[dit()];
+      const List<PointParticle>& particles = (*m_rhoDaggerParticles[0])[lvl][dit()].listItems();
+
+      for (ListIterator<PointParticle> lit(particles); lit.ok(); ++lit) {
+        const PointParticle& p = lit();
+        const RealVect&      x = p.position();
+        const IntVect iv = ParticleOps::getParticleCellIndex(x, this->m_amr->getProbLo(), this->m_amr->getDx()[lvl]);
+
+        if (x[1] < 5.1E-3) { // About the threshold for the dielectric slab
+
+          if (ebisbox.isCovered(iv)) {
+            sumCovered += p.weight();
+          }
+
+          if (ebisbox.isIrregular(iv)) {
+            sumUncovered += p.weight();
+          }
+        }
+      }
+    }
+  }
+
+  sumCovered   = ParallelOps::sum(sumCovered);
+  sumUncovered = ParallelOps::sum(sumUncovered);
+
+  if (procID() == 0) {
+    std::cout << "Covered charge = " << sumCovered * Units::Qe << std::endl;
+    std::cout << "Uncovered charge = " << sumUncovered * Units::Qe << std::endl;
+    std::cout << std::endl;
+  }
+#endif
   m_timer.stopEvent("Diffuse particles");
 
   // Perform the diffusive CDR advance.
@@ -1447,7 +1559,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   (this->m_ito)->interpolateVelocities();
   this->multiplyCdrVelocitiesByMobilities();
 #else // Have to use this for LEA - need to debug.
-  this->computeDriftVelocities();
+    this->computeDriftVelocities();
 #endif
   m_timer.stopEvent("Step-compute v");
 
