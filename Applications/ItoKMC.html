@@ -103,10 +103,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-diffusion">Parallel diffusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#d-chemistry">0D chemistry</a><ul>
@@ -171,6 +170,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#id14">Townsend coefficients</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#tips-and-tricks">Tips and tricks</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a></li>
@@ -304,8 +304,16 @@ Randomly distributing the new particles has the advantage that it generates seco
 Both these methods (<code class="docutils literal notranslate"><span class="pre">centroid</span></code> and <code class="docutils literal notranslate"><span class="pre">random</span></code>) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON 0D chemistry interface</span></a> for instructions on how to assign the particle placement method.</p>
+</section>
+<section id="parallel-diffusion">
+<h3>Parallel diffusion<a class="headerlink" href="#parallel-diffusion" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper</span></code> can limit diffusion against the electric field (or strictly speaking, the particle drift direction) by setting the flag <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper.limit_parallel_diffusion</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code>.
+The logic behind this functionality is that in a drift-diffusion approximation, and regardless of whether or one uses particles or fluids, electrons that back-diffuse against the electric field will rapidly lose their energy and can then no longer ionize the gas.
+When limiting parallel diffusion, the diffusion hop of the particles is restricted to being along or transverse to the drift direction.
+In practice, this leads to greatly enhanced stability in, especially in cathode sheaths.</p>
+</section>
 <section id="spatial-filtering">
-<h4>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h4>
+<h3>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h3>
 <p>It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
 Filters are applied as follows:</p>
 <div class="math notranslate nohighlight">
@@ -323,7 +331,6 @@ ItoKMCGodunovStepper.filter_alpha      = 0.5 # Filtering factor (0.5 is a biline
 Bugs may or may not be present.
 Users should exercise caution when using this feature.</p>
 </div>
-</section>
 </section>
 <section id="reaction-network">
 <h3>Reaction network<a class="headerlink" href="#reaction-network" title="Permalink to this heading"></a></h3>
@@ -940,7 +947,8 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@param[in] a_E       Electric field</span>
 <span class="cm">	@param[in] a_pos     Physical position</span>
 <span class="cm">	@param[in] a_phi     Plasma species densities</span>
-<span class="cm">	@param[in] a_gradPhi Density gradients for plasma species. </span>
+<span class="cm">	@param[in] a_gradPhi Density gradients for plasma species.</span>
+<span class="cm">	@param[in] a_dt      Time step</span>
 <span class="cm">	@param[in] a_dx      Grid resolution</span>
 <span class="cm">	@param[in] a_kappa   Cut-cell volume fraction</span>
 <span class="cm">	@note Must be implemented by the user.</span>
@@ -951,6 +959,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">                                   </span><span class="n">a_pos</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                              </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w">                          </span><span class="n">a_gradPhi</span><span class="p">,</span>
+<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                       </span><span class="n">a_dt</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                       </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">                                       </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
@@ -2357,6 +2366,13 @@ A JSON specification that includes this</p>
 <span class="p">]</span>
 </pre></div>
 </div>
+<p>This is equivalent to a source term</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}S &amp;= \alpha n_e\left|\mathbf{v}_e\right|\left(1 + \frac{\mathbf{E}\cdot \left(D_e\nabla n_e\right)}{n_e\mu_eE^2}\right) \\
+&amp;=\alpha\left[n_e\left|\mathbf{v}_e\right| + \hat{\mathbf{E}}\cdot\left(D_e\nabla n_e\right)\right].\end{split}\]</div>
+<p>One can recognize this term as a regular electron impact ionization source term (typically written as <span class="math notranslate nohighlight">\(\alpha \mu n_e E\)</span>).
+With the gradient correction, the ionization source term is essentially computed using the full electron flux, i.e., including the diffusive electron flux.
+Note that the full electron flux has a preferential direction, and the physical interpretation of this direction is that if there is net diffusion against the electric field, electrons lose energy and the impact ionization source term is correspondingly lower.</p>
 </section>
 <section id="understanding-reaction-rates">
 <h4>Understanding reaction rates<a class="headerlink" href="#understanding-reaction-rates" title="Permalink to this heading"></a></h4>
@@ -2573,7 +2589,8 @@ a &amp;= 1.541434\times 10^{-6}\,\text{AeV}/\text{V}^2, \\
 b &amp;= 6.830890\,\text{eV}^{-3/2}\text{V}\text{nm}^{-1},\\
 v(f) &amp;= 1 - f + \left(1/6\right)f\log(f),\\
 f &amp;\approx 1.439964\,\text{eV}^2\text{V}^{-1}\text{nm}\times \frac{F}{\phi^2}.\end{split}\]</div>
-<p>Here, <span class="math notranslate nohighlight">\(\phi\)</span> is the work function (in electron volts) and <span class="math notranslate nohighlight">\(\beta\)</span> is an empirical factor that describes local field amplifications.</p>
+<p>Here, <span class="math notranslate nohighlight">\(\phi\)</span> is the work function (in electron volts) and <span class="math notranslate nohighlight">\(\beta\)</span> is an empirical factor that describes local field amplifications.
+Note that the above expression gives <span class="math notranslate nohighlight">\(J\)</span> in units of <span class="math notranslate nohighlight">\(\text{A}/\text{nm}^2\)</span>.</p>
 </li>
 <li><p>Schottky emission:</p>
 <div class="math notranslate nohighlight">
@@ -2635,6 +2652,58 @@ For example, some care might be required when using the Townsend attachment coef
 <p>The JSON interface <em>does not guard</em> against inconsitencies in the user-provided chemistry, and provision of inconsistent <span class="math notranslate nohighlight">\(\eta/N\)</span> and attachment reaction rates are quite possible.</p>
 </div>
 </section>
+</section>
+<section id="tips-and-tricks">
+<h3>Tips and tricks<a class="headerlink" href="#tips-and-tricks" title="Permalink to this heading"></a></h3>
+<p>As with fluid drift-diffusion models, numerical instabilities can also occur due to unbounded growth in the plasma density.
+This is a process which has been linked both to the local field approximation and also to the presence of numerical diffusion.
+Simulations that fail to stabilize, i.e., where the field strength diverges, may benefit from the following stabilizing features:</p>
+<ol class="arabic">
+<li><p><strong>Turn off parallel diffusion.</strong></p>
+<p>With the <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper</span></code> class, this option is given by <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper.limit_parallel_diffusion</span></code>.
+Using this option will ensure that particles do not diffuse against their drift direction.
+Note that this also modifies the amount of <em>physical</em> diffusion in this direction.</p>
+</li>
+<li><p><strong>Use gradient corrections.</strong></p>
+<p>As discussed earlier, using a gradient correction can help limit non-physical ionization due to backwards-diffusing electrons.</p>
+</li>
+<li><p><strong>Use downstream particle placement.</strong></p>
+<p>Because the KMC algorithm solves for the number of particles in a grid cell, distributing new particles uniformly over a grid cell can lead to numerical diffusion where secondary electrons are placed in the wake of primary electrons.
+Using downstream particle placement often leads to slightly more stable simulations.</p>
+</li>
+<li><p><strong>Describe the primary species using an Ito solver.</strong></p>
+<p>Similar to the point above, using a fluid solver for the ions may lead to upstream placement of the resulting positive charge.</p>
+</li>
+<li><p><strong>Use kd-tree particle merging.</strong></p>
+<p>Currently particle merging strategies are reinitialization and merging based on bounding volume hierarchies.
+If using reinitialization, new particles can be generated in the wake of old ones and can thus upset the charge distribution and cause numerical backwards diffusion (e.g., of electrons).</p>
+</li>
+<li><p><strong>Numerically limit reaction rates.</strong></p>
+<p>It is possible to specify that reaction rates will be numerically limited so that the rate does not exceed a specified threshold of <span class="math notranslate nohighlight">\(\Delta t^{-1}\)</span>.
+This is done through the JSON interface by setting <code class="docutils literal notranslate"><span class="pre">limit</span> <span class="pre">max</span> <span class="pre">k*dt</span></code> to some value.
+Note that this changes the physics of the model, but usually enhances stability at larger time steps.
+An example is given below:</p>
+</li>
+</ol>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
+   {
+      &quot;reaction&quot;: &quot;e + N2 -&gt; e + e + N2+&quot;
+      &quot;type&quot;: &quot;constant&quot;,
+      &quot;value&quot;: 1.E-12,
+      &quot;limit max k*dt&quot; : 2.0
+   }
+]
+
+This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
+I.e., all background species are first absorbed into the rate calculation before the rate is limited.
+We point out that limiting is not possible if both species on the left hand side are solver variables.
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The above features have been implemented in order to push the algorithm towards coarser grids and larger time steps.
+It is essential that the user checks that the model converges when these features are applied.</p>
+</div>
 </section>
 </section>
 <section id="example-programs">
