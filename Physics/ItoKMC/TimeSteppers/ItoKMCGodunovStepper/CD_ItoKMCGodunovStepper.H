@@ -80,6 +80,12 @@ namespace Physics {
       preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept override;
 
       /*!
+	@brief Register operators used for the simulation
+      */
+      virtual void
+      registerOperators() noexcept override;
+
+      /*!
 	@brief Regrid methods -- puts all data on the new mesh. 
 	@param[in] a_lmin           The coarsest level that changed. 
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -190,17 +196,17 @@ namespace Physics {
       /*!
 	@brief Number of filterings when computing the semi-implicit space charge density
       */
-      int m_filterNum;
+      int m_rhoFilterNum;
 
       /*!
 	@brief Number of filterings when computing the semi-implicit space charge density
       */
-      int m_filterMaxStride;
+      int m_rhoFilterMaxStride;
 
       /*!
 	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
       */
-      Real m_filterAlpha;
+      Real m_rhoFilterAlpha;
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
