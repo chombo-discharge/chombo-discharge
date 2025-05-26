@@ -38,7 +38,6 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
-  this->m_smoothConductivity       = false;
   this->m_limitParallelDiffusion   = false;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
@@ -188,7 +187,6 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   std::string str;
 
   pp.get("extend_conductivity", m_extendConductivityEB);
-  pp.get("smooth_conductivity", m_smoothConductivity);
   pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
 
@@ -217,12 +215,23 @@ ItoKMCGodunovStepper<I, C, R, F>::parseFiltering() noexcept
   m_rhoFilterMaxStride = 1;
   m_rhoFilterAlpha     = 0.5;
 
+  m_condFilterNum       = -1;
+  m_condFilterMaxStride = 1;
+  m_condFilterAlpha     = 0.5;
+
   pp.get("rho_filter_num", m_rhoFilterNum);
   pp.get("rho_filter_max_stride", m_rhoFilterMaxStride);
   pp.get("rho_filter_alpha", m_rhoFilterAlpha);
 
+  pp.get("cond_filter_num", m_condFilterNum);
+  pp.get("cond_filter_max_stride", m_condFilterMaxStride);
+  pp.get("cond_filter_alpha", m_condFilterAlpha);
+
   if (m_rhoFilterAlpha <= 0.0 || m_rhoFilterAlpha >= 1.0) {
-    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1");
+    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1 for rho_filter");
+  }
+  if (m_condFilterAlpha <= 0.0 || m_condFilterAlpha >= 1.0) {
+    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1 for cond_filter");
   }
 }
 
@@ -1126,14 +1135,17 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
   (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 
-  if (this->m_smoothConductivity) {
-    const Real alpha  = 0.5;
-    const int  stride = 1;
+  // User can choose to filter the conductivity. Need to sync after each smoothing.
+  if (m_condFilterNum > 0 && m_condFilterMaxStride > 0) {
+    for (int i = 0; i < m_condFilterNum; i++) {
+      MayDay::Abort("shouldn't happen");
+      for (int curStride = 1; curStride <= m_condFilterMaxStride; curStride++) {
+        DataOps::filterSmooth(a_conductivityCell, m_condFilterAlpha, curStride, true);
 
-    DataOps::filterSmooth(a_conductivityCell, alpha, stride, true);
-
-    (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
-    (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+        (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+        (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+      }
+    }
   }
 
   (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
@@ -1279,6 +1291,9 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
 
   // Set coefficients as usual
   (this->m_fieldSolver)->setPermittivities();
+
+#warning "setupSemiImplicitPoisson -- should try to filter on 1 + sigma*dt/eps0 rather than just sigma"
+#warning "replace all expressions using filter_num with rho_filter_num. And so on"
 
   // Get the permittivities
   MFAMRCellData& permCell = (this->m_fieldSolver)->getPermittivityCell();

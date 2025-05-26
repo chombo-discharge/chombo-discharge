@@ -199,7 +199,7 @@ namespace Physics {
       int m_rhoFilterNum;
 
       /*!
-	@brief Number of filterings when computing the semi-implicit space charge density
+	@brief Stride when filtering the space charge density.
       */
       int m_rhoFilterMaxStride;
 
@@ -207,6 +207,21 @@ namespace Physics {
 	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
       */
       Real m_rhoFilterAlpha;
+
+      /*!
+	@brief Number of filterings of the conductivity.
+      */
+      int m_condFilterNum;
+
+      /*!
+	@brief Stride when filtering the conductivity.
+      */
+      int m_condFilterMaxStride;
+
+      /*!
+	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
+      */
+      Real m_condFilterAlpha;
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
