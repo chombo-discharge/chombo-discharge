@@ -1138,7 +1138,6 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   // User can choose to filter the conductivity. Need to sync after each smoothing.
   if (m_condFilterNum > 0 && m_condFilterMaxStride > 0) {
     for (int i = 0; i < m_condFilterNum; i++) {
-      MayDay::Abort("shouldn't happen");
       for (int curStride = 1; curStride <= m_condFilterMaxStride; curStride++) {
         DataOps::filterSmooth(a_conductivityCell, m_condFilterAlpha, curStride, true);
 
@@ -1293,7 +1292,6 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
   (this->m_fieldSolver)->setPermittivities();
 
 #warning "setupSemiImplicitPoisson -- should try to filter on 1 + sigma*dt/eps0 rather than just sigma"
-#warning "replace all expressions using filter_num with rho_filter_num. And so on"
 
   // Get the permittivities
   MFAMRCellData& permCell = (this->m_fieldSolver)->getPermittivityCell();
