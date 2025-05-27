@@ -1291,8 +1291,6 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
   // Set coefficients as usual
   (this->m_fieldSolver)->setPermittivities();
 
-#warning "setupSemiImplicitPoisson -- should try to filter on 1 + sigma*dt/eps0 rather than just sigma"
-
   // Get the permittivities
   MFAMRCellData& permCell = (this->m_fieldSolver)->getPermittivityCell();
   MFAMRFluxData& permFace = (this->m_fieldSolver)->getPermittivityFace();
