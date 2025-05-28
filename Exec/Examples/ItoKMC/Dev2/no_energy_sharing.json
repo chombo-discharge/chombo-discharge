@@ -110,9 +110,9 @@
 	    "initial particles" : [
 		{
 		    "sphere distribution" : {
-			"center" : [ 16.5E-3, 1E-2, 0 ],
-			"radius" : 1E-3,       
-			"num particles": 100,  
+			"center" : [ 15.5E-3, 1E-2, 0 ],
+			"radius" : 2E-3,       
+			"num particles": 10000,  
 			"weight" : 1           
 		    }
 		}
@@ -437,7 +437,7 @@
 	    "quenching pressure": 4000.0,
 	    "plot": true
 	    //"gradient correction": "e",	    
-//	    "limit max k*dt": 1.0
+	    //	    "limit max k*dt": 1.0
 	    
 	},
 	{

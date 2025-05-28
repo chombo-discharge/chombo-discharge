@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = 40E3
+ItoKMC.potential = 50E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ AmrMesh.lo_corner        =  -8E-2    0 -8E-2     # Low corner of problem domain
 AmrMesh.hi_corner        =  8E-2 4E-2  8E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 128 32 128     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 3           # Maximum amr depth
+AmrMesh.max_amr_depth    = 4           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -40,8 +40,8 @@ Driver.geometry_generation             = chombo-discharge # Grid generation meth
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
-Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 50               # Checkpoint interval
+Driver.plot_interval                   = 50               # Plot interval
+Driver.checkpoint_interval             = 250              # Checkpoint interval
 Driver.regrid_interval                 = 5                # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
@@ -92,7 +92,7 @@ FieldSolverMultigrid.gmg_min_iter      = 5                 # Minimum number of i
 FieldSolverMultigrid.gmg_max_iter      = 32                # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10            # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2               # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 16                # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 8                # Bottom drop
 FieldSolverMultigrid.gmg_drop_order    = 0                 # Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order      = 2                 # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 1                 # Boundary condition weights (for least squares)
@@ -216,9 +216,9 @@ MechanicalShaft.use_dielectric = true # Turn on/off dielectric
 MechanicalShaft.electrode.orientation     = "+y"  # Electrode orientation
 MechanicalShaft.electrode.translate       = 0 0 0 # Electrode translation after rotation
 MechanicalShaft.electrode.live            = true  # Live electrode or not
-MechanicalShaft.electrode.length          = 1E-2   # Electrode length 
+MechanicalShaft.electrode.length          = 2E-2   # Electrode length 
 MechanicalShaft.electrode.outer.radius    = 30E-3   # Electrode outer radius
-MechanicalShaft.electrode.inner.radius    = 17E-3   # Electrode inner radius	
+MechanicalShaft.electrode.inner.radius    = 16E-3   # Electrode inner radius	
 MechanicalShaft.electrode.curvature       = 200E-6   # Curvature. Must be > 0.0
 
 
@@ -227,7 +227,7 @@ MechanicalShaft.electrode.curvature       = 200E-6   # Curvature. Must be > 0.0
 MechanicalShaft.dielectric.shape        = circular_profiles # 'polygon', 'cylinder', or 'circular_profiles'
 MechanicalShaft.dielectric.permittivity = 4.0               # Dielectric permittivity
 MechanicalShaft.dielectric.orientation  = "+y"              # Dielectric orientation
-MechanicalShaft.dielectric.translate    = 1.25E-3 0 0             # Dielectric translation after rotatino
+MechanicalShaft.dielectric.translate    = 1.00123E-3 0 0             # Dielectric translation after rotatino
 
 # Subsettings for 'cylinder'
 ----------------------------
@@ -261,9 +261,9 @@ ItoKMCGodunovStepper.redistribute_cdr                      = true          # Tur
 ItoKMCGodunovStepper.limit_parallel_diffusion              = true                 ## If true, particles do not diffuse against their drift direction
 ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                              = conductivity           # 'conductivity', 'current_density', 'particles_per_patch'
-ItoKMCGodunovStepper.dual_grid                             = true           # Turn on/off dual-grid functionality
+ItoKMCGodunovStepper.dual_grid                             = false           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
-ItoKMCGodunovStepper.load_balance_particles                = true           # Turn on/off particle load balancing
+ItoKMCGodunovStepper.load_balance_particles                = false           # Turn on/off particle load balancing
 ItoKMCGodunovStepper.load_indices                          = -1             # Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                         = 1000000.0            # Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                           = morton         # Box sorting when load balancing
@@ -279,8 +279,8 @@ ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0            # Ad
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99          # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5            # Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                       = 100.0          # Relaxation time step restriction. 
-ItoKMCGodunovStepper.min_dt                                = 200.E-12       # Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 200.E-12       # Maximum permitted time step
+ItoKMCGodunovStepper.min_dt                                = 50.E-12       # Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                = 50.E-12       # Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
