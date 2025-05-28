@@ -122,8 +122,8 @@
 	    "id": "N2+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -137,8 +137,8 @@
             "id": "O2+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -152,8 +152,8 @@
             "id": "O4+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -167,8 +167,8 @@
             "id": "N4+",            
 	    "Z" : 1,                
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -182,8 +182,8 @@
             "id": "O2-",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -197,8 +197,8 @@
             "id": "O2-exc",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -212,8 +212,8 @@
             "id": "O-",            
 	    "Z" : -1,               
 	    "solver" : "cdr",       
-	    "mobile" : false,       
-	    "diffusive" : false,    
+	    "mobile" : true,       
+	    "diffusive" : true,    
 	    "mobility": {           
 		"type": "constant", 
 		"value": 2E-4       
@@ -266,7 +266,7 @@
 	    "spacing" : "exponential",                     
 	    "scale E/N" : 1.0,                             
 	    "scale rate/N" : 1.0,
-	    "limit max k*dt": 2.0,
+	    "limit max k*dt": 0.5,
 	    //"gradient correction": "e",	    
 	    "plot": true                                 	    
 	},
@@ -284,7 +284,7 @@
 	    "spacing" : "exponential",                       
 	    "scale E/N" : 1.0,                               
 	    "scale rate/N" : 1.0,
-	    "limit max k*dt": 2.0,
+	    "limit max k*dt": 0.5,
 	    //"gradient correction": "e",	    
 	    "plot": true                                  
 	},
@@ -420,7 +420,7 @@
 	    "plot" : true
 	},
 	{
-	    "reaction": "e + N2 -> e + Y + (N2)",
+	    "reaction": "e + N2 -> e + IR + (N2)",
 	    "description": "IR generation", 
 	    "type": "table vs E/N",        
 	    "file" : "transport_data.dat",
@@ -435,10 +435,9 @@
 	    "scale rate/N" : 1.0,       
 	    "efficiency": 0.06,         
 	    "quenching pressure": 4000.0,
-	    "plot": true
-	    //"gradient correction": "e",	    
-//	    "limit max k*dt": 1.0
-	    
+	    "plot": true,
+	    //"gradient correction": "e",	 
+	    "limit max k*dt": 0.5
 	},
 	{
 	    "reaction": "IR -> Y + (N2)",

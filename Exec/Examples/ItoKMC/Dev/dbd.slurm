@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=nn12041k
-#SBATCH --job-name=test
-#SBATCH --time=0-01:00:00
-#SBATCH --nodes=20
+#SBATCH --job-name=test3d_6
+#SBATCH --time=0-8:00:00
+#SBATCH --nodes=10
 #SBATCH --ntasks-per-node=128
 ##SBATCH --cpus-per-task=64
 ##SBATCH --qos=devel
@@ -17,7 +17,7 @@ module load foss/2023a
 module load HDF5/1.14.0-gompi-2023a
 
 # Program to run and input script
-executable=program2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+executable=program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
 # Input file
 input_file=example.inputs
@@ -43,4 +43,4 @@ cp -f $transport_file  $workdir/$transport_file
 # Navigate to directory and run
 cd $workdir
 
-mpirun ./$executable $input_file ItoKMCJSON.chemistry_file=$chemistry_file
+mpirun ./$executable $input_file ItoKMCJSON.chemistry_file=$chemistry_file Driver.restart=750 Driver.initial_regrids=1
