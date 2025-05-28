@@ -186,6 +186,10 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   std::string str;
 
   pp.get("extend_conductivity", m_extendConductivityEB);
+<<<<<<< HEAD
+=======
+  pp.get("smooth_conductivity", m_smoothConductivity);
+>>>>>>> main
   pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
 
