@@ -1190,8 +1190,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
     pout() << this->m_name + "::computeSemiImplicitRho" << endl;
   }
 
-  MFAMRCellData& rho      = this->m_fieldSolver->getRho();
-  EBAMRCellData  rhoGas   = (this->m_amr)->alias(phase::gas, rho);
+  MFAMRCellData& rho    = this->m_fieldSolver->getRho();
+  EBAMRCellData  rhoGas = (this->m_amr)->alias(phase::gas, rho);
   //  EBAMRCellData  rhoSolid = (this->m_amr)->alias(phase::solid, rho);
 
   DataOps::setValue(rho, 0.0);
@@ -1573,19 +1573,27 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           // Compute a particle hop and store it on the run-time storage.
           RealVect& hop = p.tmpVect();
           if (diffusive) {
-            hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
+            if (mobile && m_limitParallelDiffusion) {
+              // If the user asks for it, diffusion against the drift direction is not permitted
+              const RealVect& v = p.velocity();
+              const Real      V = v.vectorLength();
+              const RealVect  u = v / V;
+
+              bool goodHop = false;
+
+              while (!goodHop) {
+                hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
+
+                goodHop = ((hop.dotProduct(u) + V * a_dt) >= 0.0);
+              }
+            }
+            else {
+              // Otherwise -- just do a standard hop. This is the "correct" way anyways.
+              hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
+            }
           }
           else {
             hop = RealVect::Zero;
-          }
-
-          // If the user asks for it, diffusion against the drift direction is not permitted
-          if ((mobile && diffusive) && m_limitParallelDiffusion) {
-            const RealVect& vel = lit().velocity();
-            const RealVect& u   = vel / vel.vectorLength();
-            const Real      n   = hop.dotProduct(u);
-
-            hop -= std::min(0.0, n) * u;
           }
 
           if (Z != 0) {
