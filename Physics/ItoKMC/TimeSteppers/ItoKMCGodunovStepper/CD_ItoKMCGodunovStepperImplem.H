@@ -25,6 +25,10 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "Need to guard against lack of dielectrics"
+#warning "Need to remove Dev and Dev2 folders"
+#warning "Permitted hop should be a threshold value of V*a_dt!"
+
 using namespace Physics::ItoKMC;
 
 template <typename I, typename C, typename R, typename F>
