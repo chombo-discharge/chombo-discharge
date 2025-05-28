@@ -123,7 +123,6 @@ ItoKMCGodunovStepper<I, C, R, F>::allocateInternals() noexcept
 
   this->m_amr->allocate(m_semiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_semiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
-  this->m_amr->allocate(m_semiImplicitSigma, this->m_fluidRealm, this->m_plasmaPhase, 1);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -551,11 +550,9 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
 
   this->m_amr->allocate(m_scratchSemiImplicitRhoCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
   this->m_amr->allocate(m_scratchSemiImplicitConductivityCDR, this->m_fluidRealm, this->m_plasmaPhase, 1);
-  this->m_amr->allocate(m_scratchSemiImplicitSigma, this->m_fluidRealm, this->m_plasmaPhase, 1);
 
   DataOps::copy(m_scratchSemiImplicitRhoCDR, m_semiImplicitRhoCDR);
   DataOps::copy(m_scratchSemiImplicitConductivityCDR, m_semiImplicitConductivityCDR);
-  DataOps::copy(m_scratchSemiImplicitSigma, m_semiImplicitSigma);
 
   // Release unecessary storage.
   for (int i = 0; i < numCdrSpecies; i++) {
@@ -564,7 +561,6 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
 
   m_semiImplicitRhoCDR.clear();
   m_semiImplicitConductivityCDR.clear();
-  m_semiImplicitSigma.clear();
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -706,7 +702,6 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   // No reason to have these lying around.
   m_scratchSemiImplicitRhoCDR.clear();
   m_scratchSemiImplicitConductivityCDR.clear();
-  m_scratchSemiImplicitSigma.clear();
 
   // Fill the neutral density on the mesh
   this->fillNeutralDensity();

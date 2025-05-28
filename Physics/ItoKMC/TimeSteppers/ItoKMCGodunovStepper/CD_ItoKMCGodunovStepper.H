@@ -267,17 +267,6 @@ namespace Physics {
       EBAMRCellData m_scratchSemiImplicitConductivityCDR;
 
       /*!
-	@brief Storage for the semi-implicit approximation to the surface charge
-      */
-      EBAMRIVData m_semiImplicitSigma;
-
-      /*!
-	@brief Scratch for the semi-implicit approximation to the surface charge
-	@note Only used during regrids
-      */
-      EBAMRIVData m_scratchSemiImplicitSigma;
-
-      /*!
 	@brief Storage for the finite-volume approximation of div(D*grad(phi)) for the CDR equations.
       */
       Vector<EBAMRCellData> m_cdrDivD;
