@@ -169,11 +169,6 @@ namespace Physics {
       bool m_extendConductivityEB;
 
       /*!
-	@brief Smooth the conductivity or not.
-      */
-      bool m_smoothConductivity;
-
-      /*!
 	@brief If true, the algorithm will limit particle diffusion against the drift direction
       */
       bool m_limitParallelDiffusion;
