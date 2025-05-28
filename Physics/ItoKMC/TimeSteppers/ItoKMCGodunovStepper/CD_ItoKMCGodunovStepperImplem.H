@@ -421,7 +421,6 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
   // The intersection tests above may not have caught all particles -- do a cleanup sweep where particles on the wrong side of
   // the EB are put on the EB.
-  int sumLost = 0;
   for (auto it = this->m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
 
@@ -1193,7 +1192,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 
   MFAMRCellData& rho      = this->m_fieldSolver->getRho();
   EBAMRCellData  rhoGas   = (this->m_amr)->alias(phase::gas, rho);
-  EBAMRCellData  rhoSolid = (this->m_amr)->alias(phase::solid, rho);
+  //  EBAMRCellData  rhoSolid = (this->m_amr)->alias(phase::solid, rho);
 
   DataOps::setValue(rho, 0.0);
 
@@ -1219,6 +1218,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   // correction in the space charge density. There should be no contribution from the CDR solvers because the diffusion-only divergence
   // term was computed using homogeneous Neumann boundary conditions.
   CH_START(t2);
+#if 0
   EBAMRCellData particleScratch;
   EBAMRCellData fluidScratch;
 
@@ -1248,6 +1248,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
       DataOps::incr(rhoSolid, fluidScratch, 1.0 * Z * Units::Qe);
     }
   }
+#endif
   CH_STOP(t2);
 
   // Sync across levels
@@ -1271,7 +1272,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 
   // Put data on centroids.
   this->m_amr->interpToCentroids(rhoGas, this->m_fluidRealm, phase::gas);
-  this->m_amr->interpToCentroids(rhoSolid, this->m_fluidRealm, phase::solid);
+  //  this->m_amr->interpToCentroids(rhoSolid, this->m_fluidRealm, phase::solid);
 }
 
 template <typename I, typename C, typename R, typename F>
