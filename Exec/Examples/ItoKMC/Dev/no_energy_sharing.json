@@ -110,7 +110,7 @@
 	    "initial particles" : [
 		{
 		    "sphere distribution" : {
-			"center" : [ 0, 7E-3, 0 ],
+			"center" : [ 0, 0E-3, 0 ],
 			"radius" : 1E-3,       
 			"num particles": 100,  
 			"weight" : 1           
@@ -121,7 +121,7 @@
 	{
 	    "id": "N2+",            
 	    "Z" : 1,                
-	    "solver" : "cdr",       
+	    "solver" : "ito",       
 	    "mobile" : true,       
 	    "diffusive" : true,    
 	    "mobility": {           
@@ -136,7 +136,7 @@
 	{
             "id": "O2+",            
 	    "Z" : 1,                
-	    "solver" : "cdr",       
+	    "solver" : "ito",       
 	    "mobile" : true,       
 	    "diffusive" : true,    
 	    "mobility": {           
@@ -148,66 +148,66 @@
 		"value": 5.175E-6        
 	    }		
 	},
-	{
-            "id": "O4+",            
-	    "Z" : 1,                
-	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
-	    "mobility": {           
-		"type": "constant", 
-		"value": 2E-4       
-	    },
-	    "diffusion": {          
-		"type": "constant", 
-		"value": 5.175E-6        
-	    }		
-	},
-	{
-            "id": "N4+",            
-	    "Z" : 1,                
-	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
-	    "mobility": {           
-		"type": "constant", 
-		"value": 2E-4       
-	    },
-	    "diffusion": {          
-		"type": "constant", 
-		"value": 5.175E-6        
-	    }		
-	},		
-	{
-            "id": "O2-",            
-	    "Z" : -1,               
-	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
-	    "mobility": {           
-		"type": "constant", 
-		"value": 2E-4       
-	    },
-	    "diffusion": {          
-		"type": "constant", 
-		"value": 5.175E-6        
-	    }		
-	},
-	{
-            "id": "O2-exc",            
-	    "Z" : -1,               
-	    "solver" : "cdr",       
-	    "mobile" : true,       
-	    "diffusive" : true,    
-	    "mobility": {           
-		"type": "constant", 
-		"value": 2E-4       
-	    },
-	    "diffusion": {          
-		"type": "constant", 
-		"value": 5.175E-6        
-	    }		
-	},
+	// {
+        //     "id": "O4+",            
+	//     "Z" : 1,                
+	//     "solver" : "ito",       
+	//     "mobile" : true,       
+	//     "diffusive" : true,    
+	//     "mobility": {           
+	// 	"type": "constant", 
+	// 	"value": 2E-4       
+	//     },
+	//     "diffusion": {          
+	// 	"type": "constant", 
+	// 	"value": 5.175E-6        
+	//     }		
+	// },
+	// {
+        //     "id": "N4+",            
+	//     "Z" : 1,                
+	//     "solver" : "ito",       
+	//     "mobile" : true,       
+	//     "diffusive" : true,    
+	//     "mobility": {           
+	// 	"type": "constant", 
+	// 	"value": 2E-4       
+	//     },
+	//     "diffusion": {          
+	// 	"type": "constant", 
+	// 	"value": 5.175E-6        
+	//     }		
+	// },		
+	// {
+        //     "id": "O2-",            
+	//     "Z" : -1,               
+	//     "solver" : "cdr",       
+	//     "mobile" : true,       
+	//     "diffusive" : true,    
+	//     "mobility": {           
+	// 	"type": "constant", 
+	// 	"value": 2E-4       
+	//     },
+	//     "diffusion": {          
+	// 	"type": "constant", 
+	// 	"value": 5.175E-6        
+	//     }		
+	// },
+	// {
+        //     "id": "O2-exc",            
+	//     "Z" : -1,               
+	//     "solver" : "cdr",       
+	//     "mobile" : true,       
+	//     "diffusive" : true,    
+	//     "mobility": {           
+	// 	"type": "constant", 
+	// 	"value": 2E-4       
+	//     },
+	//     "diffusion": {          
+	// 	"type": "constant", 
+	// 	"value": 5.175E-6        
+	//     }		
+	// },
 	{
             "id": "O-",            
 	    "Z" : -1,               
@@ -248,7 +248,14 @@
 		"chi max": 1.5,         
 		"neutral": "O2"         
 	    }
-	}
+	},
+	{
+	    "id": "X",                  
+	    "kappa": {                  
+		"type": "constant",
+		"value": 1E2
+	    }
+	}	
     ],
     "plasma reactions":
     [
@@ -266,7 +273,7 @@
 	    "spacing" : "exponential",                     
 	    "scale E/N" : 1.0,                             
 	    "scale rate/N" : 1.0,
-	    "limit max k*dt": 0.5,
+//	    "limit max k*dt": 0.5,
 	    //"gradient correction": "e",	    
 	    "plot": true                                 	    
 	},
@@ -284,7 +291,7 @@
 	    "spacing" : "exponential",                       
 	    "scale E/N" : 1.0,                               
 	    "scale rate/N" : 1.0,
-	    "limit max k*dt": 0.5,
+//	    "limit max k*dt": 0.5,
 	    //"gradient correction": "e",	    
 	    "plot": true                                  
 	},
@@ -305,122 +312,140 @@
 	    "plot": true                   
 	},
 	{
-	    "reaction": "e + O2 -> O2-exc", 
-	    "description": "O2 attachment", 
-	    "type": "table vs E/N",         
+	    "reaction": "O2+ + N2 -> e + O2+ + N2+",           
+	    "description": "O2-N2 ionization",           
+	    "type": "table vs E/N",                        
 	    "file" : "transport_data.dat",
-	    //"dump" : "debug_k4.dat",	    
-	    "E/N column" : 0,          
-	    "rate/N column" : 7,       
-	    "min E/N" : 10.0,           
-	    "max E/N" : 10000.0,        
-	    "num points" : 1000,       
-	    "spacing" : "exponential", 
-	    "scale E/N" : 1.0,         
-	    "scale rate/N" : 1.0,      
-	    "plot": true     
-	},
-	{
-	    "reaction": "O2-exc -> e + (O2)", 
-	    "description": "Autodetachment", 
-	    "type": "table vs E/N",         
-	    "file" : "transport_data.dat",
-	    //"dump" : "debug_k5.dat",	    
-	    "E/N column" : 0,          
-	    "rate/N column" : 8,       
-	    "min E/N" : 10.0,           
-	    "max E/N" : 10000.0,        
-	    "num points" : 1000,       
-	    "spacing" : "exponential", 
-	    "scale E/N" : 1.0,         
-	    "scale rate/N" : 1.0,      
-	    "plot": true     
-	},
-	{
-	    "reaction": "O2-exc + O2 -> O2- + (O2)", 
-	    "description": "O2- stabilization", 
-	    "type": "table vs E/N",         
-	    "file" : "transport_data.dat",
-	    //"dump" : "debug_k6.dat",	    
-	    "E/N column" : 0,          
-	    "rate/N column" : 9,       
-	    "min E/N" : 10.0,           
-	    "max E/N" : 10000.0,        
-	    "num points" : 1000,       
-	    "spacing" : "exponential", 
-	    "scale E/N" : 1.0,         
-	    "scale rate/N" : 1.0,      
-	    "plot": true     
-	},
-	{
-	    "reaction": "N2+ + N2 + @ -> N4+",
-	    "@": ["O2", "N2"],
-	    "description": "N2+-N4+ conversion",
-	    "type": "constant",
-	    "value": 5E-41,
-	    "plot" : true
-	},
-	{
-	    "reaction": "N4+ + O2 -> O2+ + (N2) + (N2)",
-	    "description": "N4+-O2+ conversion",
-	    "type": "constant",
-	    "value": 2.5E-16,
-	    "plot" : true
-	},
-	{
-	    "reaction": "N2+ + O2 -> O2+ + (N2)",
-	    "description": "N2+-O2+ conversion",
-	    "type": "constant",
-	    "value": 6E-17,
-	    "plot" : true
-	},			
-	{
-	    "reaction": "O2+ + O2 + @ -> O4+",
-	    "@": ["O2", "N2"],
-	    "description": "O2+ conversion",
-	    "type": "constant",
-	    "value": 2.4E-42
+	    //"dump" : "debug_k1.dat",	    
+	    "E/N column" : 0,                              
+	    "rate/N column" : 4,                           
+	    "min E/N" : 10.0,                               
+	    "max E/N" : 10000.0,                            
+	    "num points" : 1000,                           
+	    "spacing" : "exponential",                     
+	    "scale E/N" : 10.0,                             
+	    "scale rate/N" : 1.0,
+//	    "limit max k*dt": 0.5,
+	    //"gradient correction": "e",	    
+	    "plot": true                                 	    
 	},	
+	// {
+	//     "reaction": "e + O2 -> O2-exc", 
+	//     "description": "O2 attachment", 
+	//     "type": "table vs E/N",         
+	//     "file" : "transport_data.dat",
+	//     //"dump" : "debug_k4.dat",	    
+	//     "E/N column" : 0,          
+	//     "rate/N column" : 7,       
+	//     "min E/N" : 10.0,           
+	//     "max E/N" : 10000.0,        
+	//     "num points" : 1000,       
+	//     "spacing" : "exponential", 
+	//     "scale E/N" : 1.0,         
+	//     "scale rate/N" : 1.0,      
+	//     "plot": true     
+	// },
+	// {
+	//     "reaction": "O2-exc -> e + (O2)", 
+	//     "description": "Autodetachment", 
+	//     "type": "table vs E/N",         
+	//     "file" : "transport_data.dat",
+	//     //"dump" : "debug_k5.dat",	    
+	//     "E/N column" : 0,          
+	//     "rate/N column" : 8,       
+	//     "min E/N" : 10.0,           
+	//     "max E/N" : 10000.0,        
+	//     "num points" : 1000,       
+	//     "spacing" : "exponential", 
+	//     "scale E/N" : 1.0,         
+	//     "scale rate/N" : 1.0,      
+	//     "plot": true     
+	// },
+	// {
+	//     "reaction": "O2-exc + O2 -> O2- + (O2)", 
+	//     "description": "O2- stabilization", 
+	//     "type": "table vs E/N",         
+	//     "file" : "transport_data.dat",
+	//     //"dump" : "debug_k6.dat",	    
+	//     "E/N column" : 0,          
+	//     "rate/N column" : 9,       
+	//     "min E/N" : 10.0,           
+	//     "max E/N" : 10000.0,        
+	//     "num points" : 1000,       
+	//     "spacing" : "exponential", 
+	//     "scale E/N" : 1.0,         
+	//     "scale rate/N" : 1.0,      
+	//     "plot": true     
+	// },
+	// {
+	//     "reaction": "N2+ + N2 + @ -> N4+",
+	//     "@": ["O2", "N2"],
+	//     "description": "N2+-N4+ conversion",
+	//     "type": "constant",
+	//     "value": 5E-41,
+	//     "plot" : true
+	// },
+	// {
+	//     "reaction": "N4+ + O2 -> O2+ + (N2) + (N2)",
+	//     "description": "N4+-O2+ conversion",
+	//     "type": "constant",
+	//     "value": 2.5E-16,
+	//     "plot" : true
+	// },
+	// {
+	//     "reaction": "N2+ + O2 -> O2+ + (N2)",
+	//     "description": "N2+-O2+ conversion",
+	//     "type": "constant",
+	//     "value": 6E-17,
+	//     "plot" : true
+	// },			
+	// {
+	//     "reaction": "O2+ + O2 + @ -> O4+",
+	//     "@": ["O2", "N2"],
+	//     "description": "O2+ conversion",
+	//     "type": "constant",
+	//     "value": 2.4E-42
+	// },	
+	// {
+	//     "reaction": "e + N2+ -> (N2)",
+	//     "description": "e-N2+ recombination",
+	//     "type": "function T A",
+	//     "c1": 4.8E-12,
+	//     "c2": -0.5,
+	//     "T": "e",
+	//     "plot" : true
+	// },
+	// {
+	//     "reaction": "e + O2+ -> (O2)",
+	//     "description": "e-O2+ recombination",
+	//     "type": "function T A",
+	//     "c1": 4.8E-12,
+	//     "c2": -0.5,
+	//     "T": "e",
+	//     "plot" : true
+	// },
+	// {
+	//     "reaction": "e + O4+ -> (O2) + (O2)",
+	//     "description": "e-O4+ recombination",
+	//     "type": "function T1T2 A",
+	//     "c1": 1.4E-12,
+	//     "c2": 0.5,
+	//     "T1": "O2",
+	//     "T2": "e",	    
+	//     "plot" : true
+	// },
+	// {
+	//     "reaction": "e + N4+ -> (N2) + (N2)",
+	//     "description": "e-N4+ recombination",
+	//     "type": "function T1T2 A",
+	//     "c1": 2E-12,
+	//     "c2": 0.5,
+	//     "T1": "N2",
+	//     "T2": "e",	    
+	//     "plot" : true
+	// },
 	{
-	    "reaction": "e + N2+ -> (N2)",
-	    "description": "e-N2+ recombination",
-	    "type": "function T A",
-	    "c1": 4.8E-12,
-	    "c2": -0.5,
-	    "T": "e",
-	    "plot" : true
-	},
-	{
-	    "reaction": "e + O2+ -> (O2)",
-	    "description": "e-O2+ recombination",
-	    "type": "function T A",
-	    "c1": 4.8E-12,
-	    "c2": -0.5,
-	    "T": "e",
-	    "plot" : true
-	},
-	{
-	    "reaction": "e + O4+ -> (O2) + (O2)",
-	    "description": "e-O4+ recombination",
-	    "type": "function T1T2 A",
-	    "c1": 1.4E-12,
-	    "c2": 0.5,
-	    "T1": "O2",
-	    "T2": "e",	    
-	    "plot" : true
-	},
-	{
-	    "reaction": "e + N4+ -> (N2) + (N2)",
-	    "description": "e-N4+ recombination",
-	    "type": "function T1T2 A",
-	    "c1": 2E-12,
-	    "c2": 0.5,
-	    "T1": "N2",
-	    "T2": "e",	    
-	    "plot" : true
-	},
-	{
-	    "reaction": "e + N2 -> e + IR + (N2)",
+	    "reaction": "e + N2 -> e + Y + (N2)",
 	    "description": "IR generation", 
 	    "type": "table vs E/N",        
 	    "file" : "transport_data.dat",
@@ -435,10 +460,29 @@
 	    "scale rate/N" : 1.0,       
 	    "efficiency": 0.06,         
 	    "quenching pressure": 4000.0,
-	    "plot": true,
+	    "plot": true
 	    //"gradient correction": "e",	 
-	    "limit max k*dt": 0.5
+//	    "limit max k*dt": 0.5
 	},
+	{
+	    "reaction": "e + N2 -> e + X + (N2)",
+	    "description": "IR generation", 
+	    "type": "table vs E/N",        
+	    "file" : "transport_data.dat",
+	    //"dump": "debug_ir.dat",	    
+	    "E/N column" : 0,           
+	    "rate/N column" : 4,        
+	    "min E/N" : 10.0,           
+	    "max E/N" : 10000.0,        
+	    "num points" : 1000,        
+	    "spacing" : "exponential",  
+	    "scale E/N" : 1.0,          
+	    "scale rate/N" : 1.0,       
+	    "efficiency": 1,
+	    "plot": true
+	    //"gradient correction": "e",	 
+//	    "limit max k*dt": 0.5
+	},	
 	{
 	    "reaction": "IR -> Y + (N2)",
 	    "description": "Photon generation", 
@@ -478,32 +522,33 @@
 	{
 	    "reaction": "Y + (O2) -> e + O2+"
 	}
-    ]// ,
-    // "electrode emission":
-    // [
-    // 	{
-    // 	    "reaction": "Y -> e",
-    // 	    "efficiency": 0.0
-    // 	},
-    // 	{
-    // 	    "reaction": "O2+ -> @",
-    // 	    "@": ["e", "(null)"],
-    // 	    "efficiencies": [1E-2, 1]
-    // 	},
-    // 	{
-    // 	    "reaction": "N2+ -> @",
-    // 	    "@": ["e", "(null)"],
-    // 	    "efficiencies": [1E-2, 1]
-    // 	},
-    // 	{
-    // 	    "reaction": "N4+ -> @",
-    // 	    "@": ["e", "(null)"],
-    // 	    "efficiencies": [1E-2, 1]
-    // 	},
-    // 	{
-    // 	    "reaction": "O4+ -> @",
-    // 	    "@": ["e", "(null)"],
-    // 	    "efficiencies": [1E-2, 1]
-    // 	}
-    // ]
+    ],
+    "electrode emission":
+    [
+	{
+	    "reaction": "X -> e",
+	    "efficiency": 1.0
+	}// ,
+	// {
+	//     "reaction": "O2+ -> @",
+	//     "@": ["e", "(null)"],
+	//     "efficiencies": [1.0, 0.0]
+	// },
+	// {
+	//     "reaction": "N2+ -> @",
+	//     "@": ["e", "(null)"],
+	//     "efficiencies": [1.0, 0.0]
+	// }
+	// ,
+	// {
+	//     "reaction": "N4+ -> @",
+	//     "@": ["e", "(null)"],
+	//     "efficiencies": [1E-2, 1]
+	// },
+	// {
+	//     "reaction": "O4+ -> @",
+	//     "@": ["e", "(null)"],
+	//     "efficiencies": [1E-2, 1]
+	// }
+    ]
 }
