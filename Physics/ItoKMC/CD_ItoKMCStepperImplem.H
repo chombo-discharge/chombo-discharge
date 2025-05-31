@@ -1765,7 +1765,7 @@ ItoKMCStepper<I, C, R, F>::fillNeutralDensity() noexcept
     pout() << m_name + "::fillNeutralDensity" << endl;
   }
 
-  DataOps::setValue(m_neutralDensity, 0.0);
+  DataOps::setValue(m_neutralDensity, std::numeric_limits<Real>::max());
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_fluidRealm)[lvl];
