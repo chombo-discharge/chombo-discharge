@@ -1,14 +1,14 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = -20E3
+ItoKMC.potential = -30E3
 ItoKMC.basename  = pout
 
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        =  -1E-2    -1E-2 -16E-2     # Low corner of problem domain
-AmrMesh.hi_corner        =  1E-2 1E-2  16E-2 # High corner of problem domain
+AmrMesh.lo_corner        =  -2E-2    -2E-2 -16E-2     # Low corner of problem domain
+AmrMesh.hi_corner        =  2E-2 2E-2  16E-2 # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64 512     # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 8           # Maximum amr depth
@@ -241,9 +241,9 @@ ItoKMCGodunovStepper.verbosity                             = -1             # Ve
 ItoKMCGodunovStepper.secondary_emission                    = after_reactions # When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                      = true           # Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.redistribute_cdr                      = true          # Turn on/off reactive redistribution
-ItoKMCGodunovStepper.limit_parallel_diffusion              = true                 ## If true, particles do not diffuse against their drift direction
+ItoKMCGodunovStepper.limit_parallel_diffusion              = false                 ## If true, particles do not diffuse against their drift direction
 ItoKMCGodunovStepper.profile                               = true           # Turn on/off run-time profiling
-ItoKMCGodunovStepper.plt_vars                              = conductivity           # 'conductivity', 'current_density', 'particles_per_patch'
+ItoKMCGodunovStepper.plt_vars                              = conductivity current_density           # 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                             = false           # Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                    = false          # Turn on/off fluid realm load balancing. 
 ItoKMCGodunovStepper.load_balance_particles                = false           # Turn on/off particle load balancing
@@ -267,7 +267,7 @@ ItoKMCGodunovStepper.max_dt                                = 100.E12       # Max
 ItoKMCGodunovStepper.max_growth_dt                         = 1.E99          # Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99          # Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                   = true           # Permit particles to live outside the EB to avoid bad gradients near EB
-ItoKMCGodunovStepper.smooth_conductivity                   = true          # Use bilinear smoothing on the conductivity.
+ItoKMCGodunovStepper.smooth_conductivity                   = false          # Use bilinear smoothing on the conductivity.
 ItoKMCGodunovStepper.rho_filter_num                            = 0              # Number of filterings for the space-density
 ItoKMCGodunovStepper.rho_filter_max_stride                     = 2              # Maximum stride for filter
 ItoKMCGodunovStepper.rho_filter_alpha                          = 0.5            # Filtering factor (0.5 is a bilinear filter)
@@ -286,7 +286,7 @@ ItoKMCJSON.chemistry_file     = no_energy_sharing.json ## Chemistry file
 
 # Kinetic Monte Carlo solver settings. 
 ItoKMCJSON.max_new_particles  = 16                      ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons    = 128                      ## Maximum number of computational photons to produce in reaction step	
+ItoKMCJSON.max_new_photons    = 16                      ## Maximum number of computational photons to produce in reaction step	
 ItoKMCJSON.crit_num           = 5                       ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps           = 50000.0                   ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num            = 1                      ## How many SSA steps to run when tau-leaping is inefficient

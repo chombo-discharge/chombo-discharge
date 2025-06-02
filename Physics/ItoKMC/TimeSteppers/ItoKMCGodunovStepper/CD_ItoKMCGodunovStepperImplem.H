@@ -25,8 +25,6 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "Need to remove Dev and Dev2 folders"
-
 using namespace Physics::ItoKMC;
 
 template <typename I, typename C, typename R, typename F>
