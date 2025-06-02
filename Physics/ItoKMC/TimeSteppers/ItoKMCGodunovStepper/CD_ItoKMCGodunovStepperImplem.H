@@ -25,9 +25,7 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "Need to guard against lack of dielectrics"
 #warning "Need to remove Dev and Dev2 folders"
-#warning "Permitted hop should be a threshold value of V*a_dt!"
 
 using namespace Physics::ItoKMC;
 
@@ -1186,17 +1184,25 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   CH_TIMER("ItoKMCGodunovStepper::computeSemiImplicitRho::plasma_phase", t1);
   CH_TIMER("ItoKMCGodunovStepper::computeSemiImplicitRho::solid_phase", t2);
   CH_TIMER("ItoKMCGodunovStepper::computeSemiImplicitRho::filter", t3);
-
-  // Soft requirement?
-  CH_assert(this->m_plasmaPhase == phase::gas);
-
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::computeSemiImplicitRho" << endl;
   }
 
+  // Soft requirement?
+  CH_assert(this->m_plasmaPhase == phase::gas);
+
+  const RefCountedPtr<MultiFluidIndexSpace>& mfis        = (this->m_computationalGeometry)->getMfIndexSpace();
+  const Vector<Dielectric>&                  dielectrics = (this->m_computationalGeometry)->getDielectrics();
+
+  const bool hasDielectrics = (mfis->numPhases() > 1) && (dielectrics.size() > 0);
+
   MFAMRCellData& rho    = this->m_fieldSolver->getRho();
   EBAMRCellData  rhoGas = (this->m_amr)->alias(phase::gas, rho);
-  //  EBAMRCellData  rhoSolid = (this->m_amr)->alias(phase::solid, rho);
+  EBAMRCellData  rhoSolid;
+
+  if (hasDielectrics) {
+    rhoSolid = (this->m_amr)->alias(phase::solid, rho);
+  }
 
   DataOps::setValue(rho, 0.0);
 
@@ -1221,39 +1227,41 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
   // Contribution from gas-side particles that diffused into EBs. This might be necessary near dielectric EBs as a comparatively small
   // correction in the space charge density. There should be no contribution from the CDR solvers because the diffusion-only divergence
   // term was computed using homogeneous Neumann boundary conditions.
-  CH_START(t2);
-#if 0
-  EBAMRCellData particleScratch;
-  EBAMRCellData fluidScratch;
+  if (hasDielectrics) {
+    CH_START(t2);
 
-  (this->m_amr)->allocate(particleScratch, this->m_particleRealm, phase::solid, 1);
-  (this->m_amr)->allocate(fluidScratch, this->m_fluidRealm, phase::solid, 1);
+    EBAMRCellData particleScratch;
+    EBAMRCellData fluidScratch;
 
-  for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
-    const RefCountedPtr<ItoSolver>&  solver  = solverIt();
-    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
-    const int                        Z       = species->getChargeNumber();
+    (this->m_amr)->allocate(particleScratch, this->m_particleRealm, phase::solid, 1);
+    (this->m_amr)->allocate(fluidScratch, this->m_fluidRealm, phase::solid, 1);
 
-    if (Z != 0) {
-      DataOps::setValue(particleScratch, 0.0);
-      DataOps::setValue(fluidScratch, 0.0);
+    for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<ItoSolver>&  solver  = solverIt();
+      const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+      const int                        Z       = species->getChargeNumber();
 
-      (this->m_amr)
-        ->template depositParticles<PointParticle, &PointParticle::weight>(particleScratch,
-                                                                           this->m_particleRealm,
-                                                                           phase::solid,
-                                                                           *m_rhoDaggerParticles[solverIt.index()],
-                                                                           DepositionType::CIC,
-                                                                           CoarseFineDeposition::Halo,
-                                                                           true);
+      if (Z != 0) {
+        DataOps::setValue(particleScratch, 0.0);
+        DataOps::setValue(fluidScratch, 0.0);
 
-      (this->m_amr)->copyData(fluidScratch, particleScratch);
+        (this->m_amr)
+          ->template depositParticles<PointParticle, &PointParticle::weight>(particleScratch,
+                                                                             this->m_particleRealm,
+                                                                             phase::solid,
+                                                                             *m_rhoDaggerParticles[solverIt.index()],
+                                                                             DepositionType::CIC,
+                                                                             CoarseFineDeposition::Halo,
+                                                                             true);
 
-      DataOps::incr(rhoSolid, fluidScratch, 1.0 * Z * Units::Qe);
+        (this->m_amr)->copyData(fluidScratch, particleScratch);
+
+        DataOps::incr(rhoSolid, fluidScratch, 1.0 * Z * Units::Qe);
+      }
     }
+
+    CH_STOP(t2);
   }
-#endif
-  CH_STOP(t2);
 
   // Sync across levels
   this->m_amr->arithmeticAverage(rho, this->m_fluidRealm);
@@ -1276,7 +1284,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 
   // Put data on centroids.
   this->m_amr->interpToCentroids(rhoGas, this->m_fluidRealm, phase::gas);
-  //  this->m_amr->interpToCentroids(rhoSolid, this->m_fluidRealm, phase::solid);
+  if (hasDielectrics) {
+    this->m_amr->interpToCentroids(rhoSolid, this->m_fluidRealm, phase::solid);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
