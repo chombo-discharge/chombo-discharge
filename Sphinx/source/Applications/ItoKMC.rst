@@ -117,9 +117,9 @@ Users can apply this filtering by adjusting the following input options:
 
 .. code-block:: txt
 
-   ItoKMCGodunovStepper.filter_num        = 0   # Number of filterings for the space-density
-   ItoKMCGodunovStepper.filter_max_stride = 1   # Maximum stride for filter
-   ItoKMCGodunovStepper.filter_alpha      = 0.5 # Filtering factor (0.5 is a bilinear filter)		
+   ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
+   ItoKMCGodunovStepper.rho_filter_max_stride = 1    # Maximum stride for filter
+   ItoKMCGodunovStepper.rho_filter_alpha      = 0.5  # Filtering factor (0.5 is a bilinear filter)		
 
 .. warning::
 

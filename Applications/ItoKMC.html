@@ -320,9 +320,9 @@ Filters are applied as follows:</p>
 \[\rho_i = \alpha\rho_i + \frac{1-\alpha}{2}\left(\rho_{i+s} + \rho_{i-s}\right).\]</div>
 <p>where <span class="math notranslate nohighlight">\(\alpha\)</span> is a filtering factor and <span class="math notranslate nohighlight">\(s\)</span> a stride.
 Users can apply this filtering by adjusting the following input options:</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.filter_num        = 0   # Number of filterings for the space-density
-ItoKMCGodunovStepper.filter_max_stride = 1   # Maximum stride for filter
-ItoKMCGodunovStepper.filter_alpha      = 0.5 # Filtering factor (0.5 is a bilinear filter)
+<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
+ItoKMCGodunovStepper.rho_filter_max_stride = 1    # Maximum stride for filter
+ItoKMCGodunovStepper.rho_filter_alpha      = 0.5  # Filtering factor (0.5 is a bilinear filter)
 </pre></div>
 </div>
 <div class="admonition warning">
