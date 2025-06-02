@@ -80,6 +80,12 @@ namespace Physics {
       preRegrid(const int a_lmin, const int a_oldFinestLevel) noexcept override;
 
       /*!
+	@brief Register operators used for the simulation
+      */
+      virtual void
+      registerOperators() noexcept override;
+
+      /*!
 	@brief Regrid methods -- puts all data on the new mesh. 
 	@param[in] a_lmin           The coarsest level that changed. 
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -163,11 +169,6 @@ namespace Physics {
       bool m_extendConductivityEB;
 
       /*!
-	@brief Smooth the conductivity or not.
-      */
-      bool m_smoothConductivity;
-
-      /*!
 	@brief If true, the algorithm will limit particle diffusion against the drift direction
       */
       bool m_limitParallelDiffusion;
@@ -190,17 +191,32 @@ namespace Physics {
       /*!
 	@brief Number of filterings when computing the semi-implicit space charge density
       */
-      int m_filterNum;
+      int m_rhoFilterNum;
 
       /*!
-	@brief Number of filterings when computing the semi-implicit space charge density
+	@brief Stride when filtering the space charge density.
       */
-      int m_filterMaxStride;
+      int m_rhoFilterMaxStride;
 
       /*!
 	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
       */
-      Real m_filterAlpha;
+      Real m_rhoFilterAlpha;
+
+      /*!
+	@brief Number of filterings of the conductivity.
+      */
+      int m_condFilterNum;
+
+      /*!
+	@brief Stride when filtering the conductivity.
+      */
+      int m_condFilterMaxStride;
+
+      /*!
+	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
+      */
+      Real m_condFilterAlpha;
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k
@@ -358,6 +374,15 @@ namespace Physics {
       */
       virtual void
       setupSemiImplicitPoisson(const Real a_dt) noexcept;
+
+      /*!
+	@brief Solve the electrostatic problem
+	@details This calls the other version with all lhs/rhs taken from the field solver. Space charge density is computed
+	in this routine. 
+	@return Returns true if the solver converged. 
+      */
+      virtual bool
+      solvePoisson() noexcept override;
 
       /*!
 	@brief Remove covered particles
