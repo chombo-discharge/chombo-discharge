@@ -3115,6 +3115,8 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   using Node         = KDNode<PType>;
   using ParticleList = KDNode<PType>::ParticleList;
 
+  const RealVect probLo = m_amr->getProbLo();
+
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   CH_START(t1);
   Real         W = 0.0;
@@ -3149,21 +3151,80 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_START(t3);
   a_particles.clear();
 
-  for (const auto& l : leaves) {
-    Real     w = 0.0;
-    Real     e = 0.0;
-    RealVect x = RealVect::Zero;
+  // If this is a cut-cell we merge as usual
+  if (true) {//a_cellInfo.getVolFrac() < 1.0) {
+    for (const auto& l : leaves) {
+      Real     w = 0.0;
+      Real     e = 0.0;
+      RealVect x = RealVect::Zero;
 
-    for (const auto& p : l->getParticles()) {
-      w += p.template real<0>();
-      x += p.template real<0>() * p.template vect<0>();
-      e += p.template real<0>() * p.template real<1>();
+      for (const auto& p : l->getParticles()) {
+        w += p.template real<0>();
+        x += p.template real<0>() * p.template vect<0>();
+        e += p.template real<0>() * p.template real<1>();
+      }
+
+      x *= 1. / w;
+      e *= 1. / w;
+
+      if(w < 0.5) {
+	MayDay::Abort("Adding bad particle mass");
+      }
+      a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
     }
+  }
+  else {
+    const IntVect iv = a_cellInfo.getGridIndex();
+    const Real dx = a_cellInfo.getDx();
+    
+    for (const auto& l : leaves) {
+      Real     w = 0.0;
+      Real     e = 0.0;
 
-    x *= 1. / w;
-    e *= 1. / w;
+      RealVect xMin = probLo + (RealVect(iv)  + RealVect::Unit) * dx;
+      RealVect xMax = probLo + (RealVect(iv)) * dx;       
 
-    a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+      for (const auto& p : l->getParticles()) {
+        w += p.template real<0>();
+	e += p.template real<0>() * p.template real<1>();
+
+	const RealVect x = p.template vect<0>();
+
+	for (int dir = 0; dir < SpaceDim; dir++) {
+	  xMin[dir] = std::min(xMin[dir], x[dir]);
+	  xMax[dir] = std::max(xMax[dir], x[dir]);	  
+	}
+      }
+
+      if(w > 0.0) {
+      RealVect x;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+	const Real r = Random::getUniformReal01();
+
+	if(xMin[dir] < (probLo[dir] + iv[dir]*dx)) {
+	  MayDay::Abort("crap 1");
+	}
+	else if(xMin[dir] > (probLo[dir] + (iv[dir] + 1)*dx)){
+	  MayDay::Abort("crap 1");
+	}
+	if(xMax[dir] < (probLo[dir] + iv[dir]*dx)) {
+	  MayDay::Abort("crap 2");
+	}
+	else if(xMax[dir] > (probLo[dir] + (iv[dir] + 1)*dx)){
+	  MayDay::Abort("crap 3");
+	}	
+
+	if(xMin[dir] > xMax[dir]) {
+	  MayDay::Abort("crap 4");
+	}
+
+	x[dir] = xMin[dir] + r * (xMax[dir] - xMin[dir]);
+      }
+
+      a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+      }
+    }    
   }
   CH_STOP(t3);
 }
