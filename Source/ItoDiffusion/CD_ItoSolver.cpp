@@ -3111,6 +3111,8 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::build_kd", t2);
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::merge_particles", t3);
 
+  // We use a cheaper particle type with a lower memory footprint when merging particles. The
+  // NonCommParticle is a bare-bones particle type without MPI capabilities.
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;
   using ParticleList = KDNode<PType>::ParticleList;
@@ -3130,11 +3132,18 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
 
     W += lit().weight();
 
+    if(lit().weight() < 0.9) {
+      MayDay::Abort("bad particle mass on the way in");
+    }
+
     particles.emplace_back(p);
   }
   CH_STOP(t1);
 
-  // Particle reconciler for manipulated two particles arising from splitting of one particle.
+  if(W < 1.0) return;
+
+  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
+  // within the particle merge.
   auto particleReconcile = [](PType& p1, PType& p2, const PType& p0) -> void {
     p1.template real<1>() = p0.template real<1>();
     p2.template real<1>() = p0.template real<1>();
@@ -3167,7 +3176,7 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
       x *= 1. / w;
       e *= 1. / w;
 
-      if(w < 0.5) {
+      if(l->getParticles().size() > 0 && w < 0.5) {
 	MayDay::Abort("Adding bad particle mass");
       }
       a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
