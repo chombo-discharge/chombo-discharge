@@ -1922,7 +1922,7 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
     pout() << m_className + "::initializeSurfaceEmission" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
+  const std::string baseError = "ItoKMCJSON::initializeSufaceEmission";
 
   std::string reactionSpecifier;
   if (a_surface == "dielectric") {
