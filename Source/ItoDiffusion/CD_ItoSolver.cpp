@@ -409,7 +409,7 @@ ItoSolver::parseParticleMerger()
       this->makeSuperparticlesEqualWeightKD(a_particles, a_cellInfo, a_ppc);
     };
   }
-  else if (str == "reinitialize_cell") {
+  else if (str == "reinitialize") {
     m_particleMerger = [this](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
       this->reinitializeParticles(a_particles, a_cellInfo, a_ppc);
     };

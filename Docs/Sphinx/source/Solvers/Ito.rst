@@ -350,7 +350,7 @@ In order to specify the merging algorithm the user must set the ``ItoSolver.merg
 
 * ``none`` - No particle merging/splitting is performed.
 * ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
-* ``reinitialize_cell`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
+* ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
 * ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible. 
 * ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
 
