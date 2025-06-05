@@ -23,6 +23,9 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "Must parse 'initial density' for CDR species and populate the density function"
+#warning "Update documentation on CDR densities"
+
 using namespace Physics::ItoKMC;
 
 ItoKMCJSON::ItoKMCJSON()
