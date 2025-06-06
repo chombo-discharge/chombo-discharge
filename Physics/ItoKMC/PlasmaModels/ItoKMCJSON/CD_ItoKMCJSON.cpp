@@ -23,8 +23,6 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "Update documentation on CDR densities"
-
 using namespace Physics::ItoKMC;
 
 ItoKMCJSON::ItoKMCJSON()
@@ -1341,7 +1339,7 @@ ItoKMCJSON::initializeDensitiesCDR()
       const int idx = m_cdrSpeciesMap.at(speciesID);
 
       // Doing the ugly, but I happen to KNOW that we can cast here.
-      auto species = static_cast<ItoKMCCDRSpecies>(&(*m_cdrSpecies[idx]));
+      auto species = static_cast<ItoKMCCDRSpecies*>(&(*m_cdrSpecies[idx]));
 
       species->setInitialData(initFunc);
     }
