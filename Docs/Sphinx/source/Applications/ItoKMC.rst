@@ -1233,6 +1233,26 @@ For example:
        }
     ]
 
+Initial densities
+_________________
+
+If a species is defined by a convection-diffusion-reaction solver, one may include an initial density by setting the ``initial density``parameter.
+For example:
+
+.. code-block:: json
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",           
+          "Z" : 1,             
+          "solver" : "cdr",    
+          "mobile" : true,     
+          "diffusive" : true,  
+	  "initial density": 1E10
+      }
+    ]
+
 Photon species
 --------------
 

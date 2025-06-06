@@ -35,20 +35,21 @@ inline ItoKMCPhysics::ItoKMCPhysics() noexcept
   m_photoReactions.clear();
 
   // Some default settings (mostly in case user forgets to call the parsing algorithms).
-  m_isDefined         = false;
-  m_debug             = true;
-  m_hasKMCSolver      = false;
-  m_downstreamSpecies = -1;
-  m_maxNewParticles   = 32;
-  m_maxNewPhotons     = 32;
-  m_Ncrit             = 5;
-  m_eps               = 2.0;
-  m_NSSA              = 5;
-  m_maxIter           = 10;
-  m_SSAlim            = 5.0;
-  m_exitTol           = 1.E-6;
-  m_algorithm         = Algorithm::ExplicitEuler;
-  m_particlePlacement = ParticlePlacement::Random;
+  m_isDefined             = false;
+  m_debug                 = true;
+  m_hasKMCSolver          = false;
+  m_incrementNewParticles = false;
+  m_downstreamSpecies     = -1;
+  m_maxNewParticles       = 32;
+  m_maxNewPhotons         = 32;
+  m_Ncrit                 = 5;
+  m_eps                   = 2.0;
+  m_NSSA                  = 5;
+  m_maxIter               = 10;
+  m_SSAlim                = 5.0;
+  m_exitTol               = 1.E-6;
+  m_algorithm             = Algorithm::ExplicitEuler;
+  m_particlePlacement     = ParticlePlacement::Random;
 }
 
 inline ItoKMCPhysics::~ItoKMCPhysics() noexcept
@@ -218,6 +219,7 @@ ItoKMCPhysics::parsePPC() noexcept
 
   pp.get("max_new_particles", m_maxNewParticles);
   pp.get("max_new_photons", m_maxNewPhotons);
+  pp.get("increment_weights", m_incrementNewParticles);
 }
 
 inline void
@@ -555,7 +557,7 @@ ItoKMCPhysics::reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
     if (diff > 0LL) {
       const long long numParticles = static_cast<long long>(a_particles[i]->length());
 
-      if (numParticles > 0LL) {
+      if (numParticles > 0LL && m_incrementNewParticles) {
         // If the cell already contains particles, partition the new particle weights and increment the existing particles
         const std::vector<long long> particleWeights = ParticleManagement::partitionParticleWeights(diff, numParticles);
 

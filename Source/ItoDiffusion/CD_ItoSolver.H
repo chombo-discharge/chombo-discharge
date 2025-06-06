@@ -840,6 +840,17 @@ public:
                                   const int          a_particlesPerCell) const noexcept;
 
   /*!
+    @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node. 
+    @param[inout] a_particles        Particles to be merged/split
+    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
+    @param[in]    a_particlesPerCell Target number of particles per cell
+  */
+  virtual void
+  makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
+                                    const CellInfo&    a_cellInfo,
+                                    const int          a_particlesPerCell) const noexcept;
+
+  /*!
     @brief Particle re-initialization algorithm
     @param[inout] a_particles        Particles to be merged/split
     @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 

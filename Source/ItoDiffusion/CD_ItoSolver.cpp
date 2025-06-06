@@ -414,6 +414,11 @@ ItoSolver::parseParticleMerger()
       this->reinitializeParticles(a_particles, a_cellInfo, a_ppc);
     };
   }
+  else if (str == "reinitialize_bvh") {
+    m_particleMerger = [this](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+      this->makeSuperparticlesBVHReinitialize(a_particles, a_cellInfo, a_ppc);
+    };
+  }
   else if (str == "external") {
     // Do nothing, because the user will set the merger algorithm through setParticleMerger
   }
@@ -3111,9 +3116,13 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::build_kd", t2);
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::merge_particles", t3);
 
+  // We use a cheaper particle type with a lower memory footprint when merging particles. The
+  // NonCommParticle is a bare-bones particle type without MPI capabilities.
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;
   using ParticleList = KDNode<PType>::ParticleList;
+
+  const RealVect probLo = m_amr->getProbLo();
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   CH_START(t1);
@@ -3132,7 +3141,13 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   }
   CH_STOP(t1);
 
-  // Particle reconciler for manipulated two particles arising from splitting of one particle.
+  // In this case there is nothing to merge or split!
+  if (W < 2.0) {
+    return;
+  }
+
+  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
+  // within the particle merge.
   auto particleReconcile = [](PType& p1, PType& p2, const PType& p0) -> void {
     p1.template real<1>() = p0.template real<1>();
     p2.template real<1>() = p0.template real<1>();
@@ -3149,6 +3164,7 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_START(t3);
   a_particles.clear();
 
+  // If this is a cut-cell we merge as usual
   for (const auto& l : leaves) {
     Real     w = 0.0;
     Real     e = 0.0;
@@ -3164,6 +3180,118 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
     e *= 1. / w;
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+  }
+  CH_STOP(t3);
+}
+
+void
+ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
+                                             const CellInfo&    a_cellInfo,
+                                             const int          a_ppc) const noexcept
+{
+  CH_TIMERS("ItoSolver::makeSuperparticlesBVHReinitialize");
+  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::populate_list", t1);
+  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::build_kd", t2);
+  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::merge_particles", t3);
+
+  // We use a cheaper particle type with a lower memory footprint when merging particles. The
+  // NonCommParticle is a bare-bones particle type without MPI capabilities.
+  using PType        = NonCommParticle<2, 1>;
+  using Node         = KDNode<PType>;
+  using ParticleList = KDNode<PType>::ParticleList;
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  // 1. Make the input list into a vector of particles with a smaller memory footprint.
+  CH_START(t1);
+  Real         W = 0.0;
+  ParticleList particles;
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    PType p;
+
+    p.template real<0>() = lit().weight();
+    p.template real<1>() = lit().energy();
+    p.template vect<0>() = lit().position();
+
+    W += lit().weight();
+
+    particles.emplace_back(p);
+  }
+  CH_STOP(t1);
+
+  // In this case there is nothing to merge or split!
+  if (W < 2.0) {
+    return;
+  }
+
+  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
+  // within the particle merge.
+  auto particleReconcile = [](PType& p1, PType& p2, const PType& p0) -> void {
+    p1.template real<1>() = p0.template real<1>();
+    p2.template real<1>() = p0.template real<1>();
+  };
+
+  // 2. Build KD-tree.
+  const std::vector<std::shared_ptr<Node>> leaves = ParticleManagement::
+    recursivePartitionAndSplitEqualWeightKD<PType, &PType::template real<0>, &PType::template vect<0>>(
+      particles,
+      a_ppc,
+      particleReconcile);
+
+  // Merge leaves into new particles.
+  CH_START(t3);
+  a_particles.clear();
+
+  // If this is a cut-cell we merge as we would normally do. Otherwise we might create particles outside the EB.
+  if (a_cellInfo.getVolFrac() < 1.0) {
+    for (const auto& l : leaves) {
+      Real     w = 0.0;
+      Real     e = 0.0;
+      RealVect x = RealVect::Zero;
+
+      for (const auto& p : l->getParticles()) {
+        w += p.template real<0>();
+        x += p.template real<0>() * p.template vect<0>();
+        e += p.template real<0>() * p.template real<1>();
+      }
+
+      x *= 1. / w;
+      e *= 1. / w;
+
+      a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+    }
+  }
+  else {
+    for (const auto& l : leaves) {
+      Real w = 0.0;
+      Real e = 0.0;
+
+      RealVect xMin = +std::numeric_limits<Real>::max() * RealVect::Unit;
+      RealVect xMax = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
+      for (const auto& p : l->getParticles()) {
+        w += p.template real<0>();
+        e += p.template real<0>() * p.template real<1>();
+
+        // Figure out the bounding box of this leaf.
+        const RealVect x = p.template vect<0>();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          xMin[dir] = std::min(xMin[dir], x[dir]);
+          xMax[dir] = std::max(xMax[dir], x[dir]);
+        }
+      }
+
+      RealVect x;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Real r = Random::getUniformReal01();
+
+        x[dir] = xMin[dir] + r * (xMax[dir] - xMin[dir]);
+      }
+
+      a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+    }
   }
   CH_STOP(t3);
 }
