@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential = +3E3
+ItoKMC.potential = 1200
 ItoKMC.basename  = pout
 
 # ====================================================================================================
@@ -11,7 +11,7 @@ AmrMesh.lo_corner        = -4E-3 -4E-3 -4E-3    # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-3  4E-3  4E-3  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 32 32 32    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 2           # Maximum amr depth
+AmrMesh.max_amr_depth    = 0           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
