@@ -172,14 +172,6 @@ SurfaceODESolver.regrid    = conservative      # Regrid method. 'conservative' o
 SurfaceODESolver.plt_vars  = phi               # Plot variables. Valid arguments are 'phi' and 'rhs'
 
 
-# ====================================================================================================
-# GeoCoarsener class options
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
 # Vessel geometry class options
