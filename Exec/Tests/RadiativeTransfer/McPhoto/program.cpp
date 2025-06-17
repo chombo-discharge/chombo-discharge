@@ -22,14 +22,13 @@ main(int argc, char* argv[])
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
   RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
 
   // Set up basic Poisson, potential = 1
   auto timestepper = RefCountedPtr<RadiativeTransferStepper<McPhoto>>(new RadiativeTransferStepper<McPhoto>());
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
   engine->setupAndRun(input_file);
 
 #ifdef CH_MPI

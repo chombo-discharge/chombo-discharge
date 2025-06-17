@@ -24,7 +24,6 @@ main(int argc, char* argv[])
   // Set geometry and AMR
   RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
   RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
 
   // Set up basic AdvectionDiffusion
   auto solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());
@@ -32,7 +31,7 @@ main(int argc, char* argv[])
   auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
   engine->setupAndRun(input_file);
 
 #ifdef CH_MPI
