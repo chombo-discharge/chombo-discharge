@@ -440,6 +440,11 @@ namespace Physics {
       bool m_isDefined;
 
       /*!
+	@brief If true, increment onto existing particles rather than creating new ones
+      */
+      bool m_incrementNewParticles;
+
+      /*!
 	@brief Is the KMC solver defined or not.
       */
       static thread_local bool m_hasKMCSolver;
