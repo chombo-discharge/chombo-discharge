@@ -9,4 +9,3 @@ TracerParticleStepper.velocity_field        = 0        ## Velocity field to use.
                                                        # 0 => Diagonal translation
                                                        # 1 => Rotational flow
 
-
