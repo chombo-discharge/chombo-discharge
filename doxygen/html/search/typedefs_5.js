@@ -10,5 +10,5 @@ var searchData=
   ['functiont_7',['functiont',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#aa7ecc58ce36ac5ead920403e02bc236e',1,'Physics::CdrPlasma::CdrPlasmaJSON::FunctionT'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4ff4d5f10a4bd24afdba3aa1057aa4d9',1,'Physics::ItoKMC::ItoKMCJSON::FunctionT']]],
   ['functiontt_8',['functiontt',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#af3510e94ad52927fdaf087fb07a3993a',1,'Physics::CdrPlasma::CdrPlasmaJSON::FunctionTT'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a9f6708e2b14ef0c4f26f93ad81ea0b63',1,'Physics::ItoKMC::ItoKMCJSON::FunctionTT']]],
   ['functionx_9',['functionx',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a38706e36fb5f8d91e1350cc1d7374a59',1,'Physics::CdrPlasma::CdrPlasmaJSON::FunctionX'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a5654fd1b3595d40b7ee47b22da5c7c13',1,'Physics::ItoKMC::ItoKMCJSON::FunctionX']]],
-  ['functionxt_10',['FunctionXt',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a5e68d08b7066edd1753c65e81de4b92f',1,'Physics::ItoKMC::ItoKMCJSON']]]
+  ['functionxt_10',['functionxt',['../classPhysics_1_1ItoKMC_1_1ItoKMCCDRSpecies.html#abaca4faae643f1107f4a41f525542948',1,'Physics::ItoKMC::ItoKMCCDRSpecies::FunctionXt'],['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a5e68d08b7066edd1753c65e81de4b92f',1,'Physics::ItoKMC::ItoKMCJSON::FunctionXt']]]
 ];

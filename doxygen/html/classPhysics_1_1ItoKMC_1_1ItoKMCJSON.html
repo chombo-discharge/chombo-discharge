@@ -331,6 +331,10 @@ Protected Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>initializeParticles</b> ()</td></tr>
 <tr class="memdesc:af791cac572a7c8a65542d272bdd07976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse initial particles. <br /></td></tr>
 <tr class="separator:af791cac572a7c8a65542d272bdd07976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c2fe0c09aea32a070979d0db3210738" id="r_a6c2fe0c09aea32a070979d0db3210738"><td class="memItemLeft" align="right" valign="top"><a id="a6c2fe0c09aea32a070979d0db3210738" name="a6c2fe0c09aea32a070979d0db3210738"></a>
+<a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>initializeDensitiesCDR</b> ()</td></tr>
+<tr class="memdesc:a6c2fe0c09aea32a070979d0db3210738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse initial densities for CDR equations. <br /></td></tr>
+<tr class="separator:a6c2fe0c09aea32a070979d0db3210738"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8628d89fd69308c5c2431304f9be3635" id="r_a8628d89fd69308c5c2431304f9be3635"><td class="memItemLeft" align="right" valign="top"><a id="a8628d89fd69308c5c2431304f9be3635" name="a8628d89fd69308c5c2431304f9be3635"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>initializeMobilities</b> ()</td></tr>
 <tr class="memdesc:a8628d89fd69308c5c2431304f9be3635"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize mobility functions. <br /></td></tr>
@@ -611,6 +615,10 @@ nlohmann::json&#160;</td><td class="memItemRight" valign="bottom"><b>m_json</b><
 <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_isDefined</b></td></tr>
 <tr class="memdesc:aeb965c335c41dd5a92e8f76b73c1951f inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is defined or not. <br /></td></tr>
 <tr class="separator:aeb965c335c41dd5a92e8f76b73c1951f inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0be1c26b09ac6b11ad3c77b0b2b0a9b8 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_a0be1c26b09ac6b11ad3c77b0b2b0a9b8"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_incrementNewParticles</b></td></tr>
+<tr class="memdesc:a0be1c26b09ac6b11ad3c77b0b2b0a9b8 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">If true, increment onto existing particles rather than creating new ones. <br /></td></tr>
+<tr class="separator:a0be1c26b09ac6b11ad3c77b0b2b0a9b8 inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf93dd374d062265d09611aa5ea6677e inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics" id="r_aaf93dd374d062265d09611aa5ea6677e"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="CD__ItoKMCPhysics_8H.html#ad61b790100426fb082d6276c5c66a811">KMCReaction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_kmcReactions</b></td></tr>
 <tr class="memdesc:aaf93dd374d062265d09611aa5ea6677e inherit pro_attribs_classPhysics_1_1ItoKMC_1_1ItoKMCPhysics"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of reactions for the KMC solver. <br /></td></tr>

@@ -388,6 +388,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a054d02df4353cf514c5a7e84616c8b3b" id="r_a054d02df4353cf514c5a7e84616c8b3b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a054d02df4353cf514c5a7e84616c8b3b">makeSuperparticlesEqualWeightKD</a> (<a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellInfo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_particlesPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a054d02df4353cf514c5a7e84616c8b3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with KD/BVH trees.  <br /></td></tr>
 <tr class="separator:a054d02df4353cf514c5a7e84616c8b3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1463ed897337d40fbcda30e64af720bd" id="r_a1463ed897337d40fbcda30e64af720bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1463ed897337d40fbcda30e64af720bd">makeSuperparticlesBVHReinitialize</a> (<a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellInfo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_particlesPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a1463ed897337d40fbcda30e64af720bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Superparticle merging with BVH trees. This reinitializes particles within each BVH node.  <br /></td></tr>
+<tr class="separator:a1463ed897337d40fbcda30e64af720bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac96f3425ab87e0a7dfead3717f262f7b" id="r_ac96f3425ab87e0a7dfead3717f262f7b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ac96f3425ab87e0a7dfead3717f262f7b">reinitializeParticles</a> (<a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_cellInfo</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_particlesPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:ac96f3425ab87e0a7dfead3717f262f7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle re-initialization algorithm.  <br /></td></tr>
 <tr class="separator:ac96f3425ab87e0a7dfead3717f262f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -3792,6 +3795,58 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_container</td><td>Which container to repartition into new superparticles </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target number of particles per cell. Vector indicates grid levels. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1463ed897337d40fbcda30e64af720bd" name="a1463ed897337d40fbcda30e64af720bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1463ed897337d40fbcda30e64af720bd">&#9670;&#160;</a></span>makeSuperparticlesBVHReinitialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoSolver::makeSuperparticlesBVHReinitialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classCellInfo.html">CellInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_cellInfo</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_particlesPerCell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Superparticle merging with BVH trees. This reinitializes particles within each BVH node. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particles to be merged/split </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_cellInfo</td><td>Arithmetic information about the current grid cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Target number of particles per cell </td></tr>
   </table>
   </dd>
 </dl>

@@ -439,8 +439,9 @@ The function for splitting and merging the particles is in all cases</p>
 In order to specify the merging algorithm the user must set the <code class="docutils literal notranslate"><span class="pre">ItoSolver.merge_algorithm</span></code> to one of the following:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">none</span></code> - No particle merging/splitting is performed.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">equal_weight_kd</span></code> Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">reinitialize</span></code> Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reinitialize_bvh</span></code> Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">external</span></code> Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Set a particle merging algorithm</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
