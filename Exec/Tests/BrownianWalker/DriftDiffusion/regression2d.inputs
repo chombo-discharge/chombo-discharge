@@ -84,14 +84,6 @@ ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting parti
 ItoSolver.deposition          = cic           # 'ngp' = nearest grid point
 ItoSolver.deposition_cf       = halo          # Coarse-fine deposition. interp, halo, or halo_ngp
 
-# ====================================================================================================
-# GEO_COARSENER CLASS OPTIONS
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = -1 -0.1         # Remove irregular cell tags 
-GeoCoarsener.box1_hi     =  1 2         # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

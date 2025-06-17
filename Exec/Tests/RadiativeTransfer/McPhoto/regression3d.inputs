@@ -96,15 +96,6 @@ McPhoto.deposition_cf      = halo          # Coarse-fine deposition. Must be int
 
 
 # ====================================================================================================
-# GEO_COARSENER CLASS OPTIONS
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = -1 -1 -0.1         # Remove irregular cell tags 
-GeoCoarsener.box1_hi     =  1 1 2         # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
-
-# ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 RodDielectric.electrode.on              = false         # Use electrode or not

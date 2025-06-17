@@ -59,16 +59,6 @@ Driver.refine_angles                   = 30.              # Refine cells if angl
 Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
-
-# ====================================================================================================
-# GEO_COARSENER CLASS OPTIONS
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
-
 # ====================================================================================================
 # ROUGH_SPHERE CLASS OPTIONS
 # ====================================================================================================

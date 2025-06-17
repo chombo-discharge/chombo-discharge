@@ -62,15 +62,6 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 
 
 # ====================================================================================================
-# GeoCoarsener class options
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
-
-# ====================================================================================================
 # RodPlaneProfile geometry class options
 #
 # This class described a rod-plane geometry with holes on the dielectric plane. The plane_point

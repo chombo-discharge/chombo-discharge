@@ -92,14 +92,6 @@ EddingtonSP1.bc.y.hi             = larsen 0.0     # Boundary on domain. 'neumann
 EddingtonSP1.bc.z.lo             = larsen 0.0     # Boundary on domain. 'neumann' or 'larsen'
 EddingtonSP1.bc.z.hi             = larsen 0.0     # Boundary on domain. 'neumann' or 'larsen'
 
-# ====================================================================================================
-# GEO_COARSENER CLASS OPTIONS
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = -1 -1 -0.1         # Remove irregular cell tags 
-GeoCoarsener.box1_hi     =  1 1 2         # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
