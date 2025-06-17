@@ -15,7 +15,6 @@
 /*!
   @brief Name containing various physics models for running chombo-discharge code
 */
-namespace Physics {
-};
+namespace Physics {};
 
 #endif

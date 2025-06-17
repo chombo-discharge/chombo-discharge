@@ -18,8 +18,7 @@ namespace Physics {
   /*!
     @brief Namespace for encapsulating physics code for tracer particles
   */
-  namespace TracerParticle {
-  }
+  namespace TracerParticle {}
 
 } // namespace Physics
 

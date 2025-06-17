@@ -81,7 +81,7 @@ main(int argc, char* argv[])
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    //clang-format off
+    // clang-format off
     std::cout << "# nref\t"
               << "Linf error\t"
               << "L1 error\t"
@@ -91,7 +91,7 @@ main(int argc, char* argv[])
       std::cout << std::pow(2, i + 1) << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
                 << std::get<2>(norms[i]) << "\n";
     }
-    //    clang-format on
+    // clang-format on
 #ifdef CH_MPI
   }
   MPI_Finalize();
