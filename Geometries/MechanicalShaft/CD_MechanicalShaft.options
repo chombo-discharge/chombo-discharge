@@ -1,45 +1,45 @@
 # ====================================================================================================
 # MechanicalShaft class options
 # ====================================================================================================
-MechanicalShaft.eps0           = 1    # Background permittivity
-MechanicalShaft.use_electrode  = true # Turn on/off electrode
-MechanicalShaft.use_dielectric = true # Turn on/off dielectric
+MechanicalShaft.eps0               = 1       ## Background permittivity
+MechanicalShaft.use_electrode      = true    ## Turn on/off electrode
+MechanicalShaft.use_dielectric     = true    ## Turn on/off dielectric
 
 # Electrode settings
 --------------------
-MechanicalShaft.electrode.orientation     = "+y"  # Electrode orientation
-MechanicalShaft.electrode.translate       = 0 0 0 # Electrode translation after rotation
-MechanicalShaft.electrode.live            = true  # Live electrode or not
-MechanicalShaft.electrode.length          = 1.0   # Electrode length 
-MechanicalShaft.electrode.outer.radius    = 0.9   # Electrode outer radius
-MechanicalShaft.electrode.inner.radius    = 0.6   # Electrode inner radius	
-MechanicalShaft.electrode.curvature       = 0.1   # Curvature. Must be > 0.0
-
+MechanicalShaft.electrode.orientation      = "+y"     ## Electrode orientation
+MechanicalShaft.electrode.translate        = 0 0 0    ## Electrode translation after rotation
+MechanicalShaft.electrode.live             = true     ## Live electrode or not
+MechanicalShaft.electrode.length           = 1.0      ## Electrode length
+MechanicalShaft.electrode.outer.radius     = 0.9      ## Electrode outer radius
+MechanicalShaft.electrode.inner.radius     = 0.6      ## Electrode inner radius
+MechanicalShaft.electrode.curvature        = 0.1      ## Curvature. Must be > 0.0
 
 # Main dielectric settings
 --------------------------
-MechanicalShaft.dielectric.shape        = circular_profiles # 'polygon', 'cylinder', or 'circular_profiles'
-MechanicalShaft.dielectric.permittivity = 4.0               # Dielectric permittivity
-MechanicalShaft.dielectric.orientation  = "+y"              # Dielectric orientation
-MechanicalShaft.dielectric.translate    = 0 0 0             # Dielectric translation after rotatino
+MechanicalShaft.dielectric.shape            = circular_profiles    ## 'polygon', 'cylinder', or 'circular_profiles'
+MechanicalShaft.dielectric.permittivity     = 4.0                  ## Dielectric permittivity
+MechanicalShaft.dielectric.orientation      = "+y"                 ## Dielectric orientation
+MechanicalShaft.dielectric.translate        = 0 0 0                ## Dielectric translation after rotatino
 
 # Subsettings for 'cylinder'
 ----------------------------
-MechanicalShaft.dielectric.cylinder.radius = 0.25 # Cylinder radius
+MechanicalShaft.dielectric.cylinder.radius     = 0.25    ## Cylinder radius
 
 # Subsettings for 'polygon'
 ---------------------------
-MechanicalShaft.dielectric.polygon.num_sides  = 6   # Number of sides for polygon shape. 
-MechanicalShaft.dielectric.polygon.radius     = 0.5 # Dielectric rod radius
-MechanicalShaft.dielectric.polygon.curvature  = 0.1 # Rounding radius
+MechanicalShaft.dielectric.polygon.num_sides     = 6      ## Number of sides for polygon shape.
+MechanicalShaft.dielectric.polygon.radius        = 0.5    ## Dielectric rod radius
+MechanicalShaft.dielectric.polygon.curvature     = 0.1    ## Rounding radius
 
 # Subsettings for 'circular_profiles'
 ------------------------------------
-MechanicalShaft.dielectric.profile.circular.cylinder_radius      = 0.3  # Cylinder radius
-MechanicalShaft.dielectric.profile.circular.profile_major_radius = 0.3  # Profile major radius (torus)
-MechanicalShaft.dielectric.profile.circular.profile_minor_radius = 0.1  # Profile minor radius (torus)
-MechanicalShaft.dielectric.profile.circular.profile_translate    = 0.00 # Profile translation along axis
-MechanicalShaft.dielectric.profile.circular.profile_period       = 0.25 # Profile repetition period
-MechanicalShaft.dielectric.profile.circular.profile_repeat_lo    = 10   # Profile repetition
-MechanicalShaft.dielectric.profile.circular.profile_repeat_hi    = 10   # Profile repetition
-MechanicalShaft.dielectric.profile.circular.profile_smooth       = 0.05 # Profile smoothing
+MechanicalShaft.dielectric.profile.circular.cylinder_radius          = 0.3     ## Cylinder radius
+MechanicalShaft.dielectric.profile.circular.profile_major_radius     = 0.3     ## Profile major radius (torus)
+MechanicalShaft.dielectric.profile.circular.profile_minor_radius     = 0.1     ## Profile minor radius (torus)
+MechanicalShaft.dielectric.profile.circular.profile_translate        = 0.00    ## Profile translation along axis
+MechanicalShaft.dielectric.profile.circular.profile_period           = 0.25    ## Profile repetition period
+MechanicalShaft.dielectric.profile.circular.profile_repeat_lo        = 10      ## Profile repetition
+MechanicalShaft.dielectric.profile.circular.profile_repeat_hi        = 10      ## Profile repetition
+MechanicalShaft.dielectric.profile.circular.profile_smooth           = 0.05    ## Profile smoothing
+

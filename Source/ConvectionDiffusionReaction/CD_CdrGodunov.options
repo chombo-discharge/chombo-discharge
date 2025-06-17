@@ -1,29 +1,30 @@
 # ====================================================================================================
 # CdrGodunov solver settings
 # ====================================================================================================
-CdrGodunov.seed                  = -1                      # Seed. Random seed with seed < 0
-CdrGodunov.bc.x.lo               = wall                    # 'data', 'function', 'wall', 'outflow', 'solver'
-CdrGodunov.bc.x.hi               = wall                    # 'data', 'function', 'wall', 'outflow', 'solver'
-CdrGodunov.bc.y.lo               = wall                    # 'data', 'function', 'wall', 'outflow', 'solver'
-CdrGodunov.bc.y.hi               = wall                    # 'data', 'function', 'wall', 'outflow', 'solver'
-CdrGodunov.bc.z.lo               = wall                    # 'data', 'function', 'wall', 'outflow', 'solver'
-CdrGodunov.bc.z.hi               = wall                    # 'data', 'function', 'wall', 'outflow', 'solver'
-CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
-CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
-CdrGodunov.extrap_source         = false                   # Flag for including source term for time-extrapolation
-CdrGodunov.plot_mode             = density                 # Plot densities 'density' or particle numbers ('numbers')
-CdrGodunov.blend_conservation    = true                    # Turn on/off blending with nonconservative divergenceo
-CdrGodunov.which_redistribution  = volume                  # Redistribution type. 'volume', 'mass', or 'none' (turned off)
-CdrGodunov.use_regrid_slopes     = true                    # Turn on/off slopes when regridding
-CdrGodunov.gmg_verbosity         = -1                      # GMG verbosity
-CdrGodunov.gmg_pre_smooth        = 12                      # Number of relaxations in GMG downsweep
-CdrGodunov.gmg_post_smooth       = 12                      # Number of relaxations in upsweep
-CdrGodunov.gmg_bott_smooth       = 12                      # Number of relaxations before dropping to bottom solver
-CdrGodunov.gmg_min_iter          = 5                       # Minimum number of iterations
-CdrGodunov.gmg_max_iter          = 32                      # Maximum number of iterations
-CdrGodunov.gmg_exit_tol          = 1.E-10                  # Residue tolerance
-CdrGodunov.gmg_exit_hang         = 0.2                     # Solver hang
-CdrGodunov.gmg_min_cells         = 16                      # Bottom drop
-CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
-CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+CdrGodunov.seed                     = -1                        ## Seed. Random seed with seed < 0
+CdrGodunov.bc.x.lo                  = wall                      ## 'data', 'function', 'wall', 'outflow', 'solver'
+CdrGodunov.bc.x.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', 'solver'
+CdrGodunov.bc.y.lo                  = wall                      ## 'data', 'function', 'wall', 'outflow', 'solver'
+CdrGodunov.bc.y.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', 'solver'
+CdrGodunov.bc.z.lo                  = wall                      ## 'data', 'function', 'wall', 'outflow', 'solver'
+CdrGodunov.bc.z.hi                  = wall                      ## 'data', 'function', 'wall', 'outflow', 'solver'
+CdrGodunov.limit_slopes             = true                      ## Use slope-limiters for godunov
+CdrGodunov.plt_vars                 = phi vel src dco ebflux    ## Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+CdrGodunov.extrap_source            = false                     ## Flag for including source term for time-extrapolation
+CdrGodunov.plot_mode                = density                   ## Plot densities 'density' or particle numbers ('numbers')
+CdrGodunov.blend_conservation       = true                      ## Turn on/off blending with nonconservative divergenceo
+CdrGodunov.which_redistribution     = volume                    ## Redistribution type. 'volume', 'mass', or 'none' (turned off)
+CdrGodunov.use_regrid_slopes        = true                      ## Turn on/off slopes when regridding
+CdrGodunov.gmg_verbosity            = -1                        ## GMG verbosity
+CdrGodunov.gmg_pre_smooth           = 12                        ## Number of relaxations in GMG downsweep
+CdrGodunov.gmg_post_smooth          = 12                        ## Number of relaxations in upsweep
+CdrGodunov.gmg_bott_smooth          = 12                        ## Number of relaxations before dropping to bottom solver
+CdrGodunov.gmg_min_iter             = 5                         ## Minimum number of iterations
+CdrGodunov.gmg_max_iter             = 32                        ## Maximum number of iterations
+CdrGodunov.gmg_exit_tol             = 1.E-10                    ## Residue tolerance
+CdrGodunov.gmg_exit_hang            = 0.2                       ## Solver hang
+CdrGodunov.gmg_min_cells            = 16                        ## Bottom drop
+CdrGodunov.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrGodunov.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
+CdrGodunov.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+

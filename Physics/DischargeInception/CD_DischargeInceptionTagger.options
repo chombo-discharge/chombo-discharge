@@ -1,8 +1,9 @@
 # ====================================================================================================
 # DischargeInceptionTagger class options
 # ====================================================================================================
-DischargeInceptionTagger.verbosity   = -1    # Tagger chattiness. 
-DischargeInceptionTagger.buffer      = 4     # Grown buffer around flagged cells
-DischargeInceptionTagger.max_voltage = 1.0   # Maximum applied voltage 
-DischargeInceptionTagger.ref_alpha   = 5.0   # Refinement curvature criterion. Lower => more mesh
-DischargeInceptionTagger.plot        = false # Plot tagging field or not. 
+DischargeInceptionTagger.verbosity       = -1       ## Tagger chattiness.
+DischargeInceptionTagger.buffer          = 4        ## Grown buffer around flagged cells
+DischargeInceptionTagger.max_voltage     = 1.0      ## Maximum applied voltage
+DischargeInceptionTagger.ref_alpha       = 5.0      ## Refinement curvature criterion. Lower => more mesh
+DischargeInceptionTagger.plot            = false    ## Plot tagging field or not.
+
