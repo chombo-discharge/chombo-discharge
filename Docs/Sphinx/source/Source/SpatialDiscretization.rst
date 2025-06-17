@@ -269,4 +269,4 @@ Given two normal vectors :math:`\mathbf{n}` and :math:`\mathbf{n}^\prime`, the c
 
 where :math:`\theta_c` is a threshold angle for grid refinent. 
 
-The other two cases are more complicated, and are covered by the :ref:`Chap:GeoCoarsener` and :ref:`Chap:CellTagger` classes.
+The other two cases are more complicated, and are covered by the :ref:`Chap:CellTagger` classes.
