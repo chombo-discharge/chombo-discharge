@@ -526,8 +526,8 @@ public:
 
 protected:
   // Reductions for performing catenation and join operations in a thread-safe manner.
-#pragma omp declare reduction(catenate : List <P> : ThreadSafeCatenation <P>(omp_out, omp_in))
-#pragma omp declare reduction(join : List <P> : ThreadSafeJoin <P>(omp_out, omp_in))
+#pragma omp declare reduction(catenate : List<P> : ThreadSafeCatenation<P>(omp_out, omp_in))
+#pragma omp declare reduction(join : List<P> : ThreadSafeJoin<P>(omp_out, omp_in))
 
   /*!
     @brief Realm on which the ParticleContainer is defined

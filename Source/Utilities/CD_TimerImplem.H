@@ -119,21 +119,15 @@ Timer::printReportHeader(std::ostream& a_outputStream) const noexcept
     header
       << "| ---------------------------------------------------------------------------------------------------------|"
       << "\n"
-      << "| " + m_processName + " kernel report: "
-      << "\n"
+      << "| " + m_processName + " kernel report: " << "\n"
       << "| ---------------------------------------------------------------------------------------------------------|"
       << "\n"
-      << "| " << std::left << std::setw(25) << "Event"
-      << "| " << std::right << std::setw(8) << "Loc. (s)"
-      << "| " << std::right << std::setw(8) << "Loc. (%)"
+      << "| " << std::left << std::setw(25) << "Event" << "| " << std::right << std::setw(8) << "Loc. (s)" << "| "
+      << std::right << std::setw(8) << "Loc. (%)"
 #ifdef CH_MPI
-      << "| " << std::right << std::setw(8) << "Min. (s)"
-      << "| " << std::right << std::setw(8) << "Max. (s)"
-      << "| " << std::right << std::setw(8) << "Avg. (s)"
-      << "| " << std::right << std::setw(8) << "Dev. (s)"
-      << "| " << std::right << std::setw(8) << "Min rank"
-      << "| " << std::right << std::setw(8) << "Max rank"
-      << "| "
+      << "| " << std::right << std::setw(8) << "Min. (s)" << "| " << std::right << std::setw(8) << "Max. (s)" << "| "
+      << std::right << std::setw(8) << "Avg. (s)" << "| " << std::right << std::setw(8) << "Dev. (s)" << "| "
+      << std::right << std::setw(8) << "Min rank" << "| " << std::right << std::setw(8) << "Max rank" << "| "
 #endif
       << "\n"
       << "| ---------------------------------------------------------------------------------------------------------|"
@@ -156,10 +150,8 @@ Timer::printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real>
     tail
       << "| ---------------------------------------------------------------------------------------------------------|"
       << "\n"
-      << "| Local elapsed time  = " << std::fixed << std::setprecision(4) << a_elapsedTime.first << " seconds"
-      << "\n"
-      << "| Global elapsed time = " << std::fixed << std::setprecision(4) << a_elapsedTime.second << " seconds"
-      << "\n"
+      << "| Local elapsed time  = " << std::fixed << std::setprecision(4) << a_elapsedTime.first << " seconds" << "\n"
+      << "| Global elapsed time = " << std::fixed << std::setprecision(4) << a_elapsedTime.second << " seconds" << "\n"
       << "| ---------------------------------------------------------------------------------------------------------|"
       << "\n";
 
@@ -293,8 +285,7 @@ Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOnly) c
                    << std::right << std::setw(8) << ssDevDuration.str() << "| " << std::right << std::setw(8)
                    << ssMinRank.str() << "| " << std::right << std::setw(8) << ssMaxRank.str()
 #endif
-                   << "| "
-                   << "\n";
+                   << "| " << "\n";
 
       a_outputStream << outputString.str();
     }
@@ -332,7 +323,7 @@ Timer::computeTotalElapsedTime(const bool a_localReportOnly) const noexcept
     elapsedTimeGlobal = elapsedTimeLocal;
   }
 #else
-  elapsedTimeGlobal  = elapsedTimeLocal;
+  elapsedTimeGlobal = elapsedTimeLocal;
 #endif
 
   return std::make_pair(elapsedTimeLocal, elapsedTimeGlobal);

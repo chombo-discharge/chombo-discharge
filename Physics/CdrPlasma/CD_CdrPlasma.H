@@ -16,8 +16,7 @@ namespace Physics {
   /*!
     @brief Namespace for encapsulating CDR plasma code.
   */
-  namespace CdrPlasma {
-  };
+  namespace CdrPlasma {};
 
 } // namespace Physics
 
