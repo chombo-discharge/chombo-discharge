@@ -22,8 +22,8 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   // Set up basic AdvectionDiffusion
   auto solver      = RefCountedPtr<CdrSolver>(new CdrGodunov());

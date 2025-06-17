@@ -38,10 +38,9 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
-  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up the time stepper.
   auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(
@@ -55,7 +54,7 @@ main(int argc, char* argv[])
     timestepper->forceDt(dt);
 
     // Run the simulation.
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
     engine->setupAndRun(input_file);
 
     // Can compute error if i > 0

@@ -21,9 +21,8 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new Cylinder());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Cylinder());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   // Set up basic AdvectionDiffusion
   auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
@@ -36,7 +35,7 @@ main(int argc, char* argv[])
   });
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
   engine->setupAndRun(input_file);
 
 #ifdef CH_MPI

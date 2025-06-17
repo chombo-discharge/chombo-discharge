@@ -237,7 +237,7 @@ Driver::getGeometryTags()
     pout() << "Driver::getGeometryTags()" << endl;
   }
 
-  // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script). 
+  // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script).
 
   const int maxAmrDepth = m_amr->getMaxAmrDepth();
 

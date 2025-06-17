@@ -44,8 +44,8 @@ main(int argc, char* argv[])
   }
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   // Set up physics
   RefCountedPtr<CdrPlasmaPhysics> physics     = RefCountedPtr<CdrPlasmaPhysics>(new CdrPlasmaJSON());
@@ -72,7 +72,7 @@ main(int argc, char* argv[])
   timestepper->setVoltage(voltageCurve);
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
   engine->setupAndRun(input_file);
 
   // Clean up memory

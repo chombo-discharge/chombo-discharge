@@ -20,9 +20,9 @@ main(int argc, char* argv[])
   ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new MechanicalShaft());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new MechanicalShaft());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up basic Poisson, potential = 1
   auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid>>(new FieldStepper<FieldSolverMultigrid>());
