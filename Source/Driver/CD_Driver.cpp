@@ -73,7 +73,6 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   this->parseOptions();
 
   // Always register this Realm and these operators.
-
   m_realm = Realm::Primal;
   m_amr->registerRealm(m_realm);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, phase::gas);
