@@ -119,6 +119,17 @@ public:
   initialData();
 
   /*!
+    @brief Fill a particle container randomly with particles such that we obtain the target uniform density.
+    @param[inout] a_particles Particle container to fill. Particles already in the container will be kept.
+    @param[in] a_densityFunc Density function.
+    @param[in] a_maxParticlesPerCell Maximum number of computational particles generated per cell. 
+  */
+  virtual void
+  generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
+                               const std::function<Real(const RealVect x)>& a_densityFunc,
+                               const int                                    a_maxParticlesPerCell) const noexcept;
+
+  /*!
     @brief Regrid this solver. 
     @param[in] a_lmin           Coarsest level where grids did not change. 
     @param[in] a_oldFinestLevel Finest AMR level before the regrid. 

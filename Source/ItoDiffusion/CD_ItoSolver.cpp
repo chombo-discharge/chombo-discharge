@@ -566,11 +566,117 @@ ItoSolver::initialData()
   bulkParticles.addParticles(m_species->getInitialParticles());
   bulkParticles.remap();
 
+  // Generate particles from the initial density distribution.
+  auto initialDensity = [&](const RealVect x) -> Real {
+    const auto& initialDensityFunc = m_species->getInitialDensity();
+
+    return initialDensityFunc(x, m_time);
+  };
+
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, 32);
+
   constexpr Real tolerance = 0.0;
 
   // Add particles, remove the ones that are inside the EB, and then deposit
   this->removeCoveredParticles(bulkParticles, EBRepresentation::ImplicitFunction, tolerance);
   this->depositParticles<ItoParticle, &ItoParticle::weight>(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
+}
+
+void
+ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
+                                        const std::function<Real(const RealVect x)>& a_densityFunc,
+                                        const int a_maxParticlesPerCell) const noexcept
+{
+  CH_TIME("ItoSolver::generateParticlesFromDensity");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::generateParticlesFromDensity" << endl;
+  }
+
+  // Lambda which stochastically determines the number of particles in a cell. This is the mean number of particles, plus
+  // a stochastic evaluation of whether or not to include the "fractional" particle.
+  auto sampleParticles = [&](const Real a_volume, const Real a_density) -> std::vector<long long> {
+    const Real meanNumParticles   = a_volume * a_density;
+    const Real remainingParticles = meanNumParticles - std::floor(meanNumParticles);
+
+    long long numParticles = std::floor(meanNumParticles);
+    if (Random::getUniformReal01() < remainingParticles) {
+      numParticles += 1LL;
+    }
+
+    return ParticleManagement::partitionParticleWeights(numParticles, static_cast<long long>(a_maxParticlesPerCell));
+  };
+
+  // Grid loop.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+    const Real               vol    = std::pow(dx, SpaceDim);
+    const RealVect           probLo = m_amr->getProbLo();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&     din        = dit[mybox];
+      const Box&           cellbox    = dbl[din];
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+      List<ItoParticle>&   particles  = a_particles[lvl][din].listItems();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          const RealVect cellPos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          const Real     phi     = a_densityFunc(cellPos);
+
+          const std::vector<long long> particleWeights = sampleParticles(vol, phi);
+
+          const RealVect lo = probLo + (RealVect(iv)) * dx;
+          const RealVect hi = probLo + (RealVect(iv) + RealVect::Unit) * dx;
+
+          // Partition the particle weights.
+          for (const auto& w : particleWeights) {
+            const RealVect x = Random::randomPosition(lo, hi);
+
+            particles.add(ItoParticle(w, x));
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+        if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
+          const Real     kappa         = ebisbox.volFrac(vof);
+          const RealVect normal        = ebisbox.normal(vof);
+          const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
+          const RealVect cellPos       = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          const Real     phi           = a_densityFunc(cellPos);
+
+          // Compute the minimum box that encloses this cell.
+          RealVect lo = -0.5 * RealVect::Unit;
+          RealVect hi = +0.5 * RealVect::Unit;
+
+          DataOps::computeMinValidBox(lo, hi, normal, bndryCentroid);
+
+          // Partition particle weights.
+          const std::vector<long long> particleWeights = sampleParticles(kappa * vol, phi);
+
+          // Sample the particles.
+          for (const auto& w : particleWeights) {
+            const RealVect x = Random::randomPosition(cellPos, lo, hi, bndryCentroid, normal, dx, kappa);
+
+            particles.add(ItoParticle(w, x));
+          }
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+
+      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
 }
 
 void

@@ -15,18 +15,24 @@
 
 ItoSpecies::ItoSpecies()
 {
-  m_name         = "ItoSpecies";
-  m_isMobile     = false;
-  m_isDiffusive  = false;
-  m_chargeNumber = 0;
+  m_name           = "ItoSpecies";
+  m_isMobile       = false;
+  m_isDiffusive    = false;
+  m_chargeNumber   = 0;
+  m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
+    return 0.0;
+  };
 }
 
 ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive)
 {
-  m_name         = a_name;
-  m_chargeNumber = a_chargeNumber;
-  m_isMobile     = a_mobile;
-  m_isDiffusive  = a_diffusive;
+  m_name           = a_name;
+  m_chargeNumber   = a_chargeNumber;
+  m_isMobile       = a_mobile;
+  m_isDiffusive    = a_diffusive;
+  m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
+    return 0.0;
+  };
 }
 
 ItoSpecies::~ItoSpecies()
@@ -44,6 +50,12 @@ ItoSpecies::getChargeNumber() const
   return m_chargeNumber;
 }
 
+const std::function<Real(const RealVect& x, const Real& t)>&
+ItoSpecies::getInitialDensity() const
+{
+  return m_initialDensity;
+}
+
 bool
 ItoSpecies::isDiffusive() const
 {
@@ -54,6 +66,12 @@ bool
 ItoSpecies::isMobile() const
 {
   return m_isMobile;
+}
+
+void
+ItoSpecies::setInitialDensity(const std::function<Real(const RealVect& x, const Real& t)>& a_initialDensity)
+{
+  m_initialDensity = a_initialDensity;
 }
 
 List<ItoParticle>&

@@ -606,10 +606,10 @@ namespace Physics {
       initializeParticles();
 
       /*!
-	@brief Parse initial densities for CDR equations.
+	@brief Parse initial densities for CDR and Ito species. 
       */
       virtual void
-      initializeDensitiesCDR();
+      initializeDensities();
 
       /*!
 	@brief Initialize mobility functions
