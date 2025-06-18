@@ -65,7 +65,6 @@
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -184,13 +183,7 @@ Solvers only interact with one another through these modules, and these modules 
 <li><p><a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> for integrating the equations of motion.</p></li>
 <li><p><a class="reference internal" href="ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a> for representing computational geometries (such as electrodes and dielectrics).</p></li>
 <li><p><a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> for flagging cells for refinement and coarsening.</p></li>
-<li><p><a class="reference internal" href="GeoCoarsener.html#chap-geocoarsener"><span class="std std-ref">GeoCoarsener</span></a> for manually removing refinement flags along the EB surface.</p></li>
 </ol>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p>In the current version of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, <a class="reference internal" href="GeoCoarsener.html#chap-geocoarsener"><span class="std std-ref">GeoCoarsener</span></a> has become redundant (due to improvements in the algorithms).
-It will be removed in future versions.</p>
-</div>
 </section>
 
 

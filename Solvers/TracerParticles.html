@@ -65,7 +65,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -276,13 +275,14 @@ See <a class="reference internal" href="../Source/Particles.html#chap-genericpar
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># TracerParticleSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">verbosity</span>     <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>     <span class="c1"># Solver verbosity level. </span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">deposition</span>    <span class="o">=</span> <span class="n">cic</span>    <span class="c1"># Deposition method. Must be &#39;ngp&#39; or &#39;cic&#39;</span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="n">cic</span>    <span class="c1"># Interpolation method. Must be &#39;ngp&#39; or &#39;cic&#39;</span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">deposition_cf</span> <span class="o">=</span> <span class="n">halo</span>   <span class="c1"># Coarse-fine deposition. Must be interp or halo</span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">plot_weight</span>   <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Turn on/off plotting of the particle weight.</span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">plot_velocity</span> <span class="o">=</span> <span class="n">true</span>   <span class="c1"># Turn on/off plotting of the particle velocities.</span>
-<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">volume_scale</span>  <span class="o">=</span> <span class="n">false</span>  <span class="c1"># If true, depositions yield density * volume instead of just volume</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">verbosity</span>         <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>       <span class="c1">## Solver verbosity level.</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">deposition</span>        <span class="o">=</span> <span class="n">cic</span>      <span class="c1">## Deposition method. Must be &#39;ngp&#39; or &#39;cic&#39;</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">interpolation</span>     <span class="o">=</span> <span class="n">cic</span>      <span class="c1">## Interpolation method. Must be &#39;ngp&#39; or &#39;cic&#39;</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">deposition_cf</span>     <span class="o">=</span> <span class="n">halo</span>     <span class="c1">## Coarse-fine deposition. Must be interp or halo</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">plot_weight</span>       <span class="o">=</span> <span class="n">true</span>     <span class="c1">## Turn on/off plotting of the particle weight.</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">plot_velocity</span>     <span class="o">=</span> <span class="n">true</span>     <span class="c1">## Turn on/off plotting of the particle velocities.</span>
+<span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">volume_scale</span>      <span class="o">=</span> <span class="n">false</span>    <span class="c1">## If true, depositions yield density * volume instead of just volume</span>
+
 </pre></div>
 </div>
 <p>The flags <code class="docutils literal notranslate"><span class="pre">deposition</span></code> and <code class="docutils literal notranslate"><span class="pre">interpolation</span></code> indicates which deposition and interpolation methods will be used.

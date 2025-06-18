@@ -65,7 +65,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/TimeStepper.html">TimeStepper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/AmrMesh.html">AmrMesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/CellTagger.html">CellTagger</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/GeoCoarsener.html">GeoCoarsener</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Discretization</span></p>
 <ul>
@@ -520,22 +519,23 @@ Valid options are <code class="docutils literal notranslate"><span class="pre">i
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># ItoSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>           <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>              <span class="c1">## Class verbosity</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>     <span class="o">=</span> <span class="n">equal_weight_kd</span> <span class="c1">## Particle merging algorithm. Either &#39;reinitialize&#39; or &#39;equal_weight_kd&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>            <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>     <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>    <span class="o">=</span> <span class="n">bisection</span>       <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>         <span class="o">=</span> <span class="mf">1.E-4</span>           <span class="c1">## Bisection step length for intersection tests</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>          <span class="o">=</span> <span class="mf">5.0</span>             <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>        <span class="o">=</span> <span class="n">false</span>           <span class="c1">## Turn on/off redistribution. </span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>  <span class="o">=</span> <span class="n">false</span>           <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>       <span class="o">=</span> <span class="n">particles</span>       <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>         <span class="o">=</span> <span class="mi">32</span>              <span class="c1">## Maximum number of computational particles to generate for restarts.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>  <span class="o">=</span> <span class="n">true</span>            <span class="c1">## Force irregular deposition in cut cells or not</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>      <span class="o">=</span> <span class="n">true</span>            <span class="c1">## Force irregular interpolation in cut cells or not</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>     <span class="o">=</span> <span class="n">direct</span>          <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>     <span class="o">=</span> <span class="n">cic</span>             <span class="c1">## Cloud-in-cell for plotting particles.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>          <span class="o">=</span> <span class="n">cic</span>             <span class="c1">## Deposition type. </span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>       <span class="o">=</span> <span class="n">halo</span>            <span class="c1">## Coarse-fine deposition. interp, halo, or halo_ngp</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">verbosity</span>              <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                 <span class="c1">## Class verbosity</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">merge_algorithm</span>        <span class="o">=</span> <span class="n">equal_weight_kd</span>    <span class="c1">## Particle merging algorithm. Either &#39;reinitialize&#39; or &#39;equal_weight_kd&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plt_vars</span>               <span class="o">=</span> <span class="n">phi</span> <span class="n">vel</span> <span class="n">dco</span>        <span class="c1">## &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;part&#39;, &#39;eb_part&#39;, &#39;dom_part&#39;, &#39;src_part&#39;, &#39;energy_density&#39;, &#39;energy&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">intersection_alg</span>       <span class="o">=</span> <span class="n">bisection</span>          <span class="c1">## Intersection algorithm for EB-particle intersections.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">bisect_step</span>            <span class="o">=</span> <span class="mf">1.E-4</span>              <span class="c1">## Bisection step length for intersection tests</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">normal_max</span>             <span class="o">=</span> <span class="mf">5.0</span>                <span class="c1">## Maximum value (absolute) that can be drawn from the exponential distribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">redistribute</span>           <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off redistribution.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">blend_conservation</span>     <span class="o">=</span> <span class="n">false</span>              <span class="c1">## Turn on/off blending with nonconservative divergenceo</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">checkpointing</span>          <span class="o">=</span> <span class="n">particles</span>          <span class="c1">## &#39;particles&#39; or &#39;numbers&#39;</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">ppc_restart</span>            <span class="o">=</span> <span class="mi">32</span>                 <span class="c1">## Maximum number of computational particles to generate for restarts.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_deposition</span>     <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular deposition in cut cells or not</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">irr_ngp_interp</span>         <span class="o">=</span> <span class="n">true</span>               <span class="c1">## Force irregular interpolation in cut cells or not</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>        <span class="o">=</span> <span class="n">direct</span>             <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>        <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Cloud-in-cell for plotting particles.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>             <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Deposition type.</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>          <span class="o">=</span> <span class="n">halo</span>               <span class="c1">## Coarse-fine deposition. interp, halo, or halo_ngp</span>
+
 </pre></div>
 </div>
 </section>
