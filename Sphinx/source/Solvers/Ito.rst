@@ -140,6 +140,20 @@ Initial data for the ``ItoSolver`` is provided through ``ItoSpecies`` by providi
 When ``ItoSolver`` initializes the data in the solver, it transfers the particles from the species and into the solver.
 See :ref:`Chap:ParticleOps` for examples on how to draw initial particles and how to partition them when using MPI.
 
+Another way the initial particles can be generated is to set an initial density distribution for the species:
+
+.. code-block:: c++
+
+   class ItoSpecies {
+   public:
+
+   void setInitialDensityDistribution(const std::function<Real(const RealVect& x, const Real& t)>& phi);
+   
+   };
+
+When the user sets this function, the initialization routine in the solver will generate particles in the grid cell so that the specified density is reached.
+Note that this evaluation is stochastic, and there is currently a hard limit that restricts the number of initial computational particles per cell to 32. 
+
 Transport kernel
 ----------------
 

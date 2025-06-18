@@ -1019,7 +1019,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 It is sufficient to populate the <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> species vectors <code class="docutils literal notranslate"><span class="pre">m_cdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">m_itoSpecies</span></code> if one only wants to initialize the solvers.
 See <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for their C++ definition.
 In addition to actually populating the vectors, users will typically also include initial conditions for the species.
-The interfaces permit initial particles for the Îto solvers, while the CDR solvers permit particles <em>and</em> initial density functions.
+The interfaces permit initial particles and density functions for both both solver types.
 Additionally, one must define all species associated with radiative transfer solvers.</p>
 </section>
 <section id="plasma-reactions">
@@ -1923,7 +1923,7 @@ The particles must be organized as rows containing the coordinate positions and 
 </section>
 <section id="initial-densities">
 <h4>Initial densities<a class="headerlink" href="#initial-densities" title="Permalink to this heading"></a></h4>
-<p>If a species is defined by a convection-diffusion-reaction solver, one may include an initial density by setting the <a href="#id7"><span class="problematic" id="id8">``</span></a>initial density``parameter.
+<p>One may include an initial density by setting the <a href="#id7"><span class="problematic" id="id8">``</span></a>initial density``parameter.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma species&quot;</span><span class="w"> </span><span class="p">:</span>
 <span class="p">[</span>
@@ -1938,6 +1938,7 @@ For example:</p>
 <span class="p">]</span>
 </pre></div>
 </div>
+<p>If the species is defined as a particle species, computational particles will be generated within each grid so that the density is approximately as specified.</p>
 </section>
 </section>
 <section id="photon-species">
@@ -2708,20 +2709,19 @@ Note that this changes the physics of the model, but usually enhances stability 
 An example is given below:</p>
 </li>
 </ol>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>&quot;plasma reactions&quot;: [
-   {
-      &quot;reaction&quot;: &quot;e + N2 -&gt; e + e + N2+&quot;
-      &quot;type&quot;: &quot;constant&quot;,
-      &quot;value&quot;: 1.E-12,
-      &quot;limit max k*dt&quot; : 2.0
-   }
-]
-
-This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
-I.e., all background species are first absorbed into the rate calculation before the rate is limited.
-We point out that limiting is not possible if both species on the left hand side are solver variables.
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">   </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;e + N2 -&gt; e + e + N2+&quot;</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.E-12</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;limit max k*dt&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span>
+<span class="w">   </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
+<p>This will limit the rate such that <span class="math notranslate nohighlight">\(k \left[\text[N]_2\right]\Delta t = 2\)</span>.
+I.e., all background species are first absorbed into the rate calculation before the rate is limited.
+We point out that limiting is not possible if both species on the left hand side are solver variables.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The above features have been implemented in order to push the algorithm towards coarser grids and larger time steps.

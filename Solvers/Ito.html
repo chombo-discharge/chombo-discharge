@@ -277,6 +277,17 @@ The constructor for the <code class="docutils literal notranslate"><span class="
 </div>
 <p>When <code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code> initializes the data in the solver, it transfers the particles from the species and into the solver.
 See <a class="reference internal" href="../Source/Particles.html#chap-particleops"><span class="std std-ref">ParticleOps</span></a> for examples on how to draw initial particles and how to partition them when using MPI.</p>
+<p>Another way the initial particles can be generated is to set an initial density distribution for the species:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ItoSpecies</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="n">setInitialDensityDistribution</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">);</span>
+
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>When the user sets this function, the initialization routine in the solver will generate particles in the grid cell so that the specified density is reached.
+Note that this evaluation is stochastic, and there is currently a hard limit that restricts the number of initial computational particles per cell to 32.</p>
 </section>
 <section id="transport-kernel">
 <h2>Transport kernel<a class="headerlink" href="#transport-kernel" title="Permalink to this heading"></a></h2>

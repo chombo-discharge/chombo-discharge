@@ -160,6 +160,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abc86cb62b622c8ddfd0b7fb1601afda7" id="r_abc86cb62b622c8ddfd0b7fb1601afda7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#abc86cb62b622c8ddfd0b7fb1601afda7">initialData</a> ()</td></tr>
 <tr class="memdesc:abc86cb62b622c8ddfd0b7fb1601afda7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the initial data.  <br /></td></tr>
 <tr class="separator:abc86cb62b622c8ddfd0b7fb1601afda7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a323dc7e71939c36b76dba919d2bd5edf" id="r_a323dc7e71939c36b76dba919d2bd5edf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a323dc7e71939c36b76dba919d2bd5edf">generateParticlesFromDensity</a> (<a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_particles</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_densityFunc</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_maxParticlesPerCell</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a323dc7e71939c36b76dba919d2bd5edf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill a particle container randomly with particles such that we obtain the target uniform density.  <br /></td></tr>
+<tr class="separator:a323dc7e71939c36b76dba919d2bd5edf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ec90d5f802b40a624d7aa0be36a6f6d" id="r_a2ec90d5f802b40a624d7aa0be36a6f6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a2ec90d5f802b40a624d7aa0be36a6f6d">regrid</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_oldFinestLevel</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_newFinestLevel</a>)</td></tr>
 <tr class="memdesc:a2ec90d5f802b40a624d7aa0be36a6f6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Regrid this solver.  <br /></td></tr>
 <tr class="separator:a2ec90d5f802b40a624d7aa0be36a6f6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2498,6 +2501,58 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
     <tr><td class="paramdir">[in]</td><td class="paramname">a_particlesPerCell</td><td>Mesh data showing how many particles are in each cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_level</td><td>Grid level. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_newPPC</td><td>Desired number of computational particles per cell </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a323dc7e71939c36b76dba919d2bd5edf" name="a323dc7e71939c36b76dba919d2bd5edf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a323dc7e71939c36b76dba919d2bd5edf">&#9670;&#160;</a></span>generateParticlesFromDensity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoSolver::generateParticlesFromDensity </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classParticleContainer.html">ParticleContainer</a>&lt; <a class="el" href="classItoParticle.html">ItoParticle</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_particles</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::function</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>(<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> <a class="el" href="classTracerParticleSolver.html">x</a>)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_densityFunc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_maxParticlesPerCell</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fill a particle container randomly with particles such that we obtain the target uniform density. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_particles</td><td>Particle container to fill. Particles already in the container will be kept. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_densityFunc</td><td>Density function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_maxParticlesPerCell</td><td>Maximum number of computational particles generated per cell. </td></tr>
   </table>
   </dd>
 </dl>

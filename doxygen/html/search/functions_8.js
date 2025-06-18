@@ -13,7 +13,7 @@ var searchData=
   ['initialdataparticles_10',['initialDataParticles',['../classCdrSolver.html#ae7b4284381910cdd77ec863410db4670',1,'CdrSolver']]],
   ['initializeautomatictownsend_11',['initializeAutomaticTownsend',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6e91d8027a8996db0c1ab9a605b382fb',1,'Physics::ItoKMC::ItoKMCJSON']]],
   ['initializebackgroundspecies_12',['initializeBackgroundSpecies',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#aa883bfab3b6d74896938f26a0a738fef',1,'Physics::ItoKMC::ItoKMCJSON']]],
-  ['initializedensitiescdr_13',['initializeDensitiesCDR',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a6c2fe0c09aea32a070979d0db3210738',1,'Physics::ItoKMC::ItoKMCJSON']]],
+  ['initializedensities_13',['initializeDensities',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a4f1c1ecdf884ef0628c5393ce3bdbb62',1,'Physics::ItoKMC::ItoKMCJSON']]],
   ['initializediffusioncoefficients_14',['initializeDiffusionCoefficients',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a1162beebac3c451022c470d34045ec8c',1,'Physics::ItoKMC::ItoKMCJSON']]],
   ['initializefieldemission_15',['initializeFieldEmission',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ac3b9f4f3434d70a726e60f33b481e385',1,'Physics::ItoKMC::ItoKMCJSON']]],
   ['initializegaslaw_16',['initializeGasLaw',['../classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a32d3f613886a1d121c9b7e9839b57479',1,'Physics::ItoKMC::ItoKMCJSON']]],
