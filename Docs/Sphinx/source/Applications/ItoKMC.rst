@@ -172,7 +172,7 @@ Species are defined either as input species for CDR solvers (see :ref:`Chap:CdrS
 It is sufficient to populate the ``ItoKMCPhysics`` species vectors ``m_cdrSpecies`` and ``m_itoSpecies`` if one only wants to initialize the solvers.
 See :ref:`Chap:ItoKMCPhysics` for their C++ definition.
 In addition to actually populating the vectors, users will typically also include initial conditions for the species.
-The interfaces permit initial particles for the Îto solvers, while the CDR solvers permit particles *and* initial density functions.
+The interfaces permit initial particles and density functions for both both solver types.
 Additionally, one must define all species associated with radiative transfer solvers.
 
 .. _Chap:ItoKMCPlasmaReaction:
@@ -1236,7 +1236,7 @@ For example:
 Initial densities
 _________________
 
-If a species is defined by a convection-diffusion-reaction solver, one may include an initial density by setting the ``initial density``parameter.
+One may include an initial density by setting the ``initial density``parameter.
 For example:
 
 .. code-block:: json
@@ -1252,6 +1252,8 @@ For example:
 	  "initial density": 1E10
       }
     ]
+
+If the species is defined as a particle species, computational particles will be generated within each grid so that the density is approximately as specified.
 
 Photon species
 --------------
