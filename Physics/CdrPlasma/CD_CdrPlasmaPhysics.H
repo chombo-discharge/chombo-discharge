@@ -47,7 +47,7 @@ namespace Physics {
 	@brief Parse run-time options
       */
       virtual void
-      parseRuntimeOptions(){
+      parseRuntimeOptions() {
 
       };
 

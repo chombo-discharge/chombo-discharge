@@ -17,8 +17,7 @@ namespace Physics {
   /*!
     @brief Namespace for encapsulating physics code for describing Brownian walkers. 
   */
-  namespace BrownianWalker {
-  }
+  namespace BrownianWalker {}
 
 } // namespace Physics
 

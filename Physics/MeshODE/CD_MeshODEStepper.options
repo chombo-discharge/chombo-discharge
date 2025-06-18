@@ -1,8 +1,9 @@
 # ====================================================================================================
 # MeshODEStepper class options
 # ====================================================================================================
-MeshODEStepper.verbosity         = -1     # Verbosity level
-MeshODEStepper.integration       = rk2    # 'euler', 'rk2', or 'rk4'
-MeshODEStepper.init_phi          = 0.0    # Initial value for phi. 
-MeshODEStepper.frequency         = 10     # Frequency
-MeshODEStepper.dt                = 1E-3   # Time step
+MeshODEStepper.verbosity       = -1      ## Verbosity level
+MeshODEStepper.integration     = rk2     ## 'euler', 'rk2', or 'rk4'
+MeshODEStepper.init_phi        = 0.0     ## Initial value for phi.
+MeshODEStepper.frequency       = 10      ## Frequency
+MeshODEStepper.dt              = 1E-3    ## Time step
+

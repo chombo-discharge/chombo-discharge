@@ -3,18 +3,19 @@
 #
 # This class can add an arbitrary number of dielectric spheres, possibly roughy spheres. To use it,
 # you need to set 'num_spheres' to the number of spheres that you want. Each sphere needs a separate
-# radius and center. 
+# radius and center.
 # ====================================================================================================
-Aerosol.num_spheres       = 3              # Number of spheres
-Aerosol.invert            = false          # Invert so that instead of particles we have holes
-Aerosol.permittivity      = 5.0            # Dielectric permittivity
-Aerosol.eps0              = 1              # Permittivity
+Aerosol.num_spheres      = 3        ## Number of spheres
+Aerosol.invert           = false    ## Invert so that instead of particles we have holes
+Aerosol.permittivity     = 5.0      ## Dielectric permittivity
+Aerosol.eps0             = 1        ## Permittivity
 
-Aerosol.sphere1.radius    = 0.2            # Sphere radius
-Aerosol.sphere1.center    = -0.5 -0.5 -0.5 # Sphere position
+Aerosol.sphere1.radius     = 0.2               ## Sphere radius
+Aerosol.sphere1.center     = -0.5 -0.5 -0.5    ## Sphere position
 
-Aerosol.sphere2.radius    = 0.2            # Sphere radius
-Aerosol.sphere2.center    = 0. 0. 0.       # Sphere center
+Aerosol.sphere2.radius     = 0.2         ## Sphere radius
+Aerosol.sphere2.center     = 0. 0. 0.    ## Sphere center
 
-Aerosol.sphere3.radius    = 0.2            # Sphere radius
-Aerosol.sphere3.center    = 0.5 0.5 0.5    # Sphere center
+Aerosol.sphere3.radius     = 0.2            ## Sphere radius
+Aerosol.sphere3.center     = 0.5 0.5 0.5    ## Sphere center
+

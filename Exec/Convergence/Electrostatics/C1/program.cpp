@@ -68,10 +68,9 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
-  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up the time stepper.
   auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid>>(new FieldStepper<FieldSolverMultigrid>());
@@ -84,7 +83,7 @@ main(int argc, char* argv[])
     amr->buildDomains();
 
     // Set up the Driver and run our program.
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
     engine->setupAndRun(input_file);
 
     // Compute the solution errors if there is a coarser solution available.

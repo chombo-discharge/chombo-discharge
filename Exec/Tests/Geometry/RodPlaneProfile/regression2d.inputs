@@ -1,74 +1,63 @@
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner       =    0.0   0.
-AmrMesh.hi_corner       =    0.04  0.02
-AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 64 32       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 2           # Maximum amr depth
-AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
-AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
-AmrMesh.buffer_size      = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm   = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
-AmrMesh.max_box_size     = 16          # Maximum allowed box size
-AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
-AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
-AmrMesh.num_ghost        = 2           # Number of ghost cells. 
-AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
-AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
-AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_interp  = minmod	     ## Centroid interp stencils. linear, lsq, minmod, etc
-AmrMesh.eb_interp        = minmod            ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
-
+AmrMesh.lo_corner            = 0.0   0.
+AmrMesh.hi_corner            = 0.04  0.02
+AmrMesh.verbosity            = -1             ## Controls verbosity.
+AmrMesh.coarsest_domain      = 64 32          ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth        = 2              ## Maximum amr depth
+AmrMesh.max_sim_depth        = -1             ## Maximum simulation depth
+AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
+AmrMesh.buffer_size          = 2              ## Number of cells between grid levels
+AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting          = morton         ## 'none', 'shuffle', 'morton'
+AmrMesh.blocking_factor      = 16             ## Blocking factor.
+AmrMesh.max_box_size         = 16             ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 16             ## Maximum allowed box size for EBIS generation.
+AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios (mixed ratios are allowed).
+AmrMesh.num_ghost            = 2              ## Number of ghost cells.
+AmrMesh.lsf_ghost            = 2              ## Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost             = 4              ## Set number of of ghost cells for EB stuff
+AmrMesh.mg_interp_order      = 2              ## Multigrid interpolation order
+AmrMesh.mg_interp_radius     = 2              ## Multigrid interpolation radius
+AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight (for least squares)
+AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
+AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
 
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                       = 2                # Engine verbosity
-Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
-Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
-Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 10               # Checkpoint interval
-Driver.regrid_interval                 = 10               # Regrid interval
-Driver.write_regrid_files              = false            # Write regrid files or not.
-Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
-Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
-Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 100              # Maximum number of steps
-Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
-Driver.write_memory                    = false            # Write MPI memory report
-Driver.write_loads                     = false            # Write (accumulated) computational loads
-Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = simulation       # Simulation output names
-Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
-Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
-Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
-Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
-
-
-# ====================================================================================================
-# GeoCoarsener class options
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
+Driver.verbosity                    = 2                   ## Engine verbosity
+Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
+Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
+Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
+Driver.plot_interval                = 10                  ## Plot interval
+Driver.checkpoint_interval          = 10                  ## Checkpoint interval
+Driver.regrid_interval              = 10                  ## Regrid interval
+Driver.write_regrid_files           = false               ## Write regrid files or not.
+Driver.write_restart_files          = false               ## Write restart files or not
+Driver.initial_regrids              = 0                   ## Number of initial regrids
+Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
+Driver.start_time                   = 0                   ## Start time (fresh simulations only)
+Driver.stop_time                    = 1.0                 ## Stop time
+Driver.max_steps                    = 100                 ## Maximum number of steps
+Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
+Driver.write_memory                 = false               ## Write MPI memory report
+Driver.write_loads                  = false               ## Write (accumulated) computational loads
+Driver.output_directory             = ./                  ## Output directory
+Driver.output_names                 = simulation          ## Simulation output names
+Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
+Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank', 'levelset'
+Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
+Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
+Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
+Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
 # RodPlaneProfile geometry class options
@@ -80,31 +69,32 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # Arguments 'profile_num_left' and 'profile_num_right' sets the number of holes to the left and right
 # of this point. You can shift the holes vertically with 'profile_offset', and increase the distance
 # between the holes with 'profile_dist'. The 'profile_shift' argument shifts all holes to the left
-# or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature. 
+# or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature.
 # ====================================================================================================
-RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
-RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
-RodPlaneProfile.rod_live          = true          # Live electrode or not
-RodPlaneProfile.rod_radius        = 500E-6        # Electrode inner radius
-RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
-RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
-RodPlaneProfile.plane_width       = 7.2E-2        # Plane width. 
-RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
-RodPlaneProfile.plane_point       = 0.0 5E-3      # Center point on plane
-RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
-RodPlaneProfile.profile_num_left  = 30            # Number of holes to the left
-RodPlaneProfile.profile_num_right = 30            # Number of holes to the left
-RodPlaneProfile.profile_dist      = 1.28E-3       # Distance between each hole
-RodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
-RodPlaneProfile.profile_yshift    = 0.0           # Vertical offset
-RodPlaneProfile.profile_curv      = 100E-6        # Rounding radius
+RodPlaneProfile.turn_on_rod           = true        ## Turn on/off electrode
+RodPlaneProfile.turn_on_plane         = true        ## Turn on/off dielectric
+RodPlaneProfile.rod_live              = true        ## Live electrode or not
+RodPlaneProfile.rod_radius            = 500E-6      ## Electrode inner radius
+RodPlaneProfile.rod_center1           = 0.0 1E-2    ## Center 1
+RodPlaneProfile.rod_center2           = 0.0 1.0     ## Center 2
+RodPlaneProfile.plane_width           = 7.2E-2      ## Plane width.
+RodPlaneProfile.plane_normal          = 0.0 1.0     ## Plane normal. Not used, oriented along +y only
+RodPlaneProfile.plane_point           = 0.0 5E-3    ## Center point on plane
+RodPlaneProfile.plane_eps             = 4.0         ## Plane permittivity
+RodPlaneProfile.profile_num_left      = 30          ## Number of holes to the left
+RodPlaneProfile.profile_num_right     = 30          ## Number of holes to the left
+RodPlaneProfile.profile_dist          = 1.28E-3     ## Distance between each hole
+RodPlaneProfile.profile_xshift        = 0.0         ## Horizontal offset
+RodPlaneProfile.profile_yshift        = 0.0         ## Vertical offset
+RodPlaneProfile.profile_curv          = 100E-6      ## Rounding radius
 
-# Shape set. Can use 'circle' or 'square' for now. 
-RodPlaneProfile.profile       = square
+# Shape set. Can use 'circle' or 'square' for now.
+RodPlaneProfile.profile     = square
 
 # Circle specific settings
-RodPlaneProfile.circle_radius = 1.031E-3
+RodPlaneProfile.circle_radius     = 1.031E-3
 
 # Square specific settings
-RodPlaneProfile.square_width = 640.0123123E-6
-RodPlaneProfile.square_depth = 440.01231231E-6
+RodPlaneProfile.square_width     = 640.0123123E-6
+RodPlaneProfile.square_depth     = 440.01231231E-6
+

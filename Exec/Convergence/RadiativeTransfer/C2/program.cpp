@@ -38,10 +38,9 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
-  RefCountedPtr<CellTagger>            tagger     = RefCountedPtr<CellTagger>(NULL);
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new CoaxialCable());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
+  RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up the time stepper.
   auto timestepper = RefCountedPtr<RadiativeTransferStepper<EddingtonSP1>>(
@@ -55,7 +54,7 @@ main(int argc, char* argv[])
     timestepper->forceDt(dt);
 
     // Run the simulation.
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
     engine->setupAndRun(input_file);
 
     // Can compute error if i > 0
@@ -81,7 +80,7 @@ main(int argc, char* argv[])
 #ifdef CH_MPI
   if (procID() == 0) {
 #endif
-    //clang-format off
+    // clang-format off
     std::cout << "# nref\t"
               << "Linf error\t"
               << "L1 error\t"
@@ -91,7 +90,7 @@ main(int argc, char* argv[])
       std::cout << std::pow(2, i + 1) << "\t" << std::get<0>(norms[i]) << "\t" << std::get<1>(norms[i]) << "\t"
                 << std::get<2>(norms[i]) << "\n";
     }
-    //    clang-format on
+    // clang-format on
 #ifdef CH_MPI
   }
   MPI_Finalize();

@@ -71,9 +71,8 @@ main(int argc, char* argv[])
   for (const auto& cells : nCells) {
 
     // Set geometry and AMR
-    RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-    RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-    RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+    RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+    RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
     // Set up basic AdvectionDiffusion
     auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
@@ -84,7 +83,7 @@ main(int argc, char* argv[])
     amr->buildDomains();
 
     // Set up the Driver and run it
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
     engine->setupAndRun(input_file);
 
     // Compute the solution errors if there is a coarser solution available.

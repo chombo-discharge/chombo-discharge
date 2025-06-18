@@ -42,11 +42,9 @@
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
-               const RefCountedPtr<CellTagger>&            a_cellTagger,
-               const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen)
+               const RefCountedPtr<CellTagger>&            a_cellTagger)
 {
-  CH_TIME(
-    "Driver::Driver(RefCPtr<ComputationalGeometry>, RefCPtr<TimeStepper>, RefCPtr<AmrMesh>, RefCPtr<CellTagger>, RefCPtr<GeoCoarsener>)");
+  CH_TIME("Driver::Driver");
 
   m_verbosity = -1;
 
@@ -54,7 +52,6 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   this->setTimeStepper(a_timeStepper);                     // Set time stepper
   this->setAmr(a_amr);                                     // Set amr
   this->setCellTagger(a_cellTagger);                       // Set cell tagger
-  this->setGeoCoarsen(a_geoCoarsen);                       // Set geo coarsener
 
   // AMR does its thing
   m_amr->sanityCheck();  // Sanity check, make sure everything is set up correctly
@@ -79,6 +76,8 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
 
   // Seed the RNG.
   Random::seed();
+
+  m_time = m_startTime;
 }
 
 Driver::~Driver()
@@ -238,8 +237,7 @@ Driver::getGeometryTags()
     pout() << "Driver::getGeometryTags()" << endl;
   }
 
-  // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script). It will also
-  //       remove some of those tags if a GeoCoarsener object was supplied to Driver.
+  // TLDR: This routine fetches cut-cell indexes using various criteria (supplied through the input script).
 
   const int maxAmrDepth = m_amr->getMaxAmrDepth();
 
@@ -355,11 +353,6 @@ Driver::getGeometryTags()
   // Grow tags with specified factor.
   for (int lvl = 0; lvl < maxAmrDepth; lvl++) {
     m_geomTags[lvl].grow(m_irregTagGrowth);
-  }
-
-  // Remove tags using the geocoarsener if we have it
-  if (!m_geoCoarsen.isNull()) {
-    m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
 
   // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
@@ -1068,17 +1061,6 @@ Driver::setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger)
   if (!a_cellTagger.isNull()) {
     m_cellTagger->parseOptions();
   }
-}
-
-void
-Driver::setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen)
-{
-  CH_TIME("Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)");
-  if (m_verbosity > 5) {
-    pout() << "Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)" << endl;
-  }
-
-  m_geoCoarsen = a_geoCoarsen;
 }
 
 void
@@ -1993,10 +1975,8 @@ Driver::writeMemoryUsage()
     const int width = 12;
 
     // Write header
-    f << std::left << std::setw(width) << "# MPI rank"
-      << "\t" << std::left << std::setw(width) << "Peak memory"
-      << "\t" << std::left << std::setw(width) << "Unfreed memory"
-      << "\t" << endl;
+    f << std::left << std::setw(width) << "# MPI rank" << "\t" << std::left << std::setw(width) << "Peak memory" << "\t"
+      << std::left << std::setw(width) << "Unfreed memory" << "\t" << endl;
 
     // Write memory
     for (int i = 0; i < numProc(); i++) {

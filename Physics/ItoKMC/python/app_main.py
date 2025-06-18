@@ -26,7 +26,6 @@ def write_template(args):
     main_filename = app_dir + "/program.cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include <CD_Driver.H>\n')
-    mainf.write('#include <CD_GeoCoarsener.H>\n')
     mainf.write('#include <CD_FieldSolverFactory.H>\n')
     mainf.write('#include <CD_' + args.field_solver + '.H>\n')
     mainf.write('#include <CD_ItoLayout.H>\n')
@@ -79,7 +78,6 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  auto compgeom    = RefCountedPtr<ComputationalGeometry> (new " + args.geometry + "());\n")
     mainf.write("  auto amr         = RefCountedPtr<AmrMesh> (new AmrMesh());\n")
-    mainf.write("  auto geocoarsen  = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());\n")
     mainf.write("  auto physics     = RefCountedPtr<ItoKMCPhysics> (new " + args.physics + "());\n")
     mainf.write("  auto timestepper = RefCountedPtr<ItoKMCStepper<>> (new " + args.time_stepper + "<>(physics));\n")
     if args.cell_tagger != "none":
@@ -94,7 +92,7 @@ def write_template(args):
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")
-    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));\n")
+    mainf.write("  RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger));\n")
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 

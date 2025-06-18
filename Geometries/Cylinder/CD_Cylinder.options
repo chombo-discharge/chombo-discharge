@@ -1,12 +1,13 @@
 # ====================================================================================================
 # Cylinder geometry class options
 # ====================================================================================================
-Cylinder.turn_off      = false          # Turn on/off geometry
-Cylinder.fluid_outside = true           # Solution region on inside/outside
-Cylinder.material      = electrode      # Material type. 'dielectric' or 'electrode'
-Cylinder.live          = true           # If electrode, this sets the live/grounded voltage
-Cylinder.permittivity  = 4              # If dielectric, this sets the permittivity
-Cylinder.z_coord       = 0.0            # z-coordinate if doing 2D
-Cylinder.center1       = -10 -10 0      # One endpoint. Must have 3 entries
-Cylinder.center2       =  10  10 0      # Other endpoint. Must have 3 entries. 
-Cylinder.radius        = 0.25           # Cylinder radius. 
+Cylinder.turn_off          = false        ## Turn on/off geometry
+Cylinder.fluid_outside     = true         ## Solution region on inside/outside
+Cylinder.material          = electrode    ## Material type. 'dielectric' or 'electrode'
+Cylinder.live              = true         ## If electrode, this sets the live/grounded voltage
+Cylinder.permittivity      = 4            ## If dielectric, this sets the permittivity
+Cylinder.z_coord           = 0.0          ## z-coordinate if doing 2D
+Cylinder.center1           = -10 -10 0    ## One endpoint. Must have 3 entries
+Cylinder.center2           = 10  10 0     ## Other endpoint. Must have 3 entries.
+Cylinder.radius            = 0.25         ## Cylinder radius.
+

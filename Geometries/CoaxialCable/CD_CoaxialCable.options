@@ -2,19 +2,20 @@
 # CoaxialCable geometry class options
 #
 # This is a coaxial cable class with outer and inner electrodes, and a dielectric.
-# Use CoaxialCable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D. 
+# Use CoaxialCable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D.
 # ====================================================================================================
-CoaxialCable.endpoint1           =  0  0  0  # One endpopint
-CoaxialCable.endpoint2           =  2  2  2  # Other endpoint
+CoaxialCable.endpoint1     = 0  0  0    ## One endpopint
+CoaxialCable.endpoint2     = 2  2  2    ## Other endpoint
 
-CoaxialCable.outer.on            = true
-CoaxialCable.outer.radius        = 0.75
-CoaxialCable.outer.live          = true
+CoaxialCable.outer.on         = true
+CoaxialCable.outer.radius     = 0.75
+CoaxialCable.outer.live       = true
 
-CoaxialCable.inner.on            = true
-CoaxialCable.inner.radius        = 0.25
-CoaxialCable.inner.live          = false
+CoaxialCable.inner.on         = true
+CoaxialCable.inner.radius     = 0.25
+CoaxialCable.inner.live       = false
 
-CoaxialCable.dielectric.on       = true
-CoaxialCable.dielectric.radius   = 0.5
-CoaxialCable.dielectric.eps      = 4
+CoaxialCable.dielectric.on         = true
+CoaxialCable.dielectric.radius     = 0.5
+CoaxialCable.dielectric.eps        = 4
+

@@ -1,2 +1,3 @@
-input_file = input_data.dat
-num_points = 12345
+input_file     = input_data.dat
+num_points     = 12345
+

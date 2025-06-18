@@ -1,29 +1,30 @@
 # ====================================================================================================
 # RandomInterface class options
 # ====================================================================================================
-RandomInterface.reseed                   = false       ## Create a new surface every time or no
-RandomInterface.smooth_len               = 1E-4        ## Smoothing length when merging planes
-RandomInterface.gas_permittivity         = 1.0         ## Gas permittivity
-RandomInterface.solid_permittivity       = 1.0         ## Gas permittivity
+RandomInterface.reseed                 = false    ## Create a new surface every time or no
+RandomInterface.smooth_len             = 1E-4     ## Smoothing length when merging planes
+RandomInterface.gas_permittivity       = 1.0      ## Gas permittivity
+RandomInterface.solid_permittivity     = 1.0      ## Gas permittivity
 
-RandomInterface.plane1.use               = true        ## Turn on/off this plane
-RandomInterface.plane1.noise_amplitude   = 0.1         ## Noise amplitude
-RandomInterface.plane1.noise_frequency   = 0.1 0.1 0.1 ## Noise frequency
-RandomInterface.plane1.noise_octaves     = 5           ## Number of octaves in noise
-RandomInterface.plane1.noise_persistence = 0.5         ## Noise drop-off factor
-RandomInterface.plane1.point             = 0 0 0       ## Point on plane
-RandomInterface.plane1.normal            = 0 1 0       ## Plane normal vector
-RandomInterface.plane1.clamp_lo          = -1 -1 -1    ## Noise clamp on low end
-RandomInterface.plane1.clamp_hi          = 1 1 1       ## Noise clamp on high end
-RandomInterface.plane1.clamp_dx          = 0.1 0.1 0.1 ## Clamping length
+RandomInterface.plane1.use                   = true           ## Turn on/off this plane
+RandomInterface.plane1.noise_amplitude       = 0.1            ## Noise amplitude
+RandomInterface.plane1.noise_frequency       = 0.1 0.1 0.1    ## Noise frequency
+RandomInterface.plane1.noise_octaves         = 5              ## Number of octaves in noise
+RandomInterface.plane1.noise_persistence     = 0.5            ## Noise drop-off factor
+RandomInterface.plane1.point                 = 0 0 0          ## Point on plane
+RandomInterface.plane1.normal                = 0 1 0          ## Plane normal vector
+RandomInterface.plane1.clamp_lo              = -1 -1 -1       ## Noise clamp on low end
+RandomInterface.plane1.clamp_hi              = 1 1 1          ## Noise clamp on high end
+RandomInterface.plane1.clamp_dx              = 0.1 0.1 0.1    ## Clamping length
 
-RandomInterface.plane2.use               = true        ## Turn on/off this plane
-RandomInterface.plane2.noise_amplitude   = 0.1         ## Noise amplitude
-RandomInterface.plane2.noise_frequency   = 0.1 0.1 0.1 ## Noise frequency
-RandomInterface.plane2.noise_octaves     = 5           ## Number of octaves in noise
-RandomInterface.plane2.noise_persistence = 0.5         ## Noise drop-off factor
-RandomInterface.plane2.point             = 0 0 0       ## Point on plane
-RandomInterface.plane2.normal            = 0 1 0       ## Plane normal vector
-RandomInterface.plane2.clamp_lo          = -1 -1 -1    ## Noise clamp on low end
-RandomInterface.plane2.clamp_hi          = 1 1 1       ## Noise clamp on high end
-RandomInterface.plane2.clamp_dx          = 0.1 0.1 0.1 ## Clamping length
+RandomInterface.plane2.use                   = true           ## Turn on/off this plane
+RandomInterface.plane2.noise_amplitude       = 0.1            ## Noise amplitude
+RandomInterface.plane2.noise_frequency       = 0.1 0.1 0.1    ## Noise frequency
+RandomInterface.plane2.noise_octaves         = 5              ## Number of octaves in noise
+RandomInterface.plane2.noise_persistence     = 0.5            ## Noise drop-off factor
+RandomInterface.plane2.point                 = 0 0 0          ## Point on plane
+RandomInterface.plane2.normal                = 0 1 0          ## Plane normal vector
+RandomInterface.plane2.clamp_lo              = -1 -1 -1       ## Noise clamp on low end
+RandomInterface.plane2.clamp_hi              = 1 1 1          ## Noise clamp on high end
+RandomInterface.plane2.clamp_dx              = 0.1 0.1 0.1    ## Clamping length
+

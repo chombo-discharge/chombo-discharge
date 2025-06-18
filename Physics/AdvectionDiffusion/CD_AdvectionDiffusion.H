@@ -16,8 +16,7 @@ namespace Physics {
   /*!
     @brief Namespace for encapsulating AdvectionDiffusion physics code.
   */
-  namespace AdvectionDiffusion {
-  };
+  namespace AdvectionDiffusion {};
 
 } // namespace Physics
 

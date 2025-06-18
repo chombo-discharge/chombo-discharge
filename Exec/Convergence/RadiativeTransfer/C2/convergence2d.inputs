@@ -1,139 +1,127 @@
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
-AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
-AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 128 128 128 # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 0           # Maximum amr depth
-AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
-AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
-AmrMesh.buffer_size      = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm   = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
-AmrMesh.max_box_size     = 16          # Maximum allowed box size
-AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
-AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
-AmrMesh.num_ghost        = 2           # Number of ghost cells. 
-AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
-AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
-AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_interp  = minmod	     ## Centroid interp stencils. linear, lsq, minmod, etc
-AmrMesh.eb_interp        = minmod            ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
-
+AmrMesh.lo_corner            = -1 -1 -1       ## Low corner of problem domain
+AmrMesh.hi_corner            = 1  1  1        ## High corner of problem domain
+AmrMesh.verbosity            = -1             ## Controls verbosity.
+AmrMesh.coarsest_domain      = 128 128 128    ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth        = 0              ## Maximum amr depth
+AmrMesh.max_sim_depth        = -1             ## Maximum simulation depth
+AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
+AmrMesh.buffer_size          = 2              ## Number of cells between grid levels
+AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting          = morton         ## 'none', 'shuffle', 'morton'
+AmrMesh.blocking_factor      = 16             ## Blocking factor.
+AmrMesh.max_box_size         = 16             ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 16             ## Maximum allowed box size for EBIS generation.
+AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios (mixed ratios are allowed).
+AmrMesh.num_ghost            = 2              ## Number of ghost cells.
+AmrMesh.lsf_ghost            = 2              ## Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost             = 4              ## Set number of of ghost cells for EB stuff
+AmrMesh.mg_interp_order      = 2              ## Multigrid interpolation order
+AmrMesh.mg_interp_radius     = 2              ## Multigrid interpolation radius
+AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight (for least squares)
+AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
+AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
 
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                       = 2                # Engine verbosity
-Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
-Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
-Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 100              # Checkpoint interval
-Driver.regrid_interval                 = 10               # Regrid interval
-Driver.write_regrid_files              = false            # Write regrid files or not.
-Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
-Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
-Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.E-9            # Stop time
-Driver.max_steps                       = 1000             # Maximum number of steps
-Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
-Driver.write_memory                    = false            # Write MPI memory report
-Driver.write_loads                     = false            # Write (accumulated) computational loads
-Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = simulation       # Simulation output names
-Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
-Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
-Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
-Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
-
+Driver.verbosity                    = 2                   ## Engine verbosity
+Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
+Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
+Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
+Driver.plot_interval                = 10                  ## Plot interval
+Driver.checkpoint_interval          = 100                 ## Checkpoint interval
+Driver.regrid_interval              = 10                  ## Regrid interval
+Driver.write_regrid_files           = false               ## Write regrid files or not.
+Driver.write_restart_files          = false               ## Write restart files or not
+Driver.initial_regrids              = 0                   ## Number of initial regrids
+Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
+Driver.start_time                   = 0                   ## Start time (fresh simulations only)
+Driver.stop_time                    = 1.E-9               ## Stop time
+Driver.max_steps                    = 1000                ## Maximum number of steps
+Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
+Driver.write_memory                 = false               ## Write MPI memory report
+Driver.write_loads                  = false               ## Write (accumulated) computational loads
+Driver.output_directory             = ./                  ## Output directory
+Driver.output_names                 = simulation          ## Simulation output names
+Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
+Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank', 'levelset'
+Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
+Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
+Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
+Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
 # EddingtonSP1 class options
 # ====================================================================================================
-EddingtonSP1.verbosity           = -1           # Solver verbosity
-EddingtonSP1.stationary          = false        # Stationary solver
-EddingtonSP1.reflectivity        = 0.           # Reflectivity
-EddingtonSP1.kappa_scale         = true         # Kappa scale source or not (depends on algorithm)
-EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are 'phi' and 'src'
-EddingtonSP1.use_regrid_slopes   = true         # Slopes on/off when regridding
+EddingtonSP1.verbosity             = -1         ## Solver verbosity
+EddingtonSP1.stationary            = false      ## Stationary solver
+EddingtonSP1.reflectivity          = 0.         ## Reflectivity
+EddingtonSP1.kappa_scale           = true       ## Kappa scale source or not (depends on algorithm)
+EddingtonSP1.plt_vars              = phi src    ## Plot variables. Available are 'phi' and 'src'
+EddingtonSP1.use_regrid_slopes     = true       ## Slopes on/off when regridding
 
-EddingtonSP1.ebbc                = larsen 0.0   # Bc on embedded boundaries
-EddingtonSP1.bc.x.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-EddingtonSP1.bc.x.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-EddingtonSP1.bc.y.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-EddingtonSP1.bc.y.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-EddingtonSP1.bc.z.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-EddingtonSP1.bc.z.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
-EddingtonSP1.bc.z.hi             = larsen 0.0   # Boundary on domain. 'neumann' or 'larsen'
+EddingtonSP1.ebbc        = larsen 0.0    ## Bc on embedded boundaries
+EddingtonSP1.bc.x.lo     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.x.hi     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.y.lo     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.y.hi     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.lo     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.hi     = larsen 0.0    ## Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.hi     = larsen 0.0    ## Boundary on domain. 'neumann' or 'larsen'
 
-EddingtonSP1.gmg_verbosity       = -1           # GMG verbosity
-EddingtonSP1.gmg_pre_smooth      = 8            # Number of relaxations in downsweep
-EddingtonSP1.gmg_post_smooth     = 8            # Number of relaxations in upsweep
-EddingtonSP1.gmg_bott_smooth     = 8            # NUmber of relaxations before dropping to bottom solver
-EddingtonSP1.gmg_min_iter        = 5            # Minimum number of iterations
-EddingtonSP1.gmg_max_iter        = 32           # Maximum number of iterations
-EddingtonSP1.gmg_exit_tol        = 1.E-6        # Residue tolerance
-EddingtonSP1.gmg_exit_hang       = 0.2          # Solver hang
-EddingtonSP1.gmg_min_cells       = 16           # Bottom drop
-EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
-EddingtonSP1.gmg_cycle           = vcycle       # Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
-EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
-EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
-
-
-# ====================================================================================================
-# GeoCoarsener class options
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
+EddingtonSP1.gmg_verbosity         = -1           ## GMG verbosity
+EddingtonSP1.gmg_pre_smooth        = 8            ## Number of relaxations in downsweep
+EddingtonSP1.gmg_post_smooth       = 8            ## Number of relaxations in upsweep
+EddingtonSP1.gmg_bott_smooth       = 8            ## NUmber of relaxations before dropping to bottom solver
+EddingtonSP1.gmg_min_iter          = 5            ## Minimum number of iterations
+EddingtonSP1.gmg_max_iter          = 32           ## Maximum number of iterations
+EddingtonSP1.gmg_exit_tol          = 1.E-6        ## Residue tolerance
+EddingtonSP1.gmg_exit_hang         = 0.2          ## Solver hang
+EddingtonSP1.gmg_min_cells         = 16           ## Bottom drop
+EddingtonSP1.gmg_bottom_solver     = bicgstab     ## Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
+EddingtonSP1.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now
+EddingtonSP1.gmg_ebbc_weight       = 2            ## EBBC weight (only for Dirichlet)
+EddingtonSP1.gmg_ebbc_order        = 2            ## EBBC order (only for Dirichlet)
+EddingtonSP1.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'red_black', or 'multi_color'
 
 # ====================================================================================================
 # CoaxialCable geometry class options
 #
 # This is a coaxial cable class with outer and inner electrodes, and a dielectric.
-# Use CoaxialCable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D. 
+# Use CoaxialCable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D.
 # ====================================================================================================
-CoaxialCable.endpoint1           =  0  0  0  # One endpopint
-CoaxialCable.endpoint2           =  2  2  2  # Other endpoint
+CoaxialCable.endpoint1     = 0  0  0    ## One endpopint
+CoaxialCable.endpoint2     = 2  2  2    ## Other endpoint
 
-CoaxialCable.outer.on            = true
-CoaxialCable.outer.radius        = 0.75
-CoaxialCable.outer.live          = true
+CoaxialCable.outer.on         = true
+CoaxialCable.outer.radius     = 0.75
+CoaxialCable.outer.live       = true
 
-CoaxialCable.inner.on            = false
-CoaxialCable.inner.radius        = 0.25
-CoaxialCable.inner.live          = false
+CoaxialCable.inner.on         = false
+CoaxialCable.inner.radius     = 0.25
+CoaxialCable.inner.live       = false
 
-CoaxialCable.dielectric.on       = false
-CoaxialCable.dielectric.radius   = 0.5
-CoaxialCable.dielectric.eps      = 4
-
+CoaxialCable.dielectric.on         = false
+CoaxialCable.dielectric.radius     = 0.5
+CoaxialCable.dielectric.eps        = 4
 
 # ====================================================================================================
 # RadiativeTransferStepper class options
 # ====================================================================================================
-RadiativeTransferStepper.verbosity      = -1          # Verbosity
-RadiativeTransferStepper.realm          = primal      # Realm 
-RadiativeTransferStepper.kappa          = 5         # Inverse absorption coefficient
-RadiativeTransferStepper.dt             = 1.E-10      # Time step
-RadiativeTransferStepper.blob_amplitude = 1.E8        # Blob amplitude
-RadiativeTransferStepper.blob_radius    = 0.1         # Blob radius
-RadiativeTransferStepper.blob_center    = 0.5 0.5 0.5 # Blob center
+RadiativeTransferStepper.verbosity          = -1             ## Verbosity
+RadiativeTransferStepper.realm              = primal         ## Realm
+RadiativeTransferStepper.kappa              = 5              ## Inverse absorption coefficient
+RadiativeTransferStepper.dt                 = 1.E-10         ## Time step
+RadiativeTransferStepper.blob_amplitude     = 1.E8           ## Blob amplitude
+RadiativeTransferStepper.blob_radius        = 0.1            ## Blob radius
+RadiativeTransferStepper.blob_center        = 0.5 0.5 0.5    ## Blob center
+
