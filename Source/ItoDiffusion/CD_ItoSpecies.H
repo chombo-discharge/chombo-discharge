@@ -61,6 +61,13 @@ public:
   getChargeNumber() const;
 
   /*!
+    @brief Return the initial density
+    @return Returns m_initialDensity
+  */
+  const std::function<Real(const RealVect& x, const Real& t)>&
+  getInitialDensity() const;
+
+  /*!
     @brief Return diffusive or not
   */
   bool
@@ -91,6 +98,13 @@ public:
   diffusion(const Real a_energy) const;
 
   /*!
+    @brief Set the initial species density
+    @param[in] a_initialDensity Initial density.
+  */
+  virtual void
+  setInitialDensity(const std::function<Real(const RealVect& x, const Real& t)>& a_initialDensity);
+
+  /*!
     @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
     @return Returns m_initialParticles
   */
@@ -116,6 +130,11 @@ protected:
   int m_chargeNumber;
 
   /*!
+    @brief Maximum number of initial numerical particles per cell
+  */
+  int m_maxInitialParticlesPerCell;
+
+  /*!
     @brief Diffusive ItoSpecies or not
   */
   bool m_isDiffusive;
@@ -129,6 +148,11 @@ protected:
     @brief Initial particles
   */
   List<ItoParticle> m_initialParticles;
+
+  /*!
+    @brief Initial density, in case the user wants to generate particles from a density distribution
+  */
+  std::function<Real(const RealVect& x, const Real& t)> m_initialDensity;
 };
 
 #include <CD_NamespaceFooter.H>
