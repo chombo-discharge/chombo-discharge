@@ -36,9 +36,8 @@ main(int argc, char* argv[])
   std::vector<std::array<Real, 3>> norms;
 
   // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-  RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-  RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
   // Set up basic AdvectionDiffusion
   auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
@@ -53,7 +52,7 @@ main(int argc, char* argv[])
     timestepper->setCFL(cfl);
 
     // Run the simulation.
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
     engine->setupAndRun(input_file);
 
     // Can compute error if i > 0

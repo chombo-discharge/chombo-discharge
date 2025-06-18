@@ -6,59 +6,60 @@
 #
 # The maximum possible global order of accuracy is (p+1) where p is the number of subintervals. Each
 # correction raises the order by 1 (corr_iter=0 is the first order solution). To reach the maximum
-# possible order, you should perform p correction iterations. 
+# possible order, you should perform p correction iterations.
 #
-# 
+#
 # ====================================================================================================
-CdrPlasmaImExSdcStepper.verbosity        = -1      # Class verbosity
-CdrPlasmaImExSdcStepper.solver_verbosity = -1      # Individual solver verbosities
-CdrPlasmaImExSdcStepper.fast_rte         = 1       # Solve RTE every this time steps
-CdrPlasmaImExSdcStepper.fast_poisson     = 1       # Solve Poisson every this time steps	
-CdrPlasmaImExSdcStepper.min_dt           = 0.      # Minimum permitted time step
-CdrPlasmaImExSdcStepper.max_dt           = 1.E99   # Maximum permitted time step
-CdrPlasmaImExSdcStepper.cfl              = 0.75    # CFL number
-CdrPlasmaImExSdcStepper.relax_time       = 1.0     # Relaxation time constant
-CdrPlasmaImExSdcStepper.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
-CdrPlasmaImExSdcStepper.use_tga          = false   # 'false' = Euler diffusion. 'true' = TGA diffusion
+CdrPlasmaImExSdcStepper.verbosity            = -1        ## Class verbosity
+CdrPlasmaImExSdcStepper.solver_verbosity     = -1        ## Individual solver verbosities
+CdrPlasmaImExSdcStepper.fast_rte             = 1         ## Solve RTE every this time steps
+CdrPlasmaImExSdcStepper.fast_poisson         = 1         ## Solve Poisson every this time steps
+CdrPlasmaImExSdcStepper.min_dt               = 0.        ## Minimum permitted time step
+CdrPlasmaImExSdcStepper.max_dt               = 1.E99     ## Maximum permitted time step
+CdrPlasmaImExSdcStepper.cfl                  = 0.75      ## CFL number
+CdrPlasmaImExSdcStepper.relax_time           = 1.0       ## Relaxation time constant
+CdrPlasmaImExSdcStepper.source_comp          = interp    ## Interpolated 'interp' or cell-average 'cell_ave' for source computations
+CdrPlasmaImExSdcStepper.use_tga              = false     ## 'false' = Euler diffusion. 'true' = TGA diffusion
 
 # ------------------------------------
 # Nodes, subintervals, and corrections
 # ------------------------------------
-CdrPlasmaImExSdcStepper.quad_nodes   = lobatto     # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
-CdrPlasmaImExSdcStepper.subintervals = 1           # Number of subintervals. This will be the maximum possible order.
-CdrPlasmaImExSdcStepper.corr_iter    = 1           # Number of iterations of the correction equation. Should be (subintervals-1)
-                                                   # for maximum order
+CdrPlasmaImExSdcStepper.quad_nodes       = lobatto    ## Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
+CdrPlasmaImExSdcStepper.subintervals     = 1          ## Number of subintervals. This will be the maximum possible order.
+CdrPlasmaImExSdcStepper.corr_iter        = 1          ## Number of iterations of the correction equation. Should be (subintervals-1)
+                                                      # for maximum order
 
 # Adaptive time stepping
 # ---------------------------------------------------------
-CdrPlasmaImExSdcStepper.print_report    = false    # Print report with error and stuff	
-CdrPlasmaImExSdcStepper.adaptive_dt     = false    # Use adaptive time stepping
-CdrPlasmaImExSdcStepper.error_norm      = 2        # Error norm (0 = Linf)
-CdrPlasmaImExSdcStepper.min_corr        = 0        # Minimum number of corrections
-CdrPlasmaImExSdcStepper.max_retries     = 100      # Maximum number of tries (for step rejection)
-CdrPlasmaImExSdcStepper.max_growth      = 1.2      # Maximum permissible time step growth
-CdrPlasmaImExSdcStepper.decrease_safety = 0.9      # Fudge factor when we decrease the time step. 
-CdrPlasmaImExSdcStepper.min_cfl         = 0.1      # Minimum CFL
-CdrPlasmaImExSdcStepper.max_cfl         = 0.75     # Maximum CFL
-CdrPlasmaImExSdcStepper.max_error       = 1.E-3    # Error threshold
-CdrPlasmaImExSdcStepper.error_index     = -1       # Error index. If -1, evaluate all CDR solvers	
-CdrPlasmaImExSdcStepper.safety          = 0.75     # Safety factor for time stepping
+CdrPlasmaImExSdcStepper.print_report        = false    ## Print report with error and stuff
+CdrPlasmaImExSdcStepper.adaptive_dt         = false    ## Use adaptive time stepping
+CdrPlasmaImExSdcStepper.error_norm          = 2        ## Error norm (0 = Linf)
+CdrPlasmaImExSdcStepper.min_corr            = 0        ## Minimum number of corrections
+CdrPlasmaImExSdcStepper.max_retries         = 100      ## Maximum number of tries (for step rejection)
+CdrPlasmaImExSdcStepper.max_growth          = 1.2      ## Maximum permissible time step growth
+CdrPlasmaImExSdcStepper.decrease_safety     = 0.9      ## Fudge factor when we decrease the time step.
+CdrPlasmaImExSdcStepper.min_cfl             = 0.1      ## Minimum CFL
+CdrPlasmaImExSdcStepper.max_cfl             = 0.75     ## Maximum CFL
+CdrPlasmaImExSdcStepper.max_error           = 1.E-3    ## Error threshold
+CdrPlasmaImExSdcStepper.error_index         = -1       ## Error index. If -1, evaluate all CDR solvers
+CdrPlasmaImExSdcStepper.safety              = 0.75     ## Safety factor for time stepping
 
-# ---------------------------------------------------------	
+# ---------------------------------------------------------
 # Debugging options
 # ---------------------------------------------------------
-CdrPlasmaImExSdcStepper.consistent_E      = true   # Use consistent E-field computations (update in between RK stages)
-CdrPlasmaImExSdcStepper.consistent_rte    = true   # Use consistent RTE updates
-CdrPlasmaImExSdcStepper.compute_v         = true   # Compute v in between substeps. 
-CdrPlasmaImExSdcStepper.compute_S         = true   # Compute S in between substeps.
-CdrPlasmaImExSdcStepper.compute_D         = true   # Compute S in between substeps.
-CdrPlasmaImExSdcStepper.do_advec_src      = true   # Turn off code functionality. Only for debugging 
-CdrPlasmaImExSdcStepper.do_diffusion      = true   # Turn off code functionality. Only for debugging
-CdrPlasmaImExSdcStepper.do_poisson        = true   # Turn off code functionality. Only for debugging
-CdrPlasmaImExSdcStepper.do_rte            = true   # Turn off code functionality. Only for debugging
-CdrPlasmaImExSdcStepper.profile_steps     = false  # Profile time steps with order, accuracy, cfl, etc.
+CdrPlasmaImExSdcStepper.consistent_E       = true     ## Use consistent E-field computations (update in between RK stages)
+CdrPlasmaImExSdcStepper.consistent_rte     = true     ## Use consistent RTE updates
+CdrPlasmaImExSdcStepper.compute_v          = true     ## Compute v in between substeps.
+CdrPlasmaImExSdcStepper.compute_S          = true     ## Compute S in between substeps.
+CdrPlasmaImExSdcStepper.compute_D          = true     ## Compute S in between substeps.
+CdrPlasmaImExSdcStepper.do_advec_src       = true     ## Turn off code functionality. Only for debugging
+CdrPlasmaImExSdcStepper.do_diffusion       = true     ## Turn off code functionality. Only for debugging
+CdrPlasmaImExSdcStepper.do_poisson         = true     ## Turn off code functionality. Only for debugging
+CdrPlasmaImExSdcStepper.do_rte             = true     ## Turn off code functionality. Only for debugging
+CdrPlasmaImExSdcStepper.profile_steps      = false    ## Profile time steps with order, accuracy, cfl, etc.
 
 # -----------------------
 # Advection extrapolation
 # -----------------------
-CdrPlasmaImExSdcStepper.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
+CdrPlasmaImExSdcStepper.extrap_advect     = false    ## Time extrapolate with source and diffusion in advection step
+

@@ -1,5 +1,4 @@
 #include <CD_Driver.H>
-#include <CD_GeoCoarsener.H>
 #include <CD_FieldSolverFactory.H>
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_ItoLayout.H>
@@ -49,7 +48,6 @@ main(int argc, char* argv[])
 
   auto compgeom    = RefCountedPtr<ComputationalGeometry>(new WireWire());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
-  auto geocoarsen  = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
   auto physics     = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
   auto timestepper = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCGodunovStepper<>(physics));
   auto tagger      = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<>>(physics, timestepper, amr));
@@ -58,7 +56,7 @@ main(int argc, char* argv[])
   timestepper->setVoltage(potential_curve);
 
   // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
   engine->setupAndRun(input_file);
 
 #ifdef CH_MPI

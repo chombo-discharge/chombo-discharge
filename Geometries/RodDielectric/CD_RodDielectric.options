@@ -1,36 +1,37 @@
 # ====================================================================================================
 # RodDielectric geometry class options
 # ====================================================================================================
-RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = 0 0 1         # One endpoint
-RodDielectric.electrode.endpoint2       = 1 1 1         # Other endpoint
-RodDielectric.electrode.radius          = 0.1           # Electrode radius
-RodDielectric.electrode.live            = true          # Live or not
+RodDielectric.electrode.on            = true     ## Use electrode or not
+RodDielectric.electrode.endpoint1     = 0 0 1    ## One endpoint
+RodDielectric.electrode.endpoint2     = 1 1 1    ## Other endpoint
+RodDielectric.electrode.radius        = 0.1      ## Electrode radius
+RodDielectric.electrode.live          = true     ## Live or not
 
-RodDielectric.dielectric.on             = true          # Use dielectric or not
-RodDielectric.dielectric.shape          = perlin_box    # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+RodDielectric.dielectric.on               = true          ## Use dielectric or not
+RodDielectric.dielectric.shape            = perlin_box    ## 'plane', 'box', 'perlin_box', 'sphere'
+RodDielectric.dielectric.permittivity     = 4             ## Dielectric permittivity
 
 # Subsettings for 'plane'
-RodDielectric.plane.point               = 0 0 0         # Plane point
-RodDielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
+RodDielectric.plane.point      = 0 0 0    ## Plane point
+RodDielectric.plane.normal     = 0 0 1    ## Plane normal vector (outward)
 
 # Subsettings for 'box'
-RodDielectric.box.lo_corner             = 0 0 0         # Low corner
-RodDielectric.box.hi_corner             = 1 1 1         # Hi corner
-RodDielectric.box.curvature             = 0.1
+RodDielectric.box.lo_corner     = 0 0 0    ## Low corner
+RodDielectric.box.hi_corner     = 1 1 1    ## Hi corner
+RodDielectric.box.curvature     = 0.1
 
 # Subsettings for 'perlin_box'
-RodDielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
-RodDielectric.perlin_box.normal         = 0  0  1       # Slab normal
-RodDielectric.perlin_box.curvature      = 0.1           # Slab rounding radius
-RodDielectric.perlin_box.dimensions     = 1  1  1       # Slab dimensions
-RodDielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
-RodDielectric.perlin_box.noise_octaves  = 1             # Noise octaves
-RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
-RodDielectric.perlin_box.noise_freq     = 1 1 1         # Noise frequency
-RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
+RodDielectric.perlin_box.point             = 0  0 -0.5    ## Slab center-point (side with roughness)
+RodDielectric.perlin_box.normal            = 0  0  1      ## Slab normal
+RodDielectric.perlin_box.curvature         = 0.1          ## Slab rounding radius
+RodDielectric.perlin_box.dimensions        = 1  1  1      ## Slab dimensions
+RodDielectric.perlin_box.noise_amp         = 0.1          ## Noise amplitude
+RodDielectric.perlin_box.noise_octaves     = 1            ## Noise octaves
+RodDielectric.perlin_box.noise_persist     = 0.5          ## Octave persistence
+RodDielectric.perlin_box.noise_freq        = 1 1 1        ## Noise frequency
+RodDielectric.perlin_box.noise_reseed      = false        ## Reseed noise or not
 
 # Subsettings for sphere
-RodDielectric.sphere.center             = 0 0 0         # Low corner
-RodDielectric.sphere.radius             = 0.5           # Radius
+RodDielectric.sphere.center     = 0 0 0    ## Low corner
+RodDielectric.sphere.radius     = 0.5      ## Radius
+

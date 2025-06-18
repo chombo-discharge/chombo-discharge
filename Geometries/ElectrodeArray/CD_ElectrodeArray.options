@@ -1,19 +1,20 @@
 # ====================================================================================================
-# ElectrodeArray geometry class options. 
-# 
+# ElectrodeArray geometry class options.
+#
 # The endpoint1 and endpoint2 arguments indicate the one of the corners of the electrode array. Use
 # num_x, num_y, and the spacings delta_x and delta_y to adjust the number of electrodes. Everything
-# lives in the xy plane. 
+# lives in the xy plane.
 #
 # In 3D, the electrodes are moved in the positive x and y directions only.
 #
 # In 2D, the electrodes are moved in the x-direction only and 'num_y' and 'delta_y' are not used.
 # ====================================================================================================
-ElectrodeArray.live      = 1             # Live voltage (1) or not (0)
-ElectrodeArray.radius    = 0.1           # Radius 
-ElectrodeArray.endpoint1 = 0 0 0         # One endpoint for first electrode
-ElectrodeArray.endpoint2 = 0 0 2         # Other endpoint for first electrode
-ElectrodeArray.num_x     = 4             # Number of electrodes in the x-direction
-ElectrodeArray.num_y     = 4             # Number of electrodes in the y-direction
-ElectrodeArray.delta_x   = 0.5           # Electrode spacing in the x-direction
-ElectrodeArray.delta_y   = 0.5           # Electrode spacing in the y-direction
+ElectrodeArray.live          = 1        ## Live voltage (1) or not (0)
+ElectrodeArray.radius        = 0.1      ## Radius
+ElectrodeArray.endpoint1     = 0 0 0    ## One endpoint for first electrode
+ElectrodeArray.endpoint2     = 0 0 2    ## Other endpoint for first electrode
+ElectrodeArray.num_x         = 4        ## Number of electrodes in the x-direction
+ElectrodeArray.num_y         = 4        ## Number of electrodes in the y-direction
+ElectrodeArray.delta_x       = 0.5      ## Electrode spacing in the x-direction
+ElectrodeArray.delta_y       = 0.5      ## Electrode spacing in the y-direction
+

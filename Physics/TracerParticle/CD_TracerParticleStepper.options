@@ -1,11 +1,11 @@
 # ====================================================================================================
 # TracerParticleStepper class options
 # ====================================================================================================
-TracerParticleStepper.initial_particles = 10000  # Number of uniformly distributed initial particles
-TracerParticleStepper.integration       = euler  # 'euler', 'rk2', or 'rk4'
-TracerParticleStepper.verbosity         = -1     # Verbosity level
-TracerParticleStepper.cfl               = 1.0    # "CFL" number. 
-TracerParticleStepper.velocity_field    = 0      # Velocity field to use.
-                                                 # 0 => Diagonal translation
-						 # 1 => Rotational flow
-						 
+TracerParticleStepper.initial_particles     = 10000    ## Number of uniformly distributed initial particles
+TracerParticleStepper.integration           = euler    ## 'euler', 'rk2', or 'rk4'
+TracerParticleStepper.verbosity             = -1       ## Verbosity level
+TracerParticleStepper.cfl                   = 1.0      ## "CFL" number.
+TracerParticleStepper.velocity_field        = 0        ## Velocity field to use.
+                                                       # 0 => Diagonal translation
+                                                       # 1 => Rotational flow
+

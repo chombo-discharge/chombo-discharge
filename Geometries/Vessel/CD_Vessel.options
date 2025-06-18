@@ -5,17 +5,18 @@
 # Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================
-Vessel.use_rod       = true           # Rod is on/off
-Vessel.use_shroom    = true           # Plate is on/off
+Vessel.use_rod        = true    ## Rod is on/off
+Vessel.use_shroom     = true    ## Plate is on/off
 
-Vessel.rod_point     = 0. 0. 0.5      # Rod center point
-Vessel.rod_radius    = 0.2            # Rod radius
+Vessel.rod_point      = 0. 0. 0.5    ## Rod center point
+Vessel.rod_radius     = 0.2          ## Rod radius
 
-Vessel.shroom_point  = 0. 0. -0.5     # Mushroom center point
-Vessel.shroom_R      = 0.5            # Mushroom head radius
-Vessel.shroom_r      = 0.2            # Mushroom stem radius
-Vessel.shroom_d      = 0.2            # Mushroom head thickness
-Vessel.shroom_curv   = 0.05           # Mushroom corner curvatures
+Vessel.shroom_point     = 0. 0. -0.5    ## Mushroom center point
+Vessel.shroom_R         = 0.5           ## Mushroom head radius
+Vessel.shroom_r         = 0.2           ## Mushroom stem radius
+Vessel.shroom_d         = 0.2           ## Mushroom head thickness
+Vessel.shroom_curv      = 0.05          ## Mushroom corner curvatures
 
-Vessel.live_rod      = true           # Rod is live or not
-Vessel.live_shroom   = false          # Mushroom is live or not
+Vessel.live_rod        = true     ## Rod is live or not
+Vessel.live_shroom     = false    ## Mushroom is live or not
+

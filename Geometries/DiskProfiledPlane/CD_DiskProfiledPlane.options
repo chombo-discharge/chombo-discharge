@@ -1,28 +1,29 @@
 # ====================================================================================================
 # DiskProfiledPlane class options
 # ====================================================================================================
-DiskProfiledPlane.use_electrode         = true          # Turn on/off electrode
-DiskProfiledPlane.use_dielectric        = true          # Turn on/off dielectric
+DiskProfiledPlane.use_electrode      = true    ## Turn on/off electrode
+DiskProfiledPlane.use_dielectric     = true    ## Turn on/off dielectric
 
-DiskProfiledPlane.wheel_live            = true          # Live electrode or not
-DiskProfiledPlane.wheel_radius          = 1             # Wheel radius
-DiskProfiledPlane.wheel_center          = 0 0 0         # Wheel center
-DiskProfiledPlane.wheel_curvature       = 0.1           # Wheel curvature (thickness)
-DiskProfiledPlane.wheel_stem_radius     = 0.01          # Wheel stem radius (< 0 => turn off this part)
-DiskProfiledPlane.wheel_smooth          = 1E-3          # Smoothing distance for CSG union
-DiskProfiledPlane.wheel_extra_thickness = 0.0           # Extra wheel thickness
+DiskProfiledPlane.wheel_live                = true     ## Live electrode or not
+DiskProfiledPlane.wheel_radius              = 1        ## Wheel radius
+DiskProfiledPlane.wheel_center              = 0 0 0    ## Wheel center
+DiskProfiledPlane.wheel_curvature           = 0.1      ## Wheel curvature (thickness)
+DiskProfiledPlane.wheel_stem_radius         = 0.01     ## Wheel stem radius (< 0 => turn off this part)
+DiskProfiledPlane.wheel_smooth              = 1E-3     ## Smoothing distance for CSG union
+DiskProfiledPlane.wheel_extra_thickness     = 0.0      ## Extra wheel thickness
 
-DiskProfiledPlane.box_dimensions        = 1 1 1         # Box dimensions
-DiskProfiledPlane.box_translate         = 0 0 0         # Box translation
-DiskProfiledPlane.box_permittivity      = 1.0           # Dielectric box permittivity
-DiskProfiledPlane.box_curvature         = 1             # Corner curvatures
+DiskProfiledPlane.box_dimensions       = 1 1 1    ## Box dimensions
+DiskProfiledPlane.box_translate        = 0 0 0    ## Box translation
+DiskProfiledPlane.box_permittivity     = 1.0      ## Dielectric box permittivity
+DiskProfiledPlane.box_curvature        = 1        ## Corner curvatures
 
-DiskProfiledPlane.profile_type          = none          # Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
-DiskProfiledPlane.profile_translate     = 0 0 0         # Profile translation
-DiskProfiledPlane.profile_repetition_lo = 0 0 0         # Repetition pattern in low coordinate direction
-DiskProfiledPlane.profile_repetition_hi = 0 0 0         # Repetition pattern in high coordinate direction
-DiskProfiledPlane.profile_period        = 1 1 1         # Repetition period
+DiskProfiledPlane.profile_type              = none     ## Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_translate         = 0 0 0    ## Profile translation
+DiskProfiledPlane.profile_repetition_lo     = 0 0 0    ## Repetition pattern in low coordinate direction
+DiskProfiledPlane.profile_repetition_hi     = 0 0 0    ## Repetition pattern in high coordinate direction
+DiskProfiledPlane.profile_period            = 1 1 1    ## Repetition period
 
-DiskProfiledPlane.square_dimensions     = 1 1 1         # Dimensions for squares/square channels
-DiskProfiledPlane.sphere_radius         = 1             # Radius for sphere profiles
-DiskProfiledPlane.cylinder_radius       = 1             # Radius for cylinder profiles
+DiskProfiledPlane.square_dimensions     = 1 1 1    ## Dimensions for squares/square channels
+DiskProfiledPlane.sphere_radius         = 1        ## Radius for sphere profiles
+DiskProfiledPlane.cylinder_radius       = 1        ## Radius for cylinder profiles
+
