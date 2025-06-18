@@ -2202,9 +2202,9 @@ Simulations that fail to stabilize, i.e., where the field strength diverges, may
       }
    ]
 
-   This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
-   I.e., all background species are first absorbed into the rate calculation before the rate is limited.
-   We point out that limiting is not possible if both species on the left hand side are solver variables.
+This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
+I.e., all background species are first absorbed into the rate calculation before the rate is limited.
+We point out that limiting is not possible if both species on the left hand side are solver variables.
 
 
 .. important::
