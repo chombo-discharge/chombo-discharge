@@ -38,7 +38,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
-  this->m_smoothConductivity       = false;
+  this->m_limitParallelDiffusion   = false;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
 
@@ -52,6 +52,21 @@ ItoKMCGodunovStepper<I, C, R, F>::~ItoKMCGodunovStepper()
   if (this->m_verbosity > 5) {
     pout() << "ItoKMCGodunovStepper::~ItoKMCGodunovStepper" << endl;
   }
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::registerOperators() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::registerOperators");
+  if (this->m_verbosity > 5) {
+    pout() << "ItoKMCGodunovStepper::registerOperators" << endl;
+  }
+
+  ItoKMCStepper<I, C, R, F>::registerOperators();
+
+  // Register this because we must be able to deposit particles inside dielectrics (due to particle diffusion across the EB).
+  (this->m_amr)->registerOperator(s_particle_mesh, this->m_particleRealm, phase::solid);
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -171,7 +186,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   std::string str;
 
   pp.get("extend_conductivity", m_extendConductivityEB);
-  pp.get("smooth_conductivity", m_smoothConductivity);
+  pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
 
   // Get algorithm
@@ -195,16 +210,27 @@ ItoKMCGodunovStepper<I, C, R, F>::parseFiltering() noexcept
   ParmParse   pp(this->m_name.c_str());
   std::string str;
 
-  m_filterNum       = -1;
-  m_filterMaxStride = 1;
-  m_filterAlpha     = 0.5;
+  m_rhoFilterNum       = -1;
+  m_rhoFilterMaxStride = 1;
+  m_rhoFilterAlpha     = 0.5;
 
-  pp.query("filter_num", m_filterNum);
-  pp.query("filter_max_stride", m_filterMaxStride);
-  pp.query("filter_alpha", m_filterAlpha);
+  m_condFilterNum       = -1;
+  m_condFilterMaxStride = 1;
+  m_condFilterAlpha     = 0.5;
 
-  if (m_filterAlpha <= 0.0 || m_filterAlpha >= 1.0) {
-    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1");
+  pp.get("rho_filter_num", m_rhoFilterNum);
+  pp.get("rho_filter_max_stride", m_rhoFilterMaxStride);
+  pp.get("rho_filter_alpha", m_rhoFilterAlpha);
+
+  pp.get("cond_filter_num", m_condFilterNum);
+  pp.get("cond_filter_max_stride", m_condFilterMaxStride);
+  pp.get("cond_filter_alpha", m_condFilterAlpha);
+
+  if (m_rhoFilterAlpha <= 0.0 || m_rhoFilterAlpha >= 1.0) {
+    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1 for rho_filter");
+  }
+  if (m_condFilterAlpha <= 0.0 || m_condFilterAlpha >= 1.0) {
+    MayDay::Abort("ItoKMCGodunovStepper::parseFiltering -- cannot have alpha <= 0 or alpha >= 1 for cond_filter");
   }
 }
 
@@ -403,10 +429,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 
     this->m_amr->transferIrregularParticles(ebParticles, bulkParticles, this->m_plasmaPhase);
   }
-
   m_timer.stopEvent("EB/Particle intersection");
-
-  // Remove the run-time configurable particle storage. It is no longer needed.
   // ====== END TRANSPORT STEP ======
 
   // Photon transport
@@ -675,8 +698,9 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
 
   m_timer.eventReport(pout(), false);
 
-  // No reason to have this lying around.
-  this->m_amr->deallocate(m_scratchSemiImplicitRhoCDR);
+  // No reason to have these lying around.
+  m_scratchSemiImplicitRhoCDR.clear();
+  m_scratchSemiImplicitConductivityCDR.clear();
 
   // Fill the neutral density on the mesh
   this->fillNeutralDensity();
@@ -1105,14 +1129,16 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
   (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
   (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
 
-  if (this->m_smoothConductivity) {
-    const Real alpha  = 0.5;
-    const int  stride = 1;
+  // User can choose to filter the conductivity. Need to sync after each smoothing.
+  if (m_condFilterNum > 0 && m_condFilterMaxStride > 0) {
+    for (int i = 0; i < m_condFilterNum; i++) {
+      for (int curStride = 1; curStride <= m_condFilterMaxStride; curStride++) {
+        DataOps::filterSmooth(a_conductivityCell, m_condFilterAlpha, curStride, true);
 
-    DataOps::filterSmooth(a_conductivityCell, alpha, stride, true);
-
-    (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
-    (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+        (this->m_amr)->arithmeticAverage(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+        (this->m_amr)->interpGhostPwl(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
+      }
+    }
   }
 
   (this->m_amr)->interpToCentroids(a_conductivityCell, this->m_fluidRealm, (this->m_plasmaPhase));
@@ -1152,17 +1178,34 @@ template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
 {
-  CH_TIME("ItoKMCGodunovStepper::computeSemiImplicitRho");
+  CH_TIMERS("ItoKMCGodunovStepper::computeSemiImplicitRho");
+  CH_TIMER("ItoKMCGodunovStepper::computeSemiImplicitRho::plasma_phase", t1);
+  CH_TIMER("ItoKMCGodunovStepper::computeSemiImplicitRho::solid_phase", t2);
+  CH_TIMER("ItoKMCGodunovStepper::computeSemiImplicitRho::filter", t3);
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::computeSemiImplicitRho" << endl;
   }
 
-  MFAMRCellData& rho      = this->m_fieldSolver->getRho();
-  EBAMRCellData  rhoPhase = this->m_amr->alias(this->m_plasmaPhase, rho);
+  // Soft requirement?
+  CH_assert(this->m_plasmaPhase == phase::gas);
+
+  const RefCountedPtr<MultiFluidIndexSpace>& mfis        = (this->m_computationalGeometry)->getMfIndexSpace();
+  const Vector<Dielectric>&                  dielectrics = (this->m_computationalGeometry)->getDielectrics();
+
+  const bool hasDielectrics = (mfis->numPhases() > 1) && (dielectrics.size() > 0);
+
+  MFAMRCellData& rho    = this->m_fieldSolver->getRho();
+  EBAMRCellData  rhoGas = (this->m_amr)->alias(phase::gas, rho);
+  EBAMRCellData  rhoSolid;
+
+  if (hasDielectrics) {
+    rhoSolid = (this->m_amr)->alias(phase::solid, rho);
+  }
 
   DataOps::setValue(rho, 0.0);
 
-  // Contribution from Ito solvers.
+  // Contribution from Ito solvers to the gas-side space charge density.
+  CH_START(t1);
   for (auto solverIt = this->m_ito->iterator(); solverIt.ok(); ++solverIt) {
     const RefCountedPtr<ItoSolver>&  solver  = solverIt();
     const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
@@ -1171,31 +1214,77 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
     if (Z != 0) {
       (this->m_amr)->copyData(this->m_fluidScratch1, solver->getPhi());
 
-      DataOps::incr(rhoPhase, this->m_fluidScratch1, 1.0 * Z * Units::Qe);
+      DataOps::incr(rhoGas, this->m_fluidScratch1, 1.0 * Z * Units::Qe);
     }
   }
 
-  // Contribution from CDR equations
-  DataOps::incr(rhoPhase, m_semiImplicitRhoCDR, 1.0);
+  // Contribution from CDR equations to the gas-side space charge density.
+  DataOps::incr(rhoGas, m_semiImplicitRhoCDR, 1.0);
+  CH_STOP(t1);
+
+  // Contribution from gas-side particles that diffused into EBs. This might be necessary near dielectric EBs as a comparatively small
+  // correction in the space charge density. There should be no contribution from the CDR solvers because the diffusion-only divergence
+  // term was computed using homogeneous Neumann boundary conditions.
+  if (hasDielectrics) {
+    CH_START(t2);
+
+    EBAMRCellData particleScratch;
+    EBAMRCellData fluidScratch;
+
+    (this->m_amr)->allocate(particleScratch, this->m_particleRealm, phase::solid, 1);
+    (this->m_amr)->allocate(fluidScratch, this->m_fluidRealm, phase::solid, 1);
+
+    for (auto solverIt = (this->m_ito)->iterator(); solverIt.ok(); ++solverIt) {
+      const RefCountedPtr<ItoSolver>&  solver  = solverIt();
+      const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+      const int                        Z       = species->getChargeNumber();
+
+      if (Z != 0) {
+        DataOps::setValue(particleScratch, 0.0);
+        DataOps::setValue(fluidScratch, 0.0);
+
+        (this->m_amr)
+          ->template depositParticles<PointParticle, &PointParticle::weight>(particleScratch,
+                                                                             this->m_particleRealm,
+                                                                             phase::solid,
+                                                                             *m_rhoDaggerParticles[solverIt.index()],
+                                                                             DepositionType::CIC,
+                                                                             CoarseFineDeposition::Halo,
+                                                                             true);
+
+        (this->m_amr)->copyData(fluidScratch, particleScratch);
+
+        DataOps::incr(rhoSolid, fluidScratch, 1.0 * Z * Units::Qe);
+      }
+    }
+
+    CH_STOP(t2);
+  }
 
   // Sync across levels
   this->m_amr->arithmeticAverage(rho, this->m_fluidRealm);
   this->m_amr->interpGhostPwl(rho, this->m_fluidRealm);
 
-  // User can choose to filter the space charge density
-  if (m_filterNum > 0 && m_filterMaxStride > 0) {
-    for (int i = 0; i < m_filterNum; i++) {
-      for (int curStride = 1; curStride <= m_filterMaxStride; curStride++) {
+  // User can choose to filter the space charge density. Need to sync after each smoothing.
+  if (m_rhoFilterNum > 0 && m_rhoFilterMaxStride > 0) {
+    CH_START(t3);
+    for (int i = 0; i < m_rhoFilterNum; i++) {
+      for (int curStride = 1; curStride <= m_rhoFilterMaxStride; curStride++) {
 
-        DataOps::filterSmooth(rhoPhase, m_filterAlpha, curStride, true);
+        DataOps::filterSmooth(rhoGas, m_rhoFilterAlpha, curStride, true);
 
-        this->m_amr->arithmeticAverage(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
-        this->m_amr->interpGhost(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+        this->m_amr->arithmeticAverage(rhoGas, this->m_fluidRealm, this->m_plasmaPhase);
+        this->m_amr->interpGhost(rhoGas, this->m_fluidRealm, this->m_plasmaPhase);
       }
     }
+    CH_STOP(t3);
   }
 
-  this->m_amr->interpToCentroids(rhoPhase, this->m_fluidRealm, this->m_plasmaPhase);
+  // Put data on centroids.
+  this->m_amr->interpToCentroids(rhoGas, this->m_fluidRealm, phase::gas);
+  if (hasDielectrics) {
+    this->m_amr->interpToCentroids(rhoSolid, this->m_fluidRealm, phase::solid);
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1211,7 +1300,6 @@ ItoKMCGodunovStepper<I, C, R, F>::setupSemiImplicitPoisson(const Real a_dt) noex
   (this->m_fieldSolver)->setPermittivities();
 
   // Get the permittivities
-  // Get the permittivities on the faces.
   MFAMRCellData& permCell = (this->m_fieldSolver)->getPermittivityCell();
   MFAMRFluxData& permFace = (this->m_fieldSolver)->getPermittivityFace();
   MFAMRIVData&   permEB   = (this->m_fieldSolver)->getPermittivityEB();
@@ -1328,6 +1416,45 @@ ItoKMCGodunovStepper<I, C, R, F>::copyConductivityParticles(
 }
 
 template <typename I, typename C, typename R, typename F>
+bool
+ItoKMCGodunovStepper<I, C, R, F>::solvePoisson() noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::solvePoisson()");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::solvePoisson()" << endl;
+  }
+
+  // Solve the Poisson equation and compute the cell-centered electric field.
+  MFAMRCellData& phi   = this->m_fieldSolver->getPotential();
+  MFAMRCellData& rho   = this->m_fieldSolver->getRho();
+  EBAMRIVData&   sigma = this->m_sigmaSolver->getPhi();
+
+  const bool converged = (this->m_fieldSolver)->solve(phi, rho, sigma, false);
+
+  (this->m_fieldSolver)->computeElectricField();
+
+  // Copy the electric field to appropriate data holders and perform center-to-centroid
+  // interpolation.
+  EBAMRCellData E;
+  (this->m_amr)->allocatePointer(E, this->m_fluidRealm);
+  (this->m_amr)->alias(E, this->m_plasmaPhase, (this->m_fieldSolver)->getElectricField());
+
+  // Fluid realm
+  (this->m_amr)->copyData(this->m_electricFieldFluid, E);
+  (this->m_amr)->conservativeAverage(this->m_electricFieldFluid, this->m_fluidRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpGhostPwl(this->m_electricFieldFluid, this->m_fluidRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpToCentroids(this->m_electricFieldFluid, this->m_fluidRealm, this->m_plasmaPhase);
+
+  // Particle realm
+  (this->m_amr)->copyData(this->m_electricFieldParticle, E);
+  (this->m_amr)->conservativeAverage(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpGhostPwl(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
+  (this->m_amr)->interpToCentroids(this->m_electricFieldParticle, this->m_particleRealm, this->m_plasmaPhase);
+
+  return converged;
+}
+
+template <typename I, typename C, typename R, typename F>
 void
 ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
 {
@@ -1379,8 +1506,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   m_timer.startEvent("Solve Poisson");
   const bool converged = this->solvePoisson();
   if (!converged) {
-    const std::string
-      errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge after regrid";
+    const std::string errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge";
 
     pout() << errMsg << endl;
 
@@ -1432,6 +1558,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
     const int idx = solverIt.index();
 
+    const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
     const int  Z         = species->getChargeNumber();
 
@@ -1458,7 +1585,24 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
           // Compute a particle hop and store it on the run-time storage.
           RealVect& hop = p.tmpVect();
           if (diffusive) {
-            hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
+            if (mobile && m_limitParallelDiffusion) {
+              // If the user asks for it, diffusion against the drift direction is not permitted
+              const RealVect& v = p.velocity();
+              const Real      V = v.vectorLength();
+              const RealVect  u = v / V;
+
+              bool goodHop = false;
+
+              while (!goodHop) {
+                hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
+
+                goodHop = ((hop.dotProduct(u) + V * a_dt) >= 0.0);
+              }
+            }
+            else {
+              // Otherwise -- just do a standard hop. This is the "correct" way anyways.
+              hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
+            }
           }
           else {
             hop = RealVect::Zero;

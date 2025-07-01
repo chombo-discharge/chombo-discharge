@@ -99,7 +99,6 @@ Design
    Source/TimeStepper
    Source/AmrMesh   
    Source/CellTagger
-   Source/GeoCoarsener
 
 Discretization
 **************

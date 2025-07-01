@@ -414,6 +414,11 @@ ItoSolver::parseParticleMerger()
       this->reinitializeParticles(a_particles, a_cellInfo, a_ppc);
     };
   }
+  else if (str == "reinitialize_bvh") {
+    m_particleMerger = [this](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
+      this->makeSuperparticlesBVHReinitialize(a_particles, a_cellInfo, a_ppc);
+    };
+  }
   else if (str == "external") {
     // Do nothing, because the user will set the merger algorithm through setParticleMerger
   }
@@ -561,11 +566,117 @@ ItoSolver::initialData()
   bulkParticles.addParticles(m_species->getInitialParticles());
   bulkParticles.remap();
 
+  // Generate particles from the initial density distribution.
+  auto initialDensity = [&](const RealVect x) -> Real {
+    const auto& initialDensityFunc = m_species->getInitialDensity();
+
+    return initialDensityFunc(x, m_time);
+  };
+
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, 32);
+
   constexpr Real tolerance = 0.0;
 
   // Add particles, remove the ones that are inside the EB, and then deposit
   this->removeCoveredParticles(bulkParticles, EBRepresentation::ImplicitFunction, tolerance);
   this->depositParticles<ItoParticle, &ItoParticle::weight>(m_phi, bulkParticles, m_deposition, m_coarseFineDeposition);
+}
+
+void
+ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
+                                        const std::function<Real(const RealVect x)>& a_densityFunc,
+                                        const int a_maxParticlesPerCell) const noexcept
+{
+  CH_TIME("ItoSolver::generateParticlesFromDensity");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::generateParticlesFromDensity" << endl;
+  }
+
+  // Lambda which stochastically determines the number of particles in a cell. This is the mean number of particles, plus
+  // a stochastic evaluation of whether or not to include the "fractional" particle.
+  auto sampleParticles = [&](const Real a_volume, const Real a_density) -> std::vector<long long> {
+    const Real meanNumParticles   = a_volume * a_density;
+    const Real remainingParticles = meanNumParticles - std::floor(meanNumParticles);
+
+    long long numParticles = std::floor(meanNumParticles);
+    if (Random::getUniformReal01() < remainingParticles) {
+      numParticles += 1LL;
+    }
+
+    return ParticleManagement::partitionParticleWeights(numParticles, static_cast<long long>(a_maxParticlesPerCell));
+  };
+
+  // Grid loop.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real               dx     = m_amr->getDx()[lvl];
+    const Real               vol    = std::pow(dx, SpaceDim);
+    const RealVect           probLo = m_amr->getProbLo();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex&     din        = dit[mybox];
+      const Box&           cellbox    = dbl[din];
+      const EBISBox&       ebisbox    = ebisl[din];
+      const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+      List<ItoParticle>&   particles  = a_particles[lvl][din].listItems();
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
+          const RealVect cellPos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          const Real     phi     = a_densityFunc(cellPos);
+
+          const std::vector<long long> particleWeights = sampleParticles(vol, phi);
+
+          const RealVect lo = probLo + (RealVect(iv)) * dx;
+          const RealVect hi = probLo + (RealVect(iv) + RealVect::Unit) * dx;
+
+          // Partition the particle weights.
+          for (const auto& w : particleWeights) {
+            const RealVect x = Random::randomPosition(lo, hi);
+
+            particles.add(ItoParticle(w, x));
+          }
+        }
+      };
+
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+        const IntVect iv = vof.gridIndex();
+        if (validCells(iv, 0) && ebisbox.isIrregular(iv)) {
+          const Real     kappa         = ebisbox.volFrac(vof);
+          const RealVect normal        = ebisbox.normal(vof);
+          const RealVect bndryCentroid = ebisbox.bndryCentroid(vof);
+          const RealVect cellPos       = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+          const Real     phi           = a_densityFunc(cellPos);
+
+          // Compute the minimum box that encloses this cell.
+          RealVect lo = -0.5 * RealVect::Unit;
+          RealVect hi = +0.5 * RealVect::Unit;
+
+          DataOps::computeMinValidBox(lo, hi, normal, bndryCentroid);
+
+          // Partition particle weights.
+          const std::vector<long long> particleWeights = sampleParticles(kappa * vol, phi);
+
+          // Sample the particles.
+          for (const auto& w : particleWeights) {
+            const RealVect x = Random::randomPosition(cellPos, lo, hi, bndryCentroid, normal, dx, kappa);
+
+            particles.add(ItoParticle(w, x));
+          }
+        }
+      };
+
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
+
+      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);
+    }
+  }
 }
 
 void
@@ -1789,7 +1900,8 @@ ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const
   //       If we use redistribution then we compute a hybrid update phiH = kappa*phi = a_phi in each cell. But we are then "missing"
   //       a mass kappa*phi - kappa*phiH = a_phi(1 - kappa). This mass can be smooshed into the neighboring grid cells. The code
   //       below does even more than that -- it can compute an update phiH = kappa*phi + (1-kappa)*phiNC where phiNC is a non-conservative
-  //       type of update. In this case the mass loss is just like for fluid models: dM = kappa*(1-kappa)(phiC - phiNC). But
+  //       type of update. In this case the mass loss is just like for fluid models: dM = kappa*(1-kappa)(phiC - phiNC). But this update
+  //       is not strictly non-negative.
 
   if (m_useRedistribution) {
     this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
@@ -3110,9 +3222,13 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::build_kd", t2);
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::merge_particles", t3);
 
+  // We use a cheaper particle type with a lower memory footprint when merging particles. The
+  // NonCommParticle is a bare-bones particle type without MPI capabilities.
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;
   using ParticleList = KDNode<PType>::ParticleList;
+
+  const RealVect probLo = m_amr->getProbLo();
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   CH_START(t1);
@@ -3131,7 +3247,13 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   }
   CH_STOP(t1);
 
-  // Particle reconciler for manipulated two particles arising from splitting of one particle.
+  // In this case there is nothing to merge or split!
+  if (W < 2.0) {
+    return;
+  }
+
+  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
+  // within the particle merge.
   auto particleReconcile = [](PType& p1, PType& p2, const PType& p0) -> void {
     p1.template real<1>() = p0.template real<1>();
     p2.template real<1>() = p0.template real<1>();
@@ -3148,6 +3270,7 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_START(t3);
   a_particles.clear();
 
+  // If this is a cut-cell we merge as usual
   for (const auto& l : leaves) {
     Real     w = 0.0;
     Real     e = 0.0;
@@ -3163,6 +3286,118 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
     e *= 1. / w;
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+  }
+  CH_STOP(t3);
+}
+
+void
+ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
+                                             const CellInfo&    a_cellInfo,
+                                             const int          a_ppc) const noexcept
+{
+  CH_TIMERS("ItoSolver::makeSuperparticlesBVHReinitialize");
+  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::populate_list", t1);
+  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::build_kd", t2);
+  CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::merge_particles", t3);
+
+  // We use a cheaper particle type with a lower memory footprint when merging particles. The
+  // NonCommParticle is a bare-bones particle type without MPI capabilities.
+  using PType        = NonCommParticle<2, 1>;
+  using Node         = KDNode<PType>;
+  using ParticleList = KDNode<PType>::ParticleList;
+
+  const RealVect probLo = m_amr->getProbLo();
+
+  // 1. Make the input list into a vector of particles with a smaller memory footprint.
+  CH_START(t1);
+  Real         W = 0.0;
+  ParticleList particles;
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
+    PType p;
+
+    p.template real<0>() = lit().weight();
+    p.template real<1>() = lit().energy();
+    p.template vect<0>() = lit().position();
+
+    W += lit().weight();
+
+    particles.emplace_back(p);
+  }
+  CH_STOP(t1);
+
+  // In this case there is nothing to merge or split!
+  if (W < 2.0) {
+    return;
+  }
+
+  // Particle reconciler when splitting one particle into two particles. The weight is handled automatically
+  // within the particle merge.
+  auto particleReconcile = [](PType& p1, PType& p2, const PType& p0) -> void {
+    p1.template real<1>() = p0.template real<1>();
+    p2.template real<1>() = p0.template real<1>();
+  };
+
+  // 2. Build KD-tree.
+  const std::vector<std::shared_ptr<Node>> leaves = ParticleManagement::
+    recursivePartitionAndSplitEqualWeightKD<PType, &PType::template real<0>, &PType::template vect<0>>(
+      particles,
+      a_ppc,
+      particleReconcile);
+
+  // Merge leaves into new particles.
+  CH_START(t3);
+  a_particles.clear();
+
+  // If this is a cut-cell we merge as we would normally do. Otherwise we might create particles outside the EB.
+  if (a_cellInfo.getVolFrac() < 1.0) {
+    for (const auto& l : leaves) {
+      Real     w = 0.0;
+      Real     e = 0.0;
+      RealVect x = RealVect::Zero;
+
+      for (const auto& p : l->getParticles()) {
+        w += p.template real<0>();
+        x += p.template real<0>() * p.template vect<0>();
+        e += p.template real<0>() * p.template real<1>();
+      }
+
+      x *= 1. / w;
+      e *= 1. / w;
+
+      a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+    }
+  }
+  else {
+    for (const auto& l : leaves) {
+      Real w = 0.0;
+      Real e = 0.0;
+
+      RealVect xMin = +std::numeric_limits<Real>::max() * RealVect::Unit;
+      RealVect xMax = -std::numeric_limits<Real>::max() * RealVect::Unit;
+
+      for (const auto& p : l->getParticles()) {
+        w += p.template real<0>();
+        e += p.template real<0>() * p.template real<1>();
+
+        // Figure out the bounding box of this leaf.
+        const RealVect x = p.template vect<0>();
+
+        for (int dir = 0; dir < SpaceDim; dir++) {
+          xMin[dir] = std::min(xMin[dir], x[dir]);
+          xMax[dir] = std::max(xMax[dir], x[dir]);
+        }
+      }
+
+      RealVect x;
+
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Real r = Random::getUniformReal01();
+
+        x[dir] = xMin[dir] + r * (xMax[dir] - xMin[dir]);
+      }
+
+      a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, e));
+    }
   }
   CH_STOP(t3);
 }

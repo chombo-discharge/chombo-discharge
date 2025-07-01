@@ -2036,15 +2036,11 @@ CdrPlasmaImExSdcStepper::writeStepProfile(const Real a_dt,
     const int width = 12;
 
     if (write_header) {
-      f << std::left << std::setw(width) << "# Step"
-        << "\t" << std::left << std::setw(width) << "Time"
-        << "\t" << std::left << std::setw(width) << "dt"
-        << "\t" << std::left << std::setw(width) << "Substeps"
-        << "\t" << std::left << std::setw(width) << "Corrections"
-        << "\t" << std::left << std::setw(width) << "Rejections"
-        << "\t" << std::left << std::setw(width) << "Error"
-        << "\t" << std::left << std::setw(width) << "CFL"
-        << "\t" << endl;
+      f << std::left << std::setw(width) << "# Step" << "\t" << std::left << std::setw(width) << "Time" << "\t"
+        << std::left << std::setw(width) << "dt" << "\t" << std::left << std::setw(width) << "Substeps" << "\t"
+        << std::left << std::setw(width) << "Corrections" << "\t" << std::left << std::setw(width) << "Rejections"
+        << "\t" << std::left << std::setw(width) << "Error" << "\t" << std::left << std::setw(width) << "CFL" << "\t"
+        << endl;
     }
 
     f << std::left << std::setw(width) << m_timeStep << "\t" << std::left << std::setw(width) << m_time << "\t"

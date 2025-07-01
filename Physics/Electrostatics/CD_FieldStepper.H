@@ -159,7 +159,7 @@ namespace Physics {
 	@brief Print step report -- this does nothing. 
       */
       void
-      printStepReport() override{};
+      printStepReport() override {};
 
       /*!
 	@brief Register simulation realms to be used for this simulation module. 

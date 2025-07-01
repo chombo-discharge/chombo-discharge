@@ -21,7 +21,6 @@ def write_template(args):
                      args.discharge_home + "/Source/ConvectionDiffusionReaction/CD_" + args.cdr_solver + ".options",\
                      args.discharge_home + "/Source/RadiativeTransfer/CD_" + args.rte_solver + ".options",\
                      args.discharge_home + "/Source/SurfaceODESolver/CD_SurfaceODESolver.options",\
-                     args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/CdrPlasma/Timesteppers/" + args.time_stepper + "/CD_" + args.time_stepper + ".options", \
                      args.discharge_home + "/Physics/CdrPlasma/PlasmaModels/" + args.physics + "/CD_" + args.physics + ".options"]

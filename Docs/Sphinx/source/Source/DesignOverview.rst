@@ -39,15 +39,8 @@ Solvers only interact with one another through these modules.
 
 The top-level classes that represent the larger components in ``chombo-discharge`` are:
 
-#. :ref:`Chap:Driver`, which is responsible for running simulations.
-#. :ref:`Chap:AmrMesh`, which supplies the domain decomposition and (almost) all AMR and EB functionality.
-#. :ref:`Chap:TimeStepper`, which advances the equations of motion.
-#. :ref:`Chap:ComputationalGeometry`, which provides computational geometries (such as electrodes and dielectrics).
-#. :ref:`Chap:CellTagger`, for flagging cells for refinement and coarsening.
-#. :ref:`Chap:GeoCoarsener`, for manually removing refinement flags along the EB surface.
-
-.. caution::
-
-   In the current version of ``chombo-discharge``, :ref:`Chap:GeoCoarsener` has become redundant (due to improvements in the algorithms).
-   It will be removed in future versions. 
-
+#. :ref:`Chap:Driver` for running simulations.
+#. :ref:`Chap:AmrMesh` for encapsulating (almost) all AMR and EB functionality in a common core class.
+#. :ref:`Chap:TimeStepper` for integrating the equations of motion.
+#. :ref:`Chap:ComputationalGeometry` for representing computational geometries (such as electrodes and dielectrics).
+#. :ref:`Chap:CellTagger` for flagging cells for refinement and coarsening.

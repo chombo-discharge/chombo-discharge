@@ -93,9 +93,17 @@ Both these methods (``centroid`` and ``random``) are, however, sources of numeri
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See :ref:`Chap:ItoKMCJSON` for instructions on how to assign the particle placement method.
 
+Parallel diffusion
+------------------
+
+``ItoKMCGodunovStepper`` can limit diffusion against the electric field (or strictly speaking, the particle drift direction) by setting the flag ``ItoKMCGodunovStepper.limit_parallel_diffusion`` to ``true``.
+The logic behind this functionality is that in a drift-diffusion approximation, and regardless of whether or one uses particles or fluids, electrons that back-diffuse against the electric field will rapidly lose their energy and can then no longer ionize the gas.
+When limiting parallel diffusion, the diffusion hop of the particles is restricted to being along or transverse to the drift direction.
+In practice, this leads to greatly enhanced stability in, especially in cathode sheaths.
+
 
 Spatial filtering
-_________________
+-----------------
 
 It is possible to apply filtering of the space-charge density prior to the field advance in order to reduce the impact of discrete particle noise.
 Filters are applied as follows:
@@ -109,9 +117,9 @@ Users can apply this filtering by adjusting the following input options:
 
 .. code-block:: txt
 
-   ItoKMCGodunovStepper.filter_num        = 0   # Number of filterings for the space-density
-   ItoKMCGodunovStepper.filter_max_stride = 1   # Maximum stride for filter
-   ItoKMCGodunovStepper.filter_alpha      = 0.5 # Filtering factor (0.5 is a bilinear filter)		
+   ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
+   ItoKMCGodunovStepper.rho_filter_max_stride = 1    # Maximum stride for filter
+   ItoKMCGodunovStepper.rho_filter_alpha      = 0.5  # Filtering factor (0.5 is a bilinear filter)		
 
 .. warning::
 
@@ -164,7 +172,7 @@ Species are defined either as input species for CDR solvers (see :ref:`Chap:CdrS
 It is sufficient to populate the ``ItoKMCPhysics`` species vectors ``m_cdrSpecies`` and ``m_itoSpecies`` if one only wants to initialize the solvers.
 See :ref:`Chap:ItoKMCPhysics` for their C++ definition.
 In addition to actually populating the vectors, users will typically also include initial conditions for the species.
-The interfaces permit initial particles for the Îto solvers, while the CDR solvers permit particles *and* initial density functions.
+The interfaces permit initial particles and density functions for both both solver types.
 Additionally, one must define all species associated with radiative transfer solvers.
 
 .. _Chap:ItoKMCPlasmaReaction:
@@ -1225,6 +1233,28 @@ For example:
        }
     ]
 
+Initial densities
+_________________
+
+One may include an initial density by setting the ``initial density``parameter.
+For example:
+
+.. code-block:: json
+		     
+    "plasma species" :
+    [
+       {
+          "id": "e",           
+          "Z" : 1,             
+          "solver" : "cdr",    
+          "mobile" : true,     
+          "diffusive" : true,  
+	  "initial density": 1E10
+      }
+    ]
+
+If the species is defined as a particle species, computational particles will be generated within each grid so that the density is approximately as specified.
+
 Photon species
 --------------
 
@@ -1515,7 +1545,7 @@ An example specification is
       }
    ]
 
-**function TT A**
+**function T1T2 A**
 
 This specification is equivalent to a fluid rate
 
@@ -1531,12 +1561,12 @@ An example specification is
 		
    "plasma reactions": [
       {
-         "reaction": "A + B -> "  // Example reaction string. 
-	 "type": "function TT A", // Function based rate.
-	 "c1": 1.0,               // c1-coefficient
-	 "c2": 1.0,               // c2-coefficient
-	 "T1": "A",               // Which species temperature for T1
-	 "T2": "B"                // Which species temperature for T2	 
+         "reaction": "A + B -> "    // Example reaction string. 
+	 "type": "function T1T2 A", // Function based rate.
+	 "c1": 1.0,                 // c1-coefficient
+	 "c2": 1.0,                 // c2-coefficient
+	 "T1": "A",                 // Which species temperature for T1
+	 "T2": "B"                  // Which species temperature for T2	 
       }
    ]   
 
@@ -1786,6 +1816,19 @@ A JSON specification that includes this
 	    "gradient correction": "e"     // Specify gradient correction using species "e"
 	}	
     ]
+
+This is equivalent to a source term
+
+.. math::
+
+   S &= \alpha n_e\left|\mathbf{v}_e\right|\left(1 + \frac{\mathbf{E}\cdot \left(D_e\nabla n_e\right)}{n_e\mu_eE^2}\right) \\
+   &=\alpha\left[n_e\left|\mathbf{v}_e\right| + \hat{\mathbf{E}}\cdot\left(D_e\nabla n_e\right)\right].
+
+One can recognize this term as a regular electron impact ionization source term (typically written as :math:`\alpha \mu n_e E`).
+With the gradient correction, the ionization source term is essentially computed using the full electron flux, i.e., including the diffusive electron flux.
+Note that the full electron flux has a preferential direction, and the physical interpretation of this direction is that if there is net diffusion against the electric field, electrons lose energy and the impact ionization source term is correspondingly lower.
+
+
 
 Understanding reaction rates
 ____________________________
@@ -2037,6 +2080,7 @@ Currently supported expressions are:
       f &\approx 1.439964\,\text{eV}^2\text{V}^{-1}\text{nm}\times \frac{F}{\phi^2}.
 
    Here, :math:`\phi` is the work function (in electron volts) and :math:`\beta` is an empirical factor that describes local field amplifications.
+   Note that the above expression gives :math:`J` in units of :math:`\text{A}/\text{nm}^2`.
       
 
 #. Schottky emission:
@@ -2107,7 +2151,66 @@ For example, some care might be required when using the Townsend attachment coef
 
 .. warning::
 
-   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible. 
+   The JSON interface *does not guard* against inconsitencies in the user-provided chemistry, and provision of inconsistent :math:`\eta/N` and attachment reaction rates are quite possible.
+
+Tips and tricks
+---------------
+
+As with fluid drift-diffusion models, numerical instabilities can also occur due to unbounded growth in the plasma density.
+This is a process which has been linked both to the local field approximation and also to the presence of numerical diffusion.
+Simulations that fail to stabilize, i.e., where the field strength diverges, may benefit from the following stabilizing features:
+
+#. **Turn off parallel diffusion.**
+   
+   With the ``ItoKMCGodunovStepper`` class, this option is given by ``ItoKMCGodunovStepper.limit_parallel_diffusion``.
+   Using this option will ensure that particles do not diffuse against their drift direction.
+   Note that this also modifies the amount of *physical* diffusion in this direction.
+
+#. **Use gradient corrections.**
+
+   As discussed earlier, using a gradient correction can help limit non-physical ionization due to backwards-diffusing electrons.
+
+#. **Use downstream particle placement.**
+
+   Because the KMC algorithm solves for the number of particles in a grid cell, distributing new particles uniformly over a grid cell can lead to numerical diffusion where secondary electrons are placed in the wake of primary electrons.
+   Using downstream particle placement often leads to slightly more stable simulations.
+
+#. **Describe the primary species using an Ito solver.**
+
+   Similar to the point above, using a fluid solver for the ions may lead to upstream placement of the resulting positive charge.   
+
+#. **Use kd-tree particle merging.**
+
+   Currently particle merging strategies are reinitialization and merging based on bounding volume hierarchies.
+   If using reinitialization, new particles can be generated in the wake of old ones and can thus upset the charge distribution and cause numerical backwards diffusion (e.g., of electrons).
+
+#. **Numerically limit reaction rates.**
+
+   It is possible to specify that reaction rates will be numerically limited so that the rate does not exceed a specified threshold of :math:`\Delta t^{-1}`.
+   This is done through the JSON interface by setting ``limit max k*dt`` to some value.
+   Note that this changes the physics of the model, but usually enhances stability at larger time steps.
+   An example is given below:
+
+.. code-block:: json
+
+   "plasma reactions": [
+      {
+         "reaction": "e + N2 -> e + e + N2+"
+	 "type": "constant",
+	 "value": 1.E-12,
+	 "limit max k*dt" : 2.0
+      }
+   ]
+
+This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
+I.e., all background species are first absorbed into the rate calculation before the rate is limited.
+We point out that limiting is not possible if both species on the left hand side are solver variables.
+
+
+.. important::
+   
+   The above features have been implemented in order to push the algorithm towards coarser grids and larger time steps.
+   It is essential that the user checks that the model converges when these features are applied.
       
 Example programs
 ================

@@ -11,7 +11,6 @@ def write_template(args):
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/CD_Driver.options", \
                      args.discharge_home + "//Source/Electrostatics/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options", \
                      args.discharge_home + "/Source/SurfaceODESolver/CD_SurfaceODESolver.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/Electrostatics/CD_FieldStepper.options"]

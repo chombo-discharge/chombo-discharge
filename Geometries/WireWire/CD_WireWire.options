@@ -4,17 +4,18 @@
 # Note: For this geometry the wires get a partial voltage. Insulation sheaths are turned off
 #       if the dielectric radius is smaller than the electrode radius.
 # ====================================================================================================
-WireWire.insulation_permittivity  = 4.0     ## Insulation permittivity
-WireWire.smooth_length            = 0.01    ## Smoothing length
+WireWire.insulation_permittivity     = 4.0     ## Insulation permittivity
+WireWire.smooth_length               = 0.01    ## Smoothing length
 
-WireWire.first.on                 = true    ## Wire on or not
-WireWire.first.electrode_radius   = 0.1     ## Wire radius
-WireWire.first.potential          = 0.5     ## Relative potential on wire
-WireWire.first.dielectric_radius  = 0.15    ## Sheath radius
-WireWire.first.center             = 0 0.15  ## Wire center
+WireWire.first.on                    = true      ## Wire on or not
+WireWire.first.electrode_radius      = 0.1       ## Wire radius
+WireWire.first.potential             = 0.5       ## Relative potential on wire
+WireWire.first.dielectric_radius     = 0.15      ## Sheath radius
+WireWire.first.center                = 0 0.15    ## Wire center
 
-WireWire.second.on                = true    ## Wire on or not
-WireWire.second.electrode_radius  = 0.1     ## Wire radius
-WireWire.second.potential         = -0.5    ## Relative potential on wire
-WireWire.second.dielectric_radius = 0.15    ## Sheath radius
-WireWire.second.center            = 0 -0.15 ## Wire center
+WireWire.second.on                    = true       ## Wire on or not
+WireWire.second.electrode_radius      = 0.1        ## Wire radius
+WireWire.second.potential             = -0.5       ## Relative potential on wire
+WireWire.second.dielectric_radius     = 0.15       ## Sheath radius
+WireWire.second.center                = 0 -0.15    ## Wire center
+

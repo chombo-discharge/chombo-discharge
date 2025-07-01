@@ -140,6 +140,20 @@ Initial data for the ``ItoSolver`` is provided through ``ItoSpecies`` by providi
 When ``ItoSolver`` initializes the data in the solver, it transfers the particles from the species and into the solver.
 See :ref:`Chap:ParticleOps` for examples on how to draw initial particles and how to partition them when using MPI.
 
+Another way the initial particles can be generated is to set an initial density distribution for the species:
+
+.. code-block:: c++
+
+   class ItoSpecies {
+   public:
+
+   void setInitialDensityDistribution(const std::function<Real(const RealVect& x, const Real& t)>& phi);
+   
+   };
+
+When the user sets this function, the initialization routine in the solver will generate particles in the grid cell so that the specified density is reached.
+Note that this evaluation is stochastic, and there is currently a hard limit that restricts the number of initial computational particles per cell to 32. 
+
 Transport kernel
 ----------------
 
@@ -349,8 +363,9 @@ The default behavior in ``ItoSolver`` is to not merge the particles, but the use
 In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
 
 * ``none`` - No particle merging/splitting is performed.
-* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles.
+* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
 * ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
+* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible. 
 * ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
 
   .. code-block:: c++

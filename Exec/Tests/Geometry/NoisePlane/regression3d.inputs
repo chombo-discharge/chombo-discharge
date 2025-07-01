@@ -1,94 +1,83 @@
 # ====================================================================================================
 # AmrMesh class options
 # ====================================================================================================
-AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
-AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain
-AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 32 32 32    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 1           # Maximum amr depth
-AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
-AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
-AmrMesh.buffer_size      = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
-AmrMesh.box_sorting      = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor  = 16          # Blocking factor. 
-AmrMesh.max_box_size     = 16          # Maximum allowed box size
-AmrMesh.max_ebis_box     = 16          # Maximum allowed box size for EBIS generation. 
-AmrMesh.ref_rat          = 2 2 2 2 2 2 # Refinement ratios (mixed ratios are allowed). 
-AmrMesh.num_ghost        = 2           # Number of ghost cells. 
-AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
-AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
-AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
-AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
-AmrMesh.centroid_interp  = minmod	     ## Centroid interp stencils. linear, lsq, minmod, etc
-AmrMesh.eb_interp        = minmod            ## EB interp stencils. linear, taylor, minmod, etc
-AmrMesh.redist_radius    = 1           # Redistribution radius for hyperbolic conservation laws
-
+AmrMesh.lo_corner            = -1 -1 -1       ## Low corner of problem domain
+AmrMesh.hi_corner            = 1  1  1        ## High corner of problem domain
+AmrMesh.verbosity            = -1             ## Controls verbosity.
+AmrMesh.coarsest_domain      = 32 32 32       ## Number of cells on coarsest domain
+AmrMesh.max_amr_depth        = 1              ## Maximum amr depth
+AmrMesh.max_sim_depth        = -1             ## Maximum simulation depth
+AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
+AmrMesh.buffer_size          = 2              ## Number of cells between grid levels
+AmrMesh.grid_algorithm       = tiled          ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.box_sorting          = morton         ## 'none', 'shuffle', 'morton'
+AmrMesh.blocking_factor      = 16             ## Blocking factor.
+AmrMesh.max_box_size         = 16             ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 16             ## Maximum allowed box size for EBIS generation.
+AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios (mixed ratios are allowed).
+AmrMesh.num_ghost            = 2              ## Number of ghost cells.
+AmrMesh.lsf_ghost            = 2              ## Number of ghost cells when writing level-set to grid
+AmrMesh.eb_ghost             = 4              ## Set number of of ghost cells for EB stuff
+AmrMesh.mg_interp_order      = 2              ## Multigrid interpolation order
+AmrMesh.mg_interp_radius     = 2              ## Multigrid interpolation radius
+AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight (for least squares)
+AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
+AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
+AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
 
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                       = 2                # Engine verbosity
-Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
-Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
-Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
-Driver.output_dt                       = -1.0             # Output interval (values <= 0 enforces step-based output)
-Driver.plot_interval                   = 10               # Plot interval
-Driver.checkpoint_interval             = 100              # Checkpoint interval
-Driver.regrid_interval                 = 10               # Regrid interval
-Driver.write_regrid_files              = false            # Write regrid files or not.
-Driver.write_restart_files             = false            # Write restart files or not
-Driver.initial_regrids                 = 0                # Number of initial regrids
-Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
-Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 0                # Maximum number of steps
-Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
-Driver.write_memory                    = false            # Write MPI memory report
-Driver.write_loads                     = false            # Write (accumulated) computational loads
-Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = simulation       # Simulation output names
-Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
-Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
-Driver.plt_vars                        = levelset         # 'tags', 'mpi_rank', 'levelset'
-Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 15.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = 0                # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
-
-
-# ====================================================================================================
-# GeoCoarsener class options
-# ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-GeoCoarsener.box1_lvl    = 0            # up to this level
-GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
+Driver.verbosity                    = 2                   ## Engine verbosity
+Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
+Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
+Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
+Driver.output_dt                    = -1.0                ## Output interval (values <= 0 enforces step-based output)
+Driver.plot_interval                = 10                  ## Plot interval
+Driver.checkpoint_interval          = 100                 ## Checkpoint interval
+Driver.regrid_interval              = 10                  ## Regrid interval
+Driver.write_regrid_files           = false               ## Write regrid files or not.
+Driver.write_restart_files          = false               ## Write restart files or not
+Driver.initial_regrids              = 0                   ## Number of initial regrids
+Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
+Driver.start_time                   = 0                   ## Start time (fresh simulations only)
+Driver.stop_time                    = 1.0                 ## Stop time
+Driver.max_steps                    = 0                   ## Maximum number of steps
+Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
+Driver.write_memory                 = false               ## Write MPI memory report
+Driver.write_loads                  = false               ## Write (accumulated) computational loads
+Driver.output_directory             = ./                  ## Output directory
+Driver.output_names                 = simulation          ## Simulation output names
+Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
+Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
+Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
+Driver.plt_vars                     = levelset            ## 'tags', 'mpi_rank', 'levelset'
+Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
+Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
+Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
+Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
 # NoisePlane geometry class options
 # ====================================================================================================
-NoisePlane.use_plane         = true         # Turn on/off plane
-NoisePlane.material          = electrode    # 'electrode' or 'dielectric'
+NoisePlane.use_plane     = true         ## Turn on/off plane
+NoisePlane.material      = electrode    ## 'electrode' or 'dielectric'
 
-NoisePlane.live              = true         # Live potential or not (for electrode)
-NoisePlane.eps               = 4            # Set permittivity for dielectric
+NoisePlane.live     = true    ## Live potential or not (for electrode)
+NoisePlane.eps      = 4       ## Set permittivity for dielectric
 
-NoisePlane.orientation       = z+           # Plane orientation
-NoisePlane.point             = 0 0 0        # Point on the plane
+NoisePlane.orientation     = z+       ## Plane orientation
+NoisePlane.point           = 0 0 0    ## Point on the plane
 
-NoisePlane.noise_amplitude   = 0.1          # Noise amplitude
-NoisePlane.noise_frequency   = 10 10 10     # Noise frequency
-NoisePlane.noise_persistence = 0.5          # Noise persistence
-NoisePlane.noise_octaves     = 4            # Noise octaves
-NoisePlane.noise_reseed      = false        # Reseed noise
+NoisePlane.noise_amplitude       = 0.1         ## Noise amplitude
+NoisePlane.noise_frequency       = 10 10 10    ## Noise frequency
+NoisePlane.noise_persistence     = 0.5         ## Noise persistence
+NoisePlane.noise_octaves         = 4           ## Noise octaves
+NoisePlane.noise_reseed          = false       ## Reseed noise
 
-NoisePlane.clamp_lo          = -0.5 -0.5 0  # Noise clamp low
-NoisePlane.clamp_hi          =  0.5  0.5 0  # Noise clamp high
-NoisePlane.clamp_dx          = 0.1          # Noise clamp falloff
+NoisePlane.clamp_lo     = -0.5 -0.5 0    ## Noise clamp low
+NoisePlane.clamp_hi     = 0.5  0.5 0     ## Noise clamp high
+NoisePlane.clamp_dx     = 0.1            ## Noise clamp falloff
 

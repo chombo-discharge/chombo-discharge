@@ -51,6 +51,7 @@ ItoKMCJSON::ItoKMCJSON()
   // Initialize the plasma species
   this->initializePlasmaSpecies();
   this->initializeParticles();
+  this->initializeDensities();
   this->initializeMobilities();
   this->initializeDiffusionCoefficients();
   this->initializeTemperatures();
@@ -1228,6 +1229,11 @@ ItoKMCJSON::initializeParticles()
           }
 
           const std::string f = this->trim(jsonEntry["file"].get<std::string>());
+          if (!(this->doesFileExist(f))) {
+            const std::string parseError = baseError + " but file '" + f + "' does not exist";
+
+            this->throwParserError(parseError.c_str());
+          }
 
           unsigned int xcol = 0;
           unsigned int ycol = 1;
@@ -1296,6 +1302,52 @@ ItoKMCJSON::initializeParticles()
 
       break;
     }
+    }
+  }
+}
+
+void
+ItoKMCJSON::initializeDensities()
+{
+  CH_TIME("ItoKMCJSON::initializeDensities");
+  if (m_verbose) {
+    pout() << m_className + "::initializeDensities" << endl;
+  }
+
+  const std::string baseError = "ItoKMCJSON::initializeDensities";
+
+  for (const auto& species : m_json["plasma species"]) {
+    const std::string speciesID   = species["id"].get<std::string>();
+    const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
+
+    List<PointParticle> initialParticles;
+
+    // Put the particles in the solvers.
+    const SpeciesType& speciesType = m_plasmaSpeciesTypes.at(speciesID);
+    if (species.contains("initial density")) {
+      const Real density = species["initial density"].get<Real>();
+
+      if (density < 0.0) {
+        this->throwParserError(baseError + " but 'initial density' can not be negative");
+      }
+
+      // Make the initial density function.
+      auto initFunc = [density](const RealVect x, const Real t) -> Real {
+        return density;
+      };
+
+      if (speciesType == SpeciesType::CDR) {
+        const int idx = m_cdrSpeciesMap.at(speciesID);
+
+        auto species = static_cast<ItoKMCCDRSpecies*>(&(*m_cdrSpecies[idx]));
+
+        species->setInitialData(initFunc);
+      }
+      else if (speciesType == SpeciesType::Ito) {
+        const int idx = m_itoSpeciesMap.at(speciesID);
+
+        m_itoSpecies[idx]->setInitialDensity(initFunc);
+      }
     }
   }
 }
@@ -1555,7 +1607,7 @@ ItoKMCJSON::initializeTemperatures()
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
-          return eVToKelvin * tabulatedCoeff.interpolate<1>(Etd) / (std::numeric_limits<Real>::epsilon() + N);
+          return eVToKelvin * tabulatedCoeff.interpolate<1>(Etd);
         };
       }
       else {
@@ -1917,7 +1969,7 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
     pout() << m_className + "::initializeSurfaceEmission" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::initializePhotoReactions";
+  const std::string baseError = "ItoKMCJSON::initializeSufaceEmission";
 
   std::string reactionSpecifier;
   if (a_surface == "dielectric") {
@@ -2086,7 +2138,7 @@ ItoKMCJSON::initializeFieldEmission()
 
     const Real J = (a * F * F / phi) * exp(-v * b * std::pow(phi, 1.5) / F);
 
-    return J;
+    return J * 1E18; // Because in the above, F is given in V/nm
   };
 
   // Field emission expression for Schottky emission. T is the cathode temperature, phi is the work function, lamdba
@@ -2504,7 +2556,8 @@ ItoKMCJSON::getReactionSpecies(std::list<size_t>&              a_backgroundReact
   }
 }
 
-std::pair<std::function<Real(const Real E, const Real V, const Real dx, const RealVect x, const Vector<Real>& phi)>,
+std::pair<std::function<
+            Real(const Real E, const Real V, const Real dx, const Real dt, const RealVect x, const Vector<Real>& phi)>,
           std::function<Real(const Real E, const RealVect x)>>
 ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                     const std::list<size_t>& a_backgroundReactants,
@@ -2554,6 +2607,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     volumeFactor += rn.second;
   }
+
+  Real maxRateDt = std::numeric_limits<Real>::max();
 
   const std::string type      = this->trim(a_reactionJSON["type"].get<std::string>());
   const std::string reaction  = this->trim(a_reactionJSON["reaction"].get<std::string>());
@@ -2647,7 +2702,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const bool isBackground = this->isBackgroundSpecies(species);
     const bool isPlasma     = this->isPlasmaSpecies(species);
 
-    if (!isBackground || !isPlasma) {
+    if (!isBackground && !isPlasma) {
       this->throwParserError(baseError + " but species '" + species + "' is not a background or plasma species");
     }
 
@@ -2665,7 +2720,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       return c1 * std::pow(T(E, x), c2);
     };
   }
-  else if (type == "function TT A") {
+  else if (type == "function T1T2 A") {
     if (!(a_reactionJSON.contains("T1"))) {
       this->throwParserError(baseError + " and got 'functionT1T2 A' but field 'T1' was not found");
     }
@@ -2708,6 +2763,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     else {
       speciesTemperature1 = m_plasmaTemperatures[m_plasmaIndexMap.at(speciesT1)];
     }
+
     if (isBackgroundT2) {
       speciesTemperature2 = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
         return backgroundTemperature(x);
@@ -2718,7 +2774,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
 
     const Real c1 = a_reactionJSON["c1"].get<Real>();
-    const Real c2 = a_reactionJSON["c1"].get<Real>();
+    const Real c2 = a_reactionJSON["c2"].get<Real>();
 
     fluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2](const Real E, const RealVect x) -> Real {
       return c1 * std::pow(T1(E, x) / T2(E, x), c2);
@@ -2897,18 +2953,25 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
   }
 
+  // Hook for limiting the maximum fluid-based rate. Use with caution.
+  if (a_reactionJSON.contains("limit max k*dt")) {
+    maxRateDt = a_reactionJSON["limit max k*dt"].get<Real>();
+  }
+
   // This is the KMC rate -- note that it absorbs the background species.
-  FunctionEVXP kmcRate = [fluidRate,
-                          volumeFactor,
-                          propensityFactor,
-                          gridFactor,
-                          a_backgroundReactants,
-                          &S = this->m_backgroundSpecies,
-                          &N = this->m_gasNumberDensity](const Real          E,
-                                                         const Real          V,
-                                                         const Real          dx,
-                                                         const RealVect      x,
-                                                         const Vector<Real>& phi) -> Real {
+  FunctionEVXTP kmcRate = [fluidRate,
+                           volumeFactor,
+                           propensityFactor,
+                           gridFactor,
+                           maxRateDt,
+                           a_backgroundReactants,
+                           &S = this->m_backgroundSpecies,
+                           &N = this->m_gasNumberDensity](const Real          E,
+                                                          const Real          V,
+                                                          const Real          dx,
+                                                          const Real          dt,
+                                                          const RealVect      x,
+                                                          const Vector<Real>& phi) -> Real {
     Real k = fluidRate(E, x);
 
     // Multiply by neutral densities
@@ -2917,6 +2980,9 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
       k *= n;
     }
+
+    // Limit the rate if the user calls for it.
+    k = std::min(k, maxRateDt / dt);
 
     // Multiply by propensity factor (because of ItoKMCDualStateReaction)
     k *= propensityFactor;
@@ -3035,7 +3101,7 @@ ItoKMCJSON::parseTableEByN(const nlohmann::json& a_tableEntry, const std::string
 
   const std::string fileName = this->trim(a_tableEntry["file"].get<std::string>());
   if (!(this->doesFileExist(fileName))) {
-    this->throwParserError(preError + " but file '" + fileName + "' " + postError + " was not found");
+    this->throwParserError(preError + " but file '" + fileName + "' was not found");
   }
 
   int columnEbyN  = 0;
@@ -3257,6 +3323,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
                                 const RealVect                                   a_pos,
                                 const Vector<Real>&                              a_phi,
                                 const Vector<RealVect>&                          a_gradPhi,
+                                const Real                                       a_dt,
                                 const Real                                       a_dx,
                                 const Real                                       a_kappa) const noexcept
 {
@@ -3274,7 +3341,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
   const Real V = std::pow(a_dx, SpaceDim);
 
   for (int i = 0; i < a_kmcReactions.size(); i++) {
-    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_pos, a_phi);
+    a_kmcReactions[i]->rate() = m_kmcReactionRates[i](E, V, a_dx, a_dt, a_pos, a_phi);
 
     // Add gradient correction if the user has asked for it.
     const std::pair<bool, std::string> gradientCorrection = m_kmcReactionGradientCorrections[i];
@@ -3425,12 +3492,12 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
       if (m_itoSpecies[species]->getChargeNumber() < 0) {
 
         const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
-        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_dt;
+        const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_bndryArea * a_dt;
 
         const long long numEmission = Random::getPoisson<long long>(JdAdt);
 
         if (numEmission > 0LL) {
-          const RealVect x = a_cellCenter + a_bndryCentroid * a_dx;
+          const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
 
           a_secondaryParticles[species].add(ItoParticle(1.0 * numEmission, x));
         }

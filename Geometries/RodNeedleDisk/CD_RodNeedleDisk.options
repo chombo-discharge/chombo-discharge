@@ -1,28 +1,29 @@
 # ====================================================================================================
 # RodNeedleDisk geometry class options
 # ====================================================================================================
-RodNeedleDisk.use_rod              = true       # Turn on/off rod
-RodNeedleDisk.use_needle           = true       # Turn on/off needle
-RodNeedleDisk.use_disk             = true       # Turn on/off disk
-RodNeedleDisk.orientation          = "-y"       # Orientation
-RodNeedleDisk.translate            = 0 0 0      # Geometric translation
-RodNeedleDisk.rod_live             = false      # Rod/needle live or not
-RodNeedleDisk.disk_live            = true       # Disk live or not
+RodNeedleDisk.use_rod         = true     ## Turn on/off rod
+RodNeedleDisk.use_needle      = true     ## Turn on/off needle
+RodNeedleDisk.use_disk        = true     ## Turn on/off disk
+RodNeedleDisk.orientation     = "-y"     ## Orientation
+RodNeedleDisk.translate       = 0 0 0    ## Geometric translation
+RodNeedleDisk.rod_live        = false    ## Rod/needle live or not
+RodNeedleDisk.disk_live       = true     ## Disk live or not
 
-RodNeedleDisk.rod_begin            = 0.25       # Start position for part of rod with small radius
-RodNeedleDisk.rod_midpoint         = 0.75       # Crossing point between small-radius portion with large-radius portion
-RodNeedleDisk.rod_end              = 1.75       # Stop position for rod
-RodNeedleDisk.rod_small_radius     = 0.1        # Radius for small-radius part of rod
-RodNeedleDisk.rod_big_radius       = 0.2        # Radius for large-radius part of rod
-RodNeedleDisk.rod_smooth           = 0.1        # Transition length between small/big radius parts
-RodNeedleDisk.rod_needle_smooth    = 0.00       # Transition length between needle and actual rod
+RodNeedleDisk.rod_begin             = 0.25    ## Start position for part of rod with small radius
+RodNeedleDisk.rod_midpoint          = 0.75    ## Crossing point between small-radius portion with large-radius portion
+RodNeedleDisk.rod_end               = 1.75    ## Stop position for rod
+RodNeedleDisk.rod_small_radius      = 0.1     ## Radius for small-radius part of rod
+RodNeedleDisk.rod_big_radius        = 0.2     ## Radius for large-radius part of rod
+RodNeedleDisk.rod_smooth            = 0.1     ## Transition length between small/big radius parts
+RodNeedleDisk.rod_needle_smooth     = 0.00    ## Transition length between needle and actual rod
 
-RodNeedleDisk.needle_length        = 0.4        # Needle length (from some origin)
-RodNeedleDisk.needle_radius        = 0.025      # Needle radius
-RodNeedleDisk.needle_tip_radius    = 0.01       # Needle tip radius
-RodNeedleDisk.needle_angle         = 30         # Full opening angle of needle tip (in degrees)
+RodNeedleDisk.needle_length         = 0.4      ## Needle length (from some origin)
+RodNeedleDisk.needle_radius         = 0.025    ## Needle radius
+RodNeedleDisk.needle_tip_radius     = 0.01     ## Needle tip radius
+RodNeedleDisk.needle_angle          = 30       ## Full opening angle of needle tip (in degrees)
 
-RodNeedleDisk.disk_point           = -0.5       # Top position of disk
-RodNeedleDisk.disk_radius          = 0.5        # Disk radius
-RodNeedleDisk.disk_curvature       = 0.05       # Disk edge curvature (also the minimum disk thickness)
-RodNeedleDisk.disk_extra_thickness = 0.0        # Extra disk thickness
+RodNeedleDisk.disk_point               = -0.5    ## Top position of disk
+RodNeedleDisk.disk_radius              = 0.5     ## Disk radius
+RodNeedleDisk.disk_curvature           = 0.05    ## Disk edge curvature (also the minimum disk thickness)
+RodNeedleDisk.disk_extra_thickness     = 0.0     ## Extra disk thickness
+

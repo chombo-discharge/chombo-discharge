@@ -1,27 +1,28 @@
 # ====================================================================================================
 # AdvectionDiffusionStepper class options
 # ====================================================================================================
-AdvectionDiffusion.verbosity      = -1      # Verbosity
-AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
-AdvectionDiffusion.advection      = true    # Turn on/off advection
-AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
+AdvectionDiffusion.verbosity      = -1      ## Verbosity
+AdvectionDiffusion.diffusion      = true    ## Turn on/off diffusion
+AdvectionDiffusion.advection      = true    ## Turn on/off advection
+AdvectionDiffusion.integrator     = imex    ## 'heun' or 'imex'
 
 # Default velocity, diffusion, and initial data
 # ---------------------------------------------
-AdvectionDiffusion.blob_amplitude = 1.0     # Blob amplitude
-AdvectionDiffusion.blob_radius    = 0.1     # Blob radius
-AdvectionDiffusion.blob_center    = 0 0     # Blob center
-AdvectionDiffusion.omega          = 1.0     # Rotation velocity	
-AdvectionDiffusion.diffco         = 1.0     # Diffusion coefficient
+AdvectionDiffusion.blob_amplitude     = 1.0    ## Blob amplitude
+AdvectionDiffusion.blob_radius        = 0.1    ## Blob radius
+AdvectionDiffusion.blob_center        = 0 0    ## Blob center
+AdvectionDiffusion.omega              = 1.0    ## Rotation velocity
+AdvectionDiffusion.diffco             = 1.0    ## Diffusion coefficient
 
 # Time step settings
 # ------------------
-AdvectionDiffusion.cfl            = 0.5     # CFL number
-AdvectionDiffusion.min_dt         = 0.0     # Smallest acceptable time step
-AdvectionDiffusion.max_dt         = 1.E99   # Largest acceptable time step
+AdvectionDiffusion.cfl        = 0.5      ## CFL number
+AdvectionDiffusion.min_dt     = 0.0      ## Smallest acceptable time step
+AdvectionDiffusion.max_dt     = 1.E99    ## Largest acceptable time step
 
 # Cell tagging controls
 # ---------------------
-AdvectionDiffusion.refine_curv = 0.1        # Refine if curvature exceeds this
-AdvectionDiffusion.refine_magn = 1E-2       # Only tag if magnitude eceeds this
-AdvectionDiffusion.buffer      = 0          # Grow tagged cells     
+AdvectionDiffusion.refine_curv     = 0.1     ## Refine if curvature exceeds this
+AdvectionDiffusion.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
+AdvectionDiffusion.buffer          = 0       ## Grow tagged cells
+

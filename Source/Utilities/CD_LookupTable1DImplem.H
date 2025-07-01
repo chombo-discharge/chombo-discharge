@@ -111,7 +111,7 @@ LookupTable1D<T, N, I>::truncate(const T& a_min, const T& a_max, const size_t a_
   std::vector<std::array<T, N + 1>> truncatedData;
 
   for (const auto& xy : m_rawData) {
-    if (xy[a_column] >= a_min || xy[a_column] <= a_max) {
+    if (xy[a_column] >= a_min && xy[a_column] <= a_max) {
       truncatedData.emplace_back(xy);
     }
   }

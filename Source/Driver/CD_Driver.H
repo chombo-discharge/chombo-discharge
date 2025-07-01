@@ -25,7 +25,6 @@
 #include <CD_AmrMesh.H>
 #include <CD_CellTagger.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <CD_GeoCoarsener.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -46,13 +45,11 @@ public:
     @param[in] a_TimeStepper          The time stepper
     @param[in] a_amr                   AmrMesh core class. 
     @param[in] a_cellTagger            Cell tagger which flags cell for refinement. 
-    @param[in] a_geoCoarsen            geo_coarsen class which can remove tags along the geometry. 
   */
   Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
          const RefCountedPtr<TimeStepper>&           a_timeStepper,
          const RefCountedPtr<AmrMesh>&               a_amr,
-         const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(nullptr),
-         const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen = RefCountedPtr<GeoCoarsener>(nullptr));
+         const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(nullptr));
 
   /*!
     @brief Destructor (does nothing)
@@ -113,11 +110,6 @@ protected:
     @brief Cell tagger
   */
   RefCountedPtr<CellTagger> m_cellTagger;
-
-  /*!
-    @brief Geometric coarsener
-  */
-  RefCountedPtr<GeoCoarsener> m_geoCoarsen;
 
   /*!
     @brief Input file
@@ -544,13 +536,6 @@ protected:
   */
   void
   setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
-
-  /*!
-    @brief Set the geo coarsener
-    @param[in] a_geoCoarsen Coarsener for cut-cell tags. 
-  */
-  void
-  setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen);
 
   /*!
     @brief Setup function

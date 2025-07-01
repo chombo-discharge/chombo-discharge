@@ -1,15 +1,16 @@
 # ====================================================================================================
 # RoughRod geometry class options
 #
-# NOTE: Only the endcap at endpoint2 has a spherical cap. 
+# NOTE: Only the endcap at endpoint2 has a spherical cap.
 # ====================================================================================================
-RoughRod.on                = true             # Turn on/off rod
-RoughRod.radius            = 1.0              # Radius
-RoughRod.endpoint1         = 0 0 2            # One endpoint
-RoughRod.endpoint2         = 0 0 0            # Other endpoint
-RoughRod.live              = true             # At live voltage
-RoughRod.noise_amplitude   = 0.1              # Noise amplitude
-RoughRod.noise_frequency   = 5 5 5            # Noise frequency
-RoughRod.noise_persistence = 0.5              # Noise persistence
-RoughRod.noise_octaves     = 1                # Noise octaves
-RoughRod.noise_reseed      = false            # Reseed noise
+RoughRod.on                    = true     ## Turn on/off rod
+RoughRod.radius                = 1.0      ## Radius
+RoughRod.endpoint1             = 0 0 2    ## One endpoint
+RoughRod.endpoint2             = 0 0 0    ## Other endpoint
+RoughRod.live                  = true     ## At live voltage
+RoughRod.noise_amplitude       = 0.1      ## Noise amplitude
+RoughRod.noise_frequency       = 5 5 5    ## Noise frequency
+RoughRod.noise_persistence     = 0.5      ## Noise persistence
+RoughRod.noise_octaves         = 1        ## Noise octaves
+RoughRod.noise_reseed          = false    ## Reseed noise
+

@@ -1,5 +1,4 @@
 #include "CD_Driver.H"
-#include <CD_GeoCoarsener.H>
 #include <CD_FieldSolverFactory.H>
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_CdrLayoutImplem.H>
@@ -92,9 +91,8 @@ main(int argc, char* argv[])
   for (const auto& cells : nCells) {
 
     // Set geometry and AMR
-    RefCountedPtr<ComputationalGeometry> compgeom   = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
-    RefCountedPtr<AmrMesh>               amr        = RefCountedPtr<AmrMesh>(new AmrMesh());
-    RefCountedPtr<GeoCoarsener>          geocoarsen = RefCountedPtr<GeoCoarsener>(new GeoCoarsener());
+    RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
+    RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
 
     // Set up physics
     RefCountedPtr<CdrPlasmaPhysics> physics     = RefCountedPtr<CdrPlasmaPhysics>(new CdrPlasmaJSON());
@@ -125,7 +123,7 @@ main(int argc, char* argv[])
     amr->buildDomains();
 
     // Set up the Driver and run it
-    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
+    RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
     engine->setupAndRun(input_file);
 
     // Compute the solution errors if there is a coarser solution available.

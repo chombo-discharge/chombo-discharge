@@ -31,9 +31,9 @@ MemoryReport::getMaxMinMemoryUsage()
 
   MemoryReport::getMaxMinMemoryUsage(maxPeak, minPeak, maxUnfreed, minUnfreed);
 
-  pout() << "MemoryReport::getMaxMinMemoryUsage:"
-         << "\t Max peak = " << 1.0 * maxPeak << "\t Min peak = " << 1.0 * minPeak
-         << "\t Max unfreed = " << 1.0 * maxUnfreed << "\t Min unfreed = " << 1.0 * minUnfreed << endl;
+  pout() << "MemoryReport::getMaxMinMemoryUsage:" << "\t Max peak = " << 1.0 * maxPeak
+         << "\t Min peak = " << 1.0 * minPeak << "\t Max unfreed = " << 1.0 * maxUnfreed
+         << "\t Min unfreed = " << 1.0 * minUnfreed << endl;
 #endif
 }
 

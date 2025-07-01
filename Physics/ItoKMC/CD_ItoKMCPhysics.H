@@ -440,6 +440,11 @@ namespace Physics {
       bool m_isDefined;
 
       /*!
+	@brief If true, increment onto existing particles rather than creating new ones
+      */
+      bool m_incrementNewParticles;
+
+      /*!
 	@brief Is the KMC solver defined or not.
       */
       static thread_local bool m_hasKMCSolver;
@@ -593,7 +598,8 @@ namespace Physics {
 	@param[in] a_E       Electric field
 	@param[in] a_pos     Physical position
 	@param[in] a_phi     Plasma species densities
-	@param[in] a_gradPhi Density gradients for plasma species. 
+	@param[in] a_gradPhi Density gradients for plasma species.
+	@param[in] a_dt      Time step
 	@param[in] a_dx      Grid resolution
 	@param[in] a_kappa   Cut-cell volume fraction
 	@note Must be implemented by the user.
@@ -604,6 +610,7 @@ namespace Physics {
                           const RealVect                                   a_pos,
                           const Vector<Real>&                              a_phi,
                           const Vector<RealVect>&                          a_gradPhi,
+                          const Real                                       a_dt,
                           const Real                                       a_dx,
                           const Real                                       a_kappa) const noexcept = 0;
 

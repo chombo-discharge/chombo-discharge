@@ -51,7 +51,8 @@ ThreadSafePairMin(std::pair<Real, RealVect>& ompOut, const std::pair<Real, RealV
 {
   ompOut = (ompIn.first < ompOut.first) ? ompIn : ompOut;
 }
-#pragma omp declare reduction(pairmin : std::pair<Real, RealVect> : ThreadSafePairMin(omp_out, omp_in)) initializer(omp_priv=omp_orig)
+#pragma omp declare reduction(pairmin : std::pair<Real, RealVect> : ThreadSafePairMin(omp_out, omp_in)) \
+  initializer(omp_priv = omp_orig)
 
 #endif
 
