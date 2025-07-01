@@ -193,6 +193,9 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   if (str == "euler_maruyama") {
     m_algorithm = WhichAlgorithm::EulerMaruyama;
   }
+  else if (str == "heun") {
+    m_algorithm = WhichAlgorithm::Heun;
+  }  
   else {
     MayDay::Abort("ItoKMCGodunovStepper::parseAlgorithm - unknown algorithm requested");
   }
@@ -325,6 +328,11 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   switch (m_algorithm) {
   case WhichAlgorithm::EulerMaruyama: {
     this->advanceEulerMaruyama(a_dt);
+
+    break;
+  }
+  case WhichAlgorithm::Heun: {
+    this->advanceHeun(a_dt);
 
     break;
   }
@@ -1461,6 +1469,91 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceEulerMaruyama(const Real a_dt) noexcept
   CH_TIME("ItoKMCGodunovStepper::advanceEulerMaruyama");
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::advanceEulerMaruyama" << endl;
+  }
+
+  // Store X^k positions.
+  this->setOldPositions();
+
+  // Diffuse the particles. This copies onto m_rhoDaggerParticles and stores the hop on the full particles. We need
+  // to remap the particles species that made a diffusion hop.
+  this->barrier();
+  m_timer.startEvent("Diffuse particles");
+  this->diffuseParticlesEulerMaruyama(m_rhoDaggerParticles, a_dt);
+  this->remapPointParticles(m_rhoDaggerParticles, SpeciesSubset::ChargedDiffusive);
+  m_timer.stopEvent("Diffuse particles");
+
+  // Perform the diffusive CDR advance.
+  this->barrier();
+  m_timer.startEvent("Diffuse CDR");
+  this->computeDiffusionTermCDR(m_semiImplicitRhoCDR, a_dt);
+  m_timer.stopEvent("Diffuse CDR");
+
+  // Compute the conductivity on the mesh. This deposits q_e * Z * w * mu on the mesh.
+  this->barrier();
+  m_timer.startEvent("Compute conductivities");
+  this->copyConductivityParticles(m_conductivityParticles);
+  this->computeConductivities(m_conductivityParticles);
+  m_timer.stopEvent("Compute conductivities");
+
+  // Set up the semi-implicit Poisson solver with the computed conductivities.
+  this->barrier();
+  m_timer.startEvent("Setup Poisson");
+  this->setupSemiImplicitPoisson(a_dt);
+  m_timer.stopEvent("Setup Poisson");
+
+  // Compute space charge density arising from the new particle positions X^k + sqrt(2*D*dt)*W. Only need to
+  // do the diffusive and charged species.
+  this->barrier();
+  m_timer.startEvent("Deposit point particles");
+  this->depositPointParticles(m_rhoDaggerParticles, SpeciesSubset::Charged);
+  this->computeSemiImplicitRho();
+  m_timer.stopEvent("Deposit point particles");
+
+  // Solve the semi-implicit Poisson equation.
+  this->barrier();
+  m_timer.startEvent("Solve Poisson");
+  const bool converged = this->solvePoisson();
+  if (!converged) {
+    const std::string errMsg = "ItoKMCGodunovStepper::advanceEulerMaruyama - Poisson solve did not converge";
+
+    pout() << errMsg << endl;
+
+    if (this->m_abortOnFailure) {
+      MayDay::Error(errMsg.c_str());
+    }
+  }
+  m_timer.stopEvent("Solve Poisson");
+
+  // Recompute velocities with the new electric field. This interpolates the velocities to the current particle positions, i.e.
+  // we compute V^(k+1)(X^k) = mu^k * E^(k+1)(X^k)
+  this->barrier();
+  m_timer.startEvent("Step-compute v");
+#if 1 // This is what the algorithm says.
+  this->setCdrVelocityFunctions();
+  this->setItoVelocityFunctions();
+  (this->m_ito)->interpolateVelocities();
+  this->multiplyCdrVelocitiesByMobilities();
+#else // Have to use this for LEA - need to debug.
+  this->computeDriftVelocities();
+#endif
+  m_timer.stopEvent("Step-compute v");
+
+  // Finalize the Euler-Maruyama update.
+  this->barrier();
+  m_timer.startEvent("Euler-Maruyama step");
+  this->stepEulerMaruyamaParticles(a_dt);
+  this->remapParticles(SpeciesSubset::AllMobileOrDiffusive);
+  this->stepEulerMaruyamaCDR(a_dt);
+  m_timer.stopEvent("Euler-Maruyama step");
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCGodunovStepper<I, C, R, F>::advanceHeun(const Real a_dt) noexcept
+{
+  CH_TIME("ItoKMCGodunovStepper::advanceHeun");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::advanceHeun" << endl;
   }
 
   // Store X^k positions.

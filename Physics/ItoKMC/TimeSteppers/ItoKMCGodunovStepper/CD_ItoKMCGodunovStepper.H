@@ -145,6 +145,7 @@ namespace Physics {
       enum class WhichAlgorithm
       {
         EulerMaruyama,
+	Heun
       };
 
       /*!
@@ -409,6 +410,13 @@ namespace Physics {
       */
       virtual void
       advanceEulerMaruyama(const Real a_dt) noexcept;
+
+      /*!
+	@brief Advance the particles using the Heun method scheme
+	@param[in] a_dt Time step
+      */
+      virtual void
+      advanceHeun(const Real a_dt) noexcept;      
 
       /*!
 	@brief Perform the diffusive Ito advance in the Euler-Maruyama step.
