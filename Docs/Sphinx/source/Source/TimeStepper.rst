@@ -4,6 +4,8 @@ TimeStepper
 ***********
 
 ``TimeStepper`` represents the EB+AMR equation solving class in ``chombo-discharge``.
+
+
 It owns the various numerical solvers and is responsible for setting up solvers and advancing the equations of motion.
 Because ``TimeStepper`` and not :ref:`Chap:Driver` owns the solvers as class members, it will also coordinate I/O (together with :ref:`Chap:Driver`). 
 
