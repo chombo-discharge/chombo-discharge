@@ -25,6 +25,8 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "ItoKMCGodunovStepper -- should we recalc the field before the reaction step to correct for boundary effects?"
+
 using namespace Physics::ItoKMC;
 
 template <typename I, typename C, typename R, typename F>
