@@ -3,7 +3,7 @@
 Overview
 ========
 
-A core design principle in ``chombo-discharge`` is the division between the AMR core, geometry, solvers, physics coupling, and user applications. 
+A design principle in ``chombo-discharge`` is the division between the AMR core, geometry, solvers, physics coupling, and user applications. 
 As an example, the fundamental time integrator class ``TimeStepper`` in ``chombo-discharge`` is a just an abstraction, i.e., it only presents an API which application codes must conform to.
 Because of that, ``TimeStepper`` can be used for solving completely unrelated problems. 
 We have, for example, implementations of ``TimeStepper`` for solving radiative transfer equations, advection-diffusion problems, electrostatic problems, or for plasma problems.
@@ -14,7 +14,7 @@ To the right in this figure we have the AMR core functionality, which supplies t
 In general, solvers may share common features (such as elliptic discretizations) or be completely disjoint.
 For this reason numerical solvers are asked to *register* AMR requirements.
 For example, elliptic solvers need functionality for interpolating ghost cells over the refinement boundary, but pure particle solvers have no need for such functionality.
-A consequence of this is that the numerical solvers are literally asked (during their instantiation) to register what type of AMR infrastructure they require. 
+A consequence of this is that the numerical solvers are asked (during their instantiation) to register what type of AMR infrastructure they require. 
 In return, the AMR core will allocate this infrastructure and make it available to solver, as illustrated in :numref:`Fig:Design`. 
 
 .. _Fig:Design:
@@ -35,6 +35,7 @@ Yet, it is the ``FieldSolver`` API which is used by most application codes (rath
 All numerical solvers interact with a common AMR core that encapsulates functionality for running the solvers.
 All solvers are also compatible with mesh refinement and complex geometries, but they can only run through *application codes*, which we also call *physics modules*. 
 These modules encapsulate the time advancement of either individual or coupled solvers.
+One such module is the ``CdrPlasma`` module, which implements a conventional drift-diffusion model for streamer (and other types of) discharges.
 Solvers only interact with one another through these modules.
 
 The top-level classes that represent the larger components in ``chombo-discharge`` are:
