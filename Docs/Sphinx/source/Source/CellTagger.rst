@@ -10,7 +10,7 @@ Since refinement is intended to be quite general, the user is responsible for pr
 
 .. tip::
 
-   `CellTagger C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCellTagger.html>`_
+   Here is the `CellTagger C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCellTagger.html>`_
 
 Refinement flags live in a data holder called ``EBAMRTags`` inside of ``Driver``.
 This data is typedef'ed as

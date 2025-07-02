@@ -24,4 +24,3 @@ AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight 
 AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
 AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
 AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
-
