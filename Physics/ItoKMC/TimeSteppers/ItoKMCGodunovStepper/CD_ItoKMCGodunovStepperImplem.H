@@ -26,6 +26,7 @@
 #include <CD_NamespaceHeader.H>
 
 #warning "ItoKMCGodunovStepper -- should we recalc the field before the reaction step to correct for boundary effects?"
+#warning "ItoKMCGodunovStepper -- for Heun we need to change the coefficients in the semi-implicit restart and regrid functions"
 
 using namespace Physics::ItoKMC;
 
@@ -1557,6 +1558,17 @@ ItoKMCGodunovStepper<I, C, R, F>::advanceHeun(const Real a_dt) noexcept
   if (this->m_verbosity > 5) {
     pout() << this->m_name + "::advanceHeun" << endl;
   }
+
+  // The various steps are:
+
+  // 1. Store the old positions X^k -- they will be needed for particle intersection tests
+  // 2. Compute the diffusion hop = DW. Store the positions X^k + DW for all charged particles are point particles
+  //    because we need to deposit them as space charge.
+  // 3. Do the same for the CDR equations, computing the diffusion term and storing the term in the appropriate data holder.
+  // 4. We need to compute the conductivity on the mesh for charged particles that are also mobile. Copy all particles that
+  //    move onto PointParticles with mass w*mobility.
+  // 5. Deposit the conductivity particles on the mesh so we get an estimate for sigma^k. 
+  // 
 
   // Store X^k positions.
   this->setOldPositions();
