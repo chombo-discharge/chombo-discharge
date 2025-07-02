@@ -43,7 +43,7 @@ To register a :ref:`Chap:Realm`, users will have ``TimeStepper`` register realms
       m_amr->registerRealm("otherParticleRealm");
    }
 
-The above code will ensure that ``chombo-discharge`` generates three :ref:`Chap:Realms`, which can be individually load balanced. 
+The above code will ensure that ``chombo-discharge`` generates three :ref:`Chap:Realm`, which can be individually load balanced. 
 Since at least one realm is required, :ref:`Chap:Driver` will *always* register the realm ``"Primal"``.
 Fundamentally, there is no limitation to the number of realms that can be allocated.
 
@@ -116,9 +116,9 @@ This can occasionally be simple, or for coupled problems it might be highly comp
 For discharge problems, this can involve filling the solvers with initial densities, and solving the Poisson equation for obtaining the electric field.
 A simpler example is again given by :ref:`Chap:AdvectionDiffusionModel`:
 
-.. _List:AdvectionDiffusionStepperAllocate:
+.. _List:AdvectionDiffusionStepperInitialData:
 .. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
-   :caption: Implementation of the ``allocate`` routine for a simple advection-diffusion problem.
+   :caption: Implementation of the ``initialData`` routine for a simple advection-diffusion problem.
    :language: c++
    :lines: 199-226
 
@@ -241,8 +241,22 @@ An example of this is the :ref:`Chap:FieldSolver` class, which only checkpoints 
 readCheckpointData
 ------------------
 
-``readCheckpointData`` will read data from the provided HDF5 file handle and back into the solvers.
-Note that the data is read on a level-by-level basis.
+``readCheckpointData`` is the function that will read data from an HDF5 checkpoint file and populate ``TimeStepper`` with this data.
+The data is read on a level-by-level basis, with a function signature
+
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+   :language: c++
+   :lines: 137-144
+   :dedent: 2
+
+Solvers will normally already know what data to read into their data members.
+E.g., the example for the :ref:`Chap:AdvectionDiffusionModel` is
+
+.. _List:AdvectionDiffusionStepperReadChkData:
+.. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
+   :caption: Implementation of the ``readCheckpointData`` routine for a simple advection-diffusion problem.
+   :language: c++
+   :lines: 242-251
 
 Advance routines
 ================
@@ -250,60 +264,169 @@ Advance routines
 computeDt
 ---------
 
-``computeDt`` will compute a time step for :ref:`Chap:Driver` to use when calling the ``advance`` method. 
+``computeDt`` is a routine that will compute a trial time step when calling the ``advance`` method.
+We have chosen to call this a trial time step because
+
+#. :ref:`Chap:Driver` might choose to use a smaller time step in order to write plot files at specific times.
+#. When calling the actual advance method (see below), it is possible to return a different time step than the one computed through ``computeDt``.
+
+The calculation of a time step can be quite involved, depending on the application being imlemented.
+Moreover, many ``TimeStepper`` implementations will provide hooks for swapping algorithms, and in this case the time step might be limited differently.
+For the :ref:`Chap:AdvectionDiffusionModel` the implementation is as follows:
+
+.. _List:AdvectionDiffusionStepperComputeDt:
+.. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
+   :caption: Implementation of the ``computeDt`` routine for a simple advection-diffusion problem.
+   :language: c++
+   :lines: 320-365
+
+In the code above, ``TimeStepper`` supports both fully explicit advection-diffusion advances as well as split-step advances with implicit diffusion.
+Depending on how the user chooses to run the code, the time step is therefore computed differently.
+At the bottom of the above code, hard limits on the time step are also enforced.
 
 advance
 -------
 
-``advance`` is called by :ref:`Chap:Driver` when advancing the equation of motion one time step.
-Note that ``advancpe`` takes a trial time step as input argument and returns the actual time step that was used.
-These do not need to be the same. 
+The ``advance`` method has responsibility for advancing physics module one time step, and is called by ``Driver``.
+The function signature is
+
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+   :language: c++
+   :lines: 211-218
+   :dedent: 2
+
+As mentioned in the documentation for this method, the function takes a trial time step ``a_dt`` which is the physical time step.
+This time step is the one computed by ``computeDt``.
+It is, however, quite possible to advance the equations of motion over a time that does not equal ``a_dt``, which is generally the case for adaptive time stepping methods.
+
+The implementation of the ``advance`` method is usually the most time-consuming part of implementation a new ``TimeStepper``, and the implementation of this routine can become substantially complicated.
+For simpler problems this routine is relatively straightforward to implement, however, also in a way that involves AMR and cut-cells.
+
+.. _List:AdvectionDiffusionStepperAdvance:
+.. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
+   :caption: Implementation of the ``advance`` routine for a simple advection-diffusion problem.
+   :language: c++
+   :lines: 367-376, 380-407, 456-459, 468-469
+
+In the above code we have included the part of the ``advance`` routine that executes Heun's method for advancing the scalar.
+This code also includes allocation of temporaries for computing the coefficients, storage for the intermediate state, and enforcement of boundary conditions, all of which include AMR.
+At the way out of the routine the solution is coarsened and the ghost cells are updated, and the trial time step (``a_dt``) is returned.
 
 synchronizeSolverTimes
 ----------------------
 
-``synchronizeSolverTimes`` is called after the ``advance`` method and is used to update the simulation time for all solvers. 
+``synchronizeSolverTimes`` is called after the ``advance`` method and is used to update the simulation time for all solvers.
+Again, this routine exists because there is often a physical time to be tracked by the solvers (e.g., enforcement of time-dependent voltage applications).
+This routine simply ensures that ``TimeStepper`` and all solvers that ``TimeStepper`` owns see the same physical time, number of steps, and time step sizes.
+The implementation for :ref:`Chap:AdvectionDiffusionModel` is
+
+.. _List:AdvectionDiffusionStepperSync:
+.. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
+   :caption: Implementation of the ``synchronizeSolverTimes`` routine for a simple advection-diffusion problem.
+   :language: c++
+   :lines: 471-484
 
 printStepReport
 ---------------
 
-``printStepReport`` called after the ``advance`` method -- it can be left empty but is otherwise used to print some information about the time step that was taken. 
+``printStepReport`` is called after the ``advance`` method, and provides extra information printed to the ``pout.*`` files (see :ref:`Control`).
+This function is called by :ref:`Chap:Driver` after performing a time step, and can be used to print extra information not covered by :ref:`Chap:Driver`, such as how the time step was limited, or other information that is useful for monitoring the behavior of ``TimeStepper``.
+For example, the current gas discharge models in ``chombo-discharge`` print the maximum electric field and density at each time step.
+Note that ``printStepReport`` has (or should have!) no side-effects that affect the simulation state.
 
 Regrid routines
 ===============
 
+The regrid routines in ``TimeStepper`` must, in combination, be able to transfer the simulation between old and new grids.
 For an explanation to how regridding occurs in ``chombo-discharge``, see :ref:`Chap:Regridding`.
+In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from whan transfer the state to the new grids. 
 
 preRegrid
 ---------
 
-``preRegrid`` should any necessary pre-regrid operation.
-Note that when solvers regrid their data, solution is allocated on new grids and the previously defined data is lost.
-For this reason most solvers have the option of putting the old grid data into temporary storage that permits us to interpolate to the new grids. 
+``preRegrid`` should any necessary pre-regrid operations that are necessary in order to call the ``regrid``.
+This will virtually always include caching the old-grid simulation state, both for the solvers and also for internal data in ``TimeStepper`` 
+Solvers usually know how to do this, and in some cases this function can be deceptively simple, as illustrated by the implementation of this function in :ref:`Chap:AdvectionDiffusionModel`:
+
+.. _List:AdvectionDiffusionStepperPreRegrid:
+.. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
+   :caption: Implementation of the ``preRegrid`` routine for a simple advection-diffusion problem.
+   :language: c++
+   :lines: 486-495
+
+Other implementations of ``TimeStepper`` may have substantially more complicated ``preRegrid`` routines.
 
 regrid
 ------
 
-``regrid`` will perform the actual regrid operation.
+``regrid`` is the function that performs an actual regrid operation.
+At the time when ``regrid`` is called, the old grids are already destroyed and are only available through the cached data.
+Solvers are usually implemented with their own regrid routine, and if the only things that need to be regridded are the solvers, the implementation of this routine can be comparatively simple, as illustrated below for the :ref:`Chap:AdvectionDiffusionModel`:
+
+.. _List:AdvectionDiffusionStepperRegrid:
+.. literalinclude:: ../../../../Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp
+   :caption: Implementation of the ``regrid`` routine for a simple advection-diffusion problem.
+   :language: c++
+   :lines: 497-516
+
+
+For other ``TimeStepper`` implementations this routine can become much more complex.
+The :ref:`Chap:ItoKMC`, for example, will regrid not only solver data but also internal mesh and particle data, recompute conductivities, deposit particles, handle superparticles, and prepare the simulation state for the next time step.
 
 postRegrid
 ----------
 
-``postRegrid`` is called after ``regrid`` can be used to perform any post-regrid operations.
+The ``postRegrid`` is called after ``regrid`` has completed and can be used to perform any post-regrid specific procedures.
+This function is not a pure function, and an implementation of this function is therefore not a requirement.
 
 
 Load balancing routines
 =======================
 
-During the regrid step, :ref:`Chap:Driver` will check if any of the realms should be load balanced.
-If a realm should be load balanced then ``TimeStepper`` take a ``DisjointBoxLayout`` which originally load balanced using the patch volume, and generate a new set of grids.
+The default load-balancing method in ``chombo-discharge`` is to distribute grid patches equally among ranks, respecting a space-filling Morton curve on each grid level.
+However, during the regrid step, :ref:`Chap:Driver` will check if meshes should be load balanced using different heuristics.
+This load balancing can be done separately for each :ref:`Chap:Realm`, and in this case the MPI ranks will have different patch ownership in different grid sets.
+
+If a realm should be load balanced with a different method than the default load balancing scheme, then ``TimeStepper`` can take a ``DisjointBoxLayout`` which originally load balanced using the patch volume, and regenerate the patch-to-rank ownership for the grids.
+This functionality is implemented through two routines:
+
+#. ``loadBalanceThisRealm`` which checks if a specific :ref:`Chap:Realm` should be load balanced.
+#. ``loadBalanceBoxes`` which load balances the boxes on the specified :ref:`Chap:Realm`.
+
+Note that these functions are not pure functions, and it is perfect fine to use their default implementation, in which case each MPI rank gets approximately the same number of grid patches. 
 
 loadBalanceThisRealm
 --------------------
 
-Return true if a :ref:`Chap:Realm` should be load balanced and false otherwise.
+The function signature for this function is
+
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+   :language: c++
+   :lines: 270-275
+   :dedent: 2
+	      
+This function must return true if the input :ref:`Chap:Realm` (``a_realm``) should be load balanced.
 
 loadBalanceBoxes
 ----------------
 
-This is called if ``loadBalanceThisRealm`` evaluates to true, and in this case the ``TimeStepper`` should compute a new set of rank ownership for the input grid boxes. 
+If ``loadBalanceThisRealm`` returns true, the following function is responsible for actually regenerating the grids:
+
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+   :language: c++
+   :lines: 277-296
+   :dedent: 2
+
+This is called if ``loadBalanceThisRealm`` evaluates to true, and in this case the ``TimeStepper`` should compute a new set of rank ownership for the input grid boxes.
+Observe that ``loadBalanceBoxes`` occurs for the entire AMR hierarchy, where the outer vector of ``a_procs`` and ``a_boxes`` is the grid level, and the inner vectors describe the ownership of each box.
+The default implementation of this function ensures that when we load balance a level, we account for the accumulated load on coarser levels (see :ref:`TimeStepperloadBalanceBoxes`).
+
+.. _TimeStepperloadBalanceBoxes:
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+   :label: Default implementation of ``loadBalanceBoxes``.
+   :language: c++
+   :lines: 270-275
+   :dedent: 2
+
+In the above, we use the ``Loads`` class to hold the computational load for each rank, and on each level we compute the load for each patch to be equal to the number of grid cells in the patch.
+This is later load balanced in ``LoadBalancing::makeBalance``, which is a routine that ensures that when we assign boxes on some grid level :math:`l`, we account for loads already assigned on coarser grid levels.
