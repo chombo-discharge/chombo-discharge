@@ -39,5 +39,5 @@ ItoKMCGodunovStepper.rho_filter_num                           = 0               
 ItoKMCGodunovStepper.rho_filter_max_stride                    = 1                  ## Maximum stride for filter
 ItoKMCGodunovStepper.rho_filter_alpha                         = 0.5                ## Filtering factor (0.5 is a bilinear filter)
 ItoKMCGodunovStepper.eb_tolerance                             = 0.0                ## EB intersection test tolerance
-ItoKMCGodunovStepper.algorithm                                = euler_maruyama     ## Integration algorithm. 'euler_maruyama' or 'trapezoidal'
+ItoKMCGodunovStepper.algorithm                                = euler_maruyama     ## Integration algorithm. 'euler_maruyama' or 'heun'
 
