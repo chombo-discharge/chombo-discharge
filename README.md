@@ -85,7 +85,7 @@ We welcome feedback, bug reports, or code contributions.
    find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
    ```
 
-3. Format input files:
+4. Format input files:
 
    ```
    ./FormatInputFiles.sh

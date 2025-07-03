@@ -508,7 +508,7 @@ AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLevel, 
   m_solver->setEbFlux(0.0);
 
   if (m_solver->isDiffusive()) {
-    //    m_solver->setDiffusionCoefficient(m_diffCo);
+    m_solver->setDiffusionCoefficient(m_diffCo);
   }
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);

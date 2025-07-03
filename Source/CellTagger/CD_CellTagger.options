@@ -11,4 +11,3 @@ CellTagger.num_ref_boxes     = 0              ## Number of specified refinement 
 CellTagger.ref_box1_lo       = 0.0 0.0 0.0    ## Refine region between
 CellTagger.ref_box1_hi       = 0.0 0.0 0.0    ## these two corners.
 CellTagger.ref_box1_lvl      = 0              ## Refine to this level.
-

@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                    = 2                   ## Engine verbosity
+Driver.verbosity                    = 2                   ## Driver verbosity. 
 Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
@@ -9,26 +9,26 @@ Driver.output_dt                    = -1.0                ## Output interval (va
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 100                 ## Checkpoint interval
 Driver.regrid_interval              = 10                  ## Regrid interval
-Driver.write_regrid_files           = false               ## Write regrid files or not.
-Driver.write_restart_files          = false               ## Write restart files or not
-Driver.initial_regrids              = 0                   ## Number of initial regrids
+Driver.write_regrid_files           = false               ## Write or do not write plot files during regrids.
+Driver.write_restart_files          = false               ## Write or do not write plot files during restart or not.
+Driver.initial_regrids              = 0                   ## Number of initial regrids.
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
-Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 1.0                 ## Stop time
-Driver.max_steps                    = 100                 ## Maximum number of steps
-Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
-Driver.write_memory                 = false               ## Write MPI memory report
-Driver.write_loads                  = false               ## Write (accumulated) computational loads
-Driver.output_directory             = ./                  ## Output directory
-Driver.output_names                 = simulation          ## Simulation output names
-Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level)
-Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level)
-Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots
-Driver.plt_vars                     = levelset            ## 'tags', 'mpi_rank', 'levelset', 'loads'
-Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
-Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
+Driver.start_time                   = 0                   ## Start time (fresh simulations only).
+Driver.stop_time                    = 1.0                 ## Stop time.
+Driver.max_steps                    = 100                 ## Maximum number of steps.
+Driver.geometry_only                = false               ## Special option that ONLY plots the geometry.
+Driver.write_memory                 = false               ## Write MPI memory report.
+Driver.write_loads                  = false               ## Write (accumulated) computational loads.
+Driver.output_directory             = ./                  ## Output directory.
+Driver.output_names                 = simulation          ## Simulation output names.
+Driver.max_plot_depth               = -1                  ## Restrict maximum plot depth (-1 => finest simulation level).
+Driver.max_chk_depth                = -1                  ## Restrict chechkpoint depth (-1 => finest simulation level).
+Driver.num_plot_ghost               = 1                   ## Number of ghost cells to include in plots.
+Driver.plt_vars                     = levelset            ## 'tags', 'mpi_rank', 'levelset', 'loads'.
+Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation).
+Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger.
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
 Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes            = 0                   ## Refine electrode surfaces to specified level ( < 0 will refine everything)
+Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces to specified level ( < 0 will refine everything)
 

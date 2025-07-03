@@ -42,13 +42,13 @@ public:
   /*!
     @brief Full constructor. 
     @param[in] a_computationalGeometry Computational geometry. 
-    @param[in] a_TimeStepper          The time stepper
-    @param[in] a_amr                   AmrMesh core class. 
+    @param[in] a_timeStepper          The time stepper
+    @param[in] a_amrMesh               AmrMesh core class. 
     @param[in] a_cellTagger            Cell tagger which flags cell for refinement. 
   */
   Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
          const RefCountedPtr<TimeStepper>&           a_timeStepper,
-         const RefCountedPtr<AmrMesh>&               a_amr,
+         const RefCountedPtr<AmrMesh>&               a_amrMesh,
          const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(nullptr));
 
   /*!

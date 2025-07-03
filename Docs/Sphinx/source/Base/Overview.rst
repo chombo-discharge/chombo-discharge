@@ -20,7 +20,7 @@ Key functionalities are provided in :numref:`Tab:KeyCapabilities`.
 
    ``chombo-discharge`` is **not** a black-box model for discharge applications.
    It is an evolving research code with occasionally expanded capabilities, API changes, and performance improvements.
-   Although problems can be set up through our Python toos, users should nonetheless be willing to take time to understand how the code works.
+   Although problems can be set up through our Python tools, users should nonetheless be willing to invest sufficient time and energy to understand how the code operates.
    In particular, developers should invest some effort in understanding the data structures and ``Chombo`` basics (see :ref:`Chap:Basics`). 
 
 .. _Tab:KeyCapabilities:
@@ -58,8 +58,10 @@ That is, all the AMR levels are advanced using the same time step.
 ``chombo-discharge`` has also incorporated many changes to the EB functionality supplied by ``Chombo``.
 This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).
 
-``chombo-discharge`` supports both fluid and particle methods, and can use multiply parallel distributed grids (see :ref:`Chap:Realm`) for individually load balancing particle and fluid kernels. 
-Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into ``chombo-discharge`` and still use the embedded boundary formalism, ``chombo-discharge`` also provides several physics modules for describing various types of problems.
+``chombo-discharge`` supports both fluid and particle methods, and can use multiply parallel distributed grids (see :ref:`Chap:Realm`).
+Particle and fluid kernels can thus be individually load balanced.
+Many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into ``chombo-discharge`` without affecting the embedded boundary formalism.
+Of course, ``chombo-discharge`` provides several physics modules for solving various types of problems.
 
 Organization
 ------------
@@ -81,4 +83,4 @@ The ``chombo-discharge`` source files are organized as follows:
    * - :file:`Submodules`
      - Git submodule dependencies.
    * - :file:`Exec`
-     - Various executable applications. 
+     - Various executable applications, including tests, convergence tests, and user examples.

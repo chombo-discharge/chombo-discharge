@@ -54,7 +54,7 @@ public:
 
   /*!
     @brief Get electrodes
-    @return Electrodes (m_dielectrics)
+    @return Electrodes (m_electrodes)
   */
   const Vector<Electrode>&
   getElectrodes() const;
@@ -176,12 +176,12 @@ protected:
   int m_maxGhostEB;
 
   /*!
-    @brief dielectrics
+    @brief List of dielectrics
   */
   Vector<Dielectric> m_dielectrics;
 
   /*!
-    @brief electrodes
+    @brief List of electrodes
   */
   Vector<Electrode> m_electrodes;
 

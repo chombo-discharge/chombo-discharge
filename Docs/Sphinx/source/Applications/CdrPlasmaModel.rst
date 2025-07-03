@@ -1071,7 +1071,8 @@ The current implementation supports
 * ``copy`` For using an already initialized particle distribution.
   The only mandatory fields is ``copy``, e.g.
 
-  .. code-block:: json  
+  .. code-block:: json
+		  
    {"plasma species":
      [
        {
