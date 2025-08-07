@@ -18,7 +18,7 @@ RealVect
 
 ``RealVect`` is a spatial vector.
 It holds two ``Real`` components in 2D and three ``Real`` components in 3D.
-The ``RealVect`` class has floating point arithmetic, e.g. addition, subtraction, multiplication etc.
+The ``RealVect`` class has floating point arithmetic, e.g., addition, subtraction, multiplication etc.
 
 Most of ``chombo-discharge`` is written in dimension-independent code, and for cases where ``RealVect`` is initialized with components the constructor uses ``Chombo`` macros for expanding the correct number of arguments.
 For example

@@ -4,9 +4,11 @@ Mesh data
 =========
 
 Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hiearchy.
-Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T> > >``.
+A requirement on the datatype ``T`` is that it must be linearizable so that it can be communicated across MPI ranks. 
+Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T>>>``.
 Here, the ``Vector`` holds data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`.
-The first entry in the Vector is base AMR level and finer levels follow later in the Vector, see e.g. :numref:`Fig:EBAMRData`.
+The first entry in the ``Vector`` is base AMR level and finer levels follow later in the ``Vector``.
+:numref:`Fig:EBAMRData` shows a sketch of the data layout in a two-level AMR hierarchy. 
 
 .. _Fig:EBAMRData:
 .. figure:: /_static/figures/PatchBasedAMR.png
@@ -14,11 +16,13 @@ The first entry in the Vector is base AMR level and finer levels follow later in
    :align: center
 
    Cartesian patch-based refinement showing two grid levels.
-   This is encapsulated by ``EBAMRData`` where the levels are stored in a ``Vector`` and the grid patches in the ``LevelData`` object. 
+   The finer level consists of two patches (red and blue zones), and these zones each have a ghost cell layer 2 cells wide.
+   The data lies on top of a coarse-grid data, i.e., data simultaneously exists on both the fine and the coarse levels. 
+   This data type is encapsulated by ``EBAMRData<T>``.
 
 The reason for having class encapsulation of mesh data is due to :ref:`Chap:Realm`, so that we can only keep track on which ``Realm`` the mesh data is defined.
 Users will interact with ``EBAMRData<T>`` through application code, or interacting with the core AMR functionality in :ref:`Chap:AmrMesh` (such as computing gradients, interpolating ghost cells etc.).
-``AmrMesh`` (see :ref:`Chap:AmrMesh`) has functionality for defining most ``EBAMRData<T>`` types on a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
+:ref:`Chap:AmrMesh` has functionality for constructing most ``EBAMRData<T>`` types on a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
 
 A number of explicit template specifications exist and are frequently used.
 These are outlined below: 
@@ -40,8 +44,8 @@ These are outlined below:
 For example, ``EBAMRCellData`` is a ``Vector<RefCountedPtr<LevelData<EBCellFAB> > >``, describing cell-centered data across the entire AMR hierarchy.
 There are many more data structures in place, but the above data structures are the most commonly used ones.
 Here, ``EBAMRFluxData`` is precisely like ``EBAMRCellData``, except that the data is stored on *cell faces* rather than cell centers.
-Likewise, ``EBAMRIVData`` is a typedef'ed data holder that holds data on each cut-cell center across the entire AMR hierachy.
-In the same way, ``EBAMRIFData`` holds data on each face of all cut cells. 
+Likewise, ``EBAMRIVData`` is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierachy.
+In the same way, ``EBAMRIFData`` holds data on each face of all cut-cells in the hierarchy. 
 
 Allocating mesh data
 --------------------
@@ -50,11 +54,11 @@ To allocate data over a particular ``Realm``, the user will interact with :ref:`
 
 .. code-block:: c++
 
-   int nComps = 1;
+   const int numComps = 1;
    EBAMRCellData myData;
-   m_amr->allocate(myData, "myRealm", phase::gas, nComps);
+   m_amr->allocate(myData, "myRealm", phase::gas, numComps);
 
-Here, ``nComps`` determine the number of cell-centered data components.
+Here, ``numCOmps`` determine the number of data components.
 Note that it *does* matter on which ``Realm`` and on which ``phase`` the data is defined.
 See :ref:`Chap:Realm` for details.
 
@@ -62,18 +66,18 @@ The user *can* specify a number of ghost cells for his/hers application code dir
 
 .. code-block:: c++
 
-   int nComps = 1;
+   int numComps = 1;
    EBAMRCellData myData;
-   m_amr->allocate(myData, "myRealm", phase::gas, nComps, 5*IntVect::Unit);
+   m_amr->allocate(myData, "myRealm", phase::gas, numComps, 5*IntVect::Unit);
 
-If the user does not specify the number of ghost cells when calling ``AmrMesh::allocate``, ``AmrMesh`` will use the default number of ghost cells specified in the input file.
+If the user does not specify the number of ghost cells when calling ``AmrMesh::allocate``, :ref:`Chap:AmrMesh` will use the default number of ghost cells specified in the input file.
 
 .. _Chap:MeshIteration:
 
-Iterating over patches
-----------------------
+Iterating over the AMR hierarchy
+--------------------------------
 
-To iterate over data in an AMR hierarchy, you will first iterate over levels and the patches in levels:
+To iterate over data in an AMR hierarchy, you will first iterate over levels and then the patches on each level:
 
 .. code-block:: c++
 
@@ -84,6 +88,26 @@ To iterate over data in an AMR hierarchy, you will first iterate over levels and
       
       for (DataIterator dit = levelGrids.dataIterator(); dit.ok(); ++dit){
          EBCellFAB& patchData = levelData[dit()];
+      }
+   }
+
+Throughout ``chombo-discharge`` it will be common to see the above implemented explicitly as a loop that supports OpenMP:
+
+.. code-block::
+
+   for (int lvl = 0; lvl < myData.size(); lvl++){
+      LevelData<EBCellFAB>& levelData = *myData[lvl];
+
+      const DisjointBoxLayout& levelGrids = levelData.disjointBoxLayout();
+      const DataIterator& dataIterator    = levelGrids.dataIterator();
+
+      const int numBoxes = dataIterator.size();
+
+   #pragma omp parallel for schedule(runtime)
+      for (int currentBox = 0; currentBox < numBoxes; currentBox++) {
+         const DataIndex& dataIndex = dataIterator[currentBox];
+	 
+         EBCellFAB& patchData = levelData[dataIndex];
       }
    }
 
@@ -108,8 +132,7 @@ For example, the standard loops for iterating over cell-centered data are
 
 Here, the ``Functor`` argument is a C++ lambda or ``std::function`` which takes a grid cell as a single argument.
 For the first loop, we iterate over all grid cells in ``a_computeBox``.
-In the second function we use a ``VoFIterator``, which 
-Iterating over the cells in a patch data holder (like the ``EBCellFAB``) can be done with a ``VoFIterator``, which can iterate through cells on an ``EBCellFAB`` that are not covered by the geometry
+Iterating over the cut-cells in a patch data holder (like the ``EBCellFAB``) can be done with a ``VoFIterator``, which can iterate through cells on an ``EBCellFAB`` that are not covered by the geometry.
 For example:
 
 .. code-block:: c++
@@ -122,8 +145,6 @@ For example:
       const DisjointBoxLayout& levelGrids = levelData.disjointBoxLayout();
       
       for (DataIterator dit = levelGrids.dataIterator(); dit.ok(); ++dit){
-
-	 
          EBCellFAB& patchData       = levelData[dit()];
 	 BaseFab<Real>& regularData = patchData.getSingleValuedFab();
 
@@ -136,8 +157,8 @@ For example:
 	 };
 
 	 // Kernel regions (defined by user)
-	 Box computeBox;
-	 VoFIterator vofit;
+	 Box computeBox = ...
+	 VoFIterator vofit = ...
 
 	 BoxLoops::loop(computeBox, regularKernel);
 	 BoxLoops::loop(vofit, irregularKernel);	 
