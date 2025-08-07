@@ -167,36 +167,28 @@ For example:
 
 There are loops available for other types of data (e.g., face-centered data), see the `BoxLoop documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/CD__BoxLoops_8H.html>`_.
 
-
-
 .. _Chap:Coarsening:
 
 Coarsening data
 ---------------
 
-Conservative coarsening of data is done using the ``averageDown(...)`` functions in :ref:`Chap:AmrMesh`.
-When using these functions, coarse-grid data is replaced by a conservative average of fine grid data throughout the entire AMR hierarchy.
-The signatures for various types of data are as follows:
+Coarsening of data implies replacing the coarse-grid data that lies underneath a fine grid by some average of the fine-grid data.
+We currently support the following coarsening algorithms:
 
-.. code-block:: c++
+* Arithmetic coarsening, in which the coarse-grid value is simply the average of the fine-grid values.
+* Conservative coarsening, in which the coarse-grid value is the conservative average of the fine-grid values.
+  This implies that the total mass on the coarse-grid cell is identical to the total mass in the fine-grid cells from which one coarsened. 
+* Harmonic, in which the coarse-grid value is the harmonic average of the fine-grid cell values.
 
-   // Conservatively coarsen multifluid cell-centered data
-   void averageDown(MFAMRCellData& a_data, const std::string a_realm) const;
+These functions are available for both cell-centered data, cut-cell data, and face-centered data.
+Multiply signatures for this functionality exists, see the code-block below.
 
-   // Conservatively coarsen multifluid face-centered data
-   void averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
-
-   // Conservatively coarsen cell-centered data
-   void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
-
-   // Conservatively coarsen face-centered data   
-   void averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
-
-   // Conservatively coarsen EB-centered data      
-   void averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
-
-There are other types of coarsening available also.
-For example, the ``averageFaces(...)`` will use unweighted averaging, see the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 697-704, 729-737, 764-776
+   :language: c++
+   :dedent: 2
+	    
+See the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
 
 .. _Chap:GhostCells:
 
@@ -204,27 +196,59 @@ Filling ghost cells
 -------------------
 
 Filling ghost cells is done using the ``interpGhost(...)`` functions in :ref:`Chap:AmrMesh`.
+This process adheres to the following rules:
 
-.. code-block:: c++
+#. Within a grid level, cells are always filled from neighboring grid patches without interpolation.
+#. Around the halo zone (see :numref:`Fig:EBAMRData`), ghost cells are filled using slope-limited interpolation *from the coarse grid only*.
+   Currently, this slope is calculated with a minmod limiter, although support for superbee, piecewise constant, and van Leer limiters are also implemented.
 
-   void interpGhost(MFAMRCellData& a_data, const std::string a_realm) const;
+The signatures for updating the ghost cells are:
 
-   void interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1308-1315
+   :language: c++
+   :dedent: 2
 
-This will fill the specified number of ghost cells using data from the coarse level only, using piecewise linear interpolation. 
+As one alternative, one can update ghost cells on a single grid level:
 
-As an alternative, one *can* interpolate a single layer of ghost cells using the multigrid interpolator (see :ref:`Chap:MultigridInterpolation`).
-In this case only a single layer of ghost cells are filled in regular regions, but additional ghost cells (up to some specified range) are filled near the EB.
-This is often required when computing gradients (to avoid reaching into invalid cut-cells), see :ref:`Chap:Gradients` for details.
-The functions for filling ghost cells in this way are
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1317-1330
+   :language: c++
+   :dedent: 2
 
-.. code-block:: c++
 
-   void interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const;
+Strictly speaking it is also possible to update ghost cells using the multigrid interpolator, but this will only fill a single layer of ghost cells around the halo zone (except near the cut-cells where additional cells are filled).
 
-   void interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+.. _Chap:CoarseGridInterpolation:
 
-See the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
+Interpolating from the coarse grid
+----------------------------------
+
+Coarse-grid interpolation occurs, e.g., when the AMR hierarchy changes.
+If one needs data on a grid level where no data already exists, it is possible to fill this data by interpolating from the coarse grid to a finer one.
+
+.. important::
+
+   This type of interpolation is distinctly different from the ghost cell interpolation, as it affects data across the whole grid patch.
+
+The interpolation function that fill fine-grid data from a coarse grid has the following signature:
+
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1399-1418
+   :language: c++
+   :dedent: 2
+
+Here, the user must supply both the old data and the new data, as well as on which grid levels the interpolation will take place.
+The final argument ``a_type`` is the interpolation type.
+We currently support the following interpolation methods:
+
+* ``Type::PWC``, which is piecewise-constant interpolation where the fine-cell data is filled with the coarse-cell values.
+* ``Type::ConservativePWC``, which is a piecewise-constant interpolation that is also conservative (i.e., volume-weighted).
+* ``Type::ConservativeMinMod``, which is a conservative interpolation method that uses the minmod limiter.
+* ``Type::ConservativeMonotonizedCentral``, which is a conservative interpolation method that uses the van Leer limiter. 
+* ``Type::Superbee``, which is a conservative interpolation method that uses the superbeed limiter. 
+  
+Note that there is "correct" interpolation method, but we note that we typically use a conservative minmod limiter in ``chombo-discharge``.
 
 .. _Chap:Gradients:
 
@@ -242,7 +266,7 @@ Likewise, the green stencil reaches over the refinement boundary and into one of
 
 :numref:`Fig:EBGradient` also shows a much larger stencil (blue stencil).
 The larger stencil is necessary because computing the :math:`y` component of the gradient using a regular 5-point stencil would have the stencil reach underneath the fine level and into coarse data that is also irregular data.
-Since there is no unique way (that we know of) for coarsening the cut-cell fine-level data onto the coarse cut-cell without introducing spurious artifacts into the gradient, we reconstruct the gradient using a least squares procedure.
+Since there is no unique way (that we know of) for coarsening the cut-cell fine-level data onto the coarse cut-cell without introducing spurious artifacts into the gradient, we reconstruct the gradient using a least squares procedure that avoids using coarsened data.
 In this case we fetch a sufficiently large neighborhood of cells for computing a least squares minimization of a local solution reconstruction in the neighborhood of the coarse cell.
 In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses *valid* grid cells, i.e. the stencil does not reach underneath the fine level at all.
 Once this neighborhood of cells is obtained, we compute the gradient using the procedure in :ref:`Chap:LeastSquares`. 
