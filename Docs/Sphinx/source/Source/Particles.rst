@@ -5,6 +5,14 @@ Particles
 
 ``chombo-discharge`` supports computational particles using native ``Chombo`` particle data.
 The source code for the particle functionality resides in :file:`$DISCHARGE_HOME/Source/Particle`.
+Particle support contains the following basic features:
+
+* Particle-mesh operations, i.e., deposition and interpolation of particle variables to/from the mesh.
+* Particle distribution and remapping with MPI.
+* Rudimentary particle output to H5Part files.
+
+Particle support is generally speaking templated, so that users can define new particle types that contain a desired set of variables.
+Typically, these will are derived from :ref:`Chap:GenericParticle`, which is discussed below.
 
 .. _Chap:GenericParticle:
 
@@ -12,7 +20,7 @@ GenericParticle
 ---------------
 
 ``GenericParticle`` is a default particle usable by the ``Chombo`` particle library.
-The particle type is a template
+The particle type is essentially a template
 
 .. code-block:: c++
 
@@ -29,7 +37,7 @@ The particle type is a template
    };
 
 where ``M`` and ``N`` are the number of ``Real`` and ``RealVect`` variables for the particle.
-The ``GenericParticle`` also stores the position of the particle, which is available through ``GenericParticle<M,N>::position``.
+The ``GenericParticle`` always stores the position of the particle, which is available through ``GenericParticle<M,N>::position``.
 
 To fetch the ``Real`` and ``RealVect`` variables, ``GenericParticle`` has member functions
 
@@ -60,7 +68,8 @@ Note that one must include the template keyword.
 Custom particles
 ----------------
 
-To create a simple custom particle class with more sane signatures, one can inherit from ``GenericParticle`` and specify new function signatures that return the appropriate fields:
+To create a simple custom particle class with more sane signatures, one can inherit from ``GenericParticle`` and specify new function signatures that return the appropriate fields.
+An example of this is given in the code-block below, where we define ``KineticParticle`` to be a particle that contains the th5ree additional fields on top of ``GenericParticle`` (weight, velocity, and acceleration).
 
 .. code-block:: c++
 	   
@@ -93,11 +102,13 @@ ParticleContainer
 The ``ParticleContainer<P>`` is a template class that
 
 #. Stores computational particles of type ``P`` over an AMR hierchy.
-#. Provides infrastructure for mapping and remapping. 
+#. Provides infrastructure for remapping particles.
+#. Provides functionality for getting a list of particles within a specified grid patch.
+#. Provides functionality that is required during regrids.
+#. Other types of functionality, like grouping particles into grid cells, set and get functions for assigning particle variables, etcl.
 
 ``ParticleContainer<P>`` uses the ``Chombo`` structure ``ParticleData<P>`` under the hood, and therefore has template constraints on ``P``.
-The simplest way to use ``ParticleContainer`` for a new type of particle is to let ``P`` inherit from :ref:`Chap:GenericParticle`.
-Howver, the fundamental requirement on ``P`` is just that it must contain the appropriate Chombo linearization functions and a ``const RealVect& P::position()`` function. 
+The simplest way to use ``ParticleContainer`` for a new type of particle is to let ``P`` inherit from :ref:`Chap:GenericParticle`, which will fulfill all template constraints.
 
 Data structures
 ---------------
@@ -145,8 +156,8 @@ On each grid level, ``ParticleContainer<P>`` stores the particles in a ``Chombo`
    ParticleData<P>
 
 where ``P`` is the particle type.
-``ParticleData<P>`` can be thought of as a ``LevelData<ListBox<P> >``, although it actually inherits from ``LayoutData<ListBox<P> >``.
-Each grid patch contains a ``ListBox<P>`` of particles. 
+``ParticleData<P>`` can be thought of as a ``LevelData<ListBox<P>>``, although it actually inherits from ``LayoutData<ListBox<P>>``.
+Each grid patch contains a ``ListBox<P>`` of particles.
 
 
 AMRParticles<P>
@@ -158,14 +169,16 @@ It is a simply a typedef of a vector of pointers to ``ParticleData<P>`` on each 
 .. code-block:: c++
 
    template <class P>
-   using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
+   using AMRParticles = Vector<RefCountedPtr<ParticleData<P>>>;
 
 Again, the ``Vector`` indicates the AMR level and the ``ParticleData<P>`` is a distributed data holder that holds the particles on each AMR level.
 
-Basic use
----------
+``AMRParticles<P>`` always lives within ``ParticleContainer<P>``, and is the class member of ``ParticleContainer<P>`` that actually holds the particles.
 
-Here, we give some examples of basic use of ``ParticleContainer``.
+Basic usage
+-----------
+
+Here, we give some examples of basic usage of ``ParticleContainer``.
 For the full API, see the ``ParticleContainer`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleContainer.html>`_.
 
 Getting the particles
@@ -244,7 +257,7 @@ The particles can also be sorted by cell by calling ``void ParticleContainer<P>:
 Internally in ``ParticleContainer<P>``, this will place the particles in another container which can be iterated over on a per-cell basis.
 This is different from ``List<P>`` and ``ListBox<P>`` above, which contained particles stored on a per-patch basis with no internal ordering of the particles.
 
-The per-cell particle container is a ``Vector<RefCountedPtr<LayoutData<BinFab<P> > > >`` type where again the ``Vector`` holds the particles on each AMR level and the ``LayoutData<BinFab>`` holds one ``BinFab`` on each grid patch.
+The per-cell particle container is a ``Vector<RefCountedPtr<LayoutData<BinFab<P>>>>`` type where again the ``Vector`` holds the particles on each AMR level and the ``LayoutData<BinFab>`` holds one ``BinFab`` on each grid patch.
 The ``BinFab`` is also a template, and it holds a ``List<P>`` in each grid cell.
 Thus, this data structure stores the particles per cell rather than per patch.
 Due to the horrific template depth, this container is typedef'ed as ``AMRCellParticles<P>``.
@@ -401,7 +414,7 @@ The function signatures for these are
 
 .. code-block:: c++
 
-   using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >;
+   using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
    template <class P>
    void copyMaskParticles(const AmrMask& a_mask) const;
