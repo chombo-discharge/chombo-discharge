@@ -138,8 +138,8 @@ Currently, we include the data in the cut-cell itself in the interpolation, and 
 
 .. _Chap:MultigridInterpolation:
 
-Ghost cell interpolation
-________________________
+Multigrid ghost cell interpolation
+__________________________________
 
 With AMR, multigrid requires ghost cells on the refinement boundary.
 The interior stencils for the Helmholtz operator have a radius of one and thus only require a single layer of ghost cells (and no corner ghost cells).

@@ -255,20 +255,25 @@ Note that there is "correct" interpolation method, but we note that we typically
 Computing gradients
 -------------------
 
-In ``chombo-discharge`` gradients are computed using a standard second-order stencil based on finite differences.
-This is true everywhere except near the refinement boundary and EB where the coarse-side stencil will avoid using the coarsened data beneath the fine level.
+In ``chombo-discharge``, gradients are computed using a standard second-order stencil based on finite differences.
+This is true everywhere except near the EB where the coarse-side stencil will avoid using the coarsened data beneath the fine level.
 This is shown in :numref:`Fig:EBGradient` which shows the typical 5-point stencil in regular grid regions, and also a much larger and more complex stencil.
 
 In :numref:`Fig:EBGradient` we have shown two regular 5-point stencils (red and green).
 The coarse stencil (red) reaches underneath the fine level and uses the data defined by coarsening of the fine-level data.
-The coarsened data in this case is just an average of the fine-level data.
+The coarsened data in this case is just a conservative average of the fine-level data.
 Likewise, the green stencil reaches over the refinement boundary and into one of the ghost cells on the coarse level.
 
-:numref:`Fig:EBGradient` also shows a much larger stencil (blue stencil).
+.. note::
+
+   It is up to the user to ensure that ghost cells are filled prior to computing the gradient.
+   This can be done either using multigrid interpolation (see :ref:`Chap:MultigridInterpolation`), or standard interpolation (see :ref:`Chap:GhostCells`).
+
+:numref:`Fig:EBGradient` also shows a much larger stencil (blue stencil) on the coarse side of the refinement interface.
 The larger stencil is necessary because computing the :math:`y` component of the gradient using a regular 5-point stencil would have the stencil reach underneath the fine level and into coarse data that is also irregular data.
-Since there is no unique way (that we know of) for coarsening the cut-cell fine-level data onto the coarse cut-cell without introducing spurious artifacts into the gradient, we reconstruct the gradient using a least squares procedure that avoids using coarsened data.
+Since there is no unique way (that we know of) for coarsening the cut-cell fine-level data onto the coarse cut-cell without introducing spurious artifacts into the gradient, we reconstruct the gradient using a least squares procedure that entirely avoids using coarsened data.
 In this case we fetch a sufficiently large neighborhood of cells for computing a least squares minimization of a local solution reconstruction in the neighborhood of the coarse cell.
-In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses *valid* grid cells, i.e. the stencil does not reach underneath the fine level at all.
+In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses *valid* grid cells, i.e., the stencil does not reach underneath the fine level at all.
 Once this neighborhood of cells is obtained, we compute the gradient using the procedure in :ref:`Chap:LeastSquares`. 
 
 .. _Fig:EBGradient:
@@ -283,15 +288,12 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 
 To compute gradients of a scalar, one can simply call ``AmrMesh::computeGradient(...)`` functions:
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 444-457
+   :language: c++
+   :dedent: 2		    
 
-  void computeGradient(EBAMRCellData&           a_gradient,
-		       const EBAMRCellData&     a_phi,
-                       const std::string        a_realm,
-                       const phase::which_phase a_phase) const;
-
-  void computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;		
-
+We reiterate that ghost cells must be updated *before* calling this routine.
 See :ref:`Chap:AmrMesh` or refer to the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details.
 
 .. _Chap:CopyingData:
@@ -299,15 +301,23 @@ See :ref:`Chap:AmrMesh` or refer to the `AmrMesh API <https://chombo-discharge.g
 Copying data
 ------------
 
-To copy data, one may use the ``EBAMRData<T>::copy(...)`` function *or* ``DataOps::copy`` (see :ref:`Chap:DataOps`).
-These differ in the following way:
+To copy data between data holders, one may use the ``AmrMesh<T>::copyData(...)`` function *or* ``DataOps::copy`` (see :ref:`Chap:DataOps`).
 
-* ``EBAMRData<T>::copy`` works across realms, but will not copy ghost cells. 
-* ``DataOps::copy`` will always do a local copy, and thus the data that is copied *must* be defined on the same realm.
-  
-If you call ``EBAMRData<T>::copy(...)``, the data holders will first check if they are both defined on the same realm.
-If they are, a purely local copy is perform, which will include ghost cells. 
-Communication copies involving MPI are performed otherwise, in which case ghost cells are *not* copied into the new data holder. 
+The simplest way of copying data between data holders is via ``DataOps::copy``, which does a *local-only* direct copy that also includes ghost cells.
+This version requires that the source and destination data holders are defined on the same realm, and does not invoke MPI calls.
+
+A more general version is supplied by :ref:`Chap:AmrMesh`, and has the following structure:
+
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 97-115
+   :language: c++
+   :dedent: 2
+
+In the above code, ``a_dst`` and ``a_src`` are the destination and source data holders for the copy.
+These need not be defined on the same :ref:`Chap:Realm`.
+Similarly, the ``a_dstComps`` and ``a_srcComps`` indicate the source and destination variables to be copied, which must have the same size.
+The final two arguments indicate which regions will be copied from.
+These are enums that are either ``CopyStrategy::Valid`` or ``CopyStrategy::ValidGhost``, and indicates whether or not we will perform the copy only into *valid* cells (``CopyStrategy::Valid``) or also into the ghost cells (``CopyStrategy::ValidGhost``).
 
 .. _Chap:DataOps:
 
@@ -315,16 +325,15 @@ DataOps
 -------
 
 We have prototyped functions for many common data operations in a static class ``DataOps``.
-For example, setting the value of various data holders can be done with
 
-.. code-block:: c++
-
-   EBAMRFluxData cellData;
-   EBAMRFluxData fluxData;
-   EBAMRIVData   irreData;
+.. tip::
    
-   DataOps::setValue(cellData, 0.0);
-   DataOps::setValue(fluxData, 1.0);
-   DataOps::setValue(irreData, 2.0);
+   For the full ``DataOps`` API, see the `DataOps documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDataOps.html>`_.
+   
+``DataOps`` contains numerous functions for operating on various template specializations of ``EBAMRData<T>`` (see :ref:`Chap:MeshData`).
+For example, ``DataOps`` contains functions for scaling data, incrementing data, averaging cell-centered data onto faces, and many more.
 
-For the full API, see the `DataOps documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDataOps.html>`_.   
+.. important::
+
+   ``DataOps`` is designed to operate only within a single realm.
+   This means that *all* arguments into the ``DataOps`` functions *must* be defined on the same realm.
