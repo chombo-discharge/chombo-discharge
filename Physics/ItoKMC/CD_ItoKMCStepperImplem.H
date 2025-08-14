@@ -606,9 +606,8 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   // Current density.
   m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
-  // Storage for the critical and non-critical time steps
-  m_amr->allocate(m_criticalDt, m_fluidRealm, m_plasmaPhase, 1);
-  m_amr->allocate(m_nonCriticalDt, m_fluidRealm, m_plasmaPhase, 1);
+  // Storage for the physics time step
+  m_amr->allocate(m_nonCriticalPhysicsDt, m_fluidRealm, m_plasmaPhase, 1);
 
   // Storage required for the reaction network.
   m_amr->allocate(m_fluidPPC, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
@@ -642,8 +641,7 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(m_fluidYPC, m_fluidRealm, m_plasmaPhase, 1);
   }
 
-  DataOps::setValue(m_criticalDt, std::numeric_limits<Real>::max());
-  DataOps::setValue(m_nonCriticalDt, std::numeric_limits<Real>::max());
+  DataOps::setValue(m_nonCriticalPhysicsDt, std::numeric_limits<Real>::max());
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4071,14 +4069,11 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
 
   // Handle to critical and non-critical time step containers.
-  EBCellFAB& criticalDt    = (*m_criticalDt[a_level])[a_din];
-  EBCellFAB& nonCriticalDt = (*m_nonCriticalDt[a_level])[a_din];
+  EBCellFAB& physicsDt = (*m_nonCriticalPhysicsDt[a_level])[a_din];
 
-  FArrayBox& criticalDtReg    = criticalDt.getFArrayBox();
-  FArrayBox& nonCriticalDtReg = nonCriticalDt.getFArrayBox();
+  FArrayBox& physicsDtReg = physicsDt.getFArrayBox();
 
-  criticalDt.setVal(std::numeric_limits<Real>::max());
-  nonCriticalDt.setVal(std::numeric_limits<Real>::max());
+  physicsDt.setVal(std::numeric_limits<Real>::max());
 
   for (auto it = m_ito->iterator(); it.ok(); ++it) {
     const RefCountedPtr<ItoSolver>& solver = it();
@@ -4137,11 +4132,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance.
-      Real critDt    = std::numeric_limits<Real>::max();
-      Real nonCritDt = std::numeric_limits<Real>::max();
+      Real physDt = std::numeric_limits<Real>::max();
 
-      m_physics
-        ->advanceKMC(particles, newPhotons, critDt, nonCritDt, densities, densityGradients, a_dt, E, pos, a_dx, 1.0);
+      m_physics->advanceKMC(particles, newPhotons, physDt, densities, densityGradients, a_dt, E, pos, a_dx, 1.0);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -4152,8 +4145,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
         newPhotonsReg(iv, i) = 1.0 * newPhotons[i];
       }
 
-      criticalDtReg(iv, 0)    = critDt;
-      nonCriticalDtReg(iv, 0) = nonCritDt;
+      physicsDtReg(iv, 0) = physDt;
     }
   };
 
@@ -4191,11 +4183,9 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
       }
 
       // Do the physics advance
-      Real critDt    = std::numeric_limits<Real>::max();
-      Real nonCritDt = std::numeric_limits<Real>::max();
+      Real physDt = std::numeric_limits<Real>::max();
 
-      m_physics
-        ->advanceKMC(particles, newPhotons, critDt, nonCritDt, densities, densityGradients, a_dt, E, pos, a_dx, kappa);
+      m_physics->advanceKMC(particles, newPhotons, physDt, densities, densityGradients, a_dt, E, pos, a_dx, kappa);
 
       // Repopulate the input data holders with the new number of particles/photons per cell.
       for (int i = 0; i < numPlasmaSpecies; i++) {
@@ -4206,8 +4196,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
         a_newPhotonsPerCell(vof, i) = 1.0 * newPhotons[i];
       }
 
-      criticalDt(vof, 0)    = critDt;
-      nonCriticalDt(vof, 0) = nonCritDt;
+      physicsDt(vof, 0) = physDt;
     }
   };
 
@@ -5230,7 +5219,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
   Real maxDt = std::numeric_limits<Real>::max();
   Real minDt = std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMin(maxDt, minDt, m_nonCriticalDt, 0);
+  DataOps::getMaxMin(maxDt, minDt, m_nonCriticalPhysicsDt, 0);
 
   m_physicsDt = minDt;
 }

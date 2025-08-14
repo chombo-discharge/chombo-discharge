@@ -321,10 +321,9 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
         Real mu     = 0.0;
         Real sigma2 = 0.0;
 
-        // Set gi to 4 for now -- this is equivalent to a third-order reaction Si*Si*Si with Xi = 3, I doubt
-        // that the Cao computation of gi is necessary because it becomes an "approximation within an approximation". So
-        // I'm just setting gi to the "worst-case" scenario and live with that.
-        constexpr Real gi = 4.0;
+        // Set gi to 1 for now. A more complex version would parse this through an input parameter
+        // where the user has inspected the highest-order-reaction.
+        constexpr Real gi = 1.0;
 
         for (size_t i = 0; i < numReactions; i++) {
           const Real& p    = a_nonCriticalPropensities[i];
