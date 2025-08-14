@@ -214,6 +214,8 @@ The most common case is that involving discontinuous coefficients across the EB,
 where :math:`b\left(\mathbf{x}\right)` is only piecewise constant.
 This is the natural boundary conditions on a dielectric surface, for example.
 
+.. _Chap:JumpCondition:
+
 Jump conditions
 _______________
 
