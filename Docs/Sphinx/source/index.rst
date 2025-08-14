@@ -113,7 +113,6 @@ Discretization
    Source/MeshData
    Source/Particles
    Source/Realm
-   Source/Regridding   
    Source/LinearSolvers
    Source/VV   
 

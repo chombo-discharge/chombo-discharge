@@ -29,7 +29,7 @@ Discretization and fluxes
 _________________________
 
 The Helmholtz equation is solved by assuming that :math:`\Phi` lies on the cell-center.
-The :math:`b\left(\mathbf{x}\right)`-coefficient lies on face centers and EB faces. 
+The :math:`b\left(\mathbf{x}\right)`-coefficient is defined on face centers and EB faces, while :math:`a\left(\mathbf{x}\right)` is defined on cell centers. 
 In the general case the cell center might lie inside the embedded boundary, and the cell-centered discretization relies on the concept of an extended state.
 Thus, :math:`\Phi` does not satisfy a discrete maximum principle.
 
@@ -48,6 +48,9 @@ For example, the flux :math:`F_3` in the figure above is
 
    F_3 = \beta b_{i,j+1/2}\frac{\Phi_{i,j+1} - \Phi_{i,j}}{\Delta x}.
 
+
+The other fluxes, such as :math:`F_2` requires interpolation of face-centered fluxes to the face centroids.
+
 Boundary conditions
 ___________________
 
@@ -61,8 +64,7 @@ Below, we discuss how these are implemented.
 Neumann
 ^^^^^^^
 Neumann boundary conditions are straightforward since the flux through the EB or domain faces are specified directly.
-
-From the above figure, the fluxes :math:`F_{\textrm{EB}}` and :math:`F_{\textrm{D}}` are specified.
+I.e., the fluxes :math:`F_{\textrm{EB}}` and :math:`F_{\textrm{D}}` are directly specified in :numref:`Fig:HelmholtzFluxes`.
 
 .. _Chap:LinearSolverDirichletBC:
 
@@ -70,13 +72,14 @@ Dirichlet
 ^^^^^^^^^
 
 Dirichlet boundary conditions are more involved since only the value at the boundary is prescribed, but the finite volume discretization requires a flux. 
-On the domain boundaries the fluxes are face-centered and we therefore use finite differencing for obtaining a second order accurate approximation to the flux at the boundary.
+On the domain boundaries where there is no EB the fluxes are face-centered and we therefore use finite differencing for obtaining a second order accurate approximation to the flux at the boundary.
+If the EB intersects the domain side, we interpolate face-centered fluxes to face centroids.
 
 On the embedded boundaries the flux is more complicated to compute, and requires us to compute an approximation to the normal gradient :math:`\partial_n\Phi` at the boundary.
-Our approach is to approximate this flux by expanding the solution as a polynomial around a specified number of grid cells.
+Our approach is to approximate this flux by expanding the solution as a polynomial using a specified number of grid cells.
 By using more grid cells than there are unknown in the Taylor series, we formulate an over-determined system of equations up to some specified order.
 As a first approximation we include only those cells in the quadrant or half-space defined by the normal vector, see :numref:`Fig:GradientReconstruction`. 
-If we can not find enough equations, the strategy is to 1) drop order and 2) include all cells around the cut-cell.
+If we can not find enough equations, several fallback options are in place to ensure that we obtain a sufficient number of equations.
 
 .. _Fig:GradientReconstruction:
 .. figure:: /_static/figures/GradientReconstruction.png
@@ -105,7 +108,9 @@ For the same reason, gradient reconstruction near the cut-cells might require in
    :width: 40%
    :align: center
 
-   Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary. 
+   Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary.
+
+Here, we rely on multigrid interpolation (see :ref:`Chap:MultigridInterpolation`) to fill the required number of ghost cells.
 
 Robin
 ^^^^^
@@ -134,7 +139,7 @@ The Robin boundary condition takes the form
 
    \partial_n\Phi = \frac{C}{A} - \frac{B}{A}\sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}.
    
-Currently, we include the data in the cut-cell itself in the interpolation, and thus also use unweighted least squares. 
+Currently, we include the data in the cut-cell itself in the interpolation (and thus also use unweighted least squares to avoid forming an ill-conditioned system).
 
 .. _Chap:MultigridInterpolation:
 
@@ -165,7 +170,7 @@ As per conventional wisdom regarding multigrid interpolation, this reconstructio
 
 Figure :numref:`Fig:EBMultigridInterpolation` shows a typical interpolation stencil for the stencil in :numref:`Fig:StencilRegion`.
 Here, the open circle indicates the ghost cell to be interpolated, and we interpolate the solution in this cell using neighboring grid cells (closed circles).
-For this particular case there are 10 nearby grid cells available, which is sufficient for second order interpolation (which requirse at least 6 cells in 2D). 
+For this particular case there are 10 nearby grid cells available, which is sufficient for second order interpolation (which requires at least 6 cells in 2D). 
    
 .. _Fig:EBMultigridInterpolation:
 .. figure:: /_static/figures/EBMultigridInterpolation.png
@@ -178,40 +183,36 @@ For this particular case there are 10 nearby grid cells available, which is suff
 
    ``chombo-discharge`` implements a fairly general ghost cell interpolation scheme near the EB. The ghost cell values can be reconstructed to specified order (and with specified least squares weights).
 
-On coarse-fine interfaces the Helmholtz operators will perform a *refluxing* operations where the coarse-grid fluxes are replaced by the sum of the fine-grid fluxes.
-``EBHelmholtzOp`` has a special flag for replacing the refluxing operation by flux coarsening, which can be specified with ``EBHelmholtzOp.reflux_free = true/false``.
-In this case the reflux operation is turned off and we compute the fluxes on the entire fine level (not just the interface) and replace the coarse-grid fluxes by averages of the fine-grid fluxes.
-   
-
 Relaxation methods
 __________________
 
 The Helmholtz equation is solved using multigrid, with various smoothers available on each grid level.
 The currently supported smoothers are:
 
-1. Standard point Jacobi relaxation. 
+1. Standard point Jacobi relaxation.
 2. Red-black Gauss-Seidel relaxation in which the relaxation pattern follows that of a checkerboard. 
 3. Multi-colored Gauss-Seidel relaxation in which the relaxation pattern follows quadrants in 2D and octants in 3D. 
 
 Users can select between the various smoothers in solvers that use multigrid.
 
-.. note::
+.. tip::
 
-   Multi-colored Gauss-Seidel usually provide the best convergence rates.
-   However, the multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D. 
+   Red-black Gauss-Seidel usually provide the best convergence rates.
+   The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and then to only marginally improve convergence rates.
 
 
 Multiphase Helmholtz equation
 -----------------------------
 
 ``chombo-discharge`` also supports a *multiphase version* where data exists on both sides of the embedded boundary.
-The most common case is that involving discontinuous coefficients, e.g. for
+The most common case is that involving discontinuous coefficients across the EB, e.g. for
 
 .. math::
 
-   \nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = 0. 
+   \beta\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = \rho.
 
 where :math:`b\left(\mathbf{x}\right)` is only piecewise constant.
+This is the natural boundary conditions on a dielectric surface, for example.
 
 Jump conditions
 _______________
@@ -219,23 +220,20 @@ _______________
 For the case of discontinous coefficients there is a jump condition on the interface between two materials:
 
 .. math::
+   :label: jump_condition
 
    b_1\partial_{n_1}\Phi + b_2\partial_{n_2}\Phi = \sigma,
 
 where :math:`b_1` and :math:`b_2` are the Helmholtz equation coefficients on each side of the interface, and :math:`n_1 = -n_2` are the normal vectors pointing away from the interface in each phase.
-:math:`\sigma` is a jump factor.
+The jump factor is :math:`\sigma`, and can be thought of as the surface charge density on the dielectric.
 
-.. _Fig:JumpCondition:
-.. figure:: /_static/figures/JumpCondition.png
-   :width: 40%
-   :align: center
 
-   Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.
 
 Discretization
 ______________
 
-To incorporate the jump condition in the Helmholtz discretization, we use a gradient reconstruction to obtain a solution to :math:`\Phi` on the boundary, and use this value to impose a Dirichlet boundary condition during multigrid relaxation.
+To incorporate the jump condition in the Helmholtz discretization, we use a gradient reconstruction to obtain an approximation of :math:`\Phi` on the boundary, using :eq:`jump_condition`.
+We then use this value to impose a Dirichlet boundary condition during multigrid relaxation.
 Recalling the gradient reconstruction :math:`\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}`, the matching condition (see :numref:`Fig:JumpCondition`) can be written as
 
 .. math::
@@ -243,6 +241,13 @@ Recalling the gradient reconstruction :math:`\frac{\partial\Phi}{\partial n} = w
    b_1\left[w_{\textrm{B},1}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},1}\Phi_{\mathbf{i},1}\right] + b_2\left[w_{\textrm{B},2}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},2}\Phi_{\mathbf{i},2}\right] = \sigma.
 
 This equation can be solved for the boundary value :math:`\Phi_{\textrm{B}}`, which can then be used to compute the finite-volume fluxes into the cut-cells.
+
+.. _Fig:JumpCondition:
+.. figure:: /_static/figures/JumpCondition.png
+   :width: 40%
+   :align: center
+
+   Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.
 
 .. note::
 
@@ -254,7 +259,7 @@ AMRMultiGrid
 ``AMRMultiGrid`` is the ``Chombo`` implementation of the Martin-Cartwright multigrid algorithm.
 It takes an "operator factory" as an argument, and the factory can generate objects (i.e., operators) that encapsulate the discretization on each AMR level.
 
-``chombo-discharge`` runs its own operator, and the user can use either of:
+``chombo-discharge`` uses its own elliptic operators, and the user can use either of:
 
 1. ``EBHelmholtzOpFactory`` for single-phase problems.
 2. ``MFHelmholtzOpFactory`` for multi-phase problems.
@@ -270,4 +275,5 @@ Chombo provides (at least) three bottom solvers which can be used with ``AMRMult
 2. A biconjugate gradient stabilized method (BiCGStab)
 3. A generalized minimal residual method (GMRES).
 
-The user can select between these for the various solvers that use multigrid.    
+The user can select between these for the various solvers that use multigrid.
+Typically, smoothers tend to work sufficiently well but improved convergence rates can occasionally be achieved by using a conjugate gradient solver.
