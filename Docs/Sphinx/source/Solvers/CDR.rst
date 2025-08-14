@@ -411,74 +411,53 @@ However, it only supports the monotonized central difference limiter.
 Using CdrSolver
 ----------------
 
-Setting up the solver
-_____________________
-
-To set up the ``CdrSolver``, the following commands are usually sufficient: 
-
-.. code-block:: c++
-
-   // Assume m_solver and m_species are pointers to a CdrSolver and CdrSpecies
-   auto solver  = RefCountedPtr<CdrSolver>  (new MyCdrSolver());
-   auto species = RefCountedPtr<CdrSpecies> (new MyCdrSpecies());
-
-To see an example, the advection-diffusion code in :file:`/Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp` shows how to set up a ``CdrSolver``. 
+.. tip::
+   
+   For a complete example, see the :ref:`Chap:AdvectionDiffusionModel`.
 
 Filling the solver
 __________________
 
 In order to obtain mesh data from the ``CdrSolver``, the user should use the following public member functions:
 
-.. code-block:: c++
-
-   EBAMRCellData& getPhi();                               // Return  phi
-   EBAMRCellData& getSource();                            // Returns S   
-   EBAMRCellData& getCellCenteredVelocity();              // Get cell-centered velocity
-   EBAMRFluxData& getFaceCenteredDiffusionCoefficient();  // Returns D
-   EBAMRIVData&   getEbFlux();                            // Returns flux at EB
-   EBAMRIFData&   getDomainFlux();                        // Returns flux at domain boundaries
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
+   :language: c++
+   :lines: 589-656
+   :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
-Interpolation to face-centered transport fluxes are done by ``CdrSolver`` during the discretization step.
+Interpolation to face-centered transport fluxes are done by ``CdrSolver`` during the discretization step, so there is normally no need to fill these directly.
 
 The general way of setting the velocity is to get a direct handle to the velocity data:
 
 .. code-block:: c++
 
-   CdrSolver solver;
+   CdrSolver* solver;
    
    EBAMRCellData& veloCell = solver.getCellCenteredVelocity();
 
 Then, ``veloCell`` can be filled with the cell-centered velocity.
+One can use ``DataOps`` functions to fill the data directly using a C++ lambda:
+
+.. literalinclude:: ../../../../Source/Utilities/CD_DataOps.H
+   :language: c++
+   :lines: 1171-1184
+   :dedent: 2
+
 This would typically look something like this:
 
 .. code-block:: c++
 
    EBAMRCellData& veloCell = m_solver->getCellCenteredVelocity();
-   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids()[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit){
-         EBCellFAB& patchVel = (*veloCell[lvl])[dit()];
+   auto veloFunc = [=](const RealVect x) -> RealVect
+   {
+     return RealVect::Unit;
+   };
 
-	 // Do something with patchVel
-      }
-   }
+   DataOps::setValue(veloCell, veloFunc, ...);
 
 The same procedure goes for the source terms, diffusion coefficients, boundary conditions and so on.
-For example, an explicit Euler discretization for the problem :math:`\partial_t\phi = S` is:
-
-.. code-block:: c++
-
-   CdrSolver* solver;
-
-   const Real dt = 1.0;
-   
-   EBAMRCellData& phi = solver->getPhi();
-   EBAMRCellData& src = solver->getSource();
-
-   DataOps::incr(phi, src, dt);
-   
 
 Adjusting output
 ________________
@@ -491,21 +470,14 @@ For example, for the ``CdrCTU`` implementation the following variables are avail
 
    CdrCTU.plt_vars = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'		
 
-Here, you adjust the plotted variables by adding or omitting them from your input script.
-E.g. if you only want to plot the cell-centered states you would do:
-
-.. code-block:: bash
-
-   CdrGodunov.plt_vars = phi  # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
-
 .. _Chap:CdrSpecies:
 
 CdrSpecies
 ----------
 
 The ``CdrSpecies`` class is a supporting class that passes information and initial conditions into ``CdrSolver`` instances.
-``CdrSpecies`` specifies whether or not the advect-diffusion solver will use only advection, diffusion, both advection and diffusion, or neither.
-It also specifies initial data, and provides a string identifier to the class (e.g. for identifying output in plot files).
+``CdrSpecies`` specifies whether or not the advection-diffusion solver will use only advection, diffusion, both advection and diffusion, or neither.
+It also specifies initial data, and provides a string identifier to the class (e.g., for identifying output in plot files).
 However, it does not contain any discretization.
 
 .. note::
@@ -517,7 +489,7 @@ Here, diffusion code is turned off and the initial data is one everywhere.
 
 .. code-block:: c++
 
-   class MySpecies : public CdrSpecies{
+   class MySpecies : public CdrSpecies {
    public:
 
       MySpecies(){
