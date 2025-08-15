@@ -332,8 +332,7 @@ ItoKMCPhysics::initialSigma(const Real a_time, const RealVect a_pos) const
 inline void
 ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
                           Vector<FPR>&            a_numNewPhotons,
-                          Real&                   a_criticalDt,
-                          Real&                   a_nonCriticalDt,
+                          Real&                   a_physicsDt,
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dt,
@@ -475,8 +474,12 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   const auto criticalPropensities    = m_kmcSolver.propensities(m_kmcState, criticalReactions);
   const auto nonCriticalPropensities = m_kmcSolver.propensities(m_kmcState, nonCriticalReactions);
 
-  a_criticalDt    = m_kmcSolver.getCriticalTimeStep(criticalPropensities);
-  a_nonCriticalDt = m_kmcSolver.getNonCriticalTimeStep(m_kmcState, nonCriticalReactions, nonCriticalPropensities);
+  // After doing this so we can simply reset the solver to use the appropriate eps.
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, 1.0, m_SSAlim, m_exitTol);
+
+  a_physicsDt = m_kmcSolver.getNonCriticalTimeStep(m_kmcState, nonCriticalReactions, nonCriticalPropensities);
+
+  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, m_eps, m_SSAlim, m_exitTol);
 }
 
 inline void

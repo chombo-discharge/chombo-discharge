@@ -741,16 +741,11 @@ namespace Physics {
       EBAMRCellData m_electricFieldParticle;
 
       /*!
-	@brief Storage for the critical time step computed by ItoKMCPhysics.
-	@note Defined on the fluid realm. 
-      */
-      EBAMRCellData m_criticalDt;
-
-      /*!
-	@brief Storage for the non-critical time step computed by ItoKMCPhysics
+	@brief Storage for the non-critical time step computed by ItoKMCPhysics.
+	@details This is computed using the non-critical reactions assuming eps=1
 	@note Defined on the fluid realm. 	
       */
-      EBAMRCellData m_nonCriticalDt;
+      EBAMRCellData m_nonCriticalPhysicsDt;
 
       /*!
 	@brief Storage for holding the energy sources for each species.
