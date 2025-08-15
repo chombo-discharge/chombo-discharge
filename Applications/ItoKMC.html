@@ -642,8 +642,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">	@brief Advance particles. </span>
 <span class="cm">	@param[inout] a_numParticles  Number of physical particles</span>
 <span class="cm">	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)</span>
-<span class="cm">	@param[out]   a_criticalDt    Critical KMC time step computed at end of integration</span>
-<span class="cm">	@param[out]   a_nonCriticalDt Non-critical KMC time step computed at end of integration	</span>
+<span class="cm">	@param[out]   a_physicsDt     Reasonable non-critical KMC time step computed at end of integration with eps = 1</span>
 <span class="cm">	@param[in]    a_phi           Plasma species densities. </span>
 <span class="cm">	@param[in]    a_gradPhi       Plasma species density gradients. </span>
 <span class="cm">	@param[in]    a_dt            Time step</span>
@@ -655,8 +654,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">      </span><span class="nf">advanceKMC</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_numParticles</span><span class="p">,</span>
 <span class="w">                 </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">FPR</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_numNewPhotons</span><span class="p">,</span>
-<span class="w">                 </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_criticalDt</span><span class="p">,</span>
-<span class="w">                 </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_nonCriticalDt</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_physicsDt</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_phi</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_gradPhi</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">              </span><span class="n">a_dt</span><span class="p">,</span>
