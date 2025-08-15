@@ -465,7 +465,8 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
-  // Compute the critical and non-critical time steps
+  // Compute a time step using the non-critical reactions. We could have done this using ALL reactions, but I take for granted
+  // that the user will segregate the critical reactions anyways.
   const auto partitionedReactions = m_kmcSolver.partitionReactions(m_kmcState);
 
   const auto& criticalReactions    = partitionedReactions.first;
@@ -474,12 +475,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   const auto criticalPropensities    = m_kmcSolver.propensities(m_kmcState, criticalReactions);
   const auto nonCriticalPropensities = m_kmcSolver.propensities(m_kmcState, nonCriticalReactions);
 
-  // After doing this so we can simply reset the solver to use the appropriate eps.
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, 1.0, m_SSAlim, m_exitTol);
-
-  a_physicsDt = m_kmcSolver.getNonCriticalTimeStep(m_kmcState, nonCriticalReactions, nonCriticalPropensities);
-
-  m_kmcSolver.setSolverParameters(m_Ncrit, m_NSSA, m_maxIter, m_eps, m_SSAlim, m_exitTol);
+  a_physicsDt = m_kmcSolver.computeDt(m_kmcState, nonCriticalReactions, nonCriticalPropensities, 1.0);
 }
 
 inline void

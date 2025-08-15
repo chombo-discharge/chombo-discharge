@@ -745,7 +745,7 @@ namespace Physics {
 	@details This is computed using the non-critical reactions assuming eps=1
 	@note Defined on the fluid realm. 	
       */
-      EBAMRCellData m_nonCriticalPhysicsDt;
+      EBAMRCellData m_kmcDt;
 
       /*!
 	@brief Storage for holding the energy sources for each species.

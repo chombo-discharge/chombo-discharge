@@ -354,6 +354,73 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 }
 
 template <typename R, typename State, typename T>
+inline Real
+KMCSolver<R, State, T>::computeDt(const State&             a_state,
+                                  const ReactionList&      a_nonCriticalReactions,
+                                  const std::vector<Real>& a_nonCriticalPropensities,
+                                  const Real               a_epsilon) const noexcept
+{
+  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList, std::vector<Real>, Real");
+
+  CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
+
+  constexpr Real one = 1.0;
+
+  Real dt = std::numeric_limits<Real>::max();
+
+  const size_t numReactions = a_nonCriticalReactions.size();
+
+  if (numReactions > 0) {
+
+    // 1. Gather a list of all reactants involved in the non-critical reactions.
+    auto allReactants = a_nonCriticalReactions[0]->getReactants();
+    for (size_t i = 1; i < numReactions; i++) {
+      const auto& curReactants = a_nonCriticalReactions[i]->getReactants();
+
+      allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
+    }
+
+    // Only do unique reactants.
+    const auto ip = std::unique(allReactants.begin(), allReactants.end());
+    allReactants.resize(std::distance(allReactants.begin(), ip));
+
+    // 2. Iterate through all reactants and compute deviations.
+    for (const auto& reactant : allReactants) {
+
+      // Xi is the population of the current reactant. It might seem weird that we are indexing this
+      // through the reactions rather then through the state. Which it is, but the reason for that is
+      // that it is the REACTION that determines how we index the state population. This is simply a
+      // design choice that permits the user to apply different type of reactions without changing
+      // the underlying state.
+      const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
+
+      if (Xi > (T)0) {
+        Real mu = 0.0;
+
+        // Set gi to 1 for now. A more complex version would parse this through an input parameter
+        // where the user has inspected the highest-order-reaction.
+        constexpr Real gi = 1.0;
+
+        for (size_t i = 0; i < numReactions; i++) {
+          const Real& p    = a_nonCriticalPropensities[i];
+          const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
+
+          mu += std::abs(muIJ * p);
+        }
+
+        const Real f = std::max(a_epsilon * Xi / gi, one);
+
+        if (mu > std::numeric_limits<Real>::min()) {
+          dt = std::min(dt, f / mu);
+        }
+      }
+    }
+  }
+
+  return dt;
+}
+
+template <typename R, typename State, typename T>
 inline void
 KMCSolver<R, State, T>::stepSSA(State& a_state) const noexcept
 {

@@ -1771,7 +1771,7 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
   }
 
   this->m_prevDt    = a_header.m_real["prev_dt"];
-  this->m_physicsDt = a_header.m_real["physicsDt_dt"];
+  this->m_physicsDt = a_header.m_real["physics_dt"];
 
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
   m_canRegridOnRestart      = m_readCheckpointParticles;
