@@ -836,9 +836,9 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_electricFieldParticle</b></td></tr>
 <tr class="memdesc:a24faea7c8117158679ae47f6bbc7a59b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the plasma phase electric field on the particle realm. <br /></td></tr>
 <tr class="separator:a24faea7c8117158679ae47f6bbc7a59b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a881740bb15d69d2bcf867a333246298a" id="r_a881740bb15d69d2bcf867a333246298a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a881740bb15d69d2bcf867a333246298a">m_nonCriticalPhysicsDt</a></td></tr>
-<tr class="memdesc:a881740bb15d69d2bcf867a333246298a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>.  <br /></td></tr>
-<tr class="separator:a881740bb15d69d2bcf867a333246298a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7fe2ec10d3c12490b6b23d0bfedb1a57" id="r_a7fe2ec10d3c12490b6b23d0bfedb1a57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEBAMRData.html">EBAMRCellData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a7fe2ec10d3c12490b6b23d0bfedb1a57">m_kmcDt</a></td></tr>
+<tr class="memdesc:a7fe2ec10d3c12490b6b23d0bfedb1a57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>.  <br /></td></tr>
+<tr class="separator:a7fe2ec10d3c12490b6b23d0bfedb1a57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2bade8aae81b93de860fa59265fb2c2" id="r_ae2bade8aae81b93de860fa59265fb2c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classEBAMRData.html">EBAMRCellData</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ae2bade8aae81b93de860fa59265fb2c2">m_energySources</a></td></tr>
 <tr class="memdesc:ae2bade8aae81b93de860fa59265fb2c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Storage for holding the energy sources for each species.  <br /></td></tr>
 <tr class="separator:ae2bade8aae81b93de860fa59265fb2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -6145,6 +6145,34 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="a7fe2ec10d3c12490b6b23d0bfedb1a57" name="a7fe2ec10d3c12490b6b23d0bfedb1a57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fe2ec10d3c12490b6b23d0bfedb1a57">&#9670;&#160;</a></span>m_kmcDt</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">I</a>, <a class="el" href="classTracerParticleSolver.html">C</a>, R, <a class="el" href="classTracerParticleSolver.html">F</a> &gt;::m_kmcDt</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>. </p>
+<p>This is computed using the non-critical reactions assuming eps=1 </p><dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm. <br  />
+ </dd></dl>
+
+</div>
+</div>
 <a id="a3a1fdb91a9e9d6e10c8f2c4cf947c164" name="a3a1fdb91a9e9d6e10c8f2c4cf947c164"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3a1fdb91a9e9d6e10c8f2c4cf947c164">&#9670;&#160;</a></span>m_loadPerCell</h2>
 
@@ -6196,34 +6224,6 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 <p>How often to merge superparticles. </p>
 <p>If &lt;= 1 we merge every time step. </p>
-
-</div>
-</div>
-<a id="a881740bb15d69d2bcf867a333246298a" name="a881740bb15d69d2bcf867a333246298a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a881740bb15d69d2bcf867a333246298a">&#9670;&#160;</a></span>m_nonCriticalPhysicsDt</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classEBAMRData.html">EBAMRCellData</a> <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html">Physics::ItoKMC::ItoKMCStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">I</a>, <a class="el" href="classTracerParticleSolver.html">C</a>, R, <a class="el" href="classTracerParticleSolver.html">F</a> &gt;::m_nonCriticalPhysicsDt</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Storage for the non-critical time step computed by <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers.">ItoKMCPhysics</a>. </p>
-<p>This is computed using the non-critical reactions assuming eps=1 </p><dl class="section note"><dt>Note</dt><dd>Defined on the fluid realm. <br  />
- </dd></dl>
 
 </div>
 </div>
