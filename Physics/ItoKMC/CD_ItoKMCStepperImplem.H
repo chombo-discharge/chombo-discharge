@@ -607,7 +607,7 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
   m_amr->allocate(m_currentDensity, m_fluidRealm, m_plasmaPhase, SpaceDim);
 
   // Storage for the physics time step
-  m_amr->allocate(m_nonCriticalPhysicsDt, m_fluidRealm, m_plasmaPhase, 1);
+  m_amr->allocate(m_kmcDt, m_fluidRealm, m_plasmaPhase, 1);
 
   // Storage required for the reaction network.
   m_amr->allocate(m_fluidPPC, m_fluidRealm, m_plasmaPhase, numPlasmaSpecies);
@@ -641,7 +641,7 @@ ItoKMCStepper<I, C, R, F>::allocateInternals() noexcept
     m_amr->allocate(m_fluidYPC, m_fluidRealm, m_plasmaPhase, 1);
   }
 
-  DataOps::setValue(m_nonCriticalPhysicsDt, std::numeric_limits<Real>::max());
+  DataOps::setValue(m_kmcDt, std::numeric_limits<Real>::max());
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -4069,7 +4069,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   Vector<const FArrayBox*> densityGradientsCDRReg(numCdrSpecies);
 
   // Handle to critical and non-critical time step containers.
-  EBCellFAB& physicsDt = (*m_nonCriticalPhysicsDt[a_level])[a_din];
+  EBCellFAB& physicsDt = (*m_kmcDt[a_level])[a_din];
 
   FArrayBox& physicsDtReg = physicsDt.getFArrayBox();
 
@@ -5219,7 +5219,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
   Real maxDt = std::numeric_limits<Real>::max();
   Real minDt = std::numeric_limits<Real>::max();
 
-  DataOps::getMaxMin(maxDt, minDt, m_nonCriticalPhysicsDt, 0);
+  DataOps::getMaxMin(maxDt, minDt, m_kmcDt, 0);
 
   m_physicsDt = minDt;
 }
