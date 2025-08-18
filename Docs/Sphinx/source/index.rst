@@ -126,12 +126,12 @@ Solvers
 
    Solvers/CDR
    Solvers/Electrostatics
+   Solvers/Ito   
    Solvers/KineticMonteCarlo
    Solvers/MeshODESolver
    Solvers/RTE
    Solvers/SurfaceODESolver
    Solvers/TracerParticles
-   Solvers/Ito
 
 Multi-physics applications
 **************************

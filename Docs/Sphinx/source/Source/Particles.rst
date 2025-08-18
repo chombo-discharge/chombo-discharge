@@ -524,6 +524,8 @@ The user can also check if this happen by checking if the particle position is o
       }
    }
 
+.. _Chap:ParticleIntersection:
+
 Particle intersection
 _____________________
 

@@ -6,32 +6,134 @@
 The Îto diffusion model advances computational particles as drifting Brownian walkers
 
 .. math::
-   
+   :label: ito_diffusion
+	   
    \Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}
 
-where :math:`\mathbf{X}` is the spatial position of a particle :math:`\mathbf{V}` is the drift velocity and :math:`D` is the diffusion coefficient *in the continuum limit*.
-The vector term :math:`\mathbf{W}` is a Gaussian random field with a mean value of 0 and standard deviation of 1.
+where :math:`\mathbf{X}` is the spatial position of a particle, :math:`\mathbf{V}` the particle drift velocity, and :math:`D` is the diffusion coefficient *in the continuum limit*.
+The vector term :math:`\mathbf{W}` indicates a random number sampled from a Gaussian distribution with mean value of 0 and standard deviation of 1.
 
-.. note::
+.. tip::
    
-   The code for Îto diffusion is given in :file:`/Source/ItoSolver`.
+   The code for Îto diffusion is given in :file:`/Source/ItoDiffusion`.
+
+ItoParticle
+-----------
+
+The ``ItoParticle`` is used as the underlying particle type for running the Ito drift-diffusion solvers.
+It derives from :ref:`Chap:GenericParticle` as follows:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoParticle.H
+   :language: c++
+   :lines: 39
+   :dedent: 0
+
+From the signature one can see that ``ItoParticle`` contains a number of extra class ``Real`` and ``RealVect`` class members.
+These extra fields are used for storing the following information in the particle:
+
+#. Particle weight, mobility, diffusion coefficient, energy (not currently used), and a holder for a scratch storage. 
+#. The previous particle position, the velocity, and a holder for a ``RealVect`` scratch storage.
+
+.. tip::
+   
+   Several member functions are available for obtaining the particle properties. See the full `ItoParticle C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoParticle.html>`_
 
 .. _Chap:ItoSolver:
 
 ItoSolver
 ---------
 
-The class ``ItoSolver`` encapsulatse the motion of drift-diffusion particles.
-This class can advance a set of particles (see :ref:`Chap:ItoParticle`) with the following functionality:
+The ``ItoSolver`` class encapsulates the implementation of :eq:`ito_diffusion` in ``chombo-discharge``.
+This class can advance a set of computational particles (see :ref:`Chap:ItoParticle`) with the following functionality:
 
-* Move particles using a microscopic drift-diffusion model.
-* Compute particle intersection with embedded boundaries and domain edges.
-* Deposit particles and other particle types on the mesh.
-* Interpolate velocities and diffusion coefficients to the particle positons.
-* Manage superparticle splitting and merging.
+#. Move particles the a microscopic drift-diffusion model.
+#. Compute particle intersection with embedded boundaries and domain edges.
+#. Deposit particles and other particle types on the mesh.
+#. Interpolate velocities and diffusion coefficients to the particle positons.
+#. Manage superparticle splitting and merging.
 
-``ItoSolver`` also defines an enum ``WhichContainer`` for classification of ``ParticleContainer`` data holders for holding particles that live on:
+Internally, ``ItoSolver`` stores its particles in various ``ParticleContainer<ItoParticle>`` containers.
+Although the particle velocities and diffusion coefficients can be manually assigned, they can also be interpolated from the mesh.
+``ItoSolver`` stores the following properties on the mesh:
 
+#. Mobility.
+#. Diffusion coefficient.
+#. Velocity function.
+
+The reason for storing both the mobility and velocity function is to simply to improve flexibility when assigned the particle velocity :math:`\mathbf{V}`.
+Note that the velocity function does *not* have to represent the particle velocity.
+When using both the mobility and velocity function, one can compute the particle velocity as :math:`\mathbf{V} = \mu\mathbf{v}`, where :math:`\mathbf{v}` is a velocity field.
+This is typically done for discharge simulations where for simplicity we assign :math:`\mathbf{v}` to be the electric field, and :math:`\mu` to the the field-dependent mobility.
+Additional information is available in :ref:`Chap:ItoInterpolation`.
+
+.. _Chap:ItoSpecies:
+
+ItoSpecies
+-----------
+
+``ItoSpecies`` is a class for parsing solver information into ``ItoSolver``, e.g., whether or not the particle type is mobile or not.
+The constructor for the ``ItoSpecies`` class is
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSpecies.H
+   :language: c++
+   :lines: 35-42
+   :dedent: 2
+
+Here, ``a_name`` indicates a variable name for the solver.
+This variable will be used in, e.g., error messages and I/O functionality.
+``a_chargeNumber`` indicates the charge number of the species and the two booleans ``a_mobile`` and ``a_diffusive`` indicates whether or not the solver is mobile or diffusive.
+
+.. note::
+
+   The C++ ``ItoSpecies`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSpecies.html>`_.
+
+Supplying initial data
+______________________
+
+Initial data for the ``ItoSolver`` is provided through ``ItoSpecies`` by providing it with the following:
+
+#. Initial particles specified from a list (``List<ItoParticle>``) of particles.
+#. Provide a density description from which initial particles are stochastically sampled within each grid cell.
+
+In particular, there are two data members that must be populated:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSpecies.H
+   :language: c++
+   :lines: 147-155
+   :dedent: 2
+
+These can either be populated during construction, or explicitly supplied via the following set functions:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSpecies.H
+   :language: c++
+   :lines: 100-112
+   :dedent: 2
+
+When ``ItoSolver`` initializes the data in the solver, it will copy the particle list ``m_initialParticles`` from the species and into the solver.
+
+.. tip::
+
+   When using MPI, the user must ensure that each MPI rank does not provide duplicate particles.
+   The ``ParticleOps`` class contains lots of supporting functionality for sampling particles with MPI, see the `ParticleOps C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classParticleOps.html>`_
+
+When sampling particles from a mesh-based density, the solver will generate the particles so that the specified density is approximately reached within each grid cell.
+If the density that is supplied does not lead to an integer number of particles in the grid cell (which is virtually always the case), the evaluation of the number of particles is stochastically evaluated.
+E.g., if the density is :math:`\phi` and then grid cell volume is :math:`\Delta V`, and :math:`\phi\Delta V = 1.2`, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.
+
+.. warning::
+   
+   There is currently a hard limit that restricts the number of initial computational particles per cell to 32. 
+
+Particle containers
+-------------------
+
+Internally, ``ItoSolver`` contains several ``ParticleContainer<ItoParticle>`` for storing various categories of particles.
+These categories exist because the transport kernel will almost always lead to particles that leave the domain or intersect the EB.
+Chemistry models that use ``ItoSolver`` for tracking particles might also require *new* particles to be added into the domain.
+
+``ItoSolver`` defines an enum ``WhichContainer`` for classification of ``ParticleContainer<ItoParticle>`` data holders for holding particles that live on:
+
+* Main particles (``WhichContainer::Bulk``). 
 * The embedded boundary (``WhichContainer::EB``).
 * On the domain edges/faces (``WhichContainer::Domain``).
 * Representing ''source particles'' (``WhichContainer::Source``).
@@ -39,10 +141,16 @@ This class can advance a set of particles (see :ref:`Chap:ItoParticle`) with the
 
 The particles are available from the solver through the function
 
-.. code-block::
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 635-640
+   :dedent: 2
 
-   ParticleContainer<ItoParticle>&
-   ItoSolver::getParticles(const WhichContainer a_whichParticles);
+Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
+The solver can then automatically fill the boundary particles containers, see :ref:`Chap:ParticleIntersection`.
+
+Computing the particle velocity
+-------------------------------
 
 For the ``ItoSolver`` the particle velocity is computed as
 
@@ -61,98 +169,7 @@ The solver can, alternatively, also compute the velocity as
 i.e. through interpolation of :math:`\mu\mathbf{v}` to the particle position.
 Regardless of which method is chosen (see :ref:`Chap:ItoInterpolation`), both :math:`\mu` and :math:`\mathbf{v}` exist on the mesh (stored as ``EBAMRCellData``).
 
-.. _Chap:ItoParticle:
 
-ItoParticle
------------
-
-The ``ItoParticle`` is used as the underlying particle type for running the Ito drift-diffusion solvers.
-It derives from :ref:`Chap:GenericParticle` as follows:
-
-.. code-block:: c++
-
-   class ItoParticle : public GenericParticle<4,2>
-
-and contains the following relevant member functions
-
-.. code-block:: c++
-
-   // Storing for particle weight
-   Real&
-   ItoParticle::weight();
-
-   // Storage for particle diffusion coefficient
-   Real&
-   ItoParticle::diffusion();
-
-   // Storage for particle mobility
-   Real&
-   ItoParticle::mobility();
-
-   // Storage for particle energy
-   Real&
-   ItoParticle::energy();
-
-   // Storage for particle velocity
-   RealVect&
-   ItoParticle::velocity();
-
-   // Storage for previous particle position
-   RealVect&
-   ItoParticle::oldPosition();
-
-All of these functions have corresponding functions with ``const`` qualifiers.
-
-.. _Chap:ItoSpecies:
-
-ItoSpecies
------------
-
-``ItoSpecies`` is a class for parsing information into ``ItoSolver``.
-The constructor for the ``ItoSpecies`` class is
-
-.. code-block:: c++
-
-   ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive);
-
-and this will set the name of the class, the charge, and whether or not the transport kernels use drift and/or diffusion.
-
-.. note::
-
-   ``ItoSpecies`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSpecies.html>`_.
-
-Initial data for the ``ItoSolver`` is provided through ``ItoSpecies`` by providing it with a list of initial particles.
-``ItoSpecies`` have members that provide/modify the initial particles:
-
-.. code-block:: c++
-
-   class ItoSpecies {
-   public:
-
-      List<ItoParticle>&
-      getInitialParticles();
-      
-   protected:
-
-      List<ItoParticle> m_initialParticles;
-   };
-
-When ``ItoSolver`` initializes the data in the solver, it transfers the particles from the species and into the solver.
-See :ref:`Chap:ParticleOps` for examples on how to draw initial particles and how to partition them when using MPI.
-
-Another way the initial particles can be generated is to set an initial density distribution for the species:
-
-.. code-block:: c++
-
-   class ItoSpecies {
-   public:
-
-   void setInitialDensityDistribution(const std::function<Real(const RealVect& x, const Real& t)>& phi);
-   
-   };
-
-When the user sets this function, the initialization routine in the solver will generate particles in the grid cell so that the specified density is reached.
-Note that this evaluation is stochastic, and there is currently a hard limit that restricts the number of initial computational particles per cell to 32. 
 
 Transport kernel
 ----------------
