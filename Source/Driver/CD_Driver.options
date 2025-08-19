@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Driver class options
 # ====================================================================================================
-Driver.verbosity                    = 2                   ## Driver verbosity. 
+Driver.verbosity                    = 2                   ## Driver verbosity.
 Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation

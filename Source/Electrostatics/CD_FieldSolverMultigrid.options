@@ -33,3 +33,4 @@ FieldSolverMultigrid.gmg_reduce_order      = false        ## If true, always use
 FieldSolverMultigrid.gmg_bottom_solver     = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+
