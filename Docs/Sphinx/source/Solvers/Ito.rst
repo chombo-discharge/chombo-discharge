@@ -149,36 +149,276 @@ The particles are available from the solver through the function
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
 The solver can then automatically fill the boundary particles containers, see :ref:`Chap:ParticleIntersection`.
 
-Computing the particle velocity
--------------------------------
+Remapping particles
+-------------------
 
-For the ``ItoSolver`` the particle velocity is computed as
+``ItoSolver`` has two functions for remapping particles:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 875-886
+   :dedent: 2
+
+The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
+Here, ``a_container`` indicates which particle container to remap.
+
+Particle deposition
+-------------------
+
+``ItoSolver`` contains several member functions for depositing various particle properties onto the mesh.
+The most general version is given below:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 309-318
+   :dedent: 2
+
+This version permits the user to select any particle container ``a_particles`` and deposit them onto some pre-allocated mesh storage ``a_phi``.
+Note that the template type ``P`` does not need to be ``ItoParticle``, although this is the most common use case.
+
+.. important::
+
+   The ``ItoSolver`` deposition methods are specified in the input script, see :ref:`Chap:ItoInput`.
+   Both the base deposition scheme (e.g., NGP or CIC) must be specified, as well as the handling near refinement boundaries. 
+
+A simpler version that deposits the bulk particles as a density on the mesh is
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 268-274
+   :dedent: 2
+
+The particles are deposited into the class member ``m_phi``, which stores the particle density on the mesh. 
+This data can then be fetched with
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 656-661
+   :dedent: 2
+   
+For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
+
+Deposition of other quantities
+______________________________
+
+One can also deposit the following quantities on the mesh:
+
+* Conductivity, which deposits :math:`\mu W`.
+* Diffusivity, which deposits :math:`D W`.
+
+Here, :math:`W` is the particle weight, :math:`\mu` is the particle mobility, :math:`D` is the particle diffusion coefficient.
+It is up to the user to first interpolate or directly set the particle mobilities and diffusion coefficients before depositing the conductivity onto the mesh.
+
+Functionality for the above deposited quantities exist as the following functions:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 170-177, 192-201
+   :dedent: 2
+
+.. _Chap:ItoInterpolation:
+
+Particle interpolation
+----------------------
+
+Interpolating particle velocities for ``ItoSolver`` is done by interpolating the mobility and particle velocities to the mesh,
 
 .. math::
 
-   \mathbf{V} = \mu\left(\mathbf{X}\right)\mathbf{v}\left(\mathbf{X}\right)
+   \mathbf{V} = \mu\left(\mathbf{X}\right) \mathbf{v}\left(\mathbf{X}\right).
 
-where :math:`\mu` is a particle mobility and :math:`\mathbf{v}` is a velocity field defined on the mesh.
-Note that both :math:`\mu` and :math:`\mathbf{v}` are defined on the mesh.
-The solver can, alternatively, also compute the velocity as
+There is, however, some freedom in choosing how the mobility coefficient is calculated, which is discussed below.
+In either case, there is some interpolation from a mesh-based variable onto the particle position :math:`\mathbf{X}`.
+This interpolation method is always parsed from an options file, and is usually an NGP or CIC scheme.
+
+.. important::
+
+   When interpolating particle properties from the mesh, the user must first ensure that ghost cells are properly updated.
+
+
+The separation into a mobility function and a velocity field is motivated by the introduction of an electric conductivity that permits a rather simple velocity velocity relation as :math:`\mathbf{v} = \mu\mathbf{E}`, where :math:`\mathbf{E}` is the electric field.
+Complete interpolation of the particle velocity consists of calling two functions:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 751-756, 732-739
+   :dedent: 2
+
+Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
+
+Mobility coefficient interpolation
+__________________________________
+
+The mobility coefficient of a particle is usually interpolated directly, i.e.,
 
 .. math::
 
-   \mathbf{V} = \left(\mu\mathbf{v}\right)\left(\mathbf{X}\right),
+   \mu = \mu\left(\mathbf{X}\right).
 
-i.e. through interpolation of :math:`\mu\mathbf{v}` to the particle position.
-Regardless of which method is chosen (see :ref:`Chap:ItoInterpolation`), both :math:`\mu` and :math:`\mathbf{v}` exist on the mesh (stored as ``EBAMRCellData``).
+The other option is to compute the mobility as
+
+.. math::
+
+   \mu = \frac{\left(\mu\left|\mathbf{v}\right|\right)\left(\mathbf{X}\right)}{\left|\mathbf{v}\left(\mathbf{X}\right)\right|}.
+
+This method ensures that the particle velocity becomes :math:`\mathbf{V} = \left(\mu\mathbf{v}\right)\left(\mathbf{X}\right)`.
+
+.. tip::
+
+   One can switch between the two interpolation methods in the ``ItoSolver`` run-time input options.
+
+Diffusion coefficient interpolation
+___________________________________
+
+Interpolation of the diffusion coefficient is always done using an interpolation method
+
+.. math::
+
+   D = D\left(\mathbf{X}\right).
+
+The function signatures is
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 765-770
+   :dedent: 2
+
+Particle intersections
+----------------------
+
+It will happen that particles occasionally hit the embedded boundary or leave through the domain sides.
+In this case one might want to keep the particles in separate data holders rather than discard them.
+``ItoSolver`` supplies several functions for transferring the particles to separate data containers when they intersect the EB or domain.
+The most relevant function is
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 416-431
+   :dedent: 2
+
+Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
+Valid options are ``EbIntersection::Bisection`` and ``EbIntersection::Raycast``.
+These algorithms are discussed in :ref:`Chap:ParticleEB`.
+The flag ``a_deleteParticles`` specifies if the original particles should be deleted when populating the other particle containers (again, see :ref:`Chap:ParticleEB`).
+
+After calling ``intersectParticles``, the particles that crossed the EB or domain walls are available through the ``getParticles`` routine, see :ref:`Chap:ItoSolver` and can then be parsed separately by user code. 
+
+Computing time steps
+--------------------
+
+While ``ItoSolver`` has no fundamental requirement on the time steps that can be used, several functions are available for computing various types of drift and diffusion related time steps.
+
+.. important::
+
+   All time step calculations below are imposed on the particles and not on the mesh variables.
+
+Advective time step
+___________________
+
+The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.
+This routine is implemented as
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 989-993
+   :dedent: 2
+
+which returns a CFL-like condition
+
+.. math::
+
+   \Delta t = \frac{\Delta x}{\textrm{max}(\left|v_x\right|, \left|v_y\right|, \left|v_z\right|)}.
+
+Diffusive time step
+___________________
+
+The signatures for the diffusion time step are similar to the ones for drift:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 1010-1014
+   :dedent: 2
+
+which returns a CFL-like condition
+
+.. math::
+
+   \Delta t = \frac{\Delta x^2}{2dD},
+
+where :math:`d` is the spatial dimension and :math:`D` is the particle diffusion coefficient.
+
+Advective-diffusive time step
+_____________________________
+
+A combination of the advection and diffusion time step routines also exists as
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 1010-1014
+   :dedent: 2
+
+This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
+
+.. math::
+
+   \Delta t = \frac{1}{\frac{\Delta x}{\left|v_x\right| +  \left|v_y\right| +  \left|v_z\right|} + \frac{\Delta x^2}{2dD}}.
+
+Superparticle management
+------------------------
+
+It can occasionally be necessary to merge or split computational particles.
+This occurs in, e.g., plasma simulations where chemical reactions lead to exponential growth of particles. 
+``ItoSolver`` can currently handle superparticles through several internal functions, and is also equipped with an interface in which the user can inject an external particle-handling routine.  
+The function for splitting and merging the particles is in all cases
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 793-799
+   :dedent: 2
+
+Calling this function will merge/split the particles.
+
+.. important::
+   
+   Particle merging is currently performed within each grid cell, and particles must therefore be sorted by their cell index before calling the merging routine.
 
 
+	    
+In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
 
-Transport kernel
-----------------
+* ``none`` - No particle merging/splitting is performed.
+* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
+* ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
+* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible. 
+* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
 
-The transport kernels for the ``ItoSolver`` will simply consist of particle updates of the following type:
+The user can set the merging algorithm through the input script (see :ref:`Chap:ItoInput`), or supply one externally by setting the merge algorithm to ``external``.
+In addition, the user must first supply a particle merging function:
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
+   :language: c++
+   :lines: 68-73
+   :dedent: 2
+
+In the code above, ``ParticleManagement::ParticleMerger<P>`` is an alias:
+
+.. literalinclude:: ../../../../Source/Particle/CD_ParticleManagement.H
+   :language: c++
+   :lines: 33-41
+   :dedent: 2  
+
+.. tip::
+   
+   ``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
+
+Example transport kernel
+------------------------
+
+Transport kernels for the particles within ``ItoSolver`` will typically be imposed externally by the user through a ``TimeStepper`` subclass that advances the particles.
+For completeness, we here include a simple transport kernel for the ``ItoSolver`` which simply consists of a drift-diffusion kick:
 
 .. code-block:: c++
 
-   Real a_dt;
    List<ItoParticle> particles;
    
    for (ListIterator<ItoParticle>& lit(particles); lit.ok(); ++lit) {
@@ -190,212 +430,6 @@ The transport kernels for the ``ItoSolver`` will simply consist of particle upda
 
 The function ``randomGaussian`` implements a diffusion hopping and returns a 2D/3D dimensional vector with values drawn from a normal distribution with standard width of one and mean value of zero.
 The implementation uses the random number generators in :ref:`Chap:Random`.
-The user can choose to truncate the normal distribution, see :ref:`Chap:ItoInput`.
-
-Remapping particles
--------------------
-
-To remap, call the ``ItoSolver`` remapping functions as
-
-.. code-block:: c++
-
-   void
-   ItoSolver::remap();
-
-This will remap the particles to the correct grid patches.
-
-To remap the other ``ParticleContainer`` data holders (holding e.g. particles that intersected the EB), there's an alternative function
-
-.. code-block:: c++
-
-   void
-   ItoSolver::remap(const WhichContainer a_container);
-
-where ``a_container`` is one of the particle containers.
-
-Deposition
-----------
-
-To deposit the particle weights onto the grid one can use
-
-.. code-block:: c++
-
-   void
-   ItoSolver::depositParticles();
-
-The particles are deposited into the data holder ``m_phi``.
-The data can then be fetched with
-
-.. code-block:: c++
-
-   EBAMRCellData&
-   ItoSolver::getPhi();
-   
-To deposit a different particle data holder into ``m_phi`` one can use
-
-.. code-block:: c++
-
-   void
-   ItoSolver::depositParticles(const WhichContainer a_container);
-
-This can be used, for example, to deposit the EB particles on the mesh.
-More general methods also exist, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
-
-One can also deposit the following quantities on the mesh:
-
-* Conductivity, which deposits :math:`\mu W`.
-* Diffusivity, which deposits :math:`D W`.
-* Energy, which deposits :math:`\epsilon W`.    
-
-Here, :math:`W` is the particle weight, :math:`\mu` is the particle mobility, :math:`D` is the particle diffusion coefficient and :math:`\epsilon` is the particle energy.
-These functions exist as
-
-.. code-block:: c++
-
-   void
-   ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
-
-   void
-   ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
-
-   void
-   ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles) const;
-
-.. important::
-
-   The ``ItoSolver`` deposition method is specified in the input script, see :ref:`Chap:ItoInput`.
-
-.. _Chap:ItoInterpolation:
-
-Velocity interpolation
-----------------------
-
-Computing the particle velocity is done by first computing the particle mobility and then computing the particle velocity.
-For interpolating the mobility to the particle position one will call
-
-.. code-block:: c++
-
-   void
-   ItoSolver::interpolateMobilities();
-
-which will compute :math:`\mu\left(\mathbf{X}\right)` using the user-specified deposition/interpolation method for computing the mobility.
-The solver can switch between two ways of computing the mobility.
-The first is to compute :math:`\mu\left(\mathbf{X}\right)` directly.
-The other is to compute the mobility as
-
-.. math::
-
-   \mu = \frac{\left(\mu\left|\mathbf{v}\right|\right)\left(\mathbf{X}\right)}{\left|\mathbf{v}\left(\mathbf{X}\right)\right|}.
-
-When computing the particle velocity as :math:`\mathbf{V} = \mu\left(\mathbf{X}\right)\mathbf{v}\left(\mathbf{X}\right)`, the latter method ensures that :math:`\mathbf{V} = \left(\mu\mathbf{v}\right)\left(\mathbf{X}\right)`.
-
-.. note::
-
-   The user selects between the two mobility interpolation methods in the input script.
-   See :ref:`Chap:ItoInput`.
-
-After the mobility has been appropriately set, the velocity can be interpolated from
-
-.. code-block:: c++
-
-   void
-   ItoSolver::interpolateVelocities();
-
-The above will compute :math:`v\left(\mathbf{X}\right)` and set the velocity as :math:`\mathbf{V} = \mu\left(\mathbf{X}\right)\mathbf{v}\left(\mathbf{X}\right)`.
-
-.. important::
-
-   The ``ItoSolver`` interpolation method is specified in the input script, see :ref:`Chap:ItoInput`.
-
-Particle intersections
-----------------------
-
-It will happen that particles occasionally hit the embedded boundary or leave through the domain sides.
-In this case one might want to keep the particles in separate data holders rather than discard them.
-``ItoSolver`` supplies the following routine for transferring the particles to the containers that hold the EB and domain particles:
-
-.. code-block:: c++
-
-   void
-   ItoSolver::intersectParticles(const EbIntersection a_ebIntersection, const bool a_deleteParticles);
-
-Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
-Valid options are ``EbIntersection::Bisection`` and ``EbIntersection::Raycast``.
-These algorithms are discussed in :ref:`Chap:ParticleEB`.
-The flag ``a_deleteParticles`` specifies if the original particles should be deleted when populating the other particle containers.
-
-After calling ``intersectParticles``, the particles that crossed the EB or domain walls are available through the ``getParticles`` routine, see :ref:`Chap:ItoSolver`. 
-   
-
-Computing time steps
---------------------
-
-The drift time step routines are implemented such that one restricts the time step such that the fastest particle does not move more than a specified number of grid cells.
-This routine is implemented as
-
-.. code-block::
-
-   Real
-   ItoSolver::computeAdvectiveDt() const;
-
-which returns a CFL-like condition :math:`\Delta x/\textrm{max}(v_x, v_y, v_z)` on the the various AMR levels and patches.
-
-The signatures for the diffusion time step are similar to the ones for drift:
-
-.. code-block:: c++
-
-   Real
-   ItoSolver::computeDiffusiveDt() const;
-
-and this returns another CFL-like condition :math:`\Delta x^2 / (2dD)` for all the particles, where :math:`d` is the spatial dimension.
-Note that there is no fundamental limitation to how far the particles can move, unless the user explicitly makes this restriction in the input options, see :ref:`Chap:ItoInput`.
-
-A combination of the advection and diffusion time step routines also exists as
-
-.. code-block::
-
-   Real
-   ItoSolver::computeDt() const;
-
-This routine computes the time step
-
-.. math::
-
-   \Delta t = \frac{1}{\frac{\Delta x}{\textrm{max}(v_x, v_y, v_z)} + \frac{\Delta x^2}{2dD}},
-
-Superparticles
---------------
-
-``ItoSolver`` currently handles superparticles through kD-trees, see :ref:`Chap:SuperParticles`, re-initialization, or user-based criteria. 
-The function for splitting and merging the particles is in all cases
-
-.. code-block:: c++
-
-   void
-   ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell);
-
-Calling this function will merge/split the particles.
-
-The default behavior in ``ItoSolver`` is to not merge the particles, but the user can set the merging algorithm through the input script, or supply one externally.
-In order to specify the merging algorithm the user must set the ``ItoSolver.merge_algorithm`` to one of the following:
-
-* ``none`` - No particle merging/splitting is performed.
-* ``equal_weight_kd`` Use a kD-tree with bounding volume hierarchies to partition and split/merge the particles. This conserves the particle center-of-mass.
-* ``reinitialize`` Re-initialize the particles in each grid cell, ensuring that weights are as uniform as possible.
-* ``reinitialize_bvh`` Re-initialize the particles in each node of a kD tree. Weights are as uniform as possible. 
-* ``external`` Use an externally injected particle merging algorithm. In order to use this feature the user must supply one through
-
-  .. code-block:: c++
-
-     // Set a particle merging algorithm
-     virtual void
-     setParticleMerger(const std::function<void(List<ItoParticle>& a_particles, const CelInfo& a_cellinfo, const int a_numParticles)>);
-
-  where the input function is a function which merges the input particles, possibly also taking into account geometric information in the cell.
-
-.. tip::
-   
-   ``ItoSolver`` uses the kD-node implementation from :ref:`Chap:SuperParticles` and partitioners for splitting the particles into two subsets with equal weights.
 
 .. _Chap:ItoIO:
 
@@ -407,52 +441,53 @@ I/O
 Plot files
 __________
 
-``ItoSolver`` can output the following variables to plot files:
 
-* :math:`\phi`, i.e. the deposited particle weights (``ItoSolver.plt_vars = phi``)
-* :math:`\mathbf{v}`, the advection field (``ItoSolver.plt_vars = vel``).
-* :math:`D`, the diffusion coefficient  (``ItoSolver.plt_vars = dco``).
 
-It can also plot the corresponding particle data holders:
+For a complete list of available plot variables, see :ref:`Chap:ItoInput`. 
 
-* Ito particles (``ItoSolver.plt_vars = part``).
-* EB particles  (``ItoSolver.plt_vars = eb_part``).
-* Domain particles  (``ItoSolver.plt_vars = domain_part``).
-* Source particles  (``ItoSolver.plt_vars = source_part``).
+..
+   .. _Chap:ItoCheck:  
 
-.. _Chap:ItoCheck:  
+   Checkpoint files
+   ________________
 
-Checkpoint files
-________________
+   When writing checkpoint files, ``ItoSolver`` can either
 
-When writing checkpoint files, ``ItoSolver`` can either
+   * Add the particles to the HDF5 file,
+   * Checkpoint the corresponding fluid data.
 
-* Add the particles to the HDF5 file,
-* Checkpoint the corresponding fluid data.
+   The user specifies this through the input script variable ``ItoSolver.checkpointing``, see :ref:`Chap:ItoInput`.
+   If checkpointing fluid data then a subsequent restart will generate a new set of particles.
 
-The user specifies this through the input script variable ``ItoSolver.checkpointing``, see :ref:`Chap:ItoInput`.
-If checkpointing fluid data then a subsequent restart will generate a new set of particles.
+   .. warning::
 
-.. warning::
-
-   If writing particle checkpoint files, simulation restarts must also *read* as if the checkpoint file contains particles. 
+      If writing particle checkpoint files, simulation restarts must also *read* as if the checkpoint file contains particles. 
 
 .. _Chap:ItoInput:
 
 Input options
 -------------
 
-I/O
-___
+Several input options are available for configuring the run-time configuration of ``ItoSolver``, which are listed in :numref:`ItoInputOptions`.
+
+.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.options
+   :name: ItoInputOptions
+   :caption: Input options for the ``ItoSolver`` class.
+	     All options are run-time configurable.
+	     
+
+Plot file variables
+___________________
 
 Plot variables are specified using ``ItoSolver.plt_vars``, see :ref:`Chap:ItoPlot`).
-If adding the various particle container data holders to the plot file, the deposition method for those is specified using ``ItoSolver.plot_deposition``.
+To add a variable to HDF5 output files, one can modify the ``ItoSolver.plt_vars`` input variable to include, e.g., the following variables:
 
-If using fluid checkpointing for simulation restarts, the flag ``ItoSolver.ppc_restart`` determines the maximum number of particles that will initialized in each grid cell during a restart. 
+* :math:`\phi`, i.e. the deposited particle weights (``ItoSolver.plt_vars = phi``)
+* :math:`\mathbf{v}`, the advection field (``ItoSolver.plt_vars = vel``).
+* :math:`D`, the diffusion coefficient  (``ItoSolver.plt_vars = dco``).
 
-
-Particle-mesh
-_____________
+Particle-mesh configuration
+___________________________
 
 To specify the mobility interpolation, use ``ItoSolver.mobility_interp``.
 Valid options are ``direct`` and ``velocity``, see :ref:`Chap:ItoInterpolation`.
@@ -474,11 +509,10 @@ __________________
 
 Available input options for the ``ItoSolver`` are listed below:
 
-.. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.options
+Example application(s)
+----------------------
 
-Example application
--------------------
-
-An example application of usage of the ``ItoSolver`` is found in
+Example applications that use ``ItoSolver`` are found in
 
 * :file:`$DISCHARGE_HOME/Physics/BrownianWalker`, see :ref:`Chap:BrownianWalkerModel`.
+* :file:`$DISCHARGE_HOME/Physics/ItoKMC`, see :ref:`Chap:ItoKMC`.  

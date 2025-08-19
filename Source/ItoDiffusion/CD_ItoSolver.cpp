@@ -2642,9 +2642,9 @@ ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const
     for (lit.rewind(); lit.ok(); ++lit) {
       const ItoParticle& p = lit();
 
-      // Get the diffusion coefficient and compute dt = dx*dx/(2*D)
+      // Get the diffusion coefficient and compute dt = dx*dx/(2*SpaceDimD)
       const Real D      = p.diffusion();
-      const Real thisDt = (D > 0.0) ? dx * dx / (2.0 * D) : std::numeric_limits<Real>::max();
+      const Real thisDt = (D > 0.0) ? dx * dx / (2.0 * SpaceDim * D) : std::numeric_limits<Real>::max();
 
       dt = std::min(dt, thisDt);
     }
@@ -2657,13 +2657,13 @@ ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const
       const RealVect&    v = p.velocity();
       const Real&        D = p.diffusion();
 
-      // Get the largest velocity component.
-      constexpr bool doAbs  = true;
-      const int      maxDir = v.maxDir(doAbs);
-      const Real     vMax   = std::abs(v[maxDir]);
+      Real vMax = 0.0;
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        vMax += std::abs(v[dir]);
+      }
 
       const Real dtAdvect  = (vMax > 0.0) ? dx / vMax : std::numeric_limits<Real>::max();
-      const Real dtDiffuse = (D > 0.0) ? dx * dx / (2.0 * D) : std::numeric_limits<Real>::max();
+      const Real dtDiffuse = (D > 0.0) ? dx * dx / (2.0 * SpaceDim * D) : std::numeric_limits<Real>::max();
 
       const Real thisDt = 1. / (1. / dtAdvect + 1. / dtDiffuse);
 
@@ -2989,7 +2989,7 @@ ItoSolver::computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const
 
   if (m_isDiffusive) {
     const Real dx  = m_amr->getDx()[a_lvl];
-    const Real dx2 = dx * dx / 2.0;
+    const Real dx2 = dx * dx / (2.0 * SpaceDim);
 
     // These are the particles we iterate over.
     const ParticleContainer<ItoParticle>& particles    = this->getParticles(WhichContainer::Bulk);
