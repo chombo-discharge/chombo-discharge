@@ -3,6 +3,8 @@
 Kinetic Monte Carlo
 ===================
 
+Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+
 Concept
 -------
 
