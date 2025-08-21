@@ -78,6 +78,7 @@ We welcome feedback, bug reports, or code contributions.
    ```
 
    If relevant, add Sphinx and doxygen documentation.
+   It is useful to run CheckDocs.py to ensure that changes to source files can be captured, as some of these are included literally in the HTML/PDF documention.
    
 3. Format the source and example codes using ```clang-format```:
 
