@@ -3,7 +3,7 @@
 Mesh ODE solver
 ===============
 
-The ``MeshODESolver`` implements a solver for
+The ``MeshODESolver<N>`` implements a solver for
 
 .. math::
 
@@ -29,7 +29,7 @@ To instantiate the solver, use the full constructor with reference to :ref:`Chap
 
 .. tip::
    
-   Source code for the ``MeshODESolver`` resides in :file:`Source/MeshODESolver`.
+   Source code for the ``MeshODESolver<N>`` resides in :file:`Source/MeshODESolver`.
    See `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html>`_ for the full C++ API.
 
 Setting :math:`\vec{\phi}`
@@ -143,10 +143,10 @@ Users can also choose to turn on/off slope limiters when putting the solution on
 Input options
 -------------
 
-Several input options are available for configuring the run-time configuration of ``MeshODESolver``, which are listed below
+Several input options are available for configuring the run-time configuration of ``MeshODESolver<N>``, which are listed below
 
 .. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.options
-   :caption: Input options for the ``MeshODESolver`` class.
+   :caption: Input options for the ``MeshODESolver<N>`` class.
 	     All options are run-time configurable.   
 
 I/O
@@ -164,5 +164,5 @@ If choosing to omit output variables for the solver, one can put e.g. ``MeshODES
 
 .. note::
 
-   ``MeshODESolver`` checkpoint files only contain :math:`\vec{\phi}`. 
+   ``MeshODESolver<N>`` checkpoint files only contain :math:`\vec{\phi}`. 
    
