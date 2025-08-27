@@ -2360,6 +2360,15 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     pout() << "DischargeInceptionStepper::postInitialize" << endl;
   }
 
+#warning "Debug code to find the root of E/N"
+#if 1
+  const Real Ecrit = this->getCriticalField();
+
+  std::cout << Ecrit << std::endl;
+
+  MayDay::Abort("CEASE THIS MADNESS AT ONCE!");
+#endif
+
   // Initialize the negative ion solver
   m_ionSolver->initialData();
   this->computeIonVelocity(m_voltageCurve(m_time));
@@ -5325,6 +5334,153 @@ DischargeInceptionStepper<P, F, C>::getElectricField() const noexcept
   CH_TIMERS("DischargeInceptionStepper::getElectricField");
 
   return &m_homogeneousFieldGas;
+}
+
+template <typename P, typename F, typename C>
+Real
+DischargeInceptionStepper<P, F, C>::getCriticalField() const noexcept
+{
+  CH_TIME("DischargeInceptionStepper::getCriticalField");
+  if (m_verbosity > 5) {
+    pout() << "DischargeInceptionStepper::getCriticalField" << endl;
+  }
+
+  Real Emin = 0.0;
+  Real Emax = 1E6;
+
+  constexpr Real tol = 1E-10;
+  constexpr Real eps = std::numeric_limits<Real>::epsilon();
+
+  Real aPt;
+  Real bPt;
+  Real cPt;
+
+  Real fa;
+  Real fb;
+  Real fc;
+
+  Real a, b, c, d, e;
+  Real p, q, r, s;
+  Real tol1, xm;
+
+  // Quick lambda for the effective Townsend ionization coefficient
+  auto alpha = [&this->m_alpha, &this->m_eta](const Real E) -> Real {
+    return m_alpha(std::pow(10.0, E), RealVect::Zero) - m_eta(std::pow(10.0, E), RealVect::Zero);
+  };
+
+  // Starting positions and values. bPt = 1E3 implies 10^10, which is a big number....
+  aPt = 0.0;
+  bPt = 10.0;
+
+  fa = alpha(aPt);
+  fb = alpha(bPt);
+
+  if (fa * fb > 0.0) {
+    MayDay::Abort("DischargeInceptionStepper::getCriticalField -- abort because alpha is > 0 everywhere");
+  }
+
+  // Initialize for safety.
+  a = 0.0;
+  b = 0.0;
+  c = 0.0;
+  d = 0.0;
+  e = 0.0;
+
+  cPt = bPt;
+  c   = b;
+  fc  = fb;
+
+  for (int i = 0; i < maxIter; i++) {
+
+    // If this triggers, the root is not on [b,c] and we can adjust the bounding interval
+    if (fb * fc > 0) {
+      cPt = aPt;
+      c   = aPt.vectorLength();
+      fc  = fa;
+      d   = b - a;
+      e   = d;
+    }
+
+    if (Abs(fc) < Abs(fb)) {
+      aPt = bPt;
+      a   = aPt.vectorLength();
+      bPt = cPt;
+      b   = bPt.vectorLength();
+      cPt = aPt;
+      c   = cPt.vectorLength();
+      fa  = fb;
+      fb  = fc;
+      fc  = fa;
+    }
+
+    // Convergence check
+    tol1 = 2.0 * eps * abs(bPt.vectorLength()) + 0.5 * tol;
+    xm   = 0.5 * (c - bPt.vectorLength());
+    if (Abs(xm) <= tol1 || fb == 0.0) {
+      break;
+    }
+
+    if (Abs(e) >= tol1 && Abs(fa) > Abs(fb)) {
+      // Attempt inverse quadratic interpolation
+      s = fb / fa;
+      if (aPt.vectorLength() == c) {
+        p = 2.0 * xm * s;
+        q = 1.0 - s;
+      }
+      else {
+        q = fa / fc;
+        r = fb / fc;
+        p = s * (2 * xm * q * (q - r) - (b - a) * (r - 1.));
+        q = (q - 1.0) * (r - 1.0) * (s - 1.0);
+      }
+
+      if (p > 0)
+        q = -q;
+
+      p = Abs(p);
+
+      if (2.0 * p < std::min((Real)3.0 * xm * q - std::abs(tol1 * q), std::abs(e * q))) {
+        // Accept interpolation
+        e = d;
+        d = p / q;
+      }
+      else {
+        // Interpolation failed, use bisection
+        d = xm;
+        e = d;
+      }
+    }
+    else {
+      // Bounds decreasing too slowly, use bisection
+      d = xm;
+      e = d;
+    }
+
+    // Move last best guess to a
+    aPt = bPt;
+    a   = aPt.vectorLength();
+    fa  = fb;
+
+    // Evaluate new trial root
+    if (Abs(d) > tol1) {
+      bPt = bPt + d * unitTangent;
+      b   = bPt.vectorLength();
+    }
+    else {
+      if (xm < 0) {
+        bPt = bPt - tol1 * unitTangent;
+      }
+      else {
+        bPt = bPt + tol1 * unitTangent;
+      }
+      b = bPt.vectorLength();
+    }
+
+    fb = alpha(bPt);
+    //    std::cout << "Iteration: " << i << "\t Function value: " << fb << std::endl;
+  }
+
+  return Ecrit;
 }
 
 #include <CD_NamespaceFooter.H>

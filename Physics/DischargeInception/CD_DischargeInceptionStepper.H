@@ -1311,6 +1311,12 @@ namespace Physics {
       */
       virtual void
       getMaxValueAndLocation(Real& a_maxVal, RealVect& a_maxPos, const EBAMRCellData& a_data) const noexcept;
+
+      /*!
+	@brief Get the breakdown field.
+      */
+      virtual Real
+      getCriticalField() const noexcept;
     };
   } // namespace DischargeInception
 } // namespace Physics
