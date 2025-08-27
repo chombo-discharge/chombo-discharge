@@ -353,7 +353,9 @@ By default, the Helmholtz operator uses a diagonally weighting of the operator u
 This means that the quantity that is passed into ``AMRMultiGrid`` should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag ``kappa_source`` indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
 If this flag is set to ``false``, it is an indication that the user has taken responsibility to perform this weighting prior to calling ``FieldSolver::solve(...)``.
-If this flag is set to ``true``, ``FieldSolverMultigrid`` will perform the multiplication before the multigrid solve. 
+If this flag is set to ``true``, ``FieldSolverMultigrid`` will perform the multiplication before the multigrid solve.
+
+.. _Chap:MultigridTuning:
 
 Tuning multigrid performance
 ____________________________

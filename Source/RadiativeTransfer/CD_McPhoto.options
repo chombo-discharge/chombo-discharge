@@ -23,4 +23,3 @@ McPhoto.source_type              = number           ## 'number'      -> Source t
                                                     # 'rate'        -> Source terms contains the rate
 McPhoto.deposition               = cic              ## 'ngp'  -> nearest grid point, 'cic' -> cloud-in-cell
 McPhoto.deposition_cf            = halo             ## Coarse-fine deposition. Must be 'interp' or 'halo'
-
