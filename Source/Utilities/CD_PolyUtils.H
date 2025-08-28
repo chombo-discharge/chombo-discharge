@@ -33,6 +33,15 @@ namespace PolyUtils {
   */
   RealVect
   brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
+
+  /*!
+    @brief Compute the root of a function between two points. This is a 1D problem.
+    @param[in] a_lo Lower initial guess.
+    @param[in] a_hi Higher initial guess.
+    @return Returns the root (if it could be found). Returns std::numeric_limits<Real>::max() otherwise.
+  */
+  Real
+  brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)> a_func) noexcept;
 } // namespace PolyUtils
 
 #include <CD_NamespaceFooter.H>
