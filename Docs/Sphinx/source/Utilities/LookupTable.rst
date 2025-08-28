@@ -121,6 +121,8 @@ where ``a_min`` and ``a_max`` are the permissible ranges for data in the input c
 Data outside these ranges is discarded from the table.
 This applies regardless of whether or not ``a_column`` indicates the independent or dependent variables.
 
+.. _Chap:LookupTableRegularize:
+
 Regularize table
 ================
 
