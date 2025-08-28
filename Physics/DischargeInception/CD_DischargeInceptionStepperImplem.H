@@ -52,6 +52,10 @@ DischargeInceptionStepper<P, F, C>::DischargeInceptionStepper()
   m_debug               = false;
   m_fullIntegration     = false;
   m_evaluateTownsend    = false;
+  m_voltageIncrease     = 1 + 0.05;
+  m_maxKLimit           = 15.0;
+
+#warning "Hardcoded voltage steps and K-limits. Should we have a number of points instead of a voltage increase???"
 
   this->parseOptions();
 
@@ -192,8 +196,6 @@ DischargeInceptionStepper<P, F, C>::allocate()
 
   switch (m_mode) {
   case Mode::Stationary: {
-    m_amr->allocate(m_inceptionIntegralPlus, m_realm, m_phase, m_voltageSweeps.size());
-    m_amr->allocate(m_inceptionIntegralMinu, m_realm, m_phase, m_voltageSweeps.size());
     m_amr->allocate(m_inceptionVoltagePlus, m_realm, m_phase, 1);
     m_amr->allocate(m_inceptionVoltageMinu, m_realm, m_phase, 1);
     m_amr->allocate(m_streamerInceptionVoltagePlus, m_realm, m_phase, 1);
@@ -201,40 +203,41 @@ DischargeInceptionStepper<P, F, C>::allocate()
     m_amr->allocate(m_townsendInceptionVoltagePlus, m_realm, m_phase, 1);
     m_amr->allocate(m_townsendInceptionVoltageMinu, m_realm, m_phase, 1);
 
-    if (m_plotFieldEmission) {
-      m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
-      m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
+    DataOps::setValue(m_inceptionVoltagePlus, 0.0);
+    DataOps::setValue(m_inceptionVoltageMinu, 0.0);
+    DataOps::setValue(m_streamerInceptionVoltagePlus, 0.0);
+    DataOps::setValue(m_streamerInceptionVoltageMinu, 0.0);
+    DataOps::setValue(m_townsendInceptionVoltagePlus, 0.0);
+    DataOps::setValue(m_townsendInceptionVoltageMinu, 0.0);
 
-      DataOps::setValue(m_emissionRatesPlus, 0.0);
-      DataOps::setValue(m_emissionRatesMinu, 0.0);
+    if (m_plotFieldEmission) {
+#warning "Commented out"
+      // m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
+      // m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
+
+      // DataOps::setValue(m_emissionRatesPlus, 0.0);
+      // DataOps::setValue(m_emissionRatesMinu, 0.0);
     }
 
     if (m_plotBackgroundIonization) {
-      m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
+#warning "Commented out"
+      // m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
 
-      DataOps::setValue(m_backgroundIonization, 0.0);
+      // DataOps::setValue(m_backgroundIonization, 0.0);
     }
 
     if (m_plotDetachment) {
-      m_amr->allocate(m_detachment, m_realm, m_phase, m_voltageSweeps.size());
+#warning "Commented out"
+      // m_amr->allocate(m_detachment, m_realm, m_phase, m_voltageSweeps.size());
 
-      DataOps::setValue(m_detachment, 0.0);
+      // DataOps::setValue(m_detachment, 0.0);
     }
-
-    m_amr->allocate(m_townsendCriterionPlus, m_realm, m_phase, m_voltageSweeps.size());
-    m_amr->allocate(m_townsendCriterionMinu, m_realm, m_phase, m_voltageSweeps.size());
-
-    DataOps::setValue(m_townsendCriterionPlus, 0.0);
-    DataOps::setValue(m_townsendCriterionMinu, 0.0);
-
-    DataOps::setValue(m_inceptionIntegralPlus, 0.0);
-    DataOps::setValue(m_inceptionIntegralMinu, 0.0);
-    DataOps::setValue(m_inceptionVoltagePlus, 0.0);
-    DataOps::setValue(m_inceptionVoltageMinu, 0.0);
 
     break;
   }
   case Mode::Transient: {
+#warning "Commented out"
+#if 0
     m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, 1);
     m_amr->allocate(m_townsendCriterion, m_realm, m_phase, 1);
     m_amr->allocate(m_emissionRate, m_realm, m_phase, 1);
@@ -246,6 +249,7 @@ DischargeInceptionStepper<P, F, C>::allocate()
     DataOps::setValue(m_emissionRate, 0.0);
     DataOps::setValue(m_backgroundIonization, 0.0);
     DataOps::setValue(m_detachment, 0.0);
+#endif
 
     break;
   }
@@ -471,33 +475,12 @@ DischargeInceptionStepper<P, F, C>::parseVoltages() noexcept
 
   ParmParse pp("DischargeInceptionStepper");
 
-  std::string str;
-
-  Real voltageLo    = 0.0;
-  Real voltageHi    = 0.0;
-  Real stepSize     = 0.0;
-  int  voltageSteps = 0;
-
-  pp.get("voltage_lo", voltageLo);
-  pp.get("voltage_hi", voltageHi);
-  pp.get("voltage_steps", voltageSteps);
+  pp.get("step_dU", m_voltageIncrease);
+  pp.get("limit_max_K", m_maxKLimit);
   pp.get("K_inception", m_inceptionK);
   pp.get("eval_townsend", m_evaluateTownsend);
 
-  // Define voltages
-  const Real deltaV = voltageHi - voltageLo;
-
-  const Real dV = deltaV / (1 + voltageSteps);
-
-  m_voltageSweeps.push_back(voltageLo);
-
-  for (size_t i = 0; i < voltageSteps; i++) {
-    m_voltageSweeps.push_back(m_voltageSweeps[i] + dV);
-  }
-
-  m_voltageSweeps.push_back(voltageHi);
-  m_maxTPlus.resize(m_voltageSweeps.size(), std::make_pair(0.0, RealVect::Zero));
-  m_maxTMinu.resize(m_voltageSweeps.size(), std::make_pair(0.0, RealVect::Zero));
+  m_voltageIncrease = 1.0 + m_voltageIncrease;
 }
 
 template <typename P, typename F, typename C>
@@ -1230,26 +1213,36 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
   }
 
   if (m_plotInceptionIntegral) {
-    this->writeData(a_output, a_icomp, m_inceptionIntegralPlus, a_outputRealm, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_inceptionIntegralMinu, a_outputRealm, a_level, false, true);
+    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+      this->writeData(a_output, a_icomp, m_inceptionIntegralPlus[i], a_outputRealm, a_level, false, true);
+      this->writeData(a_output, a_icomp, m_inceptionIntegralMinu[i], a_outputRealm, a_level, false, true);
+    }
   }
 
   if (m_plotTownsend) {
-    this->writeData(a_output, a_icomp, m_townsendCriterionPlus, a_outputRealm, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_townsendCriterionMinu, a_outputRealm, a_level, false, true);
+    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+      this->writeData(a_output, a_icomp, m_townsendCriterionPlus[i], a_outputRealm, a_level, false, true);
+      this->writeData(a_output, a_icomp, m_townsendCriterionMinu[i], a_outputRealm, a_level, false, true);
+    }
   }
 
   if (m_plotBackgroundIonization) {
-    this->writeData(a_output, a_icomp, m_backgroundIonization, a_outputRealm, a_level, false, true);
+    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+      this->writeData(a_output, a_icomp, m_backgroundIonization[i], a_outputRealm, a_level, false, true);
+    }
   }
 
   if (m_plotDetachment) {
-    this->writeData(a_output, a_icomp, m_detachment, a_outputRealm, a_level, false, true);
+    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+      this->writeData(a_output, a_icomp, m_detachment[i], a_outputRealm, a_level, false, true);
+    }
   }
 
   if (m_plotFieldEmission) {
-    this->writeData(a_output, a_icomp, m_emissionRatesPlus, a_outputRealm, a_level, false, true);
-    this->writeData(a_output, a_icomp, m_emissionRatesMinu, a_outputRealm, a_level, false, true);
+    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+      this->writeData(a_output, a_icomp, m_emissionRatesPlus[i], a_outputRealm, a_level, false, true);
+      this->writeData(a_output, a_icomp, m_emissionRatesMinu[i], a_outputRealm, a_level, false, true);
+    }
   }
 
   if (m_plotAlpha) {
@@ -1912,8 +1905,6 @@ DischargeInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFine
 
   switch (m_mode) {
   case Mode::Stationary: {
-    m_amr->reallocate(m_inceptionIntegralPlus, m_phase, a_lmin);
-    m_amr->reallocate(m_inceptionIntegralMinu, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltagePlus, m_phase, a_lmin);
     m_amr->reallocate(m_inceptionVoltageMinu, m_phase, a_lmin);
     m_amr->reallocate(m_streamerInceptionVoltagePlus, m_phase, a_lmin);
@@ -1922,29 +1913,35 @@ DischargeInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFine
     m_amr->reallocate(m_townsendInceptionVoltageMinu, m_phase, a_lmin);
 
     if (m_plotBackgroundIonization) {
-      m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
+#warning "COmmented out"
+      //      m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
     }
 
     if (m_plotDetachment) {
-      m_amr->reallocate(m_detachment, m_phase, a_lmin);
+#warning "COmmented out"
+      //      m_amr->reallocate(m_detachment, m_phase, a_lmin);
     }
 
     if (m_plotFieldEmission) {
-      m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
-      m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
+#warning "COmmented out"
+      //      m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
+      //      m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
     }
 
-    m_amr->reallocate(m_townsendCriterionPlus, m_phase, a_lmin);
-    m_amr->reallocate(m_townsendCriterionMinu, m_phase, a_lmin);
+#warning Commented out
+    //    m_amr->reallocate(m_townsendCriterionPlus, m_phase, a_lmin);
+    //    m_amr->reallocate(m_townsendCriterionMinu, m_phase, a_lmin);
 
     break;
   }
   case Mode::Transient: {
-
+#warning "Commented out"
+#if 0
     m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
     m_amr->reallocate(m_townsendCriterion, m_phase, a_lmin);
     m_amr->reallocate(m_emissionRate, m_phase, a_lmin);
     m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
+#endif
 
     break;
   }
@@ -2368,18 +2365,8 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
 
   switch (m_mode) {
   case Mode::Stationary: {
-#if 1
-    const Real Ecrit = this->getCriticalField();
-
-    std::cout << Ecrit << std::endl;
-
-    MayDay::Abort("CEASE THIS MADNESS AT ONCE!");
-#endif
-
     this->computeInceptionIntegralStationary();
-    if (m_evaluateTownsend) {
-      this->computeTownsendCriterionStationary();
-    }
+    this->computeTownsendCriterionStationary();
     this->computeCriticalVolumeStationary();
     this->computeCriticalAreaStationary();
     this->computeIonizationVolumeStationary();
@@ -2399,6 +2386,8 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
     }
 
     this->writeReportStationary();
+
+    MayDay::Abort("CEASE THIS MADNESS AT ONCE!");
 
     break;
   }
@@ -2464,12 +2453,15 @@ DischargeInceptionStepper<P, F, C>::interpolateGradAlphaToParticles() noexcept
 
 template <typename P, typename F, typename C>
 void
-DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
+DischargeInceptionStepper<P, F, C>::computeInceptionIntegral(EBAMRCellData& a_inceptionIntegral,
+                                                             const Real     a_voltage) noexcept
 {
-  CH_TIME("DischargeInceptionStepper::computeInceptionIntegralStationary");
+  CH_TIME("DischargeInceptionStepper::computeInceptionIntegral");
   if (m_verbosity > 5) {
-    pout() << "DischargeInceptionStepper::computeInceptionIntegralStationary" << endl;
+    pout() << "DischargeInceptionStepper::computeInceptionIntegral" << endl;
   }
+
+#warning "This is where all functionality should go"
 
   // TLDR: For this integration we compute the value of the inception integral
   //
@@ -2486,91 +2478,109 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
   //
   //          T += 0.5 * dx * [alpha_eff(E(x)) + alpha_eff(E(x+dx))]
 
-  // Transient storage we can deposit particles onto.
-  EBAMRCellData Kplus;
-  EBAMRCellData Kminu;
+  // Reset the particles used for field line integration
+  this->seedIonizationParticles(a_voltage);
+  this->resetTracerParticles();
 
-  m_amr->allocate(Kplus, m_realm, m_phase, 1);
-  m_amr->allocate(Kminu, m_realm, m_phase, 1);
+  // Switch between algorithms.
+  switch (m_inceptionAlgorithm) {
+  case IntegrationAlgorithm::Euler: {
+    this->inceptionIntegrateEuler(a_voltage);
 
-  // Integrate for each voltage
-  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+    break;
+  }
+  case IntegrationAlgorithm::Trapezoidal: {
+    this->inceptionIntegrateTrapezoidal(a_voltage);
+
+    break;
+  }
+  default: {
+    MayDay::Error("DischargeInceptionStepper::computeInceptionIntegral -- logic bust");
+
+    break;
+  }
+  }
+
+  // Deposit the particles on the mesh and get the max/min values.
+  m_tracerParticleSolver->deposit(a_inceptionIntegral);
+
+  m_amr->conservativeAverage(a_inceptionIntegral, m_realm, m_phase);
+  m_amr->interpGhost(a_inceptionIntegral, m_realm, m_phase);
+}
+
+template <typename P, typename F, typename C>
+void
+DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcept
+{
+  CH_TIME("DischargeInceptionStepper::computeInceptionIntegralStationary");
+  if (m_verbosity > 5) {
+    pout() << "DischargeInceptionStepper::computeInceptionIntegralStationary" << endl;
+  }
+
+  constexpr int maxIter = 100;
+
+  // Get the maximum field (in the gas phase) with the electrodes at 1V
+  Real maxField = 0.0;
+  Real minField = 0.0;
+
+  EBAMRCellData gasField = m_amr->alias(phase::gas, m_electricField);
+
+  this->superposition(gasField, 1.0);
+
+  DataOps::getMaxMinNorm(maxField, minField, gasField);
+
+  // Compute the critical and the minimum possible inception voltage.
+  const Real Ecrit = this->getCriticalField();
+
+  Real curVoltage = Ecrit / maxField;
+  Real curMaxK    = 0.0;
+  int  curIter    = 0;
+
+  m_inceptionIntegralPlus.resize(0);
+  m_inceptionIntegralMinu.resize(0);
+
+  while (curMaxK < m_maxKLimit && curIter < maxIter) {
+    EBAMRCellData Kplus;
+    EBAMRCellData Kminu;
+
+    m_amr->allocate(Kplus, m_realm, m_phase, 1);
+    m_amr->allocate(Kminu, m_realm, m_phase, 1);
 
     DataOps::setValue(Kplus, 0.0);
     DataOps::setValue(Kminu, 0.0);
 
-    // Polarities. Note that we are dealing with electrons so
-    // for positive polarity the particles move opposite to the field.
-    std::vector<Real> polarities{1.0, -1.0};
+    m_inceptionIntegralPlus.push_back(Kplus);
+    m_inceptionIntegralMinu.push_back(Kminu);
 
-    for (const auto& p : polarities) {
-      this->seedIonizationParticles(p * m_voltageSweeps[i]);
+    this->computeInceptionIntegral(Kplus, +curVoltage);
+    this->computeInceptionIntegral(Kminu, -curVoltage);
 
-      this->resetTracerParticles();
+    // Get the max and min values of K.
+    Real maxKPlus = -std::numeric_limits<Real>::max();
+    Real maxKMinu = -std::numeric_limits<Real>::max();
 
-      // Switch between various integration algorithms. At the end of this
-      // the K-value time should be stored on the particle weight and the particles
-      // should be back in their original grid cells.
-      switch (m_inceptionAlgorithm) {
-      case IntegrationAlgorithm::Euler: {
-        this->inceptionIntegrateEuler(p * m_voltageSweeps[i]);
+    RealVect maxKPlusPos = RealVect::Zero;
+    RealVect maxKMinuPos = RealVect::Zero;
 
-        break;
-      }
-      case IntegrationAlgorithm::Trapezoidal: {
-        this->inceptionIntegrateTrapezoidal(p * m_voltageSweeps[i]);
+    this->getMaxValueAndLocation(maxKPlus, maxKPlusPos, Kplus);
+    this->getMaxValueAndLocation(maxKMinu, maxKMinuPos, Kminu);
 
-        break;
-      }
-      default: {
-        MayDay::Error("DischargeInceptionStepper::computeInceptionIntegralStationary -- logic bust");
+    // Populate the relevant data containers.
+    m_KPlusValues.emplace_back(std::make_tuple(curVoltage, maxKPlus, maxKPlusPos));
+    m_KMinuValues.emplace_back(std::make_tuple(curVoltage, maxKMinu, maxKMinuPos));
 
-        break;
-      }
-      }
+    curMaxK = std::max(maxKPlus, maxKMinu);
 
-      // Deposit particles on mesh and copy to relevant data holder.
-      if (p > 0.0) {
-        m_tracerParticleSolver->deposit(Kplus);
+    // Step to next voltage. Increase this by 1% at the first step, then extrapolate linearly at later steps
+    curVoltage = curVoltage * m_voltageIncrease;
 
-        m_amr->conservativeAverage(Kplus, m_realm, m_phase);
-        m_amr->interpGhost(Kplus, m_realm, m_phase);
+    curIter++;
+  }
 
-        DataOps::copy(m_inceptionIntegralPlus, Kplus, Interval(i, i), Interval(0, 0));
-
-        Real     maxK   = -std::numeric_limits<Real>::max();
-        RealVect maxPos = RealVect::Zero;
-
-        // Get max K-value and position corresponding to this value.
-        this->getMaxValueAndLocation(maxK, maxPos, Kplus);
-
-        if (!m_fullIntegration) {
-          maxK = std::min(maxK, m_inceptionK);
-        }
-
-        m_maxKPlus.push_back(std::make_pair(maxK, maxPos));
-      }
-      else {
-        m_tracerParticleSolver->deposit(Kminu);
-
-        m_amr->conservativeAverage(Kminu, m_realm, m_phase);
-        m_amr->interpGhost(Kminu, m_realm, m_phase);
-
-        DataOps::copy(m_inceptionIntegralMinu, Kminu, Interval(i, i), Interval(0, 0));
-
-        Real     maxK   = -std::numeric_limits<Real>::max();
-        RealVect maxPos = RealVect::Zero;
-
-        // Get max K-value and corresponding to this value.
-        this->getMaxValueAndLocation(maxK, maxPos, Kminu);
-
-        if (!m_fullIntegration) {
-          maxK = std::min(maxK, m_inceptionK);
-        }
-
-        m_maxKMinu.push_back(std::make_pair(maxK, maxPos));
-      }
-    }
+  // Populate the voltage sweep table
+  m_voltageSweeps.resize(0);
+  for (int i = 0; i < m_KPlusValues.size(); i++) {
+    m_voltageSweeps.push_back(std::get<0>(m_KPlusValues[i]));
   }
 }
 
@@ -3047,35 +3057,54 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
     pout() << "DischargeInceptionStepper::computeTownsendCriterionStationary" << endl;
   }
 
-  // Allocate storage for gamma-coefficient
-  EBAMRCellData gamma;
-  EBAMRCellData expK;
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
 
-  m_amr->allocate(gamma, m_realm, m_phase, 1);
-  m_amr->allocate(expK, m_realm, m_phase, 1);
+  m_townsendCriterionPlus.resize(0);
+  m_townsendCriterionMinu.resize(0);
 
-  // Do all voltages and both polarities
-  for (int i = 0; i < m_voltageSweeps.size(); ++i) {
+  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+    const Real voltage = m_voltageSweeps[i];
 
-    // Polarities. Here, we are dealing with positive ions so the particles move with the field.
-    std::vector<Real> polarities{1.0, -1.0};
+    const EBAMRCellData KPlus = m_inceptionIntegralPlus[i];
+    const EBAMRCellData KMinu = m_inceptionIntegralMinu[i];
 
-    this->seedIonizationParticles(m_voltageSweeps[i]);
+    EBAMRCellData townsendCriterionPlus;
+    EBAMRCellData townsendCriterionMinu;
 
-    for (const auto& p : polarities) {
+    EBAMRCellData expKPlus;
+    EBAMRCellData expKMinu;
 
-      DataOps::setValue(gamma, 0.0);
+    m_amr->allocate(townsendCriterionPlus, m_realm, m_phase, 1);
+    m_amr->allocate(townsendCriterionMinu, m_realm, m_phase, 1);
 
+    m_amr->allocate(expKPlus, m_realm, m_phase, 1);
+    m_amr->allocate(expKMinu, m_realm, m_phase, 1);
+
+    DataOps::setValue(townsendCriterionPlus, 0.0);
+    DataOps::setValue(townsendCriterionMinu, 0.0);
+
+    DataOps::setValue(expKPlus, 0.0);
+    DataOps::setValue(expKMinu, 0.0);
+
+    Real maxTPlus = 0.0;
+    Real maxTMinu = 0.0;
+
+    RealVect maxTPlusPos = RealVect::Zero;
+    RealVect maxTMinuPos = RealVect::Zero;
+
+    if (m_evaluateTownsend) {
+
+      // Positive polarity.
       this->resetTracerParticles();
 
       switch (m_inceptionAlgorithm) {
       case IntegrationAlgorithm::Euler: {
-        this->townsendTrackEuler(p * m_voltageSweeps[i]);
+        this->townsendTrackEuler(voltage);
 
         break;
       }
       case IntegrationAlgorithm::Trapezoidal: {
-        this->townsendTrackTrapezoidal(p * m_voltageSweeps[i]);
+        this->townsendTrackTrapezoidal(voltage);
 
         break;
       }
@@ -3086,62 +3115,70 @@ DischargeInceptionStepper<P, F, C>::computeTownsendCriterionStationary() noexcep
       }
       }
 
-      // Deposit the particles on the mesh and see if they struck a cathode surface.
-      m_tracerParticleSolver->deposit(gamma);
+      m_tracerParticleSolver->deposit(townsendCriterionPlus);
 
-      m_amr->conservativeAverage(gamma, m_realm, m_phase);
-      m_amr->interpGhost(gamma, m_realm, m_phase);
+      m_amr->conservativeAverage(townsendCriterionPlus, m_realm, m_phase);
+      m_amr->interpGhost(townsendCriterionPlus, m_realm, m_phase);
 
-      // For turning K into exp(K)-1
+      // Negative polarity.
+      this->resetTracerParticles();
+
+      switch (m_inceptionAlgorithm) {
+      case IntegrationAlgorithm::Euler: {
+        this->townsendTrackEuler(-voltage);
+
+        break;
+      }
+      case IntegrationAlgorithm::Trapezoidal: {
+        this->townsendTrackTrapezoidal(-voltage);
+
+        break;
+      }
+      default: {
+        MayDay::Error("DischargeInceptionStepper::computeTownsendCriterionStationary -- logic bust");
+
+        break;
+      }
+      }
+
+      m_tracerParticleSolver->deposit(townsendCriterionMinu);
+
+      m_amr->conservativeAverage(townsendCriterionMinu, m_realm, m_phase);
+      m_amr->interpGhost(townsendCriterionMinu, m_realm, m_phase);
+
+      // For turning K into exp(K) - 1
       auto exponentiate = [](const Real x) -> Real {
         return x > 0.0 ? exp(x) - 1 : 0.0;
       };
 
-      if (p > 0.0) {
-        EBAMRCellData Kplus = m_amr->slice(m_inceptionIntegralPlus, Interval(i, i));
-        DataOps::copy(expK, Kplus);
-        DataOps::compute(expK, exponentiate);
-        DataOps::multiply(gamma, expK);
+      DataOps::copy(expKPlus, KPlus);
+      DataOps::copy(expKMinu, KMinu);
 
-        // If we're running without full integration we truncate the Townsend value to 1.
-        if (!m_fullIntegration) {
-          DataOps::compute(gamma, [](const Real x) {
-            return std::min(x, 1.0);
-          });
-        }
+      DataOps::compute(expKPlus, exponentiate);
+      DataOps::compute(expKMinu, exponentiate);
 
-        DataOps::copy(m_townsendCriterionPlus, gamma, Interval(i, i), Interval(0, 0));
+      DataOps::multiply(townsendCriterionPlus, expKPlus);
+      DataOps::multiply(townsendCriterionMinu, expKMinu);
 
-        Real     maxT   = 0.0;
-        RealVect maxPos = RealVect::Zero;
+      this->getMaxValueAndLocation(maxTPlus, maxTPlusPos, townsendCriterionPlus);
+      this->getMaxValueAndLocation(maxTMinu, maxTMinuPos, townsendCriterionMinu);
 
-        this->getMaxValueAndLocation(maxT, maxPos, gamma);
+      // If we're not doing full integration we truncate the Townsend value to 1.
+      if (!m_fullIntegration) {
+        auto truncate = [](const Real x) -> Real {
+          return std::min(x, 1.0);
+        };
 
-        m_maxTPlus[i] = std::make_pair(maxT, maxPos);
-      }
-      else {
-        EBAMRCellData Kminu = m_amr->slice(m_inceptionIntegralMinu, Interval(i, i));
-        DataOps::copy(expK, Kminu);
-        DataOps::compute(expK, exponentiate);
-        DataOps::multiply(gamma, expK);
-
-        // If we're running without full integration we truncate the Townsend value to 1.
-        if (!m_fullIntegration) {
-          DataOps::compute(gamma, [](const Real x) {
-            return std::min(x, 1.0);
-          });
-        }
-
-        DataOps::copy(m_townsendCriterionMinu, gamma, Interval(i, i), Interval(0, 0));
-
-        Real     maxT = 0.0;
-        RealVect maxPos;
-
-        this->getMaxValueAndLocation(maxT, maxPos, gamma);
-
-        m_maxTMinu[i] = std::make_pair(maxT, maxPos);
+        DataOps::compute(townsendCriterionPlus, truncate);
+        DataOps::compute(townsendCriterionMinu, truncate);
       }
     }
+
+    m_townsendCriterionPlus.push_back(townsendCriterionPlus);
+    m_townsendCriterionMinu.push_back(townsendCriterionMinu);
+
+    m_TPlusValues.emplace_back(std::make_tuple(voltage, maxTPlus, maxTPlusPos));
+    m_TMinuValues.emplace_back(std::make_tuple(voltage, maxTMinu, maxTMinuPos));
   }
 }
 
@@ -3673,22 +3710,33 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
     pout() << "DischargeInceptionStepper::computeBackgroundIonizationStationary" << endl;
   }
 
-  const RealVect probLo = m_amr->getProbLo();
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
+  CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
+  CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
+
+  m_backgroundIonization.resize(0);
 
   // Holds the electric field
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
 
-  for (int i = 0; i < m_voltageSweeps.size(); i++) {
+  // Solve ionization volume for each voltage
+  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+    const Real voltage = m_voltageSweeps[i];
 
     // Compute the electric field into the scratch storage
-    this->superposition(scratch, m_voltageSweeps[i]);
+    this->superposition(scratch, voltage);
+
+    EBAMRCellData backgroundRate;
+
+    m_amr->allocate(backgroundRate, m_realm, m_phase, 1);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const DataIterator&      dit   = dbl.dataIterator();
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real               dx    = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
 
       const int nbox = dit.size();
 
@@ -3698,7 +3746,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
 
         const EBISBox& ebisbox = ebisl[din];
 
-        EBCellFAB& bgIonization    = (*m_backgroundIonization[lvl])[din];
+        EBCellFAB& bgIonization    = (*backgroundRate[lvl])[din];
         FArrayBox& bgIonizationReg = bgIonization.getFArrayBox();
 
         const EBCellFAB& electricField    = (*scratch[lvl])[din];
@@ -3710,7 +3758,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
             D_DECL(electricFieldReg(iv, 0), electricFieldReg(iv, 1), electricFieldReg(iv, 2)));
           const Real E = EE.vectorLength();
 
-          bgIonizationReg(iv, i) = m_backgroundRate(E, pos);
+          bgIonizationReg(iv, 0) = m_backgroundRate(E, pos);
         };
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -3718,7 +3766,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
           const RealVect EE  = RealVect(D_DECL(electricField(vof, 0), electricField(vof, 1), electricField(vof, 2)));
           const Real     E   = EE.vectorLength();
 
-          bgIonization(vof, i) = m_backgroundRate(E, pos);
+          bgIonization(vof, 0) = m_backgroundRate(E, pos);
         };
 
         // Execute kernels
@@ -3728,6 +3776,8 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
+
+    m_backgroundIonization.push_back(backgroundRate);
   }
 }
 
@@ -3740,22 +3790,33 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
     pout() << "DischargeInceptionStepper::computeDetachmentStationary" << endl;
   }
 
-  const RealVect probLo = m_amr->getProbLo();
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
+  CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
+  CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
+
+  m_detachment.resize(0);
 
   // Holds the electric field
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
 
-  for (int i = 0; i < m_voltageSweeps.size(); i++) {
+  // Solve ionization volume for each voltage
+  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+    const Real voltage = m_voltageSweeps[i];
 
     // Compute the electric field into the scratch storage
-    this->superposition(scratch, m_voltageSweeps[i]);
+    this->superposition(scratch, voltage);
+
+    EBAMRCellData detachmentRate;
+
+    m_amr->allocate(detachmentRate, m_realm, m_phase, 1);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const DataIterator&      dit   = dbl.dataIterator();
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real               dx    = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
 
       const int nbox = dit.size();
 
@@ -3765,7 +3826,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
 
         const EBISBox& ebisbox = ebisl[din];
 
-        EBCellFAB& detachment    = (*m_detachment[lvl])[din];
+        EBCellFAB& detachment    = (*detachmentRate[lvl])[din];
         FArrayBox& detachmentReg = detachment.getFArrayBox();
 
         const EBCellFAB& ionDensity    = (*m_ionSolver->getPhi()[lvl])[din];
@@ -3781,7 +3842,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
           const Real E   = EE.vectorLength();
           const Real phi = ionDensityReg(iv, 0);
 
-          detachmentReg(iv, i) = m_detachmentRate(E, pos) * phi;
+          detachmentReg(iv, 0) = m_detachmentRate(E, pos) * phi;
         };
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -3790,7 +3851,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
           const Real     E   = EE.vectorLength();
           const Real     phi = ionDensity(vof, 0);
 
-          detachment(vof, i) = m_detachmentRate(E, pos) * phi;
+          detachment(vof, 0) = m_detachmentRate(E, pos) * phi;
         };
 
         // Execute kernels
@@ -3801,7 +3862,10 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
       }
     }
 
-    m_amr->conservativeAverage(m_detachment, m_realm, m_phase);
+    m_amr->conservativeAverage(detachmentRate, m_realm, m_phase);
+    m_amr->interpGhost(detachmentRate, m_realm, m_phase);
+
+    m_detachment.push_back(detachmentRate);
   }
 }
 
@@ -3814,7 +3878,13 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
     pout() << "DischargeInceptionStepper::computeFieldEmissionStationary" << endl;
   }
 
-  const RealVect probLo = m_amr->getProbLo();
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
+  CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
+  CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
+
+  m_detachment.resize(0);
+
+  const int numVoltages = m_inceptionIntegralPlus.size();
 
   // Holds the electric field
   EBAMRCellData scratchPlus;
@@ -3823,17 +3893,28 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
   m_amr->allocate(scratchPlus, m_realm, m_phase, SpaceDim);
   m_amr->allocate(scratchMinu, m_realm, m_phase, SpaceDim);
 
-  for (int i = 0; i < m_voltageSweeps.size(); i++) {
+  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+    const Real voltage = m_voltageSweeps[i];
 
     // Compute the electric field into the scratch storage
-    this->superposition(scratchPlus, m_voltageSweeps[i]);
-    this->superposition(scratchMinu, -m_voltageSweeps[i]);
+    this->superposition(scratchPlus, +voltage);
+    this->superposition(scratchMinu, -voltage);
+
+    EBAMRCellData emissionRatesPlus;
+    EBAMRCellData emissionRatesMinu;
+
+    m_amr->allocate(emissionRatesPlus, m_realm, m_phase, 1);
+    m_amr->allocate(emissionRatesMinu, m_realm, m_phase, 1);
+
+    DataOps::setValue(emissionRatesPlus, 0.0);
+    DataOps::setValue(emissionRatesMinu, 0.0);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
-      const DataIterator&      dit   = dbl.dataIterator();
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real&              dx    = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real&              dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
 
       const int nbox = dit.size();
 
@@ -3845,8 +3926,8 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
 
         // Here, emissionPlus is when we have the standard voltage (V = 1) and
         // emissionMinu is when the voltage is reverted.
-        EBCellFAB& emissionPlus = (*m_emissionRatesPlus[lvl])[din];
-        EBCellFAB& emissionMinu = (*m_emissionRatesMinu[lvl])[din];
+        EBCellFAB& emissionPlus = (*emissionRatesPlus[lvl])[din];
+        EBCellFAB& emissionMinu = (*emissionRatesMinu[lvl])[din];
 
         emissionPlus.setVal(0.0);
         emissionMinu.setVal(0.0);
@@ -3865,14 +3946,14 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
           const Real normalEplus = Eplus.dotProduct(ebisbox.normal(vof));
           const Real normalEminu = Eminu.dotProduct(ebisbox.normal(vof));
 
-          emissionPlus(vof, i) = 0.0;
-          emissionMinu(vof, i) = 0.0;
+          emissionPlus(vof, 0) = 0.0;
+          emissionMinu(vof, 0) = 0.0;
 
           if (normalEplus < 0.0) {
-            emissionPlus(vof, i) = m_fieldEmission(Eplus.vectorLength(), pos);
+            emissionPlus(vof, 0) = m_fieldEmission(Eplus.vectorLength(), pos);
           }
           if (normalEminu < 0.0) {
-            emissionMinu(vof, i) = m_fieldEmission(Eminu.vectorLength(), pos);
+            emissionMinu(vof, 0) = m_fieldEmission(Eminu.vectorLength(), pos);
           }
         };
 
@@ -3881,6 +3962,9 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
+
+    m_emissionRatesPlus.push_back(emissionRatesPlus);
+    m_emissionRatesMinu.push_back(emissionRatesMinu);
   }
 }
 
@@ -4038,13 +4122,15 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::computeInceptionVoltageVolume" << endl;
   }
+#warning "Entire function is blocked out"
+#if 0
 
   // TLDR: This routine runs through all the K-values in each cell and estimates the
   //       inception voltage using linear interpolation.
 
   CH_assert(m_mode == Mode::Stationary);
 
-  if (m_voltageSweeps.size() < 2) {
+  if (m_inceptionIntegralPlus.size() < 2) {
     DataOps::setValue(m_inceptionVoltagePlus, std::numeric_limits<Real>::quiet_NaN());
     DataOps::setValue(m_inceptionVoltageMinu, std::numeric_limits<Real>::quiet_NaN());
 
@@ -4283,6 +4369,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
     m_amr->conservativeAverage(m_inceptionVoltagePlus, m_realm, m_phase);
     m_amr->interpGhost(m_inceptionVoltageMinu, m_realm, m_phase);
   }
+#endif
 }
 
 template <typename P, typename F, typename C>
@@ -4369,8 +4456,17 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
     pout() << "DischargeInceptionStepper::computeCriticalVolumeStationary" << endl;
   }
 
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
+  CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
+  CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
+
+  m_criticalVolumePlus.resize(0);
+  m_criticalVolumeMinu.resize(0);
+
+  const int numVoltages = m_inceptionIntegralPlus.size();
+
   // Solve critical volume of K values for each voltage
-  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+  for (size_t i = 0; i < numVoltages; i++) {
     Real criticalVolumePlus = 0.0;
     Real criticalVolumeMinu = 0.0;
 
@@ -4392,24 +4488,24 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
         const EBISBox&       ebisbox    = ebisl[din];
         const BaseFab<bool>& validCells = validCellsLD[din];
 
-        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[din];
-        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[din];
+        const EBCellFAB& inceptionIntegralPlus = (*(m_inceptionIntegralPlus[i])[lvl])[din];
+        const EBCellFAB& inceptionIntegralMinu = (*(m_inceptionIntegralMinu[i])[lvl])[din];
 
         const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
         const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
 
-        const EBCellFAB& townsendCritPlus = (*m_townsendCriterionPlus[lvl])[din];
-        const EBCellFAB& townsendCritMinu = (*m_townsendCriterionMinu[lvl])[din];
+        const EBCellFAB& townsendCritPlus = (*(m_townsendCriterionPlus[i])[lvl])[din];
+        const EBCellFAB& townsendCritMinu = (*(m_townsendCriterionMinu[i])[lvl])[din];
 
         const FArrayBox& townsendCritPlusReg = townsendCritPlus.getFArrayBox();
         const FArrayBox& townsendCritMinuReg = townsendCritMinu.getFArrayBox();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv, 0) && ebisbox.isRegular(iv)) {
-            if (inceptionIntegralPlusReg(iv, i) >= m_inceptionK || townsendCritPlusReg(iv, i) >= 1.0) {
+            if (inceptionIntegralPlusReg(iv, 0) >= m_inceptionK || townsendCritPlusReg(iv, 0) >= 1.0) {
               criticalVolumePlus += std::pow(dx, SpaceDim);
             }
-            if (inceptionIntegralMinuReg(iv, i) >= m_inceptionK || townsendCritMinuReg(iv, i) >= 1.0) {
+            if (inceptionIntegralMinuReg(iv, 0) >= m_inceptionK || townsendCritMinuReg(iv, 0) >= 1.0) {
               criticalVolumeMinu += std::pow(dx, SpaceDim);
             }
           }
@@ -4419,10 +4515,10 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
           if (validCells(vof.gridIndex())) {
             const Real kappa = ebisbox.volFrac(vof);
 
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK || townsendCritPlus(vof, i) >= 1.0) {
+            if (inceptionIntegralPlus(vof, 0) >= m_inceptionK || townsendCritPlus(vof, 0) >= 1.0) {
               criticalVolumePlus += kappa * std::pow(dx, SpaceDim);
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK || townsendCritMinu(vof, i) >= 1.0) {
+            if (inceptionIntegralMinu(vof, 0) >= m_inceptionK || townsendCritMinu(vof, 0) >= 1.0) {
               criticalVolumeMinu += kappa * std::pow(dx, SpaceDim);
             }
           }
@@ -4515,8 +4611,17 @@ DischargeInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
     pout() << "DischargeInceptionStepper::computeCriticalAreaStationary" << endl;
   }
 
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
+  CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
+  CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
+
+  m_criticalAreaPlus.resize(0);
+  m_criticalAreaMinu.resize(0);
+
+  const int numVoltages = m_inceptionIntegralPlus.size();
+
   // Solve critical area of K values for each voltage
-  for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
+  for (size_t i = 0; i < numVoltages; i++) {
     Real criticalAreaPlus = 0.0;
     Real criticalAreaMinu = 0.0;
 
@@ -4538,20 +4643,20 @@ DischargeInceptionStepper<P, F, C>::computeCriticalAreaStationary() noexcept
         const EBISBox&       ebisbox    = ebisl[din];
         const BaseFab<bool>& validCells = validCellsLD[din];
 
-        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[din];
-        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[din];
+        const EBCellFAB& inceptionIntegralPlus = (*(m_inceptionIntegralPlus[i])[lvl])[din];
+        const EBCellFAB& inceptionIntegralMinu = (*(m_inceptionIntegralMinu[i])[lvl])[din];
 
-        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[din];
-        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[din];
+        const EBCellFAB& townsendCriterionPlus = (*(m_townsendCriterionPlus[i])[lvl])[din];
+        const EBCellFAB& townsendCriterionMinu = (*(m_townsendCriterionMinu[i])[lvl])[din];
 
         auto irregularKernel = [&](const VolIndex& vof) -> void {
           if (validCells(vof.gridIndex())) {
             const Real boundaryArea = ebisbox.bndryArea(vof);
 
-            if (inceptionIntegralPlus(vof, i) >= m_inceptionK || townsendCriterionPlus(vof, i) >= 1.0) {
+            if (inceptionIntegralPlus(vof, 0) >= m_inceptionK || townsendCriterionPlus(vof, 0) >= 1.0) {
               criticalAreaPlus += boundaryArea * std::pow(dx, SpaceDim - 1);
             }
-            if (inceptionIntegralMinu(vof, i) >= m_inceptionK || townsendCriterionMinu(vof, i) >= 1.0) {
+            if (inceptionIntegralMinu(vof, 0) >= m_inceptionK || townsendCriterionMinu(vof, 0) >= 1.0) {
               criticalAreaMinu += boundaryArea * std::pow(dx, SpaceDim - 1);
             }
           }
@@ -4577,7 +4682,8 @@ DischargeInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcep
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::computeCriticalAreaTransient" << endl;
   }
-
+#warning "Entire function commented out"
+#if 0
   Real Acr = 0.0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
@@ -4618,6 +4724,7 @@ DischargeInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcep
   }
 
   return ParallelOps::sum(Acr);
+#endif
 }
 
 template <typename P, typename F, typename C>
@@ -4629,15 +4736,25 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
     pout() << "DischargeInceptionStepper::computeIonizationVolumeStationary" << endl;
   }
 
+  CH_assert(m_inceptionIntegralPlus.size() == m_inceptionIntegralMinu.size());
+  CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
+  CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
+
+  m_ionizationVolume.resize(0);
+
+  const int numVoltages = m_inceptionIntegralPlus.size();
+
   // Storage something that holds the electric filed
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, SpaceDim);
 
   // Solve ionization volume for each voltage
-  for (size_t i = 0; i < m_voltageSweeps.size(); ++i) {
+  for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
+    const Real voltage = m_voltageSweeps[i];
+
     Real ionizationVolume = 0.0;
 
-    this->superposition(scratch, m_voltageSweeps[i]);
+    this->superposition(scratch, voltage);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[lvl];
@@ -5354,8 +5471,6 @@ DischargeInceptionStepper<P, F, C>::getCriticalField() const noexcept
   };
 
   const Real p = PolyUtils::brentSolve(Emin, Emax, alpha);
-
-  std::cout << std::pow(10.0, p) << std::endl;
 
   return std::pow(10.0, p);
 }
