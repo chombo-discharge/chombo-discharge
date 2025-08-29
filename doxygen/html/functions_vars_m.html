@@ -120,6 +120,7 @@ $(function() {
 <li>m_avgWeights&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBC.html#a66ff15e4b90e73f32e05bbb119656672">MFHelmholtzJumpBC</a></li>
 <li>m_axis&#160;:&#160;<a class="el" href="classCylinderSdf.html#a37eaf00253ad00abd81040f8c4f2ac50">CylinderSdf</a></li>
 <li>m_backgroundIonization&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ac44fdbf39abad59e0c6899e0e9871223">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_backgroundIonizationStationary&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a91837e0a0e2eb31cadff818fc08b6e99">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_backgroundRate&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a926d63a1b8311bc1eabd97159c6f932f">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_backgroundSpecies&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae252cf5cd220eed444d5bf40fa211b23">Physics::ItoKMC::ItoKMCJSON</a></li>
 <li>m_backgroundSpeciesMap&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a80a4ba4294c217d3674eb0dff52e3ba9">Physics::ItoKMC::ItoKMCJSON</a></li>
@@ -273,6 +274,7 @@ $(function() {
 <li>m_depositNumber&#160;:&#160;<a class="el" href="classMcPhoto.html#a55de2135296806b3b697d3152893fe0c">McPhoto</a></li>
 <li>m_detachment&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a0510ac0989492a8ecc026bdb2efcea9d">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_detachmentRate&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a9af63220347f575bc87f5f37f3512896">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_detachmentStationary&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a63ea77b87ab959f8e0c125d66fb321a7">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_dielectricExtrapBC&#160;:&#160;<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#a771623140f69076dad1cfd0624ede5b5">Physics::CdrPlasma::CdrPlasmaJSON</a></li>
 <li>m_dielectricFieldEmission&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#a648b7a1e66a86dc0cb243fdc16822a3a">Physics::ItoKMC::ItoKMCJSON</a></li>
 <li>m_dielectricPhotonReactions&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactionSet.html#a4d46f8748853721db7b17d00c9f567e7">Physics::ItoKMC::ItoKMCSurfaceReactionSet</a></li>
@@ -399,8 +401,8 @@ $(function() {
 <li>m_electrodeVoFs&#160;:&#160;<a class="el" href="classSurfaceODESolver.html#afb7ae1fc78c58df87d55bbbb2d6d0a36">SurfaceODESolver&lt; N &gt;</a></li>
 <li>m_electrostaticBCs&#160;:&#160;<a class="el" href="classEBHelmholtzElectrostaticDomainBC.html#a29ce6a767b059e0feb7c6d9a0dbabd4b">EBHelmholtzElectrostaticDomainBC</a>, <a class="el" href="classMFHelmholtzElectrostaticDomainBCFactory.html#ab29edcd5ff749ab966964cb2192813de">MFHelmholtzElectrostaticDomainBCFactory</a>, <a class="el" href="classMFHelmholtzElectrostaticEBBC.html#afb193f4cafb09ffe543805c9cb859c8f">MFHelmholtzElectrostaticEBBC</a>, <a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a7db31753dcdef1865b34a88f4e0adc52">MFHelmholtzElectrostaticEBBCFactory</a></li>
 <li>m_emissionRate&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a64b712901cd21e1858c5428f693e2782">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_emissionRatesMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a2f28d11f19228a2023727050fa63cc54">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_emissionRatesPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a5a99d028f21a8ebd72cc473402e3af46">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_emissionRatesMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ab178a3546267d348fbbc210ae64e454f">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_emissionRatesPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a73954138c23dc7b54d62df8dcfc3664e">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_emitSecondaryParticlesBeforeReactions&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a1a286f3f55cf040c01e05b2a04faf48a">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_endPoint1&#160;:&#160;<a class="el" href="classCylinderSdf.html#ab6618b5a9e773da347710a8a9a5d1645">CylinderSdf</a></li>
 <li>m_endPoint2&#160;:&#160;<a class="el" href="classCylinderSdf.html#af5d18632ba7f133e2f033e9195874614">CylinderSdf</a></li>
@@ -557,8 +559,8 @@ $(function() {
 <li>m_implicitFunctionSolid&#160;:&#160;<a class="el" href="classComputationalGeometry.html#afcabd334d9c236194e69f6c2e8ecd16a">ComputationalGeometry</a></li>
 <li>m_inceptionAlgorithm&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a91bad2c6ab2ec0bad1f16826941565d7">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_inceptionIntegral&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#aabeb7c43def96b88e4fd2aee5f957ca1">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_inceptionIntegralMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a9a07388a69acf2453115e3629428a07f">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_inceptionIntegralPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a35a2f03d22508720ebf42141b86fdfe1">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_inceptionIntegralMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a51425dcaff401acb05ed434901feb1ef">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_inceptionIntegralPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a107faf0d543f3da32b977e5a0b783925">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_inceptionK&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#aea11e52fba2576897d5cc00314a1047c">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_inceptionProbability&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#af6a7d3c8fb119dc4be87c2fd5e771819">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_inceptionVoltageMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a735d49796ce968fa5d010a50f634e06d">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
@@ -633,6 +635,8 @@ $(function() {
 <li>m_kmcReactionsThreadLocal&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#aaf57f007555b5e427f5b542359f0e5c2">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_kmcSolver&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a628aff65d729f54806d0450e3133ac25">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_kmcState&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#af771ab203558b3226f6ccfd7e5e315e4">Physics::ItoKMC::ItoKMCPhysics</a></li>
+<li>m_KMinuValues&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ac8bbe733f557d68e411abb97f5f64dfb">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_KPlusValues&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ac6d6b18821c989b86d743f9b077328aa">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_left&#160;:&#160;<a class="el" href="classKDNode.html#acc1d5e533e7856f76d76bf44f271e0b5">KDNode&lt; P &gt;</a></li>
 <li>m_length&#160;:&#160;<a class="el" href="classCylinderSdf.html#ae9cb3d86c5e5ddfe020a44d7be62a0c7">CylinderSdf</a>, <a class="el" href="classRoundedCylinderIF.html#a1d09601c95b735cd8db9c1152d5e1bcf">RoundedCylinderIF</a></li>
 <li>m_levelAdvect&#160;:&#160;<a class="el" href="classCdrGodunov.html#ab65d081c3aca831871cfc95972701f2c">CdrGodunov</a></li>
@@ -678,8 +682,7 @@ $(function() {
 <li>m_maxInitialParticlesPerCell&#160;:&#160;<a class="el" href="classItoSpecies.html#abe101f62dc059357859e6459a248f663">ItoSpecies</a></li>
 <li>m_maxIter&#160;:&#160;<a class="el" href="classKMCSolver.html#a88b07741bd8e30ae834b8894f8a1d0a3">KMCSolver&lt; R, State, T &gt;</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a76d20f5655c15ad2cd1e40bd18c36b01">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_maxK&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a40c2eebbcdcaa6b85ba0c5bf9f6fdda4">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_maxKMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a5e22c7e3ffa25442cac563625dd2f9ba">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_maxKPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a43369f5112ae52737290e54b220d589d">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_maxKLimit&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a2769097ecc4c782085028ed08cdc7ddc">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_maxNewParticles&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a03ef03148c232e01d76a7b495138994a">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_maxNewPhotons&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a39d028cd8eb91dd2763488a76aad638f">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_maxParticleAdvectionCFL&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#aaaff3cf2be1909018c8ed05db7f7651c">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
@@ -694,8 +697,6 @@ $(function() {
 <li>m_maxSimulationDepth&#160;:&#160;<a class="el" href="classAmrMesh.html#a3cdd7ea7c8886171bd2533b6ec39c7f3">AmrMesh</a></li>
 <li>m_maxSteps&#160;:&#160;<a class="el" href="classDriver.html#ab2fb103fd7803b79465106ea43b1934d">Driver</a></li>
 <li>m_maxT&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#afab4279e62a238c0e2277c5d680bde3f">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_maxTMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a8f69d88d8696dc504bfcd1d72cc16576">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_maxTPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ad1769dca28f490e40a3be94ade65c21f">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_maxVoltage&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html#a0d7d41d034dd3735e77ec61e2f1b3438">Physics::DischargeInception::DischargeInceptionTagger</a></li>
 <li>m_mergeInterval&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a766c1a0a4738c47e34752b7dc284819d">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_mesh&#160;:&#160;<a class="el" href="classSignedDistanceDCEL.html#a80f9645da5f0d8316e6ef5fd06111293">SignedDistanceDCEL&lt; T &gt;</a></li>
@@ -1095,8 +1096,8 @@ $(function() {
 <li>m_shroom_center&#160;:&#160;<a class="el" href="classVessel.html#a5b1ba0ed38ba64370437e48221d2f361">Vessel</a></li>
 <li>m_shroom_d&#160;:&#160;<a class="el" href="classVessel.html#ab15b39718083bcc28422e18b45ede478">Vessel</a></li>
 <li>m_shroom_live&#160;:&#160;<a class="el" href="classVessel.html#aa2add00ec06e29cd6482fbc95bdb03a9">Vessel</a></li>
-<li>m_shroom_r&#160;:&#160;<a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a></li>
 <li>m_shroom_R&#160;:&#160;<a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a></li>
+<li>m_shroom_r&#160;:&#160;<a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a></li>
 <li>m_sideBox&#160;:&#160;<a class="el" href="classEBHelmholtzOp.html#ac102826540a335e1087e506e6c87a38d">EBHelmholtzOp</a></li>
 <li>m_sideStringToSide&#160;:&#160;<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ab949b998f2f448d82e1706a1f3b790fd">Physics::CdrPlasma::CdrPlasmaJSON</a></li>
 <li>m_sigma&#160;:&#160;<a class="el" href="classFieldSolver.html#aa107b33dfc038e5b9cafaa5bd17a5e0f">FieldSolver</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a2a62a6b2bf39641c3b779b0326160fed">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a0b8099b57751f5f4de54c93d63088909">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#adcb62f7b314e6d00065c9f9de482ea5c">Physics::Electrostatics::FieldStepper&lt; T &gt;</a></li>
@@ -1150,14 +1151,16 @@ $(function() {
 <li>m_timeStepper&#160;:&#160;<a class="el" href="classDriver.html#a67eb39dad409667f0d4d64ad0e5584f7">Driver</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a32095bbc3205822b51b61663fddefdf5">Physics::CdrPlasma::CdrPlasmaTagger</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCTagger.html#a11efc56190cbb9b5fd6317d630c4249e">Physics::ItoKMC::ItoKMCTagger&lt; S &gt;</a></li>
 <li>m_timeStepRestriction&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a023ef0c1af4802041cb4e5f0f88f5ec0">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_tipRadius&#160;:&#160;<a class="el" href="classNeedleIF.html#a9dd6ad160d4f9dad26fa1702ce159223">NeedleIF</a></li>
+<li>m_TMinuValues&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#afc378e52e979fcc494325ea98cb03c40">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_toleranceEB&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a585c6fc4159c1b71fb6724b5bc05d1e8">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_top&#160;:&#160;<a class="el" href="classCylinderSdf.html#a7ffe36ff15a91bde9d337490ef0768c9">CylinderSdf</a></li>
 <li>m_townsendCriterion&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ad2f63963a83494a8d7bb8dee83d4f3d2">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_townsendCriterionMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a4c2d7a906073335373fc49aad036318c">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
-<li>m_townsendCriterionPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ad0a2fb42d1dc8b3978a71fe40d34b24c">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_townsendCriterionMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#aa05e04d7df0657ce08ff2f091f33bfd1">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_townsendCriterionPlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a00d1aed2c6a2158da06242b139554da5">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_townsendGridDx&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a9b3ee690758793797d965de3867557a4">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_townsendInceptionVoltageMinu&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a04a04871afe9ac027d564513013c5b0d">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_townsendInceptionVoltagePlus&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a4fe2153bc449daa50eaa2413921141f6">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
+<li>m_TPlusValues&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a06022f5c05535cf08a2908c64bf0f0d9">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_tracerField&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionTagger.html#a41bcc2137dc3bcfbbf0980c19ba6b2f6">Physics::DischargeInception::DischargeInceptionTagger</a></li>
 <li>m_tracerParticleSolver&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a042fdf60706eec3b73f3247c5bef14e3">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_tracers&#160;:&#160;<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaTagger.html#a8a31e21e1e443384ec03a5a18d2d4382">Physics::CdrPlasma::CdrPlasmaTagger</a></li>
@@ -1207,6 +1210,7 @@ $(function() {
 <li>m_voltage&#160;:&#160;<a class="el" href="classFieldSolver.html#ad98ede81e227228b8761ed0fa9339200">FieldSolver</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#acc9efff66a85a54e3bd13455c0bf0a8a">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#accc14b3af6e5cb3fe790bdefec37738f">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_voltageCurve&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a9fbcffce07519495f6d677336d283def">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_voltageFraction&#160;:&#160;<a class="el" href="classElectrode.html#ae7d3a103fc55adc31f3abad5fb7999bf">Electrode</a></li>
+<li>m_voltageIncrease&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a063b72798ea19cff86c1d21d46d5c37a">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_voltageSweeps&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a553bafe7e5670ffe3dd31b5aac1f932b">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_volumeScale&#160;:&#160;<a class="el" href="classTracerParticleSolver.html#a6184240f0a0a5c5b6021e18d24e78a19">TracerParticleSolver&lt; P &gt;</a></li>
 <li>m_volumeWeights&#160;:&#160;<a class="el" href="classEBCoarseToFineInterp.html#a40e22787d64b2f92ed1ad2aca76fdce0">EBCoarseToFineInterp</a></li>

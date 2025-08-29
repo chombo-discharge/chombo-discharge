@@ -86,7 +86,9 @@ $(function() {
 
 <p>Implementation of <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">CD_PolyUtils.cpp</a>.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;PolyGeom.H&gt;</code><br />
+<div class="textblock"><code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+<code>#include &lt;PolyGeom.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__PolyUtils_8H_source.html">CD_PolyUtils.H</a>&gt;</code><br />
 <code>#include &lt;CD_NamespaceHeader.H&gt;</code><br />
 <code>#include &lt;CD_NamespaceFooter.H&gt;</code><br />
@@ -95,21 +97,25 @@ Include dependency graph for CD_PolyUtils.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__PolyUtils_8cpp__incl.png" border="0" usemap="#aSource_2Utilities_2CD__PolyUtils_8cpp" alt=""/></div>
 <map name="aSource_2Utilities_2CD__PolyUtils_8cpp" id="aSource_2Utilities_2CD__PolyUtils_8cpp">
-<area shape="rect" title="Implementation of CD_PolyUtils.cpp." alt="" coords="271,5,415,45"/>
-<area shape="rect" title=" " alt="" coords="108,93,211,119"/>
-<area shape="poly" title=" " alt="" coords="300,48,200,90,198,85,298,43"/>
-<area shape="rect" href="CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="235,93,355,119"/>
-<area shape="poly" title=" " alt="" coords="334,47,312,83,307,80,329,44"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="261,167,447,192"/>
-<area shape="poly" title=" " alt="" coords="355,45,370,93,370,125,365,154,360,153,365,124,365,94,350,46"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="471,167,650,192"/>
-<area shape="poly" title=" " alt="" coords="372,43,534,156,531,161,369,48"/>
-<area shape="rect" title=" " alt="" coords="5,167,135,192"/>
-<area shape="poly" title=" " alt="" coords="260,121,120,165,119,160,258,116"/>
-<area shape="rect" title=" " alt="" coords="159,167,237,192"/>
-<area shape="poly" title=" " alt="" coords="281,121,227,160,224,156,278,117"/>
-<area shape="poly" title=" " alt="" coords="307,117,338,155,334,158,303,121"/>
-<area shape="poly" title=" " alt="" coords="339,116,505,160,504,166,337,121"/>
+<area shape="rect" title="Implementation of CD_PolyUtils.cpp." alt="" coords="223,5,367,45"/>
+<area shape="rect" title=" " alt="" coords="5,93,68,119"/>
+<area shape="poly" title=" " alt="" coords="234,48,82,94,80,89,233,43"/>
+<area shape="rect" title=" " alt="" coords="93,93,151,119"/>
+<area shape="poly" title=" " alt="" coords="255,48,161,90,159,85,253,43"/>
+<area shape="rect" title=" " alt="" coords="176,93,279,119"/>
+<area shape="poly" title=" " alt="" coords="281,47,248,84,244,81,277,44"/>
+<area shape="rect" href="CD__PolyUtils_8H.html" title="Agglomeration of some useful algebraic/polynomial routines." alt="" coords="303,93,423,119"/>
+<area shape="poly" title=" " alt="" coords="314,44,346,81,342,84,310,47"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="319,167,504,192"/>
+<area shape="poly" title=" " alt="" coords="369,41,407,61,424,75,438,92,443,108,442,125,430,156,425,154,437,124,438,109,433,95,420,79,404,65,366,46"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="529,167,707,192"/>
+<area shape="poly" title=" " alt="" coords="345,43,458,91,587,158,584,162,456,96,343,48"/>
+<area shape="rect" title=" " alt="" coords="63,167,192,192"/>
+<area shape="poly" title=" " alt="" coords="326,121,179,165,178,160,325,116"/>
+<area shape="rect" title=" " alt="" coords="216,167,295,192"/>
+<area shape="poly" title=" " alt="" coords="347,121,286,161,283,157,345,116"/>
+<area shape="poly" title=" " alt="" coords="373,118,398,154,394,157,369,121"/>
+<area shape="poly" title=" " alt="" coords="405,116,565,160,563,166,404,121"/>
 </map>
 </div>
 </div><a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
