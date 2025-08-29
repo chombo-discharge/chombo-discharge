@@ -500,13 +500,13 @@ namespace Physics {
 	@brief Background ionization rates
 	@note Both modes. 
       */
-      Vector<EBAMRCellData> m_backgroundIonization;
+      Vector<EBAMRCellData> m_backgroundIonizationStationary;
 
       /*!
 	@brief Detachment rates.
 	@note Both modes. 
       */
-      Vector<EBAMRCellData> m_detachment;
+      Vector<EBAMRCellData> m_detachmentStationary;
 
       /*!
 	@brief Field emission rates
@@ -519,6 +519,18 @@ namespace Physics {
 	@note Stationary mode, negative polarity
       */
       Vector<EBAMRCellData> m_emissionRatesMinu;
+
+      /*!
+	@brief Townsend criterion for starting positive ions
+	@note Stationary mode
+      */
+      Vector<EBAMRCellData> m_townsendCriterionPlus;
+
+      /*!
+	@brief Townsend criterion for starting positive ions
+	@note Stationary mode	
+      */
+      Vector<EBAMRCellData> m_townsendCriterionMinu;
 
       /*!
 	@brief Field emission rates
@@ -569,14 +581,14 @@ namespace Physics {
       EBAMRCellData m_townsendCriterion;
 
       /*!
-	@brief Townsend criterion for starting positive ions
+	@brief Detachment factor
       */
-      Vector<EBAMRCellData> m_townsendCriterionPlus;
+      EBAMRCellData m_detachment;
 
       /*!
-	@brief Townsend criterion for starting positive ions
+	@brief Detachment factor
       */
-      Vector<EBAMRCellData> m_townsendCriterionMinu;
+      EBAMRCellData m_backgroundIonization;
 
       /*!
 	@brief Calculated version of alpha/(|grad(alpha)|) on the mesh. 

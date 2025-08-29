@@ -211,8 +211,6 @@ DischargeInceptionStepper<P, F, C>::allocate()
     break;
   }
   case Mode::Transient: {
-#warning "Commented out"
-#if 0
     m_amr->allocate(m_inceptionIntegral, m_realm, m_phase, 1);
     m_amr->allocate(m_townsendCriterion, m_realm, m_phase, 1);
     m_amr->allocate(m_emissionRate, m_realm, m_phase, 1);
@@ -224,7 +222,6 @@ DischargeInceptionStepper<P, F, C>::allocate()
     DataOps::setValue(m_emissionRate, 0.0);
     DataOps::setValue(m_backgroundIonization, 0.0);
     DataOps::setValue(m_detachment, 0.0);
-#endif
 
     break;
   }
@@ -1210,13 +1207,13 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
 
   if (m_plotBackgroundIonization) {
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
-      this->writeData(a_output, a_icomp, m_backgroundIonization[i], a_outputRealm, a_level, false, true);
+      this->writeData(a_output, a_icomp, m_backgroundIonizationStationary[i], a_outputRealm, a_level, false, true);
     }
   }
 
   if (m_plotDetachment) {
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
-      this->writeData(a_output, a_icomp, m_detachment[i], a_outputRealm, a_level, false, true);
+      this->writeData(a_output, a_icomp, m_detachmentStationary[i], a_outputRealm, a_level, false, true);
     }
   }
 
@@ -1899,13 +1896,11 @@ DischargeInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFine
     break;
   }
   case Mode::Transient: {
-#warning "Commented out"
-#if 0
     m_amr->reallocate(m_inceptionIntegral, m_phase, a_lmin);
     m_amr->reallocate(m_townsendCriterion, m_phase, a_lmin);
     m_amr->reallocate(m_emissionRate, m_phase, a_lmin);
     m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
-#endif
+    m_amr->reallocate(m_detachment, m_phase, a_lmin);
 
     break;
   }
@@ -2531,10 +2526,14 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
     curMaxK = std::max(maxKPlus, maxKMinu);
 
-    // Step to next voltage. Increase this by 1% at the first step, then extrapolate linearly at later steps
+    // Step to next voltage.
     curVoltage = curVoltage * m_voltageIncrease;
 
     curIter++;
+
+    if (!m_fullIntegration && (std::abs(curMaxK - m_inceptionK) <= 1E-3)) {
+      break;
+    }
   }
 
   // Populate the voltage sweep table
@@ -3674,7 +3673,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
   CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
   CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
 
-  m_backgroundIonization.resize(0);
+  m_backgroundIonizationStationary.resize(0);
 
   // Holds the electric field
   EBAMRCellData scratch;
@@ -3737,7 +3736,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
       }
     }
 
-    m_backgroundIonization.push_back(backgroundRate);
+    m_backgroundIonizationStationary.push_back(backgroundRate);
   }
 }
 
@@ -3754,7 +3753,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
   CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
   CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
 
-  m_detachment.resize(0);
+  m_detachmentStationary.resize(0);
 
   // Holds the electric field
   EBAMRCellData scratch;
@@ -3825,7 +3824,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
     m_amr->conservativeAverage(detachmentRate, m_realm, m_phase);
     m_amr->interpGhost(detachmentRate, m_realm, m_phase);
 
-    m_detachment.push_back(detachmentRate);
+    m_detachmentStationary.push_back(detachmentRate);
   }
 }
 
@@ -4646,8 +4645,7 @@ DischargeInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcep
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::computeCriticalAreaTransient" << endl;
   }
-#warning "Entire function commented out"
-#if 0
+
   Real Acr = 0.0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
@@ -4688,7 +4686,6 @@ DischargeInceptionStepper<P, F, C>::computeCriticalAreaTransient() const noexcep
   }
 
   return ParallelOps::sum(Acr);
-#endif
 }
 
 template <typename P, typename F, typename C>
