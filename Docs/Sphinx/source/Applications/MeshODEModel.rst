@@ -48,6 +48,10 @@ To see available setup options, use
 
    ./setup.py --help
 
+.. note::
+
+   The Python setup tools will set up a single scalar (i.e., ``N=1``).
+
 .. _Chap:MeshODEStepperConfiguration:
 
 Solver configuration
