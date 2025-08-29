@@ -27,6 +27,12 @@ The example problem set up by ``MeshODEStepper`` is
 where :math:`f` is a user-supplied frequency.
 The user can also set the initial value for :math:`\phi` through the configuration options for ``MeshODEStepper<N>``, see :ref:`Chap:MeshODEStepperConfiguration`
 
+Time advancement
+----------------
+
+Integration over a time step is done using either a second (Heun's method) or fourth order Runge-Kutta method (classical RK4).
+The user can choose between the methods through the configuration options, see :ref:`Chap:MeshODEStepperConfiguration`.
+
 Setting up a new problem
 ------------------------
 
@@ -51,3 +57,6 @@ The ``MeshODEStepper`` class comes with configurable input options that can be a
 
 .. literalinclude:: ../../../../Physics/MeshODE/CD_MeshODEStepper.options
    :language: text   
+
+
+	      
