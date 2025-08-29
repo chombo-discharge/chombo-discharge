@@ -159,7 +159,7 @@ Vessel.live_shroom     = false    ## Mushroom is live or not
 # ====================================================================================================
 # DischargeInceptionStepper class options
 # ====================================================================================================
-DischargeInceptionStepper.verbosity            = 10000                                                  ## Chattiness.
+DischargeInceptionStepper.verbosity            = -1                                                  ## Chattiness.
 DischargeInceptionStepper.profile              = false                                               ## Turn on/off run-time profiling
 DischargeInceptionStepper.full_integration     = true                                                ## Turn on/off full integration
 DischargeInceptionStepper.mode                 = stationary                                          ## Mode (stationary or transient)
@@ -179,8 +179,8 @@ DischargeInceptionStepper.grad_alpha_dx        = 0.1       ## Maximum step size 
 DischargeInceptionStepper.townsend_grid_dx     = 2.0       ## Space step to use for Townsend tracking
 
 # Static mode
-DischargeInceptionStepper.step_dU = 0.05
-DischargeInceptionStepper.limit_max_K = 15.0
+DischargeInceptionStepper.step_dU           = 0.025
+DischargeInceptionStepper.limit_max_K       = 15.0
 DischargeInceptionStepper.voltage_lo        = 20E3    ## Low voltage multiplier
 DischargeInceptionStepper.voltage_hi        = 60E3    ## Highest voltage multiplier
 DischargeInceptionStepper.voltage_steps     = 19      ## Number of voltage steps

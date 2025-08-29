@@ -605,33 +605,7 @@ namespace Physics {
 	@brief Max T value for every voltage.
 	@note Stationary mode and negative polarity. The tuple contains (|voltage|, K-value, max position)
       */
-      std::vector<std::tuple<Real, Real, RealVect>> m_TMinuValues;            
-
-#warning "This stuff is marked for removal"
-      /*! 
-	@brief Max K value for every voltage
-	@note Stationary mode, positive polarity
-      */
-      std::vector<std::pair<Real, RealVect>> m_maxKPlus;
-
-      /*! 
-	@brief Max K value for every voltage
-	@note Stationary mode, negative polarity
-      */
-      std::vector<std::pair<Real, RealVect>> m_maxKMinu;
-
-      /*! 
-	@brief Max Townsend value (exp(K)/gamma) for every voltage
-	@note Stationary mode, positive polarity
-      */
-      std::vector<std::pair<Real, RealVect>> m_maxTPlus;
-
-      /*! 
-	@brief Max Townsend value (exp(K)/gamma) for every voltage
-	@note Stationary mode, negative polarity
-      */
-      std::vector<std::pair<Real, RealVect>> m_maxTMinu;
-#warning "all the way down to here"
+      std::vector<std::tuple<Real, Real, RealVect>> m_TMinuValues;
 
       /*!
 	@brief Max K value for every time step

@@ -55,8 +55,6 @@ DischargeInceptionStepper<P, F, C>::DischargeInceptionStepper()
   m_voltageIncrease     = 1 + 0.05;
   m_maxKLimit           = 15.0;
 
-#warning "Hardcoded voltage steps and K-limits. Should we have a number of points instead of a voltage increase???"
-
   this->parseOptions();
 
   m_rho = [](const RealVect x) -> Real {
@@ -209,29 +207,6 @@ DischargeInceptionStepper<P, F, C>::allocate()
     DataOps::setValue(m_streamerInceptionVoltageMinu, 0.0);
     DataOps::setValue(m_townsendInceptionVoltagePlus, 0.0);
     DataOps::setValue(m_townsendInceptionVoltageMinu, 0.0);
-
-    if (m_plotFieldEmission) {
-#warning "Commented out"
-      // m_amr->allocate(m_emissionRatesPlus, m_realm, m_phase, m_voltageSweeps.size());
-      // m_amr->allocate(m_emissionRatesMinu, m_realm, m_phase, m_voltageSweeps.size());
-
-      // DataOps::setValue(m_emissionRatesPlus, 0.0);
-      // DataOps::setValue(m_emissionRatesMinu, 0.0);
-    }
-
-    if (m_plotBackgroundIonization) {
-#warning "Commented out"
-      // m_amr->allocate(m_backgroundIonization, m_realm, m_phase, m_voltageSweeps.size());
-
-      // DataOps::setValue(m_backgroundIonization, 0.0);
-    }
-
-    if (m_plotDetachment) {
-#warning "Commented out"
-      // m_amr->allocate(m_detachment, m_realm, m_phase, m_voltageSweeps.size());
-
-      // DataOps::setValue(m_detachment, 0.0);
-    }
 
     break;
   }
@@ -1212,35 +1187,44 @@ DischargeInceptionStepper<P, F, C>::writePlotDataStationary(LevelData<EBCellFAB>
     this->writeData(a_output, a_icomp, m_townsendInceptionVoltageMinu, a_outputRealm, a_level, false, true);
   }
 
+  const int numVoltages = m_voltageSweeps.size();
+
   if (m_plotInceptionIntegral) {
-    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_inceptionIntegralPlus[i], a_outputRealm, a_level, false, true);
+    }
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_inceptionIntegralMinu[i], a_outputRealm, a_level, false, true);
     }
   }
 
   if (m_plotTownsend) {
-    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_townsendCriterionPlus[i], a_outputRealm, a_level, false, true);
+    }
+
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_townsendCriterionMinu[i], a_outputRealm, a_level, false, true);
     }
   }
 
   if (m_plotBackgroundIonization) {
-    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_backgroundIonization[i], a_outputRealm, a_level, false, true);
     }
   }
 
   if (m_plotDetachment) {
-    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_detachment[i], a_outputRealm, a_level, false, true);
     }
   }
 
   if (m_plotFieldEmission) {
-    for (int i = 0; i < m_inceptionIntegralPlus.size(); i++) {
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_emissionRatesPlus[i], a_outputRealm, a_level, false, true);
+    }
+    for (int i = 0; i < m_voltageSweeps.size(); i++) {
       this->writeData(a_output, a_icomp, m_emissionRatesMinu[i], a_outputRealm, a_level, false, true);
     }
   }
@@ -1912,26 +1896,6 @@ DischargeInceptionStepper<P, F, C>::regrid(const int a_lmin, const int a_oldFine
     m_amr->reallocate(m_townsendInceptionVoltagePlus, m_phase, a_lmin);
     m_amr->reallocate(m_townsendInceptionVoltageMinu, m_phase, a_lmin);
 
-    if (m_plotBackgroundIonization) {
-#warning "COmmented out"
-      //      m_amr->reallocate(m_backgroundIonization, m_phase, a_lmin);
-    }
-
-    if (m_plotDetachment) {
-#warning "COmmented out"
-      //      m_amr->reallocate(m_detachment, m_phase, a_lmin);
-    }
-
-    if (m_plotFieldEmission) {
-#warning "COmmented out"
-      //      m_amr->reallocate(m_emissionRatesPlus, m_phase, a_lmin);
-      //      m_amr->reallocate(m_emissionRatesMinu, m_phase, a_lmin);
-    }
-
-#warning Commented out
-    //    m_amr->reallocate(m_townsendCriterionPlus, m_phase, a_lmin);
-    //    m_amr->reallocate(m_townsendCriterionMinu, m_phase, a_lmin);
-
     break;
   }
   case Mode::Transient: {
@@ -2387,8 +2351,6 @@ DischargeInceptionStepper<P, F, C>::postInitialize()
 
     this->writeReportStationary();
 
-    MayDay::Abort("CEASE THIS MADNESS AT ONCE!");
-
     break;
   }
   case Mode::Transient: {
@@ -2460,8 +2422,6 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegral(EBAMRCellData& a_in
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::computeInceptionIntegral" << endl;
   }
-
-#warning "This is where all functionality should go"
 
   // TLDR: For this integration we compute the value of the inception integral
   //
@@ -3882,7 +3842,8 @@ DischargeInceptionStepper<P, F, C>::computeFieldEmissionStationary() noexcept
   CH_assert(m_inceptionIntegralPlus.size() == m_KPlusValues.size());
   CH_assert(m_inceptionIntegralMinu.size() == m_KMinuValues.size());
 
-  m_detachment.resize(0);
+  m_emissionRatesPlus.resize(0);
+  m_emissionRatesMinu.resize(0);
 
   const int numVoltages = m_inceptionIntegralPlus.size();
 
@@ -4122,9 +4083,8 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::computeInceptionVoltageVolume" << endl;
   }
-#warning "Entire function is blocked out"
+#warning "THIS FUNCTION IS NEXT UP!"
 #if 0
-
   // TLDR: This routine runs through all the K-values in each cell and estimates the
   //       inception voltage using linear interpolation.
 
@@ -4916,18 +4876,14 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
     pout() << "DischargeInceptionStepper::writeReportStationary" << endl;
   }
 
-  const std::pair<Real, RealVect> UIncPlus = this->computeMinimumInceptionVoltage(m_inceptionVoltagePlus);
-  const std::pair<Real, RealVect> UIncMinu = this->computeMinimumInceptionVoltage(m_inceptionVoltageMinu);
+  const auto UIncPlus = this->computeMinimumInceptionVoltage(m_inceptionVoltagePlus);
+  const auto UIncMinu = this->computeMinimumInceptionVoltage(m_inceptionVoltageMinu);
 
-  const std::pair<Real, RealVect> streamerUIncPlus = this->computeMinimumInceptionVoltage(
-    m_streamerInceptionVoltagePlus);
-  const std::pair<Real, RealVect> streamerUIncMinu = this->computeMinimumInceptionVoltage(
-    m_streamerInceptionVoltageMinu);
+  const auto streamerUIncPlus = this->computeMinimumInceptionVoltage(m_streamerInceptionVoltagePlus);
+  const auto streamerUIncMinu = this->computeMinimumInceptionVoltage(m_streamerInceptionVoltageMinu);
 
-  const std::pair<Real, RealVect> townsendUIncPlus = this->computeMinimumInceptionVoltage(
-    m_townsendInceptionVoltagePlus);
-  const std::pair<Real, RealVect> townsendUIncMinu = this->computeMinimumInceptionVoltage(
-    m_townsendInceptionVoltageMinu);
+  const auto townsendUIncPlus = this->computeMinimumInceptionVoltage(m_townsendInceptionVoltagePlus);
+  const auto townsendUIncMinu = this->computeMinimumInceptionVoltage(m_townsendInceptionVoltageMinu);
 
 #ifdef CH_MPI
   if (procID() == 0) {
@@ -4998,17 +4954,17 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
       return ret;
     };
 
-
     for (int i = 0; i < m_voltageSweeps.size(); i++) {
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
-      output << left << setw(15) << setfill(' ') << m_maxKPlus[i].first;
-      output << left << setw(15) << setfill(' ') << m_maxKMinu[i].first;
-      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxKPlus[i].second);
-      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxKMinu[i].second);
-      output << left << setw(20) << setfill(' ') << m_maxTPlus[i].first;
-      output << left << setw(20) << setfill(' ') << m_maxTMinu[i].first;
-      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxTPlus[i].second);
-      output << left << setw(ww) << setfill(' ') << RealVectToString(m_maxTMinu[i].second);
+      output << left << setw(15) << setfill(' ') << std::get<1>(m_KPlusValues[i]);
+      output << left << setw(15) << setfill(' ') << std::get<1>(m_KMinuValues[i]);
+      
+      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_KPlusValues[i]));
+      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_KPlusValues[i]));
+      output << left << setw(20) << setfill(' ') << std::get<1>(m_TPlusValues[i]);
+      output << left << setw(20) << setfill(' ') << std::get<1>(m_TMinuValues[i]);
+      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_TPlusValues[i]));
+      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_TPlusValues[i]));
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
