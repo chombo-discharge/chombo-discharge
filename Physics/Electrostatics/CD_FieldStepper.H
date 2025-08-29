@@ -226,15 +226,15 @@ namespace Physics {
       postRegrid() override;
 
       /*!
-	@brief Set space charge
-	@param[in] a_rho Space charge distribution
+        @brief Set space charge
+        @param[in] a_rho Space charge distribution
       */
       void
       setRho(const std::function<Real(const RealVect& a_pos)>& a_rho, const phase::which_phase a_phase) noexcept;
 
       /*!
-	@brief Set surface charge
-	@param[in] a_sigma Surface charge distribution
+        @brief Set surface charge
+        @param[in] a_sigma Surface charge distribution
       */
       void
       setSigma(const std::function<Real(const RealVect& a_pos)>& a_sigma) noexcept;

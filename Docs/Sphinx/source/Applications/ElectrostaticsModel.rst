@@ -1,4 +1,4 @@
-.. _Chap:ElectrostaticsModel:
+By .. _Chap:ElectrostaticsModel:
 
 Electrostatics model
 ====================
@@ -10,21 +10,16 @@ The electrostatics model solves
    \nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}
 
 subject to the constraints and boundary conditions given in :ref:`Chap:FieldSolver`.
-The implementation is by a class
 
-.. code-block:: c++
+There is currently no :ref:`Chap:CellTagger` implementation for this module, so AMR support is restricted to refinement based on geometric criteria.
+The full implementation for this model consists only of the following class:
 
-   class FieldStepper : public TimeStepper
+* ``FieldStepper``, which implements :ref:`Chap:TimeStepper`.
 
-and is found in :file:`$DISCHARGE_HOME/Physics/Electrostatics`.
-The C++ API is found `here <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1Electrostatics_1_1FieldStepper.html>`_.
+.. tip::
 
-Solvers
--------
-
-This module uses the following solvers:
-
-#. :ref:`Chap:FieldSolver`.
+   The source for this module is found in :file:`$DISCHARGE_HOME/Physics/Electrostatics`.
+   The C++ API is found `here <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1Electrostatics_1_1FieldStepper.html>`_.
 
 Time stepping
 -------------
@@ -32,7 +27,8 @@ Time stepping
 ``FieldStepper`` is a class with only stationary solves.
 This is enforced by making the ``TimeStepper::advance`` method throw an error, while the field solve itself is done in the initialization procedure in ``TimeStepper::postInitialize``.
 
-.. important::
+.. warning::
+   
    To run the solver, one must set ``Driver.max_steps = 0``.
 
 Setting the space charge
@@ -41,67 +37,60 @@ Setting the space charge
 Default behavior
 ________________
 
-By default, the initial space charge for this problem is given by Gaussian
+By default, the initial space charge for this problem is given by a Gaussian
 
 .. math::
 
    \rho\left(\mathbf{x}\right) = \rho_0\exp\left(-\frac{\left|\mathbf{x}-\mathbf{x}_0\right|^2}{2R^2}\right),
 
 where :math:`\rho_0` is an amplitude, :math:`\mathbf{x}_0` is the center and :math:`R` is the Gaussian radius.
-These are set by the input options
-
-.. code-block:: text
-
-   FieldStepper.init_rho     = 1.0  
-   FieldStepper.rho_center   = 0 0 0
-   FieldStepper.rho_radius   = 1.0
-
-
-Custom value
-____________
+These are set through respective configuration options, see :ref:`Chap:FieldStepperConfiguration`. 
 
 For a more general way of specifying the space charge, ``FieldStepper`` has a public member function
 
-.. code-block:: c++
-
-   void setRho(const std::function<Real(const RealVect& a_pos)>& a_rho, const phase::which_phase a_phase) noexcept;
+.. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.H
+   :language: c++
+   :lines: 228-233
+   :dedent: 6
 
 Setting the surface charge
 --------------------------
 
-By default, the initial surface charge is set to a constant.
-This constant is given by
-
-.. code-block:: none
-
-   FieldStepper.init_sigma = 1.0
-
-Custom value
-____________
-
+By default, the initial surface charge is set to a constant, see :ref:`Chap:FieldStepperConfiguration`.
 For a more general way of specifying the surface charge, ``FieldStepper`` has a public member function
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.H
+   :language: c++
+   :lines: 235-240
+   :dedent: 6
 
-   void setSigma(const std::function<Real(const RealVect& a_pos)>& a_sigma) noexcept;   
+Solver configuration
+--------------------
+
+The ``FieldStepper`` has relatively few configuration options, which are mostly limited to setting the space and surface charge
+The configuration options for ``FieldStepper`` are given below:
+
+.. literalinclude:: ../../../../Physics/Electrostatics/CD_FieldStepper.options
+   :language: text
+
+.. important::
+
+   Setup of boundary conditions is *not* a job for ``FieldStepper``, but occurs through the respective :ref:`Chap:ComputationalGeometry` and :ref:`Chap:FieldSolver`.
 
 Setting up a new problem
 ------------------------
 
 To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/Electrostatics` is the simplest way.
-To see available setup options, run
+A full description is available in the ``README.md`` contained in the folder:
+
+.. literalinclude:: ../../../../Physics/Electrostatics/README.md
+   :language: markdown
+	      
+To see available setup options, use
 
 .. code-block:: bash
 
    ./setup.py --help
-
-For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/MyElectrostaticsProblem` for a cylinder geometry, run
-
-.. code-block:: bash
-
-   ./setup.py -base_dir=MyApplications -app_name=MyElectrostaticsProblem -geometry=Cylinder
-
-This will set up a new problem in a cylinder geometry (defined in :file:`Geometries/Cylinder`).
 
 Example programs
 ----------------
@@ -196,8 +185,3 @@ On coarser grids, the reduced convergence rate in the max-norm is probably due t
    :align: center
 
    Spatial convergence rates.
-
-   
-     
-
-   

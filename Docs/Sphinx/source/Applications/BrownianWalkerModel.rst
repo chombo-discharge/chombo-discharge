@@ -74,3 +74,18 @@ The configuration options for ``AdvectionDiffusionStepper`` are given below:
 
 .. literalinclude:: ../../../../Physics/BrownianWalker/CD_BrownianWalkerStepper.options
    :language: text
+
+Setting up a new problem
+------------------------
+
+To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/BrownianWalker` is the simplest way.
+A full description is available in the ``README.md`` contained in the folder:
+
+.. literalinclude:: ../../../../Physics/BrownianWalker/README.md
+   :language: markdown
+	      
+To see available setup options, use
+
+.. code-block:: bash
+
+   ./setup.py --help
