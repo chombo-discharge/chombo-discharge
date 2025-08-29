@@ -179,9 +179,8 @@ DischargeInceptionStepper.grad_alpha_dx        = 0.1       ## Maximum step size 
 DischargeInceptionStepper.townsend_grid_dx     = 2.0       ## Space step to use for Townsend tracking
 
 # Static mode
-DischargeInceptionStepper.voltage_lo        = 1.0     ## Low voltage multiplier
-DischargeInceptionStepper.voltage_hi        = 10.0    ## Highest voltage multiplier
-DischargeInceptionStepper.voltage_steps     = 3       ## Number of voltage steps
+DischargeInceptionStepper.rel_step_dU     = 0.05    ## Relative (%) voltage increase for each step
+DischargeInceptionStepper.limit_max_K     = 15.0    ## Limit the maximum K-value
 
 # Dynamic mode
 DischargeInceptionStepper.ion_transport     = true     ## Turn on/off ion transport

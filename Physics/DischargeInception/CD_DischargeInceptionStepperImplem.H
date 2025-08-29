@@ -447,7 +447,7 @@ DischargeInceptionStepper<P, F, C>::parseVoltages() noexcept
 
   ParmParse pp("DischargeInceptionStepper");
 
-  pp.get("step_dU", m_voltageIncrease);
+  pp.get("rel_step_dU", m_voltageIncrease);
   pp.get("limit_max_K", m_maxKLimit);
   pp.get("K_inception", m_inceptionK);
   pp.get("eval_townsend", m_evaluateTownsend);
