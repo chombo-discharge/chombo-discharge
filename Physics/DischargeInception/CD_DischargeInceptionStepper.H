@@ -488,37 +488,49 @@ namespace Physics {
 	@brief Inception integral values.
 	@note Stationary mode, positive polarity
       */
-      EBAMRCellData m_inceptionIntegralPlus;
+      Vector<EBAMRCellData> m_inceptionIntegralPlus;
 
       /*!
 	@brief Inception integral values.
 	@note Stationary mode, negative polarity
       */
-      EBAMRCellData m_inceptionIntegralMinu;
+      Vector<EBAMRCellData> m_inceptionIntegralMinu;
 
       /*!
 	@brief Background ionization rates
 	@note Both modes. 
       */
-      EBAMRCellData m_backgroundIonization;
+      Vector<EBAMRCellData> m_backgroundIonizationStationary;
 
       /*!
 	@brief Detachment rates.
 	@note Both modes. 
       */
-      EBAMRCellData m_detachment;
+      Vector<EBAMRCellData> m_detachmentStationary;
 
       /*!
 	@brief Field emission rates
 	@note Stationary mode, positive polarity
       */
-      EBAMRCellData m_emissionRatesPlus;
+      Vector<EBAMRCellData> m_emissionRatesPlus;
 
       /*!
 	@brief Field emission rates
 	@note Stationary mode, negative polarity
       */
-      EBAMRCellData m_emissionRatesMinu;
+      Vector<EBAMRCellData> m_emissionRatesMinu;
+
+      /*!
+	@brief Townsend criterion for starting positive ions
+	@note Stationary mode
+      */
+      Vector<EBAMRCellData> m_townsendCriterionPlus;
+
+      /*!
+	@brief Townsend criterion for starting positive ions
+	@note Stationary mode	
+      */
+      Vector<EBAMRCellData> m_townsendCriterionMinu;
 
       /*!
 	@brief Field emission rates
@@ -569,43 +581,43 @@ namespace Physics {
       EBAMRCellData m_townsendCriterion;
 
       /*!
-	@brief Townsend criterion for starting positive ions
+	@brief Detachment factor
       */
-      EBAMRCellData m_townsendCriterionPlus;
+      EBAMRCellData m_detachment;
 
       /*!
-	@brief Townsend criterion for starting positive ions
+	@brief Detachment factor
       */
-      EBAMRCellData m_townsendCriterionMinu;
+      EBAMRCellData m_backgroundIonization;
 
       /*!
 	@brief Calculated version of alpha/(|grad(alpha)|) on the mesh. 
       */
       EBAMRCellData m_gradAlpha;
 
-      /*! 
-	@brief Max K value for every voltage
-	@note Stationary mode, positive polarity
+      /*!
+	@brief Max K value for every voltage.
+	@note Stationary mode and positive polarity. The tuple contains (|voltage|, K-value, max position)	
       */
-      std::vector<std::pair<Real, RealVect>> m_maxKPlus;
+      std::vector<std::tuple<Real, Real, RealVect>> m_KPlusValues;
 
-      /*! 
-	@brief Max K value for every voltage
-	@note Stationary mode, negative polarity
+      /*!
+	@brief Max K value for every voltage.
+	@note Stationary mode and negative polarity. The tuple contains (|voltage|, K-value, max position)
       */
-      std::vector<std::pair<Real, RealVect>> m_maxKMinu;
+      std::vector<std::tuple<Real, Real, RealVect>> m_KMinuValues;
 
-      /*! 
-	@brief Max Townsend value (exp(K)/gamma) for every voltage
-	@note Stationary mode, positive polarity
+      /*!
+	@brief Max T value for every voltage.
+	@note Stationary mode and positive polarity. The tuple contains (|voltage|, K-value, max position)	
       */
-      std::vector<std::pair<Real, RealVect>> m_maxTPlus;
+      std::vector<std::tuple<Real, Real, RealVect>> m_TPlusValues;
 
-      /*! 
-	@brief Max Townsend value (exp(K)/gamma) for every voltage
-	@note Stationary mode, negative polarity
+      /*!
+	@brief Max T value for every voltage.
+	@note Stationary mode and negative polarity. The tuple contains (|voltage|, K-value, max position)
       */
-      std::vector<std::pair<Real, RealVect>> m_maxTMinu;
+      std::vector<std::tuple<Real, Real, RealVect>> m_TMinuValues;
 
       /*!
 	@brief Max K value for every time step
@@ -697,6 +709,16 @@ namespace Physics {
 	@details First parameter is time, second parameter is the ionization volume.
       */
       std::vector<std::pair<Real, Real>> m_ionizationVolumeTransient;
+
+      /*!
+	@brief Relative voltage increase
+      */
+      Real m_voltageIncrease;
+
+      /*!
+	@brief Maximum K-value that is calculated in stationary mode
+      */
+      Real m_maxKLimit;
 
       /*!
 	@brief CFL-step for negative ions.
@@ -946,6 +968,14 @@ namespace Physics {
       */
       virtual void
       seedIonizationParticles(const Real a_voltage) noexcept;
+
+      /*!
+	@brief Compute the inception integral for the input voltage
+	@param[out] a_inceptionIntegral Mesh storage for the inception integral
+	@param[in]  a_voltage Applied voltage (can be positive or negative).
+      */
+      virtual void
+      computeInceptionIntegral(EBAMRCellData& a_inceptionIntegral, const Real a_voltage) noexcept;
 
       /*!
 	@brief Solve streamer inception integral for each particle in each voltage and store K values in m_inceptionIntegral. 
@@ -1311,6 +1341,12 @@ namespace Physics {
       */
       virtual void
       getMaxValueAndLocation(Real& a_maxVal, RealVect& a_maxPos, const EBAMRCellData& a_data) const noexcept;
+
+      /*!
+	@brief Get the breakdown field.
+      */
+      virtual Real
+      getCriticalField() const noexcept;
     };
   } // namespace DischargeInception
 } // namespace Physics
