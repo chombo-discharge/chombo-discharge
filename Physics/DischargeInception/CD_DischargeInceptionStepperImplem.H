@@ -4083,8 +4083,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
   if (m_verbosity > 5) {
     pout() << "DischargeInceptionStepper::computeInceptionVoltageVolume" << endl;
   }
-#warning "THIS FUNCTION IS NEXT UP!"
-#if 0
+
   // TLDR: This routine runs through all the K-values in each cell and estimates the
   //       inception voltage using linear interpolation.
 
@@ -4098,7 +4097,6 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
                     "inception voltage");
   }
   else {
-
     constexpr int comp = 0;
 
     // Function which interpolates the inception voltage if possible. Used in the kernels. This one does interpolation.
@@ -4199,7 +4197,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
       return std::array<Real, 3>{Uinc, streamerInc, townsendInc};
     };
 
-    // Iterate through m_inceptionIntegral data and calculate inception voltage.
+    // Iterate through m_inceptionIntegral data and calculate the inception voltage.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); ++lvl) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -4210,35 +4208,42 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        EBCellFAB& inceptionVoltagePlus = (*m_inceptionVoltagePlus[lvl])[din];
-        EBCellFAB& inceptionVoltageMinu = (*m_inceptionVoltageMinu[lvl])[din];
-
+        EBCellFAB& inceptionVoltagePlus         = (*m_inceptionVoltagePlus[lvl])[din];
+        EBCellFAB& inceptionVoltageMinu         = (*m_inceptionVoltageMinu[lvl])[din];
         EBCellFAB& streamerInceptionVoltagePlus = (*m_streamerInceptionVoltagePlus[lvl])[din];
         EBCellFAB& streamerInceptionVoltageMinu = (*m_streamerInceptionVoltageMinu[lvl])[din];
-
         EBCellFAB& townsendInceptionVoltagePlus = (*m_townsendInceptionVoltagePlus[lvl])[din];
         EBCellFAB& townsendInceptionVoltageMinu = (*m_townsendInceptionVoltageMinu[lvl])[din];
 
-        FArrayBox& inceptionVoltagePlusReg = inceptionVoltagePlus.getFArrayBox();
-        FArrayBox& inceptionVoltageMinuReg = inceptionVoltageMinu.getFArrayBox();
-
+        FArrayBox& inceptionVoltagePlusReg         = inceptionVoltagePlus.getFArrayBox();
+        FArrayBox& inceptionVoltageMinuReg         = inceptionVoltageMinu.getFArrayBox();
         FArrayBox& streamerInceptionVoltagePlusReg = streamerInceptionVoltagePlus.getFArrayBox();
         FArrayBox& streamerInceptionVoltageMinuReg = streamerInceptionVoltageMinu.getFArrayBox();
-
         FArrayBox& townsendInceptionVoltagePlusReg = townsendInceptionVoltagePlus.getFArrayBox();
         FArrayBox& townsendInceptionVoltageMinuReg = townsendInceptionVoltageMinu.getFArrayBox();
 
-        const EBCellFAB& inceptionIntegralPlus = (*m_inceptionIntegralPlus[lvl])[din];
-        const EBCellFAB& inceptionIntegralMinu = (*m_inceptionIntegralMinu[lvl])[din];
+        // Pack the inception integral and townsend criterions into workable vectors.
+        Vector<const EBCellFAB*> inceptionIntegralPlus;
+        Vector<const EBCellFAB*> inceptionIntegralMinu;
+        Vector<const EBCellFAB*> townsendCriterionPlus;
+        Vector<const EBCellFAB*> townsendCriterionMinu;
 
-        const FArrayBox& inceptionIntegralPlusReg = inceptionIntegralPlus.getFArrayBox();
-        const FArrayBox& inceptionIntegralMinuReg = inceptionIntegralMinu.getFArrayBox();
+        Vector<const FArrayBox*> inceptionIntegralPlusReg;
+        Vector<const FArrayBox*> inceptionIntegralMinuReg;
+        Vector<const FArrayBox*> townsendCriterionPlusReg;
+        Vector<const FArrayBox*> townsendCriterionMinuReg;
 
-        const EBCellFAB& townsendCriterionPlus = (*m_townsendCriterionPlus[lvl])[din];
-        const EBCellFAB& townsendCriterionMinu = (*m_townsendCriterionMinu[lvl])[din];
+        for (int i = 0; i < m_voltageSweeps.size(); i++) {
+          inceptionIntegralPlus.push_back(&(*(m_inceptionIntegralPlus[i])[lvl])[din]);
+          inceptionIntegralMinu.push_back(&(*(m_inceptionIntegralMinu[i])[lvl])[din]);
+          townsendCriterionPlus.push_back(&(*(m_townsendCriterionPlus[i])[lvl])[din]);
+          townsendCriterionMinu.push_back(&(*(m_townsendCriterionMinu[i])[lvl])[din]);
 
-        const FArrayBox& townsendCriterionPlusReg = townsendCriterionPlus.getFArrayBox();
-        const FArrayBox& townsendCriterionMinuReg = townsendCriterionMinu.getFArrayBox();
+          inceptionIntegralPlusReg.push_back(&(inceptionIntegralPlus.back()->getFArrayBox()));
+          inceptionIntegralMinuReg.push_back(&(inceptionIntegralMinu.back()->getFArrayBox()));
+          townsendCriterionPlusReg.push_back(&(townsendCriterionPlus.back()->getFArrayBox()));
+          townsendCriterionMinuReg.push_back(&(townsendCriterionMinu.back()->getFArrayBox()));
+        }
 
         // Regular kernel.
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -4249,11 +4254,11 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
           std::vector<Real> Tminu;
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            Kplus.emplace_back(inceptionIntegralPlusReg(iv, i));
-            Kminu.emplace_back(inceptionIntegralMinuReg(iv, i));
+            Kplus.emplace_back((*inceptionIntegralPlusReg[i])(iv, 0));
+            Kminu.emplace_back((*inceptionIntegralMinuReg[i])(iv, 0));
 
-            Tplus.emplace_back(townsendCriterionPlusReg(iv, i));
-            Tminu.emplace_back(townsendCriterionMinuReg(iv, i));
+            Tplus.emplace_back((*townsendCriterionPlusReg[i])(iv, 0));
+            Tminu.emplace_back((*townsendCriterionMinuReg[i])(iv, 0));
           }
 
           std::array<Real, 3> inceptionVoltagesPlus;
@@ -4287,11 +4292,11 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
           std::vector<Real> Tminu;
 
           for (size_t i = 0; i < m_voltageSweeps.size(); i++) {
-            Kplus.emplace_back(inceptionIntegralPlus(vof, i));
-            Kminu.emplace_back(inceptionIntegralMinu(vof, i));
+            Kplus.emplace_back((*inceptionIntegralPlus[i])(vof, 0));
+            Kminu.emplace_back((*inceptionIntegralMinu[i])(vof, 0));
 
-            Tplus.emplace_back(townsendCriterionPlus(vof, i));
-            Tminu.emplace_back(townsendCriterionMinu(vof, i));
+            Tplus.emplace_back((*townsendCriterionPlus[i])(vof, 0));
+            Tminu.emplace_back((*townsendCriterionMinu[i])(vof, 0));
           }
 
           std::array<Real, 3> inceptionVoltagesPlus;
@@ -4329,7 +4334,6 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
     m_amr->conservativeAverage(m_inceptionVoltagePlus, m_realm, m_phase);
     m_amr->interpGhost(m_inceptionVoltageMinu, m_realm, m_phase);
   }
-#endif
 }
 
 template <typename P, typename F, typename C>
