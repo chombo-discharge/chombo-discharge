@@ -19,6 +19,7 @@ The integration runs along electric field lines.
 
 The discharge inception model solves for :math:`K = K\left(\mathbf{x}\right)` for all :math:`\mathbf{x}`, i.e., the inception integral is evaluated for all starting positions of the first electron.
 This differs from the conventional approach where the user will first extract electric field lines for post-processing.
+Note that :math:`K\left(\mathbf{x}\right) = K(\mathbf{x}; U)` where :math:`U` is the applied voltage.
 
 In addition to the above, the user can specify a critical threshold value for :math:`K_c` which is used for computing
 
@@ -26,22 +27,20 @@ In addition to the above, the user can specify a critical threshold value for :m
 * The inception voltage :math:`U_c`.
 * The probability of having the first electron in the critical volume, :math:`dP(t,t+\Delta t)`.
 
-Note that since the :math:`K\left(\mathbf{x}\right) = K(\mathbf{x}; U)` where :math:`U` is the applied voltage, these values are computed for a user-specified range of voltages. 
-This "range of voltages" can be a series of discrete values, or a voltage curve (e.g., lightning impulse).
-
-In addition to this, one may also track positive ions and solve for the Townsend inception criterion, which is formulated as
+In addition to this, one may also track positive ions and solve for the Townsend inception criterion, which is formulated as follows:
 
 .. math::
 
-   T\left(\mathbf{x}\right) = \gamma \exp\left[K\left(\mathbf{x}\right)\right] \geq 1.
+   T\left(\mathbf{x}\right) = \gamma\left(\exp\left[K\left(\mathbf{x}\right)\right]-1\right) \geq 1.
 
-The interpretation of this criterion is that each starting electron grows into :math:`\exp\left[K\left(\mathbf{x}\right)\right]` electron-ion pairs.
+The interpretation of this criterion is that each starting electron produces :math:`\exp\left[K\left(\mathbf{x}\right)\right]-1` secondary electron-ion pairs.
 The residual ions will drift towards cathode surfaces and generate secondary ionization with a user-supplied efficiency :math:`\gamma=\gamma\left(E,\mathbf{x}\right)`.
 
 The discharge inception model can be run in two modes:
 
-* :ref:`Chap:StationaryMode`.
-* :ref:`Chap:TransientMode`.
+* A stationary mode, where one only calculations :math:`K\left(\mathbf{x}\right)` for a range of voltages, :ref:`Chap:StationaryMode`.
+* In transient mode, where :math:`K\left(\mathbf{x}\right)` is computed dynamically according to a user-supplied voltage shape.
+  This mode can also be used to evaluate the inception probability for a given voltage curve, see :ref:`Chap:TransientMode`.
 
 These are discussed below.
 
