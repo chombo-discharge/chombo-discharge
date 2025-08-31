@@ -16,7 +16,6 @@ The model consists of the following implementation files:
 * :file:`CD_RadiativeTransferStepper.H` which implements :ref:`Chap:TimeStepper`. 
 * :file:`CD_RadiativeTransferSpecies.H` which implements the necessary transport conditions through :ref:`Chap:RtSpecies`. 
 
-
 .. note::
 
    The current radiative transfer module does not incorporate solver-based adaptive mesh refinement, so refinement is restricted to refinement and coarsening through the :ref:`Chap:Driver` interface.
