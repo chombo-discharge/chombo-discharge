@@ -19,7 +19,6 @@ The model consists of the following implementation files:
 
 * :file:`CD_BrownianWalkerStepper.H/cpp` which implements :ref:`Chap:TimeStepper`. 
 * :file:`CD_BrownianWalkerSpecies.H/cpp` which implements initial conditions through :ref:`Chap:ItoSpecies`.
-* :file:`CD_BrownianWalkerTagger.H/cpp` which implements mesh refinement and de-refinement criteria by subclassing :ref:`Chap:CellTagger`.
 
 Initial data
 ------------
@@ -69,8 +68,8 @@ Setting this value to anything less than 1 will turn off super-particle handling
 Solver configuration
 --------------------
 
-The ``AdvectionDiffusionStepper`` and ``AdvectionDiffusionTagger`` classes come with user-configurable input options that can be adjusted at runtime.
-The configuration options for ``AdvectionDiffusionStepper`` are given below:
+The ``BrownianWalkerStepper`` class comes with user-configurable input options that can be adjusted at runtime.
+The configuration options for ``BrownianWalkerStepper`` are given below:
 
 .. literalinclude:: ../../../../Physics/BrownianWalker/CD_BrownianWalkerStepper.options
    :language: text
