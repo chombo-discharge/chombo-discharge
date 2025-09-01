@@ -25,7 +25,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Mesh ODE solver" href="MeshODESolver.html" />
-    <link rel="prev" title="Electrostatic solver" href="Electrostatics.html" /> 
+    <link rel="prev" title="Îto diffusion" href="Ito.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,6 +80,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Kinetic Monte Carlo</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#concept">Concept</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stochastic-simulation-algorithm">Stochastic simulation algorithm</a></li>
@@ -97,11 +97,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#advancement-routines">Advancement routines</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#state-and-reaction-examples">State and reaction examples</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#single-state">Single-state</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#kmcdualstate">KMCDualState</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#state-and-reaction-examples">State and reaction examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#c1-avalanche-model">C1: Avalanche model</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#c2-schlogl-model">C2: Schlögl model</a></li>
@@ -113,7 +109,6 @@
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -134,7 +129,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -174,9 +169,11 @@
              
   <section id="kinetic-monte-carlo">
 <span id="chap-kineticmontecarlo"></span><h1>Kinetic Monte Carlo<a class="headerlink" href="#kinetic-monte-carlo" title="Permalink to this heading"></a></h1>
+<p>Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+While various flavors of KMC are encountered in different fields of science, KMC in the context of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is primarily associated with chemistry kernels.</p>
 <section id="concept">
 <h2>Concept<a class="headerlink" href="#concept" title="Permalink to this heading"></a></h2>
-<p>Kinetic Monte Carlo solvers advance a state (or multiple states) represented e.g. as state vectors</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> the Kinetic Monte Carlo solver advances a state (or multiple states) represented e.g. as state vectors</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\vec{X}(t) = \begin{pmatrix}
 X_1(t) \\
@@ -184,7 +181,7 @@ X_2(t) \\
 X_3(t) \\
 \vdots
 \end{pmatrix}\end{split}\]</div>
-<p>Each row in <span class="math notranslate nohighlight">\(\vec{X}\)</span> represents e.g. the population of some chemical species.
+<p>Each row in <span class="math notranslate nohighlight">\(\vec{X}\)</span> represents the population of some chemical species, and is indexed by an integer.
 Reactions between species are represented stoichiometrically as</p>
 <div class="math notranslate nohighlight">
 \[X_A + X_B + \ldots \xrightarrow{k} X_C + X_D + \ldots,\]</div>
@@ -211,7 +208,7 @@ For example, for a third-order reaction <span class="math notranslate nohighligh
 The SSA is also known as the Gillespie algorithm <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id166" title="Daniel T. Gillespie. Exact stochastic simulation of coupled chemical reactions. Journal of Physical Chemistry, 81:2340-2361, 1977. doi:10.1021/j100540a008.">Gillespie, 1977</a>]</span>, and is an exact stochastic solution to the above problem.
 However, it becomes inefficient as the number of reactions per unit time grows.</p></li>
 <li><p><a class="reference internal" href="#chap-kmctauadvance"><span class="std std-ref">Tau leaping</span></a>, which is an approximation to the SSA which uses Poisson sampling of the underlying reactions.</p></li>
-<li><p>Hybrid advance, see <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a>.
+<li><p>Hybrid advance that switches between the SSA and tau-leaping in their respective limits, see <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a>.
 The hybrid algorithm is taken from <span id="id2">Cao <em>et al.</em> [<a class="reference internal" href="../ZZReferences.html#id165" title="Yang Cao, Daniel T. Gillespie, and Linda R. Petzold. Efficient step size selection for the tau-leaping simulation method. Journal of Chemical Physics, 2006. doi:10.1063/1.2159468.">2006</a>]</span>, and switches between tau leaping and the SSA in their respective limits.</p></li>
 </ol>
 </section>
@@ -233,7 +230,7 @@ The state is then advanced as</p>
 <span id="chap-kmctauadvance"></span><h2>Tau leaping<a class="headerlink" href="#tau-leaping" title="Permalink to this heading"></a></h2>
 <p>With tau-leaping the state is advanced over a time <span class="math notranslate nohighlight">\(\Delta t\)</span> as</p>
 <div class="math notranslate nohighlight">
-\[\vec{X}\left(t+\Delta t\right) =  \vec{X}\left(t\right) + \sum_{\vec{R}} \vec{\nu}_r\mathcal{P}\left(a_r\left[\vec{X}\left(t\right)\right]\Delta t\right),\]</div>
+\[\vec{X}\left(t+\Delta t\right) =  \vec{X}\left(t\right) + \sum_{r\in\vec{R}} \vec{\nu}_r\mathcal{P}\left(a_r\left[\vec{X}\left(t\right)\right]\Delta t\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> is a Poisson-distributed random variable.
 Note that tau leaping may fail to give a thermodynamically valid state, and should thus be used in combination with step rejection.</p>
 <section id="tau-leaping-variants">
@@ -251,7 +248,7 @@ Note that tau leaping may fail to give a thermodynamically valid state, and shou
 The reason for this is that exponential growth follows the equation</p>
 <div class="math notranslate nohighlight">
 \[\partial_t X = k X,\]</div>
-<p>where <span class="math notranslate nohighlight">\(X\)</span> is the number of electrons and <span class="math notranslate nohighlight">\(k&gt;0\)</span> is a growth rate.
+<p>where <span class="math notranslate nohighlight">\(k&gt;0\)</span> is a growth rate.
 Application of the implicit Euler rule to this system yields</p>
 <div class="math notranslate nohighlight">
 \[X^{n+1} = \frac{X^n}{1 - k\Delta t},\]</div>
@@ -261,7 +258,7 @@ In practice, the time step then has to be limited to <span class="math notransla
 <p>On the other hand, an explicit Euler update would yield</p>
 <div class="math notranslate nohighlight">
 \[X^{n+1} = \left(1+k\Delta t\right) X^n,\]</div>
-<p>which is stable for any <span class="math notranslate nohighlight">\(\Delta t\)</span>.</p>
+<p>which is stable for any <span class="math notranslate nohighlight">\(\Delta t\)</span> (provided <span class="math notranslate nohighlight">\(k\)</span> is positive).</p>
 </div>
 </section>
 </section>
@@ -309,18 +306,34 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 </section>
 <section id="implementation">
 <span id="chap-kmcsolver"></span><h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h2>
-<p>The Kinetic Monte Carlo solver is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
+<p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the KMC solver is implemented as</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Class for running Kinetic Monte-Carlo simulations. </span>
+<span class="cm">  @details The template parameter State is the underlying state type that KMC operators on. There are rather simple required member functions on the State parameter,</span>
+<span class="cm">  but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:</span>
+
+<span class="cm">  1. Real R::propensity(State) const -&gt; Computes the reaction propensity for the input state.</span>
+<span class="cm">  2. T R::computeCriticalNumberOfReactions(State) const -&gt; Computes the minimum number of reactions that exhausts one of the reactants. </span>
+<span class="cm">  3. void R::advanceState(State&amp;, const T numReactions) const -&gt; Advance state by numReactions</span>
+<span class="cm">  4. std::&lt;some_container&gt; getReactants() const -&gt; Get reactants involved in the reactions.</span>
+<span class="cm">  5. T R::population(const &lt;some_type&gt; reactant, const State&amp; a_state) -&gt; Get the population of the input reactant in the input state. </span>
+
+<span class="cm">  The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span>
 <span class="p">{</span>
 <span class="k">public</span><span class="o">:</span>
-<span class="w">   </span><span class="k">using</span><span class="w"> </span><span class="n">ReactionList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="w">  </span><span class="k">using</span><span class="w"> </span><span class="n">ReactionList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="n">R</span><span class="o">&gt;&gt;</span><span class="p">;</span>
 
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ReactionList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reaction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Full constructor. </span>
+<span class="cm">    @param[in] a_reactions List of reactions. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ReactionList</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_reactions</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>The template parameters are:</p>
+<p>Here, the template parameters are:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">R</span></code> is the type of reaction to advance with.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">State</span></code> is the state vector that the KMC and reactions will advance.</p></li>
@@ -330,33 +343,61 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code> C++ API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSolver.html</a>.</p>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code> is designed to operate with the possibility of separating the solver from the reaction and state types.
+Several template constraints exist on the reaction type <code class="docutils literal notranslate"><span class="pre">R</span></code> as well as the state type <code class="docutils literal notranslate"><span class="pre">State</span></code>.</p>
 <section id="state">
 <h3>State<a class="headerlink" href="#state" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">State</span></code> representation <em>must</em> have a member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">State::isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Check if state is a valid state. </span>
+<span class="cm">  @return Returns false if any populations are negative. </span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">bool</span>
+<span class="nf">isValidState</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>which determines if the state is thermodynamically valid (e.g. no negative populations).
+<p>This function should return true if the state is a valid one (e.g., no negative populations) and false otherwise.
 The functionality is used when using the hybrid advancement algorithm, see <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a>.</p>
 </section>
 <section id="reaction-s">
 <h3>Reaction(s)<a class="headerlink" href="#reaction-s" title="Permalink to this heading"></a></h3>
 <p>The reaction representation <code class="docutils literal notranslate"><span class="pre">R</span></code> <em>must</em> have the following member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Compute the propensity of the current reaction.</span>
-<span class="n">Real</span><span class="w"> </span><span class="nf">R::propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Compute the propensity function for this reaction type. </span>
+<span class="cm">  @param[in] a_state State vector</span>
+<span class="cm">  @note User should set the rate before calling this routine. </span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">propensity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="c1">// Compute the number of reactions before exhausting one of the reactants</span>
-<span class="n">T</span><span class="w"> </span><span class="nf">R::computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Compute the number of times the reaction can fire before exhausting one of the reactants.</span>
+<span class="cm">  @param[in] a_state State vector</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">T</span>
+<span class="nf">computeCriticalNumberOfReactions</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="c1">// Compute the number of reactions before exhausting one of the reactants</span>
-<span class="kt">void</span><span class="w"> </span><span class="nf">R::advanceState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get the reactants involved in the reaction.</span>
+<span class="cm">  @return m_reactants</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span>
+<span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="c1">// Get a vector/list/deque etc. of the reactants. &lt;some_container&gt; can be e.g. std::vector&lt;size_t&gt;</span>
-<span class="o">&lt;</span><span class="n">some_container</span><span class="o">&gt;</span><span class="w"> </span><span class="n">R</span><span class="o">::</span><span class="n">getReactants</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get the state change due to a change in the input reactant species.</span>
+<span class="cm">  @param[in] a_rectant Reactant species. </span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">T</span>
+<span class="nf">getStateChange</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_reactant</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="c1">// Get the population corresponding to &#39;reactant&#39; in the input state. If e.g. &lt;some_container&gt; is</span>
-<span class="c1">// std::vector&lt;size_t&gt; then &lt;some_type&gt; will be &lt;size_t&gt;</span>
-<span class="n">T</span><span class="w"> </span><span class="nf">R::population</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="o">&lt;</span><span class="n">some_type</span><span class="o">&gt;</span><span class="w"> </span><span class="n">reactant</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Advance the incoming state with the number of reactions. </span>
+<span class="cm">  @param[in] a_state        State vector</span>
+<span class="cm">  @param[in] a_numReactions Number of reactions.</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">advanceState</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_numReactions</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>These template requirements exist so that users can define their states independent of their reactions.
@@ -380,8 +421,7 @@ In the absolute simplest case a state can be defined by maintaining a list of po
 <span class="p">};</span>
 </pre></div>
 </div>
-<p>More advanced examples can distinguish between different <em>modes</em> of populations, e.g. between species that can only appear on the left/right hand side of the reactions.
-See <a class="reference internal" href="#chap-kmcdualstate"><span class="std std-ref">KMCDualState</span></a> for such an example.</p>
+<p>More advanced examples can distinguish between different <em>modes</em> of populations, e.g. between species that can only appear on the left/right hand side of the reactions.</p>
 </section>
 <section id="defining-reactions">
 <h3>Defining reactions<a class="headerlink" href="#defining-reactions" title="Permalink to this heading"></a></h3>
@@ -431,111 +471,50 @@ Using <code class="docutils literal notranslate"><span class="pre">MyState</span
 </section>
 <section id="advancement-routines">
 <h3>Advancement routines<a class="headerlink" href="#advancement-routines" title="Permalink to this heading"></a></h3>
-<p>The advancement routines for the <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code> are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSolver</span>
-<span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-
-<span class="w">   </span><span class="c1">// Advance one step with the SSA algorithm.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">   </span><span class="n">advanceSSA</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-
-<span class="w">   </span><span class="c1">// Advance using tau leaping</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">   </span><span class="nf">advanceTau</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-
-<span class="w">   </span><span class="c1">// Advance using hybrid algorithm.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">   </span><span class="nf">advanceHybrid</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_state</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-
-<span class="w">   </span><span class="c1">// Set hybrid solver parameters.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">   </span><span class="nf">setSolverParameters</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numCrit</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_numSSA</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_eps</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_SSAlim</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-<span class="p">};</span>
+<p>Many advancement routines for the <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code> are defined internally.
+The most general one that uses the hybrid advance is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.</span>
+<span class="cm">  @param[inout] a_state          State vector to advance</span>
+<span class="cm">  @param[in]    a_dt             Time increment</span>
+<span class="cm">  @param[in]    a_leapPropagator Which leap propagator to use. </span>
+<span class="cm">  @note Calls the other version with m_reactions</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">advanceHybrid</span><span class="p">(</span><span class="n">State</span><span class="o">&amp;</span><span class="w">                   </span><span class="n">a_state</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">               </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">KMCLeapPropagator</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_leapPropagator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCLeapPropagator</span><span class="o">::</span><span class="n">ExplicitEuler</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>When using the hybrid algorithm, the user should set the hybrid solver parameters through <code class="docutils literal notranslate"><span class="pre">setSolverParameters</span></code>.
-See <a class="reference internal" href="#chap-kmchybridadvance"><span class="std std-ref">Hybrid algorithm</span></a> for further details.</p>
+<p>When using the hybrid algorithm, the user should set the hybrid solver parameters through the function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set solver parameters</span>
+<span class="cm">  @param[in] a_numCrit Determines critical reactions. This is the number of reactions that need to fire before depleting a reactant.</span>
+<span class="cm">  @param[in] a_numSSA  Maximum number of SSA steps to run when switching from tau-leaping to SSA (hybrid algorithm only).</span>
+<span class="cm">  @param[in] a_maxIter Maximum permitted number of iterations for the implicit solver    </span>
+<span class="cm">  @param[in] a_eps     Maximum permitted change in propensities when performing tau-leaping for non-critical reactions.</span>
+<span class="cm">  @param[in] a_SSAlim  Threshold for switching from tau-leaping of non-critical reactions to SSA for all reactions (hybrid algorithm only)</span>
+<span class="cm">  @param[in] a_exitTol Exit tolerance for implicit solvres. </span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setSolverParameters</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w">    </span><span class="n">a_numCrit</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w">    </span><span class="n">a_numSSA</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w">    </span><span class="n">a_maxIter</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_eps</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_SSAlim</span><span class="p">,</span>
+<span class="w">                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_exitTol</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="state-and-reaction-examples">
 <h2>State and reaction examples<a class="headerlink" href="#state-and-reaction-examples" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> maintains some states and reaction methods that can be useful when solving problems with <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code>.</p>
-<section id="single-state">
-<span id="chap-kmcsinglestate"></span><h3>Single-state<a class="headerlink" href="#single-state" title="Permalink to this heading"></a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">KMCSingleState</span></code> class defines a single state vector <span class="math notranslate nohighlight">\(\vec{X}\)</span> that can appear on either side of reactions.
-The user defines the number of species through the constructor</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSingleState</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">   </span><span class="c1">// Define a state vector with specified number of species.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCSingleState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numSpecies</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-<p>Internally the state just uses a <code class="docutils literal notranslate"><span class="pre">std::vector&lt;T&gt;</span></code> for representing the populations.</p>
-<p><code class="docutils literal notranslate"><span class="pre">KMCSingleStateReaction</span></code> can be used to define reactions between species in <code class="docutils literal notranslate"><span class="pre">KMCSingleState</span></code>.
-The reaction is specified as a generic type of reaction</p>
-<div class="math notranslate nohighlight">
-\[X_A + X_B + \ldots \xrightarrow{k} X_C + X_D + \ldots.\]</div>
-<p>The relevant function signatures that specify the reactants, products, and the rate <span class="math notranslate nohighlight">\(k\)</span>, are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCSingleState</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCSingleStateReaction</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-
-<span class="w">   </span><span class="c1">// Define list of reactants/products through constructor</span>
-<span class="w">   </span><span class="kr">inline</span>
-<span class="w">   </span><span class="n">KMCSingleStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_reactants</span><span class="p">,</span>
-<span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_products</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="w">   </span><span class="c1">// For setting the reaction rate used in the propensity calculation.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
-<span class="w">   </span><span class="nf">rate</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-</section>
-<section id="kmcdualstate">
-<span id="chap-kmcdualstate"></span><h3>KMCDualState<a class="headerlink" href="#kmcdualstate" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">KMCDualState</span></code> defines two state vectors <span class="math notranslate nohighlight">\(\vec{X}\)</span> and <span class="math notranslate nohighlight">\(\vec{Y}\)</span> where <span class="math notranslate nohighlight">\(\vec{X}\)</span> are <em>reactant species</em> and <span class="math notranslate nohighlight">\(\vec{Y}\)</span> are <em>non-reactant</em> species.
-The intention behind this class is that reactant species are allowed on either side of the reaction, while the non-reactant species only occur on the right-hand side of the reaction.
-For example:</p>
-<div class="math notranslate nohighlight">
-\[X_A \ldots \xrightarrow{k} 2X_A + Y_A + \emptyset\]</div>
-<p>The class is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCDualState</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-<span class="w">   </span><span class="c1">// Define a state vector with specified number of species.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">KMCDualState</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numReactiveSpecies</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_numNonReactiveSpecies</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="w">   </span><span class="c1">// Get the reactant state (i.e, X)</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getReactiveState</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="w">   </span><span class="c1">// Get the non-reactant state (i.e, Y)</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getNonReactiveState</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">KMCDualStateReaction</span></code> can define reactions between states in the state vector <span class="math notranslate nohighlight">\(\vec{X}\)</span> which give products in both <span class="math notranslate nohighlight">\(\vec{X}\)</span> and <span class="math notranslate nohighlight">\(\vec{Y}\)</span> as follows.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="kt">long</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">State</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCDualState</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">KMCDualStateReaction</span><span class="w"> </span><span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-
-<span class="w">   </span><span class="c1">// Define list of reactants/products through constructor</span>
-<span class="w">   </span><span class="kr">inline</span>
-<span class="w">   </span><span class="n">KMCDualStateReaction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_lhsReactives</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhsReactives</span><span class="p">,</span>
-<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhsNonReactives</span><span class="p">);</span>
-
-<span class="w">   </span><span class="c1">// For setting the reaction rate used in the propensity calculation.</span>
-<span class="w">   </span><span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
-<span class="w">   </span><span class="nf">rate</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-<span class="p">};</span>
-</pre></div>
-</div>
-</section>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> maintains some states and reaction methods that can be useful when solving problems with <code class="docutils literal notranslate"><span class="pre">KMCSolver</span></code>.
+The following two implementations are currently in use:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">KMCSingleState</span></code>, see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSingleState.html">KMCSingleState C++ API</a> and the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSingleStateReaction.html">KMCSingleStateReaction C++ API</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">KMCDualState</span></code>, see the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCDualState.html">KMCDualState C++ API</a> and the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCDualStateReaction.html">KMCDualStateReaction C++ API</a>.</p></li>
+</ol>
 </section>
 <section id="verification">
 <h2>Verification<a class="headerlink" href="#verification" title="Permalink to this heading"></a></h2>
@@ -594,7 +573,7 @@ The initial state is <span class="math notranslate nohighlight">\(X(0) = 250\)</
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Electrostatics.html" class="btn btn-neutral float-left" title="Electrostatic solver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Ito.html" class="btn btn-neutral float-left" title="Îto diffusion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="MeshODESolver.html" class="btn btn-neutral float-right" title="Mesh ODE solver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

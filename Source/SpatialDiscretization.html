@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -101,12 +100,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -127,7 +126,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -169,13 +168,12 @@
 <span id="chap-spatialdiscretization"></span><h1>Spatial discretization<a class="headerlink" href="#spatial-discretization" title="Permalink to this heading"></a></h1>
 <section id="cartesian-amr">
 <h2>Cartesian AMR<a class="headerlink" href="#cartesian-amr" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">Colella <em>et al.</em>, 2004</a>]</span>.
-In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>.
-With Cartesian AMR each patch is a Cartesian block of grid cells.
-A <em>grid level</em> is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are <em>non-overlapping</em>.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses Cartesian patch-based structured adaptive mesh refinement (AMR) provided by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id82" title="P Colella, D T Graves, T J Ligocki, G Miller, D Modiano, P O Schwartz, B Van Straalen, J Pilliod, D Trebotich, M Barad, B Keen, A Nonaka, and C Shen. EBChombo software package for cartesian grid, embedded boundary applications. Technical Report, Lawrence Berkeley National Laboratory, 2004.">Colella <em>et al.</em>, 2004</a>]</span>.
+In patch-based AMR the domain is subdivided into a collection of hierarchically nested grid levels, see <a class="reference internal" href="#fig-patchbasedamr"><span class="std std-numref">Fig. 2</span></a>, where each grid level consist of a set of rectangular grid blocks.
+I.e., a <em>grid level</em> is composed of a union of grid patches sharing the same grid resolution, with the additional requirement that the patches on a grid level are <em>non-overlapping</em>.
 With AMR, such levels can be hierarchically nested; finer grid levels exist on top of coarser ones.
 In patch-based AMR there are only a few fundamental requirements on how such grids are constructed.
-For example, a refined grid level must exist completely within the bounds of it’s parent level.
+For example, a refined grid level must exist completely within its parent (i.e., coarser) grid.
 In other words, grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are spatially separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.</p>
 <figure class="align-center" id="id6">
 <span id="fig-patchbasedamr"></span><a class="reference internal image-reference" href="../_images/PatchBasedAMR.png"><img alt="../_images/PatchBasedAMR.png" src="../_images/PatchBasedAMR.png" style="width: 60%;" /></a>
@@ -184,11 +182,10 @@ In other words, grid levels <span class="math notranslate nohighlight">\(l-1\)</
 The fine-grid level lives on top of the coarse level, and consists of two patches (red and blue colors) with two layers of ghost cells (dashed lines and orange shaded region).</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p>The resolution on level <span class="math notranslate nohighlight">\(l+1\)</span> is typically finer than the resolution on level <span class="math notranslate nohighlight">\(l\)</span> by an integer (usually power of two).
-However,</p>
+<p>The resolution on level <span class="math notranslate nohighlight">\(l+1\)</span> is typically finer than the resolution on level <span class="math notranslate nohighlight">\(l\)</span> by an integer (usually power of two).</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports refinement factors of 2 and 4.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports refinement factors of 2 and 4, with a few limitations for factor 4 refinement.</p>
 </div>
 </section>
 <section id="embedded-boundaries">
@@ -199,30 +196,29 @@ This is fundamentally different from unstructured grid where one generates a vol
 Since EBs are directly intersected by the geometry, there is no fundamental need for a surface mesh for describing the geometry.
 Moreover, Cartesian EBs have a data layout which remains (almost) fully structured.
 The connectivity of neighboring grid cells is still trivially found by fundamental strides along the data rows/columns, which allows extending the efficiency of patch-based AMR to complex geometries.
-Figure <a class="reference internal" href="#fig-complexpatches"><span class="std std-numref">Fig. 3</span></a> shows an example of patch-based grid refinement for a complex surface.</p>
+<a class="reference internal" href="#fig-complexpatches"><span class="std std-numref">Fig. 3</span></a> shows an example of patch-based grid refinement for a complex surface.</p>
 <figure class="align-center" id="id7">
 <span id="fig-complexpatches"></span><a class="reference internal image-reference" href="../_images/ComplexPatches.png"><img alt="../_images/ComplexPatches.png" src="../_images/ComplexPatches.png" style="width: 50%;" /></a>
 <figcaption>
 <p><span class="caption-number">Fig. 3 </span><span class="caption-text">Patch-based refinement (factor 4 between levels) of a complex surface. Each color shows a patch, which is a rectangular computational unit.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p>Since EBs are directly intersected by the geometry, pathological cases can arise where a Cartesian grid cell consists of multiple volumes.
+<p>Since EBs are directly intersected by the geometry, pathological cases can arise where coarsening of a grid cell leads to a coarser cell consisting of multiple volumes.
 One can easily envision this case by intersecting a thin body with a Cartesian grid, as shown in <a class="reference internal" href="#fig-multicells"><span class="std std-numref">Fig. 4</span></a>.
 This figure shows a thin body which is intersected by a Cartesian grid, and this grid is then coarsened.
 At the coarsened level, one of the grid cells has two cell fragments on opposite sides of the body.
-Such multi-valued cells (a.k.a <em>multi-cells</em>) are fundamentally important for EB applications.
+Such multi-valued cells (a.k.a <em>multi-cells</em>) are fundamentally important for EB applications when coarsening is involved.
 Note that there is no fundamental difference between single-cut and multi-cut grid cells.
 This distinction exists primarily due to the fact that if all grid cells were single-cut cells the entire EB data structure would fit in a Cartesian grid block (say, of <span class="math notranslate nohighlight">\(N_x \times N_y \times N_z\)</span> grid cells).
-Because of multi-cells, EB data structures are not purely Cartesian.
-Data structures need to live on more complex graphs that describe support multi-cells and, furthermore, describe the cell connectivity.
-Without multi-cells it would be impossible to describe most complex geometries.
-It would also be extremely difficult to obtain performant geometric multigrid methods (which rely on this type of coarsening).</p>
+However, because of multi-cells, EB data structures are not purely Cartesian.
+Data structures need to live on more complex graphs that describe the multi-cells and, furthermore, describe the cell connectivity between cut-cell volumes.
+Without multi-cells it would be impossible to describe most complex geometries, and it is extremely difficult to obtain performant geometric multigrid methods which instrinsically rely on this type of coarsening.</p>
 <figure class="align-center" id="id8">
 <span id="fig-multicells"></span><a class="reference internal image-reference" href="../_images/MultiCells.png"><img alt="../_images/MultiCells.png" src="../_images/MultiCells.png" style="width: 50%;" /></a>
 <figcaption>
 <p><span class="caption-number">Fig. 4 </span><span class="caption-text">Example of how multi-valued cells occur during grid coarsening.
 Left: Original grid.
-Right: Coarsened grid.</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
+Right: Coarsened grid where one grid cell is multi-valued.</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -230,12 +226,12 @@ Right: Coarsened grid.</span><a class="headerlink" href="#id8" title="Permalink 
 <span id="chap-geometryrepresentation"></span><h2>Geometry representation<a class="headerlink" href="#geometry-representation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses (approximations to) signed distance functions (SDFs) for describing geometries.
 Signed distance fields are functions <span class="math notranslate nohighlight">\(f: \mathbb{R}^3\rightarrow \mathbb{R}\)</span> that describe the distance from the object.
-These functions are also <em>implicit functions</em>, i.e. <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> decribes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
-<p>Many EB applications only use the implicit function formulation, but <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires (an approximation to) the signed distance field.
+These functions are also <em>implicit functions</em>, i.e., <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)=0\)</span> describes the surface of the object, <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &gt; 0\)</span> decribes a point inside the object and <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right) &lt; 0\)</span> describes a point outside the object.</p>
+<p>Many EB applications only use the implicit function formulation, but <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> requires (an approximation to) the signed distance field for the following reasons:
 There are two reasons for this:</p>
 <ol class="arabic simple">
 <li><p>The SDF can be used for robustly load balancing the geometry generation with orders of magnitude speedup over naive approaches.</p></li>
-<li><p>The SDF is useful for resolving particle collisions with boundaries, using e.g. simple ray tracing of particle paths.</p></li>
+<li><p>The SDF is useful for resolving particle collisions with boundaries, and permit mesh-less ray-tracing of computational particles.</p></li>
 </ol>
 <p>To illustrate the difference between an SDF and an implicit function, consider the implicit functions for a sphere at the origin with radius <span class="math notranslate nohighlight">\(R\)</span>:</p>
 <div class="math notranslate nohighlight">
@@ -244,7 +240,7 @@ d_1\left(\mathbf{x}\right) &amp;= R - \left|\mathbf{x}\right|, \\
 d_2\left(\mathbf{x}\right) &amp;= R^2 - \mathbf{x}\cdot\mathbf{x}.
 \end{align}</div><p>Here, only <span class="math notranslate nohighlight">\(d_1\left(\mathbf{x}\right)\)</span> is a signed distance function.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, SDFs can be generated through analytic expressions, constructive solid geometry, or by supplying polygon tesselation.
-NURBS geometries are, unfortunately, not supported.
+NURBS geometries are not supported.
 Fundamentally, all geometric objects are described using <code class="docutils literal notranslate"><span class="pre">BaseIF</span></code> objects from <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, see <a class="reference internal" href="ChomboBasics.html#chap-baseif"><span class="std std-ref">BaseIF</span></a>.</p>
 <section id="constructive-solid-geometry-csg">
 <h3>Constructive solid geometry (CSG)<a class="headerlink" href="#constructive-solid-geometry-csg" title="Permalink to this heading"></a></h3>
@@ -263,8 +259,7 @@ Generating signed distance function from polygon tesselations is quite involved 
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports such functions through the <a class="reference external" href="https://github.com/rmrsk/EBGeometry">EBGeometry</a> package.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The signed distance function for a polygon surface is only well-defined if it is manifold-2, i.e. it is watertight and does not self-intersect.
-<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> should nonetheless compute the distance field as best as it can, but the final result may not make sense in an EB context.</p>
+<p>The signed distance function for a polygon surface is only well-defined if it is manifold-2, i.e., it is watertight and does not self-intersect.</p>
 </div>
 <p>Searching through all features (faces, edge, vertices) is unacceptably slow, and <code class="docutils literal notranslate"><span class="pre">EBGeometry</span></code> therefore uses a bounding volume hierarchy for accelerating these searches.
 The bounding volume hierarchy is top-down constructed, using a root bounding volume (typically a cube) that encloses all triangles.
@@ -284,14 +279,15 @@ Additional details are provided in the <a class="reference external" href="https
 <section id="chombo-approach">
 <h3><code class="docutils literal notranslate"><span class="pre">Chombo</span></code> approach<a class="headerlink" href="#chombo-approach" title="Permalink to this heading"></a></h3>
 <p>The default geometry generation method in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> is to locate cut-cells on the finest AMR level first and then generate the coarser levels cells through grid coarsening.
-This will look through all cells on the finest level, so for a domain which is effectively <span class="math notranslate nohighlight">\(N\times N\times N\)</span> cells there are <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> implicit function queries (in 2D, the complexity is <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span>).
-Note that as <span class="math notranslate nohighlight">\(N\)</span> becomes large, say <span class="math notranslate nohighlight">\(N=10^5\)</span>, geometric queries of this type become a bottleneck.</p>
+This will look through all cells on the finest level, so for a domain which is effectively <span class="math notranslate nohighlight">\(N\times N\times N\)</span> cells there are <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> implicit function queries.
+In 2D, the complexity is <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span>.
+However, as <span class="math notranslate nohighlight">\(N\)</span> becomes large, say <span class="math notranslate nohighlight">\(N=10^5\)</span>, geometric queries of this type quickly become a bottleneck and the algorithm becomes practically unusable.</p>
 </section>
 <section id="chombo-discharge-pruning">
 <h3><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> pruning<a class="headerlink" href="#chombo-discharge-pruning" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has made modifications to the geometry generation routines in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>, resolving a few bugs and, most importantly, using the signed distance function for load balancing the geometry generation step.
 This modification to <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> yields a reduction of the original <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^3\right)\)</span> scaling in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> grid generation to an <span class="math notranslate nohighlight">\(\mathcal{O}\left(N^2\right)\)</span> scaling in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-Typically, we find that this makes geometry generation computationally trivial (in the sense that it is very fast compared to the simulation).</p>
+Typically, we find that this makes geometry generation computationally trivial for geometries consisting of relatively small object surface areas.</p>
 <p>To understand this process, note that the SDF satisfies the Eikonal equation</p>
 <div class="math notranslate nohighlight">
 \begin{equation}
@@ -299,9 +295,10 @@ Typically, we find that this makes geometry generation computationally trivial (
 \end{equation}</div><p>and so it is well-behaved for all <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.
 The SDF can thus be used to prune large regions in space where cut-cells don’t exist.
 For example, consider a Cartesian grid patch with cell size <span class="math notranslate nohighlight">\(\Delta x\)</span> and cell-centered grid points <span class="math notranslate nohighlight">\(\mathbf{x}_{\mathbf{i}} = \left(\mathbf{i} + \mathbf{\frac{1}{2}}\right)\Delta x\)</span> where <span class="math notranslate nohighlight">\(\mathbf{i} \in \mathbb{Z}^3\)</span> are grid cells in the patch, as shown in <a class="reference internal" href="#fig-pruning"><span class="std std-numref">Fig. 6</span></a>.
-We know that cut cells do not exist in the grid patch if <span class="math notranslate nohighlight">\(\left|f\left(\mathbf{x}_{\mathbf{i}}\right)\right| &gt; \frac{1}{2}\Delta x\)</span> for all <span class="math notranslate nohighlight">\(\mathbf{i}\)</span> in the patch.
+We know that cut cells do not exist in the grid patch if <span class="math notranslate nohighlight">\(\left|f\left(\mathbf{x}_{\mathbf{i}}\right)\right| &gt; \frac{\sqrt{3}\Delta x}{2}\)</span> for all <span class="math notranslate nohighlight">\(\mathbf{i}\)</span> in the patch.
 One can use this to perform a quick scan of the SDF on a <em>coarse</em> grid level first, for example on <span class="math notranslate nohighlight">\(l=0\)</span>, and recurse deeper into the grid hierarchy to locate cut-cells on the other levels.
-Typically, a level is decomposed into Cartesian subregions, and each subregion can be scanned independently of the other subregions (i.e. the problem is embarassingly parallel).
+Typically, a level is decomposed into Cartesian subregions, and each subregion can be scanned independently of the other subregions, so the problem lends itself naturally to parallelization.
+By default, partitioning of subregions is done using a Morton curve.
 Subregions that can’t contain cut-cells are designated as <em>inside</em> or <em>outside</em>, depending on the sign of the SDF.
 There is no point in recursively refining these to look for cut-cells at finer grid levels, owing to the nature of the SDF they can be safely pruned from subsequent scans at finer levels.
 The subregions that did contain cut-cells are refined and decomposed into sub-subregions.
@@ -316,32 +313,28 @@ Red-colored grid patches are grid patches entirely contained inside the EB.
 Green-colored grid patches are entirely outside the EB, while blue-colored grid patches contain cut-cells.</span><a class="headerlink" href="#id10" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p>The above load balancing strategy is very simple, and it reduces the original <span class="math notranslate nohighlight">\(O(N^3)\)</span> complexity in 3D to <span class="math notranslate nohighlight">\(O(N^2)\)</span> complexity (in 2D the complexity is reduced from <span class="math notranslate nohighlight">\(O(N^2)\)</span> to <span class="math notranslate nohighlight">\(O(N)\)</span>).
+<p>The above load balancing strategy is very simple, and it reduces the original <span class="math notranslate nohighlight">\(O(N^3)\)</span> complexity in 3D to <span class="math notranslate nohighlight">\(O(N^2)\)</span> complexity, while in 2D the complexity is reduced from <span class="math notranslate nohighlight">\(O(N^2)\)</span> to <span class="math notranslate nohighlight">\(O(N)\)</span>.
 The strategy works for all SDFs although, strictly speaking, an SDF is not fundamentally needed.
 If a well-behaved Taylor series can be found for an implicit function, the bounds on the series can also be used to infer the location of the cut-cells, and the same algorithm can be used.
 For example, generating compound objects with CSG are typically sufficiently well behaved (provided that the components are SDFs).
 However, implicit functions like <span class="math notranslate nohighlight">\(d\left(\mathbf{x}\right) = R^2 - \mathbf{x}\cdot\mathbf{x}\)</span> must be used with caution.</p>
-<p>When polygonal surfaces are involved the above process might lead to load imbalance if the input grids to <a class="reference internal" href="#chap-ebgeometry"><span class="std std-ref">EBGeometry</span></a> do not produce well-balanced bounding volume hierarchies (which is often the case).
-In this case it might be beneficial to shuffle the cut-cell boxes among the ranks by specifying <code class="docutils literal notranslate"><span class="pre">ScanShop.box_sorting</span> <span class="pre">=</span> <span class="pre">shuffle</span></code>, which will normally lead to well-balanced cut-cell grid generation.
-Other options are <code class="docutils literal notranslate"><span class="pre">ScanShop.box_sorting</span> <span class="pre">=</span> <span class="pre">morton</span></code> and <code class="docutils literal notranslate"><span class="pre">ScanShop.box_sorting</span> <span class="pre">=</span> <span class="pre">std</span></code>.
-The default behavior is to use a Morton space-filling curve for organizing the cut-cell patches among the ranks.</p>
 </section>
 </section>
 <section id="mesh-generation">
 <span id="chap-meshgeneration"></span><h2>Mesh generation<a class="headerlink" href="#mesh-generation" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports two algorithm for AMR grid generation:</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports two grid generation algorithms:</p>
 <ol class="arabic simple">
 <li><p>The classical Berger-Rigoutsos algorithm <span id="id3">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">Berger and Rigoutsos, 1991</a>]</span>.</p></li>
 <li><p>A <em>tiled</em> algorithm <span id="id4">[<a class="reference internal" href="../ZZReferences.html#id164" title="Brian T.N. Gunney and Robert W. Anderson. Advances in patch-based adaptive mesh refinement scalability. Journal of Parallel and Distributed Computing, 2016. doi:10.1016/j.jpdc.2015.11.005.">Gunney and Anderson, 2016</a>]</span>.</p></li>
 </ol>
 <p>Both algorithms work by taking a set of flagged cells on each grid level and generating new boxes that cover the flags.
 Only <em>properly nested</em> grids are generated, in which case two grid levels <span class="math notranslate nohighlight">\(l-1\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span> are separated by a non-zero number of grid cells on level <span class="math notranslate nohighlight">\(l\)</span>.
-This requirement is not fundamentally required for quad- and oct-tree grids, but is nevertheless usually imposed.
-For patch based AMR, the rationale for this requirement is that stencils on level <span class="math notranslate nohighlight">\(l+1\)</span> should should only reach into grid cells on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.
+This requirement is not fundamentally required for quadtree and octree grids, but is nevertheless usually imposed.
+For patch based AMR, the rationale for this requirement is that stencils on level <span class="math notranslate nohighlight">\(l+1\)</span> should should only reach into grid cells on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>, which greatly simplifies the definition of numerical stencils on each level.
 For example, ghost cells on level <span class="math notranslate nohighlight">\(l+1\)</span> can then be interpolated from data only on levels <span class="math notranslate nohighlight">\(l\)</span> and <span class="math notranslate nohighlight">\(l+1\)</span>.</p>
 <section id="berger-rigoutsos-algorithm">
 <h3>Berger-Rigoutsos algorithm<a class="headerlink" href="#berger-rigoutsos-algorithm" title="Permalink to this heading"></a></h3>
-<p>The Berger-Rigoustous grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and is called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+<p>The Berger-Rigoustous grid algorithm is implemented in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and can be called by <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
 The classical Berger-Rigoustous algorithm is inherently serial in the sense that is collects the flagged cells onto each MPI rank and then generates the boxes, see <span id="id5">[<a class="reference internal" href="../ZZReferences.html#id38" title="Marsha Berger and Isidore Rigoutsos. An Algorithm for Point Clustering and Grid Generation. IEEE Transactions on Systems, Man and Cybernetics, 1991. doi:10.1109/21.120081.">Berger and Rigoutsos, 1991</a>]</span> for implementation details.
 Typically, it is not used at large scale in 3D due to its memory consumption.</p>
 <figure class="align-center" id="id11">
@@ -369,14 +362,14 @@ Moreover, the algorithm is extremely fast and has low memory consumption even at
 <span id="chap-refinementphilosophy"></span><h2>Cell refinement philosophy<a class="headerlink" href="#cell-refinement-philosophy" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can flag cells for refinement using various methods:</p>
 <ol class="arabic simple">
-<li><p>Refine all embedded boundaries down to a specified refinement level.</p></li>
-<li><p>Refine embedded boundaries based on estimations of the surface curvature in the cut-cells.</p></li>
-<li><p>Manually add refinement flags (by specifying boxes where cells will be refined).</p></li>
-<li><p>Physics-based or data-based refinement where the user fetches data from solver classes (e.g., discretization errors, the electric field) and uses that for refinement.</p></li>
+<li><p>Refine all embedded boundaries down to a specified refinement level. See <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>.</p></li>
+<li><p>Refine embedded boundaries based on estimations of the surface curvature in the cut-cells. See <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>.</p></li>
+<li><p>Manually add refinement flags (by specifying boxes where cells will be refined). See <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a>.</p></li>
+<li><p>Physics-based or data-based refinement where the user fetches data from solver classes (e.g., discretization errors, the electric field) and uses that for refinement. See <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a>.</p></li>
 </ol>
-<p>The first two cases are covered by the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> (see <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>).
-In the first case the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will simply fetch arguments from an input script which specifies the refinement depth for the embedded boundaries.
-In the second case, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will visit every cut-cell and check if the normal vectors in neighboring cut-cell deviate by more than a specified threshold angle.
+<p>The first two cases are covered by the <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+In the first case <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will simply fetch arguments from an input script which specifies the refinement depth for the embedded boundaries.
+In the second case, the <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class will visit every cut-cell and check if the normal vectors in neighboring cut-cell deviate by more than a specified threshold angle.
 Given two normal vectors <span class="math notranslate nohighlight">\(\mathbf{n}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{n}^\prime\)</span>, the cell is refined if</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{n}\cdot\mathbf{n}^\prime \geq \cos\theta_c,\]</div>

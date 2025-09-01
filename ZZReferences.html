@@ -71,7 +71,6 @@
 <li class="toctree-l1"><a class="reference internal" href="Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -79,12 +78,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -105,7 +104,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -146,7 +145,6 @@
   <section id="references">
 <span id="chap-publications"></span><h1>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h1>
 </section>
-<p class="rubric">Scientific references</p>
 <div class="docutils container" id="id1">
 <dl class="citation">
 <dt class="label" id="id38"><span class="brackets">R1</span></dt>
@@ -178,35 +176,6 @@
 </dd>
 <dt class="label" id="id157"><span class="brackets">R10</span></dt>
 <dd><p>David Trebotich and Daniel Graves. An adaptive finite volume method for the incompressible Navier–Stokes equations in complex geometries. <em>Commun. Appl. Math. Comput. Sci.</em>, 10(1):43–82, 2015. URL: <a class="reference external" href="https://doi.org/10.2140/camcos.2015.10.43">https://doi.org/10.2140/camcos.2015.10.43</a>, <a class="reference external" href="https://doi.org/10.2140/camcos.2015.10.43">doi:10.2140/camcos.2015.10.43</a>.</p>
-</dd>
-</dl>
-</div>
-<p class="rubric">Publications using <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code></p>
-<div class="docutils container" id="id167">
-<dl class="citation">
-<dt class="label" id="id175"><span class="brackets">P1</span></dt>
-<dd><p>R Marskar and H K H Meyer. A kinetic monte carlo study of positive streamer interaction with complex dielectric surfaces. <em>Plasma Sources Science and Technology</em>, 32(8):085010, aug 2023. URL: <a class="reference external" href="https://dx.doi.org/10.1088/1361-6595/acec0b">https://dx.doi.org/10.1088/1361-6595/acec0b</a>, <a class="reference external" href="https://doi.org/10.1088/1361-6595/acec0b">doi:10.1088/1361-6595/acec0b</a>.</p>
-</dd>
-<dt class="label" id="id168"><span class="brackets">P2</span></dt>
-<dd><p>Robert Marskar. Adaptive multiscale methods for 3d streamer discharges in air. <em>Plasma Research Express</em>, 1:015011, 1 2019. URL: <a class="reference external" href="http://stacks.iop.org/2516-1067/1/i=1/a=015011?key=crossref.40abb8d43302d498d8bd122b20e9ad97">http://stacks.iop.org/2516-1067/1/i=1/a=015011?key=crossref.40abb8d43302d498d8bd122b20e9ad97</a>, <a class="reference external" href="https://doi.org/10.1088/2516-1067/aafc7b">doi:10.1088/2516-1067/aafc7b</a>.</p>
-</dd>
-<dt class="label" id="id169"><span class="brackets">P3</span></dt>
-<dd><p>Robert Marskar. An adaptive cartesian embedded boundary approach for fluid simulations of two- and three-dimensional low temperature plasma filaments in complex geometries. <em>Journal of Computational Physics</em>, 388:624–654, 2019. <a class="reference external" href="https://doi.org/10.1016/j.jcp.2019.03.036">doi:10.1016/j.jcp.2019.03.036</a>.</p>
-</dd>
-<dt class="label" id="id171"><span class="brackets">P4</span></dt>
-<dd><p>Robert Marskar. 3d fluid modeling of positive streamer discharges in air with stochastic photoionization. <em>Plasma Sources Science and Technology</em>, 4 2020. URL: <a class="reference external" href="https://iopscience.iop.org/article/10.1088/1361-6595/ab87b6">https://iopscience.iop.org/article/10.1088/1361-6595/ab87b6</a>, <a class="reference external" href="https://doi.org/10.1088/1361-6595/ab87b6">doi:10.1088/1361-6595/ab87b6</a>.</p>
-</dd>
-<dt class="label" id="id174"><span class="brackets">P5</span></dt>
-<dd><p>Robert Marskar. chombo-discharge: An AMR code for gas discharge simulations in complex geometries. <em>Journal of Open Source Software</em>, 8(85):5335, May 2023. URL: <a class="reference external" href="https://joss.theoj.org/papers/10.21105/joss.05335">https://joss.theoj.org/papers/10.21105/joss.05335</a>, <a class="reference external" href="https://doi.org/10.21105/joss.05335">doi:10.21105/joss.05335</a>.</p>
-</dd>
-<dt class="label" id="id172"><span class="brackets">P6</span></dt>
-<dd><p>H K H Meyer, R Marskar, H Gjemdal, and F Mauseth. Streamer propagation along a profiled dielectric surface. <em>Plasma Sources Science and Technology</em>, 29:115015, 11 2020. URL: <a class="reference external" href="https://iopscience.iop.org/article/10.1088/1361-6595/abbae2">https://iopscience.iop.org/article/10.1088/1361-6595/abbae2</a>, <a class="reference external" href="https://doi.org/10.1088/1361-6595/abbae2">doi:10.1088/1361-6595/abbae2</a>.</p>
-</dd>
-<dt class="label" id="id173"><span class="brackets">P7</span></dt>
-<dd><p>H K H Meyer, R Marskar, and F Mauseth. Evolution of positive streamers in air over non-planar dielectrics: experiments and simulations. <em>Plasma Sources Science and Technology</em>, 31:114006, 11 2022. URL: <a class="reference external" href="https://iopscience.iop.org/article/10.1088/1361-6595/aca0be">https://iopscience.iop.org/article/10.1088/1361-6595/aca0be</a>, <a class="reference external" href="https://doi.org/10.1088/1361-6595/aca0be">doi:10.1088/1361-6595/aca0be</a>.</p>
-</dd>
-<dt class="label" id="id170"><span class="brackets">P8</span></dt>
-<dd><p>Hans Kristian Meyer, Frank Mauseth, Robert Marskar, Atle Pedersen, and Andreas Blaszczyk. Streamer and surface charge dynamics in non-uniform air gaps with a dielectric barrier. <em>IEEE Transactions on Dielectrics and Electrical Insulation</em>, 26:1163–1171, 8 2019. <a class="reference external" href="https://doi.org/10.1109/TDEI.2019.007929">doi:10.1109/TDEI.2019.007929</a>.</p>
 </dd>
 </dl>
 </div>

@@ -3,10 +3,6 @@
 Radiative transfer
 ==================
 
-.. tip::
-
-   The source code for the radiative transfer solvers reside in :file:`Source/RadiativeTransfer`
-
 .. _Chap:RtSolver:   
 
 RtSolver
@@ -14,12 +10,12 @@ RtSolver
 
 Radiative transfer solvers are supported in the form of
 
-* Diffusion solvers, i.e. first order Eddington solvers, which takes the form of a Helmholtz equation.
-* Using Monte Carlo sampling of discrete photons.
+* Diffusion solvers, i.e. first order Eddington solvers, which take the form of a Helmholtz equation.
+* Particle solvers, which track photons are particles (e.g., Monte Carlo sampled solvers).
   
 The solvers share a parent class ``RtSolver``, and code that uses only the ``RtSolver`` interface will should be able to switch between the two implementations.
 Note, however, that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic. 
-The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ''stationary'' transport.
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or instantaneous transport.
 
 .. tip::
    
@@ -32,24 +28,43 @@ Since most of the ``RtSolver`` is an interface which is implemented by other rad
 .. _Chap:RtSpecies:
 
 RtSpecies
----------
+_________
 
 The class ``RtSpecies`` is an abstract base class for parsing necessary information into radiative transfer solvers.
-When creating a radiative transfer solver one will need to pass in a reference to an ``RtSpecies`` instantiation such that the solvers can look up the required infromation.
+When creating a radiative transfer solver one will need to pass in a reference to an ``RtSpecies`` instantiation such that the solvers can look up the required information.
 Currently, ``RtSpecies`` is a lightweight class where the user needs to implement the function
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_RtSpecies.H
+   :language: c++
+   :lines: 48-53
+   :dedent: 2
 
-  virtual Real RtSpecies::getAbsorptionCoefficient(const RealVect a_pos) const = 0;
+This absorption coefficient is used in both the diffusion (see :ref:`Chap:DiffusionRTE`) and Monte Carlo (see :ref:`Chap:MonteCarloRTE`) solvers.
 
-The absorption coefficient is used in the diffusion (see :ref:`Chap:DiffusionRTE`) and Monte Carlo (see :ref:`Chap:MonteCarloRTE`) solvers. 
+.. important::
+   
+   Upon construction, one must set the class member ``m_name``, which is the name passed to the actual solver.
 
-One can also assign a name to the species through the member variable ``RtSpecies::m_name``.
+Setting the source term
+_______________________
+
+``RtSolver`` stores a source term :math:`\eta` on the mesh, which describes the number of photons that are generated produced per unit volume and time.
+This variable can be set through the following functions:
+
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_RtSolver.H
+   :language: c++
+   :lines: 254-273
+   :dedent: 2
+
+The usage of :math:`\eta` varies between the different solvers.
+It is possible, for example, to generate computational photons (particles) using :math:`\eta` when using Monte Carlo sampling, but this is not a requirement.
 
 .. _Chap:DiffusionRTE:
 
 Diffusion approximation
 -----------------------
+
+.. _Chap:EddingtonSP1:
 
 EddingtonSP1
 ____________
@@ -58,8 +73,8 @@ The first-order diffusion approximation to the radiative transfer equation is en
 ``EddingtonSP1`` implements ``RtSolver`` using both stationary and transient advance methods (e.g. for stationary or time-dependent radiative transport).
 The source code is located in :file:`$DISCHARGE_HOME/RadiativeTransfer`. 
 
-Equation of motion
-__________________
+Equation(s) of motion
+_____________________
 
 In the diffusion approximation, the radiative transport equation is
 
@@ -68,11 +83,13 @@ In the diffusion approximation, the radiative transport equation is
 
    \partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},
 
-where :math:`\kappa` is the absorption coefficient (i.e., inverse absorption length).
+where :math:`\Psi` is the radiative intensity (i.e., photons absorbed per unit volume`.
+Here, :math:`\kappa` is the absorption coefficient (i.e., inverse absorption length).
+This value can be spatially dependent, and is passed in through the :ref:`Chap:RtSpecies` function ``getAbsorptionCoefficient`` that was discussed above.
 Note that in the context below, :math:`\kappa` is *not* the volume fraction of a grid cell but the absorption coefficient.
-This is called the Eddington approximation, and the radiative flux is :math:`F = -\frac{c}{3\kappa}\nabla \Psi`.
+The above equation is called the Eddington approximation, with the closure relation being that the radiative flux is given by :math:`F = -\frac{c}{3\kappa}\nabla \Psi`.
 
-In the stationary case this yields a Helmholtz equation
+In the stationary case this reduces to a Helmholtz equation
 
 .. math::
    :label: StationaryDiffusionRTE
@@ -83,28 +100,26 @@ Implementation
 ______________
 
 ``EddingtonSP1`` uses multigrid methods for solving :eq:`TransientDiffusionRTE` and :eq:`StationaryDiffusionRTE`, see :ref:`Chap:LinearSolvers`.
-The class implements ``RtSolver::advance()``, which can switch between :eq:`TransientDiffusionRTE` and :eq:`StationaryDiffusionRTE`.
-Note that for both the stationary and time-dependent cases the absorption coefficient :math:`\kappa` in :eq:`TransientDiffusionRTE` and :eq:`StationaryDiffusionRTE` are filled using the ``RtSpecies`` implementation provided to the solver.
-Also note that the absorption coefficient does not need to be constant in space. 
+To advance the solution, one will call the member function
 
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
+   :language: c++
+   :lines: 80-89
+   :dedent: 2
 
-Stationary kernel
-^^^^^^^^^^^^^^^^^
+Internally, this version will perform one of the following:
 
-For the stationary kernel we solve :eq:`StationaryDiffusionRTE` directly, using a single multigrid solve.
-See :ref:`Chap:LinearSolvers` for discretization details. 
+#. Solve :eq:`TransientDiffusionRTE` if using a *transient* solver.
+   This is done using a backward Euler solve:
 
-Transient kernel
-^^^^^^^^^^^^^^^^
+   .. math::
 
-For solving :eq:`TransientDiffusionRTE`, ``EddingtonSP1`` implements the backward Euler method, while explicit discretizations are not currently available. 
-The Euler discretization is
+      \left(1+ \kappa \Delta t\right)\Psi^{k+1} - \Delta t \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi^{k+1}\right) = \Psi^{k} + \frac{\Delta t\eta^{k+1}}{c},
 
-.. math::
+   This equation is a Helmholtz equation for :math:`\Psi^{k+1}` which is solved using geometric multigrid, see :ref:`Chap:LinearSolvers`.
 
-   \left(1+ \kappa \Delta t\right)\Psi^{k+1} - \Delta t \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi^{k+1}\right) = \Psi^{k} + \frac{\Delta t\eta^{k+1}}{c},
-
-Again, this is a Helmholtz equation for :math:`\Psi^{k+1}` which is solved using geometric multigrid.
+#. Solve :eq:`StationaryDiffusionRTE` if using instantaneous photon transport.
+   This is done directly with a geometric multigrid solver, see :ref:`Chap:LinearSolvers`.
 
 .. _Chap:EddingtonSP1BC:
    
@@ -114,24 +129,52 @@ ___________________
 Simplified domain boundary conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``EddingtonSP1`` solver supports the following boundary conditions on domain faces and EBs.
-The domain boundary condition *type*, which is either Dirichlet, Neumann, or Larsen (a special type of Robin boundary condition) is always passed in through the input file.
-If the user passes in a value, say ``neumann 0.0``, for a particular domain side/face, then the class will use a homogeneous Neumann boundary for the entire domain edge/face. 
+It is possible to set the following *simplified* boundary conditions on domain faces and embedded boundaries:
+All of these boundary condition specifications take the form ``<type> <value>``.
+
+#. Dirichlet, with a fixed value of :math:`\Phi`. E.g., ``dirichlet 0.0``.
+#. Neumann, using a fixed value of :math:`\partial_n\Phi`. E.g., ``neumann 0.0``.
+#. A *Larsen-type* boundary condition, which is an absorbing boundary condition in the form
+
+   .. math::
+
+      \kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,
+
+   where :math:`r_1` and :math:`r_2` are reflection coefficients and :math:`g` is a surface source, see :cite:`Larsen2002`.
+   Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge :math:`g`.
+   In the majority of cases, however, we will have :math:`r_1 = r_2 = g = 0` and the BC becomes
+
+   .. math::
+
+      \partial_n\Psi + \frac{3\kappa}{2}\Psi = g.   
+      
+   The user must then pass a value ``larsen <value>``, where the ``value`` corresponds to the souce term :math:`g`.
+   Typically, this term is zero.
+
+.. tip::
+   
+   For radiative transfer, the Larsen boundary condition is usually the correct one as it approximately describes outflow of photons on the boundary.
+   In this case the correct boundary condition is ``larsen 0.0``.
 
 Custom domain boundary conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-It is possible to use more complex boundary conditions by passing in ``dirichlet_custom``, ``neumann_custom``, or ``larsen_custom`` options.
-In this case the ``EddingtonSP1`` solver will use a specified function at the domain edge/face.
+It is possible to use more complex boundary conditions by passing in ``dirichlet_custom``, ``neumann_custom``, or ``larsen_custom`` options through the solver configuration options (see :ref:`Chap:EddingtonInputOptions`).
+In this case the ``EddingtonSP1`` solver will use a specified function at the domain edge/face which can vary spatially (and with time).
 To specify that function, ``EddingtonSP1`` has a member function
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.H
+   :language: c++
+   :lines: 115-125
+   :dedent: 2
 
-   void setDomainSideBcFunction(const int a_dir,
-                                const Side::LoHiSide a_side,
-				const std::function<Real(const RealVect a_pos, const Real a_time)> a_function);
+Here, the ``a_function`` argument is simply an alias:
 
-which species a boundary condition value for one of the edges (faces in 3D).
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1DomainBc.H
+   :language: c++
+   :lines: 43-46
+   :dedent: 2
+
 Note that the boundary condition *type* is still Dirichlet, Neumann, or Larsen (depending on whether or not ``dirichlet_custom``, ``neumann_custom``, or ``larsen_custom`` was passed in). 
 For example, to set the boundary condition on the left :math:`x` face in the domain, one can create a ``EddingtonSP1DomainBc::BcFunction`` object as follows:
 
@@ -148,9 +191,9 @@ For example, to set the boundary condition on the left :math:`x` face in the dom
    // Set the domain bc function in the solver. 
    eddingtonSolver.setDomainSideBcFunction(0, Side::Lo, myValue);
 
-.. note::
+.. warning::
 
-   If the user specifies one of the custom boundary conditions but does not set the function, it will issue a run-time error.
+   A run-time error will occur if the user specifies one of the custom boundary conditions but does not actually set the function.
    
 Embedded boundaries
 ^^^^^^^^^^^^^^^^^^^
@@ -162,30 +205,9 @@ In the input script, the user can specify
 * ``neumann <value>`` For setting a constant Neumann boundary condition everywhere. 
 * ``larsen <value>`` For setting a constant Larsen boundary condition everywhere. 
 
-Boundary condition types
-^^^^^^^^^^^^^^^^^^^^^^^^
+The specification of these boundary conditions occurs in precise analogy with the domain boundary conditions, and are therefore not discussed further here.
 
-#. **Dirichlet**.
-   For Dirichlet boundary conditions we specify the value of :math:`\Psi` on the boundary.
-   Note that this involves reconstructing the gradient :math:`\partial_n\Psi` on domain faces and edges, see :ref:`Chap:LinearSolverDirichletBC`. 
-#. **Neumann**.
-   For Neumann boundary conditions we specify the value of :math:`\partial_n\Psi` on the boundary.
-   Note that the linear solver interface also supports setting :math:`B\partial_n\Psi` on the boundary (where :math:`B` is the Helmholtz equation :math:`B` coefficient).
-   However, the ``EddingtonSP1`` solver does not use this functionality.
-#. **Larsen**.
-   The Larsen boundary condition is an absorbing boundary condition, taking the form of a Robin boundary as follows:
-
-   .. math::
-
-      \kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,
-
-   where :math:`r_1` and :math:`r_2` are reflection coefficients and :math:`g` is a surface source, see :cite:`Larsen2002` for details.
-   Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge :math:`g`.
-   In the majority of cases, however, we will have :math:`r_1 = r_2 = g = 0` and the BC becomes
-
-   .. math::
-
-      \partial_n\Psi + \frac{3\kappa}{2}\Psi = 0.
+.. _Chap:EddingtonInputOptions:
 
 Solver configuration
 ____________________
@@ -193,91 +215,21 @@ ____________________
 The ``EddingtonSP1`` implementation has a number of configurable options for running the solver, and these are given below:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_EddingtonSP1.options
+   :emphasize-lines: 4, 6-9, 20-33
+   :caption: ``EddingtonSP1`` solver configuration options. Run-time configurable options are highlighted.
 
-Basic options
-^^^^^^^^^^^^^
-
-Basic input options to ``EddingtonSP1`` are as follows:
-
-* ``EddingtonSP1.verbosity`` for controlling solver verbosity.
-* ``EddingtonSP1.stationary`` for setting whether or not the solver is stationary.
-* ``EddingtonSP1.reflectivity`` for controlling the reflectivity in the Larsen boundary conditions.
-  Only relevant if ``EddingtonSP1.stationary = false``.
-* ``EddingtonSP1.kappa_scale`` Switch for multiplying the source with with the volume fraction or not.
-  Note that the multigrid Helmholtz solvers require a diagonal weighting of the operator, including the right-hand side.
-  If ``EddingtonSP1.kappa_scale = false`` then the solver will assume that this weighting of the source term has already been made.
-* ``EddingtonSP1.plt_vars`` For setting which solver plot variables are included in plot files.
-* ``EddingtonSP1.use_regrid_slopes`` For setting turning on/off slopes when regridding the solution.
-
-Setting boundary conditions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Boundary conditions are parsed through the flags
-
-* ``EddingtonSP1.ebbc`` Which sets the boundary conditions on the EBs.
-* ``EddingtonSP1.bc.dim.side`` Which sets the boundary conditions on the domain sides, see :ref:`Chap:EddingtonSP1BC` for details. 
-
-Multigrid settings
-^^^^^^^^^^^^^^^^^^
-
-All parameters that begin with the form ``EddingtonSP1.gmg_`` indicate a tuning parameter for geometric multigrid.
-
-* ``EddingtonSP1.gmg_verbosity``.
-  Controls the multigrid verbosity.
-  Setting it to a number :math:`> 0` will print multigrid convergence information.
-* ``EddingtonSP1.gmg_pre_smooth``.
-  Controls the number of relaxations on each level during multigrid downsweeps.
-* ``EddingtonSP1.gmg_post_smooth``.
-  Controls the number of relaxations on each level during multigrid upsweeps.
-* ``EddingtonSP1.gmg_bott_smooth``.
-  Controls the number of relaxations before entering the bottom solve. 
-* ``EddingtonSP1.gmg_min_iter``.
-  Sets the minimum number of iterations that multigrid will perform. 
-* ``EddingtonSP1.gmg_max_iter``.
-  Sets the maximum number of iterations that multigrid will perform. 
-* ``EddingtonSP1.gmg_exit_tol``.
-  Sets the exit tolerance for multigrid.
-  Multigrid will exit the iterations if :math:`r < \lambda r_0` where :math:`\lambda` is the specified tolerance, :math:`r = |L\Phi -\rho|` is the residual and :math:`r_0` is the residual for :math:`\Phi = 0`.  
-* ``EddingtonSP1.gmg_exit_hang``.
-  Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
-  Letting :math:`r^k` be the residual after :math:`k` multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of :math:`r^{k+1} < (1-h)r^k`, where :math:`h` is the "hang" factor.
-* ``EddingtonSP1.gmg_min_cells``.
-  Sets the minimum amount of cells along any coordinate direction for coarsened levels.
-  Note that this will control how far multigrid will coarsen. Setting a number ``gmg_min_cells = 16`` will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction. 
-* ``EddingtonSP1.gmg_bottom_solver``.
-  Sets the bottom solver type. 
-* ``EddingtonSP1.gmg_cycle``.
-  Sets the multigrid method.
-  Currently, only V-cycles are supported.
-* ``EddingtonSP1.gmg_ebbc_order``.
-  Sets the stencil order on EBs when using Dirichlet boundary conditions. 
-  Note that this is also the stencil radius.
-  See :ref:`Chap:LinearSolvers` for details. 
-* ``EddingtonSP1.gmg_ebbc_weight``.
-  Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs when using Robin or Dirichlet boundary conditions.
-  See :ref:`Chap:LeastSquares` for details.   
-* ``EddingtonSP1.gmg_smoother``.
-  Sets the multigrid smoother.
-
-Runtime parameters
-^^^^^^^^^^^^^^^^^^
-
-The following parameters for ``EddingtonSP1`` are run-time configurable:
-
-* All multigrid tuning parameters, i.e. parameters starting with ``EddingtonSP1.gmg_``.
-* Plot variables, i.e. ``EddingtonSP1.plt_vars``.
-* Kappa scaling (for algorithmic adjustments), i.e. ``EddingtonSP1.kappa_scale``. 
+The multigrid options are analogous to the multigrid options for :ref:`Chap:FieldSolverMultigrid`, see :ref:`Chap:MultigridTuning`.
 
 .. _Chap:MonteCarloRTE:
 
-Monte Carlo sampling
---------------------
+Monte Carlo solver
+------------------
 
-``McPhoto`` defines a class which can solve radiative transfer problems using discrete photons that travel "instantenously" or transiently.
-The class derives from ``RtSolver`` and can thus be used by problems that only require the ``RtSolver`` interface.
-``McPhoto`` can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus it can capture e.g. shadows.
+``McPhoto`` defines a class which can solve radiative transfer problems using discrete photons.
+The class derives from :ref:`Chap:RtSolver` and can thus be used also be used by applications that only require the :ref:`Chap:RtSolver` interface.
+``McPhoto`` can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus capture shadows (which :ref:`Chap:EddingtonSP1` can not).
 
-The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see :ref:`Chap:ParticleMesh`) are required in order to deposit the photons on a mesh when computing densities.
+The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see :ref:`Chap:ParticleMesh`) are thus required in order to deposit the photons on a mesh if one wants to compute mesh-based absorption profiles.
 
 .. tip::
 
@@ -286,16 +238,23 @@ The Monte Carlo sampling is a particle-based radiative transfer solver, and part
 
 The solver has multiple data holders for systemizing photons, which is especially useful during transport kernels where some of the photons might strike a boundary:
 
-* In-flight photons
-* Bulk-absorbed photons, i.e. photons absorbed on the mesh.
-* EB-absorbed photons, i.e. photons that struck the EB during a transport step.
-* Domain-absorbed photons, i.e. photons that struck the domain edge/face during a transport step.
+* In-flight photons.
+* Bulk-absorbed photons, i.e., photons that were absorbed on the mesh.
+* EB-absorbed photons, i.e., photons that struck the EB during a transport step.
+* Domain-absorbed photons, i.e., photons that struck the domain edge/face during a transport step.
 * Source photons, for letting the user pass in externally generated photons into the solver.
+
+Various functions are in place for obtaining these particles:
+
+.. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
+   :language: c++
+   :lines: 398-431
+   :dedent: 2
 
 Photon particle
 _______________
 
-The ``Photon`` particle is a simple encapsulation of a computational particle and is used by ``McPhoto``.
+The ``Photon`` particle is a simple encapsulation of a computational photon which is used by ``McPhoto``.
 It derives from ``GenericParticle<2,1>`` and stores (in addition to the particle position):
 
 * The particle weight.
@@ -306,19 +265,34 @@ It derives from ``GenericParticle<2,1>`` and stores (in addition to the particle
 
    The ``Photon`` class is defined in :file:`$DISCHARGE_HOME/Source/RadiativeTransfer/CD_Photon.H`
 
-When defining the ``McPhoto`` class, the particle's absorption coefficient is computed from the implementation of the absorption function method in :ref:`Chap:RtSpecies`.
+When defining the ``McPhoto`` class, the particle's absorption coefficient can be computed from the implementation of the absorption function method in :ref:`Chap:RtSpecies`.
 
 Generating photons
 __________________
 
 There are several ways users can generate computational photons that are to be transported by the solver.
 
-#. Fetch the *source photons* by calling ``McPhoto::getSourcePhotons()`` and fill the returned data holder.
-   The photons can then be added to the ``McPhoto`` instantiation and one of the transport kernels can be called.
+#. Fetch the *source photons* by calling
 
-#. If the source term :math:`\eta` has been filled, the user can call ``McPhoto::advance`` to have the solver generate the computational photons and than transport them.
+   .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
+      :language: c++
+      :lines: 426-431
+      :dedent: 2
 
-   .. important::
+   The source photons can then be filled and added to the other photons.
+
+#. Add photons directly, by first obtaining the in-flight photons through
+
+   .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.H
+      :language: c++
+      :lines: 398-403
+      :dedent: 2
+
+   Photons can then be added directly.
+
+#. If the source term :math:`\eta` has been filled, the user can call ``McPhoto::advance`` to have the solver generate the computational photons and then advance them.
+   This is the correct approach for, e.g., applications that always use mesh-based photon source terms and want to have the computational photons be generated on the fly.
+   .. warning::
 
       The ``advance`` function is *only* meant to be used together with a mesh-based source term that the user has filled prior to calling the method.
 
@@ -327,8 +301,10 @@ There are several ways users can generate computational photons that are to be t
 Transport modes
 _______________
 
-``McPhoto`` can be run as a fully transient (in which photons are tracked in time) or as an instantaneous solver (where photons are absorbed immediately on the mesh).
-These two differ in the way the transport problem over a time step :math:`\Delta t` is approach, but both methods include intersection tests with geometries and domain edges/faces, 
+``McPhoto`` can be run as a fully transient, in which photons are tracked in time, or as an instantaneous solver.
+For the instantaneous mode, photon absorption positions are stochastically sampled with Monte Carlo procedure and the photons are immediately absorbed on the mesh.
+For the transient mode the photon advancement occurs over :math:`\Delta t`, so there is a limited distance (:math:`c \Delta t`) that the photons can propagate.
+In this case, only some of the photons will be absorbed on the mesh whereas the rest may continue their propagation.
 
 Instantaneous transport
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -369,29 +345,12 @@ In addition to the above two methods, the solver interface permits users to add 
 .. _Chap:McPhotoOptions:
 
 Solver configuration
-___________________
+____________________
+
+
+``McPhoto`` can be configured through its input options, see below:
 
 .. literalinclude:: ../../../../Source/RadiativeTransfer/CD_McPhoto.options
-
-* ``McPhoto.verbosity`` for controlling the solver verbosity.
-* ``McPhoto.instantaneous`` for setting the transport mode.
-* ``McPhoto.max_photons_per_cell`` for restricting the number of photons generated per cell when having the solver generate the computational photons. This is only relevant when calling the ``advance`` method.
-* ``McPhoto.num_sampling_packets`` for using sub-sampling when generating and transport photons in instantaneous mode through the ``advance`` function.
-  This permits the ``McPhoto.max_photons_per_cell`` to partition the photon transport into packets where a fewer number of photons are generated during each step. Note that this will deposit the photons on the mesh for each packet, and the absorbed photons are only available as a density (i.e., the computational photons that were absorbed are lost).
-  This can reduce memory for certain types of applications when using many computational photons.
-* ``McPhoto.blend_conservation`` is a dead option marked for future removal (it blends a non-conservative divergence when depositing in cut-cells).
-* ``McPhoto.transparent_eb`` for turning on/off transparent boundaries. Mostly used for debugging.
-* ``McPhoto.plt_vars`` for setting plot variables. 
-* ``McPhoto.intersection_alg`` sets the intersection algorithm when computing collisions with EBs.
-  Ray-casting and bisection methods are supported.
-* ``McPhoto.bisect_step`` sets bisection step (physical length) when calculation intersection tests using the bisection algorithm (i.e., this parameter is irrelevant if ``McPhoto.intersection_alg = raycast``).
-* ``McPhoto.deposition`` for setting the deposition method.
-  Currently, NGP and CIC methods are supported (see :ref:`Chap:ParticleMesh`).
-* ``McPhoto.deposition_cf`` for setting the deposition strategy near coarse-fine boundaries.
-  Currently, *interp* and *halo* are supported, see :ref:`Chap:ParticleMesh`.
-* ``McPhoto_bc_<coord>_<low/high>`` sets the boundary condition on domain edges/faces.
-* ``McPhoto.photon_generation`` for setting the photon generation method (details are given below).
-* ``McPhoto.source_type`` for setting the photon generation method (details are given below).
 
 .. tip::
 
@@ -404,7 +363,7 @@ Clarifications
 When computational photons are generated through the solver, users might have filled the source term differently depending on the application.
 For example, users might have filled the source term with the number of photons generated per unit volume and time, or the *physical* number of photons to be generated. 
 The two input options ``McPhoto.photon_generation`` and ``McPhoto.source_type`` contain the necessary specifications for ensuring that the user-filled source term can be translated properly for ensuring that the correct number of physical photons are generated.
-Firstly, ``McPhoto.source_type`` contains the specification of what the source term contains, e.g.
+Firstly, ``McPhoto.source_type`` contains the specification of what the source term contains:
 
 * ``number`` if the source term contains the physical number of photons.
 * ``volume`` if the source terms contains the physical number of photons generated per unit volume.
@@ -427,7 +386,7 @@ Otherwise, if ``McPhoto.photon_generation`` is set to *deterministic* then the s
    N_{\gamma}^{\text{phys}} = \overline{N}_{\gamma}^{\text{phys}}
 
 photons.
-Again, these elements are important because users might choose to run such stochastic samplings outside of ``McPhoto``.
+Again, these elements are important because users might have chosen to perform the Poisson sampling outside of ``McPhoto``.
 
 .. important::
 

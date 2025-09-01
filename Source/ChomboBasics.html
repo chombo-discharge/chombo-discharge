@@ -85,7 +85,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -93,12 +92,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -119,7 +118,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -171,7 +170,7 @@ Compiling with double precision will typedef <code class="docutils literal notra
 <h2>RealVect<a class="headerlink" href="#realvect" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RealVect</span></code> is a spatial vector.
 It holds two <code class="docutils literal notranslate"><span class="pre">Real</span></code> components in 2D and three <code class="docutils literal notranslate"><span class="pre">Real</span></code> components in 3D.
-The <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> class has floating point arithmetic, e.g. addition, subtraction, multiplication etc.</p>
+The <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> class has floating point arithmetic, e.g., addition, subtraction, multiplication etc.</p>
 <p>Most of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is written in dimension-independent code, and for cases where <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> is initialized with components the constructor uses <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> macros for expanding the correct number of arguments.
 For example</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVect</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="n">D_DECL</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span><span class="w"> </span><span class="n">vy</span><span class="p">,</span><span class="w"> </span><span class="n">vz</span><span class="p">));</span>
@@ -194,24 +193,15 @@ To turn a cell-centered <code class="docutils literal notranslate"><span class="
 <span class="n">bx</span><span class="p">.</span><span class="n">surroundingNodes</span><span class="p">()</span><span class="o">:</span><span class="w">                </span><span class="c1">// Now a cell-centered box</span>
 </pre></div>
 </div>
-<p>This will increase the box dimensions by one in each coordinate direction.</p>
+<p>This will increase the box dimensions by one in each coordinate direction, and set the centering to face centered.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Box</span></code> is frequently used throughout <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> when iterating over grid cells.</p>
 </section>
 <section id="ebcellfab-and-farraybox">
 <h2>EBCellFAB and FArrayBox<a class="headerlink" href="#ebcellfab-and-farraybox" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> object is an array for holding cell-centered data in an embedded boundary context.
-The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> has two data structures: An <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> that holds the data on the cell centers, and a additional data structure that holds data in cells that are multiply cut.
-Doing arithmetic with <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> usually requires one to iterate over all the cell in the <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code>, and then to iterate over the <em>irregular cells</em> (i.e. cut-cells) later.
-A <code class="docutils literal notranslate"><span class="pre">VoFIterator</span></code> is such as object; it can iterate over cut-cells.
-Usually, code for doing anything with the <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> looks like this:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Call Fortran code</span>
-<span class="n">FORT_DO_SOMETHING</span><span class="p">(....)</span>
-
-<span class="c1">// Iterate over cut-cells</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">VoFIterator</span><span class="w"> </span><span class="n">vofit</span><span class="p">(...);</span><span class="w"> </span><span class="n">vofit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">vofit</span><span class="p">){</span>
-<span class="w">   </span><span class="p">(...)</span>
-<span class="p">}</span>
-</pre></div>
-</div>
+The <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> has two data structures: An <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> which is a Cartesian array, and a additional data structure that holds data in multi-valued grid cells.
+Doing arithmetic with <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> usually requires one to iterate over all the cell in the <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code>, and then also to iterate over the <em>irregular cells</em> (i.e., cut-cells) later.
+A <code class="docutils literal notranslate"><span class="pre">VoFIterator</span></code> is an object designed to iterate over the irregular cells, and must be defined by the set of cells that it will iterate over and the graph that describes the cell connectivity.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">FArrayBox</span></code> stores the data in column major order.</p>
@@ -233,13 +223,16 @@ E.g. to obtain an element in the vector</p>
 <h2>RefCountedPtr<a class="headerlink" href="#refcountedptr" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> is a pointer class in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with reference counting.
 That is, when objects that hold a reference to some <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> object goes out of scope the reference counter is decremented.
-If the reference counter reaches zero, the object that <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> points to it deallocated.
+If the reference counter reaches zero, the object that <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> points to it is deallocated.
 Using <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> is much preferred over using a raw pointer <code class="docutils literal notranslate"><span class="pre">T*</span></code> to 1) avoid memory leaks and 2) compress code since no explicit deallocations need to be called.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>In modern C++-speak, <code class="docutils literal notranslate"><span class="pre">RefCountedPtr&lt;T&gt;</span></code> can be thought of as a <em>very</em> simple version of <code class="docutils literal notranslate"><span class="pre">std::shared_ptr&lt;T&gt;</span></code>.</p>
+</div>
 </section>
 <section id="disjointboxlayout">
 <h2>DisjointBoxLayout<a class="headerlink" href="#disjointboxlayout" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> class describes a grid on an AMR level where all the boxes are <em>disjoint</em>, i.e. they don’t overlap.
+<p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> class describes a grid on an AMR level where all the boxes are <em>disjoint</em>, i.e., boxes which do not overlap.
 <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is built upon a union of non-overlapping boxes having the same grid resolution and with unique rank-to-box ownership.
 The constructor is</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;</span><span class="w"> </span><span class="n">boxes</span><span class="p">(...);</span><span class="w">  </span><span class="c1">// Vector of disjoint boxes</span>
@@ -249,9 +242,9 @@ The constructor is</p>
 </pre></div>
 </div>
 <p>In simple terms,  <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is the decomposed grid on each level in which MPI ranks have unique ownership of specific parts of the grid.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> view is global, i.e. each MPI rank knows about all the boxes and the box ownership on the entire AMR level.
+<p>The <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is not a distributed data structure, and each MPI rank knows about all the boxes and the box ownership on the entire AMR level.
 However, ranks will only allocate data on the part of the grid that they own.
-Data iterators also exist, and the most common is to use iterators that only iterate over the part of the <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> that the specific MPI ranks own:</p>
+Data iterators also exist, and the most common is to use iterators that only iterate over its own part of the <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code>.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DisjointBoxLayout</span><span class="w"> </span><span class="n">dbl</span><span class="p">;</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 <span class="w">   </span><span class="c1">// Do something</span>
@@ -259,22 +252,22 @@ Data iterators also exist, and the most common is to use iterators that only ite
 </pre></div>
 </div>
 <p>Each MPI rank will then iterate <em>only</em> over the part of the grid where it has ownership.</p>
-<p>Other data iterators exist that iterate over all boxes in the grid:</p>
+<p>A related data iterators is <code class="docutils literal notranslate"><span class="pre">LayoutIterator</span></code>, which will iterate over all boxes in the grid:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">LayoutIterator</span><span class="w"> </span><span class="n">lit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">.</span><span class="n">layoutIterator</span><span class="p">();</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
 <span class="w">   </span><span class="c1">// Do something</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>This is typically used if one wants to do some global operation, e.g. count the number of cells in the grid.
-However, trying to use <code class="docutils literal notranslate"><span class="pre">LayoutIterator</span></code> to retrieve data that was allocated locally on a different MPI rank is an error.</p>
+<p>This is typically used if one wants to do some global operations, e.g., count the number of cells in the grid.
+However, trying to use <code class="docutils literal notranslate"><span class="pre">LayoutIterator</span></code> to retrieve data that was allocated by different MPI rank is an error.</p>
 </section>
 <section id="leveldata">
 <h2>LevelData<a class="headerlink" href="#leveldata" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> template structure holds data on all the grid patches of one AMR level.
 The data is distributed with the domain decomposition specified by <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code>, and each patch contains exactly one instance of <code class="docutils literal notranslate"><span class="pre">T</span></code>.
-<code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> uses a factory pattern for creating the <code class="docutils literal notranslate"><span class="pre">T</span></code> objects, so if you have new data structures that should fit the in <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> structure you must also implement a factory method for <code class="docutils literal notranslate"><span class="pre">T</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> uses a factory pattern for creating the <code class="docutils literal notranslate"><span class="pre">T</span></code> objects, so if you have new data structures that should fit within <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> structure you must also implement a factory method for <code class="docutils literal notranslate"><span class="pre">T</span></code>, as well as an appropriate linearization function for <code class="docutils literal notranslate"><span class="pre">T</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> object provides the domain decomposition method in <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-Often, <code class="docutils literal notranslate"><span class="pre">T</span></code> is an <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code>, i.e. a Cartesian grid patch that also supports EB formulations.</p>
+Often, <code class="docutils literal notranslate"><span class="pre">T</span></code> is an <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code>.</p>
 <p>To iterate over <code class="docutils literal notranslate"><span class="pre">LevelData&lt;T&gt;</span></code> one will use the data iterator above:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myData</span><span class="p">;</span>
 <span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
@@ -289,7 +282,7 @@ Often, <code class="docutils literal notranslate"><span class="pre">T</span></co
 <p>The <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> holds the geometric information over one <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> level.
 Typically, the <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> is used for fetching the geometric moments that are required for performing computations near cut-cells.
 <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> can be thought of as an object which provides all EB-related information on a specific grid level.
-The EB information consists of e.g. cell flags (i.e., is the cell a cut-cell?), volume fractions, etc.
+The EB information consists of, e.g., cell flags (i.e., is the cell a cut-cell?), volume fractions, normal vectors, etc.
 This information is stored in a class <code class="docutils literal notranslate"><span class="pre">EBISBox</span></code>, which holds all the EB information for one specific grid patch.
 To obtain the EB-information for a specific grid patch, one will call:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">EBISLayout</span><span class="w"> </span><span class="n">ebisl</span><span class="p">;</span>
@@ -299,7 +292,7 @@ To obtain the EB-information for a specific grid patch, one will call:</p>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">EBISBox</span></code> contains the geometric information over only one grid patch.
-One can thus think of the <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> as a <code class="docutils literal notranslate"><span class="pre">LevelData&lt;EBISBox&gt;</span></code> structure.</p>
+One can thus think of the <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code> as a <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;EBISBox&gt;</span></code> structure.</p>
 <p>As an example, to iterate over all the cut-cells defined for a cell-centered data holder an AMR-level one would do:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">constexpr</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">comp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
@@ -308,10 +301,11 @@ One can thus think of the <code class="docutils literal notranslate"><span class
 <span class="n">EBISLayout</span><span class="w"> </span><span class="n">ebisl</span><span class="p">;</span>
 
 <span class="c1">// Iterate over all the patches on a grid level.</span>
-<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
-<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="w">  </span><span class="n">cellBox</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">DataIterator</span><span class="w"> </span><span class="n">dit</span><span class="p">(</span><span class="n">dbl</span><span class="p">);</span><span class="w"> </span><span class="n">dit</span><span class="p">.</span><span class="n">ok</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">dit</span><span class="p">){</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="w">      </span><span class="n">cellBox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dbl</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">EBISBox</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ebisbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
+
 <span class="w">   </span><span class="n">EBCellFAB</span><span class="o">&amp;</span><span class="w"> </span><span class="n">patchData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myData</span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
-<span class="w">   </span><span class="n">EBISBox</span><span class="o">&amp;</span><span class="w">   </span><span class="n">ebisbox</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="p">[</span><span class="n">dit</span><span class="p">()];</span>
 
 <span class="w">   </span><span class="c1">// Get all the cut-cells in the grid patch</span>
 <span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">IntVectSet</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ivs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ebisbox</span><span class="p">.</span><span class="n">getIrregIVS</span><span class="p">(</span><span class="n">cellBox</span><span class="p">);</span>

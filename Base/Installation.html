@@ -98,7 +98,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -106,12 +105,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -132,7 +131,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -193,19 +192,20 @@ It will not compile with other versions of <code class="docutils literal notrans
 <ul class="simple">
 <li><p>A serial or parallel version of HDF5, which is used for writing plot and checkpoint files.</p></li>
 <li><p>An MPI installation, which is used for parallelization.</p></li>
-<li><p><a class="reference external" href="https://visit-dav.github.io/visit-website/">https://visit-dav.github.io/visit-website/</a> visualization, which used for visualization.</p></li>
+<li><p>VisIt (<a class="reference external" href="https://visit-dav.github.io/visit-website">https://visit-dav.github.io/visit-website</a>), which used for visualization and analysis.</p></li>
 </ul>
 </section>
 <section id="cloning-chombo-discharge">
 <h2>Cloning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#cloning-chombo-discharge" title="Permalink to this heading"></a></h2>
-<p>When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, makefiles must be able to find both <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is compiled using GNUmake.
+When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, the makefiles must be able to find both <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 In our makefiles the paths to these are supplied through the environment variables</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">DISCHARGE_HOME</span></code>, pointing to the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> root directory.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CHOMBO_HOME</span></code>, pointing to your <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> library</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CHOMBO_HOME</span></code>, pointing to your <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> library.</p></li>
 </ul>
 <p>Note that <code class="docutils literal notranslate"><span class="pre">DISCHARGE_HOME</span></code> must point to the root folder in the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code, while <code class="docutils literal notranslate"><span class="pre">CHOMBO_HOME</span></code> must point to the <code class="file docutils literal notranslate"><span class="pre">lib/</span></code> folder in your <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> root directory.
-When cloning with submodules, both <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and <code class="docutils literal notranslate"><span class="pre">nlohmann/json</span></code> will be placed in the <code class="file docutils literal notranslate"><span class="pre">Submodules</span></code> folder in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code>.</p>
+When cloning recursively with submodules, both <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and <code class="docutils literal notranslate"><span class="pre">nlohmann/json</span></code> will be placed in the <code class="file docutils literal notranslate"><span class="pre">Submodules</span></code> folder in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>To clone <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> directly to <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code>, set the environment variables and clone (using <code class="docutils literal notranslate"><span class="pre">--recursive</span></code> to fetch submodules):</p>
@@ -270,7 +270,7 @@ Users need to supply this file in order to compile <code class="docutils literal
 <p>Typically, a full configuration consists of specifying</p>
 <ul class="simple">
 <li><p>Fortran and C++ compilers</p></li>
-<li><p>Specifying configurations. E.g., serial or parallel builds, and compiler flags.</p></li>
+<li><p>Specifying build configurations. E.g., serial or parallel builds, and compiler flags for optimized and debug builds.</p></li>
 <li><p>Library paths (in particular for HDF5).</p></li>
 </ul>
 <section id="main-settings">
@@ -279,19 +279,19 @@ Users need to supply this file in order to compile <code class="docutils literal
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">DIM</span> <span class="pre">=</span> <span class="pre">2/3</span></code> The dimensionality (must be 2 or 3).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">DEBUG</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
-This enables or disables debugging flags and code checks/assertions.</p></li>
+This enables or disables debugging flags and code checks/assertions.
+<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will run substantially slower with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">OPT</span> <span class="pre">=</span> <span class="pre">FALSE/TRUE/HIGH</span></code>.
-Setting <code class="docutils literal notranslate"><span class="pre">OPT=TRUE/HIGH</span></code> enables optimization flags that will speed up <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p></li>
+Setting <code class="docutils literal notranslate"><span class="pre">OPT=TRUE/HIGH</span></code> enables optimized builds.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">PRECISION</span> <span class="pre">=</span> <span class="pre">DOUBLE</span></code>
 Currently, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has not been wetted with single precision.
 Many algorithms (like conjugate gradient) depend on the use of double precision.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CXX</span> <span class="pre">=</span> <span class="pre">&lt;C++</span> <span class="pre">compiler&gt;</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FC</span> <span class="pre">=</span> <span class="pre">&lt;Fortran</span> <span class="pre">compiler&gt;</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MPI</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
-This enables/disables MPI.</p></li>
+This enables or disables MPI.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MPICXX</span> <span class="pre">=</span> <span class="pre">&lt;MPI</span> <span class="pre">compiler&gt;</span></code> This sets the MPI compiler.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CXXSTD</span> <span class="pre">=</span> <span class="pre">14</span></code> For specifying the C++ standard. We are currently at C++14.
-Sets the C++ standard - we are currently at C++14.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CXXSTD</span> <span class="pre">=</span> <span class="pre">14</span></code> For specifying the C++ standard. We are currently at C++14.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_EB=TRUE</span></code>
 Configures <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with embedded boundary functionality.
 This is a requirement.</p></li>
@@ -300,11 +300,11 @@ Configures <code class="docutils literal notranslate"><span class="pre">Chombo</
 This is a requirement.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_MT=TRUE/FALSE</span></code>
 Configures <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> with memory tracking functionality.
-Not supported with OpenMP.</p></li>
+Not supported with OpenMP, and enabling memory tracking together with OpenMP will trigger a preprocessor error.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">USE_HDF5</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
-This enables and disables HDF5 code.</p></li>
+This enables or disables HDF5 output.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
-Turn on/off OpenMP threading.</p></li>
+Turn on or off OpenMP threading.</p></li>
 </ul>
 </section>
 <section id="mpi">
@@ -344,7 +344,7 @@ When compiled with OpenMP all loops over grid patches uses threading in the form
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Memory tracking is currently not supported together with threading.
-When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> make sure that memory tracking is turned off (see <span class="xref std std-ref">MainSettings</span>).</p>
+When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> make sure that memory tracking is turned off (see <a class="reference internal" href="#chap-mainsettings"><span class="std std-ref">Main settings</span></a>).</p>
 </div>
 </section>
 <section id="compiler-flags">
@@ -361,12 +361,13 @@ Linking to these can often be done using</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">syslibflag</span> <span class="pre">=</span> <span class="pre">-llapack</span> <span class="pre">-lblas</span></code> (for GNU compilers)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">syslibflag</span> <span class="pre">=</span> <span class="pre">-mkl=sequential</span></code> (for Intel compilers)</p></li>
 </ul>
+<p>Finally, note that the <code class="docutils literal notranslate"><span class="pre">cxxoptflags</span></code> and <code class="docutils literal notranslate"><span class="pre">foptflags</span></code> are enabled when using optimized builds.
+Corresponding flags exist for builds with <code class="docutils literal notranslate"><span class="pre">DEBUG=TRUE</span></code> in the form of <code class="docutils literal notranslate"><span class="pre">cxxdbgflags</span></code> and <code class="docutils literal notranslate"><span class="pre">foptdbgflags</span></code>.</p>
 </section>
 <section id="pre-defined-configuration-files">
 <h3>Pre-defined configuration files<a class="headerlink" href="#pre-defined-configuration-files" title="Permalink to this heading"></a></h3>
-<p>Some commonly used configuration files are found in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local</span></code>.
-<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> can be compiled in serial or with MPI, and with or without HDF5.
-The user need to configure the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> makefile to ensure that the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is properly configured.
+<p>Some commonly used configuration files are found in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Lib/Local</span></code>, and most of these are given as both serial and MPI versions, and with or without HDF5.
+The user needs to further configure the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> makefile to ensure that the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is properly configured for the system being compiled for.
 Below, we include brief instructions for compilation on a Linux workstation and for a cluster.</p>
 </section>
 <section id="gnu-configuration-for-workstations">
@@ -388,8 +389,8 @@ If you already have installed MPI and/or HDF5, the steps below might require mod
 <p>This will install</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>LAPACK and BLAS</p></li>
-<li><p>GNU compilers for Fortran and C++</p></li>
+<li><p>LAPACK and BLAS.</p></li>
+<li><p>GNU compilers for Fortran and C++.</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -400,18 +401,17 @@ If you already have installed MPI and/or HDF5, the steps below might require mod
 <p>This will install</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>OpenMPI</p></li>
-<li><p>HDF5, both serial and parallel.</p></li>
+<li><p>OpenMPI.</p></li>
+<li><p>Serial and parallel versions of HDF5.</p></li>
 </ul>
 </div></blockquote>
-<p>Both serial and parallel HDF5 will be installed, and these are <em>usually</em> found in folders</p>
+<p>The serial and parallel HDF5 are normally installed in different locations, and these are <em>usually</em> found in folders</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/x86_64-linux-gnu/hdf5/serial/</span></code> for serial HDF5</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">/usr/lib/x86_64-linux-gnu/hdf5/openmpi/</span></code> for parallel HDF5 (using OpenMPI).</p></li>
 </ul>
 </div></blockquote>
-<p>Before proceeding further, the user need to locate the HDF5 libraries (if building with HDF5).</p>
 </li>
 <li><p>After installing the dependencies, copy the desired configuration file to <code class="docutils literal notranslate"><span class="pre">$CHOMBO_HOME/mk</span></code>:</p>
 <ul>
@@ -466,7 +466,7 @@ The configuration files are located in <code class="file docutils literal notran
 <p>If the prerequisites are in place, compilation of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is usually straightforward.
 However, due to dependencies on <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> and HDF5, compilation can sometimes be an issue.
 Our experience is that if <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> compiles, so does <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
-<p>If experiencing issues, try cleaning <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> by</p>
+<p>If experiencing issues, try remove the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> installation first by running</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
 make<span class="w"> </span>pristine
 </pre></div>

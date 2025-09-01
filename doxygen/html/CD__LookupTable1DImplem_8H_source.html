@@ -183,9 +183,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
 </div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#adb4e4116d0df3be92a3278979d7e1764">   89</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> K&gt;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
+<div class="foldopen" id="foldopen00090" data-start="{" data-end="}">
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#adb4e4116d0df3be92a3278979d7e1764">   90</a></span><span class="keyword">template</span> &lt;<span class="keywordtype">size_t</span> K&gt;</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00092" data-start="{" data-end="}">
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#adb4e4116d0df3be92a3278979d7e1764">   92</a></span><a class="code hl_function" href="classLookupTable1D.html#adb4e4116d0df3be92a3278979d7e1764">LookupTable1D&lt;T, N, I&gt;::scale</a>(<span class="keyword">const</span> T&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_scale</a>) <span class="keyword">noexcept</span></div>
@@ -195,26 +195,26 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>  }</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>  <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">r</a> : m_structuredData) {</div>
-<div class="foldopen" id="foldopen00099" data-start="{" data-end="}">
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">   99</a></span>    <a class="code hl_class" href="classTracerParticleSolver.html">r</a>[K] *= <a class="code hl_class" href="classTracerParticleSolver.html">a_scale</a>;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>  }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_class" href="classTracerParticleSolver.html">r</a>[K] *= <a class="code hl_class" href="classTracerParticleSolver.html">a_scale</a>;</div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">  100</a></span>  }</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>  <span class="keywordflow">if</span> (m_isGood &amp;&amp; K == <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::get&lt;2&gt;</a>(m_grid)) {</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::get&lt;4&gt;</a>(m_grid) *= <a class="code hl_class" href="classTracerParticleSolver.html">a_scale</a>;</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>  }</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}</div>
-<div class="foldopen" id="foldopen00106" data-start="{" data-end="}">
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a619b7fae94c823793d453e5c52808cac">  106</a></span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a619b7fae94c823793d453e5c52808cac">  107</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00109" data-start="{" data-end="}">
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">  109</a></span><a class="code hl_function" href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">LookupTable1D&lt;T, N, I&gt;::truncate</a>(<span class="keyword">const</span> T&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_min</a>, <span class="keyword">const</span> T&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_max</a>, <span class="keyword">const</span> <span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">a_column</a>) <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>{</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;std::array&lt;T, N + 1&gt;</a>&gt; <a class="code hl_class" href="classTracerParticleSolver.html">truncatedData</a>;</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="foldopen" id="foldopen00113" data-start="{" data-end="}">
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">  113</a></span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">xy</a> : m_rawData) {</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">xy</a>[<a class="code hl_class" href="classTracerParticleSolver.html">a_column</a>] &gt;= <a class="code hl_class" href="classTracerParticleSolver.html">a_min</a> &amp;&amp; <a class="code hl_class" href="classTracerParticleSolver.html">xy</a>[<a class="code hl_class" href="classTracerParticleSolver.html">a_column</a>] &lt;= <a class="code hl_class" href="classTracerParticleSolver.html">a_max</a>) {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">xy</a> : m_rawData) {</div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">  114</a></span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">xy</a>[<a class="code hl_class" href="classTracerParticleSolver.html">a_column</a>] &gt;= <a class="code hl_class" href="classTracerParticleSolver.html">a_min</a> &amp;&amp; <a class="code hl_class" href="classTracerParticleSolver.html">xy</a>[<a class="code hl_class" href="classTracerParticleSolver.html">a_column</a>] &lt;= <a class="code hl_class" href="classTracerParticleSolver.html">a_max</a>) {</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>      <a class="code hl_class" href="classTracerParticleSolver.html">truncatedData</a>.emplace_back(<a class="code hl_class" href="classTracerParticleSolver.html">xy</a>);</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    }</div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  }</div>
@@ -222,9 +222,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  m_rawData = <a class="code hl_class" href="classTracerParticleSolver.html">truncatedData</a>;</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>}</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="foldopen" id="foldopen00122" data-start="{" data-end="}">
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">  122</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
+<div class="foldopen" id="foldopen00123" data-start="{" data-end="}">
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">  123</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00124" data-start="{" data-end="}">
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a619b7fae94c823793d453e5c52808cac">  124</a></span><a class="code hl_function" href="classLookupTable1D.html#a619b7fae94c823793d453e5c52808cac">LookupTable1D&lt;T, N, I&gt;::setRangeStrategyLo</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_strategy</a>) <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>{</div>
@@ -233,84 +233,81 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
-<div class="foldopen" id="foldopen00130" data-start="{" data-end="}">
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a371cd575076ccc48cf8acb8c167f5d4c">  130</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00131" data-start="{" data-end="}">
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">  131</a></span><a class="code hl_function" href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">LookupTable1D&lt;T, N, I&gt;::setRangeStrategyHi</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_strategy</a>) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a371cd575076ccc48cf8acb8c167f5d4c">  131</a></span><a class="code hl_function" href="classLookupTable1D.html#ab2945213a9ea8abf884af2f8c824d67e">LookupTable1D&lt;T, N, I&gt;::setRangeStrategyHi</a>(<span class="keyword">const</span> <a class="code hl_enumeration" href="CD__LookupTable_8H.html#ae11b83e77d6f10fa01ec700a4252d0b7">LookupTable::OutOfRangeStrategy</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_strategy</a>) <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>{</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>  m_rangeStrategyHi = <a class="code hl_class" href="classTracerParticleSolver.html">a_strategy</a>;</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>}</div>
-</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
-<div class="foldopen" id="foldopen00137" data-start="{" data-end="}">
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aa39273f27e514f71b45739a16a27743b">  137</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen00138" data-start="{" data-end="}">
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">  138</a></span><a class="code hl_function" href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">LookupTable1D&lt;T, N, I&gt;::prepareTable</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span>&amp;               <a class="code hl_class" href="classTracerParticleSolver.html">a_independentVariable</a>,</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aa39273f27e514f71b45739a16a27743b">  138</a></span><a class="code hl_function" href="classLookupTable1D.html#ad5fd2ad1037051f01c5dca538d50f990">LookupTable1D&lt;T, N, I&gt;::prepareTable</a>(<span class="keyword">const</span> <span class="keywordtype">size_t</span>&amp;               <a class="code hl_class" href="classTracerParticleSolver.html">a_independentVariable</a>,</div>
 <div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                                     <span class="keyword">const</span> <span class="keywordtype">size_t</span>&amp;               <a class="code hl_class" href="classTracerParticleSolver.html">a_numPoints</a>,</div>
 <div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>                                     <span class="keyword">const</span> <a class="code hl_enumeration" href="CD__LookupTable_8H.html#ae9f02c1664a9efc37ffc70297e92bfeb">LookupTable::Spacing</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">a_spacing</a>)</div>
 <div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>{</div>
 <div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
 <div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>  <span class="keyword">const</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="code hl_class" href="classTracerParticleSolver.html">baseError</a> = <span class="stringliteral">&quot;LookupTable1D&lt;T,N,I&gt;::prepareTable&quot;</span>;</div>
-<div class="foldopen" id="foldopen00144" data-start="{" data-end="}">
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#afe51e0523a93fd76ff0848d57c029103">  144</a></span> </div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">a_numPoints</a> &lt;= 1) {</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="foldopen" id="foldopen00145" data-start="{" data-end="}">
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#afe51e0523a93fd76ff0848d57c029103">  145</a></span>  <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">a_numPoints</a> &lt;= 1) {</div>
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keywordflow">throw</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::runtime_error</a>(<a class="code hl_class" href="classTracerParticleSolver.html">baseError</a> + <span class="stringliteral">&quot; - must have &#39;a_numPoints &gt; 1&#39;&quot;</span>);</div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>  }</div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>  <span class="comment">// Sort the raw data along the specified column.</span></div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>  <span class="keyword">using </span><a class="code hl_class" href="classTracerParticleSolver.html">Values</a>                   = <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::array&lt;T, N + 1&gt;</a>;</div>
-<div class="foldopen" id="foldopen00151" data-start="{" data-end="}">
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">  151</a></span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;Values&gt;</a> <a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a> = m_rawData;</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;Values&gt;</a> <a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a> = m_rawData;</div>
+<div class="foldopen" id="foldopen00152" data-start="{" data-end="}">
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">  152</a></span> </div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>  std::sort(<a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a>.begin(),</div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>            <a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a>.end(),</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>            [<a class="code hl_class" href="classTracerParticleSolver.html">i</a> = <a class="code hl_class" href="classTracerParticleSolver.html">a_independentVariable</a>](<span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">Values</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">X1</a>, <span class="keyword">const</span> <a class="code hl_class" href="classTracerParticleSolver.html">Values</a>&amp; <a class="code hl_class" href="classTracerParticleSolver.html">X2</a>) -&gt; <span class="keywordtype">bool</span> {</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>              return X1[i] &lt; X2[i];</div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            });</div>
-<div class="foldopen" id="foldopen00158" data-start="{" data-end="}">
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aabc0af01260a29ae6715a14bd1122d34">  158</a></span> </div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>  <span class="comment">// Set up the 1D grid</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span> </div>
+<div class="foldopen" id="foldopen00159" data-start="{" data-end="}">
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aabc0af01260a29ae6715a14bd1122d34">  159</a></span>  <span class="comment">// Set up the 1D grid</span></div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>  <a class="code hl_class" href="classTracerParticleSolver.html">T</a> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">xmin</a>;</div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>  <a class="code hl_class" href="classTracerParticleSolver.html">T</a> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">xmax</a>;</div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>  <a class="code hl_class" href="classTracerParticleSolver.html">T</a> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">delta</a>;</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>  <a class="code hl_class" href="classTracerParticleSolver.html">xmin</a> = <a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a>.front()[<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_independentVariable</a>];</div>
-<div class="foldopen" id="foldopen00165" data-start="{" data-end="}">
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a25f4d42cbab8e6af94a471addfbb2f3c">  165</a></span>  <a class="code hl_class" href="classTracerParticleSolver.html">xmax</a> = <a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a>.back()[<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_independentVariable</a>];</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>  <a class="code hl_class" href="classTracerParticleSolver.html">xmax</a> = <a class="code hl_class" href="classTracerParticleSolver.html">sortedData</a>.back()[<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_independentVariable</a>];</div>
+<div class="foldopen" id="foldopen00166" data-start="{" data-end="}">
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a25f4d42cbab8e6af94a471addfbb2f3c">  166</a></span> </div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>  <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;T&gt;</a> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">coords</a>(<a class="code hl_class" href="classTracerParticleSolver.html">a_numPoints</a>);</div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>  <span class="keywordflow">switch</span> (<a class="code hl_class" href="classTracerParticleSolver.html">a_spacing</a>) {</div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>  <span class="keywordflow">case</span> LookupTable::Spacing::Uniform: {</div>
 <div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <a class="code hl_class" href="classTracerParticleSolver.html">delta</a> = (<a class="code hl_class" href="classTracerParticleSolver.html">xmax</a> - <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">xmin</a>) / (<a class="code hl_class" href="classTracerParticleSolver.html">a_numPoints</a> - 1);</div>
-<div class="foldopen" id="foldopen00172" data-start="{" data-end="}">
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#abce574b4751cc1d51f4f5a6c3f288f9b">  172</a></span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_numPoints</a>; <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="foldopen" id="foldopen00173" data-start="{" data-end="}">
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#abce574b4751cc1d51f4f5a6c3f288f9b">  173</a></span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_numPoints</a>; <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
 <div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>      <a class="code hl_class" href="classTracerParticleSolver.html">coords</a>[<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">i</a>] = <a class="code hl_class" href="classTracerParticleSolver.html">xmin</a> + <a class="code hl_class" href="classTracerParticleSolver.html">i</a> * <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">delta</a>;</div>
 <div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    }</div>
 <div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
 <div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  }</div>
-<div class="foldopen" id="foldopen00179" data-start="{" data-end="}">
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ae11e146435e00adb8073590e883ef4e9">  179</a></span>  <span class="keywordflow">case</span> LookupTable::Spacing::Exponential: {</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">xmin</a> &lt;= std::numeric_limits&lt;T&gt;::min()) {</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>  <span class="keywordflow">case</span> LookupTable::Spacing::Exponential: {</div>
+<div class="foldopen" id="foldopen00180" data-start="{" data-end="}">
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ae11e146435e00adb8073590e883ef4e9">  180</a></span>    <span class="keywordflow">if</span> (<a class="code hl_class" href="classTracerParticleSolver.html">xmin</a> &lt;= std::numeric_limits&lt;T&gt;::min()) {</div>
 <div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>      <span class="keywordflow">throw</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::runtime_error</a>(<a class="code hl_class" href="classTracerParticleSolver.html">baseError</a> + <span class="stringliteral">&quot; - but must have all &#39;x &gt; 0.0&#39; for logarithmic grid&quot;</span>);</div>
 <div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    }</div>
 <div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
 <div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>      <a class="code hl_class" href="classTracerParticleSolver.html">delta</a> = <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">log10</a>(<a class="code hl_class" href="classTracerParticleSolver.html">xmax</a> / <a class="code hl_class" href="classTracerParticleSolver.html">xmin</a>) / (<a class="code hl_class" href="classTracerParticleSolver.html">a_numPoints</a> - 1);</div>
-<div class="foldopen" id="foldopen00186" data-start="{" data-end="}">
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ad2dd3699b31cde553ec3388503ec4f17">  186</a></span> </div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_numPoints</a>; <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="foldopen" id="foldopen00187" data-start="{" data-end="}">
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ad2dd3699b31cde553ec3388503ec4f17">  187</a></span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code hl_class" href="classTracerParticleSolver.html">i</a> = 0; <a class="code hl_class" href="classTracerParticleSolver.html">i</a> &lt; <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">a_numPoints</a>; <a class="code hl_class" href="classTracerParticleSolver.html">i</a>++) {</div>
 <div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <a class="code hl_class" href="classTracerParticleSolver.html">coords</a>[<a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">i</a>] = <a class="code hl_class" href="classTracerParticleSolver.html">xmin</a> * std::pow(10.0, <a class="code hl_class" href="classTracerParticleSolver.html">i</a> * <a class="code hl_class" href="classTracerParticleSolver.html">delta</a>);</div>
 <div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>      }</div>
 <div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    }</div>
-<div class="foldopen" id="foldopen00193" data-start="{" data-end="}">
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ac1d005672cfbc3a852e17a5126adc878">  193</a></span>  }</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  <span class="keywordflow">default</span>: {</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>  }</div>
+<div class="foldopen" id="foldopen00194" data-start="{" data-end="}">
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#ac1d005672cfbc3a852e17a5126adc878">  194</a></span>  <span class="keywordflow">default</span>: {</div>
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keywordflow">throw</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::runtime_error</a>(<a class="code hl_class" href="classTracerParticleSolver.html">baseError</a> + <span class="stringliteral">&quot; - logic bust (unsupported table spacing system)&quot;</span>);</div>
 <div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
 <div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <span class="keywordflow">break</span>;</div>
@@ -348,9 +345,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>  }</div>
 <div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
 <div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>  m_grid = <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::make_tuple</a>(<a class="code hl_class" href="classTracerParticleSolver.html">a_spacing</a>, <a class="code hl_class" href="classTracerParticleSolver.html">a_independentVariable</a>, <a class="code hl_class" href="classTracerParticleSolver.html">xmin</a>, <a class="code hl_class" href="classTracerParticleSolver.html">xmax</a>, <a class="code hl_class" href="classTracerParticleSolver.html">delta</a>);</div>
-<div class="foldopen" id="foldopen00232" data-start="{" data-end="}">
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#af51a387c7afe8749f78148e1d655e45b">  232</a></span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>  m_isGood = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="foldopen" id="foldopen00233" data-start="{" data-end="}">
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#af51a387c7afe8749f78148e1d655e45b">  233</a></span>  m_isGood = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>}</div>
 <div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
 <div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
@@ -358,18 +355,18 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00238" data-start="{" data-end="}">
 <div class="line"><a id="l00238" name="l00238"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#afe51e0523a93fd76ff0848d57c029103">  238</a></span><a class="code hl_function" href="classLookupTable1D.html#afe51e0523a93fd76ff0848d57c029103">LookupTable1D&lt;T, N, I&gt;::getRawData</a>() <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
 <div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>{</div>
-<div class="foldopen" id="foldopen00240" data-start="{" data-end="}">
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aded7daebd46c37323ff3bc32036056a6">  240</a></span>  <span class="keywordflow">return</span> (m_rawData);</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>}</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  <span class="keywordflow">return</span> (m_rawData);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#aded7daebd46c37323ff3bc32036056a6">  241</a></span>}</div>
+</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
 <div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="keyword">inline</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;std::array&lt;T, N + 1&gt;</a>&gt;&amp;</div>
 <div class="foldopen" id="foldopen00245" data-start="{" data-end="}">
 <div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">  245</a></span><a class="code hl_function" href="classLookupTable1D.html#a334312701035e640be6632474dd5157c">LookupTable1D&lt;T, N, I&gt;::getStructuredData</a>() <a class="code hl_class" href="classTracerParticleSolver.html">noexcept</a></div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>{</div>
-<div class="foldopen" id="foldopen00247" data-start="{" data-end="}">
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a905759bdbf1cf9b4b272f00b167d149e">  247</a></span>  <span class="keywordflow">return</span> (m_structuredData);</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>}</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  <span class="keywordflow">return</span> (m_structuredData);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="classLookupTable1D.html#a905759bdbf1cf9b4b272f00b167d149e">  248</a></span>}</div>
+</div>
 <div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
 <div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
 <div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector&lt;std::array&lt;T, N + 1&gt;</a>&gt;&amp;</div>
@@ -439,6 +436,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>  }</div>
 <div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>}</div>
 </div>
+</div>
 <div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
 <div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span><span class="keyword">inline</span> <span class="keywordtype">void</span></div>
@@ -490,7 +488,6 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
 <div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">idxLo</a>;</div>
 <div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>}</div>
-</div>
 </div>
 <div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
 <div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N, <span class="keyword">typename</span> I&gt;</div>
@@ -622,11 +619,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span> </div>
 <div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span><span class="preprocessor">#endif</span></div>
-</div>
-</div>
-</div>
-</div>
-</div>
 </div>
 </div>
 </div>

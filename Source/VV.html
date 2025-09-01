@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Verification and validation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#spatial-convergence">Spatial convergence</a></li>
@@ -85,12 +84,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -111,7 +110,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -157,7 +156,7 @@ Below, we discuss our approach to spatial and temporal convergence testing.</p>
 <span id="chap-spatialconvergence"></span><h2>Spatial convergence<a class="headerlink" href="#spatial-convergence" title="Permalink to this heading"></a></h2>
 <p>Assume that we have some evolution problem which provides a solution on the mesh as <span class="math notranslate nohighlight">\(\phi_{\mathbf{i}}^k\left(\Delta x, \Delta t\right)\)</span> where <span class="math notranslate nohighlight">\(\Delta x\)</span> is a uniform grid resolution and <span class="math notranslate nohighlight">\(\Delta t\)</span> is the time step used for evolving the state from <span class="math notranslate nohighlight">\(t=0\)</span> to <span class="math notranslate nohighlight">\(t = k\Delta t\)</span>.</p>
 <p>To estimate the spatial order of convergence for the discretization we can use Richardson extrapolation to estimate the error, using the results from a finer grid resolution as the “exact” solution.
-We solve the problem on a grids with resolutions <span class="math notranslate nohighlight">\(\Delta x_c\)</span> and a finer resolution <span class="math notranslate nohighlight">\(\Delta x_f\)</span> and estimate the error in the coarse-grid solution as</p>
+We solve the problem on grids with resolutions <span class="math notranslate nohighlight">\(\Delta x_c\)</span> and a finer resolution <span class="math notranslate nohighlight">\(\Delta x_f\)</span> and estimate the error in the coarse-grid solution as</p>
 <div class="math notranslate nohighlight">
 \[E_{\mathbf{i}}^k\left(\Delta x_c\right) = \phi_{\mathbf{i}}^k\left(\Delta x_c,\Delta t\right) - \left\{\mathcal{A}_{\Delta x_f\rightarrow \Delta x_c}\left[\phi^k\left(\Delta x_f,\Delta t\right)\right]\right\}_{\mathbf{i}}.\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{A}_{\Delta x_f\rightarrow \Delta x_c}\)</span> is an averaging operator which coarsens the solution from the fine grid (<span class="math notranslate nohighlight">\(\Delta x_f\)</span>) to the coarse grid (<span class="math notranslate nohighlight">\(\Delta x_c\)</span>).

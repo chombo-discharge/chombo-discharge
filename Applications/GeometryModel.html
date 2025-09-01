@@ -72,7 +72,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -80,12 +79,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -98,7 +97,11 @@
 <li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Geometry</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Geometry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functionality">Functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticleModel.html">Tracer particle model</a></li>
@@ -106,7 +109,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -146,6 +149,47 @@
              
   <section id="geometry">
 <span id="chap-geometrymodel"></span><h1>Geometry<a class="headerlink" href="#geometry" title="Permalink to this heading"></a></h1>
+<section id="functionality">
+<h2>Functionality<a class="headerlink" href="#functionality" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">GeometryStepper</span></code> class is a solver-less class used for supporting the development of new geometries, which in general derive from <a class="reference internal" href="../Source/ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a>.
+<code class="docutils literal notranslate"><span class="pre">GeometryStepper</span></code> implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> without any true functionality.
+E.g., calling the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method simply returns an infinitely large time step, and <code class="docutils literal notranslate"><span class="pre">GeometryStepper</span></code> provides no I/O functionality or cell refinemention functionality.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">GeometryStepper</span></code> is the simplest way of creating new geometries since all other functionality other than geometry generation is essentially turned off.</p>
+</div>
+</section>
+<section id="setting-up-a-new-problem">
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/Geometry</span></code> is the simplest way.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/Geometry</span>
+This physics module only sets up a geometry -- it does include any solvers whatsoever and so all TimeStepper routines are empty.
+This is typically used when developing/testing a new geometry. 
+See https://chombo-discharge.github.io/Geometry.html for implementation details.
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_GeometryStepper.H/cpp**</span> Implementation of TimeStepper -- does not provide ANY solver functionality and can only instantiate a geometry. 
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>myGeometry<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/myGeometry.
+
+<span class="gu">## Modifying the application</span>
+Users are free to modify this application.
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
+</section>
 </section>
 
 

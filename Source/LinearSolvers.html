@@ -25,7 +25,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Verification and validation" href="VV.html" />
-    <link rel="prev" title="Regridding" href="Regridding.html" /> 
+    <link rel="prev" title="Realm" href="Realm.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Linear solvers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#helmholtz-equation">Helmholtz equation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#discretization-and-fluxes">Discretization and fluxes</a></li>
@@ -83,7 +82,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#robin">Robin</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#ghost-cell-interpolation">Ghost cell interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multigrid-ghost-cell-interpolation">Multigrid ghost cell interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#relaxation-methods">Relaxation methods</a></li>
 </ul>
 </li>
@@ -104,12 +103,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -130,7 +129,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -184,7 +183,7 @@ The preconditioning by the volume fraction <span class="math notranslate nohighl
 <section id="discretization-and-fluxes">
 <h3>Discretization and fluxes<a class="headerlink" href="#discretization-and-fluxes" title="Permalink to this heading"></a></h3>
 <p>The Helmholtz equation is solved by assuming that <span class="math notranslate nohighlight">\(\Phi\)</span> lies on the cell-center.
-The <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span>-coefficient lies on face centers and EB faces.
+The <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span>-coefficient is defined on face centers and EB faces, while <span class="math notranslate nohighlight">\(a\left(\mathbf{x}\right)\)</span> is defined on cell centers.
 In the general case the cell center might lie inside the embedded boundary, and the cell-centered discretization relies on the concept of an extended state.
 Thus, <span class="math notranslate nohighlight">\(\Phi\)</span> does not satisfy a discrete maximum principle.</p>
 <figure class="align-center" id="id1">
@@ -198,6 +197,7 @@ These are constructed by first computing the fluxes to second order on the face 
 For example, the flux <span class="math notranslate nohighlight">\(F_3\)</span> in the figure above is</p>
 <div class="math notranslate nohighlight">
 \[F_3 = \beta b_{i,j+1/2}\frac{\Phi_{i,j+1} - \Phi_{i,j}}{\Delta x}.\]</div>
+<p>The other fluxes, such as <span class="math notranslate nohighlight">\(F_2\)</span> requires interpolation of face-centered fluxes to the face centroids.</p>
 </section>
 <section id="boundary-conditions">
 <h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h3>
@@ -209,18 +209,19 @@ Below, we discuss how these are implemented.</p>
 </div>
 <section id="neumann">
 <h4>Neumann<a class="headerlink" href="#neumann" title="Permalink to this heading"></a></h4>
-<p>Neumann boundary conditions are straightforward since the flux through the EB or domain faces are specified directly.</p>
-<p>From the above figure, the fluxes <span class="math notranslate nohighlight">\(F_{\textrm{EB}}\)</span> and <span class="math notranslate nohighlight">\(F_{\textrm{D}}\)</span> are specified.</p>
+<p>Neumann boundary conditions are straightforward since the flux through the EB or domain faces are specified directly.
+I.e., the fluxes <span class="math notranslate nohighlight">\(F_{\textrm{EB}}\)</span> and <span class="math notranslate nohighlight">\(F_{\textrm{D}}\)</span> are directly specified in <a class="reference internal" href="#fig-helmholtzfluxes"><span class="std std-numref">Fig. 16</span></a>.</p>
 </section>
 <section id="dirichlet">
 <span id="chap-linearsolverdirichletbc"></span><h4>Dirichlet<a class="headerlink" href="#dirichlet" title="Permalink to this heading"></a></h4>
 <p>Dirichlet boundary conditions are more involved since only the value at the boundary is prescribed, but the finite volume discretization requires a flux.
-On the domain boundaries the fluxes are face-centered and we therefore use finite differencing for obtaining a second order accurate approximation to the flux at the boundary.</p>
+On the domain boundaries where there is no EB the fluxes are face-centered and we therefore use finite differencing for obtaining a second order accurate approximation to the flux at the boundary.
+If the EB intersects the domain side, we interpolate face-centered fluxes to face centroids.</p>
 <p>On the embedded boundaries the flux is more complicated to compute, and requires us to compute an approximation to the normal gradient <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> at the boundary.
-Our approach is to approximate this flux by expanding the solution as a polynomial around a specified number of grid cells.
+Our approach is to approximate this flux by expanding the solution as a polynomial using a specified number of grid cells.
 By using more grid cells than there are unknown in the Taylor series, we formulate an over-determined system of equations up to some specified order.
 As a first approximation we include only those cells in the quadrant or half-space defined by the normal vector, see <a class="reference internal" href="#fig-gradientreconstruction"><span class="std std-numref">Fig. 17</span></a>.
-If we can not find enough equations, the strategy is to 1) drop order and 2) include all cells around the cut-cell.</p>
+If we can not find enough equations, several fallback options are in place to ensure that we obtain a sufficient number of equations.</p>
 <figure class="align-center" id="id2">
 <span id="fig-gradientreconstruction"></span><a class="reference internal image-reference" href="../_images/GradientReconstruction.png"><img alt="../_images/GradientReconstruction.png" src="../_images/GradientReconstruction.png" style="width: 40%;" /></a>
 <figcaption>
@@ -242,6 +243,7 @@ For the same reason, gradient reconstruction near the cut-cells might require in
 <p><span class="caption-number">Fig. 18 </span><span class="caption-text">Example of the region of a second order stencil for the Laplacian operator with second order gradient reconstruction on the embedded boundary.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
+<p>Here, we rely on multigrid interpolation (see <a class="reference internal" href="#chap-multigridinterpolation"><span class="std std-ref">Multigrid ghost cell interpolation</span></a>) to fill the required number of ghost cells.</p>
 </section>
 <section id="robin">
 <h4>Robin<a class="headerlink" href="#robin" title="Permalink to this heading"></a></h4>
@@ -258,11 +260,11 @@ This boundary conditions is enforced through the flux</p>
 The Robin boundary condition takes the form</p>
 <div class="math notranslate nohighlight">
 \[\partial_n\Phi = \frac{C}{A} - \frac{B}{A}\sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}.\]</div>
-<p>Currently, we include the data in the cut-cell itself in the interpolation, and thus also use unweighted least squares.</p>
+<p>Currently, we include the data in the cut-cell itself in the interpolation (and thus also use unweighted least squares to avoid forming an ill-conditioned system).</p>
 </section>
 </section>
-<section id="ghost-cell-interpolation">
-<span id="chap-multigridinterpolation"></span><h3>Ghost cell interpolation<a class="headerlink" href="#ghost-cell-interpolation" title="Permalink to this heading"></a></h3>
+<section id="multigrid-ghost-cell-interpolation">
+<span id="chap-multigridinterpolation"></span><h3>Multigrid ghost cell interpolation<a class="headerlink" href="#multigrid-ghost-cell-interpolation" title="Permalink to this heading"></a></h3>
 <p>With AMR, multigrid requires ghost cells on the refinement boundary.
 The interior stencils for the Helmholtz operator have a radius of one and thus only require a single layer of ghost cells (and no corner ghost cells).
 These ghost cells are filled using a finite-difference stencil, see <a class="reference internal" href="#fig-multigridinterpolation"><span class="std std-numref">Fig. 19</span></a>.</p>
@@ -284,7 +286,7 @@ Our way of handling ghost cell interpolation near EBs is to reconstruct the solu
 As per conventional wisdom regarding multigrid interpolation, this reconstruction does <em>not</em> use coarse-level grid cells that are covered by the fine level.</p>
 <p>Figure <a class="reference internal" href="#fig-ebmultigridinterpolation"><span class="std std-numref">Fig. 20</span></a> shows a typical interpolation stencil for the stencil in <a class="reference internal" href="#fig-stencilregion"><span class="std std-numref">Fig. 18</span></a>.
 Here, the open circle indicates the ghost cell to be interpolated, and we interpolate the solution in this cell using neighboring grid cells (closed circles).
-For this particular case there are 10 nearby grid cells available, which is sufficient for second order interpolation (which requirse at least 6 cells in 2D).</p>
+For this particular case there are 10 nearby grid cells available, which is sufficient for second order interpolation (which requires at least 6 cells in 2D).</p>
 <figure class="align-center" id="id5">
 <span id="fig-ebmultigridinterpolation"></span><a class="reference internal image-reference" href="../_images/EBMultigridInterpolation.png"><img alt="../_images/EBMultigridInterpolation.png" src="../_images/EBMultigridInterpolation.png" style="width: 40%;" /></a>
 <figcaption>
@@ -295,9 +297,6 @@ For this particular case there are 10 nearby grid cells available, which is suff
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> implements a fairly general ghost cell interpolation scheme near the EB. The ghost cell values can be reconstructed to specified order (and with specified least squares weights).</p>
 </div>
-<p>On coarse-fine interfaces the Helmholtz operators will perform a <em>refluxing</em> operations where the coarse-grid fluxes are replaced by the sum of the fine-grid fluxes.
-<code class="docutils literal notranslate"><span class="pre">EBHelmholtzOp</span></code> has a special flag for replacing the refluxing operation by flux coarsening, which can be specified with <code class="docutils literal notranslate"><span class="pre">EBHelmholtzOp.reflux_free</span> <span class="pre">=</span> <span class="pre">true/false</span></code>.
-In this case the reflux operation is turned off and we compute the fluxes on the entire fine level (not just the interface) and replace the coarse-grid fluxes by averages of the fine-grid fluxes.</p>
 </section>
 <section id="relaxation-methods">
 <h3>Relaxation methods<a class="headerlink" href="#relaxation-methods" title="Permalink to this heading"></a></h3>
@@ -309,41 +308,43 @@ The currently supported smoothers are:</p>
 <li><p>Multi-colored Gauss-Seidel relaxation in which the relaxation pattern follows quadrants in 2D and octants in 3D.</p></li>
 </ol>
 <p>Users can select between the various smoothers in solvers that use multigrid.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Multi-colored Gauss-Seidel usually provide the best convergence rates.
-However, the multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Red-black Gauss-Seidel usually provide the best convergence rates.
+The multi-colored kernels are twice as expensive as red-black Gauss-Seidel relaxation in 2D, and four times as expensive in 3D, and then to only marginally improve convergence rates.</p>
 </div>
 </section>
 </section>
 <section id="multiphase-helmholtz-equation">
 <h2>Multiphase Helmholtz equation<a class="headerlink" href="#multiphase-helmholtz-equation" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supports a <em>multiphase version</em> where data exists on both sides of the embedded boundary.
-The most common case is that involving discontinuous coefficients, e.g. for</p>
+The most common case is that involving discontinuous coefficients across the EB, e.g. for</p>
 <div class="math notranslate nohighlight">
-\[\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = 0.\]</div>
-<p>where <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span> is only piecewise constant.</p>
+\[\beta\nabla\cdot\left[b\left(\mathbf{x}\right)\nabla\Phi\left(\mathbf{x}\right)\right] = \rho.\]</div>
+<p>where <span class="math notranslate nohighlight">\(b\left(\mathbf{x}\right)\)</span> is only piecewise constant.
+This is the natural boundary conditions on a dielectric surface, for example.</p>
 <section id="jump-conditions">
-<h3>Jump conditions<a class="headerlink" href="#jump-conditions" title="Permalink to this heading"></a></h3>
+<span id="chap-jumpcondition"></span><h3>Jump conditions<a class="headerlink" href="#jump-conditions" title="Permalink to this heading"></a></h3>
 <p>For the case of discontinous coefficients there is a jump condition on the interface between two materials:</p>
-<div class="math notranslate nohighlight">
-\[b_1\partial_{n_1}\Phi + b_2\partial_{n_2}\Phi = \sigma,\]</div>
+<div class="math notranslate nohighlight" id="equation-jump-condition">
+<span class="eqno">(4)<a class="headerlink" href="#equation-jump-condition" title="Permalink to this equation"></a></span>\[b_1\partial_{n_1}\Phi + b_2\partial_{n_2}\Phi = \sigma,\]</div>
 <p>where <span class="math notranslate nohighlight">\(b_1\)</span> and <span class="math notranslate nohighlight">\(b_2\)</span> are the Helmholtz equation coefficients on each side of the interface, and <span class="math notranslate nohighlight">\(n_1 = -n_2\)</span> are the normal vectors pointing away from the interface in each phase.
-<span class="math notranslate nohighlight">\(\sigma\)</span> is a jump factor.</p>
+The jump factor is <span class="math notranslate nohighlight">\(\sigma\)</span>, and can be thought of as the surface charge density on the dielectric.</p>
+</section>
+<section id="discretization">
+<h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading"></a></h3>
+<p>To incorporate the jump condition in the Helmholtz discretization, we use a gradient reconstruction to obtain an approximation of <span class="math notranslate nohighlight">\(\Phi\)</span> on the boundary, using <a class="reference internal" href="#equation-jump-condition">Eq. 4</a>.
+We then use this value to impose a Dirichlet boundary condition during multigrid relaxation.
+Recalling the gradient reconstruction <span class="math notranslate nohighlight">\(\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}\)</span>, the matching condition (see <a class="reference internal" href="#fig-jumpcondition"><span class="std std-numref">Fig. 21</span></a>) can be written as</p>
+<div class="math notranslate nohighlight">
+\[b_1\left[w_{\textrm{B},1}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},1}\Phi_{\mathbf{i},1}\right] + b_2\left[w_{\textrm{B},2}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},2}\Phi_{\mathbf{i},2}\right] = \sigma.\]</div>
+<p>This equation can be solved for the boundary value <span class="math notranslate nohighlight">\(\Phi_{\textrm{B}}\)</span>, which can then be used to compute the finite-volume fluxes into the cut-cells.</p>
 <figure class="align-center" id="id6">
 <span id="fig-jumpcondition"></span><a class="reference internal image-reference" href="../_images/JumpCondition.png"><img alt="../_images/JumpCondition.png" src="../_images/JumpCondition.png" style="width: 40%;" /></a>
 <figcaption>
 <p><span class="caption-number">Fig. 21 </span><span class="caption-text">Example of cells and stencils that are involved in discretizing the jump condition. Open and filled circles indicate cells in separate phases.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-</section>
-<section id="discretization">
-<h3>Discretization<a class="headerlink" href="#discretization" title="Permalink to this heading"></a></h3>
-<p>To incorporate the jump condition in the Helmholtz discretization, we use a gradient reconstruction to obtain a solution to <span class="math notranslate nohighlight">\(\Phi\)</span> on the boundary, and use this value to impose a Dirichlet boundary condition during multigrid relaxation.
-Recalling the gradient reconstruction <span class="math notranslate nohighlight">\(\frac{\partial\Phi}{\partial n} = w_{\textrm{B}}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i}}\Phi_{\mathbf{i}}\)</span>, the matching condition (see <a class="reference internal" href="#fig-jumpcondition"><span class="std std-numref">Fig. 21</span></a>) can be written as</p>
-<div class="math notranslate nohighlight">
-\[b_1\left[w_{\textrm{B},1}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},1}\Phi_{\mathbf{i},1}\right] + b_2\left[w_{\textrm{B},2}\Phi_{\textrm{B}} + \sum_{\mathbf{i}} w_{\mathbf{i},2}\Phi_{\mathbf{i},2}\right] = \sigma.\]</div>
-<p>This equation can be solved for the boundary value <span class="math notranslate nohighlight">\(\Phi_{\textrm{B}}\)</span>, which can then be used to compute the finite-volume fluxes into the cut-cells.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For discontinuous coefficients the gradient reconstruction on one side of the EB does not reach into the other (since the solution is not differentiable across the EB).</p>
@@ -354,7 +355,7 @@ Recalling the gradient reconstruction <span class="math notranslate nohighlight"
 <h2>AMRMultiGrid<a class="headerlink" href="#amrmultigrid" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">AMRMultiGrid</span></code> is the <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> implementation of the Martin-Cartwright multigrid algorithm.
 It takes an “operator factory” as an argument, and the factory can generate objects (i.e., operators) that encapsulate the discretization on each AMR level.</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> runs its own operator, and the user can use either of:</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses its own elliptic operators, and the user can use either of:</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">EBHelmholtzOpFactory</span></code> for single-phase problems.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">MFHelmholtzOpFactory</span></code> for multi-phase problems.</p></li>
@@ -368,7 +369,8 @@ It takes an “operator factory” as an argument, and the factory can generate 
 <li><p>A biconjugate gradient stabilized method (BiCGStab)</p></li>
 <li><p>A generalized minimal residual method (GMRES).</p></li>
 </ol>
-<p>The user can select between these for the various solvers that use multigrid.</p>
+<p>The user can select between these for the various solvers that use multigrid.
+Typically, smoothers tend to work sufficiently well but improved convergence rates can occasionally be achieved by using a conjugate gradient solver.</p>
 </section>
 </section>
 </section>
@@ -377,7 +379,7 @@ It takes an “operator factory” as an argument, and the factory can generate 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Regridding.html" class="btn btn-neutral float-left" title="Regridding" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Realm.html" class="btn btn-neutral float-left" title="Realm" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="VV.html" class="btn btn-neutral float-right" title="Verification and validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -107,7 +106,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Least squares</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#polynomial-expansion">Polynomial expansion</a></li>
@@ -115,7 +114,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#weighted-equations">Weighted equations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pseudo-inverse">Pseudo-inverse</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pruning-equations">Pruning equations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#source-code">Source code</a></li>
 </ul>
 </li>
 </ul>
@@ -157,7 +155,7 @@
 <span id="chap-leastsquares"></span><h1>Least squares<a class="headerlink" href="#least-squares" title="Permalink to this heading"></a></h1>
 <p>Least squares routines are useful for reconstructing a local polynomial in the vicinity of the embedded boundary.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports the expansion of such solutions in a fairly general way.
-These routines are often needed because the embedded boundary introduces grid pathologies which are difficult to meet with pure finite differencing, see e.g. <a class="reference internal" href="../Source/LinearSolvers.html#chap-multigridinterpolation"><span class="std std-ref">Ghost cell interpolation</span></a>.</p>
+These routines are often needed because the embedded boundary introduces grid pathologies which are difficult to meet with pure finite differencing, see, e.g., <a class="reference internal" href="../Source/LinearSolvers.html#chap-multigridinterpolation"><span class="std std-ref">Multigrid ghost cell interpolation</span></a>.</p>
 <section id="polynomial-expansion">
 <h2>Polynomial expansion<a class="headerlink" href="#polynomial-expansion" title="Permalink to this heading"></a></h2>
 <p>Given some position <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, we expand the solution around a grid point <span class="math notranslate nohighlight">\(\mathbf{x}_{\mathbf{i}}\)</span> to some order <span class="math notranslate nohighlight">\(Q\)</span>:</p>
@@ -313,10 +311,10 @@ f(\mathbf{x}_N) - f(\mathbf{x}) \\
 \end{pmatrix}.\end{split}\]</div>
 <p>Thus, when evaluating the terms in the polynomial expansion the user must account for the modified right-hand side due to equation pruning.
 The modification to the right-hand side also depends on which terms are pruned from the expansion.</p>
-</section>
-<section id="source-code">
-<h2>Source code<a class="headerlink" href="#source-code" title="Permalink to this heading"></a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>The source code for the least squares routines is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Utilities/CD_LeastSquares.*</span></code>, and the neighborhood algorithms are found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/Utilities/CD_VofUtils.*</span></code>.</p>
+</div>
 </section>
 </section>
 

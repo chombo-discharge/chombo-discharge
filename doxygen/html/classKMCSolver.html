@@ -267,7 +267,7 @@ T&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxIter</b></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> R, <a class="el" href="classTracerParticleSolver.html">typename</a> State, <a class="el" href="classTracerParticleSolver.html">typename</a> T = long long&gt;<br />
 class KMCSolver&lt; R, State, T &gt;</div><p>Class for running Kinetic Monte-Carlo simulations. </p>
-<p>The template parameter State is the underlying state type that KMC operators on. There are no required member functions on the State parameter, but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:</p>
+<p>The template parameter State is the underlying state type that KMC operators on. There are rather simple required member functions on the State parameter, but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:</p>
 <ol type="1">
 <li>Real R::propensity(State) const -&gt; Computes the reaction propensity for the input state.</li>
 <li>T R::computeCriticalNumberOfReactions(State) const -&gt; Computes the minimum number of reactions that exhausts one of the reactants.</li>

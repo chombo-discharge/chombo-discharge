@@ -90,7 +90,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -98,12 +97,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -124,7 +123,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -167,7 +166,7 @@
 <p>In this chapter we give a brief overview of how to run a <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulation and control its behavior through input scripts or command line options.</p>
 <section id="running-chombo-discharge">
 <h2>Running <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#running-chombo-discharge" title="Permalink to this heading"></a></h2>
-<p>How one runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> depends on the type of parallelism one compiled with.
+<p>How one runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> depends on the type of parallelism.
 Below, we consider basic examples for serial and parallel execution.</p>
 <section id="serial">
 <h3>Serial<a class="headerlink" href="#serial" title="Permalink to this heading"></a></h3>
@@ -175,12 +174,17 @@ Below, we consider basic examples for serial and parallel execution.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
-<p>where &lt;input_file&gt; is your input file.</p>
+<p>where &lt;input_file&gt; is your input file.
+Output from <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will then be given directly to the terminal, or alternatively can be redirected to a file using <code class="docutils literal notranslate"><span class="pre">&gt;&amp;</span> <span class="pre">status.dat</span></code>, e.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;<span class="w"> </span>&gt;<span class="p">&amp;</span><span class="w"> </span>status.dat
+</pre></div>
+</div>
 </section>
 <section id="parallel-with-openmp">
 <h3>Parallel with OpenMP<a class="headerlink" href="#parallel-with-openmp" title="Permalink to this heading"></a></h3>
-<p>When running with OpenMP one must specify the number of threads, and possibly also the binding of threads.
-<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is compiled with run-time thread scheduling (which defaults to static), which can be specified.
+<p>When running with OpenMP one must specify the number of threads, and possibly also pin threads to CPUs.
+<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is compiled with run-time thread scheduling (which defaults to static scheduling).
+Prior to running with OpenMP, one should define the number of threads, thread palcement, and the scheduling.
 For example</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">8</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">OMP_PLACES</span><span class="o">=</span>cores
@@ -199,22 +203,26 @@ For example</p>
 </div>
 <p>On clusters, this is a little bit different and usually requires passing the above command through a batch system.
 Normally, the MPI installation will map processes to cores.
-With OpenMP one can use <code class="docutils literal notranslate"><span class="pre">--report-bindings</span></code> to verify the mapping.</p>
+One can use <code class="docutils literal notranslate"><span class="pre">--report-bindings</span></code> to verify the mapping.
+E.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>--report-bindings<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
+</pre></div>
+</div>
 </section>
 <section id="parallel-with-mpi-openmp">
 <h3>Parallel with MPI+OpenMP<a class="headerlink" href="#parallel-with-mpi-openmp" title="Permalink to this heading"></a></h3>
 <p>When running with both MPI and OpenMP the user must</p>
 <ol class="arabic simple">
-<li><p>Bind each MPI rank to a specified resource (e.g., a node, socket, or list of CPUs)</p></li>
+<li><p>Bind each MPI rank to a specified resource (e.g., a node, socket, or list of CPUs).</p></li>
 <li><p>Bind OpenMP threads to resources available to each MPI rank.</p></li>
 </ol>
-<p>For example, the following may not work as expected:</p>
+<p>For example, the following may not work as expected (because threads may bind to the same CPUs):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
 mpiexec<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>./&lt;application_executable&gt;<span class="w"> </span>&lt;input_file&gt;
 </pre></div>
 </div>
 <p>Each MPI rank may spawn threads on the same physical cores.
-With e.g. OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
+With OpenMPI one can map each rank to a specified number of CPUs, and bind threads to those CPUs.
 For example, on a local workstation one might do</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">NRANKS</span><span class="o">=</span><span class="m">2</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
@@ -231,7 +239,7 @@ It is often useful to verify this by reporting the bindings as follows:</p>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>More sophisticated architectures (e.g., clusters with NUMA nodes) require careful specification of MPI and thread placement (e.g. binding of MPI ranks to sockets).</p>
+<p>More sophisticated architectures (e.g., clusters with NUMA nodes) require careful specification of MPI and thread placement (e.g., binding of MPI ranks to sockets).</p>
 </div>
 </section>
 </section>
@@ -257,18 +265,18 @@ For example, the configuration options that adjusts the number of time steps tha
 </div>
 <p>will set the <code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code> parameter to 10.
 Command-line parameters override definitions in the input file.
-Moreover, parameters parsed through the command line become static parameters, i.e. they are not run-time configurable (see <a class="reference internal" href="#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).
+Moreover, parameters parsed through the command line become static parameters, i.e., they are not run-time configurable (see <a class="reference internal" href="#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).
 Also note that if you define a parameter multiple times in the input file, the last definition is canon.</p>
 </section>
 <section id="simulation-outputs">
 <h3>Simulation outputs<a class="headerlink" href="#simulation-outputs" title="Permalink to this heading"></a></h3>
 <p>Mesh data from <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations is by default written to HDF5 files, and if HDF5 is disabled <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will not write any plot or checkpoint files.
-In addition to plot files, MPI ranks can output information to separate files so that the simulation progress can be tracked.</p>
+In addition to plot files, MPI ranks can output simulation meta-information to separate files so that the simulation progress can be individually for each rank.</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> comes with controls for adjusting output.
 Through the <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class the user may adjust the option <code class="docutils literal notranslate"><span class="pre">Driver.output_directory</span></code> to specify where output files will be placed.
 This directory is relative to the location where the application is run.
 If this directory does not exist, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will create it.
-It will also create the following subdirectories given in <a class="reference internal" href="#tab-outputdirectories"><span class="std std-ref">Simulation output organization.</span></a>.</p>
+It will also create the following subdirectories given in <a class="reference internal" href="#tab-outputdirectories"><span class="std std-numref">Table 3</span></a>.</p>
 <span id="tab-outputdirectories"></span><table class="colwidths-given docutils align-default" id="id1">
 <caption><span class="caption-number">Table 3 </span><span class="caption-text">Simulation output organization.</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
 <colgroup>
@@ -313,12 +321,15 @@ It will also create the following subdirectories given in <a class="reference in
 <p>The <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class is responsible for writing output files at specified intervals, but the user is generally speaking responsible for specifying what goes into the plot files.
 Since not all variables are always of interest, solver classes have options like <code class="docutils literal notranslate"><span class="pre">plt_vars</span></code> that specify which output variables in the solver will be written to the output file.
 For example, one of our convection-diffusion-reaction solver classes have the following output options:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrGodunov.plt_vars = phi vel dco src ebflux # Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>CdrCTU.plt_vars = phi vel dco src ebflux # Plot variables. Options are &#39;phi&#39;, &#39;vel&#39;, &#39;dco&#39;, &#39;src&#39;, &#39;ebflux&#39;
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">phi</span></code> is the state density, <code class="docutils literal notranslate"><span class="pre">vel</span></code> is the drift velocity, <code class="docutils literal notranslate"><span class="pre">dco</span></code> is the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">src</span></code> is the source term, and <code class="docutils literal notranslate"><span class="pre">ebflux</span></code> is the flux at embedded boundaries.
-If you only want to plot the density, then you should put <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span> <span class="pre">phi</span></code>.
-An empty entry like <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span></code> may lead to run-time errors, so if you do not want a class to provide plot data you may put <code class="docutils literal notranslate"><span class="pre">CdrGodunov.plt_vars</span> <span class="pre">=</span> <span class="pre">none</span></code>.</p>
+If you only want to plot the density, then you should put <code class="docutils literal notranslate"><span class="pre">CdrCTU.plt_vars</span> <span class="pre">=</span> <span class="pre">phi</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>An empty entry like <code class="docutils literal notranslate"><span class="pre">CdrCTU.plt_vars</span> <span class="pre">=</span></code> will lead to run-time errors, so if you do not want a class to provide plot data you should put <code class="docutils literal notranslate"><span class="pre">CdrCTU.plt_vars</span> <span class="pre">=</span> <span class="pre">none</span></code>.</p>
+</div>
 </section>
 <section id="parallel-processor-verbosity">
 <span id="chap-pout"></span><h3>Parallel processor verbosity<a class="headerlink" href="#parallel-processor-verbosity" title="Permalink to this heading"></a></h3>
@@ -366,7 +377,7 @@ This is useful when your simulation waited 5 days in the queue on a cluster befo
 <p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> re-reads the simulation input parameters after every time step.
 The new options are parsed by the core classes <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>, <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, and <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> through special routines <code class="docutils literal notranslate"><span class="pre">parseRuntimeOptions()</span></code>.
 Note that not all input configurations are suitable for run-time configuration.
-For example, increasing the size of the simulation domain does not make sense but changing the blocking factor, refinement criteria, or plot intervals do.
+For example, increasing the size of the simulation domain does not make any sense from a run-time perspective, but changing the blocking factor, refinement criteria, or plot intervals do.
 To see which options are run-time configurable, see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, or the <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> and <a class="reference internal" href="../Source/CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> that you use.</p>
 </section>
 </section>

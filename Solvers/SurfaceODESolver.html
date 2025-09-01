@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,6 +80,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
@@ -88,21 +88,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#instantiation">Instantiation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-vec-phi">Setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mesh-based">Mesh-based</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#function-based">Function-based</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constant-value">Constant value</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#setting-vec-f">Setting <span class="math notranslate nohighlight">\(\vec{F}\)</span></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Mesh-based</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Function-based</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-vec-f">Setting <span class="math notranslate nohighlight">\(\vec{F}\)</span></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#resetting-cells">Resetting cells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#regridding">Regridding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#i-o">I/O</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-options">Input options</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -123,7 +118,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -170,16 +165,33 @@
 Note that the underlying data type for <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> and <span class="math notranslate nohighlight">\(\vec{F}\)</span> is <code class="docutils literal notranslate"><span class="pre">EBAMRIVData</span></code>, see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>.
 Such a solver is useful, for example, as a surface charge solver where <span class="math notranslate nohighlight">\(\phi\)</span> is the surface charge density and <span class="math notranslate nohighlight">\(F\)</span> is the charge flux onto the EB.</p>
 <p>The surface charge solver is implemented as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SurfaceODESolver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Surface ODE solver</span>
+<span class="cm">  @details This is a basic solver that acts as an ODE solver on cut-cells. </span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SurfaceODESolver</span>
 </pre></div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(N\)</span> indicates the number of variables stored in each cut cell.</p>
+<p>where <span class="math notranslate nohighlight">\(N\)</span> indicates the number of variables stored in each cut cell.
+This solver is analogous to <a class="reference internal" href="MeshODESolver.html#chap-meshodesolver"><span class="std std-ref">Mesh ODE solver</span></a>, with the exception that variables are only stored on cut-cells.</p>
 <section id="instantiation">
 <h2>Instantiation<a class="headerlink" href="#instantiation" title="Permalink to this heading"></a></h2>
-<p>To instantiate the solver, use the default constructor</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">SurfaceODESolver</span><span class="p">();</span>
+<p>To instantiate the solver, use one of the following constructors:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">static_assert</span><span class="p">(</span><span class="n">N</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SurfaceODESolver&lt;N&gt; must have N &gt; 0&quot;</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Default constructor. Must subsequently set AmrMesh.</span>
+<span class="cm">  @details Sets realm to primal and phase to phase::gas.</span>
+<span class="cm">*/</span>
+<span class="n">SurfaceODESolver</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Full constructor. </span>
+<span class="cm">  @details Sets AmrMesh to input and sets realm to primal and phase to phase::gas.</span>
+<span class="cm">  @param[in] a_amr      AmrMesh reference</span>
+<span class="cm">*/</span>
+<span class="n">SurfaceODESolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>The solver also requires a reference to <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, and the computational geometry such that a full instantiation example is</p>
@@ -195,78 +207,141 @@ Such a solver is useful, for example, as a surface charge solver where <span cla
 <section id="mesh-based">
 <h3>Mesh-based<a class="headerlink" href="#mesh-based" title="Permalink to this heading"></a></h3>
 <p>To set <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the mesh, one can fetch the underlying data by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">EBAMRIVData</span><span class="o">&amp;</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getPhi</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get internal state</span>
+<span class="cm">  @return Returns m_phi</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span>
+<span class="nf">getPhi</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This returns a reference to the underlying data which is defined on all cut-cells.
-The user can then iterate through this data and set the values accordingly, see <a class="reference internal" href="../Source/MeshData.html#chap-meshiteration"><span class="std std-ref">Iterating over patches</span></a>.</p>
+The user can then iterate through this data and set the values accordingly, see <a class="reference internal" href="../Source/MeshData.html#chap-meshiteration"><span class="std std-ref">Iterating over the AMR hierarchy</span></a>.</p>
 </section>
-<section id="function-based">
-<h3>Function-based<a class="headerlink" href="#function-based" title="Permalink to this heading"></a></h3>
-<p>To set the data directly, <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code> defines a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_func</span><span class="p">);</span>
+<section id="constant-value">
+<h3>Constant value<a class="headerlink" href="#constant-value" title="Permalink to this heading"></a></h3>
+<p>To set the data directly, <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code> defines functions</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Convenience function for setting m_phi</span>
+<span class="cm">  @param[in] a_phi Values for all components</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_phi</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Convenience function for setting m_phi</span>
+<span class="cm">  @param[in] a_phi Component-wise values. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>where the input argument represents a function <span class="math notranslate nohighlight">\(\vec{f} = \vec{f}\left(\mathbf{x}\right)\)</span> that returns a value for each component in <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>.</p>
 </section>
 </section>
 <section id="setting-vec-f">
 <h2>Setting <span class="math notranslate nohighlight">\(\vec{F}\)</span><a class="headerlink" href="#setting-vec-f" title="Permalink to this heading"></a></h2>
-<section id="id1">
-<h3>Mesh-based<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>To set <span class="math notranslate nohighlight">\(\vec{F}\)</span> on the mesh, one can fetch the underlying data by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">EBAMRIVData</span><span class="o">&amp;</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<p>In order to set the right-hand side of the equation, functions exist that are entirely analogous to the function signatures for setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Convenience function for setting m_rhs</span>
+<span class="cm">  @param[in] a_rhs Values for all components</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_rhs</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Convenience function for setting m_rhs</span>
+<span class="cm">  @param[in] a_rhs Component-wise values. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rhs</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Convenience function for setting m_rhs</span>
+<span class="cm">  @param[in] a_rhs Values per cell and component. </span>
+<span class="cm">  @note a_rhs must have N components. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhs</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get internal state</span>
+<span class="cm">  @return Returns m_rhs</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">EBAMRIVData</span><span class="o">&amp;</span>
+<span class="nf">getRHS</span><span class="p">();</span>
 </pre></div>
 </div>
-<p>This returns a reference to the underlying data which is defined on all cut-cells.
-The user can then iterate through this data and set the values accordingly, see <a class="reference internal" href="../Source/MeshData.html#chap-meshiteration"><span class="std std-ref">Iterating over patches</span></a>.</p>
-</section>
-<section id="id2">
-<h3>Function-based<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
-<p>To set the right-hand side directly, <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code> defines a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setRHS</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_func</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>where the input argument represents a function <span class="math notranslate nohighlight">\(\vec{f} = \vec{f}\left(\mathbf{x}\right)\)</span> that returns a value for each component in <span class="math notranslate nohighlight">\(\vec{F}\)</span>.</p>
-</section>
 </section>
 <section id="resetting-cells">
 <h2>Resetting cells<a class="headerlink" href="#resetting-cells" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code> has functions for setting values in the subset of the cut-cells representing dielectrics or electrodes.
-The function signatures are</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">N</span><span class="o">&gt;</span>
-<span class="n">void</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">::</span><span class="n">resetElectrodeCells</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span> <span class="n">a_value</span><span class="p">);</span>
+<p><code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code> has functions for setting values in the subset of the cut-cells representing dielectrics or electrodes.
+The information about whether or not a cut-cell is on the dielectric or electrode is passed in through <a class="reference internal" href="../Source/ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a>.</p>
+<p>The function signatures are</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Reset m_phi on electrode cells. </span>
+<span class="cm">  @details This will set a_data to the specified value (in electrode cells)</span>
+<span class="cm">  @param[in] a_val  Value</span>
+<span class="cm">  @note Does not include ghost cells. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">resetElectrodes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="n">template</span> <span class="o">&lt;</span><span class="nb">int</span> <span class="n">N</span><span class="o">&gt;</span>
-<span class="n">void</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">::</span><span class="n">resetDielectricCells</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span> <span class="n">a_value</span><span class="p">);</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Reset the input data holder on electrode cells. </span>
+<span class="cm">  @details This will set a_data to the specified value (in electrode cells)</span>
+<span class="cm">  @param[in] a_data Input data to be set.</span>
+<span class="cm">  @param[in] a_val  Value</span>
+<span class="cm">  @note Does not include ghost cells. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">resetElectrodes</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_value</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Reset m_phi on dielectric cells. </span>
+<span class="cm">  @details This will set a_data to the specified value (in dielectric cells)</span>
+<span class="cm">  @param[in] a_val  Value</span>
+<span class="cm">  @note Does not include ghost cells. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">resetDielectrics</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_value</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Reset the input data holder on dielectric cells. </span>
+<span class="cm">  @details This will set a_data to the specified value (in dielectric cells)</span>
+<span class="cm">  @param[in] a_data Input data to be set.</span>
+<span class="cm">  @param[in] a_val  Value</span>
+<span class="cm">  @note Does not include ghost cells. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">resetDielectrics</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_value</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Calling these functions will set the data value in electrode or dielectric cells to <code class="docutils literal notranslate"><span class="pre">a_value</span></code>.
-Note that one can always call <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;::getPhi()</span></code> to iterate over other types of cell subsets.</p>
+<p>Note that one can always call <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;::getPhi()</span></code> to iterate over other types of cell subsets and set the values from there.</p>
 </section>
 <section id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
-<p>When regridding the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code>, one should call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<p>When regridding the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code>, one must first call call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Pre-regrid function. </span>
+<span class="cm">  @details This stores the data on the old mesh so it can be regridded later.</span>
+<span class="cm">  @param[in] a_lbase          Coarsest level which will change during regrids. </span>
+<span class="cm">  @param[in] a_oldFinestLevel Finest level before the regrid operation. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p><em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids.
-This will store <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the old mesh.
+<p>This must be done <em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids, and will store <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the old mesh.
 After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has generated the new grids, <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> can be interpolated onto the new grids by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">SurfaceODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Regrid function.</span>
+<span class="cm">  @param[in] a_lmin           Coarsest level where grids did not change. </span>
+<span class="cm">  @param[in] a_oldFinestLevel Finest AMR level before the regrid. </span>
+<span class="cm">  @param[in] a_newFinestLevel Finest AMR level after the regrid. </span>
+<span class="cm">  @details This interpolates or coarsens conservatively, e.g. sigma_c = sum(A_f * sigma_f)/A_c if we coarsen.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Note that when interpolating to the new grids one can choose to initialize data in the new cells using the value in the underlying coarse cells, i.e.</p>
@@ -280,24 +355,23 @@ After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><
 \[\vec{\phi}_{\mathbf{i}_{\textrm{fine}}} = r^{D-1}\frac{\alpha_{\mathbf{i}_{\textrm{coar}}}}{\sum_{\mathbf{i}_{\textrm{fine}}}\alpha_{\mathbf{i}_{\textrm{fine}}}}\vec{\phi}_{\mathbf{i}_{\textrm{coar}}},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{i}_{\textrm{fine}}\)</span> is set of cut-cells that occur when refining the coarse-grid cut-cell <span class="math notranslate nohighlight">\(\mathbf{i}_{\textrm{coar}}\)</span> and <span class="math notranslate nohighlight">\(r\)</span> is the refinement factor between the two grid levels.
 In this case <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> is strictly conserved.
-Users can switch between these two methods by specifying the regridding type in the input script:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SurfaceODESolver.regridding = arithmetic
-</pre></div>
-</div>
-<p>or</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SurfaceODESolver.regridding = conservative
-</pre></div>
-</div>
+Users can switch between these two methods by specifying the proper configuration option in the configuration file.</p>
 </section>
-<section id="i-o">
-<h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h2>
-<p>The user can add <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> and <span class="math notranslate nohighlight">\(\vec{F}\)</span> to output files by specifying these in the input script.
-These variables are named</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SurfaceODESolver.plt_vars = phi rhs
+<section id="input-options">
+<h2>Input options<a class="headerlink" href="#input-options" title="Permalink to this heading"></a></h2>
+<p>Several input options are available for configuring the run-time configuration of <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code>, which are listed below</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-number">Listing 30 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver&lt;N&gt;</span></code> class.
+All options are run-time configurable.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
+<span class="c1"># SurfaceODESolver solver settings.</span>
+<span class="c1"># ====================================================================================================</span>
+<span class="n">SurfaceODESolver</span><span class="o">.</span><span class="n">verbosity</span>     <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>              <span class="c1">## Chattiness</span>
+<span class="n">SurfaceODESolver</span><span class="o">.</span><span class="n">regrid</span>        <span class="o">=</span> <span class="n">conservative</span>    <span class="c1">## Regrid method. &#39;conservative&#39; or &#39;arithmetic&#39;</span>
+<span class="n">SurfaceODESolver</span><span class="o">.</span><span class="n">plt_vars</span>      <span class="o">=</span> <span class="n">phi</span>             <span class="c1">## Plot variables. Valid arguments are &#39;phi&#39; and &#39;rhs&#39;</span>
 </pre></div>
 </div>
-<p>Only <code class="docutils literal notranslate"><span class="pre">phi</span></code> and <code class="docutils literal notranslate"><span class="pre">rhs</span></code> are recognized as valid arguments.
-If choosing to omit output variables for the solver, one can put e.g. <code class="docutils literal notranslate"><span class="pre">SurfaceODESolver.plt_vars</span> <span class="pre">=</span> <span class="pre">-1</span></code>.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">SurfaceODESolver</span></code> checkpoint files only contain <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>.</p>

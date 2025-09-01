@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -97,7 +96,6 @@
 <p class="caption" role="heading"><span class="caption-text">Single-solver applications</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Advection-diffusion model</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time-stepping">Time stepping</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#heun-s-method">Heun’s method</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#imex">IMEX</a></li>
@@ -121,6 +119,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#boundary-conditions">Boundary conditions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cell-refinement">Cell refinement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#c1-spatial-convergence">C1: Spatial convergence</a></li>
@@ -139,7 +138,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -186,36 +185,28 @@ The equation of motion is</p>
 <p>The full implementation for this model consists of the following classes:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code>, which implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionSpecies</span></code>, which parses the initial conditions into the problem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionSpecies</span></code>, which implements <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>, and thus sparses the initial condition into the problem.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionTagger</span></code>, which implements <a class="reference internal" href="../Source/CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> and flags cells for refinement and coarsening.</p></li>
 </ul>
+<p>This module only uses <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>The source code for this problem is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/AdvectionDiffusion</span></code>.
 See <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html">AdvectionDiffusionStepper</a> for the C++ API for this time stepper.</p>
-<section id="solvers">
-<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
-<p>This class uses the following solvers:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p></li>
-</ul>
-</section>
+</div>
 <section id="time-stepping">
 <h2>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h2>
 <p>Two time stepping algorithms are supported:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>A second-order Runge-Kutta method (Heun’s method).</p></li>
-<li><p>An implicit-explicit method (IMEX) which uses corner-transport upwind (CTU, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a>) and a Crank-Nicholson diffusion solve.</p></li>
+<li><p>An implicit-explicit method (IMEX) which uses corner-transport upwind (CTU, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a>) and a Crank-Nicholson diffusion solve.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The Crank-Nicholson method is known to be marginally stable.</p>
+</div>
+</li>
 </ol>
-<p>To select an integrator, set</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.integrator = imex # &#39;imex&#39; or &#39;heun&#39;
-</pre></div>
-</div>
-<p>The user can set the CFL number and maximum/minimum permitted time steps by</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.cfl    = 0.5
-AdvectionDiffusion.min_dt = 0.0
-AdvectionDiffusion.max_dt = 1.E99
-</pre></div>
-</div>
-<p>where <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusion.cfl</span></code> is computed differently based on the chosen discretization.</p>
+<p>See <a class="reference internal" href="#chap-advectiondiffusionoptions"><span class="std std-ref">Solver configuration</span></a> to see how to select between these two algorithms.</p>
 <section id="heun-s-method">
 <h3>Heun’s method<a class="headerlink" href="#heun-s-method" title="Permalink to this heading"></a></h3>
 <p>For Heun’s method we perform the following steps:
@@ -224,24 +215,27 @@ The Runge-Kutta advance is then</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\phi^\prime &amp;= \phi^k - \Delta t\left[\nabla\cdot\mathbf{J}\left(\phi^k\right)\right]\\
 \phi^{k+1} &amp;= \phi^k - \frac{\Delta t}{2}\left(\left[\nabla\cdot\mathbf{J}\left(\phi^k\right)\right] + \left[\nabla\cdot\mathbf{J}\left(\phi^\prime\right)\right]\right)\end{split}\]</div>
-<p>Note that when diffusion and advecting is coupled in this way, we do not include the transverse terms in the CTU discretization and limit the time step by</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Note that when diffusion and advecting is coupled in this way, we do not include the transverse terms in the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> discretization and limit the time step by</p>
 <div class="math notranslate nohighlight">
 \[\Delta t \leq \frac{1}{\frac{\sum_{i=1}^d |v_i|}{\Delta x} + \frac{2dD}{\Delta x^2}},\]</div>
 <p>where <span class="math notranslate nohighlight">\(d\)</span> is the dimensionality and <span class="math notranslate nohighlight">\(D\)</span> is the diffusion coefficient.</p>
+</div>
 </section>
 <section id="imex">
 <h3>IMEX<a class="headerlink" href="#imex" title="Permalink to this heading"></a></h3>
-<p>For the implicit-explicit advance, we use the CTU discretization to center the divergence at the half time step.
+<p>For the implicit-explicit advance, we use the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> discretization to center the divergence at the half time step.
 We seek the update</p>
 <div class="math notranslate nohighlight">
 \[\frac{\phi^{k+1} - \phi^k}{\Delta t} - \frac{1}{2}\left[\nabla\left(D\nabla\phi^k\right) + \nabla\left(D\nabla\phi^{k+1}\right)\right] = -\nabla\cdot\mathbf{v}\phi^{k+1/2},\]</div>
 <p>which is a Crank-Nicholson discretization of the diffusion equation with a source term centered on <span class="math notranslate nohighlight">\(k+1/2\)</span>.
-We use the CTU discretization (see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a>) for computing the edge states <span class="math notranslate nohighlight">\(\phi^{k+1/2}\)</span> and then complete the update by solving the corresponding Helmholtz equation</p>
+We use the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> for obtaining the edge states <span class="math notranslate nohighlight">\(\phi^{k+1/2}\)</span> and then complete the update by solving the corresponding Helmholtz equation</p>
 <div class="math notranslate nohighlight">
-\[\phi^{k+1} - \frac{\Delta t}{2}\nabla\left(D\nabla\phi^{k+1}\right) = \phi^k - \Delta t\nabla\cdot\mathbf{v}\phi^{k+1/2} + \frac{\Delta t}{2}\nabla\left(D\nabla\phi^k\right)\]</div>
+\[\phi^{k+1} - \frac{\Delta t}{2}\nabla\left(D\nabla\phi^{k+1}\right) = \phi^k - \Delta t\nabla\cdot\mathbf{v}\phi^{k+1/2} + \frac{\Delta t}{2}\nabla\left(D\nabla\phi^k\right).\]</div>
 <p>In this case the time step limitation is</p>
 <div class="math notranslate nohighlight">
-\[\Delta t \leq \frac{\Delta x}{\sum_i^d\left|v_i\right|}.\]</div>
+\[\Delta t \leq \frac{\Delta x}{\sum_i\left|v_i\right|}.\]</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>It is possible to use this module with any implementation of <code class="docutils literal notranslate"><span class="pre">CdrSolver</span></code>, but the IMEX discretization only makes sense if the hyperbolic term can be centered on <span class="math notranslate nohighlight">\(k+1/2\)</span>.</p>
@@ -259,16 +253,21 @@ For the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><sp
 \[\phi\left(\mathbf{x},t=0\right) = \phi_0\exp\left(-\frac{\left|\mathbf{x}-\mathbf{x}_0\right|^4}{2R^4}\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\phi_0\)</span> is an amplitude, <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> is the blob center and <span class="math notranslate nohighlight">\(R\)</span> is the blob radius.
 These are set by the input options</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.blob_amplitude = 1.0
-AdvectionDiffusion.blob_radius    = 0.1
-AdvectionDiffusion.blob_center    = 0 0 0
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.blob_amplitude     = 1.0      ## Blob amplitude
+AdvectionDiffusion.blob_radius        = 0.1      ## Blob radius
+AdvectionDiffusion.blob_center        = 0 0 0    ## Blob center
 </pre></div>
 </div>
 </section>
 <section id="custom-value">
 <h3>Custom value<a class="headerlink" href="#custom-value" title="Permalink to this heading"></a></h3>
 <p>For a more general way of specifying initial data, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">void</span> <span class="n">setInitialData</span><span class="p">(</span><span class="n">const</span> <span class="n">std</span><span class="p">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="n">const</span> <span class="n">RealVect</span><span class="o">&amp;</span> <span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span> <span class="n">a_func</span><span class="p">)</span> <span class="n">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set the initial data..</span>
+<span class="cm">  @param[in] a_initData Initial data function. </span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
+<span class="nf">setInitialData</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_initData</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -284,15 +283,20 @@ v_y &amp;=  r\omega\cos\theta, \\
 v_z &amp;= 0,\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(r = \sqrt{x^2 + y^2}\)</span>, <span class="math notranslate nohighlight">\(\tan\theta = \frac{x}{y}\)</span>.
 I.e. the flow field is a circulation around the Cartesian grid origin.</p>
-<p>To adjust the velocity field through <span class="math notranslate nohighlight">\(\omega\)</span>, set</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.omega  = 1.0
+<p>To adjust the velocity field through <span class="math notranslate nohighlight">\(\omega\)</span>, simply set the following option:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.omega              = 1.0      ## Rotation velocity
 </pre></div>
 </div>
 </section>
 <section id="id2">
 <h3>Custom value<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting a user-specified velocity, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set the velocity field. </span>
+<span class="cm">  @param[in] a_velocity Velocity field. </span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
+<span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_velocity</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -303,7 +307,7 @@ I.e. the flow field is a circulation around the Cartesian grid origin.</p>
 <h3>Default behavior<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <p>The default diffusion coefficient for this problem is set to a constant.
 To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.diffco = 1.0
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.diffco             = 1.0      ## Diffusion coefficient
 </pre></div>
 </div>
 <p>to a chosen value.</p>
@@ -311,7 +315,12 @@ To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set
 <section id="id4">
 <h3>Custom value<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <p>For a more general way of setting the diffusion coefficient, <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set the diffusion coeffieint. </span>
+<span class="cm">  @param[in] a_diffusion Diffusion coefficient</span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
+<span class="nf">setDiffusionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_diffusion</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
@@ -320,12 +329,7 @@ To adjust it,  <span class="math notranslate nohighlight">\(\omega\)</span>, set
 <h2>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h2>
 <p>At the EB, this module uses a wall boundary condition (i.e. no flux into or out of the EB).
 On domain edges (faces in 3D), the user can select between wall boundary conditions or outflow boundary conditions by selecting the corresponding input option for the solver.
-E.g. for the <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a> discretization:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>CdrCTU.bc.x.lo = wall # &#39;wall&#39; or &#39;outflow&#39;
-CdrCTU.bc.x.hi = wall # &#39;wall&#39; or &#39;outflow&#39;
-</pre></div>
-</div>
-<p>The syntax for the other boundaries are completely analogous.</p>
+See <a class="reference internal" href="../Solvers/CDR.html#chap-cdrctu"><span class="std std-ref">CdrCTU</span></a>.</p>
 </section>
 <section id="cell-refinement">
 <h2>Cell refinement<a class="headerlink" href="#cell-refinement" title="Permalink to this heading"></a></h2>
@@ -336,23 +340,78 @@ CdrCTU.bc.x.hi = wall # &#39;wall&#39; or &#39;outflow&#39;
 </ol>
 <p>We refine if the curvature is above some threshold <span class="math notranslate nohighlight">\(\epsilon_1\)</span> <em>and</em> the amplitude is above some threshold <span class="math notranslate nohighlight">\(\epsilon_2\)</span>.
 These can be adjusted through</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>AdvectionDiffusion.refine_curv = 0.25
-AdvectionDiffusion.refine_magn = 1E-2
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># Cell tagging controls
+# ---------------------
+AdvectionDiffusion.refine_curv     = 0.1     ## Refine if curvature exceeds this
+AdvectionDiffusion.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
+AdvectionDiffusion.buffer          = 0       ## Grow tagged cells
 </pre></div>
 </div>
+<p>By default, every cell that fails to meet the above two criteria is coarsened.</p>
 </section>
 <section id="setting-up-a-new-problem">
 <h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/AdvectionDiffusion</span></code> is the simplest way.
-To see available setup options, run</p>
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/AdvectionDiffusion</span>
+This physics module solves for an advection-diffusion process of a single scalar quantity. This module contains files for setting up the initial conditions
+and advected species, basic integrators, and a cell tagger for refining grid cells. 
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_AdvectionDiffusionSpecies.H**</span> Implementation of CdrSpecies, for setting up initial conditions and turning on/off advection and diffusion.
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_AdvectionDiffusionTagger.H/cpp**</span>  Implementation of CellTagger, for flagging cells for refinement and coarsening.
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_AdvectionDiffusionStepper.H/cpp**</span> Implementation of TimeStepper, for advancing the advection-diffusion equation. 
+
+<span class="gh"># Setting up a new problem</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusion<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyAdvectionDiffusion.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
-<p>For example, to set up a new problem in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications/MyAdvectionDiffusionProblem</span></code> for a coaxial cable geometry, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusionProblem<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+</section>
+<section id="solver-configuration">
+<span id="chap-advectiondiffusionoptions"></span><h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> and <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionTagger</span></code> classes come with user-configurable input options that can be adjusted at runtime.
+The configuration options for <code class="docutils literal notranslate"><span class="pre">AdvectionDiffusionStepper</span></code> are given below:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# AdvectionDiffusionStepper class options
+# ====================================================================================================
+AdvectionDiffusion.verbosity      = -1      ## Verbosity
+AdvectionDiffusion.diffusion      = true    ## Turn on/off diffusion
+AdvectionDiffusion.advection      = true    ## Turn on/off advection
+AdvectionDiffusion.integrator     = imex    ## &#39;heun&#39; or &#39;imex&#39;
+
+# Default velocity, diffusion, and initial data
+# ---------------------------------------------
+AdvectionDiffusion.blob_amplitude     = 1.0      ## Blob amplitude
+AdvectionDiffusion.blob_radius        = 0.1      ## Blob radius
+AdvectionDiffusion.blob_center        = 0 0 0    ## Blob center
+AdvectionDiffusion.omega              = 1.0      ## Rotation velocity
+AdvectionDiffusion.diffco             = 1.0      ## Diffusion coefficient
+
+# Time step settings
+# ------------------
+AdvectionDiffusion.cfl        = 0.5      ## CFL number
+AdvectionDiffusion.min_dt     = 0.0      ## Smallest acceptable time step
+AdvectionDiffusion.max_dt     = 1.E99    ## Largest acceptable time step
+
+# Cell tagging controls
+# ---------------------
+AdvectionDiffusion.refine_curv     = 0.1     ## Refine if curvature exceeds this
+AdvectionDiffusion.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
+AdvectionDiffusion.buffer          = 0       ## Grow tagged cells
 </pre></div>
 </div>
-<p>This will set up a new problem in a coaxial cable geometry (defined in <code class="file docutils literal notranslate"><span class="pre">Geometries/CoaxialCable</span></code>).</p>
 </section>
 <section id="example-programs">
 <h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading"></a></h2>

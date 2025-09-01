@@ -20,6 +20,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -72,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -80,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -99,14 +99,20 @@
 <li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Mesh ODE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mesh ODE</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-problem">Example problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-advancement">Time advancement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -146,6 +152,75 @@
              
   <section id="mesh-ode">
 <span id="chap-meshodemodel"></span><h1>Mesh ODE<a class="headerlink" href="#mesh-ode" title="Permalink to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">MeshODEStepper</span></code> module is designed to illustrate the usage of a <a class="reference internal" href="../Solvers/MeshODESolver.html#chap-meshodesolver"><span class="std std-ref">Mesh ODE solver</span></a>.
+This model has no functionality for cell-refinement based on the solutions, so refinement is limited to the geometric refinement methods supplied by <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>.</p>
+<p>The main class implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> and is templated as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Implementation of TimeStepper for solving an ODE on a mesh. N is the number of variables. </span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeshODEStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">N</span></code> is the number of variables that will be stored on the mesh.</p>
+<section id="example-problem">
+<h2>Example problem<a class="headerlink" href="#example-problem" title="Permalink to this heading"></a></h2>
+<p>The example problem set up by <code class="docutils literal notranslate"><span class="pre">MeshODEStepper</span></code> is</p>
+<div class="math notranslate nohighlight">
+\[\partial_t\phi(t) = \cos\left(2\pi f t\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(f\)</span> is a user-supplied frequency.
+The user can also set the initial value for <span class="math notranslate nohighlight">\(\phi\)</span> through the configuration options for <code class="docutils literal notranslate"><span class="pre">MeshODEStepper&lt;N&gt;</span></code>, see <a class="reference internal" href="#chap-meshodestepperconfiguration"><span class="std std-ref">Solver configuration</span></a></p>
+</section>
+<section id="time-advancement">
+<h2>Time advancement<a class="headerlink" href="#time-advancement" title="Permalink to this heading"></a></h2>
+<p>Integration over a time step is done using either a second (Heun’s method) or fourth order Runge-Kutta method (classical RK4).
+The user can choose between the methods through the configuration options, see <a class="reference internal" href="#chap-meshodestepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
+</section>
+<section id="setting-up-a-new-problem">
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/MeshODEStepper</span></code> is the simplest way.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/MeshODE</span>
+This physics module solves for an ODE problem of a single scalar quantity. This module contains files for setting up problems.
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_MeshODEStepper.H**</span> Implementation of TimeStepper, for advancing the equations of motion.
+
+<span class="gh"># Setting up a new problem</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyProblem<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyProblem.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Python setup tools will set up a single scalar (i.e., <code class="docutils literal notranslate"><span class="pre">N=1</span></code>).</p>
+</div>
+</section>
+<section id="solver-configuration">
+<span id="chap-meshodestepperconfiguration"></span><h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">MeshODEStepper</span></code> class comes with configurable input options that can be adjusted at runtime, which are listed below</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# MeshODEStepper class options
+# ====================================================================================================
+MeshODEStepper.verbosity       = -1      ## Verbosity level
+MeshODEStepper.integration     = rk2     ## &#39;euler&#39;, &#39;rk2&#39;, or &#39;rk4&#39;
+MeshODEStepper.init_phi        = 0.0     ## Initial value for phi.
+MeshODEStepper.frequency       = 10      ## Frequency
+MeshODEStepper.dt              = 1E-3    ## Time step
+</pre></div>
+</div>
+</section>
 </section>
 
 

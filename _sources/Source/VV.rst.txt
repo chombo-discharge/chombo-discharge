@@ -14,7 +14,7 @@ Spatial convergence
 Assume that we have some evolution problem which provides a solution on the mesh as :math:`\phi_{\mathbf{i}}^k\left(\Delta x, \Delta t\right)` where :math:`\Delta x` is a uniform grid resolution and :math:`\Delta t` is the time step used for evolving the state from :math:`t=0` to :math:`t = k\Delta t`.
 
 To estimate the spatial order of convergence for the discretization we can use Richardson extrapolation to estimate the error, using the results from a finer grid resolution as the "exact" solution.
-We solve the problem on a grids with resolutions :math:`\Delta x_c` and a finer resolution :math:`\Delta x_f` and estimate the error in the coarse-grid solution as
+We solve the problem on grids with resolutions :math:`\Delta x_c` and a finer resolution :math:`\Delta x_f` and estimate the error in the coarse-grid solution as
 
 .. math::
 

@@ -20,7 +20,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -69,7 +68,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#simulation-advancement">Simulation advancement</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#regridding">Regridding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#class-options">Class options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#runtime-options">Runtime options</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
@@ -84,7 +82,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -92,12 +89,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -118,7 +115,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -158,18 +155,30 @@
              
   <section id="driver">
 <span id="chap-driver"></span><h1>Driver<a class="headerlink" href="#driver" title="Permalink to this heading"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations.
-The primary purpose of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is to coordinate the simulation advance (i.e. <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> integration) together with I/O and regrid functionality.
-The constructor for this class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_compgeom</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">TimeStepper</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_timestepper</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w">               </span><span class="n">a_amr</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_celltagger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">));</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is the top-level class which runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations.
+The primary purpose of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class is to</p>
+<ol class="arabic simple">
+<li><p>Coordinate the simulation advance, i.e.,  run the relevant <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> that is supplied. This can also involve restarting simulations from a user-provided time step.</p></li>
+<li><p>Initiate and coordinate regrid operations.</p></li>
+<li><p>Coordinate HDF5 I/O operations.</p></li>
+</ol>
+<p>The constructor for this class is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_computationalGeometry</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">TimeStepper</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_timeStepper</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w">               </span><span class="n">a_amrMesh</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_cellTagger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">));</span>
 </pre></div>
 </div>
+<p>Here, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class takes as input a user-provided geometry <code class="docutils literal notranslate"><span class="pre">a_computationalGeometry</span></code>, a user-provided physics module <code class="docutils literal notranslate"><span class="pre">a_timestepper</span></code>, and the AMR infrastructure <code class="docutils literal notranslate"><span class="pre">a_amrMesh</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class does not <em>require</em> an instance of <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a>, which is the responsible for flagging cells for refinement.
+If users decide to omit a cell tagger as in the above constructor, regridding functionality is completely turned off and only the initially generated grids will be used throughout the entire simulation.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDriver.html">Driver C++ API</a>.</p>
+<p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDriver.html">Driver C++ API</a>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Usage of injection of the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> object is likely to change in future versions of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
 </div>
 <section id="simulation-setup">
 <h2>Simulation setup<a class="headerlink" href="#simulation-setup" title="Permalink to this heading"></a></h2>
@@ -182,35 +191,37 @@ The constructor for this class is</p>
 <h3>New simulations<a class="headerlink" href="#new-simulations" title="Permalink to this heading"></a></h3>
 <p>If a simulation starts from the first time step, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will perform the following steps in <code class="docutils literal notranslate"><span class="pre">setupAndRun()</span></code>.</p>
 <ol class="arabic simple">
-<li><p>Ask <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> to generate the cut-cell moments.</p></li>
-<li><p>Collect all the cut-cells and ask <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> to set up an initial grid.
-This initial grid is always generated by flagging cells for refinement along the boundary.
+<li><p>Ask <a class="reference internal" href="ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a> to generate the cut-cell moments.</p></li>
+<li><p>Collect all the cut-cells and ask <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> to set up an initial grid and generate the initial AMR infrastructure.
+This initial grid is always generated by flagging cells for refinement along solid boundaries.
+If no such cells exist, a uniform grid on the coarsest domain is generated.
 Various options are available for configuring this initial grid, see <a class="reference internal" href="SpatialDiscretization.html#chap-refinementphilosophy"><span class="std std-ref">Cell refinement philosophy</span></a>.
 Also note that it is possible to restrict the maximum level that can be generated from the geometric tags.</p></li>
-<li><p>Ask the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> to set up relevant solvers and fill them with initial data.</p></li>
+<li><p>Ask the <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> to set up relevant solvers and fill them with initial data.</p></li>
 <li><p>Perform the number of initial regrids that the user asks for.
-After the regrid, the solvers are re-filled with initial data (rather than regridding).</p></li>
-<li><p>Ask <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> to perform a <em>post-initialization</em> routine.</p></li>
+After the regrid, the solvers are re-filled with initial data. I.e., initial data is always regenerated on the finest grid and is not interpolated from coarse grid.</p></li>
+<li><p>Let <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> perform a <em>post-initialization</em> routine. Whether or not this post-initialization does anything depends on the physics module begin used.</p></li>
 </ol>
 </section>
 <section id="restarting-simulations">
 <h3>Restarting simulations<a class="headerlink" href="#restarting-simulations" title="Permalink to this heading"></a></h3>
-<p>If a simulation uses restart file, i.e. one that <em>does not start</em> from the first time step, the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class will execute the following steps in <code class="docutils literal notranslate"><span class="pre">setupAndRun(...)</span></code>.</p>
+<p>If a simulation uses the restart functionality (i.e., <em>does not start</em> from the first time step), <code class="docutils literal notranslate"><span class="pre">Driver</span></code> will execute the following steps in <code class="docutils literal notranslate"><span class="pre">setupAndRun(...)</span></code>.</p>
 <ol class="arabic simple">
 <li><p>Ask <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> to generate the cut-cell moments.</p></li>
 <li><p>Read a checkpoint file that contains the grids and all the data that have been checkpointed by the solvers.
 <code class="docutils literal notranslate"><span class="pre">Driver</span></code> will issue an error and abort if the checkpoint file does not exist.</p></li>
 <li><p>Ask <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> to perform a <em>post-checkpoint</em> step.
 This functionality has been included because not all data in every solver needs to be checkpointed.
-For example, an electric field solver only needs to write the electric potential to the checkpoint file because the electric field is simply obtained by taking the gradient.</p></li>
+For example, an electric field solver only needs to write the electric potential to the checkpoint file because the electric field is obtained by taking the gradient.</p></li>
 <li><p>Perform the number of initial regrids that the user asks for.</p></li>
 </ol>
 </section>
 </section>
 <section id="simulation-advancement">
 <h2>Simulation advancement<a class="headerlink" href="#simulation-advancement" title="Permalink to this heading"></a></h2>
-<p>The algorithm for running a simulation is conceptually simple; the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class calls <code class="docutils literal notranslate"><span class="pre">TimeStepper::computeDt</span></code> for computing a reasonable time step for advancing the equations, and uses <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">TimeStepper::advance(Real</span> <span class="pre">dt)</span></code> to actually perform the advance.
-Regrids, plot files, and checkpoint files are written at certain step intervals (or when the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> demands them).
+<p>The algorithm for running a simulation is conceptually simple. <code class="docutils literal notranslate"><span class="pre">Driver</span></code> calls <code class="docutils literal notranslate"><span class="pre">TimeStepper::computeDt</span></code> for computing a reasonable time step for advancing the equations, and uses <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">TimeStepper::advance(Real</span> <span class="pre">dt)</span></code> to actually perform the advance.
+Note that these functions are abstract functions in <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>, so the actual contents of these will differ between physics modules.</p>
+<p>Regrids, plot files, and checkpoint files are written at certain step intervals, or specified time intervals.
 In brief, the algorithm looks like this:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Driver::run(...){
 
@@ -239,13 +250,15 @@ In brief, the algorithm looks like this:</p>
 <span id="chap-driverregridding"></span><h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
 <p>Regrids are called by the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class and proceed as follows:</p>
 <ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> generates tags for grid refinement and coarsening.</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> class stores data that is subject to regrids so that we have access to previously defined data when we interpolate to the new grids.</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> class generates the new grid boxes and EB information.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> checks if the defined realms show be load balanced.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> regrids the realms and EBAMR operators.</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> class regrids its solvers and internal data.</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">TimerStepper</span></code> performs a <em>post-regrid</em> operation (e.g. filling solvers with auxiliary data).</p></li>
+<li><p><a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> generates tags for grid refinement and coarsening.</p></li>
+<li><p><a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> stores data that is required during regrids.
+This is necessary because we often need storage containers to store the solver states on both the old and the new grids.
+For mesh-based data, data is usually generated by interpolating data from the old grid to the new one.</p></li>
+<li><p><a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> generates the new grid boxes and associated EB information, and performs an initial load balancing.</p></li>
+<li><p><a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> checks if the application should re-balance the grids.</p></li>
+<li><p><a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> reinstantiates the EB and AMR grid infrastructure (e.g., interpolation operators).</p></li>
+<li><p><a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> performs a regrid operation of the physics module.</p></li>
+<li><p><a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> performs a <em>post-regrid</em> operation (e.g., filling solvers with auxiliary data).</p></li>
 </ol>
 <p>In C++ pseudo-code, this looks something like:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="o">::</span><span class="n">regrid</span><span class="p">(){</span>
@@ -274,76 +287,51 @@ In brief, the algorithm looks like this:</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> class does not <em>require</em> an instance of <a class="reference internal" href="CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> (which is responsible for flagging cells for refinement).
-If users decide to omit a cell tagger, regridding functionality is completely turned off and only the initially generated grids will be used throughout the simulation.</p>
-</div>
 </section>
 <section id="class-options">
 <h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h2>
-<p>Various class options are available for adjusting the behavior of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.verbosity</span></code> controls output will be given to <code class="docutils literal notranslate"><span class="pre">pout.n</span></code>. We use 2 or 3 - higher values are for debugging.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.geometry_generation</span></code> controls the grid generation method (see <a class="reference internal" href="SpatialDiscretization.html#chap-geometrygeneration"><span class="std std-ref">Geometry generation</span></a>).
-Valid options are <em>chombo-discharge</em> or <em>chombo</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.geometry_scan_level</span></code>.
-Which refinement level to initiate the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> geometry generation method.
-This entry indicates the number of refinements of the coarsest AMR level used in the simulation.
-E.g. if the <code class="docutils literal notranslate"><span class="pre">Driver.geometry_scan_level=1</span></code> and the coarsest AMR level is <span class="math notranslate nohighlight">\(128^3\)</span> then the signed distance pruning (see <a class="reference internal" href="SpatialDiscretization.html#chap-geometrygeneration"><span class="std std-ref">Geometry generation</span></a>) begins at the AMR level <span class="math notranslate nohighlight">\(256^3\)</span>.
-Note that negative numbers are also permitted, in which case the pruning initiates at a coarsened level.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.output_dt</span></code>. Time interval between output files. This overrides step-based output and also affects the selected time steps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.plot_interval</span></code>. Time steps between each plot file.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.checkpoint_interval</span></code>. Time steps between each checkpoint file.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.regrid_interval</span></code>. Time steps between each regrid.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_regrid_files</span></code>. Write plot files during regrids. Valid options are <em>true</em> or <em>false</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_restart_files</span></code>.Write plot files during restarts. Valid options are <em>true</em> or <em>false</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.initial_regrids</span></code>. Number of initial regrids to perform when starting (or restarting) a simulation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.start_time</span></code>. Simulation start time.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.stop_time</span></code>.Simulation stop time.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code>. Maximum number of simulation time steps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.geometry_only</span></code>. If <em>true</em>, do not run the simulation and only write the geometry to file.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_memory</span></code>. Write MPI memory report. Valid options are <em>true</em> or <em>false</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_loads</span></code>.  Write computational loads. Valid options are <em>true</em> or <em>false</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.output_directory</span></code>. Output directory.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.output_names</span></code>. Simulation file names.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.max_plot_depth</span></code>. Maximum plot depth.
-Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means all levels.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.max_chk_depth</span></code>.  Maximum checkpoint file depth.
-Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means all levels.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.num_plot_ghost</span></code>. Number of ghost cells in plot files.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.plt_vars</span></code>. Plot variables for <code class="docutils literal notranslate"><span class="pre">Driver</span></code>. Valid options are <em>tags</em>, <em>mpi_rank</em>, <em>levelset</em>, <em>loads</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.restart</span></code>. Restart step (less or equal to 0 implies fresh simulation)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.allow_coarsening</span></code>. Allows removal of grid levels if cell tags dont run deep enough.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.grow_geo_tags</span></code>. How much to grow cut-cell refinement tags.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.refine_angles</span></code>. Refine cells if the angle between normal vector in neighboring cells exceed this threshold.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.refine_electrodes</span></code>. Refine electrode surfaces. Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> will refine all the way down.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.refine_dielectrics</span></code>. Refine dielectric surfaces. Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> will refine all the way down.</p></li>
-</ul>
-</section>
-<section id="runtime-options">
-<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> can parse options during run-time (i.e. between simulation steps), see <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>.
-The following options are run-time adjustable:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.verbosity</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.plot_interval</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.checkpoint_interval</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.regrid_interval</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_regrid_files</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_restart_files</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.stop_time</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_memory</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.write_loads</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.num_plot_ghost</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.plt_vars</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.allow_coarsening</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.grow_geo_tags</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.refine_angles</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.refine_electrodes</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Driver.refine_dielectrics</span></code>.</p></li>
-</ul>
+<p>Various class options are available for adjusting the behavior of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class.
+Below, we include the current template options file for the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-number">Listing 1 </span><span class="caption-text">Template input options for the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
+<span class="c1"># Driver class options</span>
+<span class="c1"># ====================================================================================================</span>
+<span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">verbosity</span>                    <span class="o">=</span> <span class="mi">2</span>                   <span class="c1">## Driver verbosity.</span>
+</span><span class="n">Driver</span><span class="o">.</span><span class="n">geometry_generation</span>          <span class="o">=</span> <span class="n">chombo</span><span class="o">-</span><span class="n">discharge</span>    <span class="c1">## Grid generation method, &#39;chombo-discharge&#39; or &#39;chombo&#39;</span>
+<span class="n">Driver</span><span class="o">.</span><span class="n">geometry_scan_level</span>          <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Geometry scan level for chombo-discharge geometry generator</span>
+<span class="n">Driver</span><span class="o">.</span><span class="n">ebis_memory_load_balance</span>     <span class="o">=</span> <span class="n">false</span>               <span class="c1">## If using Chombo geo-gen, use memory as loads for EBIS generation</span>
+<span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">output_dt</span>                    <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>                <span class="c1">## Output interval (values &lt;= 0 enforces step-based output)</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">plot_interval</span>                <span class="o">=</span> <span class="mi">10</span>                  <span class="c1">## Plot interval</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">checkpoint_interval</span>          <span class="o">=</span> <span class="mi">100</span>                 <span class="c1">## Checkpoint interval</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">regrid_interval</span>              <span class="o">=</span> <span class="mi">10</span>                  <span class="c1">## Regrid interval</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">write_regrid_files</span>           <span class="o">=</span> <span class="n">false</span>               <span class="c1">## Write or do not write plot files during regrids.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">write_restart_files</span>          <span class="o">=</span> <span class="n">false</span>               <span class="c1">## Write or do not write plot files during restart or not.</span>
+</span><span class="n">Driver</span><span class="o">.</span><span class="n">initial_regrids</span>              <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Number of initial regrids.</span>
+<span class="n">Driver</span><span class="o">.</span><span class="n">do_init_load_balance</span>         <span class="o">=</span> <span class="n">false</span>               <span class="c1">## If true, load balance the first step in a fresh simulation.</span>
+<span class="n">Driver</span><span class="o">.</span><span class="n">start_time</span>                   <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Start time (fresh simulations only).</span>
+<span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">stop_time</span>                    <span class="o">=</span> <span class="mf">1.0</span>                 <span class="c1">## Stop time.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">max_steps</span>                    <span class="o">=</span> <span class="mi">100</span>                 <span class="c1">## Maximum number of steps.</span>
+</span><span class="n">Driver</span><span class="o">.</span><span class="n">geometry_only</span>                <span class="o">=</span> <span class="n">false</span>               <span class="c1">## Special option that ONLY plots the geometry.</span>
+<span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">write_memory</span>                 <span class="o">=</span> <span class="n">false</span>               <span class="c1">## Write MPI memory report.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">write_loads</span>                  <span class="o">=</span> <span class="n">false</span>               <span class="c1">## Write (accumulated) computational loads.</span>
+</span><span class="n">Driver</span><span class="o">.</span><span class="n">output_directory</span>             <span class="o">=</span> <span class="o">./</span>                  <span class="c1">## Output directory.</span>
+<span class="n">Driver</span><span class="o">.</span><span class="n">output_names</span>                 <span class="o">=</span> <span class="n">simulation</span>          <span class="c1">## Simulation output names.</span>
+<span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">max_plot_depth</span>               <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                  <span class="c1">## Restrict maximum plot depth (-1 =&gt; finest simulation level).</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">max_chk_depth</span>                <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>                  <span class="c1">## Restrict chechkpoint depth (-1 =&gt; finest simulation level).</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">num_plot_ghost</span>               <span class="o">=</span> <span class="mi">1</span>                   <span class="c1">## Number of ghost cells to include in plots.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">plt_vars</span>                     <span class="o">=</span> <span class="n">levelset</span>            <span class="c1">## &#39;tags&#39;, &#39;mpi_rank&#39;, &#39;levelset&#39;, &#39;loads&#39;.</span>
+</span><span class="n">Driver</span><span class="o">.</span><span class="n">restart</span>                      <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Restart step (less or equal to 0 implies fresh simulation).</span>
+<span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">allow_coarsening</span>             <span class="o">=</span> <span class="n">true</span>                <span class="c1">## Allows removal of grid levels according to CellTagger.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">grow_geo_tags</span>                <span class="o">=</span> <span class="mi">2</span>                   <span class="c1">## How much to grow tags when using geometry-based refinement.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">refine_angles</span>                <span class="o">=</span> <span class="mf">15.</span>                 <span class="c1">## Refine cells if angle between elements exceed this value.</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">refine_electrodes</span>            <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Refine electrode surfaces to specified level ( &lt; 0 will refine everything)</span>
+</span><span class="hll"><span class="n">Driver</span><span class="o">.</span><span class="n">refine_dielectrics</span>           <span class="o">=</span> <span class="mi">0</span>                   <span class="c1">## Refine dielectric surfaces to specified level ( &lt; 0 will refine everything)</span>
+</span></pre></div>
+</div>
+</div>
+<p>We point out that the <code class="docutils literal notranslate"><span class="pre">output_directory</span></code> directory variable is <em>only</em> for the HDF5 plot files, whereas other files like <code class="docutils literal notranslate"><span class="pre">pout.*</span></code> are put in the directory in which the executable was ran.</p>
+<p>From the user perspective, the most commonly adjusted parameters concern the I/O operations (plot and checkpoint intervals), and geometric refinement parameters.</p>
 </section>
 </section>
 

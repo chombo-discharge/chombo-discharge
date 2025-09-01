@@ -60,7 +60,7 @@ In addition, the user can specify the maximum permitted growth or reduction in t
 
 These limits are given by the following input variables:
 
-.. code-block:: txt
+.. code-block:: text
 
    ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
    ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
@@ -115,7 +115,7 @@ Filters are applied as follows:
 where :math:`\alpha` is a filtering factor and :math:`s` a stride.
 Users can apply this filtering by adjusting the following input options:
 
-.. code-block:: txt
+.. code-block:: text
 
    ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
    ItoKMCGodunovStepper.rho_filter_max_stride = 1    # Maximum stride for filter
@@ -213,7 +213,7 @@ since there are :math:`\frac{1}{2}X_A\left(X_A-1\right)` distinct pairs of parti
 Likewise, the fluid rate coefficient would be :math:`k_2 = c_2\Delta V/2`.
 
 The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates :math:`c_j`, and it is us to the user to ensure that these are consistent with the fluid limit.
-Internally, these reactions are implemented through the dual state KMC implementation, see :ref:`Chap:KMCDualState`.
+Internally, these reactions are implemented through the dual state KMC implementation, see :ref:`Chap:KineticMonteCarlo`.
 During the reaction advance the user only needs to update the :math:`c_j` coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine ``updateReactionRates(...)``, see :ref:`Chap:ItoKMCPhysics` for the complete specification.
 
@@ -494,14 +494,14 @@ Tabulated versus height
 The molar fraction can be set as a tabulated value versus one of the Cartesian coordinate axis by setting the ``type`` specifier to ``table vs height``.
 The input data should be tabulated in column form, e.g.
 
-.. code-block:: txt
+.. code-block:: text
 
    # height       molar fraction
    0              0.1
    1              0.1 
    2              0.1
 
-The file parser (see :ref:`LookupTable`) will ignore the header file if it starts with a hashtag (#).
+The file parser (see :ref:`Chap:LookupTable`) will ignore the header file if it starts with a hashtag (#).
 Various other inputs are then also required:
 
 * ``file`` File name containing the height vs. molar fraction data (required).
@@ -519,7 +519,7 @@ Various other inputs are then also required:
 An example JSON specification is
 
 .. code-block:: json
-   :emphasize-lines: 6-18
+   :emphasize-lines: 6-19
       
    {
       "gas" : {
@@ -642,7 +642,7 @@ To set the coefficient as functions :math:`f = f\left(E/N\right)`, set the ``typ
 
 * ``file`` For specifying the file containing the input data, which must be organized as column data, e.g.
 
-  .. code-block:: txt
+  .. code-block:: text
 
      # E/N   alpha/N
      0       1E5
@@ -692,7 +692,8 @@ ________
 To include the Townsend coefficients as mesh variables in HDF5 files, include the ``plot`` specifier, e.g.
 
 .. code-block:: json
-   
+   :emphasize-lines: 5
+      
    {
       "alpha": {
          "type": "auto",
@@ -773,8 +774,9 @@ To set a constant coefficient, set the ``type`` specifier to constant and then a
 For example,
 
 .. code-block:: json
-   :emphasize-lines: 12-19
+   :emphasize-lines: 10-11
 
+                     
     "plasma species" :
     [
 	{
@@ -801,7 +803,7 @@ To set a coefficient that is constant vs :math:`N`, set the ``type`` specifier t
 For example,
 
 .. code-block:: json
-   :emphasize-lines: 12-19
+   :emphasize-lines: 10-11
 
     "plasma species" :
     [
@@ -829,7 +831,7 @@ To set the transport coefficients as functions :math:`f = f\left(E/N\right)`, se
 
 * ``file`` For specifying the file containing the input data, which must be organized as column data, e.g.
 
-  .. code-block:: txt
+  .. code-block:: text
 
      # E/N   mu/N
      0       1E5
@@ -946,7 +948,7 @@ To set the species temperature as a function :math:`T = T\left(E/N\right)`, set 
 
 * ``file`` For specifying the file containing the input data, which must be organized as column data *versus the mean energy*, e.g.
 
-  .. code-block:: txt
+  .. code-block:: text
 
      # E/N   energy (eV)
      0       1
@@ -1236,7 +1238,7 @@ For example:
 Initial densities
 _________________
 
-One may include an initial density by setting the ``initial density``parameter.
+One may include an initial density by setting the ``initial density`` parameter.
 For example:
 
 .. code-block:: json
@@ -1705,7 +1707,7 @@ An example file is e.g.
    500  0.8
    1000 1.0
    
-This data is then internally convered to a uniformly spaced lookup table (see :ref:`LookupTable`).
+This data is then internally convered to a uniformly spaced lookup table (see :ref:`Chap:LookupTable`).
 
 Efficiency vs E
 ^^^^^^^^^^^^^^^^^

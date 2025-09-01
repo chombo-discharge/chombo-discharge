@@ -20,6 +20,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -61,10 +62,11 @@
 <li class="toctree-l1"><a class="reference internal" href="DesignOverview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Driver.html">Driver</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ComputationalGeometry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#implicit-functions-and-compound-geometries">Implicit functions and compound geometries</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#electrode">Electrode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dielectric">Dielectric</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#retrieving-parts">Retrieving parts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#retrieving-implicit-functions">Retrieving implicit functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#retrieving-compound-implicit-functions">Retrieving compound implicit functions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
@@ -78,7 +80,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -86,12 +87,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -112,7 +113,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -153,73 +154,171 @@
   <section id="computationalgeometry">
 <span id="chap-computationalgeometry"></span><h1>ComputationalGeometry<a class="headerlink" href="#computationalgeometry" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> is the class that implements geometries in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-In principle, geometries consist of electrodes and dielectrics but there are many problems where the actual nature of the EB is irrelevant (such as fluid flow).</p>
+In principle, geometries consist of electrodes and dielectrics but there are many problems where the actual nature of the EB is irrelevant (such as fluid flow).
+For other problems, such as ones involving electric fields, the classification into electrodes and dielectric are obviously important.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classComputationalGeometry.html">ComputationalGeometry C++ API</a>.</p>
+<p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classComputationalGeometry.html">ComputationalGeometry C++ API</a>.</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> is <em>not</em> an abstract class.
-The default implementation is an empty geometry – i.e. a geometry without any objects, but several geometries are included in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Geometries</span></code>.
-Making a non-empty <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class requires that you inherit from <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> and instantiate the following class members:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span>
-<span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span>
+The default implementation is an empty geometry, i.e., a geometry without any solid objects.
+Several pre-defined geometries are included in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Geometries</span></code>.</p>
+<p>Making a non-empty <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class requires that you inherit from <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> and instantiate the class members specified in <a class="reference internal" href="#computationalgeometrymembers"><span class="std std-numref">Listing 2</span></a>.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<span id="computationalgeometrymembers"></span><div class="code-block-caption"><span class="caption-number">Listing 2 </span><span class="caption-text">List of all data member of the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> base class. Highlighted members must be instantiated by the user in order to create a new geometry.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Background permittivity</span>
+<span class="cm">*/</span>
+<span class="hll"><span class="n">Real</span><span class="w"> </span><span class="n">m_eps0</span><span class="p">;</span>
+</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief True if we use the chombo-discharge geometry generation utility.</span>
+<span class="cm">*/</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">m_useScanShop</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Grid level where we begin using ScanShop</span>
+<span class="cm">*/</span>
+<span class="n">ProblemDomain</span><span class="w"> </span><span class="n">m_scanDomain</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Maximum number of ghost cells that we will ever need</span>
+<span class="cm">*/</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">m_maxGhostEB</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief List of dielectrics</span>
+<span class="cm">*/</span>
+<span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_dielectrics</span><span class="p">;</span>
+</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief List of electrodes</span>
+<span class="cm">*/</span>
+<span class="hll"><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_electrodes</span><span class="p">;</span>
+</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief The gas-phase implicit function (i.e. outside electrodes and dielectrics). </span>
+<span class="cm">*/</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionGas</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief The solid-phase implicit function (i.e. the inside of the dielectrics). </span>
+<span class="cm">*/</span>
+<span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_implicitFunctionSolid</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">m_eps0</span></code> is the relative gas permittivity, <code class="docutils literal notranslate"><span class="pre">m_electrodes</span></code> are the electrodes for the geometry and <code class="docutils literal notranslate"><span class="pre">m_dielectrics</span></code> are the dielectrics for the geometry.
-These are described in detail further down.</p>
-<p>When geometries are created, the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class will first create the (approximations to the) signed distance functions that describe two possible material phases (gas and solid).
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">m_eps0</span></code> is the <em>relative gas permittivity</em> (which is virtually always 1), <code class="docutils literal notranslate"><span class="pre">m_electrodes</span></code> are the electrodes for the geometry and <code class="docutils literal notranslate"><span class="pre">m_dielectrics</span></code> are the dielectrics for the geometry.
+These are described in detail below.</p>
+<section id="implicit-functions-and-compound-geometries">
+<h2>Implicit functions and compound geometries<a class="headerlink" href="#implicit-functions-and-compound-geometries" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> always uses implicit functions for describing the geometry, see <a class="reference internal" href="SpatialDiscretization.html#chap-geometryrepresentation"><span class="std std-ref">Geometry representation</span></a>.
+These functions are analytic functions that describe the inside and outside regions of a solid object, and usually appear in the form <span class="math notranslate nohighlight">\(f: \mathbb{R}^3\rightarrow \mathbb{R}\)</span>.
+We point out that there <em>is</em> support in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> for turning surface meshes into such functions, and arbitrary complex geometries can therefore be generated.
+In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> we always use signed distance functions wherever we can.</p>
+<p>When geometries are created, the <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code> class will first create the (approximations to the) compound signed distance functions that describe two possible material phases (gas and solid).
 Here, the <em>solid</em> phase is the part of the computational domain inside the dielectrics, while the <em>gas phase</em> is the part of the computational domain that is outside both the electrodes and the dielectrics.</p>
+<p>Because of this, there is a corresponding logic that underpins the partition into the three relevant domains.
+Let <span class="math notranslate nohighlight">\(A\cup B\)</span> be the union of two objects <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>, and <span class="math notranslate nohighlight">\(A \cap B\)</span> be the intersection of the same objects.
+Furthermore, let <span class="math notranslate nohighlight">\(f_1, f_2, \ldots\)</span> denote the implicit functions for the electrodes.
+The electrode region is then given by</p>
+<div class="math notranslate nohighlight" id="equation-electroderegion">
+<span class="eqno">(1)<a class="headerlink" href="#equation-electroderegion" title="Permalink to this equation"></a></span>\[f = f_1 \cup f_2 \cup \ldots.\]</div>
+<p>For the dielectric region, the canonical definition in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is that this region is composed of all regions that are inside a dielectric but outside of a provided electrode (note that the user can override this behavior in his/her implementation of <code class="docutils literal notranslate"><span class="pre">ComputationalGeometry</span></code>).
+Specifically, if <span class="math notranslate nohighlight">\(g_1, g_2, \ldots\)</span> are the dielectric implicit functions, the dielectric region is given by</p>
+<div class="math notranslate nohighlight" id="equation-dielectricregion">
+<span class="eqno">(2)<a class="headerlink" href="#equation-dielectricregion" title="Permalink to this equation"></a></span>\[g = \left(g_1 \cup g_2 \cup \ldots \right) \cap f^\complement\]</div>
+<p>The region occupied by the gas is then given by <span class="math notranslate nohighlight">\(\left(f \cup g\right)^\complement\)</span>.</p>
+</section>
 <section id="electrode">
 <span id="chap-electrode"></span><h2>Electrode<a class="headerlink" href="#electrode" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> class is responsible for describing an electrode and potentially also its boundary condition.
-Internally, this class is lightweight and consists only of a tuple that holds a level-set function and an associated boolean value that tells whether or not the level-set function is at a live voltage or not.
-The constructor for the electrode class is:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Electrode</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_live</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> class is responsible for describing an electrode and also its boundary electrostatic boundary condition.
+Internally, this class is lightweight and consists only of a tuple that holds an implicit function and an associated boolean value that tells whether or not the level-set function is at a live voltage or not.
+The constructor for the electrode class is given in <a class="reference internal" href="#list-electrode"><span class="std std-numref">Listing 3</span></a>.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<span id="list-electrode"></span><div class="code-block-caption"><span class="caption-number">Listing 3 </span><span class="caption-text">Constructor for the the <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> object.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Electrode</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_live</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_voltageFraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>where the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the level-set function and the <code class="docutils literal notranslate"><span class="pre">a_live</span></code> argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
-If <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to false, <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will fetch this value and determine that the electrode is at ground.
-Otherwise, if <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to true then <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will determine that the electrode is at live voltage, and the <code class="docutils literal notranslate"><span class="pre">a_fraction</span></code> argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.</p>
+</div>
+<p>In the code block above, <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the implicit function for the electrode object, and the <code class="docutils literal notranslate"><span class="pre">a_live</span></code> argument is used by some solvers in order to determine if the electrode is at a live voltage or not.
+For example, if <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to false, <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will fetch this value and determine that the electrode is at ground.
+Otherwise, if <code class="docutils literal notranslate"><span class="pre">a_live</span></code> is set to true then <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> will determine that the electrode is at live voltage, and the <code class="docutils literal notranslate"><span class="pre">a_fraction</span></code> argument is an optional argument that allows the user to set the potential to a specified fraction of the live voltage.
+This is also used throughout other physics modules in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+The user can also set a specified fraction of the live voltage but setting the <code class="docutils literal notranslate"><span class="pre">a_voltageFraction</span></code> parameter to a relative fraction of the applied voltage.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classElectrode.html">Electrode C++ API</a></p>
+<p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classElectrode.html">Electrode C++ API</a></p>
 </div>
 </section>
 <section id="dielectric">
 <span id="chap-dielectric"></span><h2>Dielectric<a class="headerlink" href="#dielectric" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> class describes a dielectric.
-This class is lightweight and consists of a tuple that holds a level-set function and the associated permittivity.
-The constructors are</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Dielectric</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span>
-<span class="n">Dielectric</span><span class="p">(</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">a_permittivity</span><span class="p">)(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">);</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> class describes a dielectric similar to how <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> describes an electrode object.
+This class is lightweight and consists of a tuple that holds a level-set function and the relative associated permittivity (just like <code class="docutils literal notranslate"><span class="pre">Electrode</span></code> holds an implicit function and a relative voltage).
+The constructors for this class are</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-number">Listing 4 </span><span class="caption-text">Constructors for the the <code class="docutils literal notranslate"><span class="pre">Dielectric</span></code> object.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Full constructor which uses constant permittivity.</span>
+<span class="cm">  @param[in] a_baseIF       Implicit function</span>
+<span class="cm">  @param[in] a_permittivity Constant permittivity</span>
+<span class="cm">  @note Calls the define function for constant permittivity.</span>
+<span class="cm">*/</span>
+<span class="n">Dielectric</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Full constructor which uses variable permittivity.</span>
+<span class="cm">  @param[in] a_baseIF       Implicit function</span>
+<span class="cm">  @param[in] a_permittivity Variable permittivity</span>
+<span class="cm">  @note Calls the define function for variable permittivity.</span>
+<span class="cm">*/</span>
+<span class="n">Dielectric</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_baseIF</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_permittivity</span><span class="p">);</span>
 </pre></div>
 </div>
+</div>
 <p>where the <code class="docutils literal notranslate"><span class="pre">a_baseIF</span></code> argument is the level-set function and the second argument sets a the permittivity.
-The permittivity can be set to a constant (first constructor) or to a spatially varying value (second constructor).</p>
+In the constructor, the relative permittivity can be set to a constant (first constructor) or to a spatially varying value (second constructor).
+Several solvers will then use the permittivities were specified by the user.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDielectric.html">Dielectric C++ API</a></p>
+<p>Here is the  <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDielectric.html">Dielectric C++ API</a></p>
 </div>
 </section>
 <section id="retrieving-parts">
 <h2>Retrieving parts<a class="headerlink" href="#retrieving-parts" title="Permalink to this heading"></a></h2>
 <p>It is possible to retrieve the implicit functions for the electrodes and dielectrics through the following member functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getDielectrics</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getElectrodes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-number">Listing 5 </span><span class="caption-text">Member functions for retrieving the defined electrodes and dielectrics.</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get dielectrics</span>
+<span class="cm">  @return Dielectrics (m_dielectrics)</span>
+<span class="cm">*/</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Dielectric</span><span class="o">&gt;&amp;</span>
+<span class="n">getDielectrics</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get electrodes</span>
+<span class="cm">  @return Electrodes (m_electrodes)</span>
+<span class="cm">*/</span>
+<span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Electrode</span><span class="o">&gt;&amp;</span>
+<span class="n">getElectrodes</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
+</div>
+<p>Obtaining the implicit functions for each part can be useful when determining which object is closest to some physical location <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>.
+This is frequently used when, e.g., colliding particles with the embedded boundaries and we want to determine which electrode or dielectric the particle collided with.</p>
 </section>
-<section id="retrieving-implicit-functions">
-<h2>Retrieving implicit functions<a class="headerlink" href="#retrieving-implicit-functions" title="Permalink to this heading"></a></h2>
-<p>When generating the geometry we compute the implicit functions for each <em>phase</em>, the gas-phase and the dielectric-phase.
-If none of the implicit functions for the electrodes/dielectrics overlap, the resulting function will also be a signed distance function.
-Note that these functions are the unions/intersections of all electrodes and dielectrics.</p>
+<section id="retrieving-compound-implicit-functions">
+<h2>Retrieving compound implicit functions<a class="headerlink" href="#retrieving-compound-implicit-functions" title="Permalink to this heading"></a></h2>
+<p>When generating the geometry we compute the implicit functions for each <em>phase</em>, the gas-phase, the dielectric-phase, and the electrodes.
+We outlined this process in <a class="reference internal" href="#equation-electroderegion">Eq. 1</a> and <a class="reference internal" href="#equation-dielectricregion">Eq. 2</a>.</p>
 <p>To retrive the implicit function corresponding to a particular phase, use</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">BaseIF</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">getImplicitFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">a_phase</span></code> will be <code class="docutils literal notranslate"><span class="pre">phase::gas</span></code> or <code class="docutils literal notranslate"><span class="pre">phase::solid</span></code>.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">a_phase</span></code> will be <code class="docutils literal notranslate"><span class="pre">phase::gas</span></code> or <code class="docutils literal notranslate"><span class="pre">phase::solid</span></code>.
+This function will return the implicit function corresponding to all boundaries that contain the gas phase (<code class="docutils literal notranslate"><span class="pre">phase::gas</span></code>) or dielectric phase (<code class="docutils literal notranslate"><span class="pre">phase::solid</span></code>).
+There is no corresponding function for the interior of the electrodes as the solutions are uninteresting in these regions.</p>
 </section>
 </section>
 

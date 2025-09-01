@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,6 +80,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mesh ODE solver</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#setting-vec-phi">Setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span></a><ul>
@@ -89,19 +89,19 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-vec-s">Setting <span class="math notranslate nohighlight">\(\vec{S}\)</span></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#general-approach">General approach</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Mesh-based</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spatially-dependent">Spatially dependent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analytically-coupled">Analytically coupled</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#as-a-function-of-vec-phi">As a function of <span class="math notranslate nohighlight">\(\vec{\phi}\)</span></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#regridding">Regridding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-options">Input options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#i-o">I/O</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -122,7 +122,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -162,119 +162,179 @@
              
   <section id="mesh-ode-solver">
 <span id="chap-meshodesolver"></span><h1>Mesh ODE solver<a class="headerlink" href="#mesh-ode-solver" title="Permalink to this heading"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> implements a solver for</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code> implements a solver for</p>
 <div class="math notranslate nohighlight">
 \[\frac{\partial \vec{\phi}}{\partial t} = \vec{S},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> represents <span class="math notranslate nohighlight">\(N\)</span> unknowns on the mesh, and <span class="math notranslate nohighlight">\(\vec{S}\)</span> is the corresponding source term.
 The class is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">MeshODESolver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Class for solving dy/dt = f on an AMR hierarchy. </span>
+<span class="cm">  @details The template parameter is the number of variables in y and f.</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeshODESolver</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of variables stored on the mesh.</p>
-<p>To instantiate the solver, use the full constructor with reference to <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">MeshODESolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<p><code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code> is designed to store <code class="docutils literal notranslate"><span class="pre">N</span></code> variables in each grid cell, without any cell-to-cell coupling.
+To instantiate the solver, use the full constructor with reference to <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Full constructor. </span>
+<span class="cm">  @param[in] a_amr AMR core.</span>
+<span class="cm">*/</span>
+<span class="n">MeshODESolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>If running dual grid simulations, the corresponding <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> can be set through the public API, see <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html</a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Source code for the <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> resides in <code class="file docutils literal notranslate"><span class="pre">Source/MeshODESolver</span></code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Source code for the <code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code> resides in <code class="file docutils literal notranslate"><span class="pre">Source/MeshODESolver</span></code>.
+See <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html</a> for the full C++ API.</p>
 </div>
 <section id="setting-vec-phi">
 <h2>Setting <span class="math notranslate nohighlight">\(\vec{\phi}\)</span><a class="headerlink" href="#setting-vec-phi" title="Permalink to this heading"></a></h2>
 <section id="mesh-based">
 <h3>Mesh-based<a class="headerlink" href="#mesh-based" title="Permalink to this heading"></a></h3>
-<p>To set the initial data in a general way, one can fetch the <span class="math notranslate nohighlight">\(N\)</span> mesh components from</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">template</span> <span class="o">&lt;</span><span class="n">size_t</span> <span class="n">N</span><span class="o">&gt;</span>
+<p>To set <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>, one can fetch the <span class="math notranslate nohighlight">\(N\)</span> mesh components from</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get the solution vector (left-hand side of equation).</span>
+<span class="cm">*/</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">::</span><span class="n">getPhi</span><span class="p">()</span> <span class="n">noexcept</span><span class="p">;</span>
+<span class="nf">getPhi</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>This will return the data holder that holds the cell centered data <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> which the user can iterate through.</p>
+<p>This will return the data holder that holds the cell centered data <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> which the user can iterate through.
+See <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a> for examples.</p>
 </section>
 <section id="analytic-function">
 <h3>Analytic function<a class="headerlink" href="#analytic-function" title="Permalink to this heading"></a></h3>
-<p>One can set <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> by using analytic functions <span class="math notranslate nohighlight">\(\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)\)</span> through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Func1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+<p>One can set <span class="math notranslate nohighlight">\(\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)\)</span> through the following functions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set phi for a specific component. </span>
+<span class="cm">  @param[in] a_phiFunc Phi function</span>
+<span class="cm">  @param[in] a_comp    Component</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_phiFunc</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="k">using</span><span class="w"> </span><span class="n">Func2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
-
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func1</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_func1</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
-
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func2</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_func2</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Set phi everywhere. </span>
+<span class="cm">  @param[in] a_phiFunc Phi function. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setPhi</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_phiFunc</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>These differ in the sense that <code class="docutils literal notranslate"><span class="pre">Func1</span></code>, which is just an alias for a function <span class="math notranslate nohighlight">\(f = f\left(\mathbf{x}\right)\)</span>, sets the value for a specified component.
-The other version that takes <code class="docutils literal notranslate"><span class="pre">Func2</span></code> as an argument sets the corresponding values for all components.</p>
+<p>These differ only in that the first function sets a specific component, whereas the second version sets all <span class="math notranslate nohighlight">\(N\)</span> components.</p>
 </section>
 </section>
 <section id="setting-vec-s">
 <h2>Setting <span class="math notranslate nohighlight">\(\vec{S}\)</span><a class="headerlink" href="#setting-vec-s" title="Permalink to this heading"></a></h2>
-<section id="general-approach">
-<h3>General approach<a class="headerlink" href="#general-approach" title="Permalink to this heading"></a></h3>
+<section id="id1">
+<h3>Mesh-based<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>For a general method of setting the source term one can fetch <span class="math notranslate nohighlight">\(\vec{S}\)</span> through</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get the solution vector (left-hand side of equation).</span>
+<span class="cm">*/</span>
 <span class="n">EBAMRCellData</span><span class="o">&amp;</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<span class="nf">getRHS</span><span class="p">()</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>This returns an l-value reference to <span class="math notranslate nohighlight">\(\vec{S}\)</span> which the user can iterate through and set the value in each cell.</p>
+<p>This returns a reference to <span class="math notranslate nohighlight">\(\vec{S}\)</span> which the user can iterate through and set the value in each cell.
+See <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a> for explicit examples.</p>
 </section>
 <section id="spatially-dependent">
 <h3>Spatially dependent<a class="headerlink" href="#spatially-dependent" title="Permalink to this heading"></a></h3>
 <p>The source term can also be set on a component-by-component basis using</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
-
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Func</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set right-hand side for specified component. </span>
+<span class="cm">  @param[in] a_srcFunc Source term function.</span>
+<span class="cm">  @param[in] a_comp    Component</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_srcFunc</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">a_comp</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>The above function will evaluate a function <span class="math notranslate nohighlight">\(f(\mathbf{x})\)</span> in each cell.</p>
 </section>
-<section id="analytically-coupled">
-<h3>Analytically coupled<a class="headerlink" href="#analytically-coupled" title="Permalink to this heading"></a></h3>
-<p>A third option is to compute the right-hand side directly using a coupling function.
-<code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> aliases a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="k">using</span><span class="w"> </span><span class="n">RHSFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+<section id="as-a-function-of-vec-phi">
+<h3>As a function of <span class="math notranslate nohighlight">\(\vec{\phi}\)</span><a class="headerlink" href="#as-a-function-of-vec-phi" title="Permalink to this heading"></a></h3>
+<p>In order to compute the source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> as a function of <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>, <code class="docutils literal notranslate"><span class="pre">MeshOdeSolver&lt;N&gt;</span></code> has a function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Alias for right-hand side</span>
+<span class="cm">*/</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RHSFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t). </span>
+<span class="cm">  @param[in] a_rhsFunction Function for computing the right-hand side. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">computeRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RHSFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>which computes the source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> as a function</p>
 <div class="math notranslate nohighlight">
-\[\vec{S} = \vec{f}\left(\vec{\phi},t\right)\]</div>
-<p>To fill the source term using an analytic coupling function like this, one can call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">computeRHS</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RHSFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_rhsFunction</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+\[\vec{S} = \vec{f}\left(\vec{\phi},t\right).\]</div>
+<p>An example which sets <span class="math notranslate nohighlight">\(\vec{S} = \vec{\phi}\)</span> is given below</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">S</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">phi</span><span class="p">;</span>
+
+<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">S</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="n">solver</span><span class="p">.</span><span class="n">computeRHS</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="regridding">
 <h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
-<p>When regridding the <code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code>, one should call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<p>When regridding the <code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code>, one must first ensure that the mesh data on the old mesh is stored before calling the regrid function:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Perform pre-regrid operations. </span>
+<span class="cm">  @param[in] a_lbase          Coarsest level that changed during regrid. </span>
+<span class="cm">  @param[in] a_oldFinestLevel Finest grid level before the regrid operation. </span>
+<span class="cm">  @note This copies m_phi onto m_cache</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p><em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids.
+<p>This must be done <em>before</em> <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> creates the new grids.
 This will store <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> on the old mesh.
 After <a class="reference internal" href="../Source/AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> has generated the new grids, <span class="math notranslate nohighlight">\(\vec{\phi}\)</span> can be interpolated onto the new grids by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">MeshODESolver</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Regrid this solver. </span>
+<span class="cm">  @param[in] a_lmin           Coarsest level where grids did not change. </span>
+<span class="cm">  @param[in] a_oldFinestLevel Finest AMR level before the regrid. </span>
+<span class="cm">  @param[in] a_newFinestLevel Finest AMR level after the regrid. </span>
+<span class="cm">  @details This linearly interpolates (potentially with limiters) m_phi to the new grids. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Users can also choose to turn on/off slope limiters when putting the solution on the new mesh, see <a class="reference internal" href="../Source/Regridding.html#chap-regridding"><span class="std std-ref">Regridding</span></a>.
-The source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> is also allocated on the new mesh, but is not interpolated onto the new grids.</p>
+<p>Users can also choose to turn on/off slope limiters when putting the solution on the new mesh.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The source term <span class="math notranslate nohighlight">\(\vec{S}\)</span> is also allocated on the new mesh, but is not interpolated onto the new grids.
+It must therefore be set by the user after calling the regrid function.</p>
+</div>
+</section>
+<section id="input-options">
+<h2>Input options<a class="headerlink" href="#input-options" title="Permalink to this heading"></a></h2>
+<p>Several input options are available for configuring the run-time configuration of <code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code>, which are listed below</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-number">Listing 28 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code> class.
+All options are run-time configurable.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
+<span class="c1"># MeshODESolver class options</span>
+<span class="c1"># ====================================================================================================</span>
+<span class="n">MeshODESolver</span><span class="o">.</span><span class="n">verbosity</span>             <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>         <span class="c1">## Verbosity level</span>
+<span class="n">MeshODESolver</span><span class="o">.</span><span class="n">plt_vars</span>              <span class="o">=</span> <span class="n">phi</span> <span class="n">rhs</span>    <span class="c1">## Stuff that can be plotted. &#39;phi&#39; and/or &#39;rhs</span>
+<span class="n">MeshODESolver</span><span class="o">.</span><span class="n">use_regrid_slopes</span>     <span class="o">=</span> <span class="n">false</span>      <span class="c1">## Use or don&#39;t use slopes when regridding</span>
+</pre></div>
+</div>
+</div>
 </section>
 <section id="i-o">
 <h2>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h2>
@@ -287,7 +347,7 @@ These variables are named</p>
 If choosing to omit output variables for the solver, one can put e.g. <code class="docutils literal notranslate"><span class="pre">MeshODESolver.plt_vars</span> <span class="pre">=</span> <span class="pre">-1</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">MeshODESolver</span></code> checkpoint files only contain <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MeshODESolver&lt;N&gt;</span></code> checkpoint files only contain <span class="math notranslate nohighlight">\(\vec{\phi}\)</span>.</p>
 </div>
 </section>
 </section>

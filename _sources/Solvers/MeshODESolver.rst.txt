@@ -3,7 +3,7 @@
 Mesh ODE solver
 ===============
 
-The ``MeshODESolver`` implements a solver for
+The ``MeshODESolver<N>`` implements a solver for
 
 .. math::
 
@@ -12,25 +12,25 @@ The ``MeshODESolver`` implements a solver for
 where :math:`\vec{\phi}` represents :math:`N` unknowns on the mesh, and :math:`\vec{S}` is the corresponding source term.
 The class is templated as
 
-.. code-block:: c++
-
-   template <size_t N = 1>
-   class MeshODESolver;
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 22-27
+   :dedent: 0
 
 where ``N`` indicates the number of variables stored on the mesh.
 
+``MeshODESolver<N>`` is designed to store ``N`` variables in each grid cell, without any cell-to-cell coupling. 
 To instantiate the solver, use the full constructor with reference to :ref:`Chap:AmrMesh`:
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 40-45
+   :dedent: 2
 
-   template <size_t N>
-   MeshODESolver<N>::MeshODESolver(const RefCountedPtr<AmrMesh>& a_amr) noexcept;
-
-If running dual grid simulations, the corresponding :ref:`Chap:Realm` can be set through the public API, see `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html>`_.
-
-.. note::
+.. tip::
    
-   Source code for the ``MeshODESolver`` resides in :file:`Source/MeshODESolver`.
+   Source code for the ``MeshODESolver<N>`` resides in :file:`Source/MeshODESolver`.
+   See `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classMeshODESolver.html>`_ for the full C++ API.
 
 Setting :math:`\vec{\phi}`
 --------------------------
@@ -38,117 +38,116 @@ Setting :math:`\vec{\phi}`
 Mesh-based
 __________
 
-To set the initial data in a general way, one can fetch the :math:`N` mesh components from
+To set :math:`\vec{\phi}`, one can fetch the :math:`N` mesh components from
 
-.. code-block::
-
-   template <size_t N>
-   EBAMRCellData&
-   MeshODESolver<N>::getPhi() noexcept;
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 136-141
+   :dedent: 2
 
 This will return the data holder that holds the cell centered data :math:`\vec{\phi}` which the user can iterate through.
+See :ref:`Chap:MeshData` for examples.
 
 Analytic function
 _________________
 
-One can set :math:`\vec{\phi}` by using analytic functions :math:`\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)` through
+One can set :math:`\vec{\phi}(\mathbf{x}) = \vec{f}\left(\mathbf{x}\right)` through the following functions:
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 98-111
+   :dedent: 2
 
-   using Func1 = const std::function<Real(const RealVect& a_pos)>;
-
-   template <size_t N>
-   using Func2 = const std::function<std::array<Real, N>(const RealVect& a_pos)>;
-
-   template <size_t N>
-   void
-   MeshODESolver<N>::setPhi(const Func1& a_func1, const size_t a_comp) noexcept;
-
-   template <size_t N>
-   void
-   MeshODESolver<N>::setPhi(const Func2& a_func2) noexcept;
-
-These differ in the sense that ``Func1``, which is just an alias for a function :math:`f = f\left(\mathbf{x}\right)`, sets the value for a specified component.
-The other version that takes ``Func2`` as an argument sets the corresponding values for all components. 
+These differ only in that the first function sets a specific component, whereas the second version sets all :math:`N` components. 
 
 Setting :math:`\vec{S}`
 -----------------------
 
-General approach
-________________
+Mesh-based
+__________
 
 For a general method of setting the source term one can fetch :math:`\vec{S}` through
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 148-152
+   :dedent: 2
 
-   template <size_t N>
-   EBAMRCellData&
-   MeshODESolver<N>::getRHS() noexcept;
-
-This returns an l-value reference to :math:`\vec{S}` which the user can iterate through and set the value in each cell.
+This returns a reference to :math:`\vec{S}` which the user can iterate through and set the value in each cell.
+See :ref:`Chap:MeshData` for explicit examples.
 
 Spatially dependent
 ___________________
 
 The source term can also be set on a component-by-component basis using
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 113-119
+   :dedent: 2
 
-   using Func = std::function<Real(const RealVect&)>;
+As a function of :math:`\vec{\phi}`
+___________________________________
 
-   template <size_t N>
-   void
-   MeshODESolver<N>::setRHS(const Func& a_rhsFunction, const size_t a_comp) noexcept;
+In order to compute the source term :math:`\vec{S}` as a function of :math:`\vec{\phi}`, ``MeshOdeSolver<N>`` has a function
 
-The above function will evaluate a function :math:`f(\mathbf{x})` in each cell.
-
-Analytically coupled
-____________________
-
-A third option is to compute the right-hand side directly using a coupling function.
-``MeshODESolver`` aliases a function
-
-.. code-block:: c++
-
-   template<size_t N>
-   using RHSFunction = std::function<std::array<Real, N>(const std::array<Real, N>& phi, const Real& time)>;
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 30-33, 120-126
+   :dedent: 2
 
 which computes the source term :math:`\vec{S}` as a function
 
 .. math::
 
-   \vec{S} = \vec{f}\left(\vec{\phi},t\right)
+   \vec{S} = \vec{f}\left(\vec{\phi},t\right).
 
-To fill the source term using an analytic coupling function like this, one can call
+An example which sets :math:`\vec{S} = \vec{\phi}` is given below
 
 .. code-block:: c++
 
-   template <size_t N>
-   void
-   MeshODESolver<N>::computeRHS(const RHSFunction& a_rhsFunction) noexcept;
+   auto f = [](const std::array<Real, N>& phi, const Real t) -> std::array<Real, N> {
+      const std::array<Real, N> S = phi;
+
+      return S;
+   };
+
+   solver.computeRHS(f);
 
 Regridding
 ----------
 
-When regridding the ``MeshODESolver``, one should call
+When regridding the ``MeshODESolver<N>``, one must first ensure that the mesh data on the old mesh is stored before calling the regrid function:
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 160-167
+   :dedent: 2
 
-   template <size_t N>
-   void
-   MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept;
-
-*before* :ref:`Chap:AmrMesh` creates the new grids.
+This must be done *before* :ref:`Chap:AmrMesh` creates the new grids.
 This will store :math:`\vec{\phi}` on the old mesh.
 After :ref:`Chap:AmrMesh` has generated the new grids, :math:`\vec{\phi}` can be interpolated onto the new grids by calling
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.H
+   :language: c++
+   :lines: 169-177
+   :dedent: 2
 
-   template <size_t N>
-   MeshODESolver<N>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept;
+Users can also choose to turn on/off slope limiters when putting the solution on the new mesh.
 
-Users can also choose to turn on/off slope limiters when putting the solution on the new mesh, see :ref:`Chap:Regridding`.
-The source term :math:`\vec{S}` is also allocated on the new mesh, but is not interpolated onto the new grids.
+.. important::
+   
+   The source term :math:`\vec{S}` is also allocated on the new mesh, but is not interpolated onto the new grids.
+   It must therefore be set by the user after calling the regrid function.
+
+Input options
+-------------
+
+Several input options are available for configuring the run-time configuration of ``MeshODESolver<N>``, which are listed below
+
+.. literalinclude:: ../../../../Source/MeshODESolver/CD_MeshODESolver.options
+   :caption: Input options for the ``MeshODESolver<N>`` class.
+	     All options are run-time configurable.   
 
 I/O
 ---
@@ -165,4 +164,5 @@ If choosing to omit output variables for the solver, one can put e.g. ``MeshODES
 
 .. note::
 
-   ``MeshODESolver`` checkpoint files only contain :math:`\vec{\phi}`. 
+   ``MeshODESolver<N>`` checkpoint files only contain :math:`\vec{\phi}`. 
+   

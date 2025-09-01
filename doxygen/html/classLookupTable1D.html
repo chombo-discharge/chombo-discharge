@@ -128,10 +128,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a96a79f5a43b0f5bac9a1e9897bdaeefa" id="r_a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#a96a79f5a43b0f5bac9a1e9897bdaeefa">swap</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_columnOne</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_columnTwo</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for swapping columns.  <br /></td></tr>
 <tr class="separator:a96a79f5a43b0f5bac9a1e9897bdaeefa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb4e4116d0df3be92a3278979d7e1764" id="r_adb4e4116d0df3be92a3278979d7e1764"><td class="memTemplParams" colspan="2"><a id="adb4e4116d0df3be92a3278979d7e1764" name="adb4e4116d0df3be92a3278979d7e1764"></a>
-template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> K&gt; </td></tr>
-<tr class="memitem:adb4e4116d0df3be92a3278979d7e1764"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>scale</b> (<a class="el" href="classTracerParticleSolver.html">const</a> T &amp;<a class="el" href="classTracerParticleSolver.html">a_scale</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
-<tr class="memdesc:adb4e4116d0df3be92a3278979d7e1764"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function which scales one of the columns (either dependent or independent variable) <br /></td></tr>
+<tr class="memitem:adb4e4116d0df3be92a3278979d7e1764" id="r_adb4e4116d0df3be92a3278979d7e1764"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> K&gt; </td></tr>
+<tr class="memitem:adb4e4116d0df3be92a3278979d7e1764"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#adb4e4116d0df3be92a3278979d7e1764">scale</a> (<a class="el" href="classTracerParticleSolver.html">const</a> T &amp;<a class="el" href="classTracerParticleSolver.html">a_scale</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:adb4e4116d0df3be92a3278979d7e1764"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function which scales one of the columns (either dependent or independent variable)  <br /></td></tr>
 <tr class="separator:adb4e4116d0df3be92a3278979d7e1764"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa3034b927935a5bb8d72b2b335048a76" id="r_aa3034b927935a5bb8d72b2b335048a76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLookupTable1D.html#aa3034b927935a5bb8d72b2b335048a76">truncate</a> (<a class="el" href="classTracerParticleSolver.html">const</a> T &amp;<a class="el" href="classTracerParticleSolver.html">a_min</a>, <a class="el" href="classTracerParticleSolver.html">const</a> T &amp;<a class="el" href="classTracerParticleSolver.html">a_max</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">size_t</a> <a class="el" href="classTracerParticleSolver.html">a_column</a>) <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa3034b927935a5bb8d72b2b335048a76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function for truncating raw data along one of the variables (either dependent or independent).  <br /></td></tr>
@@ -698,6 +697,44 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T ,
 
 </div>
 </div>
+<a id="adb4e4116d0df3be92a3278979d7e1764" name="adb4e4116d0df3be92a3278979d7e1764"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb4e4116d0df3be92a3278979d7e1764">&#9670;&#160;</a></span>scale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T , <a class="el" href="classTracerParticleSolver.html">size_t</a> N, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> &gt; </div>
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> K&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classLookupTable1D.html">LookupTable1D</a>&lt; T, <a class="el" href="classTracerParticleSolver.html">N</a>, <a class="el" href="classTracerParticleSolver.html">I</a> &gt;::scale </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> T &amp;&#160;</td>
+          <td class="paramname"><em>a_scale</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Utility function which scales one of the columns (either dependent or independent variable) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_scale</td><td>Scaling factor </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ab2945213a9ea8abf884af2f8c824d67e" name="ab2945213a9ea8abf884af2f8c824d67e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab2945213a9ea8abf884af2f8c824d67e">&#9670;&#160;</a></span>setRangeStrategyHi()</h2>
 
@@ -845,7 +882,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> T ,
 </div><div class="memdoc">
 
 <p>Utility function for swapping columns. </p>
-<p>This is done on the raw data &ndash; if the user wants to swap columns in the resampled/structured data then he needs to call this function first and then resample the table through prepareTable </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This is done on the raw data &ndash; if the user wants to swap columns in the resampled/structured data then he needs to call this function first and then resample the table. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_columnOne</td><td>Column to swap. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_columnTwo</td><td>Column to swap. </td></tr>

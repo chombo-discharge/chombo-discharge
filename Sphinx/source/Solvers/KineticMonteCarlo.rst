@@ -3,10 +3,13 @@
 Kinetic Monte Carlo
 ===================
 
+Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+While various flavors of KMC are encountered in different fields of science, KMC in the context of ``chombo-discharge`` is primarily associated with chemistry kernels.
+
 Concept
 -------
 
-Kinetic Monte Carlo solvers advance a state (or multiple states) represented e.g. as state vectors
+In ``chombo-discharge`` the Kinetic Monte Carlo solver advances a state (or multiple states) represented e.g. as state vectors
 
 .. math::
 
@@ -17,7 +20,7 @@ Kinetic Monte Carlo solvers advance a state (or multiple states) represented e.g
    \vdots
    \end{pmatrix}
 
-Each row in :math:`\vec{X}` represents e.g. the population of some chemical species.
+Each row in :math:`\vec{X}` represents the population of some chemical species, and is indexed by an integer.
 Reactions between species are represented stoichiometrically as
 
 .. math::
@@ -60,7 +63,7 @@ Various algorithms can be used for advancing the state :math:`\vec{X}` for an ar
    
 #. :ref:`Chap:KMCtauAdvance`, which is an approximation to the SSA which uses Poisson sampling of the underlying reactions. 
 
-#. Hybrid advance, see :ref:`Chap:KMCHybridAdvance`.
+#. Hybrid advance that switches between the SSA and tau-leaping in their respective limits, see :ref:`Chap:KMCHybridAdvance`.
    The hybrid algorithm is taken from :cite:t:`Cao2006`, and switches between tau leaping and the SSA in their respective limits.
 
 .. _Chap:KMCSSAAdvance:
@@ -98,7 +101,7 @@ With tau-leaping the state is advanced over a time :math:`\Delta t` as
 
 .. math::
 
-   \vec{X}\left(t+\Delta t\right) =  \vec{X}\left(t\right) + \sum_{\vec{R}} \vec{\nu}_r\mathcal{P}\left(a_r\left[\vec{X}\left(t\right)\right]\Delta t\right),
+   \vec{X}\left(t+\Delta t\right) =  \vec{X}\left(t\right) + \sum_{r\in\vec{R}} \vec{\nu}_r\mathcal{P}\left(a_r\left[\vec{X}\left(t\right)\right]\Delta t\right),
 
    
 where :math:`\mathcal{P}` is a Poisson-distributed random variable.
@@ -124,7 +127,7 @@ These methods can be used either as standalone methods or together with the hybr
 
       \partial_t X = k X,
 
-   where :math:`X` is the number of electrons and :math:`k>0` is a growth rate.
+   where :math:`k>0` is a growth rate.
    Application of the implicit Euler rule to this system yields
 
    .. math::
@@ -141,7 +144,7 @@ These methods can be used either as standalone methods or together with the hybr
 
       X^{n+1} = \left(1+k\Delta t\right) X^n,
 
-   which is stable for any :math:`\Delta t`.
+   which is stable for any :math:`\Delta t` (provided :math:`k` is positive).
 
 .. _Chap:KMCHybridAdvance:
 
@@ -196,20 +199,14 @@ The :cite:t:`Cao2006` algorithm requires algorithmic specifications as follows:
 Implementation
 --------------
 
-The Kinetic Monte Carlo solver is implemented as
+In ``chombo-discharge``, the KMC solver is implemented as
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
+   :language: c++
+   :lines: 40-57, 73-78
+   :dedent: 0
 
-   template <typename R, typename State, typename T = long long>
-   class KMCSolver
-   {
-   public:
-      using ReactionList = std::vector<std::shared_ptr<const R>>;
-      
-      inline KMCSolver(const ReactionList& a_reaction) noexcept;
-   }
-
-The template parameters are:
+Here, the template parameters are:
 
 * ``R`` is the type of reaction to advance with.
 * ``State`` is the state vector that the KMC and reactions will advance.
@@ -219,16 +216,20 @@ The template parameters are:
 
    The ``KMCSolver`` C++ API is found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSolver.html>`_.
 
+``KMCSolver`` is designed to operate with the possibility of separating the solver from the reaction and state types.
+Several template constraints exist on the reaction type ``R`` as well as the state type ``State``.
+
 State
 _____
 
 The ``State`` representation *must* have a member function
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleState.H
+   :language: c++
+   :lines: 85-90
+   :dedent: 2
 
-   bool State::isValidState() const;
-
-which determines if the state is thermodynamically valid (e.g. no negative populations).
+This function should return true if the state is a valid one (e.g., no negative populations) and false otherwise. 
 The functionality is used when using the hybrid advancement algorithm, see :ref:`Chap:KMCHybridAdvance`.
 
 Reaction(s)
@@ -236,23 +237,10 @@ ___________
 
 The reaction representation ``R`` *must* have the following member functions:
 
-.. code-block:: c++
-
-   // Compute the propensity of the current reaction. 
-   Real R::propensity(const State& s) const;
-
-   // Compute the number of reactions before exhausting one of the reactants
-   T R::computeCriticalNumberOfReactions(const State& s) const;
-
-   // Compute the number of reactions before exhausting one of the reactants
-   void R::advanceState(const State& s, const T& numReactions) const;
-
-   // Get a vector/list/deque etc. of the reactants. <some_container> can be e.g. std::vector<size_t> 
-   <some_container> R::getReactants() const;
-
-   // Get the population corresponding to 'reactant' in the input state. If e.g. <some_container> is
-   // std::vector<size_t> then <some_type> will be <size_t>
-   T R::population(const <some_type> reactant, const State& s) const;
+.. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H
+   :language: c++
+   :lines: 73-108
+   :dedent: 2
 
 These template requirements exist so that users can define their states independent of their reactions.
 Likewise, reactions can be defined to operate flexibly on state, and the ``KMCSolver`` can be defined without deep restrictions on the states and reactions that are used. 
@@ -279,7 +267,6 @@ In the absolute simplest case a state can be defined by maintaining a list of po
    };
 
 More advanced examples can distinguish between different *modes* of populations, e.g. between species that can only appear on the left/right hand side of the reactions.
-See :ref:`Chap:KMCDualState` for such an example.
 
 Defining reactions
 __________________
@@ -332,133 +319,29 @@ Using ``MyState`` above as an example, a minimal reaction that can advance :math
 Advancement routines
 ____________________
 
-The advancement routines for the ``KMCSolver`` are
+Many advancement routines for the ``KMCSolver`` are defined internally.
+The most general one that uses the hybrid advance is
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
+   :language: c++
+   :lines: 396-406
+   :dedent: 2
 
-   template <typename R, typename State, typename T = long long>
-   class KMCSolver
-   {
-   public:
+When using the hybrid algorithm, the user should set the hybrid solver parameters through the function
 
-      // Advance one step with the SSA algorithm.
-      inline void
-      advanceSSA(State& a_state, const Real a_dt) const;
-
-      // Advance using tau leaping
-      inline void
-      advanceTau(State& a_state, const Real a_dt) const;
-
-      // Advance using hybrid algorithm. 
-      inline void
-      advanceHybrid(State& a_state, const Real a_dt) const;
-
-      // Set hybrid solver parameters.
-      inline void
-      setSolverParameters(const T a_numCrit, const T a_numSSA, const Real a_eps, const Real a_SSAlim) noexcept;      
-   };
-
-When using the hybrid algorithm, the user should set the hybrid solver parameters through ``setSolverParameters``.
-See :ref:`Chap:KMCHybridAdvance` for further details. 
+.. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
+   :language: c++
+   :lines: 104-119
+   :dedent: 2
 
 State and reaction examples
 ---------------------------
 
 ``chombo-discharge`` maintains some states and reaction methods that can be useful when solving problems with ``KMCSolver``.
+The following two implementations are currently in use:
 
-.. _Chap:KMCSingleState:
-
-Single-state
-____________
-
-The ``KMCSingleState`` class defines a single state vector :math:`\vec{X}` that can appear on either side of reactions.
-The user defines the number of species through the constructor
-
-.. code-block:: c++
-
-   template <typename T = long long>
-   class KMCSingleState {
-   public:
-      // Define a state vector with specified number of species. 
-      inline KMCSingleState(const size_t a_numSpecies) noexcept;
-   };
-
-Internally the state just uses a ``std::vector<T>`` for representing the populations.
-
-``KMCSingleStateReaction`` can be used to define reactions between species in ``KMCSingleState``.
-The reaction is specified as a generic type of reaction
-
-.. math::
-
-   X_A + X_B + \ldots \xrightarrow{k} X_C + X_D + \ldots.
-
-The relevant function signatures that specify the reactants, products, and the rate :math:`k`, are
-
-.. code-block:: c++
-
-   template <typename T = long long, typename State = KMCSingleState<T>>
-   class KMCSingleStateReaction {
-   public:
-
-      // Define list of reactants/products through constructor
-      inline
-      KMCSingleStateReaction(const std::list<size_t>& a_reactants,
-                             const std::list<size_t>& a_products) noexcept;
-
-      // For setting the reaction rate used in the propensity calculation.
-      inline Real&
-      rate() const noexcept;
-   };
-
-.. _Chap:KMCDualState:
-
-KMCDualState
-____________
-
-``KMCDualState`` defines two state vectors :math:`\vec{X}` and :math:`\vec{Y}` where :math:`\vec{X}` are *reactant species* and :math:`\vec{Y}` are *non-reactant* species.
-The intention behind this class is that reactant species are allowed on either side of the reaction, while the non-reactant species only occur on the right-hand side of the reaction.
-For example:
-
-.. math::
-
-   X_A \ldots \xrightarrow{k} 2X_A + Y_A + \emptyset
-
-The class is implemented as
-
-.. code-block:: c++
-		
-   template <typename T = long long>
-   class KMCDualState {
-   public:
-      // Define a state vector with specified number of species. 
-      inline KMCDualState(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept;
-
-      // Get the reactant state (i.e, X)
-      std::vector<T>& getReactiveState() noexcept;
-
-      // Get the non-reactant state (i.e, Y)
-      std::vector<T>& getNonReactiveState() noexcept;      
-   };
-
-``KMCDualStateReaction`` can define reactions between states in the state vector :math:`\vec{X}` which give products in both :math:`\vec{X}` and :math:`\vec{Y}` as follows.
-
-.. code-block:: c++
-		
-   template <typename T = long long, typename State = KMCDualState<T>>
-   class KMCDualStateReaction {
-   public:
-
-      // Define list of reactants/products through constructor
-      inline
-      KMCDualStateReaction(const std::list<size_t>& a_lhsReactives,
-                           const std::list<size_t>& a_rhsReactives,
-                           const std::list<size_t>& a_rhsNonReactives);
-
-      // For setting the reaction rate used in the propensity calculation.
-      inline Real&
-      rate() const noexcept;
-   };
-
+#. ``KMCSingleState``, see the `KMCSingleState C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSingleState.html>`_ and the `KMCSingleStateReaction C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCSingleStateReaction.html>`_.
+#. ``KMCDualState``, see the `KMCDualState C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCDualState.html>`_ and the `KMCDualStateReaction C++ API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classKMCDualStateReaction.html>`_.
 
 Verification
 ------------

@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Least squares" href="LeastSquares.html" />
-    <link rel="prev" title="Lookup tables" href="LookupTable.html" /> 
+    <link rel="prev" title="LookupTable1D" href="LookupTable.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -72,7 +72,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -80,12 +79,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -106,10 +105,14 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Random numbers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#drawing-random-numbers">Drawing random numbers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#setting-the-seed">Setting the seed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drawing-random-numbers">Drawing random numbers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-approach">General approach</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pre-defined-distributions">Pre-defined distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#seeding-the-rng">Seeding the RNG</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="LeastSquares.html">Least squares</a></li>
@@ -151,39 +154,88 @@
   <section id="random-numbers">
 <span id="chap-random"></span><h1>Random numbers<a class="headerlink" href="#random-numbers" title="Permalink to this heading"></a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">Random</span></code> is a static class for generating pseudo-random numbers, and exist so that all random number operations can be aggregated into a single class.
-Internally, <code class="docutils literal notranslate"><span class="pre">Random</span></code> use a Mersenne-Twister random number generation.</p>
-<p>To use the <code class="docutils literal notranslate"><span class="pre">Random</span></code> class, simply include <code class="docutils literal notranslate"><span class="pre">&lt;CD_Random.H&gt;</span></code>, e.g.</p>
+Internally, <code class="docutils literal notranslate"><span class="pre">Random</span></code> use a Mersenne-Twister random number generation supplied by <code class="docutils literal notranslate"><span class="pre">std::random</span></code>.</p>
+<p>To use the <code class="docutils literal notranslate"><span class="pre">Random</span></code> class, simply include <code class="docutils literal notranslate"><span class="pre">&lt;CD_Random.H&gt;</span></code>, e.g.,</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_Random.H&gt;</span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classRandom.html">Random API</a> for further details.</p>
 <section id="drawing-random-numbers">
 <h2>Drawing random numbers<a class="headerlink" href="#drawing-random-numbers" title="Permalink to this heading"></a></h2>
+<section id="general-approach">
+<h3>General approach<a class="headerlink" href="#general-approach" title="Permalink to this heading"></a></h3>
 <p>The general routine for drawing a random number is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
-<span class="n">Real</span><span class="w"> </span><span class="n">get</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_distribution</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief For getting a random number from a user-supplied distribution. T must be a distribution for which we can call T(s_rng)</span>
+<span class="cm">  @param[in] a_distribution Distribution. Must have object of type</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span>
+<span class="n">get</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_distribution</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>which is for example used as follows:</p>
+<p>Here, the template parameter <code class="docutils literal notranslate"><span class="pre">T</span></code> is some distribution that follows the appropriate C++ template constraints of <code class="docutils literal notranslate"><span class="pre">&lt;random&gt;</span></code>.
+For example:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">uniform_real_distribution</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dist</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">100.0</span><span class="p">);</span>
 
 <span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">randomNumber</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Random</span><span class="o">::</span><span class="n">get</span><span class="p">(</span><span class="n">dist</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Pre-defined distributions exist for performing the following operations:</p>
-<ol class="arabic simple">
-<li><p>For drawing a real number from a uniform distribution between 0 and 1, use <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">Random::getUniformReal01()</span></code>.</p></li>
-<li><p>For drawing a real number from a uniform distribution between -1 and 1, use <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">Random::getUniformReal11()</span></code>.</p></li>
-<li><p>For drawing a real number from a normal distribution centered at 0 and with a variance of 1, use <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">Random::getNormal01()</span></code>.</p></li>
-<li><p>For drawing an integer from a Poisson distribution with a specified mean, use <code class="docutils literal notranslate"><span class="pre">T</span> <span class="pre">Random::getPoisson&lt;T&gt;(const</span> <span class="pre">Real</span> <span class="pre">a_mean)</span></code> where <code class="docutils literal notranslate"><span class="pre">T</span></code> is an integer type.</p></li>
-<li><p>For drawing a random direction in space, use <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">Random::getDirection()</span></code>.
-The implementation uses the Marsaglia algorithm for drawing coordinates uniformly distributed over the unit sphere.</p></li>
-</ol>
 </section>
-<section id="setting-the-seed">
-<h2>Setting the seed<a class="headerlink" href="#setting-the-seed" title="Permalink to this heading"></a></h2>
-<p>By default, the random number generator is seeded with the MPI rank, which we do to avoid having the MPI ranks producing the same number sequences.
-<code class="docutils literal notranslate"><span class="pre">Driver</span></code> (see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>) will seed the random number generator, and user can override the seed by setting <code class="docutils literal notranslate"><span class="pre">Random.seed</span> <span class="pre">=</span> <span class="pre">&lt;number&gt;</span></code> in the input script.
+<section id="pre-defined-distributions">
+<h3>Pre-defined distributions<a class="headerlink" href="#pre-defined-distributions" title="Permalink to this heading"></a></h3>
+<p>Pre-defined distributions exist for performing the following operations:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get Poisson distributed number</span>
+<span class="cm">  @param[in] a_mean Poisson mean value (inverse rate)</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">is_integral</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">value</span><span class="o">&gt;&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">T</span>
+<span class="n">getPoisson</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_mean</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get Poisson distributed number. </span>
+<span class="cm">  @param[in] a_N Number of trials</span>
+<span class="cm">  @param[in] a_p The usual success probability in binomial distributions</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">is_integral</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">value</span><span class="o">&gt;&gt;</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">T</span>
+<span class="n">getBinomial</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">a_N</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_p</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get a uniform real number on the interval [0,1]</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">getUniformReal01</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get a uniform real number on the interval [-1,1]</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">getUniformReal11</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get a number from a normal distribution centered on zero and variance 1</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">getNormal01</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get a random direction in space.</span>
+<span class="cm">  @details Uses Marsaglia algorithm. </span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">RealVect</span>
+<span class="nf">getDirection</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="seeding-the-rng">
+<h2>Seeding the RNG<a class="headerlink" href="#seeding-the-rng" title="Permalink to this heading"></a></h2>
+<p>By default, the random number generator is seeded using the MPI rank.
+It is necessary to seed MPI ranks using different seeds to avoid them producing the same number sequences.
+If using MPI+OpenMP, additional steps are taken to ensure that each OpenMP thread obtains a unique random number generator.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Driver</span></code> (see <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>) will seed the random number generator, and user can override the seed by setting <code class="docutils literal notranslate"><span class="pre">Random.seed</span> <span class="pre">=</span> <span class="pre">&lt;number&gt;</span></code> in the input script.
 If the user sets <code class="docutils literal notranslate"><span class="pre">&lt;number&gt;</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> then a random seed will be produced based on the elapsed CPU clock time.
 If running with MPI, this seed is obtained by only one of the MPI ranks, and this seed is then broadcast to all the other ranks.
 The other ranks will then increment the seed by their own MPI rank number so that each MPI rank gets a unique seed.</p>
@@ -194,7 +246,7 @@ The other ranks will then increment the seed by their own MPI rank number so tha
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="LookupTable.html" class="btn btn-neutral float-left" title="Lookup tables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="LookupTable.html" class="btn btn-neutral float-left" title="LookupTable1D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="LeastSquares.html" class="btn btn-neutral float-right" title="Least squares" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

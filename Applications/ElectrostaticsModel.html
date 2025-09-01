@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -99,17 +98,13 @@
 <li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="BrownianWalkerModel.html">Brownian walker</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Electrostatics model</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-the-space-charge">Setting the space charge</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#default-behavior">Default behavior</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#custom-value">Custom value</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#setting-the-surface-charge">Setting the surface charge</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Custom value</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-the-surface-charge">Setting the surface charge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a><ul>
@@ -128,7 +123,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -171,26 +166,23 @@
 <p>The electrostatics model solves</p>
 <div class="math notranslate nohighlight">
 \[\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0}\]</div>
-<p>subject to the constraints and boundary conditions given in <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.
-The implementation is by a class</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FieldStepper</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">TimeStepper</span>
-</pre></div>
-</div>
-<p>and is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/Electrostatics</span></code>.
+<p>subject to the constraints and boundary conditions given in <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.</p>
+<p>There is currently no <a class="reference internal" href="../Source/CellTagger.html#chap-celltagger"><span class="std std-ref">CellTagger</span></a> implementation for this module, so AMR support is restricted to refinement based on geometric criteria.
+The full implementation for this model consists only of the following class:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code>, which implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The source for this module is found in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/Electrostatics</span></code>.
 The C++ API is found <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1Electrostatics_1_1FieldStepper.html">here</a>.</p>
-<section id="solvers">
-<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
-<p>This module uses the following solvers:</p>
-<ol class="arabic simple">
-<li><p><a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.</p></li>
-</ol>
-</section>
+</div>
 <section id="time-stepping">
 <h2>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> is a class with only stationary solves.
 This is enforced by making the <code class="docutils literal notranslate"><span class="pre">TimeStepper::advance</span></code> method throw an error, while the field solve itself is done in the initialization procedure in <code class="docutils literal notranslate"><span class="pre">TimeStepper::postInitialize</span></code>.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
 <p>To run the solver, one must set <code class="docutils literal notranslate"><span class="pre">Driver.max_steps</span> <span class="pre">=</span> <span class="pre">0</span></code>.</p>
 </div>
 </section>
@@ -198,52 +190,87 @@ This is enforced by making the <code class="docutils literal notranslate"><span 
 <h2>Setting the space charge<a class="headerlink" href="#setting-the-space-charge" title="Permalink to this heading"></a></h2>
 <section id="default-behavior">
 <h3>Default behavior<a class="headerlink" href="#default-behavior" title="Permalink to this heading"></a></h3>
-<p>By default, the initial space charge for this problem is given by Gaussian</p>
+<p>By default, the initial space charge for this problem is given by a Gaussian</p>
 <div class="math notranslate nohighlight">
 \[\rho\left(\mathbf{x}\right) = \rho_0\exp\left(-\frac{\left|\mathbf{x}-\mathbf{x}_0\right|^2}{2R^2}\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\rho_0\)</span> is an amplitude, <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> is the center and <span class="math notranslate nohighlight">\(R\)</span> is the Gaussian radius.
-These are set by the input options</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldStepper.init_rho     = 1.0
-FieldStepper.rho_center   = 0 0 0
-FieldStepper.rho_radius   = 1.0
-</pre></div>
-</div>
-</section>
-<section id="custom-value">
-<h3>Custom value<a class="headerlink" href="#custom-value" title="Permalink to this heading"></a></h3>
+These are set through respective configuration options, see <a class="reference internal" href="#chap-fieldstepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
 <p>For a more general way of specifying the space charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set space charge</span>
+<span class="cm">  @param[in] a_rho Space charge distribution</span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
+<span class="nf">setRho</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_rho</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">a_phase</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="setting-the-surface-charge">
 <h2>Setting the surface charge<a class="headerlink" href="#setting-the-surface-charge" title="Permalink to this heading"></a></h2>
-<p>By default, the initial surface charge is set to a constant.
-This constant is given by</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>FieldStepper.init_sigma = 1.0
-</pre></div>
-</div>
-<section id="id1">
-<h3>Custom value<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
-<p>For a more general way of specifying the surface charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<p>By default, the initial surface charge is set to a constant, see <a class="reference internal" href="#chap-fieldstepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.
+For a more general way of specifying the surface charge, <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has a public member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set surface charge</span>
+<span class="cm">  @param[in] a_sigma Surface charge distribution</span>
+<span class="cm">*/</span>
+<span class="kt">void</span>
+<span class="nf">setSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_sigma</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 </section>
+<section id="solver-configuration">
+<span id="chap-fieldstepperconfiguration"></span><h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> has relatively few configuration options, which are mostly limited to setting the space and surface charge
+The configuration options for <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code> are given below:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# FIELD_STEPPER CLASS OPTIONS
+# ====================================================================================================
+FieldStepper.verbosity        = -1        ## Verbosity
+FieldStepper.realm            = primal    ## Realm where solver lives.
+FieldStepper.load_balance     = false     ## Load balance or not.
+FieldStepper.box_sorting      = morton    ## If you load balance you can redo the box sorting.
+FieldStepper.init_sigma       = 0.0       ## Surface charge density
+FieldStepper.init_rho         = 0.0       ## Space charge density (value)
+FieldStepper.rho_center       = 0 0 0     ## Space charge blob center
+FieldStepper.rho_radius       = 1.0       ## Space charge blob radius
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Setup of boundary conditions is <em>not</em> a job for <code class="docutils literal notranslate"><span class="pre">FieldStepper</span></code>, but occurs through the respective <a class="reference internal" href="../Source/ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a> and <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a>.</p>
+</div>
 </section>
 <section id="setting-up-a-new-problem">
 <h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/Electrostatics</span></code> is the simplest way.
-To see available setup options, run</p>
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/Electrostatics</span>
+This physics module solves the Poisson equation. It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
+See https://chombo-discharge.github.io/ElectrostaticsModel.html for implementation details.
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_FieldStepper.H/cpp**</span> Implementation of TimeStepper, for solving the Poisson equation. 
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyElectrostatics<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyElectrostatics.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+
+<span class="gu">## Modifying the application</span>
+Users are free to modify this application, e.g. adding support for mesh refinement or setting up more complex boundary conditions. 
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
-<p>For example, to set up a new problem in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications/MyElectrostaticsProblem</span></code> for a cylinder geometry, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyElectrostaticsProblem<span class="w"> </span>-geometry<span class="o">=</span>Cylinder
-</pre></div>
-</div>
-<p>This will set up a new problem in a cylinder geometry (defined in <code class="file docutils literal notranslate"><span class="pre">Geometries/Cylinder</span></code>).</p>
 </section>
 <section id="example-programs">
 <h2>Example programs<a class="headerlink" href="#example-programs" title="Permalink to this heading"></a></h2>
@@ -268,18 +295,18 @@ To see available setup options, run</p>
 <p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C1</span></code> is a spatial convergence test in a coaxial cable geometry.
 Figure <a class="reference internal" href="#fig-electrostaticsc1-1"><span class="std std-numref">Fig. 28</span></a> shows the field distribution.
 Note that there is a dielectric embedded between the two cylindrical shells.</p>
-<figure class="align-center" id="id2">
+<figure class="align-center" id="id1">
 <span id="fig-electrostaticsc1-1"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC1_1.png"><img alt="../_images/ElectrostaticsC1_1.png" src="../_images/ElectrostaticsC1_1.png" style="width: 40%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 28 </span><span class="caption-text">Field distribution for a coaxial cable geometry on a <span class="math notranslate nohighlight">\(512^2\)</span> grid.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 28 </span><span class="caption-text">Field distribution for a coaxial cable geometry on a <span class="math notranslate nohighlight">\(512^2\)</span> grid.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc1-2"><span class="std std-numref">Fig. 29</span></a>.
 We find second order convergence in all three norms.</p>
-<figure class="align-center" id="id3">
+<figure class="align-center" id="id2">
 <span id="fig-electrostaticsc1-2"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC1_2.png"><img alt="../_images/ElectrostaticsC1_2.png" src="../_images/ElectrostaticsC1_2.png" style="width: 45%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 29 </span><span class="caption-text">Spatial convergence rates for two-dimensional coaxial cable geometry.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 29 </span><span class="caption-text">Spatial convergence rates for two-dimensional coaxial cable geometry.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -287,18 +314,18 @@ We find second order convergence in all three norms.</p>
 <h3>C2: Profiled surface<a class="headerlink" href="#c2-profiled-surface" title="Permalink to this heading"></a></h3>
 <p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C2</span></code> is a 2D spatial convergence test for an electrode and a dielectric slab with surface profiles.
 Figure <a class="reference internal" href="#fig-electrostaticsc2-1"><span class="std std-numref">Fig. 30</span></a> shows the field distribution.</p>
-<figure class="align-center" id="id4">
+<figure class="align-center" id="id3">
 <span id="fig-electrostaticsc2-1"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC2_1.png"><img alt="../_images/ElectrostaticsC2_1.png" src="../_images/ElectrostaticsC2_1.png" style="width: 45%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 30 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(2048^2\)</span> grid.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 30 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(2048^2\)</span> grid.</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc2-2"><span class="std std-numref">Fig. 31</span></a>.
 We find second order convergence in all three norms.</p>
-<figure class="align-center" id="id5">
+<figure class="align-center" id="id4">
 <span id="fig-electrostaticsc2-2"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC2_2.png"><img alt="../_images/ElectrostaticsC2_2.png" src="../_images/ElectrostaticsC2_2.png" style="width: 45%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 31 </span><span class="caption-text">Spatial convergence rates for two-dimensional dielectric surface profile.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 31 </span><span class="caption-text">Spatial convergence rates for two-dimensional dielectric surface profile.</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>
@@ -306,19 +333,19 @@ We find second order convergence in all three norms.</p>
 <h3>C3: Dielectric shaft<a class="headerlink" href="#c3-dielectric-shaft" title="Permalink to this heading"></a></h3>
 <p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Convergence/Electrostatics/C3</span></code> is a 3D spatial convergence test for a dielectric shaft perpendicular to the background field.
 Figure <a class="reference internal" href="#fig-electrostaticsc3-1"><span class="std std-numref">Fig. 32</span></a> shows the field distribution for a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</p>
-<figure class="align-center" id="id6">
+<figure class="align-center" id="id5">
 <span id="fig-electrostaticsc3-1"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC3_1.png"><img alt="../_images/ElectrostaticsC3_1.png" src="../_images/ElectrostaticsC3_1.png" style="width: 25%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 32 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 32 </span><span class="caption-text">Field distribution for a profiled surface geometry on a <span class="math notranslate nohighlight">\(256^3\)</span> grid.</span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>The computed convergence rates are given in <a class="reference internal" href="#fig-electrostaticsc3-2"><span class="std std-numref">Fig. 33</span></a>.
 We find second order convergence in <span class="math notranslate nohighlight">\(L_1\)</span> and <span class="math notranslate nohighlight">\(L_2\)</span> on all grids, and find second order convergence in the max-norm on sufficiently fine grids.
 On coarser grids, the reduced convergence rate in the max-norm is probably due to under-resolution of the geometry.</p>
-<figure class="align-center" id="id7">
+<figure class="align-center" id="id6">
 <span id="fig-electrostaticsc3-2"></span><a class="reference internal image-reference" href="../_images/ElectrostaticsC3_2.png"><img alt="../_images/ElectrostaticsC3_2.png" src="../_images/ElectrostaticsC3_2.png" style="width: 45%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 33 </span><span class="caption-text">Spatial convergence rates.</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 33 </span><span class="caption-text">Spatial convergence rates.</span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 </section>

@@ -25,7 +25,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Discharge inception model" href="DischargeInceptionModel.html" />
-    <link rel="prev" title="Îto diffusion" href="../Solvers/Ito.html" /> 
+    <link rel="prev" title="Tracer particles" href="../Solvers/TracerParticles.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,35 +80,22 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CDR plasma model</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#simulation-quick-start">Simulation quick start</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#cdrplasmaphysics">CdrPlasmaPhysics</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#api">API</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#initializing-species">Initializing species</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#defining-drift-velocities">Defining drift velocities</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#defining-diffusion-coefficients">Defining diffusion coefficients</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#defining-chemistry-terms">Defining chemistry terms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fluxes-at-electrode-boundaries">Fluxes at electrode boundaries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fluxes-at-dielectric-boundaries">Fluxes at dielectric boundaries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#fluxes-at-domain-boundaries">Fluxes at domain boundaries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#setting-initial-surface-charge">Setting initial surface charge</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#time-discretizations">Time discretizations</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#godunov-operator-splitting">Godunov operator splitting</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#specifying-transport-algorithm">Specifying transport algorithm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#specifying-diffusion">Specifying diffusion</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#time-step-limitations">Time step limitations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#spectral-deferred-corrections">Spectral deferred corrections</a><ul>
@@ -117,6 +103,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#id2">Time step limitations</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cdrplasmaphysics">CdrPlasmaPhysics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#complete-api">Complete API</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#json-interface">JSON interface</a><ul>
@@ -156,9 +147,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#eb-boundary-conditions">EB boundary conditions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#domain-boundary-conditions">Domain boundary conditions</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#adaptive-mesh-refinement">Adaptive mesh refinement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="DischargeInceptionModel.html">Discharge inception model</a></li>
@@ -177,7 +169,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -217,34 +209,26 @@
              
   <section id="cdr-plasma-model">
 <span id="chap-cdrplasmamodel"></span><h1>CDR plasma model<a class="headerlink" href="#cdr-plasma-model" title="Permalink to this heading"></a></h1>
-<p>The CDR plasma model resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma</span></code> and describes plasmas in the drift-diffusion approximation.
-This physics model also includes the following subfolders:</p>
-<ul class="simple">
-<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/PlasmaModel</span></code> which contains various implementation of some plasma models that we have used.</p></li>
-<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/TimeSteppers</span></code> contains various algorithms for advancing the equations of motion.</p></li>
-<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CellTaggers</span></code> contains various algorithms for flagging cells for refinement and coarsening.</p></li>
-<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/python</span></code> contains Python source files for quickly setting up new applications.</p></li>
-</ul>
 <p>In the CDR plasma model we are solving</p>
 <div class="math notranslate nohighlight" id="equation-cdrplasmaequations">
-<span class="eqno">(7)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
+<span class="eqno">(12)<a class="headerlink" href="#equation-cdrplasmaequations" title="Permalink to this equation"></a></span>\[\begin{split}&amp;\nabla\cdot\left(\epsilon_r\nabla\Phi\right) = -\frac{\rho}{\epsilon_0},\\
 &amp;\frac{\partial\sigma}{\partial t} = F_\sigma,\\
 &amp;\frac{\partial n}{\partial t} + \nabla\cdot\left(\mathbf{v} n - D\nabla n\right) = S,\end{split}\]</div>
 <p>The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces.</p>
-<p>Radiative transport can be done either in the diffusive approximation or by means of Monte Carlo methods.
-Diffusive RTE methods involve solving</p>
+<p>Radiative transport can be done either in the diffusive approximation or by means of Monte Carlo methods (see <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>).
+Diffusive RTE methods (see <a class="reference internal" href="../Solvers/RTE.html#chap-eddingtonsp1"><span class="std std-ref">EddingtonSP1</span></a>) involve solving</p>
 <div class="math notranslate nohighlight">
 \[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the isotropic photon density, <span class="math notranslate nohighlight">\(\kappa\)</span> is an absorption length and <span class="math notranslate nohighlight">\(\eta\)</span> is an isotropic source term.
 I.e., <span class="math notranslate nohighlight">\(\eta\)</span> is the number of photons produced per unit time and volume.
 The time dependent term can be turned off and the equation can be solved stationary.</p>
-<p>The module also supports discrete photons where photon transport and absorption is done by sampling discrete photons.
-In general, discrete photon methods incorporate better physics (like shadows)
-They can easily be adapted to e.g. scattering media.
+<p>The module also supports discrete photons where photon transport and absorption is done by sampling discrete photons (see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo solver</span></a>).
+In general, discrete photon methods incorporate better physics (like shadows).
+They can also be more easily adapted to scattering media.
 They are, on the other hand, inherently stochastic which implies that some extra caution must be exercised when integrating the equations of motion.</p>
 <p>The coupling that is (currently) available in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is</p>
 <div class="math notranslate nohighlight" id="equation-cdrplasmacoupling">
-<span class="eqno">(8)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\epsilon_r =&amp; \epsilon_r(\mathbf{x}),\\
+<span class="eqno">(13)<a class="headerlink" href="#equation-cdrplasmacoupling" title="Permalink to this equation"></a></span>\[\begin{split}\epsilon_r =&amp; \epsilon_r(\mathbf{x}),\\
 \mathbf{v} =&amp; \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
 D =&amp; \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right),\\
 S =&amp; S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\right),\\
@@ -252,40 +236,17 @@ S =&amp; S\left(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi\r
 F =&amp; F(t, \mathbf{x}, \mathbf{E}, n),\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(F\)</span> is the boundary flux on insulators or electrodes (which must be separately implemented).</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> works by embedding the equations above into an abstract C++ framework (see <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>) that the user must implement or reuse existing pieces of, and then compile into an executable.</p>
-<section id="simulation-quick-start">
-<span id="chap-cdrplasmanewproblem"></span><h2>Simulation quick start<a class="headerlink" href="#simulation-quick-start" title="Permalink to this heading"></a></h2>
-<p>New problems that use the <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code> physics model are best set up by using the Python tools provided with the module.
-Navigate to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma`</span></code> and set up the problem with.
-To see the list of available options type</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>/Physics/CdrPlasma
-./setup.py<span class="w"> </span>--help
-</pre></div>
-</div>
-<p>The following options are helpful for setting up the problem:</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The CDR plasma model resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma</span></code> and describes plasmas in the drift-diffusion approximation.
+This physics model also includes the following subfolders:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">base_dir</span></code> The base directory where the application will be placed.
-Defaults to <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/MyApplications</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">app_name</span></code> The application name.
-The application will be put in <code class="file docutils literal notranslate"><span class="pre">base_dir/app_name</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> The geometry to be used.
-The geometry must be one of the ones provided in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Geometries</span></code> (users can also provide their own models).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">physics</span></code> The plasma physics model.
-This must be one of the folders/class in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModel</span></code> (users can also provide their own models).
-Defaults to <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> (see <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a>).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">time_stepper</span></code> Time integrator.
-This must derive from <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> and must be one of the time steppers in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers</span></code>.
-The default integrator is <code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cell_tagger</span></code> Cell tagger
-This must derive from <code class="docutils literal notranslate"><span class="pre">CdrPlasmaTagger</span></code> and must be one of the cell taggers in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma/CellTaggers</span></code>.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/PlasmaModel</span></code> which contains various implementation of some plasma models that we have used.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/TimeSteppers</span></code> contains various algorithms for advancing the equations of motion.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CellTaggers</span></code> contains various algorithms for flagging cells for refinement and coarsening.</p></li>
 </ul>
-<p>For example, to set up a geometry-less that does not use AMR, do</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>
-./setup.py<span class="w"> </span>-app_name<span class="o">=</span>MyApplication
-</pre></div>
+<p>See <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html">CdrPlasmaStepper</a> for the overall C++ API.</p>
 </div>
-</section>
-<section id="solvers">
-<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
 <p>This module uses the following solvers:</p>
 <ol class="arabic simple">
 <li><p>Advection-diffusion-reaction solver, <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>.</p></li>
@@ -293,240 +254,9 @@ This must derive from <code class="docutils literal notranslate"><span class="pr
 <li><p>Radiative transfer solver (either Monte-Carlo or continuum approximation), <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>.</p></li>
 <li><p>Surface charge solver, see <a class="reference internal" href="../Solvers/SurfaceODESolver.html#chap-surfaceodesolver"><span class="std std-ref">Surface ODE solver</span></a>.</p></li>
 </ol>
-</section>
-<section id="cdrplasmaphysics">
-<span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this heading"></a></h2>
-<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 8</a>.
-The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
-Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
-<p>There are no default input parameters for <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>, as users must generally implement their own kinetics.
-The class exists solely for providing the integrators with the necessary fundamentals for filling solvers with the correct quantities at the same time, for example filling source terms and drift velocities.</p>
-<p>A successful implementation of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> has the following:</p>
-<ol class="arabic simple">
-<li><p>Instantiated a list of <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
-These become <a class="reference internal" href="../Solvers/CDR.html#chap-cdr"><span class="std std-ref">Convection-Diffusion-Reaction</span></a> solvers and contain initial conditions and basic transport settings for the convection-diffusion-reaction solvers.</p></li>
-<li><p>Instantiated a list <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a>.
-These become <a class="reference internal" href="../Solvers/RTE.html#chap-radiativetransfer"><span class="std std-ref">Radiative transfer</span></a> solvers and contain metadata for the radiative transport solvers.</p></li>
-<li><p>Implemented the core functionality that couple the solvers together.</p></li>
-</ol>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
-For information on how to interface into the CDR solvers, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
-Likewise, see <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for how to interface into the RTE solvers.</p>
-<p>Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
-For this reason we also provide an implementation layer <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a> that provides a plug-and-play interface for specifying the plasma physics.</p>
-<section id="api">
-<h3>API<a class="headerlink" href="#api" title="Permalink to this heading"></a></h3>
-<p>The API for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> is as follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_E</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_cdrSources</span><span class="p">,</span>
-<span class="w">                                    </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_rteSources</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dx</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dt</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                                   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                                   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                                   </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                                     </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                                     </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                                     </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                                               </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                                                </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">       </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">            </span><span class="n">a_dir</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">       </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-
-<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>The above code blocks do the following:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">computeAlpha</span></code> computes the Townsend ionization coefficient.
-This is used by the cell tagger.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code> provides the coupling <span class="math notranslate nohighlight">\(S = S(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi)\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDriftVelocities</span></code> provides the coupling <span class="math notranslate nohighlight">\(\mathbf{v} = \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right)\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDiffusionCoefficients</span></code> provides the coupling <span class="math notranslate nohighlight">\(D = \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right)\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrElectrodeFluxes</span></code> provides the coupling <span class="math notranslate nohighlight">\(F = F(t, \mathbf{x}, \mathbf{E}, n)\)</span> on electrode EBs.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code> provides the coupling <span class="math notranslate nohighlight">\(F = F(t, \mathbf{x}, \mathbf{E}, n)\)</span> on dielectric EBs.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">computeCdrDomainFluxes</span></code> provides the coupling <span class="math notranslate nohighlight">\(F = F(t, \mathbf{x}, \mathbf{E}, n)\)</span> on domain sides.</p></li>
-</ul>
-<p>For a fully documented API, see the <a class="reference external" href="doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html">doxygen API</a>.</p>
-<p>Below, we include a brief overview of how <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> can be directly implemented.
-Note that direct implements like these tend to become boilerplate, we also include an interface which implements these functions with pre-defined rules, see <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a>.</p>
-</section>
-<section id="initializing-species">
-<h3>Initializing species<a class="headerlink" href="#initializing-species" title="Permalink to this heading"></a></h3>
-<p>In the constructor, the user should define the advected/diffused species and the radiative transfer species.
-These are stored in vectors <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;CdrSpecies&gt;</span> <span class="pre">&gt;</span> <span class="pre">m_CdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector&lt;RefCountedPtr&lt;RtSpecies&gt;</span> <span class="pre">&gt;</span> <span class="pre">m_RtSpecies</span></code>.
-Each species in these vectors become a convection-diffusion-reaction solver or a radiative transfer solver.
-See <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a> and <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for details on how to implement these.</p>
-</section>
-<section id="defining-drift-velocities">
-<h3>Defining drift velocities<a class="headerlink" href="#defining-drift-velocities" title="Permalink to this heading"></a></h3>
-<p>To set the drift velocities, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDriftVelocities</span></code> – this will set the drift velocity <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> in the CDR equations:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                           </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w">  </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span><span class="w"> </span><span class="n">a_E</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>This implementation is set the advection velocity equal to <span class="math notranslate nohighlight">\(\mathbf{E}\)</span>.
-For a full plasma simulation, there will also be mobilities involved, which the user is reponsible for obtaining.</p>
-</section>
-<section id="defining-diffusion-coefficients">
-<h3>Defining diffusion coefficients<a class="headerlink" href="#defining-diffusion-coefficients" title="Permalink to this heading"></a></h3>
-<p>To set the diffusion coefficients, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDiffusionCoefficients</span></code> – this will set the diffusion coefficient <span class="math notranslate nohighlight">\(D\)</span> in the CDR equations:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>This sets <span class="math notranslate nohighlight">\(D = 1\)</span> for all species involved.</p>
-</section>
-<section id="defining-chemistry-terms">
-<h3>Defining chemistry terms<a class="headerlink" href="#defining-chemistry-terms" title="Permalink to this heading"></a></h3>
-<p>To set the source terms <span class="math notranslate nohighlight">\(S\)</span>, implement <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
-This routine should set the reaction terms for both the CDR equations <em>and</em> the radiative transfer equations.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For the radiative transfer equations we set the isotropic source term <span class="math notranslate nohighlight">\(\eta\)</span> which is the number of ionizing photons produced per unit volume and time.</p>
-</div>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_cdrSources</span><span class="p">,</span>
-<span class="w">                                    </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_rteSources</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dx</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dt</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="n">a_cdrSources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
-<span class="w">   </span><span class="n">a_rteSources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numRteSpecies</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The above code will set <span class="math notranslate nohighlight">\(S = \eta = 1\)</span> for all species.</p>
-<p>We point out that in the plasma module the source terms are <em>always</em> used in the form</p>
-<div class="math notranslate nohighlight">
-\[n^{k+1} = n^k + \Delta t S,\]</div>
-<p>where <span class="math notranslate nohighlight">\(S\)</span> is the source term obtained from <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
-This implies that it <em>is</em> possible to define fully implicit integrators directly in <code class="docutils literal notranslate"><span class="pre">advanceReactionNetwork</span></code>.
-For example, if the reactive problem consisted only of <span class="math notranslate nohighlight">\(\partial_t n = -\frac{n}{\tau}\)</span>, one could form a reactive integrator with the implicit Euler rule by first computing <span class="math notranslate nohighlight">\(n^{k+1} = \frac{n^k}{1 + \Delta t/\tau}\)</span> and then linearizing <span class="math notranslate nohighlight">\(S = \frac{n^{k+1} - n^k}{\Delta t}\)</span>.</p>
-</section>
-<section id="fluxes-at-electrode-boundaries">
-<h3>Fluxes at electrode boundaries<a class="headerlink" href="#fluxes-at-electrode-boundaries" title="Permalink to this heading"></a></h3>
-<p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on electrode EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrElectrodeFluxes</span></code>.
-Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_normal</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrVelocities</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_rteFluxes</span><span class="p">,</span>
-                                       <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="n">const</span> <span class="p">{</span>
-   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the EBs.</p>
-</section>
-<section id="fluxes-at-dielectric-boundaries">
-<h3>Fluxes at dielectric boundaries<a class="headerlink" href="#fluxes-at-dielectric-boundaries" title="Permalink to this heading"></a></h3>
-<p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on dielectric EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code>.
-Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="n">const</span> <span class="n">Real</span>         <span class="n">a_time</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_pos</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_normal</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">RealVect</span>     <span class="n">a_E</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrDensities</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrVelocities</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_cdrGradients</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_rteFluxes</span><span class="p">,</span>
-                                        <span class="n">const</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">a_extrapCdrFluxes</span><span class="p">)</span> <span class="n">const</span> <span class="p">{</span>
-   <span class="k">return</span> <span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the EBs.</p>
-</section>
-<section id="fluxes-at-domain-boundaries">
-<h3>Fluxes at domain boundaries<a class="headerlink" href="#fluxes-at-domain-boundaries" title="Permalink to this heading"></a></h3>
-<p>To set the fluxes <span class="math notranslate nohighlight">\(F\)</span> on dielectric EBs, implement <code class="docutils literal notranslate"><span class="pre">computeCdrDielectricFluxes</span></code>.
-Note that the fluxes <span class="math notranslate nohighlight">\(F\)</span> are those occuring in a finite-volume context; i.e. the total injected or extracted mass.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_time</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">       </span><span class="n">a_pos</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">            </span><span class="n">a_dir</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">       </span><span class="n">a_E</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrDensities</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrGradients</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_rteFluxes</span><span class="p">,</span>
-<span class="w">                                    </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_numCdrSpecies</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The input variable <code class="docutils literal notranslate"><span class="pre">a_extrapCdrFluxes</span></code> are cell-centered fluxes extrapolated to the domain sides.</p>
-</section>
-<section id="setting-initial-surface-charge">
-<h3>Setting initial surface charge<a class="headerlink" href="#setting-initial-surface-charge" title="Permalink to this heading"></a></h3>
-<p>To set the initial surface charge on dielectric boundaries, implement</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span><span class="w"> </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">{</span>
-<span class="w">   </span><span class="k">return</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</section>
-</section>
 <section id="time-discretizations">
 <h2>Time discretizations<a class="headerlink" href="#time-discretizations" title="Permalink to this heading"></a></h2>
-<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 7</a>.
+<p>Here, we discuss two discretizations of <a class="reference internal" href="#equation-cdrplasmaequations">Eq. 12</a>.
 Firstly, note that there are two layers to the time integrators:</p>
 <ol class="arabic simple">
 <li><p>A pure class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> which inherits from <code class="docutils literal notranslate"><span class="pre">TimeSteppers</span></code> but does not implement an <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
@@ -615,6 +345,36 @@ In addition, the flag <code class="docutils literal notranslate"><span class="pr
 <p>The user is responsible for setting these when running the simulation.
 Note when the semi-implicit scheme is used, it is not necessary to restrict the time step by the dielectric relaxation time.</p>
 </section>
+<section id="solver-configuration">
+<h4>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">CdrPlasmaGodunovStepper</span></code> contains several options that can be configured when running the solver, which are listed below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
+<span class="c1"># CdrPlasmaGodunovStepper options</span>
+<span class="c1"># ====================================================================================================</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">verbosity</span>             <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>               <span class="c1">## Class verbosity</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">solver_verbosity</span>      <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>               <span class="c1">## Individual solver verbosities</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">min_dt</span>                <span class="o">=</span> <span class="mf">0.</span>               <span class="c1">## Minimum permitted time step</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">max_dt</span>                <span class="o">=</span> <span class="mf">1.E99</span>            <span class="c1">## Maximum permitted time step</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">cfl</span>                   <span class="o">=</span> <span class="mf">0.8</span>              <span class="c1">## CFL number</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">use_regrid_slopes</span>     <span class="o">=</span> <span class="n">false</span>            <span class="c1">## Use slopes when regridding (or not)</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">filter_rho</span>            <span class="o">=</span> <span class="mi">0</span>                <span class="c1">## Number of filterings of space charge</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">filter_compensate</span>     <span class="o">=</span> <span class="n">false</span>            <span class="c1">## Use compensation step after filter or not</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">field_coupling</span>        <span class="o">=</span> <span class="n">semi_implicit</span>    <span class="c1">## Field coupling. &#39;explicit&#39; or &#39;semi_implicit&#39;</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">advection</span>             <span class="o">=</span> <span class="n">muscl</span>            <span class="c1">## Advection algorithm. &#39;euler&#39;, &#39;rk2&#39;, or &#39;muscl&#39;</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">diffusion</span>             <span class="o">=</span> <span class="n">explicit</span>         <span class="c1">## Diffusion. &#39;explicit&#39;, &#39;implicit&#39;, or &#39;auto&#39;.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">diffusion_thresh</span>      <span class="o">=</span> <span class="mf">1.2</span>              <span class="c1">## Diffusion threshold. If dtD/dtA &gt; this then we use implicit diffusion.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">diffusion_order</span>       <span class="o">=</span> <span class="mi">2</span>                <span class="c1">## Diffusion order.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">relax_time</span>            <span class="o">=</span> <span class="mf">100.</span>             <span class="c1">## Relaxation time. 100 &lt;= is usually a &quot;safe&quot; choice.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">fast_poisson</span>          <span class="o">=</span> <span class="mi">1</span>                <span class="c1">## Solve Poisson every this time steps. Mostly for debugging.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">fast_rte</span>              <span class="o">=</span> <span class="mi">1</span>                <span class="c1">## Solve RTE every this time steps. Mostly for debugging.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">fhd</span>                   <span class="o">=</span> <span class="n">false</span>            <span class="c1">## Set to true if you want to add a stochastic diffusion flux</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">source_comp</span>           <span class="o">=</span> <span class="n">interp</span>           <span class="c1">## Interpolated interp, or upwind X for species X</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">floor_cdr</span>             <span class="o">=</span> <span class="n">true</span>             <span class="c1">## Floor CDR solvers to avoid negative densities</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">debug</span>                 <span class="o">=</span> <span class="n">false</span>            <span class="c1">## Turn on debugging messages. Also monitors mass if it was injected into the system.</span>
+<span class="n">CdrPlasmaGodunovStepper</span><span class="o">.</span><span class="n">profile</span>               <span class="o">=</span> <span class="n">false</span>            <span class="c1">## Turn on/off performance profiling.</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="spectral-deferred-corrections">
 <span id="chap-sisdc"></span><h3>Spectral deferred corrections<a class="headerlink" href="#spectral-deferred-corrections" title="Permalink to this heading"></a></h3>
@@ -655,6 +415,272 @@ In general, each correction raises the discretization order by one.</p>
 </section>
 </section>
 </section>
+<section id="cdrplasmaphysics">
+<span id="chap-cdrplasmaphysics"></span><h2>CdrPlasmaPhysics<a class="headerlink" href="#cdrplasmaphysics" title="Permalink to this heading"></a></h2>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h3>
+<p><a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in <a class="reference internal" href="#equation-cdrplasmacoupling">Eq. 13</a>.
+The source code for the class resides in <code class="file docutils literal notranslate"><span class="pre">/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H</span></code>.
+Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.</p>
+<p>There are no default input parameters for <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a>, as users must generally implement their own kinetics.
+The class exists solely for providing the integrators with the necessary fundamentals for filling solvers with the correct quantities at the same time, for example filling source terms and drift velocities.</p>
+<p>A successful implementation of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> has the following:</p>
+<ol class="arabic simple">
+<li><p>Instantiated a list of <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
+These become <a class="reference internal" href="../Solvers/CDR.html#chap-cdr"><span class="std std-ref">Convection-Diffusion-Reaction</span></a> solvers and contain initial conditions and basic transport settings for the convection-diffusion-reaction solvers.</p></li>
+<li><p>Instantiated a list <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a>.
+These become <a class="reference internal" href="../Solvers/RTE.html#chap-radiativetransfer"><span class="std std-ref">Radiative transfer</span></a> solvers and contain metadata for the radiative transport solvers.</p></li>
+<li><p>Implemented the core functionality that couple the solvers together.</p></li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
+For information on how to interface into the CDR solvers, see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrspecies"><span class="std std-ref">CdrSpecies</span></a>.
+Likewise, see <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> for how to interface into the RTE solvers.</p>
+<p>Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
+For this reason we also provide an implementation layer <a class="reference internal" href="#chap-cdrplasmajson"><span class="std std-ref">JSON interface</span></a> that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for description the physics.</p>
+</section>
+<section id="complete-api">
+<h3>Complete API<a class="headerlink" href="#complete-api" title="Permalink to this heading"></a></h3>
+<p>The full API for the <code class="docutils literal notranslate"><span class="pre">CdrPlasmaPhysics</span></code> class is given below:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Abstract base class for specifying plasma kinetics. This is the base class used by CdrPlasmaStepper when advancing the minimal plasma model. </span>
+<span class="cm">*/</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CdrPlasmaPhysics</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Default constructor. Does nothing. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="n">CdrPlasmaPhysics</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{}</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Base destructor. Does nothing.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">CdrPlasmaPhysics</span><span class="p">()</span>
+<span class="w">  </span><span class="p">{}</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Parse run-time options</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="n">parseRuntimeOptions</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get number of plot variables for this physics class. </span>
+<span class="cm">    @details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. When overriding</span>
+<span class="cm">    this method then this routine should return the number of plot variables that will be plotted. The returned number</span>
+<span class="cm">    should thus be the same as the vectors that are returned from getPlotVariableNames and getPlotVariables.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get plot variable names. The</span>
+<span class="cm">    @details This function will return the plot variable names that CdrPlasmaPhysics will plot. The length of the returned</span>
+<span class="cm">    vector must be the same as the returned value from getNumberOfPlotVariables. Note that the names/positions between this </span>
+<span class="cm">    routine and getPlotVariables should be consistent.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">(),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="s">&quot;empty data&quot;</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. </span>
+<span class="cm">    @details The length of the returned vector should be the same as the returned value from getNumberOfPlotVariables. The names</span>
+<span class="cm">    for the returned variables are given by the returned vector in getPlotVariableNames().</span>
+<span class="cm">    @param[in]  a_cdrDensities  Grid-based density for particle species.</span>
+<span class="cm">    @param[in]  a_cdrGradients  Grid-based gradients for particle species.</span>
+<span class="cm">    @param[in]  a_rteDensities  Grid-based densities for photons.</span>
+<span class="cm">    @param[in]  a_E             Electric field.</span>
+<span class="cm">    @param[in]  a_pos           Position in space.</span>
+<span class="cm">    @param[in]  a_dx            Grid resolution. </span>
+<span class="cm">    @param[in]  a_dt            Advanced time.</span>
+<span class="cm">    @param[in]  a_time          Current time.</span>
+<span class="cm">    @param[in]  a_kappa         Grid cell unit volume. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">getPlotVariables</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_position</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">(),</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute alpha. Should return Townsend ionization coefficient. </span>
+<span class="cm">    @details This function is mostly used for the cell tagging classes</span>
+<span class="cm">    @param[in] a_E        Electric field.</span>
+<span class="cm">    @param[in] a_position Physical coordinates</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="n">computeAlpha</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute eta. Should return Townsend attachment coefficient. </span>
+<span class="cm">    @details This function is mostly used for the cell tagging classes</span>
+<span class="cm">    @param[in] a_E        Electric field.</span>
+<span class="cm">    @param[in] a_position Physical coordinates</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="nf">computeEta</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_E</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Routine intended for advancing a reaction network over a time a_dt. </span>
+<span class="cm">    @details This routine assumes that the subsequent advance is in the form phi^(k+1) = phi^k + S*a_dt. Thus, this routine exists such that users can EITHER</span>
+<span class="cm">    fill a_cdrSources and a_rteSources directly with an explicit rule, OR they can perform a fully implicit advance within this routine and set S from that. </span>
+<span class="cm">    @param[out] a_cdrSources    Source terms for CDR equations.</span>
+<span class="cm">    @param[out] a_rteSources    Source terms for RTE equations.</span>
+<span class="cm">    @param[in]  a_cdrDensities  Grid-based density for particle species.</span>
+<span class="cm">    @param[in]  a_cdrGradients  Grid-based gradients for particle species.</span>
+<span class="cm">    @param[in]  a_rteDensities  Grid-based densities for photons.</span>
+<span class="cm">    @param[in]  a_E             Electric field.</span>
+<span class="cm">    @param[in]  a_pos           Position in space.</span>
+<span class="cm">    @param[in]  a_dx            Grid resolution. </span>
+<span class="cm">    @param[in]  a_dt            Advanced time.</span>
+<span class="cm">    @param[in]  a_time          Current time.</span>
+<span class="cm">    @param[in]  a_kappa         Grid cell unit volume. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">advanceReactionNetwork</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_cdrSources</span><span class="p">,</span>
+<span class="w">                         </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">          </span><span class="n">a_rteSources</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">     </span><span class="n">a_rteDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">         </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dx</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_dt</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">             </span><span class="n">a_kappa</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute velocities for the CDR equations</span>
+<span class="cm">    @param[in] a_time         Time</span>
+<span class="cm">    @param[in] a_pos          Position</span>
+<span class="cm">    @param[in] a_E            Electric field</span>
+<span class="cm">    @param[in] a_cdrDensities CDR densities</span>
+<span class="cm">    @return Returns the drift velocities for each CDR species. The vector ordering is the same as m_cdrSpecies. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDriftVelocities</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute diffusion coefficients for the CDR equations. </span>
+<span class="cm">    @param[in] a_time         Time</span>
+<span class="cm">    @param[in] a_pos          Position</span>
+<span class="cm">    @param[in] a_E            Electric field</span>
+<span class="cm">    @param[in] a_cdrDensities CDR densities</span>
+<span class="cm">    @return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDiffusionCoefficients</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                                  </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute CDR fluxes on electrode-gas interfaces. This is used as a boundary condition in the CDR equations. </span>
+<span class="cm">    @param[in] a_time            Time</span>
+<span class="cm">    @param[in] a_pos             Position</span>
+<span class="cm">    @param[in] a_normal          Boundary normal vector. This points into the gas phase. </span>
+<span class="cm">    @param[in] a_E               Electric field</span>
+<span class="cm">    @param[in] a_cdrVelocities   CDR velocities. Normal component only. </span>
+<span class="cm">    @param[in] a_cdrDensities    CDR densities. </span>
+<span class="cm">    @param[in] a_cdrGradients    Normal gradients of cdr densities</span>
+<span class="cm">    @param[in] a_rteFluxes       RTE fluxes (normal component only)</span>
+<span class="cm">    @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. </span>
+<span class="cm">    @return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_cdrSpecies. </span>
+<span class="cm">    @note A positive flux is a flux INTO the domain. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrElectrodeFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
+<span class="w">                            </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute CDR fluxes on dielectric-gas interfaces. This is used as a boundary condition in the CDR equations. </span>
+<span class="cm">    @param[in] a_time            Time</span>
+<span class="cm">    @param[in] a_pos             Position</span>
+<span class="cm">    @param[in] a_normal          Normal vector. This points into the gas phase. </span>
+<span class="cm">    @param[in] a_E Electric      field</span>
+<span class="cm">    @param[in] a_cdrDensities    CDR densities (on the EB)</span>
+<span class="cm">    @param[in] a_cdrVelocities   Normal component of CDR velocities (on the EB).</span>
+<span class="cm">    @param[in] a_cdrGradients    Normal gradients of cdr densities</span>
+<span class="cm">    @param[in] a_rteFluxes       RTE fluxes (normal component only)</span>
+<span class="cm">    @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. </span>
+<span class="cm">    @return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_cdrSpecies. </span>
+<span class="cm">    @note A positive flux is a flux INTO the domain. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDielectricFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">         </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_normal</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">     </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_rteFluxes</span><span class="p">,</span>
+<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute CDR fluxes through domain sides. This is used as a boundary condition in the CDR equations.</span>
+<span class="cm">    @param[in] a_time            Time</span>
+<span class="cm">    @param[in] a_pos             Position</span>
+<span class="cm">    @param[in] a_dir             Direction (0 = x, 1=y etc)</span>
+<span class="cm">    @param[in] a_side            Side (low or high side)</span>
+<span class="cm">    @param[in] a_E               Electric field</span>
+<span class="cm">    @param[in] a_cdrDensities    CDR densities. </span>
+<span class="cm">    @param[in] a_cdrVelocities   CDR velocities (normal component only). </span>
+<span class="cm">    @param[in] a_cdrGradients    CDR gradients (normal component only)</span>
+<span class="cm">    @param[in] a_rteFluxes       RTE fluxes (normal component only)</span>
+<span class="cm">    @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. </span>
+<span class="cm">    @note A positive flux is a flux INTO the domain. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">computeCdrDomainFluxes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w">           </span><span class="n">a_time</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">       </span><span class="n">a_pos</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">            </span><span class="n">a_dir</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w">       </span><span class="n">a_E</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrDensities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrVelocities</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_cdrGradients</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_rteFluxes</span><span class="p">,</span>
+<span class="w">                         </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w">   </span><span class="n">a_extrapCdrFluxes</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Set the initial surface charge</span>
+<span class="cm">    @param[in] a_time Time</span>
+<span class="cm">    @param[in] a_pos Position</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="nf">initialSigma</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+</section>
 <section id="json-interface">
 <span id="chap-cdrplasmajson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this heading"></a></h2>
 <p>Since implementations of <a class="reference internal" href="#chap-cdrplasmaphysics"><span class="std std-ref">CdrPlasmaPhysics</span></a> are usually boilerplate, we provide a class <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> which can initialize and parse various types of initial conditions and reactions from a JSON input file.
@@ -667,7 +693,7 @@ This means that the interpretation of <span class="math notranslate nohighlight"
 This is true for both continuum and discrete radiative transfer models.</p>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h3>
-<p>To use this plasma model, use <code class="docutils literal notranslate"><span class="pre">-physics</span> <span class="pre">CdrPlasmaJSON</span></code> when setting up a new plasma problem (see <a class="reference internal" href="#chap-cdrplasmanewproblem"><span class="std std-ref">Simulation quick start</span></a>).
+<p>To use this plasma model, use <code class="docutils literal notranslate"><span class="pre">-physics</span> <span class="pre">CdrPlasmaJSON</span></code> when setting up a new plasma problem (see <a class="reference internal" href="#chap-cdrplasmanewproblem"><span class="std std-ref">Setting up a new problem</span></a>).
 When <code class="docutils literal notranslate"><span class="pre">CdrPlasmaJSON</span></code> is instantiated, the constructor will parse species, reactions, initial conditions, and boundary conditions from a JSON file that the user provides.
 In addition, users can parse transport data or reaction rates from tabulated ASCII files that they provide.</p>
 <p>To specify the input plasma kinetics file, include</p>
@@ -679,7 +705,7 @@ In addition, users can parse transport data or reaction rates from tabulated ASC
 <section id="discrete-photons">
 <h3>Discrete photons<a class="headerlink" href="#discrete-photons" title="Permalink to this heading"></a></h3>
 <p>There are two approaches when using discrete photons, and both rely on the user setting up the application with the Monte Carlo photon solver (rather than continuum solvers).
-For an introduction to the particle radiative transfer solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo sampling</span></a>.</p>
+For an introduction to the particle radiative transfer solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo solver</span></a>.</p>
 <p>The user must use one of the following:</p>
 <ul>
 <li><p>Set the following class options:</p>
@@ -909,7 +935,7 @@ Simply the field <code class="docutils literal notranslate"><span class="pre">un
 <li><p><code class="docutils literal notranslate"><span class="pre">height</span> <span class="pre">profile</span></code> For specifying a height profile along <span class="math notranslate nohighlight">\(y\)</span> in 2D, and <span class="math notranslate nohighlight">\(z\)</span> in 3D.
 To include it, prepare an ASCII files with at least two columns.
 The height (in meters) must be specified in one column and the density (in units of <span class="math notranslate nohighlight">\(m^{-3}\)</span>) in another.
-Internally, this data is stored in a lookup table (see <span class="xref std std-ref">Chap:LookupTable1D</span>).
+Internally, this data is stored in a lookup table (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>).
 Required fields are</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> , for specifying the file.</p></li>
@@ -991,7 +1017,41 @@ Mandatory fields are</p>
 </div>
 </li>
 <li><p><code class="docutils literal notranslate"><span class="pre">copy</span></code> For using an already initialized particle distribution.
-The only mandatory fields is <code class="docutils literal notranslate"><span class="pre">copy</span></code>, e.g.</p></li>
+The only mandatory fields is <code class="docutils literal notranslate"><span class="pre">copy</span></code>, e.g.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w">  </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;mobile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;diffusive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;initial particles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;sphere&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;center&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;radius&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;weight&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;O2+&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;mobile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;diffusive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;initial particles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="nt">&quot;copy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]}</span>
+</pre></div>
+</div>
+<p>This will copy the particles from the species <code class="docutils literal notranslate"><span class="pre">e</span></code> to the species <code class="docutils literal notranslate"><span class="pre">O2+</span></code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The species one copies from must be defined <em>before</em> the species one copies <em>to</em>.</p>
+</div>
+</li>
 </ul>
 </section>
 <section id="complex-example">
@@ -1116,7 +1176,7 @@ For example:</p>
 <p><strong>Tabulated mobility</strong></p>
 <p>Specifying <code class="docutils literal notranslate"><span class="pre">lookup</span></code> to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">E/N</span></code> lets the user set the mobility from a tabulated value of the reduced electric field.
 BOLSIG-like files can be parsed by specifying the header which contains the tabulated data, and the columns that identify the reduced electric field and mobilities.
-This data is then stored in a lookup table, see <span class="xref std std-ref">Chap:LookupTable1D</span>.</p>
+This data is then stored in a lookup table, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>.</p>
 <p>For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;plasma species&quot;</span><span class="p">:</span>
 <span class="w">  </span><span class="p">[</span>
@@ -1152,7 +1212,7 @@ The data must be stored in rows and columns.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dump</span></code>, an optional argument (useful for debugging) which will write the table to file.</p></li>
 </ul>
 <p>Note that the input file does <em>not</em> need regularly spaced or sorted data.
-For performance reasons, the tables are always resampled, see <span class="xref std std-ref">Chap:LookupTable1D</span>.</p>
+For performance reasons, the tables are always resampled, see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>.</p>
 </section>
 <section id="diffusion-coefficients">
 <h4>Diffusion coefficients<a class="headerlink" href="#diffusion-coefficients" title="Permalink to this heading"></a></h4>
@@ -1873,10 +1933,54 @@ The same emission coefficient will be used for both reactions.</p></li>
 </pre></div>
 </div>
 </section>
-<section id="domain-boundary-conditions">
-<h3>Domain boundary conditions<a class="headerlink" href="#domain-boundary-conditions" title="Permalink to this heading"></a></h3>
-<p>TODO.</p>
 </section>
+<section id="adaptive-mesh-refinement">
+<h2>Adaptive mesh refinement<a class="headerlink" href="#adaptive-mesh-refinement" title="Permalink to this heading"></a></h2>
+<p>The AMR functionality for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStepper</span></code> is implemented by subclassing <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> through a series of intermediate classes.
+Currently, we mostly use the <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStreamerTagger</span></code> class for tagging cells based on the evaluation of the Townsend ionization coefficient as</p>
+<div class="math notranslate nohighlight">
+\[\left(\alpha-\eta\right)\Delta x &gt; \epsilon,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\epsilon\)</span> is a refinement threshold.
+A similar threshold is used when coarsening grid cells.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>See <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html</a> for the C++ API for <code class="docutils literal notranslate"><span class="pre">CdrPlasmaStreamerTagger</span></code>.</p>
+</div>
+</section>
+<section id="setting-up-a-new-problem">
+<span id="chap-cdrplasmanewproblem"></span><h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>New problems that use the <code class="docutils literal notranslate"><span class="pre">CdrPlasma</span></code> physics model are best set up by using the Python tools provided with the module.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> file contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/CdrPlasma</span>
+This physics module solves the minimal plasma model
+
+The folders contains
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**PlasmaModels**</span> Implementations of various plasma models. 
+<span class="k">*</span><span class="w"> </span><span class="gs">**TimeSteppers**</span> Implementations of the various time integration algorithms.
+<span class="k">*</span><span class="w"> </span><span class="gs">**CellTaggers**</span> Implementations of various cell taggers.
+<span class="k">*</span><span class="w"> </span><span class="gs">**Data**</span> Various data (e.g. transport data). 
+
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyPlasmaModel<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaApplication
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+
+<span class="gu">## Modifying the application</span>
+Users are free to modify this application, e.g. adding new initial conditions and flow fields.
+</pre></div>
+</div>
+<p>To see the list of available options type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>/Physics/CdrPlasma
+./setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -1884,7 +1988,7 @@ The same emission coefficient will be used for both reactions.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../Solvers/Ito.html" class="btn btn-neutral float-left" title="Îto diffusion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Solvers/TracerParticles.html" class="btn btn-neutral float-left" title="Tracer particles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="DischargeInceptionModel.html" class="btn btn-neutral float-right" title="Discharge inception model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -24,7 +24,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Îto diffusion" href="Ito.html" />
+    <link rel="next" title="CDR plasma model" href="../Applications/CdrPlasmaModel.html" />
     <link rel="prev" title="Surface ODE solver" href="SurfaceODESolver.html" /> 
 </head>
 
@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,6 +80,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RTE.html">Radiative transfer</a></li>
@@ -96,7 +96,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#input-options">Input options</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -117,7 +116,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -157,21 +156,37 @@
              
   <section id="tracer-particles">
 <span id="chap-tracerparticles"></span><h1>Tracer particles<a class="headerlink" href="#tracer-particles" title="Permalink to this heading"></a></h1>
-<p>Tracer particles are particles that move along a velocity field</p>
+<p>Tracer particles are particles that move along a prescribed velocity field</p>
 <div class="math notranslate nohighlight">
 \[\frac{\partial\mathbf{X}}{\partial t} = \mathbf{V}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> is the particle velocity.
-This is interpolated from a mesh-based field as</p>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the particle position and <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> is the particle velocity.
+The velocity is interpolated from a mesh-based field as</p>
 <div class="math notranslate nohighlight">
 \[\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{v}\)</span> is a velocity field defined on the mesh.
 Such particles are useful, for example, for numerical integration along field lines.</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> defines AMR-ready tracer particle solvers in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/TracerParticles</span></code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> tracer particle functionality resides in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/TracerParticles</span></code>.</p>
+</div>
 <section id="tracerparticlesolver">
 <span id="chap-tracerparticlesolver"></span><h2>TracerParticleSolver<a class="headerlink" href="#tracerparticlesolver" title="Permalink to this heading"></a></h2>
 <p>The tracer particle solver is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TracerParticleSolver</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Base class for a tracer particle solver. This solver can advance particles in a pre-defined velocity field.</span>
+<span class="cm">  @details The user can set the velocity field through public member functions. This class is templated so the user can </span>
+<span class="cm">  switch tracer particle implementations.</span>
+
+<span class="cm">  This is a single-phase solver -- i.e. the particles only live on one of the phases. Extensions to multiphase</span>
+<span class="cm">  is certainly possible. </span>
+
+<span class="cm">  The template requirements on the particle type P are: </span>
+<span class="cm">  1) It must contain a function RealVect&amp; position() (derived from BinItem)</span>
+<span class="cm">  2) It must contain a function const Real&amp; weight() const.</span>
+<span class="cm">  3) It must contain a function RealVect&amp; velocity().</span>
+<span class="cm">*/</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TracerParticleSolver</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type used for the solver.
@@ -185,93 +200,144 @@ The template constraints on <code class="docutils literal notranslate"><span cla
 However, we also define a plug-and-play particle class that meets these requirements, see <a class="reference internal" href="#chap-tracerparticle"><span class="std std-ref">TracerParticle</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticleSolver</span></code> API is available at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html</a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticleSolver&lt;P&gt;</span></code> API is available at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html</a>.</p>
 </div>
 </section>
 <section id="tracerparticle">
 <span id="chap-tracerparticle"></span><h2>TracerParticle<a class="headerlink" href="#tracerparticle" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticle</span></code> type inherits from the <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> particle class and is templated as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">TracerParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>and also defines two more members: A particle weight and a particle velocity.
-These are accesible as</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">Real</span><span class="o">&amp;</span>
-<span class="n">TracerParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;::</span><span class="n">weight</span><span class="p">();</span>
-
+<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticle</span></code> type inherits from <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> particle class and is templated as</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief A tracer particle class. This is templated for holding extra storage (useful for kernels). </span>
+<span class="cm">  @details The template parameters M and N determine extra storage allocated to the particle. M determines</span>
+<span class="cm">  the number of allocated scalars (Reals) and N determines the number of allocated vectors (RealVects). These</span>
+<span class="cm">  quantities are communicated when remapping particles. </span>
+<span class="cm">*/</span>
 <span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
-<span class="n">RealVect</span><span class="o">&amp;</span>
-<span class="n">TracerParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;::</span><span class="n">velocity</span><span class="p">();</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TracerParticle</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>Note that, just as for <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code>, the template arguments <code class="docutils literal notranslate"><span class="pre">M</span></code> and <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of scalars and vectors allocated to the particle.
-See <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticleSolver</span></code> API is available at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticle.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticle.html</a>.</p>
+<p>The class also defines two more members; the weight and a particle velocity.
+These are accessible as</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get the particle &quot;weight&quot;</span>
+<span class="cm">  @return m_weight</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
+<span class="nf">weight</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get the particle &quot;weight&quot;</span>
+<span class="cm">  @return m_weight</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
+<span class="nf">weight</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get the particle velocity. </span>
+<span class="cm">  @return m_velocity</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span>
+<span class="nf">velocity</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get the particle velocity.</span>
+<span class="cm">  @return m_velocity</span>
+<span class="cm">*/</span>
+<span class="kr">inline</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span>
+<span class="nf">velocity</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
 </div>
+<p>Note that, just as for <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code>, the template arguments <code class="docutils literal notranslate"><span class="pre">M</span></code> and <code class="docutils literal notranslate"><span class="pre">N</span></code> indicates the number of scalars and vectors allocated to the particle, see <a class="reference internal" href="../Source/Particles.html#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a>.
+These data fields can be used by applications for, e.g., storing integration variables (such as intermediate positions in a Runge-Kutta code).</p>
 </section>
 <section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this heading"></a></h2>
 <p>To initialize the solver, one can use the full constructor</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="n">TracerParticleSolver</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">TracerParticleSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">,</span>
-<span class="w">                                              </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_compGeom</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Full contructor</span>
+<span class="cm">  @param[in] a_amr      Handle to AmrMesh.</span>
+<span class="cm">  @param[in] a_compGeom Computational geometry. </span>
+<span class="cm">*/</span>
+<span class="n">TracerParticleSolver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_compGeom</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
 <section id="getting-the-particles">
 <h2>Getting the particles<a class="headerlink" href="#getting-the-particles" title="Permalink to this heading"></a></h2>
-<p>To obtain the solver particles simply call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
-<span class="n">TracerParticleSolver</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">getParticles</span><span class="p">();</span>
+<p>To obtain the solver particles, simply call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get all particles.</span>
+<span class="cm">  @return m_particles</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
+<span class="n">getParticles</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get all particles. Const version. </span>
+<span class="cm">  @return m_particles</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
+<span class="n">getParticles</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>This returns the <code class="docutils literal notranslate"><span class="pre">ParticleContainer</span></code> holding the particles, see <a class="reference internal" href="../Source/Particles.html#chap-particlecontainer"><span class="std std-ref">ParticleContainer</span></a>.</p>
+<p>This returns the <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> holding the particles, see <a class="reference internal" href="../Source/Particles.html#chap-particlecontainer"><span class="std std-ref">ParticleContainer</span></a>.</p>
 </section>
 <section id="setting-mathbf-v">
 <h2>Setting <span class="math notranslate nohighlight">\(\mathbf{v}\)</span><a class="headerlink" href="#setting-mathbf-v" title="Permalink to this heading"></a></h2>
-<p>To set the velocity use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">TracerParticleSolver</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_velocityField</span><span class="p">)</span>
+<p>To set the velocity field on the mesh, use</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set the tracer particle velocity field.</span>
+<span class="cm">  @param[in] a_velocityField Velocity field.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setVelocity</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_velocityField</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This will associate the input velocity <code class="docutils literal notranslate"><span class="pre">a_velocityField</span></code> with <span class="math notranslate nohighlight">\(\mathbf{v}\)</span>.</p>
 </section>
 <section id="interpolating-velocities">
 <h2>Interpolating velocities<a class="headerlink" href="#interpolating-velocities" title="Permalink to this heading"></a></h2>
-<p>To compute <span class="math notranslate nohighlight">\(\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)\)</span> use</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">TracerParticleSolver</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">interpolateVelocities</span><span class="p">();</span>
+<p>To compute <span class="math notranslate nohighlight">\(\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)\)</span> for all particles that reside in the solver, use</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Interpolate particles velocities.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">interpolateVelocities</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>This will interpolate the velocities to the particle positions using the user-defined interpolation method (see <a class="reference internal" href="#chap-tracerinputoptions"><span class="std std-ref">Input options</span></a>).</p>
-<p>One can also interpolate a scalar field defined on the mesh onto the particle weight by calling</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">TracerParticleSolver</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">interpolateWeight</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_scalar</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+<p>If desirable, one can also interpolate a scalar field defined on the mesh onto the particle weight by calling</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Interpolate a scalar field onto the particle weight</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">interpolateWeight</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_scalar</span><span class="p">)</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Letting <span class="math notranslate nohighlight">\(f\)</span> define the input field <code class="docutils literal notranslate"><span class="pre">a_scalar</span></code>, this performs the operation <span class="math notranslate nohighlight">\(w = f\left(\mathbf{X}\right)\)</span>.</p>
+<p>The interpolation function is set by the user, see <a class="reference internal" href="#chap-tracerinputoptions"><span class="std std-ref">Input options</span></a>.
+See <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a> for further details.</p>
 </section>
 <section id="deposit-particles">
 <h2>Deposit particles<a class="headerlink" href="#deposit-particles" title="Permalink to this heading"></a></h2>
-<p>To deposit the particles call</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">P</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">TracerParticleSolver</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;::</span><span class="n">deposit</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">)</span>
+<p>To deposit the particles, call</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Deposit particle weight on mesh. </span>
+<span class="cm">  @param[out] a_phi Deposited weight. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">deposit</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This will deposit the particle weights onto the input data holder.</p>
+<p>The deposition function is set by the user, see <a class="reference internal" href="#chap-tracerinputoptions"><span class="std std-ref">Input options</span></a>.
+Complete details regarding how the deposition functions work is available in <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>.</p>
 </section>
 <section id="input-options">
 <span id="chap-tracerinputoptions"></span><h2>Input options<a class="headerlink" href="#input-options" title="Permalink to this heading"></a></h2>
-<p>Available input options for the tracer particle solver are</p>
+<p>Available input options for the tracer particle solver are given in the listing below.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-number">Listing 31 </span><span class="caption-text">List on configuration options for <code class="docutils literal notranslate"><span class="pre">TracerParticleSolver&lt;P&gt;</span></code>.
+All options are run-time configurable.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># TracerParticleSolver class options</span>
 <span class="c1"># ====================================================================================================</span>
@@ -282,12 +348,9 @@ See <a class="reference internal" href="../Source/Particles.html#chap-genericpar
 <span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">plot_weight</span>       <span class="o">=</span> <span class="n">true</span>     <span class="c1">## Turn on/off plotting of the particle weight.</span>
 <span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">plot_velocity</span>     <span class="o">=</span> <span class="n">true</span>     <span class="c1">## Turn on/off plotting of the particle velocities.</span>
 <span class="n">TracerParticleSolver</span><span class="o">.</span><span class="n">volume_scale</span>      <span class="o">=</span> <span class="n">false</span>    <span class="c1">## If true, depositions yield density * volume instead of just volume</span>
-
 </pre></div>
 </div>
-<p>The flags <code class="docutils literal notranslate"><span class="pre">deposition</span></code> and <code class="docutils literal notranslate"><span class="pre">interpolation</span></code> indicates which deposition and interpolation methods will be used.
-Likewise, <code class="docutils literal notranslate"><span class="pre">deposition_cf</span></code> indicates the coarse-fine deposition strategy, see <a class="reference internal" href="../Source/Particles.html#chap-particles"><span class="std std-ref">Particles</span></a>.
-The flags <code class="docutils literal notranslate"><span class="pre">plot_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_velocity</span></code> indicates whether or not to include the particle weights and velocities in plot files.</p>
+</div>
 </section>
 </section>
 
@@ -296,7 +359,7 @@ The flags <code class="docutils literal notranslate"><span class="pre">plot_weig
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="SurfaceODESolver.html" class="btn btn-neutral float-left" title="Surface ODE solver" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Ito.html" class="btn btn-neutral float-right" title="Îto diffusion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Applications/CdrPlasmaModel.html" class="btn btn-neutral float-right" title="CDR plasma model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -64,18 +64,15 @@
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="AmrMesh.html">AmrMesh</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">CellTagger</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#user-interface">User interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#tagcells">tagCells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementing-a-new-celltagger">Implementing a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#regrid">regrid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tagcells">tagCells</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#parseoptions">parseOptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#parseruntimeoptions">parseRuntimeOptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#getnumberofplotvariables">getNumberOfPlotVariables</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#writeplotdata">writePlotData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-data">Plot data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#restrict-tagging">Restrict tagging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-refinement-and-restriction">Manual refinement and restriction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-a-buffer">Adding a buffer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#manual-refinement">Manual refinement</a></li>
 </ul>
 </li>
 </ul>
@@ -86,7 +83,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -94,12 +90,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -120,7 +116,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -160,114 +156,154 @@
              
   <section id="celltagger">
 <span id="chap-celltagger"></span><h1>CellTagger<a class="headerlink" href="#celltagger" title="Permalink to this heading"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> class is responsible for flagging grid cells for refinement or coarsening.
-If the user wants to implement a new refinement or coarsening routine, he will do so by writing a new derived class from <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.
-The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> parent class is a stand-alone class - it does not have a view of <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>, <code class="docutils literal notranslate"><span class="pre">Driver</span></code>, or <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
-Since refinement is intended to be quite general, the user is responsible for providing <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> with the appropriate depedencies.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> class is responsible for flagging grid cells for refinement or coarsening, and is thus the main class that determines what the grids look like.
+By default, <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> does not actually flag anything for refinement, so if the user wants to implement a new refinement or coarsening routine, one must do so by writing a new derived class from <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> parent class is a stand-alone class - it does not have a view of <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a>, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, or <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> and the user is responsible for providing <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> with these dependencies.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCellTagger.html">CellTagger C++ API</a></p>
+<p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCellTagger.html">CellTagger C++ API</a></p>
 </div>
-<p>Refinement flags live in a data holder called <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> inside of <code class="docutils literal notranslate"><span class="pre">Driver</span></code>.
-This data is typedef’ed as</p>
+<p>Refinement flags live in a data holder called <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code>, which is a typedef:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LayoutData</span><span class="o">&lt;</span><span class="n">DenseIntVectSet</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">EBAMRTags</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>For performance reasons, <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> onlys store refinement cells on a per-patch basis.
+<p>See <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a> for an explanation of how the individual templates.
+Briefly, the outer vector in <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> indicates the grid level, whereas <code class="docutils literal notranslate"><span class="pre">LayoutData</span></code> is a data holder on each grid level and indexes the grid patches.
+That is, <code class="docutils literal notranslate"><span class="pre">LayoutData&lt;DenseIntVectSet</span></code> is a distribution of <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> on a level, whereas <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is a data holder that stores the refinement flags on a grid patch.
+For performance reasons, <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> onlys store refinement cells on a per-patch basis.
 It is not possible to add a grid cell to a <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> if it falls outside the grid patch.
-Furthermore, the <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> structure is a distributed data structure which makes sure that each MPI rank is aware of the refinement flags on the corresponding grid patches.
-The flags themselves are owned by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, and they are copied onto the new grids in the regrid step.</p>
-<section id="user-interface">
-<h2>User interface<a class="headerlink" href="#user-interface" title="Permalink to this heading"></a></h2>
-<p>To implement a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>, the following functions must be implemented:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseOptions</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+Note that <code class="docutils literal notranslate"><span class="pre">EBAMRTags</span></code> is <em>not</em> set up for communication, and so it is not possible to fill ghost cells regions from other patches.
+The refinement flags themselves are owned by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, and are used to generate new grids that cover all the cell tags.</p>
+<p>A part of the current C++ header file for <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> is included below, where we highlight the functions that must be implemented in order to create a new refinement method.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<span id="celltaggerpurefunctions"></span><div class="code-block-caption"><span class="caption-number">Listing 22 </span><span class="caption-text">Header file for <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Regrid function for cell tagger (in case it uses transient storage to do things)</span>
+<span class="cm">  @details This function exists because implementations may require data to be allocated on a mesh. This function is</span>
+<span class="cm">  called by Driver to make sure data is reallocated when it needs to. </span>
+<span class="cm">*/</span>
+<span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+</span><span class="hll"><span class="nf">regrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Parse class options.</span>
+<span class="cm">  @note This function is called by Driver. </span>
+<span class="cm">*/</span>
+<span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+</span><span class="hll"><span class="nf">parseOptions</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span>
+<span class="cm">/*!</span>
+<span class="cm">  @brief Tag cells</span>
+<span class="cm">  @param[inout] a_tags Tags on grid levels</span>
+<span class="cm">  @details EBAMRTags is a data-type Vector&lt;RefCountedPtr&lt;LayoutData&lt;DenseIntVectSet&gt; &gt; &gt;. The vector indicates the grid level, the LayoutData indicates data ownership (in</span>
+<span class="cm">  much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch). </span>
+<span class="cm">  This function cells for refinement or coarsening. The user&#39;s responsibility is to add (or remove) tags from a_tags. </span>
+<span class="hll"><span class="cm">*/</span>
+</span><span class="hll"><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+</span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Users can also parse run-time options and even have <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> write to plot files, by implementing</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getNumberOfPlotVariables</span><span class="p">();</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotvar_names</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">);</span>
-</pre></div>
 </div>
-<p>This is primarily useful for debugging the tracer fields that are used for flagging cells for refinement.</p>
-<section id="tagcells">
-<h3>tagCells<a class="headerlink" href="#tagcells" title="Permalink to this heading"></a></h3>
-<p>When the regrid routine enters, the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> will be asked to generate the refinement flags through a function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">bool</span><span class="w"> </span><span class="nf">tagCells</span><span class="p">(</span><span class="n">EBAMRTags</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_tags</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>This routine should add cells that will be refined, and remove cells that will be coarsened.</p>
-</section>
+<section id="implementing-a-new-celltagger">
+<h2>Implementing a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code><a class="headerlink" href="#implementing-a-new-celltagger" title="Permalink to this heading"></a></h2>
+<p>To implement a new <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>, the pure functions listed in <a class="reference internal" href="#celltaggerpurefunctions"><span class="std std-numref">Listing 22</span></a> must be implemented.
+Below, we discuss these in turn:</p>
 <section id="regrid">
 <h3>regrid<a class="headerlink" href="#regrid" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">regrid</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> during regrids.
-The existence of this routine is due to the common usage pattern where <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> holds some auxiliary mesh data that is used when evaluating refinement and coarsening criteria.
-This routine should reallocate such temporary storage during regrids.</p>
+The existence of this routine is due to the common usage pattern where <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> holds some auxiliary mesh (or particle) data that is used when evaluating refinement and coarsening criteria.
+This routine should reallocate this  storage during regrids.</p>
+</section>
+<section id="tagcells">
+<h3>tagCells<a class="headerlink" href="#tagcells" title="Permalink to this heading"></a></h3>
+<p>When the regrid routine enters, the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> will be asked to generate the refinement flags through the <code class="docutils literal notranslate"><span class="pre">tagCells</span></code> function in <a class="reference internal" href="#celltaggerpurefunctions"><span class="std std-numref">Listing 22</span></a>.
+This routine should add cells that will be refined, and remove cells that will be coarsened.
+The return value of this function is a boolean that should return <code class="docutils literal notranslate"><span class="pre">false</span></code> if no new tags were found.
+While it is possible to skip this test, we note that returning <code class="docutils literal notranslate"><span class="pre">true</span></code> also when no new refinement regions were found will trigger a full regrid.</p>
 </section>
 <section id="parseoptions">
 <h3>parseOptions<a class="headerlink" href="#parseoptions" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">parseOptions</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> when setting the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>.
-This routine should parse options into the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> instance.</p>
+This routine should parse options into the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> subclass.
+Note that it is also useful to overwrite the function <code class="docutils literal notranslate"><span class="pre">parseRuntimeOptions</span></code> if one needs run-time configuration of the refinement criteria.</p>
 </section>
-<section id="parseruntimeoptions">
-<h3>parseRuntimeOptions<a class="headerlink" href="#parseruntimeoptions" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">parseRuntimeOptions</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> after each grid step.
-This routine will re-read class options into the <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> instance.
-See <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a> for further details.</p>
+<section id="plot-data">
+<h3>Plot data<a class="headerlink" href="#plot-data" title="Permalink to this heading"></a></h3>
+<p>It is also possible to have <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> write data to plot files, and the interface for this is identical to the plot file interface in <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.
+The three functions below must then be implemented:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get number of plot variables that will be written to file (by Driver).</span>
+<span class="cm">    @return Returns number of plot variables that Driver will write to plot files. </span>
+<span class="cm">  */</span>
+<span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
+</span><span class="hll"><span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get plot variable names. </span>
+<span class="cm">  */</span>
+<span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
+</span><span class="hll"><span class="w">  </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Write plot data.</span>
+<span class="cm">    @param[inout] a_output Output data holder</span>
+<span class="cm">    @param[inout] a_icomp Starting variable in a_output where we begin appending data.</span>
+<span class="cm">    @param[in] a_outputRealm Realm where a_output belongs</span>
+<span class="cm">    @param[in] a_level Grid level</span>
+<span class="cm">  */</span>
+<span class="hll"><span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+</span><span class="hll"><span class="w">  </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_outputRealm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</span></pre></div>
+</div>
+<p>The interpretation of these functions is exactly the same as for <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>, and we refer to the <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> documentation for a detailed explanation.</p>
 </section>
-<section id="getnumberofplotvariables">
-<h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> will return the number of plot variables that <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> will write to plot files.</p>
 </section>
-<section id="writeplotdata">
-<h3>writePlotData<a class="headerlink" href="#writeplotdata" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> will write the plot data to the provided data holder.
-The functionality is the same as for <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p>
-</section>
-</section>
-<section id="restrict-tagging">
-<h2>Restrict tagging<a class="headerlink" href="#restrict-tagging" title="Permalink to this heading"></a></h2>
-<p>It is possible to prevent <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> from adding refinement flags in specified regions.
-The default behavior is to add a number of boxes where refinement and coarsening is allowed:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MyCellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-MyCellTagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
-MyCellTagger.box1_hi     = 1.0 1.0 1.0  # these two corners
+<section id="manual-refinement-and-restriction">
+<h2>Manual refinement and restriction<a class="headerlink" href="#manual-refinement-and-restriction" title="Permalink to this heading"></a></h2>
+<p>The user can add manual refinement by specifying Cartesian spatial regions to be refined down to some grid level, by specifying the physical corners and the refinement level.
+The input parameters in this case are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">num_ref_boxes</span></code> for specifying how many such boxes will be parsed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ref_box&lt;num&gt;_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">ref_box&lt;num&gt;_hi</span></code> that determine the Cartesian region to be refined.
+Here, <code class="docutils literal notranslate"><span class="pre">&lt;num&gt;</span></code> is a placeholder for an integer.
+If the user specifies <code class="docutils literal notranslate"><span class="pre">num_ref_boxes</span> <span class="pre">=</span> <span class="pre">2</span></code>, then <code class="docutils literal notranslate"><span class="pre">ref_box1_lo</span></code>, <code class="docutils literal notranslate"><span class="pre">ref_box1_hi</span></code>, <code class="docutils literal notranslate"><span class="pre">ref_box2_lo</span></code>, and <code class="docutils literal notranslate"><span class="pre">ref_box2_hi</span></code> must all be defined.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ref_box&lt;num&gt;_lvl</span></code>, which specifies the refinement depth corresponding to box <code class="docutils literal notranslate"><span class="pre">&lt;num&gt;</span></code>.</p></li>
+</ul>
+<p>An example of the manual refinement syntax is given in <a class="reference internal" href="#celltaggeroptions"><span class="std std-numref">Listing 23</span></a>.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<span id="celltaggeroptions"></span><div class="code-block-caption"><span class="caption-number">Listing 23 </span><span class="caption-text">Default class options for <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code>, including the manual refinement syntax and buffer region definition.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# CellTagger class options
+# ====================================================================================================
+CellTagger.buffer     = 0    ## Grow tagged cells
+
+CellTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowe everywhere)
+CellTagger.tag_box1_lo       = 0.0 0.0 0.0    ## Only allow tags that fall between
+CellTagger.tag_box1_hi       = 0.0 0.0 0.0    ## these two corners
+
+CellTagger.num_ref_boxes     = 0              ## Number of specified refinement boxes
+CellTagger.ref_box1_lo       = 0.0 0.0 0.0    ## Refine region between
+CellTagger.ref_box1_hi       = 0.0 0.0 0.0    ## these two corners.
+CellTagger.ref_box1_lvl      = 0              ## Refine to this level.
 </pre></div>
 </div>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">MyCellTagger</span></code> is a placeholder for the name of the class that is used.
-By adding restrictive boxes, tagging will only be allowed inside the specified box corners <code class="docutils literal notranslate"><span class="pre">box1_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">box1_hi</span></code>.
-More boxes can be specified by following the same convention, e.g. <code class="docutils literal notranslate"><span class="pre">box2_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">box2_hi</span></code> etc.</p>
+</div>
+<p>It is possible to prevent <code class="docutils literal notranslate"><span class="pre">CellTagger</span></code> from adding refinement flags in specified regions by specifying <code class="docutils literal notranslate"><span class="pre">num_tag_boxes</span></code>.
+The default behavior is to add a number of boxes where refinement and coarsening is allowed, and prevent tags from being generated outside of these regions.
+If no boxes are defined, tagging is allowed everywhere.
+The syntax is the same as for <code class="docutils literal notranslate"><span class="pre">num_ref_boxes</span></code>, e.g., one must define <code class="docutils literal notranslate"><span class="pre">tag_box&lt;num&gt;_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">tag_box&lt;num&gt;_hi</span></code>.
+By adding restrictive boxes, tagging will only be allowed inside the specified box corners <code class="docutils literal notranslate"><span class="pre">tag_box1_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">tag_box1_hi</span></code>.
+More boxes can be specified by following the same convention, e.g., <code class="docutils literal notranslate"><span class="pre">tag_box2_lo</span></code> and <code class="docutils literal notranslate"><span class="pre">tag_box2_hi</span></code>.</p>
 </section>
 <section id="adding-a-buffer">
 <h2>Adding a buffer<a class="headerlink" href="#adding-a-buffer" title="Permalink to this heading"></a></h2>
-<p>By default, each MPI rank can only tag grid cells where it owns data.
-This has been done for performance and communication reasons.
+<p>By default, each MPI rank can only tag grid cells where it owns data, which has has been enforced due to performance and communication reasons.
 Under the hood, the <code class="docutils literal notranslate"><span class="pre">DenseIntVectSet</span></code> is an array of boolean values on a patch which is very fast and simple to communicate with MPI.
 Adding a grid cell for refinement which lies outside the patch will lead to memory corruptions.
-It is nonetheless still possible to do this by growing the final generated tags like so:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MyCellTagger.buffer = 4 # Add a buffer region around the tagged cells
-</pre></div>
-</div>
-<p>Just before passing the flags into <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> grid generation routines, the tagged cells are put in a different data holder (<code class="docutils literal notranslate"><span class="pre">IntVectSet</span></code>) and this data holder <em>can</em> contain cells that are outside the patch boundaries.</p>
-</section>
-<section id="manual-refinement">
-<h2>Manual refinement<a class="headerlink" href="#manual-refinement" title="Permalink to this heading"></a></h2>
-<p>The user can add manual refinement by specifying Cartesian spatial regions to be refined down to some grid level, by specifying the physical corners and the refinement level.
-For example:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>MyCellTagger.num_ref_boxes = 2
-
-MyCellTagger.ref_box1_lo   = 0 0 0
-MyCellTagger.ref_box1_hi   = 1 1 1
-MyCellTagger.ref_box1_lvl  = 2
-
-MyCellTagger.ref_box2_lo   = 1 1 1
-MyCellTagger.ref_box2_hi   = 2 2 2
-MyCellTagger.ref_box2_lvl  = 3
-</pre></div>
-</div>
-<p>Any number of boxes can be specified using this format.</p>
+Frequently, however, it is necessary to add <em>buffer regions</em> to ensure that an area-of-interest around the tagged region is also refined.
+This is done by growing the final generated tags by specifying the <code class="docutils literal notranslate"><span class="pre">buffer</span></code>.
+The syntax for this is given in <a class="reference internal" href="#celltaggeroptions"><span class="std std-numref">Listing 23</span></a>.
+Just before passing the flags into <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> grid generation routines, the tagged cells are put into a different data holder (<code class="docutils literal notranslate"><span class="pre">IntVectSet</span></code>), and this data holder <em>can</em> contain cells that are outside the patch boundaries.</p>
 </section>
 </section>
 

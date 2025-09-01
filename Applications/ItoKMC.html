@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul class="current">
@@ -145,11 +144,11 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#photon-species">Photon species</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#id9">Basic definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Basic definition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#absorption-coefficient">Absorption coefficient</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id11">Plasma reactions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Plasma reactions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#reaction-specifiers">Reaction specifiers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#rate-calculation">Rate calculation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#scaling">Scaling</a></li>
@@ -161,13 +160,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#printing-rates">Printing rates</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id14">Particle placement</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id15">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id16">Townsend coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">Townsend coefficients</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tips-and-tricks">Tips and tricks</a></li>
@@ -190,7 +189,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -246,7 +245,7 @@ Further details regarding the Îto method are given in <a class="reference inter
 <h3>Photoionization<a class="headerlink" href="#photoionization" title="Permalink to this heading"></a></h3>
 <p>Photoionization in the Îto-KMC model is done using discrete photons.
 These are generated and advanced in every time step, and interact with the plasma through user-defined photo-reactions.
-The underlying solver is the discrete Monte Carlo photon transport solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo sampling</span></a>.</p>
+The underlying solver is the discrete Monte Carlo photon transport solver, see <a class="reference internal" href="../Solvers/RTE.html#chap-montecarlorte"><span class="std std-ref">Monte Carlo solver</span></a>.</p>
 </section>
 <section id="field-interaction">
 <h3>Field interaction<a class="headerlink" href="#field-interaction" title="Permalink to this heading"></a></h3>
@@ -274,7 +273,7 @@ Currently, the time step can be restricted through several means:</p>
 </ol>
 <p>In addition, the user can specify the maximum permitted growth or reduction in the time step.</p>
 <p>These limits are given by the following input variables:</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
 ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0     ## Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0     ## Diffusive time step CFL restriction
@@ -320,7 +319,7 @@ Filters are applied as follows:</p>
 \[\rho_i = \alpha\rho_i + \frac{1-\alpha}{2}\left(\rho_{i+s} + \rho_{i-s}\right).\]</div>
 <p>where <span class="math notranslate nohighlight">\(\alpha\)</span> is a filtering factor and <span class="math notranslate nohighlight">\(s\)</span> a stride.
 Users can apply this filtering by adjusting the following input options:</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
 ItoKMCGodunovStepper.rho_filter_max_stride = 1    # Maximum stride for filter
 ItoKMCGodunovStepper.rho_filter_alpha      = 0.5  # Filtering factor (0.5 is a bilinear filter)
 </pre></div>
@@ -1044,7 +1043,7 @@ Note that if the reaction was <span class="math notranslate nohighlight">\(A + A
 <p>since there are <span class="math notranslate nohighlight">\(\frac{1}{2}X_A\left(X_A-1\right)\)</span> distinct pairs of particles of type <span class="math notranslate nohighlight">\(A\)</span>.
 Likewise, the fluid rate coefficient would be <span class="math notranslate nohighlight">\(k_2 = c_2\Delta V/2\)</span>.</p>
 <p>The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates <span class="math notranslate nohighlight">\(c_j\)</span>, and it is us to the user to ensure that these are consistent with the fluid limit.
-Internally, these reactions are implemented through the dual state KMC implementation, see <a class="reference internal" href="../Solvers/KineticMonteCarlo.html#chap-kmcdualstate"><span class="std std-ref">KMCDualState</span></a>.
+Internally, these reactions are implemented through the dual state KMC implementation, see <a class="reference internal" href="../Solvers/KineticMonteCarlo.html#chap-kineticmontecarlo"><span class="std std-ref">Kinetic Monte Carlo</span></a>.
 During the reaction advance the user only needs to update the <span class="math notranslate nohighlight">\(c_j\)</span> coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine <code class="docutils literal notranslate"><span class="pre">updateReactionRates(...)</span></code>, see <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for the complete specification.</p>
 </section>
@@ -1255,13 +1254,13 @@ An example JSON specification is</p>
 <h5>Tabulated versus height<a class="headerlink" href="#tabulated-versus-height" title="Permalink to this heading"></a></h5>
 <p>The molar fraction can be set as a tabulated value versus one of the Cartesian coordinate axis by setting the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">height</span></code>.
 The input data should be tabulated in column form, e.g.</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># height       molar fraction
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># height       molar fraction
 0              0.1
 1              0.1
 2              0.1
 </pre></div>
 </div>
-<p>The file parser (see <span class="xref std std-ref">LookupTable</span>) will ignore the header file if it starts with a hashtag (#).
+<p>The file parser (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>) will ignore the header file if it starts with a hashtag (#).
 Various other inputs are then also required:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> File name containing the height vs. molar fraction data (required).</p></li>
@@ -1295,8 +1294,8 @@ Various other inputs are then also required:</p>
 </span><span class="hll"><span class="w">               </span><span class="nt">&quot;max height&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w">               </span><span class="c1">// Optional truncation of maximum height kept in internal table (occurs after scaling)</span>
 </span><span class="hll"><span class="w">               </span><span class="nt">&quot;num points&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w">               </span><span class="c1">// Optional specification of number of data points kept in internal table (defaults to 1000)</span>
 </span><span class="hll"><span class="w">               </span><span class="nt">&quot;spacing&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;linear&quot;</span><span class="w">              </span><span class="c1">// Optional specification of table representation. Can be &#39;linear&#39; or &#39;exponential&#39; (defaults to linear)</span>
-</span><span class="w">            </span><span class="p">}</span>
-<span class="w">         </span><span class="p">}</span>
+</span><span class="hll"><span class="w">            </span><span class="p">}</span>
+</span><span class="w">         </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">   </span><span class="p">}</span>
 <span class="p">}</span>
@@ -1381,7 +1380,7 @@ The advantage of this approach is that one may choose to discard some of the rea
 <p>To set the coefficient as functions <span class="math notranslate nohighlight">\(f = f\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data, e.g.</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># E/N   alpha/N
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># E/N   alpha/N
 0       1E5
 100     1E5
 200     1E5
@@ -1430,8 +1429,8 @@ This is an optional argument that defaults to <code class="docutils literal notr
 <span class="w">   </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;species&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;plot&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<span class="w">   </span><span class="p">}</span>
+<span class="hll"><span class="w">      </span><span class="nt">&quot;plot&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+</span><span class="w">   </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1508,16 +1507,16 @@ For example,</p>
 <span class="w">         </span><span class="nt">&quot;mobile&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">       </span><span class="c1">// Mobile or not</span>
 <span class="w">         </span><span class="nt">&quot;diffusive&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">     </span><span class="c1">// Diffusive or not,</span>
 <span class="w">         </span><span class="nt">&quot;mobility&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set constant mobility</span>
-<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
-<span class="hll"><span class="w">         </span><span class="p">},</span>
-</span><span class="hll"><span class="w">         </span><span class="nt">&quot;diffusion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span class="hll"><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set constant diffusion coefficient</span>
-</span><span class="hll"><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2E-4</span>
-</span><span class="hll"><span class="w">         </span><span class="p">}</span>
-</span><span class="hll"><span class="w">     </span><span class="p">}</span>
-</span><span class="hll"><span class="w"> </span><span class="p">]</span>
-</span></pre></div>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set constant mobility</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.02</span>
+</span><span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;diffusion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set constant diffusion coefficient</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2E-4</span>
+<span class="w">         </span><span class="p">}</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w"> </span><span class="p">]</span>
+</pre></div>
 </div>
 </section>
 <section id="constant-n">
@@ -1533,16 +1532,16 @@ For example,</p>
 <span class="w">         </span><span class="nt">&quot;mobile&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">            </span><span class="c1">// Mobile or not</span>
 <span class="w">         </span><span class="nt">&quot;diffusive&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">          </span><span class="c1">// Diffusive or not,</span>
 <span class="w">         </span><span class="nt">&quot;mobility&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant mu*N&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set mu*N to a constant</span>
-<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E24</span>
-<span class="hll"><span class="w">         </span><span class="p">},</span>
-</span><span class="hll"><span class="w">         </span><span class="nt">&quot;diffusion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span class="hll"><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant D*N&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Set D*N to a constant</span>
-</span><span class="hll"><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5E24</span>
-</span><span class="hll"><span class="w">         </span><span class="p">}</span>
-</span><span class="hll"><span class="w">     </span><span class="p">}</span>
-</span><span class="hll"><span class="w"> </span><span class="p">]</span>
-</span></pre></div>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant mu*N&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Set mu*N to a constant</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1E24</span>
+</span><span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;diffusion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;constant D*N&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Set D*N to a constant</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5E24</span>
+<span class="w">         </span><span class="p">}</span>
+<span class="w">     </span><span class="p">}</span>
+<span class="w"> </span><span class="p">]</span>
+</pre></div>
 </div>
 </section>
 <section id="table-vs-e-n">
@@ -1550,7 +1549,7 @@ For example,</p>
 <p>To set the transport coefficients as functions <span class="math notranslate nohighlight">\(f = f\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data, e.g.</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># E/N   mu/N
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># E/N   mu/N
 0       1E5
 100     1E5
 200     1E5
@@ -1655,7 +1654,7 @@ For example:</p>
 <p>To set the species temperature as a function <span class="math notranslate nohighlight">\(T = T\left(E/N\right)\)</span>, set the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier to <code class="docutils literal notranslate"><span class="pre">table</span> <span class="pre">vs</span> <span class="pre">E/N</span></code> and specify the following fields:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">file</span></code> For specifying the file containing the input data, which must be organized as column data <em>versus the mean energy</em>, e.g.</p>
-<div class="highlight-txt notranslate"><div class="highlight"><pre><span></span># E/N   energy (eV)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># E/N   energy (eV)
 0       1
 100     2
 200     3
@@ -1921,7 +1920,7 @@ The particles must be organized as rows containing the coordinate positions and 
 </section>
 <section id="initial-densities">
 <h4>Initial densities<a class="headerlink" href="#initial-densities" title="Permalink to this heading"></a></h4>
-<p>One may include an initial density by setting the <a href="#id7"><span class="problematic" id="id8">``</span></a>initial density``parameter.
+<p>One may include an initial density by setting the <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">density</span></code> parameter.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma species&quot;</span><span class="w"> </span><span class="p">:</span>
 <span class="p">[</span>
@@ -1947,8 +1946,8 @@ These are defined by an array of entries in a <code class="docutils literal notr
 <li><p>An ID/name for the species.</p></li>
 <li><p>The absorption coefficient for the photon type.</p></li>
 </ul>
-<section id="id9">
-<h4>Basic definition<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h4>
+<section id="id7">
+<h4>Basic definition<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
 <p>A basic definition of a single photon species is</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
 <span class="w"> </span><span class="p">[</span>
@@ -1985,8 +1984,8 @@ These are defined by an array of entries in a <code class="docutils literal notr
 </section>
 <section id="absorption-coefficient">
 <h4>Absorption coefficient<a class="headerlink" href="#absorption-coefficient" title="Permalink to this heading"></a></h4>
-<section id="id10">
-<h5>Constant<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h5>
+<section id="id8">
+<h5>Constant<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h5>
 <p>In order to set a constant absorption coefficient, set <code class="docutils literal notranslate"><span class="pre">type</span></code> to constant and then specify the <code class="docutils literal notranslate"><span class="pre">value</span></code> field.
 For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;photon species&quot;</span><span class="p">:</span>
@@ -2055,8 +2054,8 @@ For example:</p>
 </section>
 </section>
 </section>
-<section id="id11">
-<h3>Plasma reactions<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<section id="id9">
+<h3>Plasma reactions<a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
 <p>Plasma reactions are always specified stoichiometrically in the form <span class="math notranslate nohighlight">\(S_A + S_B + \ldots \xrightarrow{k} S_C + S_D + \ldots\)</span>.
 The user must supply the following information:</p>
 <ul class="simple">
@@ -2113,8 +2112,8 @@ The reaction string can then be defined as the string <code class="docutils lite
 <h4>Rate calculation<a class="headerlink" href="#rate-calculation" title="Permalink to this heading"></a></h4>
 <p>Reaction rates can be specified using multiple formats (constant, tabulated, function-based, etc).
 To specify how the rate is computed, one must specify the <code class="docutils literal notranslate"><span class="pre">type</span></code> keyword in the JSON entry.</p>
-<section id="id12">
-<h5>Constant<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h5>
+<section id="id10">
+<h5>Constant<a class="headerlink" href="#id10" title="Permalink to this heading"></a></h5>
 <p>To use a constant reaction rate, the <code class="docutils literal notranslate"><span class="pre">type</span></code> specifier must be set to constant and the reaction rate must be specified through the <code class="docutils literal notranslate"><span class="pre">value</span></code> keyword.
 A JSON specification is e.g.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -2228,8 +2227,8 @@ The reason for this is that the Townsend coefficients <span class="math notransl
 By specifying e.g. a reaction string <span class="math notranslate nohighlight">\(\text{e} + \text{N}_2 \rightarrow \text{e} + \text{e} + \text{N}_2^+\)</span> together with the <code class="docutils literal notranslate"><span class="pre">alpha*v</span></code> or <code class="docutils literal notranslate"><span class="pre">eta*v</span></code> specifiers, one will end up multiplying in the neutral density twice, which will lead to an incorrect rate.</p>
 </div>
 </section>
-<section id="id13">
-<h5>Tabulated vs E/N<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h5>
+<section id="id11">
+<h5>Tabulated vs E/N<a class="headerlink" href="#id11" title="Permalink to this heading"></a></h5>
 </section>
 </section>
 <section id="scaling">
@@ -2298,7 +2297,7 @@ An example file is e.g.</p>
 1000 1.0
 </pre></div>
 </div>
-<p>This data is then internally convered to a uniformly spaced lookup table (see <span class="xref std std-ref">LookupTable</span>).</p>
+<p>This data is then internally convered to a uniformly spaced lookup table (see <a class="reference internal" href="../Utilities/LookupTable.html#chap-lookuptable"><span class="std std-ref">LookupTable1D</span></a>).</p>
 </section>
 <section id="efficiency-vs-e">
 <h5>Efficiency vs E<a class="headerlink" href="#efficiency-vs-e" title="Permalink to this heading"></a></h5>
@@ -2465,8 +2464,8 @@ Reactions are ordered identical to the order of the reactions in the JSON specif
 This feature is mostly used for debugging or development efforts.</p>
 </section>
 </section>
-<section id="id14">
-<h3>Particle placement<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
+<section id="id12">
+<h3>Particle placement<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
 <p>Specification of secondary particle placement is done through the JSON file by specifying the <code class="docutils literal notranslate"><span class="pre">particle</span> <span class="pre">placement</span></code> field.
 Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
 The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
@@ -2490,8 +2489,8 @@ The following three specifies are all valid:</p>
 </pre></div>
 </div>
 </section>
-<section id="id15">
-<h3>Photoionization<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h3>
+<section id="id13">
+<h3>Photoionization<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
 <p>Photoionization reactions are specified by including a <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> array of JSON entries that specify each reaction.
 The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
 Each entry <em>must</em> contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
@@ -2665,8 +2664,8 @@ This is particularly the case for three-body reactions with BOLSIG+ that may req
 <p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
 </div>
 </section>
-<section id="id16">
-<h4>Townsend coefficients<a class="headerlink" href="#id16" title="Permalink to this heading"></a></h4>
+<section id="id14">
+<h4>Townsend coefficients<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
 <p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
 For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
 <div class="admonition warning">

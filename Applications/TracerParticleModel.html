@@ -72,7 +72,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -80,12 +79,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -101,12 +100,21 @@
 <li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODEModel.html">Mesh ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="RadiativeTransferModel.html">Radiative transfer</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tracer particle model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tracer particle model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-problem">Basic problem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-algorithm">Integration algorithm</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -146,6 +154,85 @@
              
   <section id="tracer-particle-model">
 <span id="chap-tracerparticlemodel"></span><h1>Tracer particle model<a class="headerlink" href="#tracer-particle-model" title="Permalink to this heading"></a></h1>
+<p>The tracer particle model was written in order to illustrate the usage of <a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a>.
+The module can trace particles passively in a fixed velocity fieldk.`).</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/TracerParticle</span></code>.</p>
+</div>
+<p>The model consists of the following implementation files:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_TracerParticleStepper.H</span></code>, which implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a> as a subclass <code class="docutils literal notranslate"><span class="pre">TracerParticleStepper</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The current implementation does not incorporate solver-based adaptive mesh refinement, so refinement is restricted to refinement and coarsening through the <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> interface.</p>
+</div>
+<section id="basic-problem">
+<h2>Basic problem<a class="headerlink" href="#basic-problem" title="Permalink to this heading"></a></h2>
+<p>Currently, <code class="docutils literal notranslate"><span class="pre">TracerParticleStepper</span></code> simply instantiates a <a class="reference internal" href="../Solvers/TracerParticles.html#chap-tracerparticlesolver"><span class="std std-ref">TracerParticleSolver</span></a> the particles in a fixed velocity field.
+There is currently no handling of particles that fall off the domain.</p>
+<section id="initial-conditions">
+<h3>Initial conditions<a class="headerlink" href="#initial-conditions" title="Permalink to this heading"></a></h3>
+<p>The user can set the velocity field, which is either a velocity field that is diagonal to the Cartesian mesh, or a rotational flow.
+Likewise, the user can set the number of particles, which are sampled uniformly across the domain.</p>
+</section>
+<section id="integration-algorithm">
+<h3>Integration algorithm<a class="headerlink" href="#integration-algorithm" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">TracerParticleStepper</span></code> implements the following algorithms for the particle advection: The explicit Euler method, Heun’s method, and the classical fourth order Runge-Kutta method.</p>
+</section>
+</section>
+<section id="solver-configuration">
+<h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">TracerParticleStepper</span></code> class comes with user-configurable input options that can be adjusted at runtime.
+These configuration options are given below.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# TracerParticleStepper class options
+# ====================================================================================================
+TracerParticleStepper.initial_particles     = 10000    ## Number of uniformly distributed initial particles
+TracerParticleStepper.integration           = euler    ## &#39;euler&#39;, &#39;rk2&#39;, or &#39;rk4&#39;
+TracerParticleStepper.verbosity             = -1       ## Verbosity level
+TracerParticleStepper.cfl                   = 1.0      ## &quot;CFL&quot; number.
+TracerParticleStepper.velocity_field        = 0        ## Velocity field to use.
+                                                       # 0 =&gt; Diagonal translation
+                                                       # 1 =&gt; Rotational flow
+</pre></div>
+</div>
+</section>
+<section id="setting-up-a-new-problem">
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/TracerParticle</span></code> is the simplest way.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/TracerParticle</span>
+This physics module solves for an tracer particle solver.
+This module contains files for setting up the initial conditions
+and advected species, basic integrators, and a cell tagger for refining grid cells.
+See https://chombo-discharge.github.io/TracerParticleModel.html for implementation details.
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_TracerParticleStepper.H**</span>  Implementation of TimeStepper, for advancing a tracer particle solver. 
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>TracerParticle<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/TracerParticle.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+
+<span class="gu">## Modifying the application</span>
+The application is simply set up to track particles in various flow fields. 
+Users are free to modify this application, e.g. adding new initial conditions and flow fields. 
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
+</section>
 </section>
 
 

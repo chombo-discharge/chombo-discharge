@@ -64,10 +64,12 @@
 <li class="toctree-l1"><a class="reference internal" href="ComputationalGeometry.html">ComputationalGeometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TimeStepper.html">TimeStepper</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">AmrMesh</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-functionality">Main functionality</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#particle-intersection">Particle intersection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#class-options">Class options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#runtime-options">Runtime options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coarse-grid-decomposition">Coarse-grid decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#domain-decomposition">Domain decomposition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ghost-cells">Ghost cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multigrid-interpolation">Multigrid interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interpolation-near-the-eb">Interpolation near the EB</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="CellTagger.html">CellTagger</a></li>
@@ -79,7 +81,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -87,12 +88,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -113,7 +114,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -153,112 +154,136 @@
              
   <section id="amrmesh">
 <span id="chap-amrmesh"></span><h1>AmrMesh<a class="headerlink" href="#amrmesh" title="Permalink to this heading"></a></h1>
-<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> handles (almost) all spatial operations in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-Internally, <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> contains a bunch of operators that are useful across classes, such as ghost cell interpolation operators, coarsening operators, and stencils for interpolation and extrapolation near the embedded boundaries.
-<a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> also contains routines for generation and load-balancing of grids based and also contains simple routines for allocation and deallocation of memory.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> only handles spatial <em>operations</em>, it otherwise has limited knowledge of numerical discretizations.</p>
-</div>
-<p><a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is an integral part of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and users will never have the need to modify it unless they are implementing something entirely new.
+<p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> handles virtually the entire AMR and cut-cell infrastructure in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and has the following responsibility:</p>
+<ol class="arabic simple">
+<li><p>Generate grids form a set of cell tags (potentially more than one set of grids).</p></li>
+<li><p>Load balance the grids if necessary.</p></li>
+<li><p>Instantiate the cut-cell information on grids.</p></li>
+<li><p>Provide a mask which tells the user if a cell is covered by a finer grid.</p></li>
+<li><p>Generate operators that are required for handling AMR data, e.g.,</p>
+<ul class="simple">
+<li><p>Ghost cell interpolators.</p></li>
+<li><p>Coarsening operators.</p></li>
+<li><p>Stencils for interpolation and extrapolation near the embedded boundaries.</p></li>
+<li><p>Fine-to-coarse grid interpolators.</p></li>
+<li><p>Infrastructure for particle-mesh operators.</p></li>
+<li><p>… and many others.</p></li>
+</ul>
+</li>
+</ol>
+<p>In addition to these, <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> contains function for actually allocating data with user-defined centering (e.g., cell, face, EB) on a specified <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>.
+It also has responsibility for allocating particle containers.</p>
+<p>One thing that <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> is <em>not</em>, is a numerical discretization holder for PDEs, which is a responsibility that is generally deferred to solvers.
+In some cases <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> certainly holds operators that have an underlying discretization, e.g., gradient operators which have a specific discretization based on least squares reconstruction around the embedded boundaries.
+But in virtually all cases one should simply think of these operators as AMR operators that handle specific types of common data operations on mesh and particle data.</p>
+<p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> is an integral part of <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, and users will never have the need to modify it unless they are implementing something entirely new.
 The behavior of <a class="reference internal" href="#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> is modified through its available input parameters.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh C++ API</a></p>
+<p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh C++ API</a></p>
 </div>
-<section id="main-functionality">
-<h2>Main functionality<a class="headerlink" href="#main-functionality" title="Permalink to this heading"></a></h2>
-<p>There are two main functionalities in <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
-<ol class="arabic simple">
-<li><p>Building grid hierarchies, and providing geometric information</p></li>
-<li><p>Providing AMR operators.</p></li>
-</ol>
-<p>The grids in <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> consist of a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> (see <a class="reference internal" href="ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>) on each level, supported also by the EB information (<code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>).
-Recall that each grid patch in a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> is owned by a unique rank.
-However, since <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports multiple decompositions, we support the use of multiple <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> describing the same grid level.
-Although these <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> consist of the same boxes, the patch-to-rank mapping can be different (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>).
-To fetch a grid on a particular level, one can call <code class="docutils literal notranslate"><span class="pre">AmrMesh::getGrids(const</span> <span class="pre">std::string</span> <span class="pre">a_realm)</span></code>.
-E.g.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">myRealm</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myLevel</span><span class="p">;</span>
-
-<span class="k">const</span><span class="w"> </span><span class="n">DisjointBoxLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getGrids</span><span class="p">(</span><span class="s">&quot;myRealm&quot;</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span>
-</pre></div>
-</div>
-<p>Likewise, to fetch the geometric (EB) information for a specified realm, phase, and level:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">myRealm</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">myLevel</span><span class="p">;</span>
-<span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="w"> </span><span class="n">myPhase</span><span class="p">;</span>
-
-<span class="k">const</span><span class="w"> </span><span class="n">EBISLayout</span><span class="o">&amp;</span><span class="w"> </span><span class="n">ebisl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getEBISLayout</span><span class="p">(</span><span class="n">myRealm</span><span class="p">,</span><span class="w"> </span><span class="n">myPhase</span><span class="p">)[</span><span class="n">myLevel</span><span class="p">];</span>
-</pre></div>
-</div>
-<p>In addition to the grids, the user can fetch AMR operators.
-These are, for example, coarsening operators, interpolation operators, ghost cell interpolators etc.
-To save some regrid time, we don’t always build every AMR operator that we might ever need, but have solvers <em>register</em> the ones that they specifically need.
-See <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details.</p>
-<p>The API of <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> is quite extensive, and it has functionality both for providing grid operators as well as:</p>
-<ul class="simple">
-<li><p>Maintaining overview of grids and operators.</p></li>
-<li><p>Allocating grid and particle data.</p></li>
-<li><p>Interpolating to new grids.</p></li>
-<li><p>Coarsening data.</p></li>
-<li><p>Updating ghost cells.</p></li>
-<li><p>Interpolating data to e.g. EB centroids.</p></li>
-</ul>
-<p>The <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html">AmrMesh API</a> is a good place to start for figuring out the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> functionality.</p>
-</section>
-<section id="particle-intersection">
-<span id="chap-amrparticleintersection"></span><h2>Particle intersection<a class="headerlink" href="#particle-intersection" title="Permalink to this heading"></a></h2>
-</section>
 <section id="class-options">
 <h2>Class options<a class="headerlink" href="#class-options" title="Permalink to this heading"></a></h2>
-<p>The class options below control <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lo_corner</span></code>. Low corner of problem domain (e.g. 0 0 0)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.hi_corner</span></code>. High corner of problem domain (e.g. 1 1 1).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.verbosity</span></code>. Class verbosity. Leave to -1 unless you are debugging.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.coarsest_domain</span></code>. Number of grid cells on coarsest domain</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_amr_depth</span></code>. Maximum number of refinement levels.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_sim_depth</span></code>. Maximum simulation depth.
-Values <span class="math notranslate nohighlight">\(&lt; 0\)</span> means that grids can be generated with depths up to <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_amr_depth</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.fill_ratio</span></code>. Fill ratio for BR grid generation</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.buffer_size</span></code>. Buffer size for BR grid generation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.grid_algorithm</span></code>. Grid generation algorithm. Valid options are <em>br</em> or <em>tiled</em>. See <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.box_sorting</span></code>. Box sorting algorithm. Valid options are <em>std</em>, <em>morton</em>, or <em>shuffle</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>. Blocking factor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code>. Maximum box size.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_ebis_box</span></code>. Maximum box size during EB geometry generation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ref_rat</span></code>. Refinement ratios.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.num_ghost</span></code>. Number of ghost cells for mesh data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lsf_ghost</span></code>. Number of ghost cells when allocating level-set function on the grid.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code>. Number of ghost cells for EB moments.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_interp</span></code>. Which centroid interpolation stencils to use. Good options are <em>minmod</em>, <em>linear</em>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_interp</span></code>. EB interpolation stencils. Good options are <em>minmod</em>, <em>pwl</em></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.redist_radius</span></code>. Redistribution radius.</p></li>
-</ul>
+<p>Various class options are available for adjusting the behavior of the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class.
+Below, we include the current template options file for the <code class="docutils literal notranslate"><span class="pre">Driver</span></code> class.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-number">Listing 21 </span><span class="caption-text">Template input options for the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
+<span class="c1"># AmrMesh class options</span>
+<span class="c1"># ====================================================================================================</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">lo_corner</span>            <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span><span class="mi">1</span>       <span class="c1">## Low corner of problem domain</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">hi_corner</span>            <span class="o">=</span> <span class="mi">1</span>  <span class="mi">1</span>  <span class="mi">1</span>        <span class="c1">## High corner of problem domain</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">verbosity</span>            <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c1">## Controls verbosity.</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">coarsest_domain</span>      <span class="o">=</span> <span class="mi">128</span> <span class="mi">128</span> <span class="mi">128</span>    <span class="c1">## Number of cells on coarsest domain</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">max_amr_depth</span>        <span class="o">=</span> <span class="mi">0</span>              <span class="c1">## Maximum amr depth</span>
+<span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">max_sim_depth</span>        <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>             <span class="c1">## Maximum simulation depth</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">fill_ratio</span>           <span class="o">=</span> <span class="mf">1.0</span>            <span class="c1">## Fill ratio for grid generation</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">buffer_size</span>          <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Number of cells between grid levels</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">grid_algorithm</span>       <span class="o">=</span> <span class="n">tiled</span>          <span class="c1">## Berger-Rigoustous &#39;br&#39; or &#39;tiled&#39; for the tiled algorithm</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">box_sorting</span>          <span class="o">=</span> <span class="n">morton</span>         <span class="c1">## &#39;none&#39;, &#39;shuffle&#39;, &#39;morton&#39;</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">blocking_factor</span>      <span class="o">=</span> <span class="mi">16</span>             <span class="c1">## Blocking factor.</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">max_box_size</span>         <span class="o">=</span> <span class="mi">16</span>             <span class="c1">## Maximum allowed box size</span>
+</span><span class="n">AmrMesh</span><span class="o">.</span><span class="n">max_ebis_box</span>         <span class="o">=</span> <span class="mi">16</span>             <span class="c1">## Maximum allowed box size for EBIS generation.</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">ref_rat</span>              <span class="o">=</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span>    <span class="c1">## Refinement ratios (mixed ratios are allowed).</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">num_ghost</span>            <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Number of ghost cells.</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">lsf_ghost</span>            <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Number of ghost cells when writing level-set to grid</span>
+<span class="n">AmrMesh</span><span class="o">.</span><span class="n">eb_ghost</span>             <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Set number of of ghost cells for EB stuff</span>
+<span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">mg_interp_order</span>      <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Multigrid interpolation order</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">mg_interp_radius</span>     <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Multigrid interpolation radius</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">mg_interp_weight</span>     <span class="o">=</span> <span class="mi">2</span>              <span class="c1">## Multigrid interpolation weight (for least squares)</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">centroid_interp</span>      <span class="o">=</span> <span class="n">minmod</span>         <span class="c1">## Centroid interp stencils. linear, lsq, minmod, etc</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">eb_interp</span>            <span class="o">=</span> <span class="n">minmod</span>         <span class="c1">## EB interp stencils. linear, taylor, minmod, etc</span>
+</span><span class="hll"><span class="n">AmrMesh</span><span class="o">.</span><span class="n">redist_radius</span>        <span class="o">=</span> <span class="mi">1</span>              <span class="c1">## Redistribution radius for hyperbolic conservation laws</span>
+</span></pre></div>
+</div>
+</div>
+<p>For users, modifying the behavior of <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> is comparatively easy.
+We have listed the most commonly adjusted grid parameters above, which include the specification of the physical domain, the maximum number of AMR levels that are permitted, as well as how grids are generated.</p>
+</section>
+<section id="coarse-grid-decomposition">
+<h2>Coarse-grid decomposition<a class="headerlink" href="#coarse-grid-decomposition" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">AmrMesh.lo_corner</span></code> and <code class="docutils literal notranslate"><span class="pre">AmrMesh.hi_corner</span></code> are the physical corners of the simulation domain.
+<code class="docutils literal notranslate"><span class="pre">AmrMesh.coarsest_domain</span></code> is the number of grid cells on the coarsest grid level (i.e., without AMR).
+It is important that cell sizes are uniform, so one must always have <span class="math notranslate nohighlight">\(\Delta x = \Delta y = \Delta z\)</span>.
+Usually, this means that <code class="docutils literal notranslate"><span class="pre">AmrMesh.lo_corner</span></code>, <code class="docutils literal notranslate"><span class="pre">AmrMesh.hi_corner</span></code>, and <code class="docutils literal notranslate"><span class="pre">AmrMesh.coarsest_domain</span></code> must all be consistently defined. Moreover, it is normally desirable to make <code class="docutils literal notranslate"><span class="pre">AmrMesh.coarsest_domain</span></code> a factor of 2 (e.g., 64, 128, 256, etc.), since this permits arbitrarily deep multigrid coarsening.
+This is not a requirement, however, although we do note that <code class="docutils literal notranslate"><span class="pre">AmrMesh.coarsest_domain</span></code> <em>must</em> be divisible by <code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>.</p>
+</section>
+<section id="domain-decomposition">
+<h2>Domain decomposition<a class="headerlink" href="#domain-decomposition" title="Permalink to this heading"></a></h2>
+<p>With Cartesian AMR, each grid level is decomposed into grid blocks of constant size, or sizes that potentially vary between some min/max size along each dimension.
+In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> this is encapsulated by <code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>, which is the smallest grid box that can be generated when meshing the domain.
+Likewise, <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code> is the maximum box size that can be produced, but usage of a constant box size is common an increased requirement in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Use fixed box sizes where <code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code> and <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code> are the same.</p>
+</div>
+<p>The flag <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_ebis_box</span></code> indicates essentially the blocking factor when generating the cut-cell information at the start of a simulation.
+It may happen for very large simulations that one has to increase the box size (e.g., to 32) in order to trim grid metadata.</p>
+<p><code class="docutils literal notranslate"><span class="pre">AmrMesh.ref_rat</span></code> determines the refinement ratio between grid levels, and factors of 2 and 4 are supported.
+We want to point out that mixed refinement factors are supported.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">AmrMesh.max_amr_depth</span></code> is greater than the number of refinement ratios specified in <code class="docutils literal notranslate"><span class="pre">AmrMesh.ref_rat</span></code>, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> will automatically fill in the remaining refinement ratios (padding with the last entry). I.e., one obtains factor 2 refinement every if <code class="docutils literal notranslate"><span class="pre">AmrMesh.ref_rat</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p>
+</div>
+<p>Two gridding algorithms are supported, called Tiled mesh refinement the classical Berger-Rigoutsos refinement algorithm.
+These are discussed in <a class="reference internal" href="SpatialDiscretization.html#chap-meshgeneration"><span class="std std-ref">Mesh generation</span></a>, and the user can specify which one to use by setting <code class="docutils literal notranslate"><span class="pre">AmrMesh.grid_algorithm</span></code> accordingly.
+In general, the tiled algorithm is exceedingly more performant at larger scales.</p>
+</section>
+<section id="ghost-cells">
+<h2>Ghost cells<a class="headerlink" href="#ghost-cells" title="Permalink to this heading"></a></h2>
+<p>It is normally not necessary to adjust the number of ghost cells in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulations since most discretizations require at most 2 ghost cells.
+Substantial efforts have been made to avoid increasing the required number of ghost cells.
+Regardless, the number of ghost cells can be adjusted by setting <code class="docutils literal notranslate"><span class="pre">AmrMesh.num_ghost</span></code> to a specified value.
+A companion parameter is <code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code>, which specifies the maximum number of ghost cells that are used when computing the cut-cell discretization.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> only supports uniform resolution (i.e., cubic grid cells).
-I.e. the user must specify consist domain sizes and resolutions.</p>
+<p>One must always have <code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">AmrMesh.num_ghost</span></code>.</p>
 </div>
+<p>Finally, it is possible to evaluate implicit functions on the mesh (e.g., for figuring out how far a cell is from a boundary).
+It can be useful to include a larger ghost region in these data holders, which is adjusted by <code class="docutils literal notranslate"><span class="pre">AmrMesh.lsf_ghost</span></code>.</p>
 </section>
-<section id="runtime-options">
-<h2>Runtime options<a class="headerlink" href="#runtime-options" title="Permalink to this heading"></a></h2>
-<p>The following options are runtime options for <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code>:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.verbosity</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.fill_ratio</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.irreg_growth</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.buffer_size</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.grid_algorithm</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.box_sorting</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.blocking_factor</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.max_box_size</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_interp</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_interp</span></code></p></li>
-</ul>
-<p>These options only affect the grid generation method and parameters, and are thus only effective after the next regrid.</p>
+<section id="multigrid-interpolation">
+<h2>Multigrid interpolation<a class="headerlink" href="#multigrid-interpolation" title="Permalink to this heading"></a></h2>
+<p>Multigrid interpolation is done using least squares reconstruction, as discussed in <a class="reference internal" href="LinearSolvers.html#chap-multigridinterpolation"><span class="std std-ref">Multigrid ghost cell interpolation</span></a>.
+The user can set the order, radius, and least squares weighting for this interpolation by setting <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_order</span></code>, <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_radius</span></code>, and <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_weight</span></code>.
+Note that specifying <code class="docutils literal notranslate"><span class="pre">AmrMesh.mg_interp_radius</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_ghost</span></code> is sure to lead to a run-time error (possibly a segfault).</p>
+</section>
+<section id="interpolation-near-the-eb">
+<h2>Interpolation near the EB<a class="headerlink" href="#interpolation-near-the-eb" title="Permalink to this heading"></a></h2>
+<p>Most data in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is cell-centered, although data can be interpolated or extrapolated to cell centroids and EB centroids.
+The interpolation type is done by setting <code class="docutils literal notranslate"><span class="pre">AmrMesh.centroid_interp</span></code> and <code class="docutils literal notranslate"><span class="pre">AmrMesh.eb_interp</span></code> accordingly.
+Currently, we support the following options:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">constant</span></code> i.e., use the cell centered value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">linear</span></code>, using bi/tri-linear interpolation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">taylor</span></code>, using the Taylor series evaluated at the cell center.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lsq</span></code>, using a first order unweighted least squares polynomial.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pwl</span></code>, using piecewise linear reconstruction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minmod</span></code>, using a minmod slope limiter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">superbee</span></code>, using a superbee slope limiter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monotonized_central</span></code>, using a van Leer slope limiter.</p></li>
+</ol>
+<p>Typically, one can just leave this option at <code class="docutils literal notranslate"><span class="pre">minmod</span></code>.</p>
 </section>
 </section>
 

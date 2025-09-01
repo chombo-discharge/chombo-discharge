@@ -20,6 +20,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -72,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -80,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -100,13 +100,18 @@
 <li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="GeometryModel.html">Geometry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODEModel.html">Mesh ODE</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Radiative transfer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Radiative transfer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-problem">Basic problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticleModel.html">Tracer particle model</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -146,6 +151,87 @@
              
   <section id="radiative-transfer">
 <span id="chap-radiativetransfermodel"></span><h1>Radiative transfer<a class="headerlink" href="#radiative-transfer" title="Permalink to this heading"></a></h1>
+<p>The radiative transfer model runs a single solver using the <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> interface, where the underlying solver can derived from any subclass of <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>.
+This module is designed to show how to set up and run <a class="reference internal" href="../Solvers/RTE.html#chap-rtsolver"><span class="std std-ref">RtSolver</span></a>, and the code was not written to solve any particular problem.
+Selecting between different types of solvers must be done at compile time.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/RadiativeTransfer</span></code>.</p>
+</div>
+<p>The model consists of the following implementation files:</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_RadiativeTransferStepper.H</span></code> which implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_RadiativeTransferSpecies.H</span></code> which implements the necessary transport conditions through <a class="reference internal" href="../Solvers/RTE.html#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The current radiative transfer module does not incorporate solver-based adaptive mesh refinement, so refinement is restricted to refinement and coarsening through the <a class="reference internal" href="../Source/Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> interface.</p>
+</div>
+<section id="basic-problem">
+<h2>Basic problem<a class="headerlink" href="#basic-problem" title="Permalink to this heading"></a></h2>
+<p>Currently, <code class="docutils literal notranslate"><span class="pre">RadiativeTransferStepper</span></code> simply instantiates a solver and advances the solution using a synthetic source given by</p>
+<div class="math notranslate nohighlight">
+\[\eta\left(\mathbf{x}\right) = \eta_0\exp\left[-\frac{\left(\mathbf{x}-\mathbf{x}_0\right)^2}{2 R^2}\right],\]</div>
+<p>where the source strength <span class="math notranslate nohighlight">\(\eta_0\)</span>, source radius <span class="math notranslate nohighlight">\(R\)</span>, and source center <span class="math notranslate nohighlight">\(\mathbf{x}_0\)</span> are set by the user.
+Similarly, the user can set the photon absorption length, see <a class="reference internal" href="#chap-radiativetransferstepperconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
+</section>
+<section id="solver-configuration">
+<span id="chap-radiativetransferstepperconfiguration"></span><h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">RadiativeTransferStepper</span></code> class comes with user-configurable input options that can be adjusted at runtime.
+These configuration options are given below.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# RadiativeTransferStepper class options
+# ====================================================================================================
+RadiativeTransferStepper.verbosity          = -1        ## Verbosity
+RadiativeTransferStepper.realm              = primal    ## Realm
+RadiativeTransferStepper.kappa              = 1.0       ## Inverse absorption coefficient
+RadiativeTransferStepper.dt                 = 1.E-10    ## Time step
+RadiativeTransferStepper.blob_amplitude     = 1.0       ## Blob amplitude
+RadiativeTransferStepper.blob_radius        = 0.1       ## Blob radius
+RadiativeTransferStepper.blob_center        = 0 0       ## Blob center
+</pre></div>
+</div>
+</section>
+<section id="setting-up-a-new-problem">
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/RadiativeTransfer</span></code> is the simplest way.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/RtPhysics</span>
+This physics module solves for a radiative transfer problem. This module contains files for setting up the initial conditions and integrators. It does not feature adaptive mesh refinement. 
+See https://chombo-discharge.github.io/RtPhysicsModel.html for implementation details.
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_RtPhysicsSpecies.H/cpp**</span> Implementation of RtSpecies, for setting up a radiative transfer equation. 
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_RtPhysicsStepper.H/cpp**</span> Implementation of TimeStepper, for advancing the radiative transfer equation, either stationary or transient. 
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>myApplications<span class="w"> </span>-app_name<span class="o">=</span>myRtPhysics<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable<span class="w"> </span>-RtSolver<span class="o">=</span>EddingtonSP1
+<span class="sb">```</span>
+
+Note that the user can choose between either using discrete or continuum models with the -RtSolver flag.
+Acceptable options are EddingtonSP1 or McPhoto. 
+
+The application will be installed to $DISCHARGE_HOME/myApplications/myRtPhysics.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+
+<span class="gu">## Modifying the application</span>
+By default, this application specifies a Gaussian source for the photons. 
+Users are free to modify this application, e.g. adding other initial conditions.
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To set up a new problem using either a Monte-Carlo or diffusion-based radiative transfer solver, pass in the flag <code class="docutils literal notranslate"><span class="pre">-RtSolver</span></code> to set up the problem using the desired solver.</p>
+</div>
+</section>
 </section>
 
 

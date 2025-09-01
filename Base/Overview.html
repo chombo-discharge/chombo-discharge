@@ -77,7 +77,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -85,12 +84,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -111,7 +110,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -165,7 +164,7 @@ Key functionalities are provided in <a class="reference internal" href="#tab-key
 <p class="admonition-title">Important</p>
 <p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is <strong>not</strong> a black-box model for discharge applications.
 It is an evolving research code with occasionally expanded capabilities, API changes, and performance improvements.
-Although problems can be set up through our Python toos, users should nonetheless be willing to take time to understand how the code works.
+Although problems can be set up through our Python tools, users should nonetheless be willing to invest sufficient time and energy to understand how the code operates.
 In particular, developers should invest some effort in understanding the data structures and <code class="docutils literal notranslate"><span class="pre">Chombo</span></code> basics (see <a class="reference internal" href="../Source/ChomboBasics.html#chap-basics"><span class="std std-ref">Chombo-3 basics</span></a>).</p>
 </div>
 <span id="tab-keycapabilities"></span><table class="colwidths-given docutils align-default" id="id1">
@@ -219,8 +218,10 @@ In particular, developers should invest some effort in understanding the data st
 That is, all the AMR levels are advanced using the same time step.
 <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> has also incorporated many changes to the EB functionality supplied by <code class="docutils literal notranslate"><span class="pre">Chombo</span></code>.
 This includes much faster grid generation, support for polygon surfaces, and many performance optimizations (in particular to the EB formulation).</p>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multiply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individually load balancing particle and fluid kernels.
-Although many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> and still use the embedded boundary formalism, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also provides several physics modules for describing various types of problems.</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports both fluid and particle methods, and can use multiply parallel distributed grids (see <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>).
+Particle and fluid kernels can thus be individually load balanced.
+Many abstractions are in place so that user can describe a new set of physics, or write entirely new solvers into <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> without affecting the embedded boundary formalism.
+Of course, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> provides several physics modules for solving various types of problems.</p>
 </section>
 <section id="organization">
 <h2>Organization<a class="headerlink" href="#organization" title="Permalink to this heading"></a></h2>
@@ -250,7 +251,7 @@ Although many abstractions are in place so that user can describe a new set of p
 <td><p>Git submodule dependencies.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">Exec</span></code></p></td>
-<td><p>Various executable applications.</p></td>
+<td><p>Various executable applications, including tests, convergence tests, and user examples.</p></td>
 </tr>
 </tbody>
 </table>

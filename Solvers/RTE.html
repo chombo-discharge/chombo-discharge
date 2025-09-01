@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,36 +80,29 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Radiative transfer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#rtsolver">RtSolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rtspecies">RtSpecies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#diffusion-approximation">Diffusion approximation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#eddingtonsp1">EddingtonSP1</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#equation-of-motion">Equation of motion</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#stationary-kernel">Stationary kernel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#transient-kernel">Transient kernel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rtsolver">RtSolver</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rtspecies">RtSpecies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-the-source-term">Setting the source term</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#diffusion-approximation">Diffusion approximation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#eddingtonsp1">EddingtonSP1</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#equation-s-of-motion">Equation(s) of motion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#boundary-conditions">Boundary conditions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#simplified-domain-boundary-conditions">Simplified domain boundary conditions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#custom-domain-boundary-conditions">Custom domain boundary conditions</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#embedded-boundaries">Embedded boundaries</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#boundary-condition-types">Boundary condition types</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#solver-configuration">Solver configuration</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#basic-options">Basic options</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#setting-boundary-conditions">Setting boundary conditions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#multigrid-settings">Multigrid settings</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#runtime-parameters">Runtime parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#monte-carlo-sampling">Monte Carlo sampling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#monte-carlo-solver">Monte Carlo solver</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#photon-particle">Photon particle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#generating-photons">Generating photons</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#transport-modes">Transport modes</a><ul>
@@ -130,7 +122,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -151,7 +142,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -191,99 +182,175 @@
              
   <section id="radiative-transfer">
 <span id="chap-radiativetransfer"></span><h1>Radiative transfer<a class="headerlink" href="#radiative-transfer" title="Permalink to this heading"></a></h1>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>The source code for the radiative transfer solvers reside in <code class="file docutils literal notranslate"><span class="pre">Source/RadiativeTransfer</span></code></p>
-</div>
 <section id="rtsolver">
 <span id="chap-rtsolver"></span><h2>RtSolver<a class="headerlink" href="#rtsolver" title="Permalink to this heading"></a></h2>
 <p>Radiative transfer solvers are supported in the form of</p>
 <ul class="simple">
-<li><p>Diffusion solvers, i.e. first order Eddington solvers, which takes the form of a Helmholtz equation.</p></li>
-<li><p>Using Monte Carlo sampling of discrete photons.</p></li>
+<li><p>Diffusion solvers, i.e. first order Eddington solvers, which take the form of a Helmholtz equation.</p></li>
+<li><p>Particle solvers, which track photons are particles (e.g., Monte Carlo sampled solvers).</p></li>
 </ul>
 <p>The solvers share a parent class <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code>, and code that uses only the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> interface will should be able to switch between the two implementations.
 Note, however, that the radiative transfer equation is inherently deterministic while Monte Carlo photon transport is inherently stochastic.
-The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or ‘’stationary’’ transport.</p>
+The diffusion approximation relies on solving an elliptic equation in the stationary case and a parabolic equation in the time-dependent case, while the Monte-Carlo approach solves solves for fully transient or instantaneous transport.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The source code for the solver is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/RadiativeTransfer</span></code> and it is a fairly lightweight abstract class.
 As with other solvers, <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> can use a specified <a class="reference internal" href="../Source/Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>.</p>
 </div>
-<p>To use the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> interface the user must cast from one of the inherited classes (see <a class="reference internal" href="#chap-diffusionrte"><span class="std std-ref">Diffusion approximation</span></a> or <a class="reference internal" href="#chap-montecarlorte"><span class="std std-ref">Monte Carlo sampling</span></a>).
+<p>To use the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> interface the user must cast from one of the inherited classes (see <a class="reference internal" href="#chap-diffusionrte"><span class="std std-ref">Diffusion approximation</span></a> or <a class="reference internal" href="#chap-montecarlorte"><span class="std std-ref">Monte Carlo solver</span></a>).
 Since most of the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> is an interface which is implemented by other radiative transfer solvers, documentation of boundary conditions, kernels and so on are found in the implementation classes.</p>
-</section>
 <section id="rtspecies">
-<span id="chap-rtspecies"></span><h2>RtSpecies<a class="headerlink" href="#rtspecies" title="Permalink to this heading"></a></h2>
+<span id="chap-rtspecies"></span><h3>RtSpecies<a class="headerlink" href="#rtspecies" title="Permalink to this heading"></a></h3>
 <p>The class <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> is an abstract base class for parsing necessary information into radiative transfer solvers.
-When creating a radiative transfer solver one will need to pass in a reference to an <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> instantiation such that the solvers can look up the required infromation.
+When creating a radiative transfer solver one will need to pass in a reference to an <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> instantiation such that the solvers can look up the required information.
 Currently, <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> is a lightweight class where the user needs to implement the function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">RtSpecies::getAbsorptionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get kappa (i.e. the inverse absorption length) at physical coordinates. </span>
+<span class="cm">  @param[in] a_pos Physical coordinates. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">getAbsorptionCoefficient</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>The absorption coefficient is used in the diffusion (see <a class="reference internal" href="#chap-diffusionrte"><span class="std std-ref">Diffusion approximation</span></a>) and Monte Carlo (see <a class="reference internal" href="#chap-montecarlorte"><span class="std std-ref">Monte Carlo sampling</span></a>) solvers.</p>
-<p>One can also assign a name to the species through the member variable <code class="docutils literal notranslate"><span class="pre">RtSpecies::m_name</span></code>.</p>
+<p>This absorption coefficient is used in both the diffusion (see <a class="reference internal" href="#chap-diffusionrte"><span class="std std-ref">Diffusion approximation</span></a>) and Monte Carlo (see <a class="reference internal" href="#chap-montecarlorte"><span class="std std-ref">Monte Carlo solver</span></a>) solvers.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Upon construction, one must set the class member <code class="docutils literal notranslate"><span class="pre">m_name</span></code>, which is the name passed to the actual solver.</p>
+</div>
+</section>
+<section id="setting-the-source-term">
+<h3>Setting the source term<a class="headerlink" href="#setting-the-source-term" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> stores a source term <span class="math notranslate nohighlight">\(\eta\)</span> on the mesh, which describes the number of photons that are generated produced per unit volume and time.
+This variable can be set through the following functions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set source term</span>
+<span class="cm">  @param[in] a_source Source term</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setSource</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Set source</span>
+<span class="cm">  @param[in] a_source Source term</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setSource</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_source</span><span class="p">);</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Set source</span>
+<span class="cm">  @param[in] a_source Source term (varies in space)</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setSource</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_source</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The usage of <span class="math notranslate nohighlight">\(\eta\)</span> varies between the different solvers.
+It is possible, for example, to generate computational photons (particles) using <span class="math notranslate nohighlight">\(\eta\)</span> when using Monte Carlo sampling, but this is not a requirement.</p>
+</section>
 </section>
 <section id="diffusion-approximation">
 <span id="chap-diffusionrte"></span><h2>Diffusion approximation<a class="headerlink" href="#diffusion-approximation" title="Permalink to this heading"></a></h2>
 <section id="eddingtonsp1">
-<h3>EddingtonSP1<a class="headerlink" href="#eddingtonsp1" title="Permalink to this heading"></a></h3>
+<span id="chap-eddingtonsp1"></span><h3>EddingtonSP1<a class="headerlink" href="#eddingtonsp1" title="Permalink to this heading"></a></h3>
 <p>The first-order diffusion approximation to the radiative transfer equation is encapsulated by the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> class which implements a first order Eddington approximation of the radiative transfer equation.
 <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> using both stationary and transient advance methods (e.g. for stationary or time-dependent radiative transport).
 The source code is located in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/RadiativeTransfer</span></code>.</p>
 </section>
-<section id="equation-of-motion">
-<h3>Equation of motion<a class="headerlink" href="#equation-of-motion" title="Permalink to this heading"></a></h3>
+<section id="equation-s-of-motion">
+<h3>Equation(s) of motion<a class="headerlink" href="#equation-s-of-motion" title="Permalink to this heading"></a></h3>
 <p>In the diffusion approximation, the radiative transport equation is</p>
 <div class="math notranslate nohighlight" id="equation-transientdiffusionrte">
-<span class="eqno">(5)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\kappa\)</span> is the absorption coefficient (i.e., inverse absorption length).
+<span class="eqno">(10)<a class="headerlink" href="#equation-transientdiffusionrte" title="Permalink to this equation"></a></span>\[\partial_t\Psi + \kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Psi\)</span> is the radiative intensity (i.e., photons absorbed per unit volume`.
+Here, <span class="math notranslate nohighlight">\(\kappa\)</span> is the absorption coefficient (i.e., inverse absorption length).
+This value can be spatially dependent, and is passed in through the <a class="reference internal" href="#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a> function <code class="docutils literal notranslate"><span class="pre">getAbsorptionCoefficient</span></code> that was discussed above.
 Note that in the context below, <span class="math notranslate nohighlight">\(\kappa\)</span> is <em>not</em> the volume fraction of a grid cell but the absorption coefficient.
-This is called the Eddington approximation, and the radiative flux is <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>.</p>
-<p>In the stationary case this yields a Helmholtz equation</p>
+The above equation is called the Eddington approximation, with the closure relation being that the radiative flux is given by <span class="math notranslate nohighlight">\(F = -\frac{c}{3\kappa}\nabla \Psi\)</span>.</p>
+<p>In the stationary case this reduces to a Helmholtz equation</p>
 <div class="math notranslate nohighlight" id="equation-stationarydiffusionrte">
-<span class="eqno">(6)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
+<span class="eqno">(11)<a class="headerlink" href="#equation-stationarydiffusionrte" title="Permalink to this equation"></a></span>\[\kappa\Psi - \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi\right) = \frac{\eta}{c},\]</div>
 </section>
 <section id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
-The class implements <code class="docutils literal notranslate"><span class="pre">RtSolver::advance()</span></code>, which can switch between <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a>.
-Note that for both the stationary and time-dependent cases the absorption coefficient <span class="math notranslate nohighlight">\(\kappa\)</span> in <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> are filled using the <code class="docutils literal notranslate"><span class="pre">RtSpecies</span></code> implementation provided to the solver.
-Also note that the absorption coefficient does not need to be constant in space.</p>
-<section id="stationary-kernel">
-<h4>Stationary kernel<a class="headerlink" href="#stationary-kernel" title="Permalink to this heading"></a></h4>
-<p>For the stationary kernel we solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 6</a> directly, using a single multigrid solve.
-See <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a> for discretization details.</p>
-</section>
-<section id="transient-kernel">
-<h4>Transient kernel<a class="headerlink" href="#transient-kernel" title="Permalink to this heading"></a></h4>
-<p>For solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 5</a>, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implements the backward Euler method, while explicit discretizations are not currently available.
-The Euler discretization is</p>
+<p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> uses multigrid methods for solving <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 10</a> and <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 11</a>, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
+To advance the solution, one will call the member function</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Advance RTE onto state a_phi</span>
+<span class="cm">  @param[in]    a_dt      Time step</span>
+<span class="cm">  @param[inout] a_phi     RTE solution</span>
+<span class="cm">  @param[in]    a_source  Source term</span>
+<span class="cm">  @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve</span>
+<span class="cm">  @note If you&#39;re not doing a stationary solve, this does a backward Euler solve. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">,</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_source</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">a_zeroPhi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="k">override</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Internally, this version will perform one of the following:</p>
+<ol class="arabic">
+<li><p>Solve <a class="reference internal" href="#equation-transientdiffusionrte">Eq. 10</a> if using a <em>transient</em> solver.
+This is done using a backward Euler solve:</p>
 <div class="math notranslate nohighlight">
 \[\left(1+ \kappa \Delta t\right)\Psi^{k+1} - \Delta t \nabla\cdot\left(\frac{1}{3\kappa}\nabla\Psi^{k+1}\right) = \Psi^{k} + \frac{\Delta t\eta^{k+1}}{c},\]</div>
-<p>Again, this is a Helmholtz equation for <span class="math notranslate nohighlight">\(\Psi^{k+1}\)</span> which is solved using geometric multigrid.</p>
-</section>
+<p>This equation is a Helmholtz equation for <span class="math notranslate nohighlight">\(\Psi^{k+1}\)</span> which is solved using geometric multigrid, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.</p>
+</li>
+<li><p>Solve <a class="reference internal" href="#equation-stationarydiffusionrte">Eq. 11</a> if using instantaneous photon transport.
+This is done directly with a geometric multigrid solver, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.</p></li>
+</ol>
 </section>
 <section id="boundary-conditions">
 <span id="chap-eddingtonsp1bc"></span><h3>Boundary conditions<a class="headerlink" href="#boundary-conditions" title="Permalink to this heading"></a></h3>
 <section id="simplified-domain-boundary-conditions">
 <h4>Simplified domain boundary conditions<a class="headerlink" href="#simplified-domain-boundary-conditions" title="Permalink to this heading"></a></h4>
-<p>The <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver supports the following boundary conditions on domain faces and EBs.
-The domain boundary condition <em>type</em>, which is either Dirichlet, Neumann, or Larsen (a special type of Robin boundary condition) is always passed in through the input file.
-If the user passes in a value, say <code class="docutils literal notranslate"><span class="pre">neumann</span> <span class="pre">0.0</span></code>, for a particular domain side/face, then the class will use a homogeneous Neumann boundary for the entire domain edge/face.</p>
+<p>It is possible to set the following <em>simplified</em> boundary conditions on domain faces and embedded boundaries:
+All of these boundary condition specifications take the form <code class="docutils literal notranslate"><span class="pre">&lt;type&gt;</span> <span class="pre">&lt;value&gt;</span></code>.</p>
+<ol class="arabic">
+<li><p>Dirichlet, with a fixed value of <span class="math notranslate nohighlight">\(\Phi\)</span>. E.g., <code class="docutils literal notranslate"><span class="pre">dirichlet</span> <span class="pre">0.0</span></code>.</p></li>
+<li><p>Neumann, using a fixed value of <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span>. E.g., <code class="docutils literal notranslate"><span class="pre">neumann</span> <span class="pre">0.0</span></code>.</p></li>
+<li><p>A <em>Larsen-type</em> boundary condition, which is an absorbing boundary condition in the form</p>
+<div class="math notranslate nohighlight">
+\[\kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,\]</div>
+<p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Seaid Mohammed, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">Larsen <em>et al.</em>, 2002</a>]</span>.
+Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge <span class="math notranslate nohighlight">\(g\)</span>.
+In the majority of cases, however, we will have <span class="math notranslate nohighlight">\(r_1 = r_2 = g = 0\)</span> and the BC becomes</p>
+<div class="math notranslate nohighlight">
+\[\partial_n\Psi + \frac{3\kappa}{2}\Psi = g.\]</div>
+<p>The user must then pass a value <code class="docutils literal notranslate"><span class="pre">larsen</span> <span class="pre">&lt;value&gt;</span></code>, where the <code class="docutils literal notranslate"><span class="pre">value</span></code> corresponds to the souce term <span class="math notranslate nohighlight">\(g\)</span>.
+Typically, this term is zero.</p>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>For radiative transfer, the Larsen boundary condition is usually the correct one as it approximately describes outflow of photons on the boundary.
+In this case the correct boundary condition is <code class="docutils literal notranslate"><span class="pre">larsen</span> <span class="pre">0.0</span></code>.</p>
+</div>
 </section>
 <section id="custom-domain-boundary-conditions">
 <h4>Custom domain boundary conditions<a class="headerlink" href="#custom-domain-boundary-conditions" title="Permalink to this heading"></a></h4>
-<p>It is possible to use more complex boundary conditions by passing in <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code>, <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code>, or <code class="docutils literal notranslate"><span class="pre">larsen_custom</span></code> options.
-In this case the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver will use a specified function at the domain edge/face.
+<p>It is possible to use more complex boundary conditions by passing in <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code>, <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code>, or <code class="docutils literal notranslate"><span class="pre">larsen_custom</span></code> options through the solver configuration options (see <a class="reference internal" href="#chap-eddingtoninputoptions"><span class="std std-ref">Solver configuration</span></a>).
+In this case the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver will use a specified function at the domain edge/face which can vary spatially (and with time).
 To specify that function, <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> has a member function</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_dir</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w"> </span><span class="n">a_side</span><span class="p">,</span>
-<span class="w">                             </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_function</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Set the boundary condition function on a domain side</span>
+<span class="cm">  @param[in] a_dir      Coordinate direction.</span>
+<span class="cm">  @param[in] a_side     Side (low/high)</span>
+<span class="cm">  @param[in] a_function Boundary condition function.</span>
+<span class="cm">  @details This sets a boundary condition for a particular domain side. The user must also specify how to use this BC in the input script. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">setDomainSideBcFunction</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                               </span><span class="n">a_dir</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">LoHiSide</span><span class="w">                    </span><span class="n">a_side</span><span class="p">,</span>
+<span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">EddingtonSP1DomainBc</span><span class="o">::</span><span class="n">BcFunction</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_function</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>which species a boundary condition value for one of the edges (faces in 3D).
-Note that the boundary condition <em>type</em> is still Dirichlet, Neumann, or Larsen (depending on whether or not <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code>, <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code>, or <code class="docutils literal notranslate"><span class="pre">larsen_custom</span></code> was passed in).
+<p>Here, the <code class="docutils literal notranslate"><span class="pre">a_function</span></code> argument is simply an alias:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type. </span>
+<span class="cm">*/</span>
+<span class="k">using</span><span class="w"> </span><span class="n">BcFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_position</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that the boundary condition <em>type</em> is still Dirichlet, Neumann, or Larsen (depending on whether or not <code class="docutils literal notranslate"><span class="pre">dirichlet_custom</span></code>, <code class="docutils literal notranslate"><span class="pre">neumann_custom</span></code>, or <code class="docutils literal notranslate"><span class="pre">larsen_custom</span></code> was passed in).
 For example, to set the boundary condition on the left <span class="math notranslate nohighlight">\(x\)</span> face in the domain, one can create a <code class="docutils literal notranslate"><span class="pre">EddingtonSP1DomainBc::BcFunction</span></code> object as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Assume this has been instantiated.</span>
 <span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">EddingtonSP1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">eddingtonSolver</span><span class="p">;</span>
@@ -297,9 +364,9 @@ For example, to set the boundary condition on the left <span class="math notrans
 <span class="n">eddingtonSolver</span><span class="p">.</span><span class="n">setDomainSideBcFunction</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Side</span><span class="o">::</span><span class="n">Lo</span><span class="p">,</span><span class="w"> </span><span class="n">myValue</span><span class="p">);</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If the user specifies one of the custom boundary conditions but does not set the function, it will issue a run-time error.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A run-time error will occur if the user specifies one of the custom boundary conditions but does not actually set the function.</p>
 </div>
 </section>
 <section id="embedded-boundaries">
@@ -311,43 +378,24 @@ In the input script, the user can specify</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">neumann</span> <span class="pre">&lt;value&gt;</span></code> For setting a constant Neumann boundary condition everywhere.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">larsen</span> <span class="pre">&lt;value&gt;</span></code> For setting a constant Larsen boundary condition everywhere.</p></li>
 </ul>
-</section>
-<section id="boundary-condition-types">
-<h4>Boundary condition types<a class="headerlink" href="#boundary-condition-types" title="Permalink to this heading"></a></h4>
-<ol class="arabic">
-<li><p><strong>Dirichlet</strong>.
-For Dirichlet boundary conditions we specify the value of <span class="math notranslate nohighlight">\(\Psi\)</span> on the boundary.
-Note that this involves reconstructing the gradient <span class="math notranslate nohighlight">\(\partial_n\Psi\)</span> on domain faces and edges, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolverdirichletbc"><span class="std std-ref">Dirichlet</span></a>.</p></li>
-<li><p><strong>Neumann</strong>.
-For Neumann boundary conditions we specify the value of <span class="math notranslate nohighlight">\(\partial_n\Psi\)</span> on the boundary.
-Note that the linear solver interface also supports setting <span class="math notranslate nohighlight">\(B\partial_n\Psi\)</span> on the boundary (where <span class="math notranslate nohighlight">\(B\)</span> is the Helmholtz equation <span class="math notranslate nohighlight">\(B\)</span> coefficient).
-However, the <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver does not use this functionality.</p></li>
-<li><p><strong>Larsen</strong>.
-The Larsen boundary condition is an absorbing boundary condition, taking the form of a Robin boundary as follows:</p>
-<div class="math notranslate nohighlight">
-\[\kappa\partial_n\Psi + \frac{3\kappa^2}{2}\frac{1-3r_2}{1-2r_1}\Psi = g,\]</div>
-<p>where <span class="math notranslate nohighlight">\(r_1\)</span> and <span class="math notranslate nohighlight">\(r_2\)</span> are reflection coefficients and <span class="math notranslate nohighlight">\(g\)</span> is a surface source, see <span id="id1">[<a class="reference internal" href="../ZZReferences.html#id51" title="Edward W. Larsen, Guido Thömmes, Axel Klar, Seaid Mohammed, and Thomas Götz. Simplified PN Approximations to the Equations of Radiative Heat Transfer and Applications. Journal of Computational Physics, 183(2):652–675, dec 2002. URL: https://www.sciencedirect.com/science/article/pii/S0021999102972104, doi:10.1006/JCPH.2002.7210.">Larsen <em>et al.</em>, 2002</a>]</span> for details.
-Note that when the user specifies the boundary condition value (e.g. by setting the BC function), he is setting the surface sourge <span class="math notranslate nohighlight">\(g\)</span>.
-In the majority of cases, however, we will have <span class="math notranslate nohighlight">\(r_1 = r_2 = g = 0\)</span> and the BC becomes</p>
-<div class="math notranslate nohighlight">
-\[\partial_n\Psi + \frac{3\kappa}{2}\Psi = 0.\]</div>
-</li>
-</ol>
+<p>The specification of these boundary conditions occurs in precise analogy with the domain boundary conditions, and are therefore not discussed further here.</p>
 </section>
 </section>
 <section id="solver-configuration">
-<h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h3>
+<span id="chap-eddingtoninputoptions"></span><h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> implementation has a number of configurable options for running the solver, and these are given below:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-number">Listing 29 </span><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> solver configuration options. Run-time configurable options are highlighted.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># EddingtonSP1 class options</span>
 <span class="c1"># ====================================================================================================</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">verbosity</span>             <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>         <span class="c1">## Solver verbosity</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">stationary</span>            <span class="o">=</span> <span class="n">true</span>       <span class="c1">## Stationary solver</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">reflectivity</span>          <span class="o">=</span> <span class="mf">0.</span>         <span class="c1">## Reflectivity</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">kappa_scale</span>           <span class="o">=</span> <span class="n">true</span>       <span class="c1">## Kappa scale source or not (depends on algorithm)</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">plt_vars</span>              <span class="o">=</span> <span class="n">phi</span> <span class="n">src</span>    <span class="c1">## Plot variables. Available are &#39;phi&#39; and &#39;src&#39;</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">use_regrid_slopes</span>     <span class="o">=</span> <span class="n">true</span>       <span class="c1">## Slopes on/off when regridding</span>
-
+<span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">verbosity</span>             <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>         <span class="c1">## Solver verbosity</span>
+</span><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">stationary</span>            <span class="o">=</span> <span class="n">true</span>       <span class="c1">## Stationary solver</span>
+<span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">reflectivity</span>          <span class="o">=</span> <span class="mf">0.</span>         <span class="c1">## Reflectivity</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">kappa_scale</span>           <span class="o">=</span> <span class="n">true</span>       <span class="c1">## Kappa scale source or not (depends on algorithm)</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">plt_vars</span>              <span class="o">=</span> <span class="n">phi</span> <span class="n">src</span>    <span class="c1">## Plot variables. Available are &#39;phi&#39; and &#39;src&#39;</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">use_regrid_slopes</span>     <span class="o">=</span> <span class="n">true</span>       <span class="c1">## Slopes on/off when regridding</span>
+</span>
 <span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">ebbc</span>        <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on embedded boundaries</span>
 <span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">lo</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
 <span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">hi</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
@@ -355,107 +403,34 @@ In the majority of cases, however, we will have <span class="math notranslate no
 <span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">hi</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
 <span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">lo</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
 <span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">hi</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">hi</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Boundary on domain. &#39;neumann&#39; or &#39;larsen&#39;</span>
+<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">bc</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">hi</span>     <span class="o">=</span> <span class="n">larsen</span> <span class="mf">0.0</span>    <span class="c1">## Bc on domain side. &#39;dirichlet&#39;, &#39;neuman&#39;, or &#39;larsen&#39;</span>
 
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_verbosity</span>         <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>           <span class="c1">## GMG verbosity</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_pre_smooth</span>        <span class="o">=</span> <span class="mi">8</span>            <span class="c1">## Number of relaxations in downsweep</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_post_smooth</span>       <span class="o">=</span> <span class="mi">8</span>            <span class="c1">## Number of relaxations in upsweep</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_bott_smooth</span>       <span class="o">=</span> <span class="mi">8</span>            <span class="c1">## NUmber of relaxations before dropping to bottom solver</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_min_iter</span>          <span class="o">=</span> <span class="mi">5</span>            <span class="c1">## Minimum number of iterations</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_max_iter</span>          <span class="o">=</span> <span class="mi">32</span>           <span class="c1">## Maximum number of iterations</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_exit_tol</span>          <span class="o">=</span> <span class="mf">1.E-6</span>        <span class="c1">## Residue tolerance</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_exit_hang</span>         <span class="o">=</span> <span class="mf">0.2</span>          <span class="c1">## Solver hang</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_min_cells</span>         <span class="o">=</span> <span class="mi">16</span>           <span class="c1">## Bottom drop</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_bottom_solver</span>     <span class="o">=</span> <span class="n">bicgstab</span>     <span class="c1">## Bottom solver type. Either &#39;simple &lt;number&gt;&#39; and &#39;bicgstab&#39;</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_cycle</span>             <span class="o">=</span> <span class="n">vcycle</span>       <span class="c1">## Cycle type. Only &#39;vcycle&#39; supported for now</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_ebbc_weight</span>       <span class="o">=</span> <span class="mi">1</span>            <span class="c1">## EBBC weight (only for Dirichlet)</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_ebbc_order</span>        <span class="o">=</span> <span class="mi">2</span>            <span class="c1">## EBBC order (only for Dirichlet)</span>
-<span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_smoother</span>          <span class="o">=</span> <span class="n">red_black</span>    <span class="c1">## Relaxation type. &#39;jacobi&#39;, &#39;red_black&#39;, or &#39;multi_color&#39;</span>
-
-</pre></div>
+<span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_verbosity</span>         <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>           <span class="c1">## GMG verbosity</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_pre_smooth</span>        <span class="o">=</span> <span class="mi">8</span>            <span class="c1">## Number of relaxations in downsweep</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_post_smooth</span>       <span class="o">=</span> <span class="mi">8</span>            <span class="c1">## Number of relaxations in upsweep</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_bott_smooth</span>       <span class="o">=</span> <span class="mi">8</span>            <span class="c1">## NUmber of relaxations before dropping to bottom solver</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_min_iter</span>          <span class="o">=</span> <span class="mi">5</span>            <span class="c1">## Minimum number of iterations</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_max_iter</span>          <span class="o">=</span> <span class="mi">32</span>           <span class="c1">## Maximum number of iterations</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_exit_tol</span>          <span class="o">=</span> <span class="mf">1.E-6</span>        <span class="c1">## Residue tolerance</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_exit_hang</span>         <span class="o">=</span> <span class="mf">0.2</span>          <span class="c1">## Solver hang</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_min_cells</span>         <span class="o">=</span> <span class="mi">16</span>           <span class="c1">## Bottom drop</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_bottom_solver</span>     <span class="o">=</span> <span class="n">bicgstab</span>     <span class="c1">## Bottom solver type. Either &#39;simple &lt;number&gt;&#39; and &#39;bicgstab&#39;</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_cycle</span>             <span class="o">=</span> <span class="n">vcycle</span>       <span class="c1">## Cycle type. Only &#39;vcycle&#39; supported for now</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_ebbc_weight</span>       <span class="o">=</span> <span class="mi">1</span>            <span class="c1">## EBBC weight (only for Dirichlet)</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_ebbc_order</span>        <span class="o">=</span> <span class="mi">2</span>            <span class="c1">## EBBC order (only for Dirichlet)</span>
+</span><span class="hll"><span class="n">EddingtonSP1</span><span class="o">.</span><span class="n">gmg_smoother</span>          <span class="o">=</span> <span class="n">red_black</span>    <span class="c1">## Relaxation type. &#39;jacobi&#39;, &#39;red_black&#39;, or &#39;multi_color&#39;</span>
+</span></pre></div>
 </div>
-<section id="basic-options">
-<h4>Basic options<a class="headerlink" href="#basic-options" title="Permalink to this heading"></a></h4>
-<p>Basic input options to <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> are as follows:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.verbosity</span></code> for controlling solver verbosity.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.stationary</span></code> for setting whether or not the solver is stationary.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.reflectivity</span></code> for controlling the reflectivity in the Larsen boundary conditions.
-Only relevant if <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.stationary</span> <span class="pre">=</span> <span class="pre">false</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.kappa_scale</span></code> Switch for multiplying the source with with the volume fraction or not.
-Note that the multigrid Helmholtz solvers require a diagonal weighting of the operator, including the right-hand side.
-If <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.kappa_scale</span> <span class="pre">=</span> <span class="pre">false</span></code> then the solver will assume that this weighting of the source term has already been made.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.plt_vars</span></code> For setting which solver plot variables are included in plot files.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.use_regrid_slopes</span></code> For setting turning on/off slopes when regridding the solution.</p></li>
-</ul>
-</section>
-<section id="setting-boundary-conditions">
-<h4>Setting boundary conditions<a class="headerlink" href="#setting-boundary-conditions" title="Permalink to this heading"></a></h4>
-<p>Boundary conditions are parsed through the flags</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.ebbc</span></code> Which sets the boundary conditions on the EBs.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.bc.dim.side</span></code> Which sets the boundary conditions on the domain sides, see <a class="reference internal" href="#chap-eddingtonsp1bc"><span class="std std-ref">Boundary conditions</span></a> for details.</p></li>
-</ul>
-</section>
-<section id="multigrid-settings">
-<h4>Multigrid settings<a class="headerlink" href="#multigrid-settings" title="Permalink to this heading"></a></h4>
-<p>All parameters that begin with the form <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_</span></code> indicate a tuning parameter for geometric multigrid.</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_verbosity</span></code>.
-Controls the multigrid verbosity.
-Setting it to a number <span class="math notranslate nohighlight">\(&gt; 0\)</span> will print multigrid convergence information.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_pre_smooth</span></code>.
-Controls the number of relaxations on each level during multigrid downsweeps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_post_smooth</span></code>.
-Controls the number of relaxations on each level during multigrid upsweeps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_bott_smooth</span></code>.
-Controls the number of relaxations before entering the bottom solve.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_min_iter</span></code>.
-Sets the minimum number of iterations that multigrid will perform.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_max_iter</span></code>.
-Sets the maximum number of iterations that multigrid will perform.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_exit_tol</span></code>.
-Sets the exit tolerance for multigrid.
-Multigrid will exit the iterations if <span class="math notranslate nohighlight">\(r &lt; \lambda r_0\)</span> where <span class="math notranslate nohighlight">\(\lambda\)</span> is the specified tolerance, <span class="math notranslate nohighlight">\(r = |L\Phi -\rho|\)</span> is the residual and <span class="math notranslate nohighlight">\(r_0\)</span> is the residual for <span class="math notranslate nohighlight">\(\Phi = 0\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_exit_hang</span></code>.
-Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
-Letting <span class="math notranslate nohighlight">\(r^k\)</span> be the residual after <span class="math notranslate nohighlight">\(k\)</span> multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of <span class="math notranslate nohighlight">\(r^{k+1} &lt; (1-h)r^k\)</span>, where <span class="math notranslate nohighlight">\(h\)</span> is the “hang” factor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_min_cells</span></code>.
-Sets the minimum amount of cells along any coordinate direction for coarsened levels.
-Note that this will control how far multigrid will coarsen. Setting a number <code class="docutils literal notranslate"><span class="pre">gmg_min_cells</span> <span class="pre">=</span> <span class="pre">16</span></code> will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_bottom_solver</span></code>.
-Sets the bottom solver type.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_cycle</span></code>.
-Sets the multigrid method.
-Currently, only V-cycles are supported.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_ebbc_order</span></code>.
-Sets the stencil order on EBs when using Dirichlet boundary conditions.
-Note that this is also the stencil radius.
-See <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_ebbc_weight</span></code>.
-Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs when using Robin or Dirichlet boundary conditions.
-See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_smoother</span></code>.
-Sets the multigrid smoother.</p></li>
-</ul>
-</section>
-<section id="runtime-parameters">
-<h4>Runtime parameters<a class="headerlink" href="#runtime-parameters" title="Permalink to this heading"></a></h4>
-<p>The following parameters for <code class="docutils literal notranslate"><span class="pre">EddingtonSP1</span></code> are run-time configurable:</p>
-<ul class="simple">
-<li><p>All multigrid tuning parameters, i.e. parameters starting with <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.gmg_</span></code>.</p></li>
-<li><p>Plot variables, i.e. <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.plt_vars</span></code>.</p></li>
-<li><p>Kappa scaling (for algorithmic adjustments), i.e. <code class="docutils literal notranslate"><span class="pre">EddingtonSP1.kappa_scale</span></code>.</p></li>
-</ul>
+</div>
+<p>The multigrid options are analogous to the multigrid options for <a class="reference internal" href="Electrostatics.html#chap-fieldsolvermultigrid"><span class="std std-ref">FieldSolverMultigrid</span></a>, see <a class="reference internal" href="Electrostatics.html#chap-multigridtuning"><span class="std std-ref">Tuning multigrid performance</span></a>.</p>
 </section>
 </section>
-</section>
-<section id="monte-carlo-sampling">
-<span id="chap-montecarlorte"></span><h2>Monte Carlo sampling<a class="headerlink" href="#monte-carlo-sampling" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> defines a class which can solve radiative transfer problems using discrete photons that travel “instantenously” or transiently.
-The class derives from <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> and can thus be used by problems that only require the <code class="docutils literal notranslate"><span class="pre">RtSolver</span></code> interface.
-<code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus it can capture e.g. shadows.</p>
-<p>The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>) are required in order to deposit the photons on a mesh when computing densities.</p>
+<section id="monte-carlo-solver">
+<span id="chap-montecarlorte"></span><h2>Monte Carlo solver<a class="headerlink" href="#monte-carlo-solver" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> defines a class which can solve radiative transfer problems using discrete photons.
+The class derives from <a class="reference internal" href="#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> and can thus be used also be used by applications that only require the <a class="reference internal" href="#chap-rtsolver"><span class="std std-ref">RtSolver</span></a> interface.
+<code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus capture shadows (which <a class="reference internal" href="#chap-eddingtonsp1"><span class="std std-ref">EddingtonSP1</span></a> can not).</p>
+<p>The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>) are thus required in order to deposit the photons on a mesh if one wants to compute mesh-based absorption profiles.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> class is defined in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/RadiativeTransfer/CD_McPhoto.H</span></code>.
@@ -463,15 +438,52 @@ See the <a class="reference external" href="https://chombo-discharge.github.io/c
 </div>
 <p>The solver has multiple data holders for systemizing photons, which is especially useful during transport kernels where some of the photons might strike a boundary:</p>
 <ul class="simple">
-<li><p>In-flight photons</p></li>
-<li><p>Bulk-absorbed photons, i.e. photons absorbed on the mesh.</p></li>
-<li><p>EB-absorbed photons, i.e. photons that struck the EB during a transport step.</p></li>
-<li><p>Domain-absorbed photons, i.e. photons that struck the domain edge/face during a transport step.</p></li>
+<li><p>In-flight photons.</p></li>
+<li><p>Bulk-absorbed photons, i.e., photons that were absorbed on the mesh.</p></li>
+<li><p>EB-absorbed photons, i.e., photons that struck the EB during a transport step.</p></li>
+<li><p>Domain-absorbed photons, i.e., photons that struck the domain edge/face during a transport step.</p></li>
 <li><p>Source photons, for letting the user pass in externally generated photons into the solver.</p></li>
 </ul>
+<p>Various functions are in place for obtaining these particles:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get m_photons</span>
+<span class="cm">  @return m_photons</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getPhotons</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get bulk photons, i.e. photons absorbed on the mesh</span>
+<span class="cm">  @return m_bulkPhotons</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getBulkPhotons</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get eb Photons, i.e. photons absorbed on the EB</span>
+<span class="cm">  @return m_ebPhotons</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getEbPhotons</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get domain photons, i.e. photons absorbed on domain edges/faces</span>
+<span class="cm">  @return m_domainPhotonsl</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getDomainPhotons</span><span class="p">();</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Get source photons</span>
+<span class="cm">  @return m_sourcePhotons</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getSourcePhotons</span><span class="p">();</span>
+</pre></div>
+</div>
 <section id="photon-particle">
 <h3>Photon particle<a class="headerlink" href="#photon-particle" title="Permalink to this heading"></a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">Photon</span></code> particle is a simple encapsulation of a computational particle and is used by <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code>.
+<p>The <code class="docutils literal notranslate"><span class="pre">Photon</span></code> particle is a simple encapsulation of a computational photon which is used by <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code>.
 It derives from <code class="docutils literal notranslate"><span class="pre">GenericParticle&lt;2,1&gt;</span></code> and stores (in addition to the particle position):</p>
 <ul class="simple">
 <li><p>The particle weight.</p></li>
@@ -482,27 +494,51 @@ It derives from <code class="docutils literal notranslate"><span class="pre">Gen
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">Photon</span></code> class is defined in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Source/RadiativeTransfer/CD_Photon.H</span></code></p>
 </div>
-<p>When defining the <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> class, the particle’s absorption coefficient is computed from the implementation of the absorption function method in <a class="reference internal" href="#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a>.</p>
+<p>When defining the <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> class, the particle’s absorption coefficient can be computed from the implementation of the absorption function method in <a class="reference internal" href="#chap-rtspecies"><span class="std std-ref">RtSpecies</span></a>.</p>
 </section>
 <section id="generating-photons">
 <h3>Generating photons<a class="headerlink" href="#generating-photons" title="Permalink to this heading"></a></h3>
 <p>There are several ways users can generate computational photons that are to be transported by the solver.</p>
 <ol class="arabic">
-<li><p>Fetch the <em>source photons</em> by calling <code class="docutils literal notranslate"><span class="pre">McPhoto::getSourcePhotons()</span></code> and fill the returned data holder.
-The photons can then be added to the <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> instantiation and one of the transport kernels can be called.</p></li>
-<li><p>If the source term <span class="math notranslate nohighlight">\(\eta\)</span> has been filled, the user can call <code class="docutils literal notranslate"><span class="pre">McPhoto::advance</span></code> to have the solver generate the computational photons and than transport them.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">advance</span></code> function is <em>only</em> meant to be used together with a mesh-based source term that the user has filled prior to calling the method.</p>
-<p>When using the <code class="docutils literal notranslate"><span class="pre">advance</span></code>, the number of photons that are generated are limit to a user-specified number (see <a class="reference internal" href="#chap-mcphotooptions"><span class="std std-ref">Solver configuration</span></a> for further details).</p>
+<li><p>Fetch the <em>source photons</em> by calling</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get source photons</span>
+<span class="cm">  @return m_sourcePhotons</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getSourcePhotons</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The source photons can then be filled and added to the other photons.</p>
+</li>
+<li><p>Add photons directly, by first obtaining the in-flight photons through</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Get m_photons</span>
+<span class="cm">  @return m_photons</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">Photon</span><span class="o">&gt;&amp;</span>
+<span class="n">getPhotons</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Photons can then be added directly.</p>
+</li>
+<li><p>If the source term <span class="math notranslate nohighlight">\(\eta\)</span> has been filled, the user can call <code class="docutils literal notranslate"><span class="pre">McPhoto::advance</span></code> to have the solver generate the computational photons and then advance them.
+This is the correct approach for, e.g., applications that always use mesh-based photon source terms and want to have the computational photons be generated on the fly.
+.. warning:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The ``advance`` function is *only* meant to be used together with a mesh-based source term that the user has filled prior to calling the method.
+
+When using the ``advance``, the number of photons that are generated are limit to a user-specified number (see :ref:`Chap:McPhotoOptions` for further details).
+</pre></div>
 </div>
 </li>
 </ol>
 </section>
 <section id="transport-modes">
 <h3>Transport modes<a class="headerlink" href="#transport-modes" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can be run as a fully transient (in which photons are tracked in time) or as an instantaneous solver (where photons are absorbed immediately on the mesh).
-These two differ in the way the transport problem over a time step <span class="math notranslate nohighlight">\(\Delta t\)</span> is approach, but both methods include intersection tests with geometries and domain edges/faces,</p>
+<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can be run as a fully transient, in which photons are tracked in time, or as an instantaneous solver.
+For the instantaneous mode, photon absorption positions are stochastically sampled with Monte Carlo procedure and the photons are immediately absorbed on the mesh.
+For the transient mode the photon advancement occurs over <span class="math notranslate nohighlight">\(\Delta t\)</span>, so there is a limited distance (<span class="math notranslate nohighlight">\(c \Delta t\)</span>) that the photons can propagate.
+In this case, only some of the photons will be absorbed on the mesh whereas the rest may continue their propagation.</p>
 <section id="instantaneous-transport">
 <h4>Instantaneous transport<a class="headerlink" href="#instantaneous-transport" title="Permalink to this heading"></a></h4>
 <p>When using instantaneous transport, any photon generated in a time step is immediately absorbed on the boundary through the following steps:</p>
@@ -539,6 +575,7 @@ For each photon, do the following:</p>
 </section>
 <section id="chap-mcphotooptions">
 <span id="id2"></span><h3>Solver configuration<a class="headerlink" href="#chap-mcphotooptions" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> can be configured through its input options, see below:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ====================================================================================================</span>
 <span class="c1"># McPhoto class options</span>
 <span class="c1"># ====================================================================================================</span>
@@ -564,30 +601,8 @@ For each photon, do the following:</p>
                                                     <span class="c1"># &#39;rate&#39;        -&gt; Source terms contains the rate</span>
 <span class="n">McPhoto</span><span class="o">.</span><span class="n">deposition</span>               <span class="o">=</span> <span class="n">cic</span>              <span class="c1">## &#39;ngp&#39;  -&gt; nearest grid point, &#39;cic&#39; -&gt; cloud-in-cell</span>
 <span class="n">McPhoto</span><span class="o">.</span><span class="n">deposition_cf</span>            <span class="o">=</span> <span class="n">halo</span>             <span class="c1">## Coarse-fine deposition. Must be &#39;interp&#39; or &#39;halo&#39;</span>
-
 </pre></div>
 </div>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.verbosity</span></code> for controlling the solver verbosity.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.instantaneous</span></code> for setting the transport mode.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.max_photons_per_cell</span></code> for restricting the number of photons generated per cell when having the solver generate the computational photons. This is only relevant when calling the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.num_sampling_packets</span></code> for using sub-sampling when generating and transport photons in instantaneous mode through the <code class="docutils literal notranslate"><span class="pre">advance</span></code> function.
-This permits the <code class="docutils literal notranslate"><span class="pre">McPhoto.max_photons_per_cell</span></code> to partition the photon transport into packets where a fewer number of photons are generated during each step. Note that this will deposit the photons on the mesh for each packet, and the absorbed photons are only available as a density (i.e., the computational photons that were absorbed are lost).
-This can reduce memory for certain types of applications when using many computational photons.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.blend_conservation</span></code> is a dead option marked for future removal (it blends a non-conservative divergence when depositing in cut-cells).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.transparent_eb</span></code> for turning on/off transparent boundaries. Mostly used for debugging.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.plt_vars</span></code> for setting plot variables.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.intersection_alg</span></code> sets the intersection algorithm when computing collisions with EBs.
-Ray-casting and bisection methods are supported.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.bisect_step</span></code> sets bisection step (physical length) when calculation intersection tests using the bisection algorithm (i.e., this parameter is irrelevant if <code class="docutils literal notranslate"><span class="pre">McPhoto.intersection_alg</span> <span class="pre">=</span> <span class="pre">raycast</span></code>).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.deposition</span></code> for setting the deposition method.
-Currently, NGP and CIC methods are supported (see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.deposition_cf</span></code> for setting the deposition strategy near coarse-fine boundaries.
-Currently, <em>interp</em> and <em>halo</em> are supported, see <a class="reference internal" href="../Source/Particles.html#chap-particlemesh"><span class="std std-ref">Particle-mesh</span></a>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto_bc_&lt;coord&gt;_&lt;low/high&gt;</span></code> sets the boundary condition on domain edges/faces.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.photon_generation</span></code> for setting the photon generation method (details are given below).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span></code> for setting the photon generation method (details are given below).</p></li>
-</ul>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code> class includes a hidden input parameter <code class="docutils literal notranslate"><span class="pre">McPhoto.dirty_sampling</span> <span class="pre">=</span> <span class="pre">true/false</span></code> which enables a cheaper sampling method for discrete photons when calling the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
@@ -598,7 +613,7 @@ The caveat is that the method does not incorporate boundary intersect, only work
 <p>When computational photons are generated through the solver, users might have filled the source term differently depending on the application.
 For example, users might have filled the source term with the number of photons generated per unit volume and time, or the <em>physical</em> number of photons to be generated.
 The two input options <code class="docutils literal notranslate"><span class="pre">McPhoto.photon_generation</span></code> and <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span></code> contain the necessary specifications for ensuring that the user-filled source term can be translated properly for ensuring that the correct number of physical photons are generated.
-Firstly, <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span></code> contains the specification of what the source term contains, e.g.</p>
+Firstly, <code class="docutils literal notranslate"><span class="pre">McPhoto.source_type</span></code> contains the specification of what the source term contains:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">number</span></code> if the source term contains the physical number of photons.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">volume</span></code> if the source terms contains the physical number of photons generated per unit volume.</p></li>
@@ -614,7 +629,7 @@ If this is set to <em>stochastic</em>, the solver will first compute the number 
 <div class="math notranslate nohighlight">
 \[N_{\gamma}^{\text{phys}} = \overline{N}_{\gamma}^{\text{phys}}\]</div>
 <p>photons.
-Again, these elements are important because users might choose to run such stochastic samplings outside of <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code>.</p>
+Again, these elements are important because users might have chosen to perform the Poisson sampling outside of <code class="docutils literal notranslate"><span class="pre">McPhoto</span></code>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>All of the above procedures are done <em>per-cell</em>.</p>

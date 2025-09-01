@@ -444,13 +444,13 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a42432c4f69f66dfca9a5c74784664167"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b93acc51df2b5bf6f6d69309027c646" id="r_a4b93acc51df2b5bf6f6d69309027c646"><td class="memItemLeft" align="right" valign="top"><a id="a4b93acc51df2b5bf6f6d69309027c646" name="a4b93acc51df2b5bf6f6d69309027c646"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>computeDiffusiveDt</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a4b93acc51df2b5bf6f6d69309027c646"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles. <br /></td></tr>
+<tr class="memdesc:a4b93acc51df2b5bf6f6d69309027c646"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles. <br /></td></tr>
 <tr class="separator:a4b93acc51df2b5bf6f6d69309027c646"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1bb099bd8a10e78857d024d26f7b6570" id="r_a1bb099bd8a10e78857d024d26f7b6570"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a1bb099bd8a10e78857d024d26f7b6570">computeDiffusiveDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lvl</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a1bb099bd8a10e78857d024d26f7b6570"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level.  <br /></td></tr>
+<tr class="memdesc:a1bb099bd8a10e78857d024d26f7b6570"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level.  <br /></td></tr>
 <tr class="separator:a1bb099bd8a10e78857d024d26f7b6570"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a040479280a818cbe4947529d7651ce1c" id="r_a040479280a818cbe4947529d7651ce1c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#a040479280a818cbe4947529d7651ce1c">computeDiffusiveDt</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lvl</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a040479280a818cbe4947529d7651ce1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input grid patch.  <br /></td></tr>
+<tr class="memdesc:a040479280a818cbe4947529d7651ce1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input grid patch.  <br /></td></tr>
 <tr class="separator:a040479280a818cbe4947529d7651ce1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6205a79851e8e13fee2fd0edc2b48c9" id="r_ab6205a79851e8e13fee2fd0edc2b48c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="CD__DepositionType_8H.html#a3e0386e57e39a4ba4ec16c3d7734a486">DepositionType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoSolver.html#ab6205a79851e8e13fee2fd0edc2b48c9">getDeposition</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:ab6205a79851e8e13fee2fd0edc2b48c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get deposition method.  <br /></td></tr>
@@ -1261,7 +1261,7 @@ template&lt;<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c
 </table>
 </div><div class="memdoc">
 
-<p>Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level. </p>
+<p>Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level </td></tr>
@@ -1305,7 +1305,7 @@ template&lt;<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c
 </table>
 </div><div class="memdoc">
 
-<p>Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input grid patch. </p>
+<p>Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input grid patch. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level </td></tr>
@@ -1340,7 +1340,7 @@ template&lt;<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c
 </div><div class="memdoc">
 
 <p>Compute a time step for the advance &ndash; this calls the level function. </p>
-<p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p>
+<p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p>
 
 </div>
 </div>
@@ -1369,7 +1369,7 @@ template&lt;<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c
 </div><div class="memdoc">
 
 <p>Compute a time step for the advance &ndash; this returns the maximum permitted time step on the input grid level. </p>
-<p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level </td></tr>
   </table>
@@ -1413,7 +1413,7 @@ template&lt;<a class="el" href="classItoSolver.html#a070d75d0d3ac16e04013d25574c
 </div><div class="memdoc">
 
 <p>Compute a time step for the advance &ndash; this returns the maximum permitted time step on the input grid patch. </p>
-<p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lvl</td><td>Grid level </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Grid index </td></tr>

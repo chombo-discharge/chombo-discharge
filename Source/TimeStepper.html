@@ -20,6 +20,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -65,8 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#basic-functions">Basic functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setup-routines">Setup routines</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#registerrealms">registerRealms</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#registeroperators">registerOperators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#setupsolvers">setupSolvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#registeroperators">registerOperators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#allocate">allocate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#initialdata">initialData</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#postinitialize">postInitialize</a></li>
@@ -75,6 +76,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#i-o-routines">I/O routines</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#getnumberofplotvariables">getNumberOfPlotVariables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getplotvariablenames">getPlotVariableNames</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writeplotdata">writePlotData</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writecheckpointdata">writeCheckpointData</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#readcheckpointdata">readCheckpointData</a></li>
@@ -110,7 +112,6 @@
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="VV.html">Verification and validation</a></li>
 </ul>
@@ -118,12 +119,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -144,7 +145,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -184,63 +185,361 @@
              
   <section id="timestepper">
 <span id="chap-timestepper"></span><h1>TimeStepper<a class="headerlink" href="#timestepper" title="Permalink to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> represents the EB+AMR equation solving class in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
-It owns the various numerical solvers and is responsible for setting up solvers and advancing the equations of motion.
-Because <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> and not <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> owns the solvers as class members, it will also coordinate I/O (together with <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> is essentially the problem solving class <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>.
+The class is abstract and is subclassed by the programmer in order to solve new problems (or change time discretizations).
+Typically, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> owns all numerical solvers, has responsibility for setting up solvers, regridding its internal state, and advancing the equations of motion.
+Because <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> and not <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> owns the solvers as class members, it will also partially coordinate I/O by providing data that <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will add to HDF5 files.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p><a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTimeStepper.html">TimeStepper C++ API</a></p>
+<p>Here is the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTimeStepper.html">TimeStepper C++ API</a></p>
 </div>
 <section id="basic-functions">
 <h2>Basic functions<a class="headerlink" href="#basic-functions" title="Permalink to this heading"></a></h2>
-<p>Since it is necessary to implement different solvers for different types of physics, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> is an abstract class with the following pure functions:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Setup routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setupSolvers</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">allocate</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialData</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postInitialize</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postCheckpointSetup</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerRealms</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerOperators</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span>
+<p>There are numerous functions that must be implemented and coordinated in order to provide a full-fledged <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> for various problems.
+Below, we include the current header file for <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/* chombo-discharge</span>
+<span class="cm"> * Copyright © 2021 SINTEF Energy Research.</span>
+<span class="cm"> * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.</span>
+<span class="cm"> */</span>
 
-<span class="c1">// IO routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotVariableNames</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">getCheckpointLoads</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cm">/*!</span>
+<span class="cm">  @file   CD_TimeStepper.H</span>
+<span class="cm">  @brief  Declaration of main (abstract) time stepper class. </span>
+<span class="cm">  @author Robert Marskar</span>
+<span class="cm">*/</span>
 
-<span class="c1">// Advance routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">synchronizeSolverTimes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">printStepReport</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="cp">#ifndef CD_TimeStepper_H</span>
+<span class="cp">#define CD_TimeStepper_H</span>
 
-<span class="c1">// Regrid routines</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postRegrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">needToRegrid</span><span class="p">();</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_procs</span><span class="p">,</span>
-<span class="w">                              </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_boxes</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">                </span><span class="n">a_realm</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_grids</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span>
-<span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_finestLevel</span><span class="p">);</span>
+<span class="c1">// Chombo includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CH_HDF5.H&gt;</span>
+
+<span class="c1">// Our includes</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_ComputationalGeometry.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_MultiFluidIndexSpace.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_AmrMesh.H&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceHeader.H&gt;</span>
+
+<span class="cm">/*!</span>
+<span class="cm">  @brief Base class for advancing equations. </span>
+<span class="cm">  @details This class is used by Driver for advancing sets of equations. In short, this class should implement a time-stepping routine for a</span>
+<span class="cm">  set of solvers. One should also implement routines for setting up the solvers, allocating necessary memory, regridding etc. </span>
+<span class="cm">*/</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TimeStepper</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Default constructor (does nothing)</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="n">TimeStepper</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Default destructor (does nothing)</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="o">~</span><span class="n">TimeStepper</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Set AmrMesh</span>
+<span class="cm">    @param[in] a_amr AmrMesh</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">setAmr</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_amr</span><span class="p">);</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Set the computational geometry</span>
+<span class="cm">    @param[in] a_computationalGeometry The computational geometry.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">setComputationalGeometry</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_computationalGeometry</span><span class="p">);</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Set up solvers</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">setupSolvers</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Allocate data for the time stepper and solvers. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">allocate</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Fill solvers with initial data</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">initialData</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Post-initialize operations to be performed at end of setup stage. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">postInitialize</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Post-initialize operations to be performed after filling solvers with data read from checkpoint files. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">postCheckpointSetup</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Register realms to be used for the simulation.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">registerRealms</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Register operators to be used for the simulation</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">registerOperators</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Parse runtime options</span>
+<span class="cm">    @details Override this routine if your time stepper can use run-time configuration of the solvers that it advances. This can e.g.</span>
+<span class="cm">    be the CFL condition.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">parseRuntimeOptions</span><span class="p">();</span>
+
+<span class="cp">#ifdef CH_USE_HDF5</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Read header data from checkpoint file.</span>
+<span class="cm">    @param[inout] a_header HDF5 header.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">readCheckpointHeader</span><span class="p">(</span><span class="n">HDF5HeaderData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_header</span><span class="p">);</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef CH_USE_HDF5</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Write header data to checkpoint file.</span>
+<span class="cm">    @param[inout] a_header HDF5 header.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">writeCheckpointHeader</span><span class="p">(</span><span class="n">HDF5HeaderData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_header</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef CH_USE_HDF5</span>
+<span class="w">  </span><span class="cm">/*!  </span>
+<span class="cm">    @brief Write checkpoint data to file</span>
+<span class="cm">    @param[inout] a_handle HDF5 file</span>
+<span class="cm">    @param[in]    a_lvl    Grid level</span>
+<span class="cm">    @details Implement this routine for checkpointing data for restarts. This will</span>
+<span class="cm">    typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef CH_USE_HDF5</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Read checkpoint data from file</span>
+<span class="cm">    @param[inout] a_handle HDF5 file</span>
+<span class="cm">    @param[in]    a_lvl    Grid level</span>
+<span class="cm">    @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting routine. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="cp">#endif</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get the number of plot variables for this time stepper. </span>
+<span class="cm">    @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. </span>
+<span class="cm">    @return Returns number of plot variables that will be written during writePlotData</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span>
+<span class="w">  </span><span class="nf">getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get plot variable names</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Write plot data to output holder. </span>
+<span class="cm">    @param[inout] a_output      Output data holder.</span>
+<span class="cm">    @param[inout] a_icomp       Starting component in a_output to begin at. </span>
+<span class="cm">    @param[in]    a_outputRealm Realm where a_output belongs</span>
+<span class="cm">    @param[in]    a_level       Grid level</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span>
+<span class="w">                </span><span class="kt">int</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_icomp</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">     </span><span class="n">a_outputRealm</span><span class="p">,</span>
+<span class="w">                </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">             </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief An option for calling special functions prior to plotting data. </span>
+<span class="cm">    Called by Driver in the IMMEDIATELY before writing the plot file. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">prePlot</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief An option for calling special functions prior to plotting data. </span>
+<span class="cm">    Called by Driver in the IMMEDIATELY after writing the plot file. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">postPlot</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Get computational loads to be checkpointed. </span>
+<span class="cm">    @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is</span>
+<span class="cm">    disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced</span>
+<span class="cm">    grids where the but the final ones. </span>
+<span class="cm">    @note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load balance your application, and also</span>
+<span class="cm">    make sure that the loads returned from this routine are consistent with what you put in loadBalanceBoxes. </span>
+
+<span class="cm">    Also note that the return vector has the same ordering as the DisjointBoxLayout&#39;s boxes on the input grid level. See the implementation for further details. </span>
+<span class="cm">    @param[in] a_realm Realm</span>
+<span class="cm">    @param[in] a_level Grid level</span>
+<span class="cm">    @return Returns computational loads for each box on grid level a_level. </span>
+<span class="cm">    </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">long</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">getCheckpointLoads</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Compute a time step to be used by Driver. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="nf">computeDt</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Advancement method. The implementation of this method should advance all equations of motion</span>
+<span class="cm">    @param[in] a_dt Time step to be used for advancement</span>
+<span class="cm">    @return    Returns the time step that was used. </span>
+<span class="cm">    @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="w">  </span><span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Synchronzie solver times and time steps</span>
+<span class="cm">    @param[in] a_step Time step</span>
+<span class="cm">    @param[in] a_time Time (in seconds)</span>
+<span class="cm">    @param[in] a_dt   Time step that was used. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">synchronizeSolverTimes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Print a step report. </span>
+<span class="cm">    @details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">printStepReport</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Perform pre-regrid operations.</span>
+<span class="cm">    @details This should include all copying all data which should be interpolated to the new grids. It can also include deallocating memory in case the regrid</span>
+<span class="cm">    operation takes a lot of memory. </span>
+<span class="cm">    @param[in] a_lmin           The coarsest level that changes</span>
+<span class="cm">    @param[in] a_oldFinestLevel The finest level before the regrid. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Time stepper regrid method. </span>
+<span class="cm">    @param[in] a_lmin           The coarsest level that changed. </span>
+<span class="cm">    @param[in] a_oldFinestLevel The finest level before the regrid. </span>
+<span class="cm">    @param[in] a_newFinestLevel The finest level after the regrid. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Perform post-regrid operations. </span>
+<span class="cm">    @details This includes all operations to be done AFTER interpolating data to new grids. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">postRegrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Fuction which can have Driver do regrids at arbitrary points in the simulation. </span>
+<span class="cm">    @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is </span>
+<span class="cm">    on the regular &quot;regrid intervals&quot;. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">needToRegrid</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. </span>
+<span class="cm">    @param[in] a_realm Realm name</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Load balance grid boxes for a specified realm. </span>
+<span class="cm">    @param[out] a_procs       MPI ranks owning the various grid boxes. </span>
+<span class="cm">    @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())</span>
+<span class="cm">    @param[in]  a_realm       Realm identifier</span>
+<span class="cm">    @param[in]  a_grids       Original grids</span>
+<span class="cm">    @param[in]  a_lmin        Coarsest grid level that changed</span>
+<span class="cm">    @param[in]  a_finestLevel New finest grid level</span>
+<span class="cm">    @details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation</span>
+<span class="cm">    uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and</span>
+<span class="cm">    he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance on each level. It is up to the user/programmer</span>
+<span class="cm">    to decide if load balancing should be done independently on each level, or if loads per MPI rank are accumulated across levels.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">  </span><span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_procs</span><span class="p">,</span>
+<span class="w">                   </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_boxes</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">                </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_grids</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span>
+<span class="w">                   </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_finestLevel</span><span class="p">);</span>
+
+<span class="k">protected</span><span class="o">:</span>
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Class verbosity</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_verbosity</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Time step</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">m_timeStep</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief TIme</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">m_time</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Previous time step size</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">m_dt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief AmrMesh. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_amr</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Computational geometry. </span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_computationalGeometry</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;CD_NamespaceFooter.H&gt;</span>
+
+<span class="cp">#endif</span>
 </pre></div>
 </div>
-<p>These functions are all used by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> class at various stages.</p>
 </section>
 <section id="setup-routines">
 <h2>Setup routines<a class="headerlink" href="#setup-routines" title="Permalink to this heading"></a></h2>
 <p>Here, we consider the various setup routines in <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
-The routines are used by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> in the simulation setup step.</p>
+The routines are used by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> in the simulation setup step, both for fresh simulation setups as well as restarts.</p>
 <section id="registerrealms">
 <span id="chap-registerrealms"></span><h3>registerRealms<a class="headerlink" href="#registerrealms" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> permits solvers to run on different realms (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>) for individual load balancing of various components.
-To register a <code class="docutils literal notranslate"><span class="pre">Realm</span></code>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> register realms in the <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code>, as follows:</p>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> permits things to happen on different sets of grids where the the grids themselves cover the same physical region, but where MPI ownership of grids might change between grid sets (see <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> for details).
+To register a <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, users will have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> register realms in the <code class="docutils literal notranslate"><span class="pre">registerRealms()</span></code> routine, as follows:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">myTimeStepper::registerRealms</span><span class="p">(){</span>
 <span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="n">Realm</span><span class="o">::</span><span class="n">Primal</span><span class="p">);</span>
 <span class="w">   </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerRealm</span><span class="p">(</span><span class="s">&quot;particleRealm&quot;</span><span class="p">);</span>
@@ -248,151 +547,644 @@ To register a <code class="docutils literal notranslate"><span class="pre">Realm
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Since at least one realm is required, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will <em>always</em> register the realm <code class="docutils literal notranslate"><span class="pre">&quot;Primal&quot;</span></code>.
+<p>The above code will ensure that <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> generates three <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, which can be individually load balanced.
+Since at least one realm is required, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will <em>always</em> register the realm <code class="docutils literal notranslate"><span class="pre">&quot;Primal&quot;</span></code>.
 Fundamentally, there is no limitation to the number of realms that can be allocated.</p>
+</section>
+<section id="setupsolvers">
+<h3>setupSolvers<a class="headerlink" href="#setupsolvers" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">setupSolvers</span></code> is used for instantiating the solvers.
+This routine is called <em>prior</em> to creating grids, so it is not possible to allocate mesh data for the solvers inside this routine.
+The rationale for this design is that <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> must know relatively early which part of the AMR infrastructure that will be instantiated, so the solvers are created before allocating the grids.
+It is still quite possible to parse lots of data into the solvers, e.g., setting input variables.</p>
+<p>To provide an example, the code snippet below shows the implementation of this routine for the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementation for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<span id="list-advectiondiffusionsteppersetupsolvers"></span><div class="code-block-caption"><span class="caption-number">Listing 6 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">setupSolvers</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::setupSolvers</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::setupSolvers&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::setupSolvers&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="o">!</span><span class="n">m_solver</span><span class="p">.</span><span class="n">isNull</span><span class="p">());</span>
+
+<span class="w">  </span><span class="c1">// Instantiate the species.</span>
+<span class="w">  </span><span class="n">m_species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AdvectionDiffusionSpecies</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">AdvectionDiffusionSpecies</span><span class="p">(</span><span class="n">m_initialData</span><span class="p">,</span><span class="w"> </span><span class="n">m_mobile</span><span class="p">,</span><span class="w"> </span><span class="n">m_diffusive</span><span class="p">));</span>
+
+<span class="w">  </span><span class="c1">// Prep the solver.</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setVerbosity</span><span class="p">(</span><span class="n">m_verbosity</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setSpecies</span><span class="p">(</span><span class="n">m_species</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">parseOptions</span><span class="p">();</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setPhase</span><span class="p">(</span><span class="n">m_phase</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setAmr</span><span class="p">(</span><span class="n">m_amr</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setComputationalGeometry</span><span class="p">(</span><span class="n">m_computationalGeometry</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setRealm</span><span class="p">(</span><span class="n">m_realm</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isMobile</span><span class="p">()</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isDiffusive</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::setupSolvers - can&#39;t turn off both advection AND diffusion&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </section>
 <section id="registeroperators">
 <span id="chap-registeroperators"></span><h3>registerOperators<a class="headerlink" href="#registeroperators" title="Permalink to this heading"></a></h3>
-<p>Internally, an instantiation of <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> contains the grids and the geometric information (e.g. <code class="docutils literal notranslate"><span class="pre">EBISLayout</span></code>), as well as any operators that the user has seen fit to <em>register</em>.
-Various operators are available for e.g. gradient stencils, conservative coarsening, ghost cell interpolation, filling a patch with interpolation data, redistribution, and so on.
+<p>Internally, an instantiation of <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> will provide access to the grids and cut-cell information on that <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, as well as any operators that the user has seen fit to <em>register</em>.
+Various operators are available for, e.g., computing gradients, conservative coarsening, ghost cell interpolation, filling a patch with interpolation data, redistribution, particle-mesh operations, and so on.
 Since operators always incur overhead and not all applications require <em>all</em> operators, they must be <em>registered</em>.
 If a solver needs an operator for, say, piecewise linear ghost cell interpolation, the solver needs to <em>register</em> that operator through the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> public interface:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">registerOperator</span><span class="p">(</span><span class="n">s_eb_pwl_interp</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Once an operator has been registered, <code class="docutils literal notranslate"><span class="pre">Realm</span></code> will define those operators during initialization e.g. regrids.
+<p>Once an operator has been registered, <code class="docutils literal notranslate"><span class="pre">Realm</span></code> will automatically instantiate those operators during initialization or regrid operations.
 Run-time error messages are issued if an AMR operator is used, but has not been registered.</p>
 <p>More commonly, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> solvers will contain a routine that registers the operators that the solver needs.
-A valid <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementation <em>must</em> register all required operators in the function <code class="docutils literal notranslate"><span class="pre">registerOperators()</span></code>.</p>
-<p>Currently available operators are:</p>
-<ol class="arabic simple">
-<li><p>Gradient <code class="docutils literal notranslate"><span class="pre">s_eb_gradient</span></code>.</p></li>
-<li><p>Irregular cell centroid interpolation, <code class="docutils literal notranslate"><span class="pre">s_eb_irreg_interp</span></code>.</p></li>
-<li><p>Coarse grid conservative coarsening, <code class="docutils literal notranslate"><span class="pre">s_eb_coar_ave</span></code>.</p></li>
-<li><p>Piecewise linear interpolation (with slope limiters), <code class="docutils literal notranslate"><span class="pre">s_eb_fill_patch</span></code>.</p></li>
-<li><p>Linear ghost cell interpolation, <code class="docutils literal notranslate"><span class="pre">s_eb_fine_interp</span></code>.</p></li>
-<li><p>Flux registers, <code class="docutils literal notranslate"><span class="pre">s_eb_flux_reg</span></code>.</p></li>
-<li><p>Redistribution registers, <code class="docutils literal notranslate"><span class="pre">s_eb_redist</span></code>.</p></li>
-<li><p>Non-conservative divergence stencils, <code class="docutils literal notranslate"><span class="pre">s_eb_noncons_div</span></code>.</p></li>
-<li><p>Multigrid interpolators, <code class="docutils literal notranslate"><span class="pre">s_eb_multigrid</span></code> (used for multigrid).</p></li>
-<li><p>Signed distance function defined on grid, <code class="docutils literal notranslate"><span class="pre">s_levelset</span></code>.</p></li>
-<li><p>Particle-mesh support, <code class="docutils literal notranslate"><span class="pre">s_eb_particle_mesh</span></code>.</p></li>
-</ol>
-<p>Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will probably be in use.</p>
-</section>
-<section id="setupsolvers">
-<h3>setupSolvers<a class="headerlink" href="#setupsolvers" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">setupSolvers</span></code> is used for setting up solvers.
-This step is done <em>prior</em> to setting up the grids, so it is not possible to allocate mesh data inside this routine.</p>
+A valid <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementation <em>must</em> register all required operators in the function <code class="docutils literal notranslate"><span class="pre">registerOperators()</span></code>, but this is usually done by letting the solvers register what they need.
+Failure to do so will issue a run-time error.
+Solvers will typically allocate a subset of these operators, but for multiphysics code that use both fluid and particles, most of these will be in use.
+An example of this is given in <a class="reference internal" href="#list-advectiondiffusionstepperregister"><span class="std std-numref">Listing 7</span></a>, which shows how this routine is implemented for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<span id="list-advectiondiffusionstepperregister"></span><div class="code-block-caption"><span class="caption-number">Listing 7 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">registerOperators</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::registerOperators</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::registerOperators&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::registerOperators&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Let the solver do this -- it knows what it needs.</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">registerOperators</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </section>
 <section id="allocate">
 <h3>allocate<a class="headerlink" href="#allocate" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">allocate</span></code> is used for allocating particle and mesh data for the solvers and <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
-This step is done <em>after</em> the grids have been initialized by <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> <em>and</em> during regrids.</p>
+<p><code class="docutils literal notranslate"><span class="pre">allocate</span></code> is used for allocating particle and mesh data that is required during simulations.
+This step is done <em>after</em> the grids have been initialized by <a class="reference internal" href="AmrMesh.html#chap-amrmesh"><span class="std std-ref">AmrMesh</span></a> <em>and</em> during regrids.
+Again using <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a> as an example,</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<span id="list-advectiondiffusionstepperallocate"></span><div class="code-block-caption"><span class="caption-number">Listing 8 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">allocate</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::allocate</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::allocate&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::allocate&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>In the above snippet, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> only calls the solver allocation function (solvers generally know how to allocate their own internal data).
+For more complex problems this routine will probably allocate additonal data that only lives within <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> (and not the solvers).</p>
 </section>
 <section id="initialdata">
 <h3>initialData<a class="headerlink" href="#initialdata" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">initialData</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> setup routines after the <code class="docutils literal notranslate"><span class="pre">allocate</span></code> step.
-This routine must fill solvers with initial data.</p>
+<p><code class="docutils literal notranslate"><span class="pre">initialData</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> setup routines after the <code class="docutils literal notranslate"><span class="pre">allocate</span></code> step, and has responsibility of setting up the problem with initial data.
+This can occasionally be simple, or for coupled problems it might be highly complex.
+For discharge problems, this can involve filling the solvers with initial densities, and solving the Poisson equation for obtaining the electric field.
+A simpler example is again given by <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<span id="list-advectiondiffusionstepperinitialdata"></span><div class="code-block-caption"><span class="caption-number">Listing 9 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">initialData</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id4" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::initialData</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::initialData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::initialData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Fill the solver with initial data from the species.</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">initialData</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Set velocity, diffusion coefficient, and boundary conditions.</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setSource</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setEbFlux</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isDiffusive</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setDiffusionCoefficient</span><span class="p">(</span><span class="n">m_diffCo</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isMobile</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setVelocity</span><span class="p">(</span><span class="n">m_velocity</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Set flux functions</span>
+<span class="w">  </span><span class="k">auto</span><span class="w"> </span><span class="n">fluxFunc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="w"> </span><span class="n">a_pos</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="c1">//  m_solver-&gt;setDomainFlux(fluxFunc);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>The above code defers the initialization of the density in the advection-diffusion-reaction solver to the actual solver implementation.
+Here, one could equally well have fetched the density directly from the solver and set it to something else by simply iterating through the grid cells (or setting it through other means).
+In addition, source terms are set to zero, as are boundary fluxes.</p>
 </section>
 <section id="postinitialize">
 <h3>postInitialize<a class="headerlink" href="#postinitialize" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">postInitialize</span></code> is called <em>after</em> <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> has filled the solvers with initial data.
-Most data initialization steps can, however, be done in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">postInitialize</span></code> is a special routine that is called <em>after</em> <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> has filled the solvers with initial data <em>and</em> <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> is done with all the initial regrids.
+While most data initialization steps can, however, be done in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>, the function is put there as an open door to the programmer for performing certain post-initialization functions that do not not need be performed in <code class="docutils literal notranslate"><span class="pre">initialData</span></code> (which is called once per initial regrid).
+For example, the <a class="reference internal" href="../Applications/DischargeInceptionModel.html#chap-dischargeinceptionmodel"><span class="std std-ref">Discharge inception model</span></a> uses this function to compute several relevant quantities after the electric has been obtained in <code class="docutils literal notranslate"><span class="pre">initialData</span></code>.</p>
 </section>
 <section id="postcheckpointsetup">
 <h3>postCheckpointSetup<a class="headerlink" href="#postcheckpointsetup" title="Permalink to this heading"></a></h3>
-<p>During simulation restarts, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will open an HDF5 file and have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> fill solvers with data from that file.
-<code class="docutils literal notranslate"><span class="pre">postCheckpointSetup</span></code> is a routine which is called immediately after the solvers have been filled with data.</p>
+<p>During simulation restarts, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will open an HDF5 file and have <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> fill solvers and its own internal data with data from that file.
+<code class="docutils literal notranslate"><span class="pre">postCheckpointSetup</span></code> is a routine which is called immediately after the solvers have performed this step.
+Several gas discharge models use this function to compute the electric field from the potential that was saved in the HDF5 file.</p>
 </section>
 </section>
 <section id="i-o-routines">
 <h2>I/O routines<a class="headerlink" href="#i-o-routines" title="Permalink to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> I/O routines serves two purposes:</p>
+<p><code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> contains I/O routines primarily serves two purposes:</p>
 <ol class="arabic simple">
-<li><p>To add solver data to HDF5 plot files.</p></li>
-<li><p>To write and read data for checkpoint/restart files.</p></li>
+<li><p>To provide data for HDF5 plot files, used for post-processing analysis.</p></li>
+<li><p>To read and write data from HDF5 checkpoint files, which are used to restart simulations from a specified time step.</p></li>
 </ol>
-<p>In general, plot and checkpoint data do not contain the same data.</p>
+<p>In general, plot and checkpoint data do not contain the same data, and <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> therefore requires that plot and checkpoint files are filled separately.
+We discuss these below:</p>
 <section id="getnumberofplotvariables">
 <h3>getNumberOfPlotVariables<a class="headerlink" href="#getnumberofplotvariables" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> must return the number of components that will be plotted by <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
-Note that if <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will plot a single scalar, it must return a value of one.
-If it plots a single vector, it must return a value of <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code>.</p>
-<p>The existence of <code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> is due to pre-allocation of memory that will be written to the plot file.</p>
+The reason why this routine exists is the <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will pre-allocate the necessary memory on each AMR level, and <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will then copy solver data into this data holder.
+Specifically, if <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will plot a single scalar, it must return a value of one.
+If it plots a single vector, it must return a value of <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code>.
+Below we include the implementation of this routine for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<span id="list-advectiondiffusionsteppergetnumplotvars"></span><div class="code-block-caption"><span class="caption-number">Listing 10 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id5" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span>
+<span class="nf">AdvectionDiffusionStepper::getNumberOfPlotVariables</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::getNumberOfPlotVariables&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::getNumberOfPlotVariables&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Not plotting anything of our own, so return whatever the solver wants to plot.</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">getNumberOfPlotVariables</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="getplotvariablenames">
+<h3>getPlotVariableNames<a class="headerlink" href="#getplotvariablenames" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">getPlotVariableNames</span></code> provides a list of plot variable names for the HDF5 file.
+This list must have the same length as the returned value of <code class="docutils literal notranslate"><span class="pre">getNumberOfPlotVariables</span></code>.
+Below we include the implementation of this routine for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<span id="list-advectiondiffusionsteppergetplotvarnames"></span><div class="code-block-caption"><span class="caption-number">Listing 11 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">getPlotVariableNames</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id6" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span>
+<span class="n">AdvectionDiffusionStepper</span><span class="o">::</span><span class="n">getPlotVariableNames</span><span class="p">()</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::getPlotVariableNames&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::getPlotVariableNames&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">getPlotVariableNames</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>When writing some vector data <span class="math notranslate nohighlight">\(F\)</span> to the HDF5-file, one can write the variables as <code class="docutils literal notranslate"><span class="pre">x-F</span></code>, <code class="docutils literal notranslate"><span class="pre">y-F</span></code>, and <code class="docutils literal notranslate"><span class="pre">z-F</span></code>, and VisIt visualization will automatically recognize <span class="math notranslate nohighlight">\(F\)</span> as a vector field.</p>
+</div>
 </section>
 <section id="writeplotdata">
 <h3>writePlotData<a class="headerlink" href="#writeplotdata" title="Permalink to this heading"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> will write the plot data to the provided data holder.
-The signature is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writePlotData</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_plotVariableNames</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+The function signature is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Write plot data to output holder. </span>
+<span class="cm">  @param[inout] a_output      Output data holder.</span>
+<span class="cm">  @param[inout] a_icomp       Starting component in a_output to begin at. </span>
+<span class="cm">  @param[in]    a_outputRealm Realm where a_output belongs</span>
+<span class="cm">  @param[in]    a_level       Grid level</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="n">writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span>
+<span class="w">              </span><span class="kt">int</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_icomp</span><span class="p">,</span>
+<span class="w">              </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">     </span><span class="n">a_outputRealm</span><span class="p">,</span>
 </pre></div>
 </div>
-<p>Here, <code class="docutils literal notranslate"><span class="pre">a_output</span></code> is pre-allocate block of memory that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will write its components to, and <code class="docutils literal notranslate"><span class="pre">a_plotVariable</span></code> are the associated plot variable names.
-<code class="docutils literal notranslate"><span class="pre">a_icomp</span></code> is the starting component in <code class="docutils literal notranslate"><span class="pre">a_output</span></code> where we start writing data.</p>
+<p>In this function, <code class="docutils literal notranslate"><span class="pre">a_output</span></code> is pre-allocated block of memory that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> will write its components to (beginning at <code class="docutils literal notranslate"><span class="pre">a_icomp</span></code>).
+Note that if <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> writes <span class="math notranslate nohighlight">\(N\)</span> components, the implementation must increment <code class="docutils literal notranslate"><span class="pre">a_icomp</span></code> by <span class="math notranslate nohighlight">\(N\)</span>.
+Usually, solvers will have their own <code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> routines which lets <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> simply call the solver functions.
+An example is given below for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<span id="list-advectiondiffusionstepperwriteplotdata"></span><div class="code-block-caption"><span class="caption-number">Listing 12 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">writePlotData</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id7" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::writePlotData</span><span class="p">(</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">EBCellFAB</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_output</span><span class="p">,</span>
+<span class="w">                                         </span><span class="kt">int</span><span class="o">&amp;</span><span class="w">                  </span><span class="n">a_icomp</span><span class="p">,</span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">     </span><span class="n">a_outputRealm</span><span class="p">,</span>
+<span class="w">                                         </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">             </span><span class="n">a_level</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::writePlotData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::writePlotData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">a_level</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">CH_assert</span><span class="p">(</span><span class="n">a_level</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">getFinestLevel</span><span class="p">());</span>
+
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">writePlotData</span><span class="p">(</span><span class="n">a_output</span><span class="p">,</span><span class="w"> </span><span class="n">a_icomp</span><span class="p">,</span><span class="w"> </span><span class="n">a_outputRealm</span><span class="p">,</span><span class="w"> </span><span class="n">a_level</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </section>
 <section id="writecheckpointdata">
 <h3>writeCheckpointData<a class="headerlink" href="#writecheckpointdata" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">writeCheckpointData</span></code> will write solver data to the provided HDF5 file handle.
+<p><code class="docutils literal notranslate"><span class="pre">writeCheckpointData</span></code> must write necessary data for checkpointing the simulation state.
 This data is used when restarting simulations from a checkpoint file.
-Note that checkpoint data is written on a level-by-level basis.</p>
+Note that checkpoint data is written on a level-by-level basis.
+The function signature is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!  </span>
+<span class="cm">  @brief Write checkpoint data to file</span>
+<span class="cm">  @param[inout] a_handle HDF5 file</span>
+<span class="cm">  @param[in]    a_lvl    Grid level</span>
+<span class="cm">  @details Implement this routine for checkpointing data for restarts. This will</span>
+<span class="cm">  typically call the solvers&#39; checkpointing routine, but more data can be added.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Usually, the solvers know themselves what data to put in the checkpoint files and these routines are then pretty simple.
+Below, we again include an example for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<span id="list-advectiondiffusionstepperwritechkdata"></span><div class="code-block-caption"><span class="caption-number">Listing 13 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">writeCheckpointData</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id8" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::writeCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="k">const</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::writeCheckpointData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::writeCheckpointData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">writeCheckpointLevel</span><span class="p">(</span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>When implementing the function, it is important to add any data that is required when restarting the simulation.
+It is also beneficial to <em>not</em> add data that is not required since this will just lead to larger files.
+An example of this is the <a class="reference internal" href="../Solvers/Electrostatics.html#chap-fieldsolver"><span class="std std-ref">FieldSolver</span></a> class, which only checkpoints the potential and not the electric field, as the latter is simply obtained by taking the gradient.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Computational particles can also be added to the checkpoint files.</p>
+</div>
 </section>
 <section id="readcheckpointdata">
 <h3>readCheckpointData<a class="headerlink" href="#readcheckpointdata" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">readCheckpointData</span></code> will read data from the provided HDF5 file handle and back into the solvers.
-Note that the data is read on a level-by-level basis.</p>
+<p><code class="docutils literal notranslate"><span class="pre">readCheckpointData</span></code> is the function that will read data from an HDF5 checkpoint file and populate <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> with this data.
+The data is read on a level-by-level basis, with a function signature</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Read checkpoint data from file</span>
+<span class="cm">  @param[inout] a_handle HDF5 file</span>
+<span class="cm">  @param[in]    a_lvl    Grid level</span>
+<span class="cm">  @details Implement this routine for reading data for restarts. This will typically call the solvers&#39; checkponiting routine. </span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Solvers will normally already know what data to read into their data members.
+E.g., the example for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a> is</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<span id="list-advectiondiffusionstepperreadchkdata"></span><div class="code-block-caption"><span class="caption-number">Listing 14 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">readCheckpointData</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id9" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::readCheckpointData</span><span class="p">(</span><span class="n">HDF5Handle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::readCheckpointData&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::readCheckpointData&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">readCheckpointLevel</span><span class="p">(</span><span class="n">a_handle</span><span class="p">,</span><span class="w"> </span><span class="n">a_lvl</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 <section id="advance-routines">
 <h2>Advance routines<a class="headerlink" href="#advance-routines" title="Permalink to this heading"></a></h2>
 <section id="computedt">
 <h3>computeDt<a class="headerlink" href="#computedt" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">computeDt</span></code> will compute a time step for <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> to use when calling the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.</p>
+<p><code class="docutils literal notranslate"><span class="pre">computeDt</span></code> is a routine that will compute a trial time step when calling the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method.
+We have chosen to call this a trial time step because</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> might choose to use a smaller time step in order to write plot files at specific times.</p></li>
+<li><p>When calling the actual advance method (see below), it is possible to return a different time step than the one computed through <code class="docutils literal notranslate"><span class="pre">computeDt</span></code>.</p></li>
+</ol>
+<p>The calculation of a time step can be quite involved, depending on the application being imlemented.
+Moreover, many <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementations will provide hooks for swapping algorithms, and in this case the time step might be limited differently.
+For the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a> the implementation is as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<span id="list-advectiondiffusionsteppercomputedt"></span><div class="code-block-caption"><span class="caption-number">Listing 15 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">computeDt</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id10" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
+<span class="nf">AdvectionDiffusionStepper::computeDt</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::computeDt&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::computeDt&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// TLDR: If we run explicit advection but implicit diffusion then we are only limited by the advective CFL. Otherwise,</span>
+<span class="w">  </span><span class="c1">//       if diffusion is also explicit we need the advection-diffusion limited time step.</span>
+
+<span class="w">  </span><span class="c1">// A weird thing, but sometimes we want to be able to force the CFL so that</span>
+<span class="w">  </span><span class="c1">// we override run-time configurations of the CFL number. This code does that.</span>
+<span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">cfl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_forceCFL</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cfl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_forceCFL</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">cfl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_cfl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">m_integrator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="no">Integrator</span><span class="o">::</span><span class="no">Heun</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfl</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">computeAdvectionDiffusionDt</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="no">Integrator</span><span class="o">::</span><span class="no">IMEX</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfl</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">computeAdvectionDt</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">MayDay</span><span class="o">::</span><span class="n">Error</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::computeDt - logic bust&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">m_minDt</span><span class="p">);</span>
+<span class="w">  </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">min</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">m_maxDt</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">dt</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>In the code above, <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> supports both fully explicit advection-diffusion advances as well as split-step advances with implicit diffusion.
+Depending on how the user chooses to run the code, the time step is therefore computed differently.
+At the bottom of the above code, hard limits on the time step are also enforced.</p>
 </section>
 <section id="advance">
 <h3>advance<a class="headerlink" href="#advance" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">advance</span></code> is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> when advancing the equation of motion one time step.
-Note that <code class="docutils literal notranslate"><span class="pre">advancpe</span></code> takes a trial time step as input argument and returns the actual time step that was used.
-These do not need to be the same.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">advance</span></code> method has responsibility for advancing physics module one time step, and is called by <code class="docutils literal notranslate"><span class="pre">Driver</span></code>.
+The function signature is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Advancement method. The implementation of this method should advance all equations of motion</span>
+<span class="cm">  @param[in] a_dt Time step to be used for advancement</span>
+<span class="cm">  @return    Returns the time step that was used. </span>
+<span class="cm">  @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="n">Real</span>
+<span class="nf">advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>As mentioned in the documentation for this method, the function takes a trial time step <code class="docutils literal notranslate"><span class="pre">a_dt</span></code> which is the physical time step.
+This time step is the one computed by <code class="docutils literal notranslate"><span class="pre">computeDt</span></code>.
+It is, however, quite possible to advance the equations of motion over a time that does not equal <code class="docutils literal notranslate"><span class="pre">a_dt</span></code>, which is generally the case for adaptive time stepping methods.</p>
+<p>The implementation of the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method is usually the most time-consuming part of implementation a new <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>, and the implementation of this routine can become substantially complicated.
+For simpler problems this routine is relatively straightforward to implement, however, also in a way that involves AMR and cut-cells.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<span id="list-advectiondiffusionstepperadvance"></span><div class="code-block-caption"><span class="caption-number">Listing 16 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">advance</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id11" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Real</span>
+<span class="nf">AdvectionDiffusionStepper::advance</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::advance&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::advance&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// State to be advanced.</span>
+<span class="w">  </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">getPhi</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">m_integrator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">case</span><span class="w"> </span><span class="no">Integrator</span><span class="o">::</span><span class="no">Heun</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">conservativeOnly</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">addEbFlux</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">addDomainFlux</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Transient storage</span>
+<span class="w">    </span><span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">yp</span><span class="p">;</span>
+<span class="w">    </span><span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">k1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">EBAMRCellData</span><span class="w"> </span><span class="n">k2</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">yp</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">allocate</span><span class="p">(</span><span class="n">k2</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Compute k1 coefficient</span>
+<span class="w">    </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">computeDivJ</span><span class="p">(</span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="n">addEbFlux</span><span class="p">,</span><span class="w"> </span><span class="n">addDomainFlux</span><span class="p">);</span>
+<span class="w">    </span><span class="n">DataOps</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span><span class="n">yp</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">);</span>
+<span class="w">    </span><span class="n">DataOps</span><span class="o">::</span><span class="n">incr</span><span class="p">(</span><span class="n">yp</span><span class="p">,</span><span class="w"> </span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">a_dt</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Compute k2 coefficient and final state</span>
+<span class="w">    </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">computeDivJ</span><span class="p">(</span><span class="n">k2</span><span class="p">,</span><span class="w"> </span><span class="n">yp</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">conservativeOnly</span><span class="p">,</span><span class="w"> </span><span class="n">addEbFlux</span><span class="p">,</span><span class="w"> </span><span class="n">addDomainFlux</span><span class="p">);</span>
+<span class="w">    </span><span class="n">DataOps</span><span class="o">::</span><span class="n">incr</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">k1</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a_dt</span><span class="p">);</span>
+<span class="w">    </span><span class="n">DataOps</span><span class="o">::</span><span class="n">incr</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">k2</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a_dt</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">conservativeAverage</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_amr</span><span class="o">-&gt;</span><span class="n">interpGhost</span><span class="p">(</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">m_realm</span><span class="p">,</span><span class="w"> </span><span class="n">m_phase</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>In the above code we have included the part of the <code class="docutils literal notranslate"><span class="pre">advance</span></code> routine that executes Heun’s method for advancing the scalar.
+This code also includes allocation of temporaries for computing the coefficients, storage for the intermediate state, and enforcement of boundary conditions, all of which include AMR.
+At the way out of the routine the solution is coarsened and the ghost cells are updated, and the trial time step (<code class="docutils literal notranslate"><span class="pre">a_dt</span></code>) is returned.</p>
 </section>
 <section id="synchronizesolvertimes">
 <h3>synchronizeSolverTimes<a class="headerlink" href="#synchronizesolvertimes" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">synchronizeSolverTimes</span></code> is called after the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and is used to update the simulation time for all solvers.</p>
+<p><code class="docutils literal notranslate"><span class="pre">synchronizeSolverTimes</span></code> is called after the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method and is used to update the simulation time for all solvers.
+Again, this routine exists because there is often a physical time to be tracked by the solvers (e.g., enforcement of time-dependent voltage applications).
+This routine simply ensures that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> and all solvers that <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> owns see the same physical time, number of steps, and time step sizes.
+The implementation for <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a> is</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<span id="list-advectiondiffusionsteppersync"></span><div class="code-block-caption"><span class="caption-number">Listing 17 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">synchronizeSolverTimes</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id12" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::synchronizeSolverTimes</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::synchronizeSolverTimes&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::synchronizeSolverTimes&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">m_timeStep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a_step</span><span class="p">;</span>
+<span class="w">  </span><span class="n">m_time</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="n">a_time</span><span class="p">;</span>
+<span class="w">  </span><span class="n">m_dt</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="n">a_dt</span><span class="p">;</span>
+
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setTime</span><span class="p">(</span><span class="n">a_step</span><span class="p">,</span><span class="w"> </span><span class="n">a_time</span><span class="p">,</span><span class="w"> </span><span class="n">a_dt</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
 </section>
 <section id="printstepreport">
 <h3>printStepReport<a class="headerlink" href="#printstepreport" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">printStepReport</span></code> called after the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method – it can be left empty but is otherwise used to print some information about the time step that was taken.</p>
+<p><code class="docutils literal notranslate"><span class="pre">printStepReport</span></code> is called after the <code class="docutils literal notranslate"><span class="pre">advance</span></code> method, and provides extra information printed to the <code class="docutils literal notranslate"><span class="pre">pout.*</span></code> files (see <a class="reference internal" href="../Base/Control.html#chap-control"><span class="std std-ref">Controlling chombo-discharge</span></a>).
+This function is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> after performing a time step, and can be used to print extra information not covered by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, such as how the time step was limited, or other information that is useful for monitoring the behavior of <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
+For example, the current gas discharge models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> print the maximum electric field and density at each time step.
+Note that <code class="docutils literal notranslate"><span class="pre">printStepReport</span></code> has (or should have!) no side-effects that affect the simulation state.</p>
 </section>
 </section>
 <section id="regrid-routines">
 <h2>Regrid routines<a class="headerlink" href="#regrid-routines" title="Permalink to this heading"></a></h2>
-<p>For an explanation to how regridding occurs in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, see <a class="reference internal" href="Regridding.html#chap-regridding"><span class="std std-ref">Regridding</span></a>.</p>
+<p>The regrid routines in <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> must, in combination, be able to transfer the simulation between old and new grids.
+For an explanation to how regridding occurs in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, see <a class="reference internal" href="Driver.html#chap-driverregridding"><span class="std std-ref">Regridding</span></a>.
+In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from whan transfer the state to the new grids.</p>
 <section id="preregrid">
 <h3>preRegrid<a class="headerlink" href="#preregrid" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> should any necessary pre-regrid operation.
-Note that when solvers regrid their data, solution is allocated on new grids and the previously defined data is lost.
-For this reason most solvers have the option of putting the old grid data into temporary storage that permits us to interpolate to the new grids.</p>
+<p><code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> should any necessary pre-regrid operations that are necessary in order to call the <code class="docutils literal notranslate"><span class="pre">regrid</span></code>.
+This will virtually always include caching the old-grid simulation state, both for the solvers and also for internal data in <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>
+Solvers usually know how to do this, and in some cases this function can be deceptively simple, as illustrated by the implementation of this function in <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<span id="list-advectiondiffusionstepperpreregrid"></span><div class="code-block-caption"><span class="caption-number">Listing 18 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id13" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::preRegrid&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::preRegrid&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">preRegrid</span><span class="p">(</span><span class="n">a_lbase</span><span class="p">,</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Other implementations of <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> may have substantially more complicated <code class="docutils literal notranslate"><span class="pre">preRegrid</span></code> routines.</p>
 </section>
 <section id="regrid">
 <h3>regrid<a class="headerlink" href="#regrid" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">regrid</span></code> will perform the actual regrid operation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">regrid</span></code> is the function that performs an actual regrid operation.
+At the time when <code class="docutils literal notranslate"><span class="pre">regrid</span></code> is called, the old grids are already destroyed and are only available through the cached data.
+Solvers are usually implemented with their own regrid routine, and if the only things that need to be regridded are the solvers, the implementation of this routine can be comparatively simple, as illustrated below for the <a class="reference internal" href="../Applications/AdvectionDiffusionModel.html#chap-advectiondiffusionmodel"><span class="std std-ref">Advection-diffusion model</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<span id="list-advectiondiffusionstepperregrid"></span><div class="code-block-caption"><span class="caption-number">Listing 19 </span><span class="caption-text">Implementation of the <code class="docutils literal notranslate"><span class="pre">regrid</span></code> routine for a simple advection-diffusion problem.</span><a class="headerlink" href="#id14" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span>
+<span class="nf">AdvectionDiffusionStepper::regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="n">CH_TIME</span><span class="p">(</span><span class="s">&quot;AdvectionDiffusionStepper::regrid&quot;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_verbosity</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pout</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;AdvectionDiffusionStepper::regrid&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Regrid CDR solver and set up the flow fields</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">regrid</span><span class="p">(</span><span class="n">a_lmin</span><span class="p">,</span><span class="w"> </span><span class="n">a_oldFinestLevel</span><span class="p">,</span><span class="w"> </span><span class="n">a_newFinestLevel</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setSource</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setEbFlux</span><span class="p">(</span><span class="mf">0.0</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isDiffusive</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setDiffusionCoefficient</span><span class="p">(</span><span class="n">m_diffCo</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">isMobile</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_solver</span><span class="o">-&gt;</span><span class="n">setVelocity</span><span class="p">(</span><span class="n">m_velocity</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>For other <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> implementations this routine can become much more complex.
+The <a class="reference internal" href="../Applications/ItoKMC.html#chap-itokmc"><span class="std std-ref">Îto-KMC plasma model</span></a>, for example, will regrid not only solver data but also internal mesh and particle data, recompute conductivities, deposit particles, handle superparticles, and prepare the simulation state for the next time step.</p>
 </section>
 <section id="postregrid">
 <h3>postRegrid<a class="headerlink" href="#postregrid" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">postRegrid</span></code> is called after <code class="docutils literal notranslate"><span class="pre">regrid</span></code> can be used to perform any post-regrid operations.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">postRegrid</span></code> is called after <code class="docutils literal notranslate"><span class="pre">regrid</span></code> has completed and can be used to perform any post-regrid specific procedures.
+This function is not a pure function, and an implementation of this function is therefore not a requirement.</p>
 </section>
 </section>
 <section id="load-balancing-routines">
 <h2>Load balancing routines<a class="headerlink" href="#load-balancing-routines" title="Permalink to this heading"></a></h2>
-<p>During the regrid step, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will check if any of the realms should be load balanced.
-If a realm should be load balanced then <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> take a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> which originally load balanced using the patch volume, and generate a new set of grids.</p>
+<p>The default load-balancing method in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is to distribute grid patches equally among ranks, respecting a space-filling Morton curve on each grid level.
+However, during the regrid step, <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will check if meshes should be load balanced using different heuristics.
+This load balancing can be done separately for each <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>, and in this case the MPI ranks will have different patch ownership in different grid sets.</p>
+<p>If a realm should be load balanced with a different method than the default load balancing scheme, then <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> can take a <code class="docutils literal notranslate"><span class="pre">DisjointBoxLayout</span></code> which originally load balanced using the patch volume, and regenerate the patch-to-rank ownership for the grids.
+This functionality is implemented through two routines:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> which checks if a specific <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> should be load balanced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">loadBalanceBoxes</span></code> which load balances the boxes on the specified <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a>.</p></li>
+</ol>
+<p>Note that these functions are not pure functions, and it is perfect fine to use their default implementation, in which case each MPI rank gets approximately the same number of grid patches.</p>
 <section id="loadbalancethisrealm">
 <h3>loadBalanceThisRealm<a class="headerlink" href="#loadbalancethisrealm" title="Permalink to this heading"></a></h3>
-<p>Return true if a <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> should be load balanced and false otherwise.</p>
+<p>The function signature for this function is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. </span>
+<span class="cm">  @param[in] a_realm Realm name</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This function must return true if the input <a class="reference internal" href="Realm.html#chap-realm"><span class="std std-ref">Realm</span></a> (<code class="docutils literal notranslate"><span class="pre">a_realm</span></code>) should be load balanced.</p>
 </section>
 <section id="loadbalanceboxes">
 <h3>loadBalanceBoxes<a class="headerlink" href="#loadbalanceboxes" title="Permalink to this heading"></a></h3>
-<p>This is called if <code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> evaluates to true, and in this case the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> should compute a new set of rank ownership for the input grid boxes.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> returns true, the following function is responsible for actually regenerating the grids:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Load balance grid boxes for a specified realm. </span>
+<span class="cm">  @param[out] a_procs       MPI ranks owning the various grid boxes. </span>
+<span class="cm">  @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())</span>
+<span class="cm">  @param[in]  a_realm       Realm identifier</span>
+<span class="cm">  @param[in]  a_grids       Original grids</span>
+<span class="cm">  @param[in]  a_lmin        Coarsest grid level that changed</span>
+<span class="cm">  @param[in]  a_finestLevel New finest grid level</span>
+<span class="cm">  @details This is only called by Driver if TimeStepper::loadBalanceThisRealm(a_realm) returned true. The default implementation</span>
+<span class="cm">  uses volume-based loads for the grid patches. If the user wants to load balance boxes on a realm, this routine must be overwritten and</span>
+<span class="cm">  he should compute loads for the various patches in a_grids and call LoadBalancing::makeBalance on each level. It is up to the user/programmer</span>
+<span class="cm">  to decide if load balancing should be done independently on each level, or if loads per MPI rank are accumulated across levels.</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
+<span class="nf">loadBalanceBoxes</span><span class="p">(</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_procs</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Box</span><span class="o">&gt;&gt;&amp;</span><span class="w">             </span><span class="n">a_boxes</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w">                </span><span class="n">a_realm</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_grids</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_lmin</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_finestLevel</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This is called if <code class="docutils literal notranslate"><span class="pre">loadBalanceThisRealm</span></code> evaluates to true, and in this case the <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> should compute a new set of rank ownership for the input grid boxes.
+Observe that <code class="docutils literal notranslate"><span class="pre">loadBalanceBoxes</span></code> occurs for the entire AMR hierarchy, where the outer vector of <code class="docutils literal notranslate"><span class="pre">a_procs</span></code> and <code class="docutils literal notranslate"><span class="pre">a_boxes</span></code> is the grid level, and the inner vectors describe the ownership of each box.
+The default implementation of this function ensures that when we load balance a level, we account for the accumulated load on coarser levels (see <a class="reference internal" href="#timestepperloadbalanceboxes"><span class="std std-ref">Default implementation of loadBalanceBoxes.</span></a>).</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<span id="timestepperloadbalanceboxes"></span><div class="code-block-caption"><span class="caption-number">Listing 20 </span><span class="caption-text">Default implementation of <code class="docutils literal notranslate"><span class="pre">loadBalanceBoxes</span></code>.</span><a class="headerlink" href="#id15" title="Permalink to this code"></a></div>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. </span>
+<span class="cm">  @param[in] a_realm Realm name</span>
+<span class="cm">*/</span>
+<span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
+<span class="nf">loadBalanceThisRealm</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<p>In the above, we use the <code class="docutils literal notranslate"><span class="pre">Loads</span></code> class to hold the computational load for each rank, and on each level we compute the load for each patch to be equal to the number of grid cells in the patch.
+This is later load balanced in <code class="docutils literal notranslate"><span class="pre">LoadBalancing::makeBalance</span></code>, which is a routine that ensures that when we assign boxes on some grid level <span class="math notranslate nohighlight">\(l\)</span>, we account for loads already assigned on coarser grid levels.</p>
 </section>
 </section>
 </section>

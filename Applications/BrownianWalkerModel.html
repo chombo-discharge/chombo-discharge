@@ -73,7 +73,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../Source/MeshData.html">Mesh data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Particles.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/Realm.html">Realm</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Source/Regridding.html">Regridding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/LinearSolvers.html">Linear solvers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Source/VV.html">Verification and validation</a></li>
 </ul>
@@ -81,12 +80,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/CDR.html">Convection-Diffusion-Reaction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/Electrostatics.html">Electrostatic solver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/KineticMonteCarlo.html">Kinetic Monte Carlo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/MeshODESolver.html">Mesh ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/RTE.html">Radiative transfer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/SurfaceODESolver.html">Surface ODE solver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Solvers/TracerParticles.html">Tracer particles</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Solvers/Ito.html">Îto diffusion</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Multi-physics applications</span></p>
 <ul>
@@ -98,7 +97,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="AdvectionDiffusionModel.html">Advection-diffusion model</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Brownian walker</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#solvers">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#initial-data">Initial data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transport-specification">Transport specification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#superparticle-handling">Superparticle handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ElectrostaticsModel.html">Electrostatics model</a></li>
@@ -110,7 +114,7 @@
 <p class="caption" role="heading"><span class="caption-text">Utilities</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/DataParser.html">Data parsing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">Lookup tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Utilities/LookupTable.html">LookupTable1D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/RandomNumbers.html">Random numbers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Utilities/LeastSquares.html">Least squares</a></li>
 </ul>
@@ -150,9 +154,9 @@
              
   <section id="brownian-walker">
 <span id="chap-brownianwalkermodel"></span><h1>Brownian walker<a class="headerlink" href="#brownian-walker" title="Permalink to this heading"></a></h1>
-<p>The Brownian walker model runs a single microscropic drift-diffusion using the <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>, solving</p>
+<p>The Brownian walker model runs a single microscropic drift-diffusion using the <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>, where the underlying transport kernel is</p>
 <div class="math notranslate nohighlight">
-\[\Delta\mathbf{X} = \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}\]</div>
+\[d\mathbf{X} = \mathbf{V}dt + \sqrt{2Ddt}\mathbf{W}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathbf{X}\)</span> is the spatial position of a particle <span class="math notranslate nohighlight">\(\mathbf{V}\)</span> is the drift velocity and <span class="math notranslate nohighlight">\(D\)</span> is the diffusion coefficient <em>in the continuum limit</em>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -160,16 +164,108 @@
 </div>
 <p>The model consists of the following implementation files:</p>
 <ul class="simple">
-<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerStepper.H/cpp</span></code> which implements the integration routines.</p></li>
-<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerSpecies.H/cpp</span></code> which implements initial conditions.</p></li>
-<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerTagger.H/cpp</span></code> which implements mesh refinement and de-refinement criteria.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerStepper.H/cpp</span></code> which implements <a class="reference internal" href="../Source/TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">CD_BrownianWalkerSpecies.H/cpp</span></code> which implements initial conditions through <a class="reference internal" href="../Solvers/Ito.html#chap-itospecies"><span class="std std-ref">ItoSpecies</span></a>.</p></li>
 </ul>
-<section id="solvers">
-<h2>Solvers<a class="headerlink" href="#solvers" title="Permalink to this heading"></a></h2>
-<p>This application uses the following solvers:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>.</p></li>
-</ul>
+<section id="initial-data">
+<h2>Initial data<a class="headerlink" href="#initial-data" title="Permalink to this heading"></a></h2>
+<p>The initial data is randomly generated by sampling from an exponential distribution with specified radius and center.
+The user can specify the number of particles, and control this sampling through the respective input options, see <a class="reference internal" href="#chap-brownianwalkerconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
+</section>
+<section id="transport-specification">
+<h2>Transport specification<a class="headerlink" href="#transport-specification" title="Permalink to this heading"></a></h2>
+<p>The default velocity field for this class is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}v_x &amp;= -r\omega\sin\theta, \\
+v_y &amp;=  r\omega\cos\theta, \\
+v_z &amp;= 0,\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(r = \sqrt{x^2 + y^2}\)</span>, <span class="math notranslate nohighlight">\(\tan\theta = \frac{x}{y}\)</span>.
+I.e. the flow field is a circulation around the Cartesian grid origin.
+The diffusion coefficient is simply set to a constant value.</p>
+<p>To adjust the velocity field or diffusion coefficients, adjust the configuration options given in <a class="reference internal" href="#chap-brownianwalkerconfiguration"><span class="std std-ref">Solver configuration</span></a>.</p>
+</section>
+<section id="time-stepping">
+<h2>Time stepping<a class="headerlink" href="#time-stepping" title="Permalink to this heading"></a></h2>
+<p>Time stepping in this module is performed using a simple Euler-Maruyama scheme, i.e.,</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{X}^{k+1} = \mathbf{X}^{k} + \mathbf{V}\Delta t + \sqrt{2D\Delta t}\mathbf{W}\]</div>
+<p>It is possible to adjust the time step size by setting the appropriate option (<code class="docutils literal notranslate"><span class="pre">BrownianWalker.cfl</span></code>).
+The time step is then limited by a particle-like CFL time step condition on the advective part (i.e., on <span class="math notranslate nohighlight">\(\mathbf{V}\)</span>).</p>
+</section>
+<section id="superparticle-handling">
+<h2>Superparticle handling<a class="headerlink" href="#superparticle-handling" title="Permalink to this heading"></a></h2>
+<p>Superparticle handling in this module occurs via <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>, so the user needs to specify the superparticle algorithm through the <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a> configuration options.
+However, the <em>number</em> of superparticles is adjusted through <code class="docutils literal notranslate"><span class="pre">BrownianWalkerStepper</span></code>, and is set through <code class="docutils literal notranslate"><span class="pre">BrownianWalker.ppc</span></code>.
+Setting this value to anything less than 1 will turn off super-particle handling.</p>
+</section>
+<section id="solver-configuration">
+<span id="chap-brownianwalkerconfiguration"></span><h2>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">BrownianWalkerStepper</span></code> class comes with user-configurable input options that can be adjusted at runtime.
+The configuration options for <code class="docutils literal notranslate"><span class="pre">BrownianWalkerStepper</span></code> are given below:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
+# BrownianWalkerStepper class options.
+# ====================================================================================================
+BrownianWalker.verbosity          = -1        ## Verbosity
+BrownianWalker.realm              = primal    ## Realm
+BrownianWalker.diffusion          = true      ## Turn on/off diffusion
+BrownianWalker.advection          = true      ## Turn on/off advection
+BrownianWalker.blob_amplitude     = 1.0       ## Blob amplitude
+BrownianWalker.blob_radius        = 0.1       ## Blob radius
+BrownianWalker.blob_center        = 0 0       ## Blob center
+BrownianWalker.seed               = 0         ## RNG seed
+BrownianWalker.num_particles      = 100       ## Number of initial particles
+BrownianWalker.cfl                = 1.0       ## CFL-like number.
+BrownianWalker.ppc                = -1        ## Particles per cell. &lt;= 0 turns off superparticles
+BrownianWalker.load_balance       = true      ## Turn on/off particle load balancing
+BrownianWalker.which_balance      = mesh      ## Switch for load balancing method. Either &#39;mesh&#39; or &#39;particle&#39;.
+
+# Velocity, diffusion, and CFL
+# ----------------------------
+BrownianWalker.mobility     = 1.0    ## Mobility coefficient
+BrownianWalker.diffco       = 1.0    ## Diffusion coefficient
+BrownianWalker.omega        = 1.0    ## Rotation velocity for advection field
+
+# Cell tagging stuff
+# ------------------
+BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
+BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
+BrownianWalker.buffer          = 0       ## Grow tagged cells
+</pre></div>
+</div>
+</section>
+<section id="setting-up-a-new-problem">
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/BrownianWalker</span></code> is the simplest way.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/BrownianWalker</span>
+This physics module solves for advection-diffusion process of a single scalar quantity. This module contains files for setting up the initial conditions
+and species, integrators, and a cell tagger for refining grid cells. See https://chombo-discharge.github.io/BrownianWalkerModel.html for implementation details.
+
+The source files consist of the following:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_BrownianWalkerSpecies.H/cpp**</span> Implementation of ItoSpecies, for setting up initial conditions and turning on/off advection and diffusion.
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_BrownianWalkerTagger.H/cpp**</span>  Implementation of CellTagger, for flagging cells for refinement and coarsening.
+<span class="k">*</span><span class="w"> </span><span class="gs">**CD_BrownianWalkerStepper.H/cpp**</span> Implementation of TimeStepper, for advancing the advection-diffusion equation. 
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>myApplications<span class="w"> </span>-app_name<span class="o">=</span>myBrownianWalker<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/myApplications/myBrownianWalker.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+
+<span class="gu">## Modifying the application</span>
+The application is simply set up to advect and diffuse a scalar in a rotating flow.
+Users are free to modify this application, e.g. adding new initial conditions and flow fields. 
+</pre></div>
+</div>
+<p>To see available setup options, use</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
 </section>
 </section>
 
