@@ -218,7 +218,7 @@ The ``EddingtonSP1`` implementation has a number of configurable options for run
    :emphasize-lines: 4, 6-9, 20-33
    :caption: ``EddingtonSP1`` solver configuration options. Run-time configurable options are highlighted.
 
-The multigrid options are analogous to the multigrid options for :ref:`Chap:FieldSolverMultigrid`, see :ref:`MultigridTuning`.
+The multigrid options are analogous to the multigrid options for :ref:`Chap:FieldSolverMultigrid`, see :ref:`Chap:MultigridTuning`.
 
 .. _Chap:MonteCarloRTE:
 
@@ -226,7 +226,7 @@ Monte Carlo solver
 ------------------
 
 ``McPhoto`` defines a class which can solve radiative transfer problems using discrete photons.
-The class derives from :ref:`Chap:RtSolver` and can thus be used also be used by applications that only require the :ref:`ChapRtSolver` interface.
+The class derives from :ref:`Chap:RtSolver` and can thus be used also be used by applications that only require the :ref:`Chap:RtSolver` interface.
 ``McPhoto`` can provide a rather complex interaction with boundaries, such as computing the intersection between a photon path and a geometry, and thus capture shadows (which :ref:`Chap:EddingtonSP1` can not).
 
 The Monte Carlo sampling is a particle-based radiative transfer solver, and particle-mesh operations (see :ref:`Chap:ParticleMesh`) are thus required in order to deposit the photons on a mesh if one wants to compute mesh-based absorption profiles.
@@ -345,7 +345,8 @@ In addition to the above two methods, the solver interface permits users to add 
 .. _Chap:McPhotoOptions:
 
 Solver configuration
-___________________
+____________________
+
 
 ``McPhoto`` can be configured through its input options, see below:
 

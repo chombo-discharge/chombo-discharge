@@ -67,7 +67,7 @@ namespace Physics {
         @brief Get plot variable names. The
         @details This function will return the plot variable names that CdrPlasmaPhysics will plot. The length of the returned
         vector must be the same as the returned value from getNumberOfPlotVariables. Note that the names/positions between this 
-p       routine and getPlotVariables should be consistent.
+        routine and getPlotVariables should be consistent.
       */
       virtual Vector<std::string>
       getPlotVariableNames() const

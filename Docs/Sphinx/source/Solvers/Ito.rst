@@ -17,6 +17,8 @@ The vector term :math:`\mathbf{W}` indicates a random number sampled from a Gaus
    
    The code for Îto diffusion is given in :file:`/Source/ItoDiffusion`.
 
+.. _Chap:ItoParticle:
+
 ItoParticle
 -----------
 

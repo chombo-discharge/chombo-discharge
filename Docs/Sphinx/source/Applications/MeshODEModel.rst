@@ -39,7 +39,7 @@ Setting up a new problem
 To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/MeshODEStepper` is the simplest way.
 A full description is available in the ``README.md`` contained in the folder:
 
-.. literalinclude:: ../../../../Physics/MeshODEStepper/README.md
+.. literalinclude:: ../../../../Physics/MeshODE/README.md
    :language: markdown
 	      
 To see available setup options, use

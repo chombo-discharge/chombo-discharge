@@ -329,7 +329,7 @@ The implementation for :ref:`Chap:AdvectionDiffusionModel` is
 printStepReport
 ---------------
 
-``printStepReport`` is called after the ``advance`` method, and provides extra information printed to the ``pout.*`` files (see :ref:`Control`).
+``printStepReport`` is called after the ``advance`` method, and provides extra information printed to the ``pout.*`` files (see :ref:`Chap:Control`).
 This function is called by :ref:`Chap:Driver` after performing a time step, and can be used to print extra information not covered by :ref:`Chap:Driver`, such as how the time step was limited, or other information that is useful for monitoring the behavior of ``TimeStepper``.
 For example, the current gas discharge models in ``chombo-discharge`` print the maximum electric field and density at each time step.
 Note that ``printStepReport`` has (or should have!) no side-effects that affect the simulation state.
@@ -338,7 +338,7 @@ Regrid routines
 ===============
 
 The regrid routines in ``TimeStepper`` must, in combination, be able to transfer the simulation between old and new grids.
-For an explanation to how regridding occurs in ``chombo-discharge``, see :ref:`Chap:Regridding`.
+For an explanation to how regridding occurs in ``chombo-discharge``, see :ref:`Chap:DriverRegridding`.
 In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from whan transfer the state to the new grids. 
 
 preRegrid
@@ -423,7 +423,7 @@ The default implementation of this function ensures that when we load balance a 
 
 .. _TimeStepperloadBalanceBoxes:
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
-   :label: Default implementation of ``loadBalanceBoxes``.
+   :caption: Default implementation of ``loadBalanceBoxes``.
    :language: c++
    :lines: 270-275
    :dedent: 2

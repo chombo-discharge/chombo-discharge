@@ -181,7 +181,7 @@ We also compute the probability of a first electron appearing in the time interv
    
    \Delta P(t, t+\Delta t) = \left[1-P(t)\right] \left(\int_{V_c(t^\prime)}\left\langle\frac{dn_{\text{e}}}{dt^\prime}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V + \int_{A_c(t^\prime)}\frac{j_e}{q_{\text{e}}}\left(1-\frac{\eta}{\alpha}\right) \text{d}A\right)\Delta t
 
-When running in transient mode the user must set the voltage curve (see :ref:`Chap:DischargeInceptionVoltageCurve`) and pay particular caution to setting the initial ion density, mobility, and detachment rates.
+When running in transient mode the user must set the voltage curve, and pay particular caution to setting the initial ion density, mobility, and detachment rates.
 
 The statistical time lag, or average waiting time for the first electron, is available from the computed data, and is given by integrating :math:`t \text{d}P`, which yields
 
@@ -306,7 +306,7 @@ The particle integration step size is then selected according to the following h
 
 These parameters are implemented through the following input options:
 
-.. code-block:: txt
+.. code-block:: text
 
    # Particle integration controls
    DischargeInceptionStepper.min_phys_dx      = 1.E-10		## Minimum permitted physical step size

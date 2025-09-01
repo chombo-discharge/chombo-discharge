@@ -267,7 +267,6 @@ In the absolute simplest case a state can be defined by maintaining a list of po
    };
 
 More advanced examples can distinguish between different *modes* of populations, e.g. between species that can only appear on the left/right hand side of the reactions.
-See :ref:`Chap:KMCDualState` for such an example.
 
 Defining reactions
 __________________

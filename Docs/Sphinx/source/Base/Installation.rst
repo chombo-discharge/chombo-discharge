@@ -194,7 +194,7 @@ When compiled with OpenMP all loops over grid patches uses threading in the form
 .. warning::
 
    Memory tracking is currently not supported together with threading.
-   When compiling ``chombo-discharge`` make sure that memory tracking is turned off (see :ref:`MainSettings`).
+   When compiling ``chombo-discharge`` make sure that memory tracking is turned off (see :ref:`Chap:MainSettings`).
 
 
 Compiler flags

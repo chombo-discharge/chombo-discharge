@@ -1,4 +1,4 @@
-By .. _Chap:ElectrostaticsModel:
+.. _Chap:ElectrostaticsModel:
 
 Electrostatics model
 ====================
@@ -63,6 +63,8 @@ For a more general way of specifying the surface charge, ``FieldStepper`` has a 
    :language: c++
    :lines: 235-240
    :dedent: 6
+
+.. _Chap:FieldStepperConfiguration: 
 
 Solver configuration
 --------------------

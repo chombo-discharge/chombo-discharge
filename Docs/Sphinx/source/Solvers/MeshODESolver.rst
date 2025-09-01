@@ -133,7 +133,7 @@ After :ref:`Chap:AmrMesh` has generated the new grids, :math:`\vec{\phi}` can be
    :lines: 169-177
    :dedent: 2
 
-Users can also choose to turn on/off slope limiters when putting the solution on the new mesh, see :ref:`Chap:Regridding`.
+Users can also choose to turn on/off slope limiters when putting the solution on the new mesh.
 
 .. important::
    

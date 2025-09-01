@@ -35,7 +35,7 @@ The function signatures for reading this type of data are:
       
 .. important::
 
-   After parsing into a :ref:`Chap:LookupTable1D`, the user must regularize the table in order to use the interpolation functions.
+   After parsing into a :ref:`Chap:LookupTable`, the user must regularize the table in order to use the interpolation functions.
    See :ref:`Chap:LookupTableRegularize`.
    
 

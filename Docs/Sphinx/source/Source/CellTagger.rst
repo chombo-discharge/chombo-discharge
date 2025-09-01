@@ -68,7 +68,6 @@ _________
 It is also possible to have ``CellTagger`` write data to plot files, and the interface for this is identical to the plot file interface in :ref:`Chap:TimeStepper`.
 The three functions below must then be implemented:
 
-.. _CellTaggerPureFunctions:
 .. literalinclude:: ../../../../Source/CellTagger/CD_CellTagger.H
    :language: c++
    :lines: 87-108
@@ -93,7 +92,7 @@ An example of the manual refinement syntax is given in :numref:`CellTaggerOption
 .. _CellTaggerOptions:
 .. literalinclude:: ../../../../Source/CellTagger/CD_CellTagger.options
    :caption: Default class options for ``CellTagger``, including the manual refinement syntax and buffer region definition.
-   :language: txt
+   :language: text
 
 It is possible to prevent ``CellTagger`` from adding refinement flags in specified regions by specifying ``num_tag_boxes``.
 The default behavior is to add a number of boxes where refinement and coarsening is allowed, and prevent tags from being generated outside of these regions.
