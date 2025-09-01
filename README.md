@@ -78,7 +78,7 @@ We welcome feedback, bug reports, or code contributions.
    ```
 
    If relevant, add Sphinx and doxygen documentation.
-   It is useful to run CheckDocs.py to ensure that changes to source files can be captured, as some of these are included literally in the HTML/PDF documention.
+
    
 3. Format the source and example codes using ```clang-format```:
 
@@ -86,16 +86,19 @@ We welcome feedback, bug reports, or code contributions.
    find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) -exec clang-format -i {} +
    ```
 
-4. Format input files:
+4. Run CheckDocs.py to ensure that changes to source files can be captured, as some of these are included literally in the HTML/PDF documention.
+   If the source files that are changed are also used as literal includes in the Sphinx documentation, ensure that the changed files do not break the includes.
+
+5. Format input files:
 
    ```
    ./FormatInputFiles.sh
    ```
    
-5. Push the changes to GitHub
+6. Push the changes to GitHub
 
    ```
    git push --set-upstream origin my_branch
    ```
    
-6. Create a pull request and make sure the GitHub continuous integration tests pass.
+7. Create a pull request and make sure the GitHub continuous integration tests pass.

@@ -324,7 +324,7 @@ The most general one that uses the hybrid advance is
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSolver.H
    :language: c++
-   :lines: 382-392
+   :lines: 396-406
    :dedent: 2
 
 When using the hybrid algorithm, the user should set the hybrid solver parameters through the function

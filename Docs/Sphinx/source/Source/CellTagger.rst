@@ -30,8 +30,9 @@ A part of the current C++ header file for ``CellTagger`` is included below, wher
 .. _CellTaggerPureFunctions:
 .. literalinclude:: ../../../../Source/CellTagger/CD_CellTagger.H
    :language: c++
+   :dedent: 2
    :caption: Header file for ``CellTagger``.
-   :lines: 49-62, 71-79
+   :lines: 49-62, 70-79
    :emphasize-lines: 6-7, 13-14, 22-23
 
 Implementing a new ``CellTagger``

@@ -23,20 +23,22 @@ Currently, only two types of file reads are supported:
       2.0 3.0
 
    It is also possible to restrict which rows that are read, by specifying string identifiers on the line preceding the data and on the line immediately after the data.
+
+   .. important::
+
+      After parsing into a :ref:`Chap:LookupTable`, the user must regularize the table in order to use the interpolation functions.
+      See :ref:`Chap:LookupTableRegularize`.
 		   
 #. Read particle data, where the particle data is in a :math:`(x,y,z,w)` file format, where :math:`w` is the particle weight.
    
-The function signatures for reading this type of data are:
+   The function signatures for reading this type of data are:
 
-.. literalinclude:: ../../../../Source/Utilities/CD_DataParser.H
-   :language: c++
-   :lines: 28-84
-   :dedent: 2
+   .. literalinclude:: ../../../../Source/Utilities/CD_DataParser.H
+      :language: c++
+      :lines: 28-84
+      :dedent: 2
       
-.. important::
 
-   After parsing into a :ref:`Chap:LookupTable`, the user must regularize the table in order to use the interpolation functions.
-   See :ref:`Chap:LookupTableRegularize`.
    
 
 
