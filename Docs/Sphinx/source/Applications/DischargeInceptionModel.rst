@@ -210,198 +210,18 @@ The input to the discharge inception model are:
 #. Space and surface charge if resolving a space-charge influenced field.
 
 The input data to the discharge inception model is done by passing in C++-functions to the class.
-These functions are mainly in the forms
-
-.. code-block:: c++
-
-   std::function<Real(const Real& E)>
-   std::function<Real(const Real& E, const RealVect& x)>
-
-The user can specify analytic fields or use tabulated data, and pass these in through a C++ lambda function.
-An example of defining an analytic input function is
-
-.. code-block:: c++
-
-   auto alphaCoeff = [](const Real& E, const RealVect& x) -> void {
-      return 1/E.
-   };
-
-Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used as follows,
-
-.. code-block:: c++
-		
-   LookupTable1D<1> tableData;
-   
-   auto alphaCoeff = [tableData](const Real& E, const RealVect& x) -> void {
-      return tableData.getEntry<1>(E);
-   };
+These functions are mainly in the forms of an ``std::function``, so the user can pass in function pointers or lambdas for configuring the behavior of the model.
+The relevant user API for setting the above variables are listed below.
 
 .. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
    :language: c++
    :lines: 291-386
-   :dedent: 4   
+   :dedent: 4
 
-Free charges
-------------
+.. tip::
 
-By default, ``DischargeInceptionStepper`` assume that the simulation region is charge-free, i.e. :math:`\rho = \sigma= 0`.
-Nonetheless, the class has member functions for specifying these, which are given by
-
-.. code-block:: c++
-
-   // Set the space charge
-   void setRho(const std::function<Real(const RealVect&x)>& a_rho) noexcept;
-
-   // Set the surface charge
-   void setSigma(const std::function<Real(const RealVect&x)>& a_sigma) noexcept;
-
-.. warning::
-
-   This feature is currently a work-in-progress and relies on the superposition of a homogeneous solution :math:`\Phi_1` (one without charges) and an inhomogeneous solution :math:`\Phi_2` (one with charges), i.e. :math:`\Phi = U\Phi_1 + \Phi_2` where :math:`U` is the applied potential.
-
-   As this feature has not (yet) been sufficiently hardened, it is recommend to run with debugging enabled.
-   This can be done by adding ``DischargeInceptionStepper.debug=true`` to the input script of command line, which should catch cases where the superposition is not properly taken care of (typically due to conflicting BCs). 
-   
-
-Inception threshold
--------------------
-
-Use in class input value ``DischargeInceptionStepper.K_inception`` for setting the inception threshold.
-
-For example:
-
-.. code-block:: text
-
-   DischargeInceptionStepper.K_inception   = 12.0
-
-Townsend ionization coefficient
--------------------------------
-
-To set the Townsend ionization coefficient, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setAlpha(const std::function<Real(const RealVect& E, const RealVect& x)>& a_alpha) noexcept;
-
-
-Townsend attachment coefficient
--------------------------------
-
-To set the Townsend attachment coefficient, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setEta(const std::function<Real(const Real& E, const RealVect& x)>& a_eta) noexcept;
-   
-
-Negative ion mobility
----------------------
-
-To set the negative ion mobility, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setIonMobility(const std::function<Real(const Real& E)>& a_mobility) noexcept;
-   
-
-Negative ion diffusion coefficient
-----------------------------------
-
-To set the negative ion diffusion coefficient, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setIonDiffusion(const std::function<Real(const Real& E)>& a_diffCo) noexcept;   
-
-
-Negative ion density
---------------------
-
-To set the negative ion density, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
-
-Secondary emission
-------------------
-
-To set the secondary emission efficiency at cathodes, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setSecondaryEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_coeff) noexcept;
-
-This efficiency is position-dependent so that the user can set different efficiencies for different materials (or different positions in a single material).
-
-   
-Background ionization rate
---------------------------
-
-The background ionization rate describes the appearance of a first electron from a background contribution, e.g. through cosmic radiation, decay of radioactive isotopes, etc.
-
-To set the background ionization rate, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setBackgroundRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
-
-Detachment rate
----------------
-
-The detachment rate from negative describes the apperance of electrons through the equation
-
-.. math::
-
-   \left\langle\frac{dn_{\text{e}}}{dt}\right\rangle = k_d \left\langle n_-\right\rangle
-
-where :math:`\left\langle n_-\right\rangle` is the negative ion density in units of :math:`m^{-3}` (or strictly speaking the negative ion probability density). 
-This is used when calculating the inception probability, and the user sets the detachment rate :math:`k_d` through
-
-.. code-block:: c++
-		
-   DischargeInceptionStepper::setDetachmentRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
-
-Field emission
---------------
-
-To set the field emission current, use the function
-
-.. code-block:: c++
-
-   DischargeInceptionStepper::setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
-
-This will set a field-dependent emission rate from cathodes given by the input function.
-Note that, under the hood, the function indicates a general cathode emission current which can be the sum of several contributions (field emission, photoelectric effect etc.).
-
-.. important::
-
-   The input function should provide the surface current density :math:`j_e` (in units of :math:`\text{C}\cdot\text{m}^{-2}\cdot \text{s}^{-1}`).
-
-Input voltages
---------------
-
-By default, the model will always read voltage levels from the input script.
-These are in the format
-
-.. code-block:: text
-
-   DischargeInceptionStepper.voltage_lo    = 1.0   # Low voltage multiplier
-   DischargeInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
-   DischargeInceptionStepper.voltage_steps = 3     # Number of voltage steps
-
-.. _Chap:DischargeInceptionVoltageCurve:
-
-Voltage curve
--------------
-
-To set the voltage curve, use the member function
-
-.. code-block:: c++
-
-   DischargeInceptionSteppersetVoltageCurve(const std::function<Real(const Real& time)>& a_voltageCurve) noexcept;
-
-This is relevant only when running a transient simulation. 
+   It is relatively simple to use tabulated data input for setting the input (e.g., the transport coefficients).
+   See :ref:`Chap:LookupTable`.
 
 Algorithms
 ==========
@@ -413,16 +233,20 @@ Field solve
 -----------
 
 Since the background field scales linearly with applied voltage, we require only a single field solve at the beginning of the simulation.
-This field solve is done with an applied voltage of :math:`U = 1\,\text{V}` and the electric field is then simply later scaled by the actual voltage.
+This field solve is done with an applied voltage of :math:`U = 1\,\text{V}` and the electric field is then later scaled by the appropriate voltage.
 
 Inception integral
 ------------------
 
 We use a Particle-In-Cell method for computing the inception integral :math:`K\left(\mathbf{x}\right)` for an arbitrary electron starting position.
 All grid cells where :math:`\alpha_{\textrm{eff}} > 0` are seeded with one particle on the cell centroid and the particles are then tracked through the grid.
-The particles move a user-specified distance along field lines :math:`\mathbf{E}` and the particle weights are updated using first or second order integration.
-If a particle leaves through a boundary (EB or domain boundary), or enters a region :math:`\alpha_{\text{eff}} \leq 0`, the integration is stopped.
-Once the particle integration halts, we rewind the particles back to their starting position and deposit their weight on the mesh, which provides us with :math:`K = K\left(\mathbf{x}\right)`.
+The particles move a user-specified distance along field lines :math:`\mathbf{E}`,  using first or second order integration. 
+If a particle leaves through a boundary (EB or domain boundary), or enters a region :math:`\alpha_{\text{eff}} \leq 0`, the integration for that particle is stopped.
+Once all the particle integrations have halted, we rewind the particles back to their starting position and deposit their weight on the mesh, which provides us with :math:`K = K\left(\mathbf{x}\right)`.
+
+.. note::
+
+   When tracking positive ions for evaluation of the Townsend criterion, the same algorithms are used.
 
 Euler
 _____
@@ -431,270 +255,33 @@ For the Euler rule the particle weight for a particle :math:`p` the update rule 
 
 .. math::
 
-   \mathbf{x}_p^{k+1} = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x
+   \mathbf{X}_p^{k+1} = \mathbf{X}_p^k - \mathbf{\hat{E}}\left(\mathbf{X}_p^k\right)\Delta x
    
-   w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right)\Delta x,
+   w_p^{k+1} = w_p^k + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{X}_p^k\right)\right|,\mathbf{X}_p^k\right)\Delta x,
 
-where :math:`\Delta x` is a user-specified integration length.
+where :math:`\Delta x` is an integration length.
 
 Trapezoidal
 ___________
 
-With the trapezoidal rule the update is first
+With the trapezoidal rule we first update
 
 .. math::
 
-   \mathbf{x}_p^\prime = \mathbf{x}_p^k - \mathbf{\hat{E}}\left(\mathbf{x}_p^k\right)\Delta x
+   \mathbf{X}_p^\prime = \mathbf{X}_p^k - \mathbf{\hat{E}}\left(\mathbf{X}_p^k\right)\Delta x,
 
-followed by
-
-
-.. math::
-
-      \mathbf{x}_p^{k+1} = \mathbf{x}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{x}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{x}_p^\prime\right)\right].
-
-      w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^k\right)\right|,\mathbf{x}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{x}_p^\prime\right)\right|,\mathbf{x}_p^\prime\right)\right]
-
-.. note::
-
-   When tracking positive ions for evaluation of the Townsend criterion, the same algorithms are used.
-   The exception is that the positive ions are simply tracked along field lines until they strike a cathode, so that there is no integration with respect to :math:`\alpha_{\text{eff}}`.
-
-
-Critical volume
----------------
-
-The critical volume is computed as
+which is followed by
 
 .. math::
 
-   V_c = \int_{K\left(\mathbf{x}\right) > K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}V.
+      \mathbf{X}_p^{k+1} = \mathbf{X}_p^k + \frac{\Delta x}{2}\left[\mathbf{\hat{E}}\left(\mathbf{X}_p^k\right) + \mathbf{\hat{E}}\left(\mathbf{X}_p^\prime\right)\right].
 
-Note that the critical volume is both voltage and polarity dependent.
+      w_p^{k+1} = w_p^k + \frac{\Delta x}{2}\left[\alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{X}_p^k\right)\right|,\mathbf{X}_p^k\right) + \alpha_{\text{eff}}\left(\left|\mathbf{E}\left(\mathbf{X}_p^\prime\right)\right|,\mathbf{X}_p^\prime\right)\right]
 
-Critical surface
-----------------
-
-The critical surface is computed as
-
-.. math::
-
-   A_c = \int_{K\left(\mathbf{x}\right) > K \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}A.
-
-Note that the critical surface is both voltage and polarity dependent, and is non-zero only on cathode surfaces.
-
-Inception voltage
------------------
-
-Arbitrary starting electron
-___________________________
-
-The inception voltage for starting a critical avalanche can be computed in the stationary solver mode.
-In this case we compute :math:`K\left(\mathbf{x}; U\right)` for a range of voltages :math:`U \in U_1, U_2, \ldots`.
-
-If two values of the :math:`K` integral bracket :math:`K_c`, i.e.
-
-.. math::
-
-   K_a = K\left(\mathbf{x}; U_a\right) \leq K_c
-
-   K_b = K\left(\mathbf{x}; U_b\right) \geq K_c
-
-then we can estimate the inception voltage for a starting electron at position :math:`\mathbf{x}` through linear interpolation as
-
-.. math::
-
-   U_{\text{inc, streamer}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)
-
-A similar method is used for the Townsend criterion, using e.g. :math:`T\left(\mathbf{x}; U\right) = \gamma\exp\left[K\left(\mathbf{x}; U\right)\right]`, then if
-
-
-.. math::
-   
-   T_a = T\left(\mathbf{x}; U_a\right) \leq 1
-
-   T_b = T\left(\mathbf{x}; U_b\right) \ge 1
-
-then we can estimate the inception voltage for a starting electron at position :math:`\mathbf{x}` through linear interpolation as
-
-.. math::
-
-   U_{\text{inc, Townsend}}\left(\mathbf{x}\right) = U_a + \frac{1 - T_a}{T_b - T_a}\left(U_b - U_a\right)
-
-The inception voltage for position :math:`\mathbf{x}` is then
-
-.. math::
-
-   U_{\text{inc}} = \min\left[U_{\text{inc, streamer}}\left(\mathbf{x}\right), U_{\text{inc, Townsend}}\left(\mathbf{x}\right)\right]
-   
-
-Minimum inception voltage
-_________________________
-
-The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
-From the above, this is simply
-
-.. math::
-
-   U_{\text{inc}}^{\text{min}} = \min_{\forall \mathbf{x}} \left[U_{\text{inc}}\left(\mathbf{x}\right)\right].
-
-From the above we also determine
-
-.. math::
-
-   \mathbf{x}_{\text{inc}}^{\text{min}} \leftarrow \mathbf{x}\text{ that minimizes } U_{\text{inc}}\left(\mathbf{x}\right) \forall \mathbf{x},
-
-which is the position of the first electron that enables a critical avalanche at the minimum inception voltage.
-
-.. note::
-
-   The minimum inception voltage is the minimum voltage required for starting a critical avalanche.
-   However, as :math:`U \rightarrow U_{\text{inc}}^{\text{min}}` we also have :math:`V_c \rightarrow 0`, requires the a starting electron *precisely* in :math:`\mathbf{x}_{\text{inc}}^{\text{min}}`.
-
-Inception probability
----------------------
-
-The inception probability is given by :eq:`DischargeInceptionProbability` and is computed using straightforward numerical quadrature:
-
-.. math::
-
-   \int_{V_c}\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V \approx \sum_{\mathbf{i}\in K_\mathbf{i} > K_c} \left(\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\right)_{\mathbf{i}}\left(1 - \frac{\eta_{\mathbf{i}}}{\alpha_{\mathbf{i}}}\right)\kappa_{\mathbf{i}}\Delta V_{\mathbf{i}},
-
-and similarly for the surface integral.
-
-.. important::
-
-   The integration runs over *valid cells*, i.e. grid cells that are not covered by a finer grid.
-
-Advection algorithm
--------------------
-
-The advection algorithm for the negative ion distribution follows the time stepping algorithms described in the advection-diffusion model, see :ref:`Chap:AdvectionDiffusionModel`.
-
-
-Simulation control
-==================
-
-Here, we discuss simulation controls that are available for the discharge inception model.
-These all appear in the form ``DischargeInceptionStepper.<option>``.
-
-verbosity
----------
-
-The ``verbosity`` input option controls the model chattiness (to the ``pout.*`` files).
-Usually we have
-
-.. code-block:: text
-
-   DischargeInceptionStepper.verbosity = -1
-
-mode
-----
-
-The mode flag switches between stationary and transient solves.
-Accepted values are ``stationary`` and ``transient``, e.g.,
-
-.. code-block:: text
-
-   DischargeInceptionStepper.mode = stationary
-
-.. important::
-
-   When running in stationary mode, set ``Driver.max_steps=0``. 
-
-
-inception_alg
--------------
-
-Controls the discharge inception algorithm (for computing the :math:`K` integral).
-This should be specified in the form
-
-.. code-block:: text
-
-   DischargeInceptionStepper.inception_alg = <algorithm>,
-
-where ``<algorithm>`` is either ``euler`` or ``trapz``. 
-
-   
-full_integration
-----------------
-
-Normally, it will not necessary to integrate the particles beyond :math:`w > K_c` since this already implies inception.
-The flag ``full_integration`` can be used to turn on/off integration beyond :math:`K_c`.
-If the flag is set to false, the particle integration routine will terminate once a particle weight reaches :math:`K_c`.
-If the flag is set to true, the particle integration routine will proceed until the particles leave the domain or ionization volumes. 
-
-.. tip::
-
-   Setting ``full_integration`` to false can lead to large computational savings when the ionization volumes are large.
-
-
-output_file
------------
-
-Controls the overall report file for stationary and transient solves.
-The user specifies a filename for a file which will be created (in the same directory as the application is running), containing a summary of the most important simulation output variables.
-
-.. warning::
-
-   Running a new simulation will overwrite the specified ``output_file``. 
-
-For example:
-
-.. code-block:: text
-
-   DischargeInceptionStepper.output_file = report.txt
-
-K_inception
------------
-
-Controls the critical value of the :math:`K` integral.
-E.g.,
-
-.. code-block:: text
-
-   DischargeInceptionStepper.K_inception = 12
-
-eval_townsend
--------------
-
-Controls whether or not the Townsend criterion is also evaluated.
-
-E.g.,
-
-.. code-block:: text
-
-   DischargeInceptionStepper.eval_townsend = true
-
-Will turn on the Townsend criterion. 
-
-plt_vars
---------
-
-Controls plot variables that will be written to HDF5 outputs in the :file:`plt` folder. 
-Valid options are
-
-* ``field``    - Potential, field, and charge distributions.
-* ``K``        - Inception integral.
-* ``T``        - Townsend criterion.  
-* ``Uinc``     - Inception voltage.
-* ``alpha``    - Effective ionization coefficient.
-* ``eta``      - Eta coefficient.  
-* ``bg_rate``  - Background ionization rate.
-* ``emission`` - Field emission.
-* ``poisson``  - Poisson solver.
-* ``tracer``   - Tracer particle solver.
-* ``cdr``      - CDR solver.
-* ``ions``     - Ion solver.
-
-For example:
-
-.. code-block:: text
-
-   DischargeInceptionStepper.plt_vars = K Uinc bg_rate emission ions
+.. _Chap:DischargeInceptionStepSizeSelection:
 
 Step size selection
--------------------
+___________________
 
 The permitted tracer particle step size is controlled by user-specified maximum and minimum space steps:
 
@@ -733,61 +320,111 @@ These parameters are implemented through the following input options:
 Note that the input variable ``townsend_grid_dx`` determines the spatial step (relative to the grid resolution :math:`\Delta x`) when tracking ions for the Townsend region reconstruction.
 
 
-For stationary mode
+Critical volume
+---------------
+
+The critical volume is computed as
+
+.. math::
+
+   V_c = \int_{K\left(\mathbf{x}\right) \geq K_c \cup \gamma\exp\left[K\left(\mathbf{x}\right)\right] \ge 1} \text{d}V.
+
+Note that the critical volume is both voltage and polarity dependent.
+
+Critical surface
+----------------
+
+The critical surface is computed as
+
+.. math::
+
+   A_c = \int_{K\left(\mathbf{x}\right) \geq K_c \cup \gamma\left(\exp\left[K\left(\mathbf{x}\right)\right]-1\right) \ge 1} \text{d}A.
+
+Note that the critical surface is both voltage and polarity dependent, and is non-zero only on cathode surfaces.
+
+Inception voltage
+-----------------
+
+The inception voltage for starting a critical avalanche can be computed in the stationary solver mode (see :ref:`Chap:StationaryMode`).
+This is done separately for the streamer and Townsend inception voltages.
+
+Streamer inception
+__________________
+
+For streamer inception we use :math:`K\left(\mathbf{x}; U\right)` for a range of voltages :math:`U \in U_1, U_2, \ldots` and (linearly) interpolate between these values.
+If two values of the :math:`K` integral bracket :math:`K_c`, i.e.
+
+.. math::
+
+   K_a &= K\left(\mathbf{x}; U_a\right) \leq K_c \\
+   K_b &= K\left(\mathbf{x}; U_b\right) \geq K_c
+
+then we can estimate the inception voltage for a starting electron at position :math:`\mathbf{x}` through linear interpolation as
+
+.. math::
+
+   U_{\text{inc, streamer}}\left(\mathbf{x}\right) = U_a + \frac{K_c - K_a}{K_b - K_a}\left(U_b - U_a\right)
+
+Townsend inception
+__________________
+
+A similar method to the one used above is used for the Townsend criterion, using e.g. :math:`T\left(\mathbf{x}; U\right) = \gamma\left(\exp\left[K\left(\mathbf{x}; U\right)\right]-1\right)`, then if
+
+.. math::
+   
+   T_a &= T\left(\mathbf{x}; U_a\right) \leq 1, \\
+   T_b &= T\left(\mathbf{x}; U_b\right) \ge 1,
+
+then we can estimate the inception voltage for a starting electron at position :math:`\mathbf{x}` through linear interpolation as
+
+.. math::
+
+   U_{\text{inc, Townsend}}\left(\mathbf{x}\right) = U_a + \frac{1 - T_a}{T_b - T_a}\left(U_b - U_a\right)
+
+
+Minimum inception voltage
+_________________________
+
+The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
+For any position :math:`\mathbf{x}`, then
+
+.. math::
+
+   U_{\text{inc}}\left(\mathbf{x}\right) = \min\left[U_{\text{inc, streamer}}\left(\mathbf{x}\right), U_{\text{inc, Townsend}}\left(\mathbf{x}\right)\right]
+   
+From the above, this is simply
+
+.. math::
+
+   U_{\text{inc}}^{\text{min}} = \min_{\forall \mathbf{x}} \left[U_{\text{inc}}\left(\mathbf{x}\right)\right].
+
+From the above we also determine
+
+.. math::
+
+   \mathbf{x}_{\text{inc}}^{\text{min}} \leftarrow \mathbf{x}\text{ that minimizes } U_{\text{inc}}\left(\mathbf{x}\right) \forall \mathbf{x},
+
+which is the position of the first electron that enables a critical avalanche at the minimum inception voltage.
+
+Inception probability
+---------------------
+
+The inception probability is given by :eq:`DischargeInceptionProbability` and is computed using straightforward numerical quadrature:
+
+.. math::
+
+   \int_{V_c}\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\left(1-\frac{\eta}{\alpha}\right) \text{d}V \approx \sum_{\mathbf{i}\in K_\mathbf{i} > K_c} \left(\left\langle\frac{dn_{\text{e}}}{dt}\right\rangle\right)_{\mathbf{i}}\left(1 - \frac{\eta_{\mathbf{i}}}{\alpha_{\mathbf{i}}}\right)\kappa_{\mathbf{i}}\Delta V_{\mathbf{i}},
+
+and similarly for the surface integral.
+
+.. important::
+
+   The integration runs over *valid cells*, i.e. grid cells that are not covered by a finer grid.
+
+Advection algorithm
 -------------------
 
-For the stationary mode the following input flags are required:
-
-* ``voltage_lo`` Lowest simulated voltage. 
-* ``voltage_hi`` High simulated voltage. 
-* ``voltage_steps`` Extra voltage steps between ``voltage_lo`` and ``voltage_hi``.
-
-These voltages levels are used when running a stationary solve.   
-For example:
-
-.. code-block:: text
-
-   DischargeInceptionStepper.voltage_lo    = 10E3
-   DischargeInceptionStepper.voltage_hi    = 30E3
-   DischargeInceptionStepper.voltage_steps = 5
-
-For transient mode
-------------------
-
-For the transient mode the following input options must be set:
-
-* ``ion_transport`` For turning on/off ion transport.
-* ``transport_alg`` For controlling the transport algorithm.
-  Valid options are ``euler``, ``heun``, or ``imex`` (for semi-implicit with corner transport upwind).
-* ``cfl`` Which controls the ion advection time step.
-* ``min_dt`` For setting the minimum time step used.
-* ``max_dt`` For setting the maximum time step used.
-
-For example,
-
-.. code-block:: text
-		
-   DischargeInceptionStepper.ion_transport = true 
-   DischargeInceptionStepper.transport_alg = imex  
-   DischargeInceptionStepper.cfl           = 0.8  
-   DischargeInceptionStepper.min_dt        = 0.0  
-   DischargeInceptionStepper.max_dt        = 1E99 
-
-.. warning::
-
-   The ``ctu`` option exists because the default advection solver for the discharge inception model is the corner transport upwind solver (see :ref:`Chap:CdrCTU`).
-   Ensure that ``CdrCTU.use_ctu = true`` if using ``DischargeInceptionStepper.transport_alg = ctu`` algorithm and set ``CdrCTU.use_ctu = false`` otherwise.
-
-  
-Caveats
--------
-
-The model is intended to be used with a nearest-grid-point deposition scheme (which is also volume-weighted).
-When running the model, ensure that the :ref:`Chap:TracerParticleSolver` flag is set as follows:
-
-.. code-block:: text
-
-   TracerParticleSolver.deposition   = ngp    
+The advection algorithm for the negative ion distribution follows the time stepping algorithms described in the advection-diffusion model, see :ref:`Chap:AdvectionDiffusionModel`.
 
 Adaptive mesh refinement
 ========================
@@ -799,27 +436,49 @@ The discharge inception model runs its own mesh refinement routine, which refine
    \alpha_{\text{eff}}\left(\left|\mathbf{E}\right|, \mathbf{x}\right)\Delta x > \lambda,
 
 where :math:`\lambda` is a user-specified refinement criterion.
-
-This is implemented in a class
-
-.. code-block:: c++
-
-   class DischargeInceptionTagger : public CellTagger
-
-and is automatically included in simulations when setting up the application through the Python setup tools (see :ref:`Chap:DischargeInceptionSetup`).
-The user can control refinement buffers and criterion through the following input options:
+The user can control refinement buffers and criterion through the following input options (see :ref:`Chap:DischargeInceptionConfiguration`).
 
 * ``DischargeInceptionTagger.buffer`` Adds a buffer region around tagged cells.
 * ``DischargeInceptionTagger.max_voltage`` Maximum voltage that will be simulated.
 * ``DischargeInceptionTagger.ref_alpha`` Sets the refinement criterion :math:`\lambda` as above.
 
-For example:
+.. tip::
 
-.. code-block:: text
-		
-   DischargeInceptionTagger.buffer      = 4  
-   DischargeInceptionTagger.max_voltage = 30E3
-   DischargeInceptionTagger.ref_alpha   = 2.0
+   When using transient mode, it may be useful to simply set the maximum voltage to the peak voltage of the voltage curve.
+
+   For stationary solves it might be difficult because the range of voltages is determined automatically during run-time.
+   It may be beneficial to run the program twice, first using ``max_voltage = 1``, and then running the program again using the peak voltage from the output file.
+
+   
+.. _Chap:DischargeInceptionConfiguration:
+
+Solver configuration
+====================
+
+The ``DischargeInceptionStepper`` class come with user-configurable input options which are given below.
+
+.. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.options
+   :language: text
+
+In the above options, the user can select the integration algorithms, the mode, and where to place the output file (which contains, e.g., the values of the ionization integral). 
+The user can also include the following data in the HDF5 output files, by setting the ``plt_vars`` configuration option:
+
+* ``field``    - Potential, field, and charge distributions.
+* ``K``        - Inception integral.
+* ``T``        - Townsend criterion.  
+* ``Uinc``     - Inception voltage.
+* ``alpha``    - Effective ionization coefficient.
+* ``eta``      - Eta coefficient.  
+* ``bg_rate``  - Background ionization rate.
+* ``emission`` - Field emission.
+* ``poisson``  - Poisson solver.
+* ``tracer``   - Tracer particle solver.
+* ``cdr``      - CDR solver.
+* ``ions``     - Ion solver.
+
+.. important::
+
+   The interface for setting the transport data (e.g., ionization coefficients) occurs via the C++ interface.              
 
 .. _Chap:DischargeInceptionSetup:
 
@@ -827,20 +486,16 @@ Setting up a new problem
 ========================
 
 To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/DischargeInception` is the simplest way.
-To see available setup options, run
+A full description is available in the ``README.md`` contained in the folder:
 
-.. code-block:: text
+.. literalinclude:: ../../../../Physics/DischargeInception/README.md
+   :language: markdown
+	      
+To see available setup options, use
 
-   python3 setup.py --help
+.. code-block:: bash
 
-For example, to set up a new problem in :file:`$DISCHARGE_HOME/MyApplications/MyDischargeInception` for a cylinder geometry, run
-
-.. code-block:: text
-
-   python3 setup.py -base_dir=MyApplications -app_name=MyDischargeInception -geometry=Cylinder
-
-This will set up a new problem in a cylinder geometry (defined in :file:`Geometries/Cylinder`).
-The main file is named :file:`program.cpp`` and contains default implementations for the required input data (see :ref:`Chap:DischargeInceptionInputData`).
+   ./setup.py --help
 
 
 Example programs
