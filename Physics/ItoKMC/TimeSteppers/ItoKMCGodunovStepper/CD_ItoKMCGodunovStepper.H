@@ -45,6 +45,12 @@ namespace Physics {
       virtual ~ItoKMCGodunovStepper();
 
       /*!
+	@brief Compute a time step used for the advance method
+      */
+      virtual Real
+      computeDt() override;
+
+      /*!
 	@brief Advance the Ito-Poisson-KMC system over a_dt
 	@param[in] a_dt Time step
       */
@@ -217,6 +223,11 @@ namespace Physics {
 	@brief Factor for strided filter. Alpha=0.5 yields a bilinear filter
       */
       Real m_condFilterAlpha;
+
+      /*!
+        @brief Limit for maximum field abort
+      */
+      Real m_maxFieldAbort;
 
       /*!
 	@brief Storage for simplified particles that gave us sigma^k

@@ -496,6 +496,11 @@ namespace Physics {
       int m_mergeInterval;
 
       /*!
+        @brief Storage for the maximum field strength that was computed
+      */
+      Real m_maxReducedField;
+
+      /*!
 	@brief Previous time step
       */
       Real m_prevDt;
