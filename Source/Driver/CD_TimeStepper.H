@@ -124,9 +124,10 @@ public:
 #ifdef CH_USE_HDF5
   /*!  
     @brief Write checkpoint data to file
-    @param[inout] a_handle HDF5 fil
+    @param[inout] a_handle HDF5 file
     @param[in]    a_lvl    Grid level
-    @details Implement this routine for checkpointing data for restarts. This will typically call the solvers' checkpointing routine. 
+    @details Implement this routine for checkpointing data for restarts. This will
+    typically call the solvers' checkpointing routine, but more data can be added.
   */
   virtual void
   writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;

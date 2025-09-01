@@ -254,4 +254,3 @@ CdrPlasmaStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 CdrPlasmaStreamerTagger.refine_alpha          = 2.0      ## Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl       = 3        ## Set max coarsening depth
-

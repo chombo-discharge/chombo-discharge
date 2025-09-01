@@ -27,4 +27,3 @@ RandomInterface.plane2.normal                = 0 1 0          ## Plane normal ve
 RandomInterface.plane2.clamp_lo              = -1 -1 -1       ## Noise clamp on low end
 RandomInterface.plane2.clamp_hi              = 1 1 1          ## Noise clamp on high end
 RandomInterface.plane2.clamp_dx              = 0.1 0.1 0.1    ## Clamping length
-

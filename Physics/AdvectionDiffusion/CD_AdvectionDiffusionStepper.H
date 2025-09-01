@@ -207,22 +207,22 @@ namespace Physics {
       setCFL(const Real a_cfl);
 
       /*!
-	@brief Set the initial data.. 
-	@param[in] a_initData Initial data function. 
+        @brief Set the initial data..
+        @param[in] a_initData Initial data function. 
       */
       void
       setInitialData(const std::function<Real(const RealVect& a_position)>& a_initData) noexcept;
 
       /*!
-	@brief Set the velocity field. 
-	@param[in] a_velocity Velocity field. 
+        @brief Set the velocity field. 
+        @param[in] a_velocity Velocity field. 
       */
       void
       setVelocity(const std::function<RealVect(const RealVect& a_position)>& a_velocity) noexcept;
 
       /*!
-	@brief Set the diffusion coeffieint. 
-	@param[in] a_diffusion Diffusion coefficient
+        @brief Set the diffusion coeffieint. 
+        @param[in] a_diffusion Diffusion coefficient
       */
       void
       setDiffusionCoefficient(const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept;

@@ -8,4 +8,3 @@ TracerParticleSolver.deposition_cf     = halo     ## Coarse-fine deposition. Mus
 TracerParticleSolver.plot_weight       = true     ## Turn on/off plotting of the particle weight.
 TracerParticleSolver.plot_velocity     = true     ## Turn on/off plotting of the particle velocities.
 TracerParticleSolver.volume_scale      = false    ## If true, depositions yield density * volume instead of just volume
-

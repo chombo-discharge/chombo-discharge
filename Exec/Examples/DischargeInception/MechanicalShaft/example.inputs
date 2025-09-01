@@ -224,4 +224,3 @@ DischargeInceptionTagger.buffer          = 0        ## Grown buffer around flagg
 DischargeInceptionTagger.max_voltage     = 60E3     ## Maximum applied voltage
 DischargeInceptionTagger.ref_alpha       = 1.0      ## Refinement curvature criterion. Lower => more mesh
 DischargeInceptionTagger.plot            = false    ## Plot tagging field or not.
-

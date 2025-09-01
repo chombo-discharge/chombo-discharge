@@ -39,7 +39,7 @@ enum class KMCLeapPropagator
 
 /*!
   @brief Class for running Kinetic Monte-Carlo simulations. 
-  @details The template parameter State is the underlying state type that KMC operators on. There are no required member functions on the State parameter,
+  @details The template parameter State is the underlying state type that KMC operators on. There are rather simple required member functions on the State parameter,
   but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:
 
   1. Real R::propensity(State) const -> Computes the reaction propensity for the input state.

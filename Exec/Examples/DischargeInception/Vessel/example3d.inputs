@@ -215,4 +215,3 @@ lightning_impulse.tail_time      = 50E-6
 # Other physics adjustable physics data
 # ====================================================================================================
 DischargeInception.second_townsend     = 1.E-3
-

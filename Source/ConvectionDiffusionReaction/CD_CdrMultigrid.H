@@ -286,6 +286,9 @@ protected:
 
   /*!
     @brief Advection-only extrapolation to faces
+    @param[out] a_facePhi Face-centered states
+    @param[in] a_phi Cell-centered states
+    @param[in] a_extrapDt Extrapolating time step.
   */
   virtual void
   advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override = 0;

@@ -18,4 +18,3 @@ WireWire.second.electrode_radius      = 0.1        ## Wire radius
 WireWire.second.potential             = -0.5       ## Relative potential on wire
 WireWire.second.dielectric_radius     = 0.15       ## Sheath radius
 WireWire.second.center                = 0 -0.15    ## Wire center
-

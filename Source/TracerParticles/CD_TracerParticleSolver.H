@@ -291,7 +291,7 @@ public:
 
   /*!
     @brief Return the velocity field
-    @return *m_velocityField
+    @return m_velocityField
   */
   const EBAMRCellData&
   getVelocityField() const;

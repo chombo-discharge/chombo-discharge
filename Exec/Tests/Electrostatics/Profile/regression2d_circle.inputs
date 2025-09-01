@@ -153,4 +153,3 @@ FieldStepper.init_rho         = 1.E-5     ## Space charge density
 FieldStepper.init_sigma       = 0.0       ## Surface charge density
 FieldStepper.rho_center       = 0 5E-3    ## Space charge blob center
 FieldStepper.rho_radius       = 1.E-3     ## Space charge blob radius
-

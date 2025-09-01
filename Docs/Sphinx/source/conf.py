@@ -36,7 +36,7 @@ PygmentsBridge.latex_formatter = CustomLatexFormatter
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '2.0'
+#needs_sphinx = '2.0'
 
 # Git commit
 commit_id = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip().decode('ascii')
@@ -216,7 +216,7 @@ latex_elements = {
 'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-'preamble': '\setcounter{secnumdepth}{3}\setcounter{tocdepth}{2}',
+#'preamble': '\setcounter{secnumdepth}{3}\setcounter{tocdepth}{2}',
 
 # Release name
 #'releasename': ''

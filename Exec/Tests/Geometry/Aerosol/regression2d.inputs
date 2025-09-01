@@ -79,4 +79,3 @@ Aerosol.sphere2.center     = 0. 0. 0.    ## Sphere center
 
 Aerosol.sphere3.radius     = 0.2            ## Sphere radius
 Aerosol.sphere3.center     = 0.5 0.5 0.5    ## Sphere center
-

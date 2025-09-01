@@ -8,4 +8,3 @@ RadiativeTransferStepper.dt                 = 1.E-10    ## Time step
 RadiativeTransferStepper.blob_amplitude     = 1.0       ## Blob amplitude
 RadiativeTransferStepper.blob_radius        = 0.1       ## Blob radius
 RadiativeTransferStepper.blob_center        = 0 0       ## Blob center
-

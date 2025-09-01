@@ -284,4 +284,3 @@ ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. H
 ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
 
 Random.seed     = -1
-

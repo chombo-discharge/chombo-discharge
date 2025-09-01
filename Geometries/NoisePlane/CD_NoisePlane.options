@@ -19,4 +19,3 @@ NoisePlane.noise_reseed          = false    ## Reseed noise
 NoisePlane.clamp_lo     = -1 -1 -1    ## Noise clamp low
 NoisePlane.clamp_hi     = 1  1  1     ## Noise clamp high
 NoisePlane.clamp_dx     = 0.1         ## Noise clamp falloff
-

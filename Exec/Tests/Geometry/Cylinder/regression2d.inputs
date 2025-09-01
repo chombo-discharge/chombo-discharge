@@ -71,4 +71,3 @@ Cylinder.z_coord           = 0.0          ## z-coordinate if doing 2D
 Cylinder.center1           = -10 -10 0    ## One endpoint. Must have 3 entries
 Cylinder.center2           = 10  10 0     ## Other endpoint. Must have 3 entries.
 Cylinder.radius            = 0.25         ## Cylinder radius.
-

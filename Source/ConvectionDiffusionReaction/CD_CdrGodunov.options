@@ -27,4 +27,3 @@ CdrGodunov.gmg_min_cells            = 16                        ## Bottom drop
 CdrGodunov.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrGodunov.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-

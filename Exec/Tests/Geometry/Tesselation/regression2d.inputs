@@ -65,4 +65,3 @@ Driver.refine_dielectrics           = -1                   ## Refine dielectric 
 Tesselation.mesh_file       = sphere.stl    ## STL file
 Tesselation.flip_inside     = false         ## Flip inside/outside
 Tesselation.z_coord         = 0.0           ## z-coordinate for 2D slicing this object
-

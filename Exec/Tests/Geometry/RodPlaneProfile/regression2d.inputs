@@ -97,4 +97,3 @@ RodPlaneProfile.circle_radius     = 1.031E-3
 # Square specific settings
 RodPlaneProfile.square_width     = 640.0123123E-6
 RodPlaneProfile.square_depth     = 440.01231231E-6
-

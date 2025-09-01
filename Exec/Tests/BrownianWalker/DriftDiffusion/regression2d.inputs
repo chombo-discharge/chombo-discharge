@@ -131,4 +131,3 @@ BrownianWalker.omega        = 1.0     ## Rotation velocity
 BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
 BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
 BrownianWalker.buffer          = 0       ## Grow tagged cells
-

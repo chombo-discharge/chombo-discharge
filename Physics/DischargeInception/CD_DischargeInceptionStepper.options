@@ -33,4 +33,3 @@ DischargeInceptionStepper.min_dt            = 1.E-9    ## Minimum permitted time
 DischargeInceptionStepper.max_dt            = 1.E99    ## Maximum permitted time step
 DischargeInceptionStepper.voltage_eps       = 0.02     ## Permitted relative change in V(t) when computing dt
 DischargeInceptionStepper.max_dt_growth     = 0.05     ## Maximum relative change in dt when computing dt
-

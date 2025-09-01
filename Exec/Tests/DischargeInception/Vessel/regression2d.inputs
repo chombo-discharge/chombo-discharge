@@ -208,4 +208,3 @@ lightning_impulse.peak           = 50E3
 lightning_impulse.start          = 50E-9
 lightning_impulse.front_time     = 1.2E-6
 lightning_impulse.tail_time      = 50E-6
-

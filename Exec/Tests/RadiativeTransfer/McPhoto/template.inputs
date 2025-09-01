@@ -128,4 +128,3 @@ rod_sphere.dielectric_radius           = 1.0             ## Dielectric radius
 # ====================================================================================================
 RadiativeTransferStepper.verbosity     = -1     ## Verbosity
 RadiativeTransferStepper.kappa         = 1.0    ## Inverse absorption coefficient
-

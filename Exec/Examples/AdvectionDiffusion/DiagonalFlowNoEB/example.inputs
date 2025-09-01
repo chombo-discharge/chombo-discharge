@@ -116,4 +116,3 @@ AdvectionDiffusion.max_dt     = 1.E99    ## Largest acceptable time step
 AdvectionDiffusion.refine_curv     = 0.1     ## Refine if curvature exceeds this
 AdvectionDiffusion.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
 AdvectionDiffusion.buffer          = 0       ## Grow tagged cells
-

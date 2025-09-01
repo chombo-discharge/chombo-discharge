@@ -80,4 +80,3 @@ NoisePlane.noise_reseed          = false       ## Reseed noise
 NoisePlane.clamp_lo     = -0.5 -0.5 0    ## Noise clamp low
 NoisePlane.clamp_hi     = 0.5  0.5 0     ## Noise clamp high
 NoisePlane.clamp_dx     = 0.1            ## Noise clamp falloff
-

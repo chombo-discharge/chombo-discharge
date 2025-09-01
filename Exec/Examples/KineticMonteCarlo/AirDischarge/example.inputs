@@ -24,4 +24,3 @@ num_initial_electrons     = 100        ## Number of initial electrons
 E                         = 1E7        ## Background field
 dt                        = 10E-12     ## Time step
 stop_time                 = 100E-12    ## Stop time
-

@@ -26,4 +26,3 @@ DiskProfiledPlane.profile_period            = 1 1 1    ## Repetition period
 DiskProfiledPlane.square_dimensions     = 1 1 1    ## Dimensions for squares/square channels
 DiskProfiledPlane.sphere_radius         = 1        ## Radius for sphere profiles
 DiskProfiledPlane.cylinder_radius       = 1        ## Radius for cylinder profiles
-

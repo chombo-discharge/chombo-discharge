@@ -25,12 +25,12 @@ args = parser.parse_args()
 # Check if DISCHARGE_HOME and CHOMBO_HOME has been set
 discharge_home = args.discharge_home
 if not args.discharge_home:
-    print "Error: Cannot set application because the DISCHARGE_HOME environment variable has not been set."
-    print "       Please set DISCHARGE_HOME, for example:"
-    print "       >export  DISCHARGE_HOME=<directory>"
+    print("Error: Cannot set application because the DISCHARGE_HOME environment variable has not been set.")
+    print("       Please set DISCHARGE_HOME, for example:")
+    print("       >export  DISCHARGE_HOME=<directory>")
 else:
-    print "DISCHARGE_HOME is " + args.discharge_home
-    print 'Setting up problem in directory ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name
+    print("DISCHARGE_HOME is " + args.discharge_home)
+    print('Setting up problem in directory ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name)
 
     app_main.write_template(args)    # Write main file
     app_options.write_template(args) # Write options file
@@ -46,6 +46,6 @@ else:
             os.system('make -s -j ' + str(args.procs) + ' program')
         else:
             os.system('make -j ' + str(args.procs) + ' program')
-            print 'Created and built your mini app - it resides in ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name
+            print('Created and built your mini app - it resides in ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name)
     else:
-        print 'Problem setup successful'
+        print('Problem setup successful')

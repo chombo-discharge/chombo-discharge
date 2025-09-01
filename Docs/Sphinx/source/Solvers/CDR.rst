@@ -6,18 +6,21 @@ Convection-Diffusion-Reaction
 Here, we discuss the discretization of the equation 
 
 .. math::
+   :label: cdr_equation
    
    \frac{\partial \phi}{\partial t} + \nabla\cdot\left(\mathbf{v} \phi - D\nabla \phi\right) = S.
 
 We assume that :math:`\phi` is discretized by cell-centered averages (note that cell centers may lie inside solid boundaries), and use finite volume methods to construct fluxes in a cut-cells and regular cells.
-Here, :math:`\mathbf{v}` indicates a drift velocity and :math:`D` is the diffusion coefficient. 
+Here, :math:`\mathbf{v}` indicates a drift velocity and :math:`D` is the (isotropic) diffusion coefficient.
 
 .. note::
    
    Using cell-centered versions :math:`\phi` might be problematic for some models since the state is extended outside the valid region.
    Models might have to recenter the state in order compute e.g. physically meaningful reaction terms in cut-cells.
 
-Source code for the convection-diffusion-reaction solvers reside in :file:`$DISCHARGE_HOME/Source/ConvectionDiffusionReaction` and the full API can be found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html>`_.
+.. tip::
+   
+   Source code for the convection-diffusion-reaction solvers reside in :file:`$DISCHARGE_HOME/Source/ConvectionDiffusionReaction`.
 
 .. _Chap:CdrSolver:   
 
@@ -26,34 +29,39 @@ CdrSolver
 
 The ``CdrSolver`` class contains the interface for solving advection-diffusion-reaction problems.
 ``CdrSolver`` is an abstract class and does not contain any specific advective or diffusive discretization (these are added by implementation classes).
+However, ``CdrSolver`` supplies a useful interface that includes implementations of regrid functions and I/O capabilities, such that only the advective and diffusive discretizations need to be provided.
 
-Currently, the implementation layers consist of the following:
+The implementation layers of the CDR capabilities consist of the following:
 
 #. :ref:`Chap:CdrMultigrid`, which inherits from ``CdrSolver`` and adds a second order accurate discretization for the diffusion operator.
+   This includes both explicit and implicit discretizations, where the implicit discretization uses geometric multigrid to resolve the diffusion problem.
 #. :ref:`Chap:CdrCTU` and :ref:`Chap:CdrGodunov` which inherit from ``CdrMultigrid`` and add a second order accurate spatial discretization for the advection operator. 
 
-Currently, we mostly use the ``CTU`` class which contains a second order accurate discretization with slope limiters.
-``CdrGodunov`` is a similar operator, but the advection code for this is distributed by the ``Chombo`` team.
-The C++ API for these classes can be obtained from `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html>`_.
+Currently, we mostly use the :ref:`Chap:CdrCTU` class which contains a second order accurate discretization with slope limiters.
+:ref:`Chap:CdrGodunov` is a similar operator, but the advection code for this is distributed by the ``Chombo`` team.
+The C++ API for these classes can be obtained from `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classCdrSolver.html>`_ and references therein.
 
-The advance methods for ``CdrSolver`` are encapsulated by the following functions:
+Explicit advance methods for :eq:`cdr_equation` only require an approximation to the right-hand side of the equation.
+These approximations are encapsulated by the following functions:
 
-.. code-block:: c++
+.. _cdr_div_functions:
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
+   :caption: List of functions responsible for calculating approximations to divergence operators.
+   :language: c++
+   :lines: 159-211
+   :dedent: 2
 
-   // For advancing the diffusion equation with an implicit Euler method. 
-   void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const EBAMRCellData& a_source, const Real a_dt) = 0;
+These functions are not implemented in ``CdrSolver``, but in subclasses.
+In the current structure, :ref:`Chap:CdrMultigrid` supplies the diffusive discretization and :ref:`Chap:CdrCTU` supplies the advective discretization.
 
-   // For advancing the diffusion equation with a Crank-Nicholson method.
-   void advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const EBAMRCellData& a_source, const Real a_dt) = 0;
+The implicit advance methods for ``CdrSolver`` are encapsulated by the following functions:
 
-   // For computing div(v*phi - D*grad(phi)).
-   void computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) = 0;
-
-   // For computing div(v*phi).
-   void computeDivF(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) = 0;
-
-   // For computing div(D*grad(phi)).
-   void computeDivD(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_dt, const bool a_conservativeOnly, const bool a_ebFlux, const bool a_domainFlux) = 0;
+.. _cdr_implicit_diffusion:
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
+   :caption: List of current implicit diffusion advance functions.
+   :language: c++
+   :lines: 121-134,145-157
+   :dedent: 2
 
 .. _Chap:CdrDetails:   
 
@@ -136,11 +144,12 @@ After these steps, we define
 Numerically, the above steps for computing a conservative divergence of a one-component flux :math:`\mathbf{G}` are implemented in the convection-diffusion-reaction solvers, which also respects boundary conditions (e.g. charge injection).
 The user will need to call the function
 
-.. code-block:: c++
-		
-   virtual void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebG)
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
+   :language: c++
+   :lines: 213-221
+   :dedent: 2
 
-where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebG`` is the flux on the embedded boundary.
+where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebFlux`` is the flux through the embedded boundary.
 The above steps are performed by interpolating ``a_G`` to face centroids in the cut cells for computing the conservative divergence, and the remaining steps are then performed successively.
 The result is put in ``a_divG``.
 
@@ -158,53 +167,43 @@ __________________
 
 Scalar advection updates follows the computation of the explicit divergence discussed in :ref:`Chap:ExplicitDivergence`.
 The face-centered fluxes :math:`\mathbf{G} = \phi\mathbf{v}` are computed by instantiation classes for the convection-diffusion-reaction solvers.
-The function signature for explicit advection is
+The function signature for explicit advection (``computeDivF``) was given in :numref:`cdr_div_functions`.
 
-.. code-block:: c++
+The face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF`` using the procedure outlined above.
+In the simplest case, these fluxes are simply calculated using an upwind rule, potentially extrapolated with slope-limiters from the cell-center.
+In more complex cases, we use both the normal and transverse slopes in a cell.
+The argument ``a_extrapDt`` is the time step size.
+It is not needed in a method-of-lines context, but it is used in e.g. :ref:`Chap:CdrCTU` for computing transverse derivatives in order to expand the stability region of the discretization (i.e., permit larger CFL numbers). 
 
-   void computeDivF(EBAMRCellData& a_divF, const EBAMRCellData& a_state, const Real a_dt);
-
-where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF`` using the procedure outlined above.
-The argument ``a_dt`` is the time step size.
-It is not needed in a method-of-lines context, but it is used in e.g. :ref:`Chap:CdrCTU` for computing transverse derivatives in order to expand the stability region (i.e., use larger CFL numbers). 
-
-For example, in order to perform an advective advance over a time step :math:`\Delta t`, one would perform the following:
+For example, in order to perform an advective advance with the explicit Euler rule over a time step :math:`\Delta t`, one would perform the following:
 
 .. code-block:: c++
 
    CdrSolver* solver;
 
-   const Real dt = 1.0;
-
-   EBAMRCellData& phi  = solver->getPhi();     // Cell-centered state
-   EBAMRCellData& divF = solver->getScratch(); // Scratch storage in solver
-   solver->computeDivF(divF, phi, 0.0);        // Computes divF
-   DataOps:incr(phi, divF, -dt);               // makes phi -> phi - dt*divF
+   EBAMRCellData& phi  = solver->getPhi();                 // Cell-centered state
+   EBAMRCellData& divF = solver->getScratch();             // Scratch storage in solver
+   solver->computeDivF(divF, phi, 0.0, false, true, true); // Computes divF including BCs
+   DataOps:incr(phi, divF, -dt);                           // Makes phi -> phi - dt*divF
 
 .. _Chap:ExplicitDiffusion:
    
 Explicit diffusion
 __________________
 
-Explicit diffusion is performed in much the same way as implicit advection, with the exception that the general flux :math:`\mathbf{G} = D\nabla\phi` is computed by using centered differences on face centers.
-The function signature for explicit diffusion is
+Explicit diffusion is performed in much the same way as explicit advection, with the exception that the general flux :math:`\mathbf{G} = D\nabla\phi` is computed by using centered differences on face centers.
+The function signature for explicit diffusion (``computeDivD``) was given in :numref:`cdr_div_functions`. 
 
-.. code-block:: c++
-
-   void computeDivD(EBAMRCellData& a_divF, const EBAMRCellData& a_state);
-
-and we increment in the same way as for explicit advection:
+For example, to use an explicit Euler update of a diffusion-only problem, we increment in the same way as for explicit advection:
 
 .. code-block:: c++
 
    CdrSolver* solver;
 
-   const Real dt = 1.0;
-
-   EBAMRCellData& phi  = solver->getPhi();     // Cell-centered state
-   EBAMRCellData& divD = solver->getScratch(); // Scratch storage in solver
-   solver->computeDivF(divD, phi, 0.0);        // Computes divD
-   DataOps:incr(phi, divD, dt);                // makes phi -> phi + dt*divD
+   EBAMRCellData& phi  = solver->getPhi();            // Cell-centered state
+   EBAMRCellData& divD = solver->getScratch();        // Scratch storage in solver
+   solver->computeDivD(divD, phi, false, true, true); // Computes divD including BCs
+   DataOps:incr(phi, divD, dt);                       // Makes phi -> phi + dt*divD
 
 .. _Chap:ExplicitAdvectionDiffusion:
    
@@ -214,24 +213,19 @@ ____________________________
 There is also functionality for aggregating explicit advection and diffusion advances.
 The reason for this is that the cut-cell overhead is only applied once on the combined flux :math:`\phi\mathbf{v} - D\nabla\phi` rather than on the individual fluxes.
 For non-split methods this leads to some performance improvement since the interpolation of fluxes on cut-cell faces only needs to be performed once. 
-The signature for this is precisely the same as for explicit advection only:
+The signature for this is precisely the same as for explicit advection and diffusion, but aggregated as a function ``computeDivJ``.
+The function signature is given in :numref:`cdr_div_functions`. 
 
-.. code-block:: c++
-		
-   void computeDivJ(EBAMRCellData& a_divJ, const EBAMRCellData& a_state, const Real a_extrapDt)
-
-where the face-centered fluxes are computed by using the velocities and boundary conditions that reside in the solver, and result is put in ``a_divF``.
-For example, in order to perform an advective advance over a time step :math:`\Delta t`, one would perform the following:
+For example, in order to perform an advection-diffusion advance over a time step :math:`\Delta t`, one would perform the following:
 
 .. code-block:: c++
 
-   const Real dt = 1.0;
+   CdrSolver* solver;
 
-   EBAMRCellData& phi  = solver->getPhi();     // Cell-centered state
-   EBAMRCellData& divJ = solver->getScratch(); // Scratch storage in solver
-   solver->computeDivJ(divJ, phi, 0.0);        // Computes divD
-   DataOps:incr(phi, divJ, -dt);               // makes phi -> phi - dt*divJ
-
+   EBAMRCellData& phi  = solver->getPhi();                 // Cell-centered state
+   EBAMRCellData& divJ = solver->getScratch();             // Scratch storage in solver
+   solver->computeDivJ(divJ, phi, 0.0, false, true, true); // Computes divJ including BCs
+   DataOps:incr(phi, divJ, -dt);                           // makes phi -> phi - dt*divJ
 
 Often, time integrators have the option of using implicit or explicit diffusion.
 If the time-evolution is not split (i.e. not using a Strang or Godunov splitting), the integrators will often call ``computeDivJ`` rather separately calling ``computeDivF`` and ``computeDivD``.
@@ -243,42 +237,31 @@ If you had a split-step Godunov method, the above procedure for a forward Euler 
 
    const Real dt = 1.0;
 
-   solver->computeDivF(divF, phi, 0.0); // Computes divF = div(n*phi)
-   DataOps:incr(phi, divF, -dt);        // makes phi -> phi - dt*divF
+   solver->computeDivF(...);     // Computes divF = div(n*phi)
+   DataOps:incr(phi, divF, -dt); // makes phi -> phi - dt*divF
 
-   solver->computeDivD(divD, phi);      // Computes divD = div(D*nabla(phi))
-   DataOps:incr(phi, divD, dt);         // makes phi -> phi + dt*divD
+   solver->computeDivD(...);     // Computes divD = div(D*nabla(phi))
+   DataOps:incr(phi, divD, dt);  // makes phi -> phi + dt*divD
 
-However, the cut-cell redistribution dance (flux interpolation, hybrid divergence, and redistribution) would be performed twice. 
+However, the cut-cell redistribution dance (flux interpolation, hybrid divergence, and redistribution) would then be performed twice. 
 
 .. _Chap:ImplicitDiffusion:
 
 Implicit diffusion
 __________________
 
-Implicit diffusion can occasionally be necesasry. 
-The convection-diffusion-reaction solvers support two basic diffusion solves:
-Backward Euler and the Crank-Nicholson methods.
-The function signatures for these are
+Usage of implicit diffusion can occasionally be necessary, especially if the diffusive time step leads to numerical stiffness and severe time step limitations.
+The convection-diffusion-reaction solvers support two basic implicit diffusion solves which were given in :ref:`cdr_implicit_diffusion`.
+
+As an example, perform a split step Godunov method with the Euler rules for explicit advection and implicit diffusion is done as follows:
 
 .. code-block:: c++
 
-   void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const EBAMRCellData& a_source, const Real a_dt) = 0;
-   void advanceCrankNicholson(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const EBAMRCellData& a_source, const Real a_dt) = 0;		
-		
-		
-where ``a_newPhi`` is the state at the new time :math:`t + \Delta t`, ``a_oldPhi`` is the state at time :math:`t` and ``a_source`` is the source term which strictly speaking should be centered at time :math:`t + \Delta t` for the Euler update and at time :math:`t + \Delta t/2` for the Crank-Nicholson update.
-This may or may not be possible for your particular problem. 
-
-For example, performing a split step Godunov method for advection-diffusion is as simple as:
-
-.. code-block:: c++
-
-   // First. Compute phi = phi - dt*div(F)
-   solver->computeDivF(divF, phi, 0.0); 
+   // Compute phi = phi - dt*div(F)
+   solver->computeDivF(divF, phi, ...);
    DataOps:incr(phi, divF, -dt);        
 
-   // Implicit diffusion advance over a time step dt
+   // Implicit diffusion advance over a time step dt.
    DataOps::copy(phiOld, phi);            
    solver->advanceEuler(phi, phiOld, dt); 
 
@@ -294,11 +277,13 @@ In addition, ``CdrMultigrid`` adds two implicit time-integrators, an implicit Eu
 The ``CdrMultigrid`` layer uses the Helmholtz discretization discussed in :ref:`Chap:Helmholtz`.
 It implements the pure functions required by :ref:`Chap:CdrSolver` but introduces a new pure function
 
-.. code-block::
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
+   :language: c++
+   :lines: 287-294
+   :dedent: 2
 
-   virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_dt) = 0;
-
-The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators, see :ref:`Chap:CdrDetails`.
+The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
+In the simplest case, the face-centered values of :math:`\phi` are formed by an upwind approximation of the cell-centered states.
 
 .. _Chap:CdrCTU:
 
@@ -309,12 +294,14 @@ CdrCTU
 The CTU discretization uses information that propagates over corners of grid cells when calculating the face states.
 It can combine this with use various limiters:
 
-* No limiter (pure CTU)
-* Minmod
-* Superbee
-* Monotonized central differences
+* No limiter.
+* Minmod.
+* Superbee.
+* Monotonized central differences.
 
-In addition, ``CdrCTU`` can turn off the transverse terms in which case the discretization reduces to the donor cell method.
+In addition, ``CdrCTU`` can turn off the transverse terms in which case the discretization reduces to the donor cell method where only normal slopes are used.
+A standard CFL condition will apply in this case.
+
 Our motivation for using the CTU discretization lies in the time step selection for the CTU and donor-cell methods, see :ref:`Chap:CTUStep`.
 Typically, we want to achieve a dimensionally independent time step that is the same in 1D, 2D, and 3D, but without directional splitting. 
 
@@ -371,8 +358,8 @@ where for the superbee slope we have :math:`\Delta_1 = \text{minmod}\left(\Delta
 
 .. note::
 
-   When using slopes, monotonicity is not guaranteed for the CTU discretization.
-   If slopes are turned off, however, the scheme is guaranteed to be monotone. 
+   When using transverse slopes, monotonicity is not guaranteed for the CTU discretization.
+   If transverse slopes are turned off, however, the scheme is guaranteed to be monotone. 
 
 .. _Chap:CTUStep:
 
@@ -387,17 +374,24 @@ The stability region for the donor-cell and corner transport upwind methods are:
 
    \text{CTU}: \Delta t \leq \frac{\Delta x}{\max\left(|v_x|,|v_y|,|v_z|\right)}
 
-Note that when the flow is diagonal to the grid, i.e. :math:`|v_x| = |v_y| = |v_z|`, the CTU can use a time step that is three times larger than for the donor-cell method.
+Note that when the flow is diagonal to the grid, i.e., :math:`|v_x| = |v_y| = |v_z|`, the CTU can use a time step that is three times larger than for the donor-cell method.
 
 Class options
 _____________
 
 When running the ``CdrCTU`` solver the user can adjust the advective algorithm by turning on/off slope limiters and the transverse term through the class options:
+Several options are available for adjusting the behavior of the discretization, as given below:
+
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrCTU.options
+   :language: text
+
+We do not discuss all options here, but note the following:
 
 * ``CdrCTU.slope_limiter``, which must be *none*, *minmod*, *mc*, or *superbee*.
 * ``CdrCTU.use_ctu``, which must be *true* or *false*.
-
-If the transverse terms are turned off, ``CdrCTU`` will compute the donor-cell time step.
+  If setting this to false, transverse terms are turned off the ``CdrCTU`` will use the donor-cell scheme and time step restriction.
+* All options that begin with ``gmg_`` indicate control over how the geometric multigrid algorithm operates, e.g., number of smoothings on each level or the bottom solver type.
+* ``CdrCTU.plt_vars`` indicate which variables are added to plot files.
 
 .. _Chap:CdrGodunov:
 
@@ -417,74 +411,53 @@ However, it only supports the monotonized central difference limiter.
 Using CdrSolver
 ----------------
 
-Setting up the solver
-_____________________
-
-To set up the ``CdrSolver``, the following commands are usually sufficient: 
-
-.. code-block:: c++
-
-   // Assume m_solver and m_species are pointers to a CdrSolver and CdrSpecies
-   auto solver  = RefCountedPtr<CdrSolver>  (new MyCdrSolver());
-   auto species = RefCountedPtr<CdrSpecies> (new MyCdrSpecies());
-
-To see an example, the advection-diffusion code in :file:`/Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp` shows how to set up a ``CdrSolver``. 
+.. tip::
+   
+   For a complete example, see the :ref:`Chap:AdvectionDiffusionModel`.
 
 Filling the solver
 __________________
 
 In order to obtain mesh data from the ``CdrSolver``, the user should use the following public member functions:
 
-.. code-block:: c++
-
-   EBAMRCellData& getPhi();                               // Return  phi
-   EBAMRCellData& getSource();                            // Returns S   
-   EBAMRCellData& getCellCenteredVelocity();              // Get cell-centered velocity
-   EBAMRFluxData& getFaceCenteredDiffusionCoefficient();  // Returns D
-   EBAMRIVData&   getEbFlux();                            // Returns flux at EB
-   EBAMRIFData&   getDomainFlux();                        // Returns flux at domain boundaries
+.. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
+   :language: c++
+   :lines: 589-656
+   :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
-Interpolation to face-centered transport fluxes are done by ``CdrSolver`` during the discretization step.
+Interpolation to face-centered transport fluxes are done by ``CdrSolver`` during the discretization step, so there is normally no need to fill these directly.
 
 The general way of setting the velocity is to get a direct handle to the velocity data:
 
 .. code-block:: c++
 
-   CdrSolver solver;
+   CdrSolver* solver;
    
    EBAMRCellData& veloCell = solver.getCellCenteredVelocity();
 
 Then, ``veloCell`` can be filled with the cell-centered velocity.
+One can use ``DataOps`` functions to fill the data directly using a C++ lambda:
+
+.. literalinclude:: ../../../../Source/Utilities/CD_DataOps.H
+   :language: c++
+   :lines: 1171-1184
+   :dedent: 2
+
 This would typically look something like this:
 
 .. code-block:: c++
 
    EBAMRCellData& veloCell = m_solver->getCellCenteredVelocity();
-   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids()[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit){
-         EBCellFAB& patchVel = (*veloCell[lvl])[dit()];
+   auto veloFunc = [=](const RealVect x) -> RealVect
+   {
+     return RealVect::Unit;
+   };
 
-	 // Do something with patchVel
-      }
-   }
+   DataOps::setValue(veloCell, veloFunc, ...);
 
 The same procedure goes for the source terms, diffusion coefficients, boundary conditions and so on.
-For example, an explicit Euler discretization for the problem :math:`\partial_t\phi = S` is:
-
-.. code-block:: c++
-
-   CdrSolver* solver;
-
-   const Real dt = 1.0;
-   
-   EBAMRCellData& phi = solver->getPhi();
-   EBAMRCellData& src = solver->getSource();
-
-   DataOps::incr(phi, src, dt);
-   
 
 Adjusting output
 ________________
@@ -497,21 +470,14 @@ For example, for the ``CdrCTU`` implementation the following variables are avail
 
    CdrCTU.plt_vars = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'		
 
-Here, you adjust the plotted variables by adding or omitting them from your input script.
-E.g. if you only want to plot the cell-centered states you would do:
-
-.. code-block:: bash
-
-   CdrGodunov.plt_vars = phi  # Plot variables. Options are 'phi', 'vel', 'dco', 'src', 'ebflux'
-
 .. _Chap:CdrSpecies:
 
 CdrSpecies
 ----------
 
 The ``CdrSpecies`` class is a supporting class that passes information and initial conditions into ``CdrSolver`` instances.
-``CdrSpecies`` specifies whether or not the advect-diffusion solver will use only advection, diffusion, both advection and diffusion, or neither.
-It also specifies initial data, and provides a string identifier to the class (e.g. for identifying output in plot files).
+``CdrSpecies`` specifies whether or not the advection-diffusion solver will use only advection, diffusion, both advection and diffusion, or neither.
+It also specifies initial data, and provides a string identifier to the class (e.g., for identifying output in plot files).
 However, it does not contain any discretization.
 
 .. note::
@@ -523,7 +489,7 @@ Here, diffusion code is turned off and the initial data is one everywhere.
 
 .. code-block:: c++
 
-   class MySpecies : public CdrSpecies{
+   class MySpecies : public CdrSpecies {
    public:
 
       MySpecies(){

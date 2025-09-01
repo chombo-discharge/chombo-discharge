@@ -909,8 +909,8 @@ public:
     @brief Compute a time step for the advance -- this calls the level function. 
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
-    If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
-    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA.
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
   */
   virtual Real
@@ -921,7 +921,7 @@ public:
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
     If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
-    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
   */
@@ -933,7 +933,7 @@ public:
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
     If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
-    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
@@ -1008,20 +1008,20 @@ public:
   computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
-    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles
   */
   virtual Real
   computeDiffusiveDt() const;
 
   /*!
-    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level
     @param[in] a_lvl Grid level
   */
   virtual Real
   computeDiffusiveDt(const int a_lvl) const;
 
   /*!
-    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input grid patch
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input grid patch
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */

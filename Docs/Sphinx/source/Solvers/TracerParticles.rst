@@ -3,14 +3,14 @@
 Tracer particles
 ================
 
-Tracer particles are particles that move along a velocity field
+Tracer particles are particles that move along a prescribed velocity field
 
 .. math::
 
    \frac{\partial\mathbf{X}}{\partial t} = \mathbf{V}
 
-where :math:`\mathbf{V}` is the particle velocity.
-This is interpolated from a mesh-based field as
+where :math:`\mathbf{X}` is the particle position and :math:`\mathbf{V}` is the particle velocity.
+The velocity is interpolated from a mesh-based field as
 
 .. math::
 
@@ -19,7 +19,9 @@ This is interpolated from a mesh-based field as
 where :math:`\mathbf{v}` is a velocity field defined on the mesh. 
 Such particles are useful, for example, for numerical integration along field lines.
 
-``chombo-discharge`` defines AMR-ready tracer particle solvers in :file:`$DISCHARGE_HOME/Source/TracerParticles`.
+.. tip::
+   
+   The ``chombo-discharge`` tracer particle functionality resides in :file:`$DISCHARGE_HOME/Source/TracerParticles`.
 
 .. _Chap:TracerParticleSolver:
 
@@ -28,10 +30,10 @@ TracerParticleSolver
 
 The tracer particle solver is templated as
 
-.. code-block:: c++
-
-   template <typename P>
-   class TracerParticleSolver;
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 22-36
+   :dedent: 0
 
 where ``P`` is the particle type used for the solver.
 The template constraints on ``P`` are
@@ -45,123 +47,109 @@ However, we also define a plug-and-play particle class that meets these requirem
 
 .. note::
 
-   The ``TracerParticleSolver`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html>`_.
+   The ``TracerParticleSolver<P>`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticleSolver.html>`_.
 
 .. _Chap:TracerParticle:
 
 TracerParticle
 --------------
 
-The ``TracerParticle`` type inherits from the ``GenericParticle`` particle class and is templated as
+The ``TracerParticle`` type inherits from :ref:`Chap:GenericParticle` particle class and is templated as
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
+   :language: c++
+   :lines: 25-32
+   :dedent: 0
 
-   template <size_t M, size_t N>
-   class TracerParticle<M,N> : public GenericParticle<M, N>
+The class also defines two more members; the weight and a particle velocity.
+These are accessible as
 
-and also defines two more members: A particle weight and a particle velocity.
-These are accesible as
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticle.H
+   :language: c++
+   :lines: 51-77
+   :dedent: 2
 
-.. code-block:: c++
-
-   template <size_t M, size_t N>
-   Real&
-   TracerParticle<M, N>::weight();
-
-   template <size_t M, size_t N>
-   RealVect&
-   TracerParticle<M, N>::velocity();
-
-Note that, just as for ``GenericParticle``, the template arguments ``M`` and ``N`` indicates the number of scalars and vectors allocated to the particle.
-See :ref:`Chap:GenericParticle`.
-
-.. note::
-
-   The ``TracerParticleSolver`` API is available at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classTracerParticle.html>`_.
+Note that, just as for ``GenericParticle``, the template arguments ``M`` and ``N`` indicates the number of scalars and vectors allocated to the particle, see :ref:`Chap:GenericParticle`.
+These data fields can be used by applications for, e.g., storing integration variables (such as intermediate positions in a Runge-Kutta code).
 
 Initialization
 --------------
 
 To initialize the solver, one can use the full constructor
 
-.. code-block:: c++
-
-   template <typename P>
-   TracerParticleSolver<P>::TracerParticleSolver(const RefCountedPtr<AmrMesh>& a_amr,
-		                                 const RefCountedPtr<ComputationalGeometry> a_compGeom);
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 56-61
+   :dedent: 2
 
 Getting the particles
 ---------------------
 
-To obtain the solver particles simply call
+To obtain the solver particles, simply call
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 278-290
+   :dedent: 2
 
-   template <typename P>
-   ParticleContainer<P>&
-   TracerParticleSolver<P>::getParticles();
-
-This returns the ``ParticleContainer`` holding the particles, see :ref:`Chap:ParticleContainer`. 
+This returns the ``ParticleContainer<P>`` holding the particles, see :ref:`Chap:ParticleContainer`. 
 
 Setting :math:`\mathbf{v}`
 --------------------------
 
-To set the velocity use
+To set the velocity field on the mesh, use
 
-.. code-block:: c++
-
-   template <typename P>
-   void
-   TracerParticleSolver<P>::setVelocity(const EBAMRCellData& a_velocityField)
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 146-151
+   :dedent: 2
 
 This will associate the input velocity ``a_velocityField`` with :math:`\mathbf{v}`.
 
 Interpolating velocities
 ------------------------
 
-To compute :math:`\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)` use
+To compute :math:`\mathbf{V} = \mathbf{v}\left(\mathbf{X}\right)` for all particles that reside in the solver, use
 
-.. code-block:: c++
-
-   template <typename P>
-   void
-   TracerParticleSolver<P>::interpolateVelocities();
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 198-202
+   :dedent: 2
 
 This will interpolate the velocities to the particle positions using the user-defined interpolation method (see :ref:`Chap:TracerInputOptions`).
 
-One can also interpolate a scalar field defined on the mesh onto the particle weight by calling
+If desirable, one can also interpolate a scalar field defined on the mesh onto the particle weight by calling
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 192-196
+   :dedent: 2
 
-   template <typename P>
-   void
-   TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexcept;
-
-Letting :math:`f` define the input field ``a_scalar``, this performs the operation :math:`w = f\left(\mathbf{X}\right)`.
+The interpolation function is set by the user, see :ref:`Chap:TracerInputOptions`.
+See :ref:`Chap:ParticleMesh` for further details.
 
 Deposit particles
 -----------------
 
-To deposit the particles call
+To deposit the particles, call
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.H
+   :language: c++
+   :lines: 185-190
+   :dedent: 2
 
-   template <typename P>
-   void
-   TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi)
+This will deposit the particle weights onto the input data holder.
 
-This will deposit the particle weights onto the input data holder. 
+The deposition function is set by the user, see :ref:`Chap:TracerInputOptions`.
+Complete details regarding how the deposition functions work is available in :ref:`Chap:ParticleMesh`.
 
 .. _Chap:TracerInputOptions:
 
 Input options
 -------------
 
-Available input options for the tracer particle solver are
+Available input options for the tracer particle solver are given in the listing below.
 
 .. literalinclude:: ../../../../Source/TracerParticles/CD_TracerParticleSolver.options
-
-The flags ``deposition`` and ``interpolation`` indicates which deposition and interpolation methods will be used.
-Likewise, ``deposition_cf`` indicates the coarse-fine deposition strategy, see :ref:`Chap:Particles`.
-The flags ``plot_weight`` and ``plot_velocity`` indicates whether or not to include the particle weights and velocities in plot files. 
-
+   :caption: List on configuration options for ``TracerParticleSolver<P>``.
+	     All options are run-time configurable.

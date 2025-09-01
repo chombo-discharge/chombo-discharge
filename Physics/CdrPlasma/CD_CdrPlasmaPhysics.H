@@ -32,19 +32,19 @@ namespace Physics {
     {
     public:
       /*!
-	@brief Default constructor. Does nothing. 
+        @brief Default constructor. Does nothing. 
       */
       CdrPlasmaPhysics()
       {}
 
       /*!
-	@brief Base destructor. Does nothing.
+        @brief Base destructor. Does nothing.
       */
       virtual ~CdrPlasmaPhysics()
       {}
 
       /*!
-	@brief Parse run-time options
+        @brief Parse run-time options
       */
       virtual void
       parseRuntimeOptions() {
@@ -52,10 +52,10 @@ namespace Physics {
       };
 
       /*!
-	@brief Get number of plot variables for this physics class. 
-	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. When overriding
-	this method then this routine should return the number of plot variables that will be plotted. The returned number
-	should thus be the same as the vectors that are returned from getPlotVariableNames and getPlotVariables.
+        @brief Get number of plot variables for this physics class. 
+        @details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. When overriding
+        this method then this routine should return the number of plot variables that will be plotted. The returned number
+        should thus be the same as the vectors that are returned from getPlotVariableNames and getPlotVariables.
       */
       virtual int
       getNumberOfPlotVariables() const
@@ -64,10 +64,10 @@ namespace Physics {
       }
 
       /*!
-	@brief Get plot variable names. The
-	@details This function will return the plot variable names that CdrPlasmaPhysics will plot. The length of the returned
-	vector must be the same as the returned value from getNumberOfPlotVariables. Note that the names/positions between this 
-	routine and getPlotVariables should be consistent.
+        @brief Get plot variable names. The
+        @details This function will return the plot variable names that CdrPlasmaPhysics will plot. The length of the returned
+        vector must be the same as the returned value from getNumberOfPlotVariables. Note that the names/positions between this 
+        routine and getPlotVariables should be consistent.
       */
       virtual Vector<std::string>
       getPlotVariableNames() const
@@ -76,18 +76,18 @@ namespace Physics {
       }
 
       /*!
-	@brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
-	@details The length of the returned vector should be the same as the returned value from getNumberOfPlotVariables. The names
-	for the returned variables are given by the returned vector in getPlotVariableNames().
-	@param[in]  a_cdrDensities  Grid-based density for particle species.
-	@param[in]  a_cdrGradients  Grid-based gradients for particle species.
-	@param[in]  a_rteDensities  Grid-based densities for photons.
-	@param[in]  a_E             Electric field.
-	@param[in]  a_pos           Position in space.
-	@param[in]  a_dx            Grid resolution. 
-	@param[in]  a_dt            Advanced time.
-	@param[in]  a_time          Current time.
-	@param[in]  a_kappa         Grid cell unit volume. 
+        @brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
+        @details The length of the returned vector should be the same as the returned value from getNumberOfPlotVariables. The names
+        for the returned variables are given by the returned vector in getPlotVariableNames().
+        @param[in]  a_cdrDensities  Grid-based density for particle species.
+        @param[in]  a_cdrGradients  Grid-based gradients for particle species.
+        @param[in]  a_rteDensities  Grid-based densities for photons.
+        @param[in]  a_E             Electric field.
+        @param[in]  a_pos           Position in space.
+        @param[in]  a_dx            Grid resolution. 
+        @param[in]  a_dt            Advanced time.
+        @param[in]  a_time          Current time.
+        @param[in]  a_kappa         Grid cell unit volume. 
       */
       virtual Vector<Real>
       getPlotVariables(const Vector<Real>     a_cdrDensities,
@@ -104,38 +104,38 @@ namespace Physics {
       }
 
       /*!
-	@brief Compute alpha. Should return Townsend ionization coefficient. 
-	@details This function is mostly used for the cell tagging classes
-	@param[in] a_E        Electric field.
-	@param[in] a_position Physical coordinates
+        @brief Compute alpha. Should return Townsend ionization coefficient. 
+        @details This function is mostly used for the cell tagging classes
+        @param[in] a_E        Electric field.
+        @param[in] a_position Physical coordinates
       */
       virtual Real
       computeAlpha(const Real a_E, const RealVect a_position) const = 0;
 
       /*!
-	@brief Compute eta. Should return Townsend attachment coefficient. 
-	@details This function is mostly used for the cell tagging classes
-	@param[in] a_E        Electric field.
-	@param[in] a_position Physical coordinates
+        @brief Compute eta. Should return Townsend attachment coefficient. 
+        @details This function is mostly used for the cell tagging classes
+        @param[in] a_E        Electric field.
+        @param[in] a_position Physical coordinates
       */
       virtual Real
       computeEta(const Real a_E, const RealVect a_position) const = 0;
 
       /*!
-	@brief Routine intended for advancing a reaction network over a time a_dt. 
-	@details This routine assumes that the subsequent advance is in the form phi^(k+1) = phi^k + S*a_dt. Thus, this routine exists such that users can EITHER
-	fill a_cdrSources and a_rteSources directly with an explicit rule, OR they can perform a fully implicit advance within this routine and set S from that. 
-	@param[out] a_cdrSources    Source terms for CDR equations.
-	@param[out] a_rteSources    Source terms for RTE equations.
-	@param[in]  a_cdrDensities  Grid-based density for particle species.
-	@param[in]  a_cdrGradients  Grid-based gradients for particle species.
-	@param[in]  a_rteDensities  Grid-based densities for photons.
-	@param[in]  a_E             Electric field.
-	@param[in]  a_pos           Position in space.
-	@param[in]  a_dx            Grid resolution. 
-	@param[in]  a_dt            Advanced time.
-	@param[in]  a_time          Current time.
-	@param[in]  a_kappa         Grid cell unit volume. 
+        @brief Routine intended for advancing a reaction network over a time a_dt. 
+        @details This routine assumes that the subsequent advance is in the form phi^(k+1) = phi^k + S*a_dt. Thus, this routine exists such that users can EITHER
+        fill a_cdrSources and a_rteSources directly with an explicit rule, OR they can perform a fully implicit advance within this routine and set S from that. 
+        @param[out] a_cdrSources    Source terms for CDR equations.
+        @param[out] a_rteSources    Source terms for RTE equations.
+        @param[in]  a_cdrDensities  Grid-based density for particle species.
+        @param[in]  a_cdrGradients  Grid-based gradients for particle species.
+        @param[in]  a_rteDensities  Grid-based densities for photons.
+        @param[in]  a_E             Electric field.
+        @param[in]  a_pos           Position in space.
+        @param[in]  a_dx            Grid resolution. 
+        @param[in]  a_dt            Advanced time.
+        @param[in]  a_time          Current time.
+        @param[in]  a_kappa         Grid cell unit volume. 
       */
       virtual void
       advanceReactionNetwork(Vector<Real>&          a_cdrSources,
@@ -151,12 +151,12 @@ namespace Physics {
                              const Real             a_kappa) const = 0;
 
       /*!
-	@brief Compute velocities for the CDR equations
-	@param[in] a_time         Time
-	@param[in] a_pos          Position
-	@param[in] a_E            Electric field
-	@param[in] a_cdrDensities CDR densities
-	@return Returns the drift velocities for each CDR species. The vector ordering is the same as m_cdrSpecies. 
+        @brief Compute velocities for the CDR equations
+        @param[in] a_time         Time
+        @param[in] a_pos          Position
+        @param[in] a_E            Electric field
+        @param[in] a_cdrDensities CDR densities
+        @return Returns the drift velocities for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual Vector<RealVect>
       computeCdrDriftVelocities(const Real         a_time,
@@ -165,12 +165,12 @@ namespace Physics {
                                 const Vector<Real> a_cdrDensities) const = 0;
 
       /*!
-	@brief Compute diffusion coefficients for the CDR equations. 
-	@param[in] a_time         Time
-	@param[in] a_pos          Position
-	@param[in] a_E            Electric field
-	@param[in] a_cdrDensities CDR densities
-	@return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
+        @brief Compute diffusion coefficients for the CDR equations. 
+        @param[in] a_time         Time
+        @param[in] a_pos          Position
+        @param[in] a_E            Electric field
+        @param[in] a_cdrDensities CDR densities
+        @return Returns the diffusion coefficients for each CDR species. The vector ordering is the same as m_cdrSpecies. 
       */
       virtual Vector<Real>
       computeCdrDiffusionCoefficients(const Real         a_time,
@@ -179,18 +179,18 @@ namespace Physics {
                                       const Vector<Real> a_cdrDensities) const = 0;
 
       /*!
-	@brief Compute CDR fluxes on electrode-gas interfaces. This is used as a boundary condition in the CDR equations. 
-	@param[in] a_time            Time
-	@param[in] a_pos             Position
-	@param[in] a_normal          Boundary normal vector. This points into the gas phase. 
-	@param[in] a_E               Electric field
-	@param[in] a_cdrVelocities   CDR velocities. Normal component only. 
-	@param[in] a_cdrDensities    CDR densities. 
-	@param[in] a_cdrGradients    Normal gradients of cdr densities
-	@param[in] a_rteFluxes       RTE fluxes (normal component only)
-	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
-	@return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_cdrSpecies. 
-	@note A positive flux is a flux INTO the domain. 
+        @brief Compute CDR fluxes on electrode-gas interfaces. This is used as a boundary condition in the CDR equations. 
+        @param[in] a_time            Time
+        @param[in] a_pos             Position
+        @param[in] a_normal          Boundary normal vector. This points into the gas phase. 
+        @param[in] a_E               Electric field
+        @param[in] a_cdrVelocities   CDR velocities. Normal component only. 
+        @param[in] a_cdrDensities    CDR densities. 
+        @param[in] a_cdrGradients    Normal gradients of cdr densities
+        @param[in] a_rteFluxes       RTE fluxes (normal component only)
+        @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+        @return Returns the flux on an electrode interface cell. The vector ordering must be the same as m_cdrSpecies. 
+        @note A positive flux is a flux INTO the domain. 
       */
       virtual Vector<Real>
       computeCdrElectrodeFluxes(const Real         a_time,
@@ -204,18 +204,18 @@ namespace Physics {
                                 const Vector<Real> a_extrapCdrFluxes) const = 0;
 
       /*!
-	@brief Compute CDR fluxes on dielectric-gas interfaces. This is used as a boundary condition in the CDR equations. 
-	@param[in] a_time            Time
-	@param[in] a_pos             Position
-	@param[in] a_normal          Normal vector. This points into the gas phase. 
-	@param[in] a_E Electric      field
-	@param[in] a_cdrDensities    CDR densities (on the EB)
-	@param[in] a_cdrVelocities   Normal component of CDR velocities (on the EB).
-	@param[in] a_cdrGradients    Normal gradients of cdr densities
-	@param[in] a_rteFluxes       RTE fluxes (normal component only)
-	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
-	@return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_cdrSpecies. 
-	@note A positive flux is a flux INTO the domain. 
+        @brief Compute CDR fluxes on dielectric-gas interfaces. This is used as a boundary condition in the CDR equations. 
+        @param[in] a_time            Time
+        @param[in] a_pos             Position
+        @param[in] a_normal          Normal vector. This points into the gas phase. 
+        @param[in] a_E Electric      field
+        @param[in] a_cdrDensities    CDR densities (on the EB)
+        @param[in] a_cdrVelocities   Normal component of CDR velocities (on the EB).
+        @param[in] a_cdrGradients    Normal gradients of cdr densities
+        @param[in] a_rteFluxes       RTE fluxes (normal component only)
+        @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+        @return Returns the flux on a dielectric interface cell. The vector ordering must be the same as m_cdrSpecies. 
+        @note A positive flux is a flux INTO the domain. 
       */
       virtual Vector<Real>
       computeCdrDielectricFluxes(const Real         a_time,
@@ -229,18 +229,18 @@ namespace Physics {
                                  const Vector<Real> a_extrapCdrFluxes) const = 0;
 
       /*!
-	@brief Compute CDR fluxes through domain sides. This is used as a boundary condition in the CDR equations.
-	@param[in] a_time            Time
-	@param[in] a_pos             Position
-	@param[in] a_dir             Direction (0 = x, 1=y etc)
-	@param[in] a_side            Side (low or high side)
-	@param[in] a_E               Electric field
-	@param[in] a_cdrDensities    CDR densities. 
-	@param[in] a_cdrVelocities   CDR velocities (normal component only). 
-	@param[in] a_cdrGradients    CDR gradients (normal component only)
-	@param[in] a_rteFluxes       RTE fluxes (normal component only)
-	@param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
-	@note A positive flux is a flux INTO the domain. 
+        @brief Compute CDR fluxes through domain sides. This is used as a boundary condition in the CDR equations.
+        @param[in] a_time            Time
+        @param[in] a_pos             Position
+        @param[in] a_dir             Direction (0 = x, 1=y etc)
+        @param[in] a_side            Side (low or high side)
+        @param[in] a_E               Electric field
+        @param[in] a_cdrDensities    CDR densities. 
+        @param[in] a_cdrVelocities   CDR velocities (normal component only). 
+        @param[in] a_cdrGradients    CDR gradients (normal component only)
+        @param[in] a_rteFluxes       RTE fluxes (normal component only)
+        @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+        @note A positive flux is a flux INTO the domain. 
       */
       virtual Vector<Real>
       computeCdrDomainFluxes(const Real           a_time,
@@ -255,15 +255,15 @@ namespace Physics {
                              const Vector<Real>   a_extrapCdrFluxes) const = 0;
 
       /*!
-	@brief Set the initial surface charge
-	@param[in] a_time Time
-	@param[in] a_pos Position
+        @brief Set the initial surface charge
+        @param[in] a_time Time
+        @param[in] a_pos Position
       */
       virtual Real
       initialSigma(const Real a_time, const RealVect a_pos) const = 0;
 
       /*!
-	@brief Get all CDR species. 
+        @brief Get all CDR species. 
       */
       const Vector<RefCountedPtr<CdrSpecies>>&
       getCdrSpecies() const
@@ -272,7 +272,7 @@ namespace Physics {
       }
 
       /*!
-	@brief Get all RTE species. 
+        @brief Get all RTE species. 
       */
       const Vector<RefCountedPtr<RtSpecies>>&
       getRtSpecies() const
@@ -281,7 +281,7 @@ namespace Physics {
       }
 
       /*!
-	@brief Return number of CDR species that we solve for. 
+        @brief Return number of CDR species that we solve for. 
       */
       int
       getNumCdrSpecies() const
@@ -290,7 +290,7 @@ namespace Physics {
       }
 
       /*!
-	@brief Return number of RTE equations that we solve for. 
+        @brief Return number of RTE equations that we solve for. 
       */
       int
       getNumRtSpecies() const
@@ -300,22 +300,22 @@ namespace Physics {
 
     protected:
       /*!
-	@brief List of species
+        @brief List of species
       */
       Vector<RefCountedPtr<CdrSpecies>> m_cdrSpecies;
 
       /*!
-	@brief List of optical transitions between species
+        @brief List of optical transitions between species
       */
       Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
 
       /*!
-	@brief Number of species
+        @brief Number of species
       */
       int m_numCdrSpecies;
 
       /*!
-	@brief Number of RTE species
+        @brief Number of RTE species
       */
       int m_numRtSpecies;
     };

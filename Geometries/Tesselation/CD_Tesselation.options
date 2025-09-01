@@ -4,4 +4,3 @@
 Tesselation.mesh_file       = myFile.stl    ## STL file
 Tesselation.flip_inside     = false         ## Flip inside/outside
 Tesselation.z_coord         = 0.0           ## z-coordinate for 2D slicing this object
-

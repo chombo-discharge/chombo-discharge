@@ -73,4 +73,3 @@ DoubleRod.rod2.endpoint1     = 0 0 -0.5    ## One endpoint
 DoubleRod.rod2.endpoint2     = 0 0 -2      ## Other endpoint
 DoubleRod.rod2.radius        = 0.25        ## Radius
 DoubleRod.rod2.live          = false       ## Live or not
-

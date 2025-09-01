@@ -74,7 +74,7 @@ public:
   /*!
     @brief Utility function for swapping columns. 
     @details This is done on the raw data -- if the user wants to swap columns in the resampled/structured data
-    then he needs to call this function first and then resample the table through prepareTable
+    then he needs to call this function first and then resample the table.
     @param[in] a_columnOne Column to swap.
     @param[in] a_columnTwo Column to swap.
   */
@@ -83,6 +83,7 @@ public:
 
   /*!
     @brief Utility function which scales one of the columns (either dependent or independent variable)
+    @param[in] a_scale Scaling factor
   */
   template <size_t K>
   inline void
