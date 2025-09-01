@@ -9,6 +9,10 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <cmath>
+#include <limits>
+
 // Chombo includes
 #include <PolyGeom.H>
 
@@ -158,6 +162,115 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
   // }
 
   return bPt + a_point1;
+}
+
+Real
+PolyUtils::brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)> a_func) noexcept
+{
+  CH_TIME("PolyUtils::bretSolve");
+
+  constexpr Real tol     = 1E-10;
+  constexpr Real eps     = std::numeric_limits<Real>::epsilon();
+  constexpr int  maxIter = 500;
+
+  Real root = std::numeric_limits<Real>::max();
+
+  Real fa = a_func(a_point1);
+  Real fb = a_func(a_point2);
+
+  if (fa * fb > 0.0) {
+    MayDay::Warning("PolyUtils::brentSolve -- abort because alpha is > 0 everywhere");
+
+    return root;
+  }
+
+  Real a  = a_point1;
+  Real b  = a_point2;
+  Real c  = a;
+  Real fc = fa;
+  Real d  = b - a;
+  Real e  = d;
+
+  Real x  = b;
+  Real fx = fb;
+
+  for (int iter = 0; iter < maxIter; iter++) {
+    if ((fb > 0 && fc > 0) || (fb < 0 && fc < 0)) {
+      c  = a;
+      fc = fa;
+      d  = b - a;
+      e  = d;
+    }
+
+    if (std::abs(fc) < std::abs(fb)) {
+      a = b;
+      b = c;
+      c = a;
+
+      fa = fb;
+      fb = fc;
+      fc = fa;
+    }
+
+    const Real tol1 = 2 * eps * std::abs(b) + 0.5 * tol;
+    const Real m    = 0.5 * (c - b);
+
+    if (std::abs(m) <= tol1 || fb == 0.0) {
+      return b;
+    }
+
+    if (std::abs(e) >= tol1 && std::abs(fa) > std::abs(fb)) {
+      const Real s = fb / fa;
+
+      Real p;
+      Real q;
+
+      if (a == c) {
+        p = 2 * m * s;
+        q = 1.0 - s;
+      }
+      else {
+        const Real q1 = fa / fc;
+        const Real r  = fb / fc;
+
+        p = s * (2 * m * q1 * (q1 - r) - (b - a) * (r - 1));
+        q = (q1 - 1) * (r - 1) * (s - 1);
+      }
+
+      if (p > 0) {
+        q = -q;
+      }
+
+      p = std::abs(p);
+
+      if (2 * p < std::min(3 * m * q - std::abs(tol1 * q), std::abs(e * q))) {
+        e = d;
+        d = p / q;
+      }
+      else {
+        d = m;
+        e = d;
+      }
+    }
+    else {
+      d = m;
+      e = d;
+    }
+
+    a  = b;
+    fa = fb;
+
+    if (std::abs(d) > tol1) {
+      b += d;
+    }
+    else {
+      b += (m > 0) ? tol1 : -tol1;
+    }
+
+    fb = a_func(b);
+  }
+
+  return root;
 }
 
 #include <CD_NamespaceFooter.H>

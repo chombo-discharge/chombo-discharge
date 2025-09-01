@@ -237,6 +237,20 @@ public:
                          const std::vector<Real>& a_nonCriticalPropensities) const noexcept;
 
   /*!
+    @brief Compute a time step, using the leap condition on the mean value with eps = 1.
+    @details This is just like getNonCriticalTimeStep EXCEPT that the leap condition is not applied for the deviation
+    @param[in] a_state                   State vector
+    @param[in] a_nonCriticalReactions    Non-critical reactions
+    @param[in] a_nonCriticalPropensities Non-critical propensities
+    @param[in] a_epsilon                 Epsilon value for maximum change in propensities
+  */
+  inline Real
+  computeDt(const State&             a_state,
+            const ReactionList&      a_nonCriticalReactions,
+            const std::vector<Real>& a_nonCriticalPropensities,
+            const Real               a_epsilon) const noexcept;
+
+  /*!
     @brief Perform a single SSA step.
     @param[inout] a_state State vector to advance
     @note Calls the other version with m_reactions
