@@ -222,8 +222,8 @@ The multigrid options are analogous to the multigrid options for :ref:`Chap:Fiel
 
 .. _Chap:MonteCarloRTE:
 
-Particle solver
----------------
+Monte Carlo solver
+------------------
 
 ``McPhoto`` defines a class which can solve radiative transfer problems using discrete photons.
 The class derives from :ref:`Chap:RtSolver` and can thus be used also be used by applications that only require the :ref:`ChapRtSolver` interface.

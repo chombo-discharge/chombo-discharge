@@ -486,7 +486,7 @@ Setting up a new problem
 ========================
 
 To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/DischargeInception` is the simplest way.
-A full description is available in the ``README.md`` contained in the folder:
+A full description is available in the ``README.md`` file contained in the folder:
 
 .. literalinclude:: ../../../../Physics/DischargeInception/README.md
    :language: markdown
