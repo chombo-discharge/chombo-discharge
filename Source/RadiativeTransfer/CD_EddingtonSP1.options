@@ -31,3 +31,4 @@ EddingtonSP1.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' s
 EddingtonSP1.gmg_ebbc_weight       = 1            ## EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order        = 2            ## EBBC order (only for Dirichlet)
 EddingtonSP1.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'red_black', or 'multi_color'
+

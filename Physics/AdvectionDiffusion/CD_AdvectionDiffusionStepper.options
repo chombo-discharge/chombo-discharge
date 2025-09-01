@@ -8,11 +8,11 @@ AdvectionDiffusion.integrator     = imex    ## 'heun' or 'imex'
 
 # Default velocity, diffusion, and initial data
 # ---------------------------------------------
-AdvectionDiffusion.blob_amplitude     = 1.0    ## Blob amplitude
-AdvectionDiffusion.blob_radius        = 0.1    ## Blob radius
-AdvectionDiffusion.blob_center        = 0 0 0  ## Blob center
-AdvectionDiffusion.omega              = 1.0    ## Rotation velocity
-AdvectionDiffusion.diffco             = 1.0    ## Diffusion coefficient
+AdvectionDiffusion.blob_amplitude     = 1.0      ## Blob amplitude
+AdvectionDiffusion.blob_radius        = 0.1      ## Blob radius
+AdvectionDiffusion.blob_center        = 0 0 0    ## Blob center
+AdvectionDiffusion.omega              = 1.0      ## Rotation velocity
+AdvectionDiffusion.diffco             = 1.0      ## Diffusion coefficient
 
 # Time step settings
 # ------------------
