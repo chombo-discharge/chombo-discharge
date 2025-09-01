@@ -31,4 +31,3 @@ Driver.grow_geo_tags                = 2                   ## How much to grow ta
 Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes            = 0                   ## Refine electrode surfaces to specified level ( < 0 will refine everything)
 Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces to specified level ( < 0 will refine everything)
-

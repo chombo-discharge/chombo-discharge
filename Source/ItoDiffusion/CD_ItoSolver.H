@@ -909,7 +909,7 @@ public:
     @brief Compute a time step for the advance -- this calls the level function. 
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
-    If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
+    If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA.
     If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
   */

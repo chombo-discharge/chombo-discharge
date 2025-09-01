@@ -17,4 +17,3 @@ ItoSolver.mobility_interp        = direct             ## How to interpolate mobi
 ItoSolver.plot_deposition        = cic                ## Cloud-in-cell for plotting particles.
 ItoSolver.deposition             = cic                ## Deposition type.
 ItoSolver.deposition_cf          = halo               ## Coarse-fine deposition. interp, halo, or halo_ngp
-

@@ -22,4 +22,3 @@ CdrPlasmaGodunovStepper.source_comp           = interp           ## Interpolated
 CdrPlasmaGodunovStepper.floor_cdr             = true             ## Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug                 = false            ## Turn on debugging messages. Also monitors mass if it was injected into the system.
 CdrPlasmaGodunovStepper.profile               = false            ## Turn on/off performance profiling.
-

@@ -224,4 +224,3 @@ CdrPlasmaJSON.skip_reactions       = false
 CdrPlasmaJSON.integrator           = explicit_euler
 CdrPlasmaJSON.substeps             = 1
 CdrPlasmaJSON.chemistry_dt         = 1.E99
-

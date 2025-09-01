@@ -73,4 +73,3 @@ RoughSphere.noise_frequency       = 10 10        ## Noise frequency
 RoughSphere.noise_persistence     = 0.5          ## Noise persistence
 RoughSphere.noise_octaves         = 3            ## Noise octaves
 RoughSphere.noise_reseed          = false        ## Reseed noise
-

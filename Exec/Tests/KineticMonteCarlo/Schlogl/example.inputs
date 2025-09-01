@@ -11,4 +11,3 @@ num_ssa      = 10
 ssa_lim      = 5.0
 max_iter     = 15
 exit_tol     = 1.E-6
-

@@ -62,4 +62,3 @@ CdrPlasmaImExSdcStepper.profile_steps      = false    ## Profile time steps with
 # Advection extrapolation
 # -----------------------
 CdrPlasmaImExSdcStepper.extrap_advect     = false    ## Time extrapolate with source and diffusion in advection step
-

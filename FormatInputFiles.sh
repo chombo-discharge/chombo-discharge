@@ -202,4 +202,7 @@ find . \( -name '*.inputs' -o -name '*.options' \) ! -path '*/Submodules/*' | wh
   }
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 
+  # Part 6: Remove empty line at the bottom of the file
+  sed -i '${/^$/d;}' "$file"  
+
 done

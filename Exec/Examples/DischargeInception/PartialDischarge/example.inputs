@@ -206,4 +206,3 @@ pressure                 = 1.0      ## Pressure in atmospheres
 temperature              = 300      ## Temperature in Kelvin
 Aerosol.permittivity     = 4.0      ## Permittivity
 sigma0                   = -1E-7    ## Surface charge density (given as sigma0 * (sin theta)^3)
-

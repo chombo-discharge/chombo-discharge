@@ -87,4 +87,3 @@ RodNeedleDisk.disk_point               = -0.5    ## Top position of disk
 RodNeedleDisk.disk_radius              = 0.5     ## Disk radius
 RodNeedleDisk.disk_curvature           = 0.05    ## Disk edge curvature (also the minimum disk thickness)
 RodNeedleDisk.disk_extra_thickness     = 0.0     ## Extra disk thickness
-

@@ -101,4 +101,3 @@ TracerParticleStepper.cfl                   = 1.0      ## "CFL" number.
 TracerParticleStepper.velocity_field        = 1        ## Velocity field to use.
                                                        # 0 => Diagonal translation
                                                        # 1 => Rotational flow
-

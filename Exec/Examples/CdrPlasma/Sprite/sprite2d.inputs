@@ -222,4 +222,3 @@ CdrPlasmaJSON.skip_reactions       = false                   ## For debugging, t
 CdrPlasmaJSON.integrator           = explicit_trapezoidal    ## Reaction network integrator
 CdrPlasmaJSON.substeps             = 1                       ## Substeps in the reaction integrator
 CdrPlasmaJSON.chemistry_dt         = 1.E99                   ## Time step to use for chemistry integration
-

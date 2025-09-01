@@ -74,4 +74,3 @@ RoughRod.noise_frequency       = 50 50    ## Noise frequency
 RoughRod.noise_persistence     = 0.5      ## Noise persistence
 RoughRod.noise_octaves         = 3        ## Noise octaves
 RoughRod.noise_reseed          = false    ## Reseed noise
-
