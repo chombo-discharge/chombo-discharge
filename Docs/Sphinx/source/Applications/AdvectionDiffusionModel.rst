@@ -13,7 +13,7 @@ The equation of motion is
 The full implementation for this model consists of the following classes:
 
 * ``AdvectionDiffusionStepper``, which implements :ref:`Chap:TimeStepper`.
-* ``AdvectionDiffusionSpecies``, which implements :ref:`Chap:CdrSpecies`, and thu sparses the initial condition into the problem.
+* ``AdvectionDiffusionSpecies``, which implements :ref:`Chap:CdrSpecies`, and thus sparses the initial condition into the problem.
 * ``AdvectionDiffusionTagger``, which implements :ref:`Chap:CellTagger` and flags cells for refinement and coarsening.
 
 This module only uses :ref:`Chap:CdrSolver`.

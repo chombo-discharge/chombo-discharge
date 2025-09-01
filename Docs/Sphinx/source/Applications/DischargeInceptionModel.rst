@@ -1,17 +1,17 @@
 .. _Chap:DischargeInceptionModel:
 
 Discharge inception model
-=========================
+*************************
 
 Overview
---------
+========
 
 The discharge inception model computes the inception voltage and probability of discharge inception for arbitrary geometries and voltage forms.
-
-For estimating the streamer inception, the module solves the electron avalanche integral
+For estimating the streamer inception, the module resolves the electron avalanche integral
 
 .. math::
-
+   :label: K_integral
+	   
    K\left(\mathbf{x}\right) = \int_{\mathbf{x}}^{\text{until }\alpha_{\text{eff}} \leq 0} \alpha_{\text{eff}}(E,\mathbf{x}^\prime)\text{d}l
 
 where :math:`E = |\mathbf{E}|` and where :math:`\alpha_{\text{eff}}(E,\mathbf{x}) = \alpha(E,\mathbf{x}) - \eta(E,\mathbf{x})` is the effective ionization coefficient.
@@ -23,11 +23,25 @@ Note that :math:`K\left(\mathbf{x}\right) = K(\mathbf{x}; U)` where :math:`U` is
 
 In addition to the above, the user can specify a critical threshold value for :math:`K_c` which is used for computing
 
-* The critical volume :math:`V_c = \int_{K>K_c} \textrm{d}V`.
+* The *critical volume* :math:`V_c = \int_{K\geq K_c} \textrm{d}V`.
 * The inception voltage :math:`U_c`.
 * The probability of having the first electron in the critical volume, :math:`dP(t,t+\Delta t)`.
 
-In addition to this, one may also track positive ions and solve for the Townsend inception criterion, which is formulated as follows:
+The discharge inception model is implemented through the following files:
+
+* ``DischargeInceptionStepper``, which implements :ref:`Chap:TimeStepper`.
+* ``DischargeInceptionTagger``, which implements :ref:`Chap:CellTagger` and flags cells for refinement and coarsening.
+* ``DischargeInceptionSpecies``, which implements :ref:`Chap:CdrSpecies` for the negative ion transport description.
+
+.. tip::
+
+   The source code for the discharge inception model is given in :file:`$DISCHARGE_HOME/Physics/DischargeInception`.
+   See `DischargeInceptionStepper <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html>`_ for the C++ API for this time stepper.
+
+Townsend criterion
+------------------
+
+One may also solve for the Townsend inception criterion, which is formulated as follows:
 
 .. math::
 
@@ -38,78 +52,103 @@ The residual ions will drift towards cathode surfaces and generate secondary ion
 
 The discharge inception model can be run in two modes:
 
-* A stationary mode, where one only calculations :math:`K\left(\mathbf{x}\right)` for a range of voltages, :ref:`Chap:StationaryMode`.
+* A stationary mode, where one only calculations :math:`K\left(\mathbf{x}\right)` for a range of voltages, see :ref:`Chap:StationaryMode`.
 * In transient mode, where :math:`K\left(\mathbf{x}\right)` is computed dynamically according to a user-supplied voltage shape.
   This mode can also be used to evaluate the inception probability for a given voltage curve, see :ref:`Chap:TransientMode`.
 
-These are discussed below.
-
 Implementation
-______________
+--------------
 
 The discharge inception model is implemented in :file:`$DISCHARGE_HOME/Physics/DischargeInception` as
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
+   :language: c++
+   :lines: 72-79
+   :dedent: 4
+	   
+The template template parameters indicate which types of solvers to used within the compound algorithm.
+The template parameters indicate the following: 
 
-   template <typename P, typename F, typename C>
-   class DischargeInceptionStepper : public TimeStepper
-
-The template complexity is due to flexibility in what solver implementations we use.
-The following solvers are used within the model:
-
-* The tracer particle solver (:ref:`Chap:TracerParticleSolver`) for reconstructing the inception integral.
-* The :ref:`Chap:FieldSolver` for computing the electric field.
-* The convection diffusion reaction module (:ref:`Chap:CdrSolver`) for modeling negative ion transport. 
+* ``typename P`` is the tracer particle solver (see :ref:`Chap:TracerParticleSolver`) for reconstructing the inception integral.
+* ``typename F`` is the field solver (see :ref:`Chap:FieldSolver`) that is used when computing the electric field.
+* ``typename C`` is the convection diffusion reaction solver (see :ref:`Chap:CdrSolver`) to use when resolving negative ion transport.
 
 .. _Chap:StationaryMode:
 
 Stationary mode
-_______________
+===============
 
-The stationary mode solves the :math:`K` integral for a range of input voltages.
-The computation is done for both polarities so that the user obtains:
+The stationary mode resolves :eq:`K_integral` for a range of voltages, including both positive and negative polarities.
+This procedure occurs through the following steps:
+
+#. Solve for the background field with an applied voltage :math:`U = 1` on all live electrodes.
+#. Obtain the critical field by obtaining the root :math:`\alpha_{\text{eff}}(E) = 0`.
+   This step is performed using Brent's method.
+#. Scale the voltage to the lowest voltage that exceeds the critical field.
+#. Solve for :math:`K(\mathbf{x})` from the lowest voltage that exceeds the critical field until a user-specified threshold.
+   These calculations are performed for both polarities.    
+
+On output, the user is provided with the following:
 
 * :math:`K` values for positive and negative voltages, as well as the Townsend criterion.
-* Critical volumes :math:`V_c` for positive and negative voltages.
-* Inception voltage, using a combined Townsend-streamer criterion.
+* Critical volumes and surfaces.
+* Inception voltage, both for streamer inception and Townsend inception, for both polarities. 
+* The *critical position*, i.e., the position corresponding to :math:`K(\mathbf{x})`.
 
 .. _Chap:TransientMode:
 
 Transient mode
-______________
+==============
 
-In the transient mode we apply a voltage curve :math:`U = U(t)` reconstruct the :math:`K` value at each time step and recompute the critical volume so that we obtain
+In transient mode the user can apply a voltage curve :math:`U = U(t)` reconstruct the :math:`K` value at each time step, and recompute the critical volume so that we obtain
 
 .. math::
 
-   K = K(t) \\
-   T = T(t) \\
-   V_c = V_c(t)
+   K &= K(\mathbf{x}, t) \\
+   T &= T(\mathbf{x}, t) \\
+   V_c &= V_c(t).
+
+The rationale for computing the above quantities is that one may describe the availability of negative ions within the critical volumes by augmenting the model with an ion transport description.
+Furthermore, if one also has a description of the electron detachment rate, one may then evaluate the probability that an electron detaches from a negative ion inside of the critical region. 
+
+Negative ion transport
+----------------------
 
 We also assume that ions move as drifting Brownian walkers in the electric field (see :ref:`Chap:ItoDiffusion`).
-This can be written in the fluctuating hydrodynamics limit as an evolution equation for the ion distribution (not density!) as
+This can be written in the fluctuating hydrodynamics limit as an evolution equation for the ion density
 
 .. math::
    
-   \frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right) + \sqrt{2D\langle n_-\rangle}\mathbf{Z},
+   \frac{\partial n_-}{\partial t} = -\nabla\cdot\left(\mathbf{v} n_-\right) + \nabla\cdot\left(D\nabla  n_-\right) + \sqrt{2D n_-}\mathbf{Z},
 
 where :math:`\mathbf{Z}` represents uncorrelated Gaussian white noise.
 Note that the above equation is a mere rewrite of the Ito process for a collection of particles; it is not really useful per se since it is a tautology for the original Ito process. 
 
-However, we are interested in the average ion distribution over many experiments, so by taking the ensemble average we obtain a regular advection-diffusion equation for the evolution of the negative ion distribution (note that we redefine :math:`\langle n_-\rangle` to be the ensemble average).
+However, we are interested in the average ion distribution over many experiments, so by taking the ensemble average we obtain a regular advection-diffusion equation for the evolution of the negative ion distribution :math:`\langle n_-\rangle`:
 
 .. math::
    
    \frac{\partial \langle n_-\rangle}{\partial t} = -\nabla\cdot\left(\mathbf{v} \langle n_-\rangle\right) + \nabla\cdot\left(D\nabla \langle n_-\rangle\right).
 
-This equation is sensible only when :math:`\langle n_-\rangle` is interpreted as an ion density distribution (over many identical experiments). 
+This equation is sensible only when :math:`\langle n_-\rangle` is interpreted as an ion density distribution (over many identical experiments).
 
-The above quantities are then used for computing the probability of discharge inception in a time interval :math:`[t,t+\text{d}t]`, which is
+Inception probability
+---------------------
+
+The probability of discharge inception in a time interval :math:`[t,t+\text{d}t]` is given by
 
 .. math::
+   
    \text{d}P(t) = \left[1-P\left(t\right)\right]\lambda(t) \text{d}t,
 
-where :math:`\lambda(t)` is a placeholder for the electron generation rate, given by
+where :math:`\lambda(t)` is a placeholder for the electron generation rate within the critical volume.
+The exact solution for :math:`P(t)` is
+
+.. math::
+
+   P(t) = 1 - \exp\left(-\int_{-\infty}^t \lambda\left(t^\prime\right)\text{d}t^\prime\right).
+
+An expression for the electron generation rate can be given by
 
 .. math::
 
@@ -132,6 +171,9 @@ where :math:`S_{\text{bg}}` is the background ionization rate set by the user, :
 The second integral is due to electron emission from the cathode and into the critical volume.
 Note that, internally, we always ensure that :math:`j_{\text{e}} dA` evaluates to zero on anode surfaces.
 
+Statistical time lag
+--------------------
+
 We also compute the probability of a first electron appearing in the time interval :math:`[t, t+\Delta t]`, given by
 
 .. math::
@@ -153,23 +195,21 @@ Numerically, this is calculated using the trapezoidal rule.
 .. _Chap:DischargeInceptionInputData:
 
 Input data
-----------
+==========
 
 The input to the discharge inception model are:
 
-#. Space and surface charge. 
 #. Streamer inception threshold.
-#. Townsend ionization coefficient.
-#. Townsend attachment coefficients.
+#. Townsend ionization and attachment coefficient.
 #. Background ionization rate (e.g., from cosmic radiation).
-#. Electron detachment rate (from negative ions).
-#. Negative ion mobility.
-#. Negative ion diffusion coefficient.   
+#. Electron detachment rate from negative ions.
+#. Negative ion mobility and diffusion coefficients. 
 #. Initial negative ion density.
 #. Secondary emission coefficients.
 #. Voltage curve (for transient simulations).
+#. Space and surface charge if resolving a space-charge influenced field.
 
-The input data to the discharge inception model is mostly done by passing in C++-functions to the class.
+The input data to the discharge inception model is done by passing in C++-functions to the class.
 These functions are mainly in the forms
 
 .. code-block:: c++
@@ -190,20 +230,19 @@ Tabulated data (see :ref:`Chap:LookupTable1D`) can also be used as follows,
 
 .. code-block:: c++
 		
-   LookupTable1D<2> tableData;
+   LookupTable1D<1> tableData;
    
    auto alphaCoeff = [tableData](const Real& E, const RealVect& x) -> void {
       return tableData.getEntry<1>(E);
    };
 
-.. note::
-
-   The :math:`K` integral is determined only by the Townsend ionization and attachment coefficients.
-   The Townsend criterion is then a derived value of :math:`K` and the secondary electron emission coefficient :math:`\gamma` .
-   The remaining transport data is used for calculating the inception probability (appearance of a first electron in the critical volume).
+.. literalinclude:: ../../../../Physics/DischargeInception/CD_DischargeInceptionStepper.H
+   :language: c++
+   :lines: 291-386
+   :dedent: 4   
 
 Free charges
-____________
+------------
 
 By default, ``DischargeInceptionStepper`` assume that the simulation region is charge-free, i.e. :math:`\rho = \sigma= 0`.
 Nonetheless, the class has member functions for specifying these, which are given by
@@ -225,7 +264,7 @@ Nonetheless, the class has member functions for specifying these, which are give
    
 
 Inception threshold
-___________________
+-------------------
 
 Use in class input value ``DischargeInceptionStepper.K_inception`` for setting the inception threshold.
 
@@ -236,7 +275,7 @@ For example:
    DischargeInceptionStepper.K_inception   = 12.0
 
 Townsend ionization coefficient
-_______________________________
+-------------------------------
 
 To set the Townsend ionization coefficient, use the member function
 
@@ -246,7 +285,7 @@ To set the Townsend ionization coefficient, use the member function
 
 
 Townsend attachment coefficient
-_______________________________
+-------------------------------
 
 To set the Townsend attachment coefficient, use the member function
 
@@ -256,7 +295,7 @@ To set the Townsend attachment coefficient, use the member function
    
 
 Negative ion mobility
-_____________________
+---------------------
 
 To set the negative ion mobility, use the member function
 
@@ -266,7 +305,7 @@ To set the negative ion mobility, use the member function
    
 
 Negative ion diffusion coefficient
-__________________________________
+----------------------------------
 
 To set the negative ion diffusion coefficient, use the member function
 
@@ -276,7 +315,7 @@ To set the negative ion diffusion coefficient, use the member function
 
 
 Negative ion density
-____________________
+--------------------
 
 To set the negative ion density, use the member function
 
@@ -285,7 +324,7 @@ To set the negative ion density, use the member function
    DischargeInceptionStepper::setIonDensity(const std::function<Real(const RealVect x)>& a_density) noexcept;
 
 Secondary emission
-__________________
+------------------
 
 To set the secondary emission efficiency at cathodes, use the member function
 
@@ -297,7 +336,7 @@ This efficiency is position-dependent so that the user can set different efficie
 
    
 Background ionization rate
-__________________________
+--------------------------
 
 The background ionization rate describes the appearance of a first electron from a background contribution, e.g. through cosmic radiation, decay of radioactive isotopes, etc.
 
@@ -308,7 +347,7 @@ To set the background ionization rate, use the member function
    DischargeInceptionStepper::setBackgroundRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
 Detachment rate
-_______________
+---------------
 
 The detachment rate from negative describes the apperance of electrons through the equation
 
@@ -324,7 +363,7 @@ This is used when calculating the inception probability, and the user sets the d
    DischargeInceptionStepper::setDetachmentRate(const std::function<Real(const Real& E, const RealVect& x)>& a_backgroundRate) noexcept;
 
 Field emission
-______________
+--------------
 
 To set the field emission current, use the function
 
@@ -340,7 +379,7 @@ Note that, under the hood, the function indicates a general cathode emission cur
    The input function should provide the surface current density :math:`j_e` (in units of :math:`\text{C}\cdot\text{m}^{-2}\cdot \text{s}^{-1}`).
 
 Input voltages
-______________
+--------------
 
 By default, the model will always read voltage levels from the input script.
 These are in the format
@@ -351,12 +390,10 @@ These are in the format
    DischargeInceptionStepper.voltage_hi    = 10.0  # Highest voltage multiplier
    DischargeInceptionStepper.voltage_steps = 3     # Number of voltage steps
 
-
-
 .. _Chap:DischargeInceptionVoltageCurve:
 
 Voltage curve
-_____________
+-------------
 
 To set the voltage curve, use the member function
 
@@ -367,19 +404,19 @@ To set the voltage curve, use the member function
 This is relevant only when running a transient simulation. 
 
 Algorithms
-----------
+==========
 
 The discharge inception model uses a combination of electrostatic field solves, Particle-In-Cell, and fluid advection for resolving the necessary dynamics.
 The various algorithms involved are discussed below.
 
 Field solve
-___________
+-----------
 
 Since the background field scales linearly with applied voltage, we require only a single field solve at the beginning of the simulation.
 This field solve is done with an applied voltage of :math:`U = 1\,\text{V}` and the electric field is then simply later scaled by the actual voltage.
 
 Inception integral
-__________________
+------------------
 
 We use a Particle-In-Cell method for computing the inception integral :math:`K\left(\mathbf{x}\right)` for an arbitrary electron starting position.
 All grid cells where :math:`\alpha_{\textrm{eff}} > 0` are seeded with one particle on the cell centroid and the particles are then tracked through the grid.
@@ -388,7 +425,7 @@ If a particle leaves through a boundary (EB or domain boundary), or enters a reg
 Once the particle integration halts, we rewind the particles back to their starting position and deposit their weight on the mesh, which provides us with :math:`K = K\left(\mathbf{x}\right)`.
 
 Euler
-^^^^^
+_____
 
 For the Euler rule the particle weight for a particle :math:`p` the update rule is
 
@@ -401,7 +438,7 @@ For the Euler rule the particle weight for a particle :math:`p` the update rule 
 where :math:`\Delta x` is a user-specified integration length.
 
 Trapezoidal
-^^^^^^^^^^^
+___________
 
 With the trapezoidal rule the update is first
 
@@ -425,7 +462,7 @@ followed by
 
 
 Critical volume
-_______________
+---------------
 
 The critical volume is computed as
 
@@ -436,7 +473,7 @@ The critical volume is computed as
 Note that the critical volume is both voltage and polarity dependent.
 
 Critical surface
-________________
+----------------
 
 The critical surface is computed as
 
@@ -447,10 +484,10 @@ The critical surface is computed as
 Note that the critical surface is both voltage and polarity dependent, and is non-zero only on cathode surfaces.
 
 Inception voltage
-_________________
+-----------------
 
 Arbitrary starting electron
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+___________________________
 
 The inception voltage for starting a critical avalanche can be computed in the stationary solver mode.
 In this case we compute :math:`K\left(\mathbf{x}; U\right)` for a range of voltages :math:`U \in U_1, U_2, \ldots`.
@@ -492,7 +529,7 @@ The inception voltage for position :math:`\mathbf{x}` is then
    
 
 Minimum inception voltage
-^^^^^^^^^^^^^^^^^^^^^^^^^
+_________________________
 
 The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
 From the above, this is simply
@@ -515,7 +552,7 @@ which is the position of the first electron that enables a critical avalanche at
    However, as :math:`U \rightarrow U_{\text{inc}}^{\text{min}}` we also have :math:`V_c \rightarrow 0`, requires the a starting electron *precisely* in :math:`\mathbf{x}_{\text{inc}}^{\text{min}}`.
 
 Inception probability
-_____________________
+---------------------
 
 The inception probability is given by :eq:`DischargeInceptionProbability` and is computed using straightforward numerical quadrature:
 
@@ -530,19 +567,19 @@ and similarly for the surface integral.
    The integration runs over *valid cells*, i.e. grid cells that are not covered by a finer grid.
 
 Advection algorithm
-___________________
+-------------------
 
 The advection algorithm for the negative ion distribution follows the time stepping algorithms described in the advection-diffusion model, see :ref:`Chap:AdvectionDiffusionModel`.
 
 
 Simulation control
-------------------
+==================
 
 Here, we discuss simulation controls that are available for the discharge inception model.
 These all appear in the form ``DischargeInceptionStepper.<option>``.
 
 verbosity
-_________
+---------
 
 The ``verbosity`` input option controls the model chattiness (to the ``pout.*`` files).
 Usually we have
@@ -552,7 +589,7 @@ Usually we have
    DischargeInceptionStepper.verbosity = -1
 
 mode
-____
+----
 
 The mode flag switches between stationary and transient solves.
 Accepted values are ``stationary`` and ``transient``, e.g.,
@@ -567,7 +604,7 @@ Accepted values are ``stationary`` and ``transient``, e.g.,
 
 
 inception_alg
-_____________
+-------------
 
 Controls the discharge inception algorithm (for computing the :math:`K` integral).
 This should be specified in the form
@@ -580,7 +617,7 @@ where ``<algorithm>`` is either ``euler`` or ``trapz``.
 
    
 full_integration
-________________
+----------------
 
 Normally, it will not necessary to integrate the particles beyond :math:`w > K_c` since this already implies inception.
 The flag ``full_integration`` can be used to turn on/off integration beyond :math:`K_c`.
@@ -593,7 +630,7 @@ If the flag is set to true, the particle integration routine will proceed until 
 
 
 output_file
-___________
+-----------
 
 Controls the overall report file for stationary and transient solves.
 The user specifies a filename for a file which will be created (in the same directory as the application is running), containing a summary of the most important simulation output variables.
@@ -609,7 +646,7 @@ For example:
    DischargeInceptionStepper.output_file = report.txt
 
 K_inception
-___________
+-----------
 
 Controls the critical value of the :math:`K` integral.
 E.g.,
@@ -619,7 +656,7 @@ E.g.,
    DischargeInceptionStepper.K_inception = 12
 
 eval_townsend
-_____________
+-------------
 
 Controls whether or not the Townsend criterion is also evaluated.
 
@@ -632,7 +669,7 @@ E.g.,
 Will turn on the Townsend criterion. 
 
 plt_vars
-________
+--------
 
 Controls plot variables that will be written to HDF5 outputs in the :file:`plt` folder. 
 Valid options are
@@ -657,7 +694,7 @@ For example:
    DischargeInceptionStepper.plt_vars = K Uinc bg_rate emission ions
 
 Step size selection
-___________________
+-------------------
 
 The permitted tracer particle step size is controlled by user-specified maximum and minimum space steps:
 
@@ -697,7 +734,7 @@ Note that the input variable ``townsend_grid_dx`` determines the spatial step (r
 
 
 For stationary mode
-____________________
+-------------------
 
 For the stationary mode the following input flags are required:
 
@@ -715,7 +752,7 @@ For example:
    DischargeInceptionStepper.voltage_steps = 5
 
 For transient mode
-__________________
+------------------
 
 For the transient mode the following input options must be set:
 
@@ -743,7 +780,7 @@ For example,
 
   
 Caveats
-_______
+-------
 
 The model is intended to be used with a nearest-grid-point deposition scheme (which is also volume-weighted).
 When running the model, ensure that the :ref:`Chap:TracerParticleSolver` flag is set as follows:
@@ -753,7 +790,7 @@ When running the model, ensure that the :ref:`Chap:TracerParticleSolver` flag is
    TracerParticleSolver.deposition   = ngp    
 
 Adaptive mesh refinement
-------------------------
+========================
 
 The discharge inception model runs its own mesh refinement routine, which refines the mesh if
 
@@ -787,7 +824,7 @@ For example:
 .. _Chap:DischargeInceptionSetup:
 
 Setting up a new problem
-------------------------
+========================
 
 To set up a new problem, using the Python setup tools in :file:`$DISCHARGE_HOME/Physics/DischargeInception` is the simplest way.
 To see available setup options, run
@@ -807,26 +844,26 @@ The main file is named :file:`program.cpp`` and contains default implementations
 
 
 Example programs
-----------------
+================
 
 Example programs that use the discharge inception model are given in
 
 High-voltage vessel
-___________________
+-------------------
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/Vessel`.
   This program is set up in 2D (stationary) and 3D (transient) for discharge inception in atmospheric air.
   The input data is computed using BOLSIG+.
 
 Electrode with surface roughness
-________________________________
+--------------------------------
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness`.
   This program is set up in 2D (stationary) and 3D (transient) for discharge inception on an irregular electrode surface. 
   We use SF6 transport data as input data, computed using BOLSIG+.
 
 Electrode with surface roughness
-________________________________
+--------------------------------
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/DischargeInception/ElectrodeRoughness`.
   This program is set up in 2D and 3D (stationary) mode, and includes the influence of the Townsend criterion.
