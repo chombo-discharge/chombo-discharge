@@ -41,6 +41,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_limitParallelDiffusion   = false;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
+  this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
 
   this->parseOptions();
 }
@@ -188,6 +189,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   pp.get("extend_conductivity", m_extendConductivityEB);
   pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
+  pp.get("max_field_abort", m_maxFieldAbort);
 
   // Get algorithm
   if (str == "euler_maruyama") {
@@ -277,6 +279,24 @@ ItoKMCGodunovStepper<I, C, R, F>::parseSecondaryEmissionSpecification() noexcept
 
     MayDay::Abort(err.c_str());
   }
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
+ItoKMCGodunovStepper<I, C, R, F>::computeDt()
+{
+  CH_TIME("ItoKMCGodunovStepper::computeDt");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeDt" << endl;
+  }
+
+  Real dt = ItoKMCStepper<I, C, R, F>::computeDt();
+
+  if ((this->m_maxReducedField > m_maxFieldAbort) && (m_maxFieldAbort > 0.0)) {
+    dt = 0.0;
+  }
+
+  return dt;
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -519,6 +539,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
 
   m_timer.clear();
+
+  // Compute the maximum field (in Townsend).
+  this->m_maxReducedField = this->computeMaxReducedElectricField(this->m_plasmaPhase);
 
   return a_dt;
 }

@@ -63,6 +63,7 @@ ItoKMCStepper<I, C, R, F>::ItoKMCStepper() noexcept
   m_minDt                            = std::numeric_limits<Real>::min();
   m_maxDt                            = std::numeric_limits<Real>::max();
   m_physicsDt                        = std::numeric_limits<Real>::max();
+  m_maxReducedField                  = 0.0;
 }
 
 template <typename I, typename C, typename R, typename F>
@@ -1176,8 +1177,6 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
     pout() << m_name + "::printStepReport" << endl;
   }
 
-  const Real Emax = this->computeMaxReducedElectricField(m_plasmaPhase);
-
   const unsigned long long localParticlesBulk    = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
   const unsigned long long globalParticlesBulk   = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
   const unsigned long long localParticlesEB      = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, true);
@@ -1262,7 +1261,7 @@ ItoKMCStepper<I, C, R, F>::printStepReport() noexcept
   //clang-format off
   const std::string whitespace = "                                   ";
   pout() << "                                   " + str << endl;
-  pout() << whitespace + "Emax        = " << Emax << " (Td)" << endl
+  pout() << whitespace + "Emax        = " << m_maxReducedField << " (Td)" << endl
          << whitespace + "Max n/N     = " << maxDensity << " (" << maxSolver << ")" << endl
          << whitespace + "Qplus       = " << Qplus << endl
          << whitespace + "Qminu       = " << Qminu << endl
