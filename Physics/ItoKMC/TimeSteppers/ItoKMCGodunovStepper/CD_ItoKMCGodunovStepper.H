@@ -48,7 +48,7 @@ namespace Physics {
 	@brief Compute a time step used for the advance method
       */
       virtual Real
-      computeDt() override;      
+      computeDt() override;
 
       /*!
 	@brief Advance the Ito-Poisson-KMC system over a_dt

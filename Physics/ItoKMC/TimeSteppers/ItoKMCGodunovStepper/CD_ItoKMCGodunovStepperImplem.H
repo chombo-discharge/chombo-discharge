@@ -189,7 +189,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   pp.get("extend_conductivity", m_extendConductivityEB);
   pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
-  pp.get("max_field_abort", m_maxFieldAbort);
+  pp.get("abort_max_field", m_maxFieldAbort);
 
   // Get algorithm
   if (str == "euler_maruyama") {
@@ -293,6 +293,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDt()
   Real dt = ItoKMCStepper<I, C, R, F>::computeDt();
 
   if ((this->m_maxReducedField > m_maxFieldAbort) && (m_maxFieldAbort > 0.0)) {
+    pout() << this->m_name + " aborting because maximum field is too high (" << this->m_maxReducedField << ")" << endl;
+
     dt = 0.0;
   }
 
