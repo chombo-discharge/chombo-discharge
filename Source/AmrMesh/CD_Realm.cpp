@@ -260,7 +260,13 @@ Realm::defineOuterHaloMask(const int a_lmin)
         mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
           new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
 
-        this->defineOuterHaloMask(*mask[lvl], domainCoar, domainFine, gridsCoar, gridsFine, buffer, m_refinementRatios[lvl]);
+        this->defineOuterHaloMask(*mask[lvl],
+                                  domainCoar,
+                                  domainFine,
+                                  gridsCoar,
+                                  gridsFine,
+                                  buffer,
+                                  m_refinementRatios[lvl]);
       }
 
       // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
@@ -272,12 +278,12 @@ Realm::defineOuterHaloMask(const int a_lmin)
 
 void
 Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                      const ProblemDomain&      a_domainCoar,
-                      const ProblemDomain&      a_domainFine,
-                      const DisjointBoxLayout&  a_gridsCoar,
-                      const DisjointBoxLayout&  a_gridsFine,
-                      const int                 a_buffer,
-                      const int                 a_refRat)
+                           const ProblemDomain&      a_domainCoar,
+                           const ProblemDomain&      a_domainFine,
+                           const DisjointBoxLayout&  a_gridsCoar,
+                           const DisjointBoxLayout&  a_gridsFine,
+                           const int                 a_buffer,
+                           const int                 a_refRat)
 {
   CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
@@ -411,6 +417,68 @@ Realm::defineInnerHaloMask(const int a_lmin)
   CH_TIME("Realm::defineInnerHaloMask");
   if (m_verbosity > 5) {
     pout() << "Realm::defineInnerHaloMask" << endl;
+  }
+
+  // Loop through all masks and do something about the halo masks only.
+  for (auto& m : m_masks) {
+
+    // Get mask identifier and buffer.
+    const std::string which_mask = m.first.first;
+    const int         buffer     = m.first.second;
+
+    if (which_mask == s_inner_particle_halo) {
+      if (buffer < 0) {
+        MayDay::Abort("Realm::defineInnerHaloMask -- cannot have buffer < 0!");
+      }
+
+      AMRMask& mask = m.second;
+
+      mask.resize(1 + m_finestLevel);
+
+      for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+        const DisjointBoxLayout& gridsCoar = m_grids[lvl];
+        const DisjointBoxLayout& gridsFine = m_grids[lvl + 1];
+
+        const ProblemDomain& domainCoar = m_domains[lvl];
+        const ProblemDomain& domainFine = m_domains[lvl + 1];
+
+        const int ncomp = 1;
+
+        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+          new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
+
+        // On the coarsest level the mask is always false because there is no inner refinement boundary.
+        if (lvl == 0) {
+          const DataIterator& ditCoar  = gridsCoar.dataIterator();
+          const int           nboxCoar = ditCoar.size();
+
+          // First, reset the mask.
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < nboxCoar; mybox++) {
+            const DataIndex& din = ditCoar[mybox];
+
+            (*mask[lvl])[din].setVal(false);
+          }
+        }
+        else {
+#if 0
+          const LevelData<BaseFab<bool>>& validCellsCoar = (*m_validCells[lvl]);
+
+          this->defineInnerHaloMask(*mask[lvl],
+                                    domainCoar,
+                                    domainFine,
+                                    gridsCoar,
+                                    gridsFine,
+                                    buffer,
+                                    m_refinementRatios[lvl]);
+#endif
+        }
+      }
+
+      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
+      // the old mask will remain in the vector after resizing. This fixes that.
+      //      mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+    }
   }
 }
 
