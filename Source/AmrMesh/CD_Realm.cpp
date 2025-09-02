@@ -260,7 +260,7 @@ Realm::defineOuterHaloMask(const int a_lmin)
         mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
           new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
 
-        this->defineHaloMask(*mask[lvl], domainCoar, domainFine, gridsCoar, gridsFine, buffer, m_refinementRatios[lvl]);
+        this->defineOuterHaloMask(*mask[lvl], domainCoar, domainFine, gridsCoar, gridsFine, buffer, m_refinementRatios[lvl]);
       }
 
       // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
@@ -271,7 +271,7 @@ Realm::defineOuterHaloMask(const int a_lmin)
 }
 
 void
-Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
                       const ProblemDomain&      a_domainCoar,
                       const ProblemDomain&      a_domainFine,
                       const DisjointBoxLayout&  a_gridsCoar,
@@ -402,6 +402,30 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
 
       BoxLoops::loop(box, kernel);
     }
+  }
+}
+
+void
+Realm::defineInnerHaloMask(const int a_lmin)
+{
+  CH_TIME("Realm::defineInnerHaloMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineInnerHaloMask" << endl;
+  }
+}
+
+void
+Realm::defineInnerHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+                           const ProblemDomain&      a_domainCoar,
+                           const ProblemDomain&      a_domainFine,
+                           const DisjointBoxLayout&  a_gridsCoar,
+                           const DisjointBoxLayout&  a_gridsFine,
+                           const int                 a_buffer,
+                           const int                 a_refRat)
+{
+  CH_TIME("Realm::defineInnerHaloMask");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineInnerHaloMask" << endl;
   }
 }
 

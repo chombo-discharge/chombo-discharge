@@ -474,7 +474,7 @@ protected:
   defineMasks(const int a_lmin);
 
   /*!
-    @brief Define particle halo mask.
+    @brief Define outer particle halo mask.
     @details This is a mask which is true on the OUTSIDE of a refinement boundary.
     @param[in] a_lmin Coarsest level that changed during regrid
   */
@@ -482,15 +482,7 @@ protected:
   defineOuterHaloMask(const int a_lmin);
 
   /*!
-    @brief Define particle halo mask.
-    @details This is a mask which is true on the INSIDE of a refinement boundary.
-    @param[in] a_lmin Coarsest level that changed during regrid
-  */
-  void
-  defineInnerHaloMask(const int a_lmin);
-
-  /*!
-    @brief Define particle halo masks. This is the level-version. 
+    @brief Define the outer particle halo masks. This is the level-version. 
     @param[out] a_coarMask   Mask
     @param[in]  a_domainCoar Coarse domain
     @param[in]  a_domainFine Fine domain
@@ -500,13 +492,40 @@ protected:
     @param[in]  a_refRat     Refinement ratio between the two levels
   */
   void
-  defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                 const ProblemDomain&      a_domainCoar,
-                 const ProblemDomain&      a_domainFine,
-                 const DisjointBoxLayout&  a_gridsCoar,
-                 const DisjointBoxLayout&  a_gridsFine,
-                 const int                 a_buffer,
-                 const int                 a_refRat);
+  defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+                      const ProblemDomain&      a_domainCoar,
+                      const ProblemDomain&      a_domainFine,
+                      const DisjointBoxLayout&  a_gridsCoar,
+                      const DisjointBoxLayout&  a_gridsFine,
+                      const int                 a_buffer,
+                      const int                 a_refRat);
+
+  /*!
+    @brief Define inner particle halo mask.
+    @details This is a mask which is true on the INSIDE of a refinement boundary.
+    @param[in] a_lmin Coarsest level that changed during regrid
+  */
+  void
+  defineInnerHaloMask(const int a_lmin);
+
+  /*!
+    @brief Define inner particle halo masks. This is the level-version. 
+    @param[out] a_coarMask   Mask
+    @param[in]  a_domainCoar Coarse domain
+    @param[in]  a_domainFine Fine domain
+    @param[in]  a_gridsCoar  Coarse grids
+    @param[in]  a_gridsFine  Fine grids
+    @param[in]  a_buffer     Buffer (i.e. width of "halo")
+    @param[in]  a_refRat     Refinement ratio between the two levels
+  */
+  void
+  defineInnerHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+                      const ProblemDomain&      a_domainCoar,
+                      const ProblemDomain&      a_domainFine,
+                      const DisjointBoxLayout&  a_gridsCoar,
+                      const DisjointBoxLayout&  a_gridsFine,
+                      const int                 a_buffer,
+                      const int                 a_refRat);
 
   /*!
     @brief Define the valid cell region mask. 
