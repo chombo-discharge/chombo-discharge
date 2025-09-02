@@ -507,7 +507,8 @@ ItoSolver::registerOperators() const
     }
 
     // Register mask for CIC deposition.
-    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
+    m_amr->registerMask(s_outer_particle_halo, m_haloBuffer, m_realm);
+    m_amr->registerMask(s_inner_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
@@ -573,7 +574,13 @@ ItoSolver::initialData()
     return initialDensityFunc(x, m_time);
   };
 
+#warning "Development here"
+#warning "EBParticleMesh infrastructure uses temporary buffers. This should be prealloacted memory"
+#if 1
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, 512); // Dev code
+#else
   this->generateParticlesFromDensity(bulkParticles, initialDensity, 32);
+#endif
 
   constexpr Real tolerance = 0.0;
 

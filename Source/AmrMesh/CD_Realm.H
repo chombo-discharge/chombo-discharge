@@ -23,7 +23,12 @@
 /*!
   @brief Identifier for particle halo masks
 */
-static const std::string s_particle_halo = "particle_halo";
+static const std::string s_outer_particle_halo = "outer_particle_halo";
+
+/*!
+  @brief Identifier for particle inner halo masks
+*/
+static const std::string s_inner_particle_halo = "inner_particle_halo";
 
 /*!
   @brief Identifier for particle valid region. 
@@ -469,11 +474,20 @@ protected:
   defineMasks(const int a_lmin);
 
   /*!
-    @brief Define particle halo amsks
+    @brief Define particle halo mask.
+    @details This is a mask which is true on the OUTSIDE of a refinement boundary.
     @param[in] a_lmin Coarsest level that changed during regrid
   */
   void
-  defineHaloMasks(const int a_lmin);
+  defineOuterHaloMask(const int a_lmin);
+
+  /*!
+    @brief Define particle halo mask.
+    @details This is a mask which is true on the INSIDE of a refinement boundary.
+    @param[in] a_lmin Coarsest level that changed during regrid
+  */
+  void
+  defineInnerHaloMask(const int a_lmin);
 
   /*!
     @brief Define particle halo masks. This is the level-version. 

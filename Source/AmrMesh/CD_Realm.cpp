@@ -193,7 +193,8 @@ Realm::defineMasks(const int a_lmin)
   }
 
   // Regrid all masks
-  this->defineHaloMasks(a_lmin);
+  this->defineOuterHaloMask(a_lmin);
+  this->defineInnerHaloMask(a_lmin);
 }
 
 void
@@ -225,11 +226,11 @@ Realm::defineMFLevelGrid(const int a_lmin)
 }
 
 void
-Realm::defineHaloMasks(const int a_lmin)
+Realm::defineOuterHaloMask(const int a_lmin)
 {
-  CH_TIME("Realm::defineHaloMasks");
+  CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineHaloMasks" << endl;
+    pout() << "Realm::defineOuterHaloMask" << endl;
   }
 
   // Loop through all masks and do something about the halo masks only.
@@ -239,9 +240,9 @@ Realm::defineHaloMasks(const int a_lmin)
     const std::string which_mask = m.first.first;
     const int         buffer     = m.first.second;
 
-    if (which_mask == s_particle_halo) {
+    if (which_mask == s_outer_particle_halo) {
       if (buffer < 0)
-        MayDay::Abort("Realm::defineHaloMasks -- cannot have buffer < 0!");
+        MayDay::Abort("Realm::defineOuterHaloMask -- cannot have buffer < 0!");
 
       AMRMask& mask = m.second;
 
@@ -278,9 +279,9 @@ Realm::defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
                       const int                 a_buffer,
                       const int                 a_refRat)
 {
-  CH_TIME("Realm::defineHaloMasks");
+  CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineHaloMasks" << endl;
+    pout() << "Realm::defineOuterHaloMask" << endl;
   }
 
   // TLDR: This routine defines a "mask" of valid coarse-grid cells (i.e., not covered by a finer level) around a fine grid. The mask is a_buffer wide. It is
