@@ -4959,13 +4959,12 @@ DischargeInceptionStepper<P, F, C>::writeReportStationary() const noexcept
       output << left << setw(15) << setfill(' ') << m_voltageSweeps[i];
       output << left << setw(15) << setfill(' ') << std::get<1>(m_KPlusValues[i]);
       output << left << setw(15) << setfill(' ') << std::get<1>(m_KMinuValues[i]);
-      
       output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_KPlusValues[i]));
-      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_KPlusValues[i]));
+      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_KMinuValues[i]));
       output << left << setw(20) << setfill(' ') << std::get<1>(m_TPlusValues[i]);
       output << left << setw(20) << setfill(' ') << std::get<1>(m_TMinuValues[i]);
       output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_TPlusValues[i]));
-      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_TPlusValues[i]));
+      output << left << setw(ww) << setfill(' ') << RealVectToString(std::get<2>(m_TMinuValues[i]));
       output << left << setw(20) << setfill(' ') << m_criticalVolumePlus[i];
       output << left << setw(20) << setfill(' ') << m_criticalVolumeMinu[i];
       output << left << setw(20) << setfill(' ') << m_criticalAreaPlus[i];
