@@ -45,7 +45,7 @@
 	}
     },
     "particle placement": {     // Particle placement algorithm. 
-	"method": "downstream", // Method. Must be either 'centroid', 'random', or 'downstream'
+	"method": "random", // Method. Must be either 'centroid', 'random', or 'downstream'
 	"species": "e"		// Species. Must be one of the plasma species. 
     },    
     "alpha": {		// Specification of the Townsend ionization coefficient.
@@ -168,7 +168,7 @@
 	    // Definition of O2+ plasma species.
             "id": "O2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -184,7 +184,7 @@
 	    // Definition of O2- plasma species.
             "id": "O2-",            // Species ID
 	    "Z" : -1,               // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -200,7 +200,7 @@
 	    // Definition of N2+ plasma species.
 	    "id": "N2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility

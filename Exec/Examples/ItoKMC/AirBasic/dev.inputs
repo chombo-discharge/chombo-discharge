@@ -11,7 +11,7 @@ AmrMesh.lo_corner            = -4E-2 -4E-2 -4E-2    ## Low corner of problem dom
 AmrMesh.hi_corner            = 4E-2  4E-2  4E-2     ## High corner of problem domain
 AmrMesh.verbosity            = -1                   ## Controls verbosity.
 AmrMesh.coarsest_domain      = 64 64 64             ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 2                   ## Maximum amr depth
+AmrMesh.max_amr_depth        = 5                   ## Maximum amr depth
 AmrMesh.max_sim_depth        = -1                   ## Maximum simulation depth
 AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
@@ -61,7 +61,7 @@ Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank',
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
-Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 

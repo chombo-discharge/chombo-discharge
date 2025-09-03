@@ -198,8 +198,6 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     const DataIterator&      dit     = dbl.dataIterator();
     const int                nbox    = dit.size();
 
-
-
     // 1. Deposit particles on this level.
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {

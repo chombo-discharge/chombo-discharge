@@ -245,13 +245,14 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
                                                     m_realm,
                                                     m_phase,
                                                     a_particles,
-                                                    a_deposition,
+                                                    DepositionType::TSC,
                                                     CoarseFineDeposition::Interp,
                                                     m_forceIrregDepositionNGP);
     break;
   }
   case CoarseFineDeposition::Halo: {
 
+#warning "Need to try to deposit the halo particles using HALF the grid width."
     // Copy the mask particles.
     const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
