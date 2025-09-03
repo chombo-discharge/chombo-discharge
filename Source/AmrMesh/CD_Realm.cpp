@@ -431,69 +431,136 @@ Realm::defineInnerHaloMask(const int a_lmin)
         MayDay::Abort("Realm::defineInnerHaloMask -- cannot have buffer < 0!");
       }
 
-      AMRMask& mask = m.second;
+      AMRMask& amrMask = m.second;
 
-      mask.resize(1 + m_finestLevel);
+      amrMask.resize(1 + m_finestLevel);
 
-      for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-        const DisjointBoxLayout& gridsCoar = m_grids[lvl];
-        const DisjointBoxLayout& gridsFine = m_grids[lvl + 1];
+      const int comp    = 0;
+      const int numComp = 1;
 
-        const ProblemDomain& domainCoar = m_domains[lvl];
-        const ProblemDomain& domainFine = m_domains[lvl + 1];
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
 
-        const int ncomp = 1;
+        const DisjointBoxLayout& dbl      = m_grids[lvl];
+        const DataIterator&      dit      = dbl.dataIterator();
+        const int                numBoxes = dit.size();
 
-        mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
-          new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
+        amrMask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+          new LevelData<BaseFab<bool>>(dbl, numComp, IntVect::Zero));
 
-        // On the coarsest level the mask is always false because there is no inner refinement boundary.
-        if (lvl == 0) {
-          const DataIterator& ditCoar  = gridsCoar.dataIterator();
-          const int           nboxCoar = ditCoar.size();
-
-          // First, reset the mask.
 #pragma omp parallel for schedule(runtime)
-          for (int mybox = 0; mybox < nboxCoar; mybox++) {
-            const DataIndex& din = ditCoar[mybox];
+        for (int mybox = 0; mybox < numBoxes; mybox++) {
+          const DataIndex& din = dit[mybox];
 
-            (*mask[lvl])[din].setVal(false);
+          (*amrMask[lvl])[din].setVal(false);
+        }
+
+        if (lvl > 0) {
+          // TLDR: Below, we use the valid cells to figure out the region on the inside of the refinement boundary. In everything below, the "fine" grid
+          //       is the current grid level, and the coarse grid is the grid level below.
+
+          const int refToCoar = m_refinementRatios[lvl - 1];
+
+          const LevelData<BaseFab<bool>>& validCellsCoar = (*m_validCells[lvl - 1]);
+
+          const DisjointBoxLayout& gridsCoar = m_grids[lvl - 1];
+          const DisjointBoxLayout& gridsFine = m_grids[lvl];
+
+          const ProblemDomain& domainCoar = m_domains[lvl - 1];
+          const ProblemDomain& domainFine = m_domains[lvl];
+
+          const DataIterator& ditCoar = gridsCoar.dataIterator();
+          const DataIterator& ditFine = gridsFine.dataIterator();
+
+          const int numBoxesCoar = ditCoar.size();
+          const int numBoxesFine = ditFine.size();
+
+          Vector<Box> boxesCoar = gridsCoar.boxArray();
+          Vector<Box> boxesFine = gridsFine.boxArray();
+
+          const Vector<int> procsCoar = gridsCoar.procIDs();
+          const Vector<int> procsFine = gridsFine.procIDs();
+
+          // Grow all the coarse boxes by the buffer and create a box layout on the coarse level using these boxes.
+          for (int i = 0; i < boxesCoar.size(); i++) {
+            boxesCoar[i] = grow(boxesCoar[i], buffer) & domainCoar;
+          }
+
+          // Coarsen all the fine boxes and create a boxlayout on the coarse level using the fine-grid decomposition
+          for (int i = 0; i < boxesFine.size(); i++) {
+            boxesFine[i] = coarsen(boxesFine[i], refToCoar);
+          }
+
+          const BoxLayout boxLayoutCoar(boxesCoar, procsCoar);
+          const BoxLayout boxLayoutCoFi(boxesFine, procsFine);
+
+          BoxLayoutData<FArrayBox> coarLevelMask(boxLayoutCoar, 1);
+          BoxLayoutData<FArrayBox> coFiLevelMask(boxLayoutCoFi, 1);
+
+          // Set the coarse mask to false everywhere on the coarse level, except on the region just inside the refinement boundary.
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < numBoxesCoar; mybox++) {
+            const DataIndex& dinCoar = ditCoar[mybox];
+            const Box&       cellBox = gridsCoar[dinCoar];
+
+            FArrayBox&           coarMask   = coarLevelMask[dinCoar];
+            const BaseFab<bool>& validCells = validCellsCoar[dinCoar];
+
+            coarMask.setVal(0.0);
+
+            auto flagGrownRegion = [&](const IntVect& iv) -> void {
+              if (validCells(iv, comp)) {
+                const Box grownBox = grow(Box(iv, iv), buffer) & domainCoar;
+
+                for (BoxIterator bit(grownBox); bit.ok(); ++bit) {
+                  coarMask(bit(), comp) = 1.0;
+                }
+              }
+            };
+
+            BoxLoops::loop(cellBox, flagGrownRegion);
+          }
+
+          // Reset the mask on the coarsened grid
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < numBoxes; mybox++) {
+            const DataIndex& din     = dit[mybox];
+            const Box&       cellBox = boxLayoutCoFi[din];
+
+            FArrayBox& coFiMask = coFiLevelMask[din];
+
+            coFiMask.setVal(0.0);
+          }
+
+          // Increment the data from the coarse grid to the coarsened fine grid. This must
+          // also increment with the ghost vell values.
+          const Interval srcInterv(comp, comp);
+          const Interval dstInterv(comp, comp);
+
+          coarLevelMask.addTo(srcInterv, coFiLevelMask, dstInterv, domainCoar);
+
+          // Iterate through the current level and, for each cell, check if the coarsened cell value was
+          // flagged as a mask cell.
+#pragma omp parallel for schedule(runtime)
+          for (int mybox = 0; mybox < numBoxes; mybox++) {
+            const DataIndex& din     = dit[mybox];
+            const Box&       cellBox = gridsFine[din];
+
+            BaseFab<bool>&   curMask  = (*amrMask[lvl])[din];
+            const FArrayBox& coFiMask = coFiLevelMask[din];
+
+            auto kernel = [&](const IntVect& iv) -> void {
+              const IntVect coarIV = coarsen(iv, refToCoar);
+
+              if (coFiMask(coarIV, comp) > 0.0) {
+                curMask(iv, comp) = true;
+              }
+            };
+
+            BoxLoops::loop(cellBox, kernel);
           }
         }
-        else {
-#if 0
-          const LevelData<BaseFab<bool>>& validCellsCoar = (*m_validCells[lvl]);
-
-          this->defineInnerHaloMask(*mask[lvl],
-                                    domainCoar,
-                                    domainFine,
-                                    gridsCoar,
-                                    gridsFine,
-                                    buffer,
-                                    m_refinementRatios[lvl]);
-#endif
-        }
       }
-
-      // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
-      // the old mask will remain in the vector after resizing. This fixes that.
-      //      mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
     }
-  }
-}
-
-void
-Realm::defineInnerHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                           const ProblemDomain&      a_domainCoar,
-                           const ProblemDomain&      a_domainFine,
-                           const DisjointBoxLayout&  a_gridsCoar,
-                           const DisjointBoxLayout&  a_gridsFine,
-                           const int                 a_buffer,
-                           const int                 a_refRat)
-{
-  CH_TIME("Realm::defineInnerHaloMask");
-  if (m_verbosity > 5) {
-    pout() << "Realm::defineInnerHaloMask" << endl;
   }
 }
 

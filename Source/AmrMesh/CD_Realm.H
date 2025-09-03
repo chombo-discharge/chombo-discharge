@@ -31,11 +31,6 @@ static const std::string s_outer_particle_halo = "outer_particle_halo";
 static const std::string s_inner_particle_halo = "inner_particle_halo";
 
 /*!
-  @brief Identifier for particle valid region. 
-*/
-static const std::string s_particle_valid_region = "pvr";
-
-/*!
   @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
 */
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
@@ -507,25 +502,6 @@ protected:
   */
   void
   defineInnerHaloMask(const int a_lmin);
-
-  /*!
-    @brief Define inner particle halo masks. This is the level-version. 
-    @param[out] a_coarMask   Mask
-    @param[in]  a_domainCoar Coarse domain
-    @param[in]  a_domainFine Fine domain
-    @param[in]  a_gridsCoar  Coarse grids
-    @param[in]  a_gridsFine  Fine grids
-    @param[in]  a_buffer     Buffer (i.e. width of "halo")
-    @param[in]  a_refRat     Refinement ratio between the two levels
-  */
-  void
-  defineInnerHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                      const ProblemDomain&      a_domainCoar,
-                      const ProblemDomain&      a_domainFine,
-                      const DisjointBoxLayout&  a_gridsCoar,
-                      const DisjointBoxLayout&  a_gridsFine,
-                      const int                 a_buffer,
-                      const int                 a_refRat);
 
   /*!
     @brief Define the valid cell region mask. 
