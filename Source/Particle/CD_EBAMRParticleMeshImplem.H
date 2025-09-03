@@ -198,6 +198,8 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     const DataIterator&      dit     = dbl.dataIterator();
     const int                nbox    = dit.size();
 
+
+
     // 1. Deposit particles on this level.
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
@@ -223,7 +225,7 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     //    EBCoarseFineParticleMesh has buffers and functions that handle that type of interpolation.
     if (hasCoar) {
       m_coarseFinePM[lvl]->addInvalidCoarseToFine(*a_meshData[lvl], *a_meshData[lvl - 1]);
-    }
+    }        
   }
 }
 

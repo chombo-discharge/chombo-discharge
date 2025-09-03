@@ -30,18 +30,25 @@
   @brief Class for handling particle-mesh operations with AMR. 
   @details This class contains templated functions for depositing particles with AMR. When depositing, the user must specify the deposition type (e.g., CIC) as
   well as how to handle coarse-fine boundary conditions and cut-cell deposition. Because of the many degrees of freedom in depositing particles with AMR (and EB), 
-  the user must expect to preprocess his particle data before solving. There are thus two "main" ways of handling deposition near refinement boundaries. 
+  the user must expect to preprocess his particle data before solving. There are several ways deposition works through this class:
 
   When specifying CoarseFineDeposition::Interp, the deposition is done by first depositing the data as usual on both levels. On the fine level, there may be mass that
   hangs over the refinement boundaries; that mass is added to the coarse level. On the coarse level some of the particles will deposit mass into cells that are covered
-  by a finer level; that mass is interpolated with piece-wise constant interpolation and added to the fine level. 
+  by a finer level; that mass is interpolated with piece-wise constant interpolation and then added to the fine level. 
 
-  When specyfing CoarseFineDeposition::Halo, only the handling of the coarse-side deposition is different. As with PVR, the mass from the fine-level particles that
-  hangs over refinement boundaries is put on the coarse mesh. However, the coarse-level particles are deposited in two separate steps so that the coarse-level particles
+  When specifying CoarseFineDeposition::Halo, the handling of the coarse-side deposition is different. The mass from the fine-level particles that hangs over the 
+  refinement boundaries is put on the coarse mesh. However, the coarse-level particles are deposited in two separate steps so that the coarse-level particles
   have the same physical widths on the coarse and fine levels. We first deposit ALL the coarse-level particles on the coarse level. Some of these particles (halo particles)
   will have clouds that overlap with the fine level. We take the set of these particles and deposit them directly onto the fine level (via buffers) with 2x or 4x the
   original particle width (depending on the refinement ratios between the levels). Essentially, this differs CoarseFineDeposition::Interp in the sense that the original 
   particle width is maintained on the fine level.
+
+  When specifying CoarseFineDeposition::HaloNGP, the particles whose deposition clouds hang over the refinement boundary are deposited on the fine level, and the ghosted
+  mass is then added to the coarse side. Particles that live on the coarse side of a refinement boundary are deposited using an NGP scheme.
+
+  When specifying CoarseFineDeposition::Buffer, the user MUST first take responsibility and transfer particles that live within a specified region of the refinement
+  boundary to the masked data holder. These particles are then moved to the coarser level, and particles then deposit on the entire level. Some of ths mass may then
+  fall underneath the fine grids. This mass is (piecewise constant) interpolated to the next level before depositing particles there. 
 */
 class EBAMRParticleMesh
 {
@@ -331,8 +338,7 @@ protected:
   defineEBParticleMesh();
 
   /*!
-    @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user does NOT need to fill the "halo" particles. Rather, the
+    @brief Deposit
     mass that is deposited on the part of the coarse grid that lies underneath the fine grid (i.e., the invalid region) is interpolated to the fine level. 
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
@@ -425,7 +431,7 @@ protected:
                  const ParticleContainer<P>& a_particles,
                  const DepositionType        a_depositionType,
                  const bool                  a_forceIrregNGP = false);
-
+  
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
     @details See deposit() for details regarding the template arguments. When calling this routine the user does NOT need to fill the "halo" particles. Rather, the

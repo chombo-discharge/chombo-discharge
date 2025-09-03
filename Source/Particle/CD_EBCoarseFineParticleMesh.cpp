@@ -344,7 +344,7 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
       auto fineKernel = [&](const IntVect& iv) {
         const IntVect ivFine = m_refRat * ivCoar + iv;
 
-        fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
+        fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);        
       };
 
       BoxLoops::loop(Box(IntVect::Zero, m_refRat * IntVect::Unit), fineKernel);
@@ -371,7 +371,7 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
 
   // Finally, add the data to the valid region on the fine grid.
   const Interval interv(0, m_nComp - 1);
-  bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineNoGhosts, EBAddOp());
+  //  bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineNoGhosts, EBAddOp());
 }
 
 const EBLevelGrid&

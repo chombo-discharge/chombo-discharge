@@ -11,15 +11,15 @@ AmrMesh.lo_corner            = -4E-2 -4E-2 -4E-2    ## Low corner of problem dom
 AmrMesh.hi_corner            = 4E-2  4E-2  4E-2     ## High corner of problem domain
 AmrMesh.verbosity            = -1                   ## Controls verbosity.
 AmrMesh.coarsest_domain      = 64 64 64             ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 10                   ## Maximum amr depth
+AmrMesh.max_amr_depth        = 2                   ## Maximum amr depth
 AmrMesh.max_sim_depth        = -1                   ## Maximum simulation depth
 AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = tiled                ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton               ## 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor      = 16                   ## Blocking factor.
-AmrMesh.max_box_size         = 16                   ## Maximum allowed box size
-AmrMesh.max_ebis_box         = 16                   ## Maximum allowed box size for EBIS generation.
+AmrMesh.blocking_factor      = 32                   ## Blocking factor.
+AmrMesh.max_box_size         = 32                   ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 32                   ## Maximum allowed box size for EBIS generation.
 AmrMesh.ref_rat              = 2 2 2 2 2 2          ## Refinement ratios (mixed ratios are allowed).
 AmrMesh.num_ghost            = 2                    ## Number of ghost cells.
 AmrMesh.lsf_ghost            = 2                    ## Number of ghost cells when writing level-set to grid
@@ -44,11 +44,11 @@ Driver.checkpoint_interval          = 100                 ## Checkpoint interval
 Driver.regrid_interval              = 2                   ## Regrid interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
-Driver.initial_regrids              = 3                   ## Number of initial regrids
+Driver.initial_regrids              = 0                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
 Driver.stop_time                    = 15E-9               ## Stop time
-Driver.max_steps                    = 1000                ## Maximum number of steps
+Driver.max_steps                    = 0                ## Maximum number of steps
 Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
 Driver.write_memory                 = false               ## Write MPI memory report
 Driver.write_loads                  = false               ## Write (accumulated) computational loads
@@ -62,8 +62,8 @@ Driver.restart                      = 0                   ## Restart step (less 
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
 Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes            = 3                   ## Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics           = 1                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
 # FieldSolverMultigrid class options
@@ -297,3 +297,5 @@ ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
+
+ItoSolver.ppc=1024
