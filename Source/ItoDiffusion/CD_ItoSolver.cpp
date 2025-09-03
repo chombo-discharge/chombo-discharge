@@ -115,6 +115,14 @@ ItoSolver::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
+  m_outerHaloBuffer = 1;
+  m_innerHaloBuffer = 2;
+
+  ParmParse pp("ItoSolver");
+
+  pp.query("outer_halo_buffer", m_outerHaloBuffer);
+  pp.query("inner_halo_buffer", m_innerHaloBuffer);
+
   this->parseVerbosity();
   this->parseRNG();
   this->parseTruncation();
