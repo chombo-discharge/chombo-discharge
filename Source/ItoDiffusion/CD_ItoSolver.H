@@ -1158,9 +1158,14 @@ protected:
   int m_timeStep;
 
   /*!
-    @brief Size of refinement boundary halo
+    @brief Size of desired outer refinement boundary halo
   */
-  int m_haloBuffer;
+  int m_outerHaloBuffer;
+
+  /*!
+    @brief Size of desired inner refinement boundary halo
+  */
+  int m_innerHaloBuffer;
 
   /*!
     @brief Current time

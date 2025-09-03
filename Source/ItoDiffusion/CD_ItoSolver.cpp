@@ -43,7 +43,8 @@ ItoSolver::ItoSolver()
   m_className            = "ItoSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_haloBuffer           = 1;
+  m_outerHaloBuffer      = 1;
+  m_innerHaloBuffer      = 2;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
   m_deposition           = DepositionType::CIC;
   m_plotDeposition       = DepositionType::CIC;
@@ -507,8 +508,8 @@ ItoSolver::registerOperators() const
     }
 
     // Register mask for CIC deposition.
-    m_amr->registerMask(s_outer_particle_halo, m_haloBuffer, m_realm);
-    m_amr->registerMask(s_inner_particle_halo, m_haloBuffer, m_realm);
+    m_amr->registerMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
+    m_amr->registerMask(s_inner_particle_halo, m_innerHaloBuffer, m_realm);
   }
 }
 
