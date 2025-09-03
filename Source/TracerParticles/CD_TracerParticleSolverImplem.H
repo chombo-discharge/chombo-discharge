@@ -186,7 +186,7 @@ TracerParticleSolver<P>::registerOperators() const
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
 
     // For CIC halo deposition.
-    m_amr->registerMask(s_particle_halo, 1, m_realm);
+    m_amr->registerMask(s_outer_particle_halo, 1, m_realm);
   }
 }
 
@@ -757,7 +757,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
   case CoarseFineDeposition::Halo: {
 
     // Copy particles living on the mask.
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_haloBuffer, m_realm);
 
     mutableParticles.copyMaskParticles(mask);
 
@@ -775,7 +775,7 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
     break;
   }
   case CoarseFineDeposition::HaloNGP: {
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_haloBuffer, m_realm);
 
     // Transfer particles living on the mask.
     mutableParticles.transferMaskParticles(mask);

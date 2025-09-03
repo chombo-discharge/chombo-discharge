@@ -43,7 +43,8 @@ ItoSolver::ItoSolver()
   m_className            = "ItoSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_haloBuffer           = 1;
+  m_outerHaloBuffer      = 1;
+  m_innerHaloBuffer      = 2;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
   m_deposition           = DepositionType::CIC;
   m_plotDeposition       = DepositionType::CIC;
@@ -113,6 +114,14 @@ ItoSolver::parseOptions()
   if (m_verbosity > 5) {
     pout() << m_name + "::parseOptions" << endl;
   }
+
+  m_outerHaloBuffer = 1;
+  m_innerHaloBuffer = 2;
+
+  ParmParse pp("ItoSolver");
+
+  pp.query("outer_halo_buffer", m_outerHaloBuffer);
+  pp.query("inner_halo_buffer", m_innerHaloBuffer);
 
   this->parseVerbosity();
   this->parseRNG();
@@ -263,6 +272,9 @@ ItoSolver::parseDeposition()
   else if (str == "cic") {
     m_deposition = DepositionType::CIC;
   }
+  else if (str == "tsc") {
+    m_deposition = DepositionType::TSC;
+  }  
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
   }
@@ -278,6 +290,9 @@ ItoSolver::parseDeposition()
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
   }
+  else if (str == "buffer") {
+    m_coarseFineDeposition = CoarseFineDeposition::Buffer;
+  }  
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }
@@ -507,7 +522,8 @@ ItoSolver::registerOperators() const
     }
 
     // Register mask for CIC deposition.
-    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
+    m_amr->registerMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
+    m_amr->registerMask(s_inner_particle_halo, m_innerHaloBuffer, m_realm);
   }
 }
 
@@ -573,7 +589,16 @@ ItoSolver::initialData()
     return initialDensityFunc(x, m_time);
   };
 
+#warning "Development here"
+#warning "EBParticleMesh infrastructure uses temporary buffers. This should be prealloacted memory"
+#if 1
+  int ppc = 32;
+  ParmParse pp("ItoSolver");
+  pp.query("ppc", ppc);
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, ppc); // Dev code
+#else
   this->generateParticlesFromDensity(bulkParticles, initialDensity, 32);
+#endif
 
   constexpr Real tolerance = 0.0;
 

@@ -26,7 +26,8 @@ enum class CoarseFineDeposition
 {
   Interp,
   Halo,
-  HaloNGP
+  HaloNGP,
+  Buffer
 };
 
 #include <CD_NamespaceFooter.H>
