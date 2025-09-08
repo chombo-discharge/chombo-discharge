@@ -395,7 +395,7 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
       // that it is the REACTION that determines how we index the state population. This is simply a
       // design choice that permits the user to apply different type of reactions without changing
       // the underlying state.
-      const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
+      const T Xi = R::population(reactant, a_state);
 
       if (Xi > (T)0) {
         Real mu = 0.0;

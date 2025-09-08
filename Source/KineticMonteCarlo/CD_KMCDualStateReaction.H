@@ -69,7 +69,7 @@ public:
     @param[in] a_reactant Reactive species
     @param[in] a_state    State vector
   */
-  static T
+  inline static T
   population(const size_t& a_reactant, const State& a_state) noexcept;
 
   /*!
