@@ -61,8 +61,8 @@ Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank',
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
-Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes            = 3                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_angles                = 15.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes            = 1                   ## Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics           = 1                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
@@ -90,14 +90,14 @@ FieldSolverMultigrid.gmg_min_iter          = 5            ## Minimum number of i
 FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
-FieldSolverMultigrid.gmg_min_cells         = 8            ## Bottom drop
-FieldSolverMultigrid.gmg_drop_order        = 128          ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_min_cells         = 2            ## Bottom drop
+FieldSolverMultigrid.gmg_drop_order        = 0          ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order          = 2            ## Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order        = 2            ## Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight       = 1            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_reduce_order      = false        ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverMultigrid.gmg_bottom_solver     = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverMultigrid.gmg_bottom_solver     = simple 32     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
@@ -249,7 +249,7 @@ ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl     = 0.0             
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl     = 1.E99              ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl            = 0.5                ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                          = 500.0              ## Relaxation time step restriction.
-ItoKMCGodunovStepper.min_dt                                   = 1.0E-12            ## Minimum permitted time step
+ItoKMCGodunovStepper.min_dt                                   = 1.0E-40            ## Minimum permitted time step
 ItoKMCGodunovStepper.max_dt                                   = 100.E-9           ## Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
@@ -271,8 +271,8 @@ ItoKMCJSON.debug              = true                         ## Turn on/off debu
 ItoKMCJSON.chemistry_file     = simple_air_chemistry.json    ## Chemistry file
 
 # Kinetic Monte Carlo solver settings.
-ItoKMCJSON.max_new_particles     = 32                 ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons       = 32                 ## Maximum number of computational photons to produce in reaction step
+ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_photons       = 16                 ## Maximum number of computational photons to produce in reaction step
 ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
 ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
 ItoKMCJSON.prop_eps              = 2.0                ## Maximum relative change in propensity function
@@ -296,4 +296,4 @@ ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.0      ## Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl       = 4        ## Set max coarsening depth

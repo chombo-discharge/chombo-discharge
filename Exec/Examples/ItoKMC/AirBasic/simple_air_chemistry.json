@@ -45,7 +45,7 @@
 	}
     },
     "particle placement": {     // Particle placement algorithm. 
-	"method": "downstream", // Method. Must be either 'centroid', 'random', or 'downstream'
+	"method": "random", // Method. Must be either 'centroid', 'random', or 'downstream'
 	"species": "e"		// Species. Must be one of the plasma species. 
     },    
     "alpha": {		// Specification of the Townsend ionization coefficient.
@@ -67,7 +67,6 @@
 	    "solver" : "ito",   // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,    // Mobile or not
 	    "diffusive" : true, // Diffusive or not
-            "initial density": 1E10,	    
 	    "mobility" : {
 		// Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
 		// tabulated vs E/N
@@ -117,7 +116,7 @@
 	    // Definition of O2+ plasma species.
             "id": "O2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -127,30 +126,13 @@
 	    "diffusion": {          // Specification of diffusion coefficient
 		"type": "constant", // Diffusion coefficient is constant
 		"value": 0.0        // Diffusion coefficient is 0.0
-	    }		
+	    }
 	},
-	{
-	    // Definition of O2- plasma species.
-            "id": "O2-",            // Species ID
-	    "Z" : -1,               // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : false,       // Mobile or not
-	    "diffusive" : false,    // Diffusive or not
-	    "mobility": {           // Specification of the mobility
-		"type": "constant", // Mobility is constant 
-		"value": 2E-4       // Mobility value is 2E-4
-	    },
-	    "diffusion": {          // Specification of diffusion coefficient
-		"type": "constant", // Diffusion coefficient is constant
-		"value": 0.0        // Diffusion coefficient is 0.0
-	    },
-            "initial density": 1E10
-	},	
 	{
 	    // Definition of N2+ plasma species.
 	    "id": "N2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -161,7 +143,25 @@
 		"type": "constant", // Diffusion coefficient is constant
 		"value": 0.0        // Diffusion coefficient is 0.0
 	    }				
+	},	
+	{
+	    // Definition of O2- plasma species.
+            "id": "O2-",            // Species ID
+	    "Z" : -1,               // Charge number
+	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : false,       // Mobile or not
+	    "diffusive" : false,    // Diffusive or not
+	    "mobility": {           // Specification of the mobility
+		"type": "constant", // Mobility is constant 
+		"value": 2E-4       // Mobility value is 2E-4
+	    },
+	    "diffusion": {          // Specification of diffusion coefficient
+		"type": "constant", // Diffusion coefficient is constant
+		"value": 0.0        // Diffusion coefficient is 0.0
+	    },
+	    "initial density": 1E14
 	}
+
     ],
     "photon species":
     [
@@ -295,9 +295,10 @@
 	    "E/N column" : 0,                    
 	    "rate/N column" : 1,                 
 	    "min E/N" : 1.0,                     
-	    "max E/N" : 1000.0,                  
+	    "max E/N" : 1000.0,
 	    "num points" : 10000,                 
-	    "spacing" : "exponential"
+	    "spacing" : "exponential",
+	    "dump": "debug.dat"
 	}        
     ],
     "photoionization":
