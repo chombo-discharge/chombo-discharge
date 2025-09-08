@@ -298,7 +298,7 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDt()
     dt = 0.0;
   }
 
-  if(this->m_timeStep == 0) {
+  if (this->m_timeStep == 0) {
     return 1E-18;
   }
 
