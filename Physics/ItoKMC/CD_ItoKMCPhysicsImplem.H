@@ -465,32 +465,26 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
-  // Compute a time step using the non-critical reactions. We could have done this using ALL reactions, but I take for granted
-  // that the user will segregate the critical reactions anyways.
-  auto proxyState = m_kmcState;
+  // Compute a time step using all reactions.
+  const auto propensities = m_kmcSolver.propensities(m_kmcState, m_kmcReactionsThreadLocal);
 
-  std::vector<FPR>& X = proxyState.getReactiveState();
-  for (auto& x : X) {
-    x = 1.0;
+  a_physicsDt = m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, propensities, 1.0);
+
+#if 0
+  //  for (const auto& reaction : m_kmcReactionsThreadLocal) {
+    auto proxyState = m_kmcState;
+
+    m_kmcReactionsThreadLocal[5]->advanceState(proxyState, 1);
+
+    if(proxyState.isValidState()){
+      const auto propensities = m_kmcSolver.propensities(proxyState, m_kmcReactionsThreadLocal);
+      
+      const Real physicsDt = m_kmcSolver.computeDt(proxyState, m_kmcReactionsThreadLocal, propensities, 1.0);
+
+      a_physicsDt = std::min(a_physicsDt, physicsDt);
+      //    }
   }
-  // Advance every reaction once
-  // for (const auto& reaction : m_kmcReactionsThreadLocal) {
-  //   reaction->advanceState(proxyState, 10);
-  // }
-
-  // for (int i = 0; i < a_numParticles.size(); i++) {
-  //   proxyState
-  // }
-  
-  const auto partitionedReactions = m_kmcSolver.partitionReactions(proxyState);
-
-  const auto& criticalReactions    = partitionedReactions.first;
-  const auto& nonCriticalReactions = partitionedReactions.second;
-
-  const auto criticalPropensities    = m_kmcSolver.propensities(proxyState, criticalReactions);
-  const auto nonCriticalPropensities = m_kmcSolver.propensities(proxyState, nonCriticalReactions);
-
-  a_physicsDt = m_kmcSolver.computeDt(proxyState, nonCriticalReactions, nonCriticalPropensities, 1.0);
+#endif
 }
 
 inline void
