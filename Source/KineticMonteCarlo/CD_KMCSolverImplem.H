@@ -363,7 +363,7 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
                                   const std::vector<Real>& a_nonCriticalPropensities,
                                   const Real               a_epsilon) const noexcept
 {
-  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList, std::vector<Real>, Real");
+  CH_TIME("KMCSolver::computeDt(State, ReactionList, std::vector<Real>, Real");
 
   CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
 

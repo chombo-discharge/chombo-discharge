@@ -465,27 +465,24 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
-  // Compute a time step for the next iteration. This step is a bit special in that it assumes that all reactions fire so
-  // we get new species on the right-hand side. This is done in order to avoid prediction of a large time step, followed by
-  // production of a rapidly-growing species within the next time step.
-#warning \
-  "This needs to be debugged -- what happens if there are more than one reaction that consumes reactants, for example?"
-#warning \
-  "I don't think it's correct to look at all the reactions because the critiacl reactions are treated in an exact manner anyways!"
-  auto       proxyState           = m_kmcState;
-  const auto partitionedReactions = m_kmcSolver.partitionReactions(proxyState);
+  // Compute a time step using the non-critical reactions. We could have done this using ALL reactions, but I take for granted
+  // that the user will segregate the critical reactions anyways.
+  auto proxyState = m_kmcState;
 
-  std::vector<FPR>  oldParticleState = proxyState.getReactiveState();
-  std::vector<FPR>& newParticleState = proxyState.getReactiveState();
-
+  std::vector<FPR>& X = proxyState.getReactiveState();
+  for (auto& x : X) {
+    x = 1.0;
+  }
+  // Advance every reaction once
   // for (const auto& reaction : m_kmcReactionsThreadLocal) {
-  //   reaction->advanceState(proxyState, 1);
+  //   reaction->advanceState(proxyState, 10);
   // }
 
-  // Gather states.
-  // for (int i = 0; i < oldParticleState.size(); i++) {
-  //   newParticleState[i] = std::max(newParticleState[i], oldParticleState[i]);
+  // for (int i = 0; i < a_numParticles.size(); i++) {
+  //   proxyState
   // }
+  
+  const auto partitionedReactions = m_kmcSolver.partitionReactions(proxyState);
 
   const auto& criticalReactions    = partitionedReactions.first;
   const auto& nonCriticalReactions = partitionedReactions.second;
@@ -493,9 +490,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   const auto criticalPropensities    = m_kmcSolver.propensities(proxyState, criticalReactions);
   const auto nonCriticalPropensities = m_kmcSolver.propensities(proxyState, nonCriticalReactions);
 
-  //  const auto propensities = m_kmcSolver.propensities(proxyState, m_kmcReactionsThreadLocal);
-
-  a_physicsDt = m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, nonCriticalPropensities, 1.0);
+  a_physicsDt = m_kmcSolver.computeDt(proxyState, nonCriticalReactions, nonCriticalPropensities, 1.0);
 }
 
 inline void
