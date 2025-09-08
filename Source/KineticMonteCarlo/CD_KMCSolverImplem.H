@@ -329,14 +329,17 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
           const Real& p    = a_nonCriticalPropensities[i];
           const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
 
-          mu += std::abs(muIJ * p);
-          sigma2 += std::abs(muIJ * muIJ * p);
+          mu += muIJ * p;
+          sigma2 += muIJ * muIJ * p;
         }
 
         Real dt1 = std::numeric_limits<Real>::max();
         Real dt2 = std::numeric_limits<Real>::max();
 
         const Real f = std::max(m_eps * Xi / gi, one);
+
+        mu     = std::abs(mu);
+        sigma2 = std::abs(sigma2);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt1 = f / mu;
@@ -405,10 +408,12 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
           const Real& p    = a_nonCriticalPropensities[i];
           const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
 
-          mu += std::abs(muIJ * p);
+          mu += muIJ * p;
         }
 
         const Real f = std::max(a_epsilon * Xi / gi, one);
+
+        mu = std::abs(mu);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt = std::min(dt, f / mu);
