@@ -468,25 +468,34 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // Compute a time step for the next iteration. This step is a bit special in that it assumes that all reactions fire so
   // we get new species on the right-hand side. This is done in order to avoid prediction of a large time step, followed by
   // production of a rapidly-growing species within the next time step.
-#warning "This needs to be debugged -- what happens if there are more than one reaction that consumes reactants, for example?"
-#warning "I don't think it's correct to look at all the reactions because the critiacl reactions are treated in an exact manner anyways!"
-  auto proxyState = m_kmcState;
+#warning \
+  "This needs to be debugged -- what happens if there are more than one reaction that consumes reactants, for example?"
+#warning \
+  "I don't think it's correct to look at all the reactions because the critiacl reactions are treated in an exact manner anyways!"
+  auto       proxyState           = m_kmcState;
+  const auto partitionedReactions = m_kmcSolver.partitionReactions(proxyState);
 
   std::vector<FPR>  oldParticleState = proxyState.getReactiveState();
   std::vector<FPR>& newParticleState = proxyState.getReactiveState();
 
-  for (const auto& reaction : m_kmcReactionsThreadLocal) {
-    reaction->advanceState(proxyState, 1);
-  }
+  // for (const auto& reaction : m_kmcReactionsThreadLocal) {
+  //   reaction->advanceState(proxyState, 1);
+  // }
 
   // Gather states.
-  for (int i = 0; i < oldParticleState.size(); i++) {
-    newParticleState[i] = std::max(newParticleState[i], oldParticleState[i]);
-  }
+  // for (int i = 0; i < oldParticleState.size(); i++) {
+  //   newParticleState[i] = std::max(newParticleState[i], oldParticleState[i]);
+  // }
 
-  const auto propensities = m_kmcSolver.propensities(proxyState, m_kmcReactionsThreadLocal);
+  const auto& criticalReactions    = partitionedReactions.first;
+  const auto& nonCriticalReactions = partitionedReactions.second;
 
-  a_physicsDt = m_kmcSolver.computeDt(proxyState, m_kmcReactionsThreadLocal, propensities, 1.0);
+  const auto criticalPropensities    = m_kmcSolver.propensities(proxyState, criticalReactions);
+  const auto nonCriticalPropensities = m_kmcSolver.propensities(proxyState, nonCriticalReactions);
+
+  //  const auto propensities = m_kmcSolver.propensities(proxyState, m_kmcReactionsThreadLocal);
+
+  a_physicsDt = m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, nonCriticalPropensities, 1.0);
 }
 
 inline void
