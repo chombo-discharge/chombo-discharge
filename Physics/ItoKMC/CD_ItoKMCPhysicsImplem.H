@@ -464,56 +464,6 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   if (chargeAfter != chargeBefore) {
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
-
-  // Compute a time step using the non-critical reactions. We could have done this using ALL reactions, but I take for granted
-  // that the user will segregate the critical reactions anyways.
-#if 1 // This is the original code
-#warning "This part will really overestimate the importance of detachment because X/|sum mu| can become exceptionally tiny"
-  const auto partitionedReactions = m_kmcSolver.partitionReactions(m_kmcState);
-
-  const auto& criticalReactions    = partitionedReactions.first;
-  const auto& nonCriticalReactions = partitionedReactions.second;
-
-  const auto criticalPropensities    = m_kmcSolver.propensities(m_kmcState, criticalReactions);
-  const auto nonCriticalPropensities = m_kmcSolver.propensities(m_kmcState, nonCriticalReactions);
-
-  a_physicsDt = m_kmcSolver.computeDt(m_kmcState, nonCriticalReactions, nonCriticalPropensities, 1.0);
-#endif
-
-#if 1 // Debug code
-#warning "This part emulates complete detachment computes a time step from there -- this is how we need to do it..."
-  //  for (const auto& reaction : m_kmcReactionsThreadLocal) {
-  const auto Y          = m_kmcState.getReactiveState();
-  auto       proxyState = m_kmcState;
-
-  m_kmcReactionsThreadLocal.back()->advanceState(proxyState, Y.back());
-
-  //    if(proxyState.isValidState()){
-  const auto A = m_kmcSolver.propensities(proxyState, m_kmcReactionsThreadLocal);
-
-  const Real physicsDt = m_kmcSolver.computeDt(proxyState, m_kmcReactionsThreadLocal, A, 1.0);
-
-  if (physicsDt < 1.0E-12) {
-    std::cout << physicsDt << "\t" << a_E.vectorLength() << std::endl;
-
-    for (int i = 0; i < A.size(); i++) {
-      std::cout << A[i] << "\n";
-    }
-    std::cout << "state vector:\n";
-    const auto X = proxyState.getReactiveState();
-
-    for (int i = 0; i < X.size(); i++) {
-      std::cout << llround(X[i]) << "\t" << llround(Y[i]) << "\n";
-    }
-
-    MayDay::Abort("stop - bad time step");
-  }
-
-  //  a_physicsDt = std::min(a_physicsDt, physicsDt);
-  a_physicsDt = physicsDt;
-  //    }
-
-#endif  
 }
 
 inline void

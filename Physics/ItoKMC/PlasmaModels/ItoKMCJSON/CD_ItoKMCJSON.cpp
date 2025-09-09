@@ -1864,11 +1864,13 @@ ItoKMCJSON::initializePlasmaReactions()
       const auto reactionRates      = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
       const auto reactionPlot       = this->parsePlasmaReactionPlot(reactionJSON);
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
+      const auto reactionDt         = this->parsePlasmaReactionDtCalculation(reactionJSON);
 
       m_kmcReactions.emplace_back(KMCReaction(plasmaReactants, plasmaProducts, photonProducts));
       m_kmcReactionRates.emplace_back(reactionRates.first);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
+      m_kmcReactionDtCalculation.emplace_back(reactionDt);
       m_fluidRates.emplace_back(reactionRates.second);
 
       // Store the list of reactants/products.
@@ -3024,6 +3026,24 @@ ItoKMCJSON::parsePlasmaReactionPlot(const nlohmann::json& a_reactionJSON) const
 }
 
 std::pair<bool, std::string>
+ItoKMCJSON::parsePlasmaReactionDtCalculation(const nlohmann::json& a_reactionJSON) const
+{
+  CH_TIME("ItoKMCJSON::parsePlasmaReactionDtCalculation");
+  if (m_verbose) {
+    pout() << m_className + "::parsePlasmaReactionDtCalculation" << endl;
+  }
+
+  bool        dtCalc = true;
+  std::string id     = this->trim(a_reactionJSON["reaction"].get<std::string>());
+
+  if (a_reactionJSON.contains("exhaust_dt")) {
+    dtCalc = a_reactionJSON["exhaust_dt"].get<bool>();
+  }
+
+  return std::make_pair(dtCalc, id);
+}
+
+std::pair<bool, std::string>
 ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const
 {
   CH_TIME("ItoKMCJSON::parsePlasmaReactionGradientCorrection");
@@ -3363,6 +3383,81 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 
       a_kmcReactions[i]->rate() *= fcorr;
     }
+  }
+}
+
+void
+ItoKMCJSON::advanceKMC(Vector<FPR>&            a_numParticles,
+                       Vector<FPR>&            a_numNewPhotons,
+                       Real&                   a_physicsDt,
+                       const Vector<Real>&     a_phi,
+                       const Vector<RealVect>& a_gradPhi,
+                       const Real              a_dt,
+                       const RealVect          a_E,
+                       const RealVect          a_pos,
+                       const Real              a_dx,
+                       const Real              a_kappa) const
+{
+  CH_TIME("ItoKMCJSON::secondaryEmissionEB");
+  if (m_verbose) {
+    pout() << m_className + "::secondaryEmissionEB" << endl;
+  }
+
+  ItoKMCPhysics::advanceKMC(a_numParticles,
+                            a_numNewPhotons,
+                            a_physicsDt,
+                            a_phi,
+                            a_gradPhi,
+                            a_dt,
+                            a_E,
+                            a_pos,
+                            a_dx,
+                            a_kappa);
+
+  bool useAllReactions = true;
+
+  // This loop is for isolating reactions that the user will explicitly ask to fire before computing the physics-based time step. It exists
+  // because if there are no electrons but lots of ions, one may get a time step that is too large because X/|sum mu| is zero for the electrons.
+  // Similarly, one may get a time step that is too small away from ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron
+  // but lots of detachment. This hook fixes this, but requires that the user is aware of the problem in the first place.
+  //
+  // The below code iterates through all reactions that have been marked, and exhausts the reactants and then computes a time step. This seems
+  // to work relatively well. Note that reactions like "e -> e + e" do not consume reactants, and are pruned from the loop below.
+  for (int i = 0; i < m_kmcReactionDtCalculation.size(); i++) {
+    const bool exhaustDt = m_kmcReactionDtCalculation[i].first;
+
+    if (exhaustDt) {
+      auto       S = m_kmcState;
+      const auto N = m_kmcReactionsThreadLocal[i]->computeCriticalNumberOfReactions(m_kmcState);
+
+      if (N < std::numeric_limits<FPR>::max()) { 
+        m_kmcReactionsThreadLocal[i]->advanceState(S, N);
+
+        const auto propensities = m_kmcSolver.propensities(S, m_kmcReactionsThreadLocal);
+        const Real physicsDt    = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensities, 1.0);
+
+#if 1
+#warning "Marked for removal"
+        if (physicsDt < 1E-12) {
+          std::cout << i << "\t" << a_physicsDt << "\t" << a_E.vectorLength() << "\t" << N << "\t" << physicsDt << "\t"
+                    << std::endl;
+
+          MayDay::Abort("shait!");
+        }
+#endif
+
+        a_physicsDt     = std::min(a_physicsDt, physicsDt);
+        useAllReactions = false;
+      }
+    }
+  }
+
+  // Compute a time step using all reactions if the user did not do anything "manual"
+  if (useAllReactions) {
+    const auto& reactions    = m_kmcReactionsThreadLocal;
+    const auto  propensities = m_kmcSolver.propensities(m_kmcState, m_kmcReactionsThreadLocal);
+
+    a_physicsDt = m_kmcSolver.computeDt(m_kmcState, reactions, propensities, 1.0);
   }
 }
 

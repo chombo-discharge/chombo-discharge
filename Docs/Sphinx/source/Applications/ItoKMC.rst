@@ -3,6 +3,13 @@
 Îto-KMC plasma model
 ********************
 
+.. warning::
+
+   This section is not very well documented. The following featurse are definitely missing:
+
+   * Use of hybrid models (PPC-fluid specifications)
+   * Use of better time step restrictions. In particular, emulating complete detachment before running the dt calculation
+
 Underlying model
 ================
 
@@ -60,22 +67,9 @@ In addition, the user can specify the maximum permitted growth or reduction in t
 
 These limits are given by the following input variables:
 
-.. code-block:: text
-
-   ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
-   ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
-   ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0     ## Advective time step CFL restriction
-   ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0     ## Diffusive time step CFL restriction
-   ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99   ## Diffusive time step CFL restriction
-   ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0     ## Advection-diffusion time step CFL restriction
-   ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99   ## Advection-diffusion time step CFL restriction
-   ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5     ## Advection-diffusion time step CFL restriction
-   ItoKMCGodunovStepper.relax_dt_factor                       = 100.0   ## Relaxation time step restriction.
-   ItoKMCGodunovStepper.min_dt                                = 0.0     ## Minimum permitted time step
-   ItoKMCGodunovStepper.max_dt                                = 1.E99   ## Maximum permitted time step
-   ItoKMCGodunovStepper.max_growth_dt                         = 1.E99   ## Maximum permitted time step increase (dt * factor)
-   ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99   ## Maximum permissible time step reduction (dt/factor)
-
+.. literalinclude:: ../../../../Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepper.options
+   :language: text
+   :lines: 22-35
 
 Particle placement
 ------------------
@@ -288,6 +282,13 @@ Note that these functions should return the *fluid coefficients*.
 .. important::
 
    There is currently no support for computing :math:`\mu` as a function of the species densities (e.g., the electron density), but this only requires modest extensions of the Îto-KMC module.
+
+Time step calculation
+_____________________
+
+.. warning::
+
+   This section must be written, and also include the downsides of using :math:`\Delta t = X/|\sum\mu|`.
 
 .. _Chap:ItoKMCJSON:
 
