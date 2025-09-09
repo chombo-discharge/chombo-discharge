@@ -481,7 +481,7 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
 
       const auto propensities = m_kmcSolver.propensities(S, m_kmcReactionsThreadLocal);
       const Real physicsDt    = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensities, 1.0);
-      
+
       a_physicsDt = std::min(a_physicsDt, physicsDt);
     }
   }

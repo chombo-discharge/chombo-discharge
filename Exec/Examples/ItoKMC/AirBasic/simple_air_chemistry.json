@@ -203,7 +203,6 @@
 	    "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
 	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
 	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
-            "exhaust_dt": true,
 	    //"dump" : "debug_r1.dat",                       // Optional dump of internalized table to file. Useful for debugging.
 //            "gradient correction": "e",                      // Use gradient correction to rate
 	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
@@ -264,8 +263,7 @@
 	    // "dump" : "debug_r4.dat",          // Optional dump of internalized table to file. Useful for debugging.
 	    "scale": 1.0E-6,                     // Scaling as per BOLSIG+
 //            "gradient correction": "e",          // Use gradient correction to rate
-	    "plot": true,
-            "exhaust_dt": true// Optional. If true, the reaction rate will be plotted.
+	    "plot": true
 	},	
 	{
 	    // Tabulated reaction rate for e + N2 -> e + Y + N2
@@ -300,7 +298,6 @@
 	    "max E/N" : 1000.0,
 	    "num points" : 10000,                 
 	    "spacing" : "exponential",
-            "exhaust_dt" : true,
 	    "dump": "debug.dat"
 	}        
     ],
