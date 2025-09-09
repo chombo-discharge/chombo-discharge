@@ -68,7 +68,7 @@ public:
     @param[in] a_state    State
   */
   static inline T
-  population(const size_t& a_reactant, const State& a_state) const noexcept;
+  population(const size_t& a_reactant, const State& a_state) noexcept;
 
   /*!
     @brief Compute the propensity function for this reaction type. 
