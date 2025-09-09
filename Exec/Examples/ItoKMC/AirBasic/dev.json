@@ -297,8 +297,7 @@
 	    "min E/N" : 1.0,                     
 	    "max E/N" : 1000.0,
 	    "num points" : 10000,                 
-	    "spacing" : "exponential",
-	    "dump": "debug.dat"
+	    "spacing" : "exponential"
 	}        
     ],
     "photoionization":

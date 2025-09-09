@@ -268,7 +268,7 @@ ItoKMCGodunovStepper.algorithm                                = euler_maruyama  
 # ====================================================================================================
 ItoKMCJSON.verbose            = false                        ## Turn on/off verbosity
 ItoKMCJSON.debug              = true                         ## Turn on/off debugging
-ItoKMCJSON.chemistry_file     = simple_air_chemistry.json    ## Chemistry file
+ItoKMCJSON.chemistry_file     = dev.json    ## Chemistry file
 
 # Kinetic Monte Carlo solver settings.
 ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of computational particles to produce in reaction step
