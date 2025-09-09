@@ -1638,6 +1638,14 @@ namespace Physics {
       computePhysicsDt() noexcept;
 
       /*!
+        @brief Special routine which performs a dummy KMC advance over a zero time step.
+        @details This is only used in order to compute a good physics-based time step before
+        the first time step
+      */
+      virtual void
+      computeDummyPhysicsDt() noexcept;
+
+      /*!
 	@brief Compute total charge
       */
       virtual Real
