@@ -8,7 +8,7 @@
    This section is not very well documented. The following featurse are definitely missing:
 
    * Use of hybrid models (PPC-fluid specifications)
-   * Use of better time step restrictions. In particular, emulating complete detachment before running the dt calculation
+   * How the physics time step is restricted
 
 Underlying model
 ================
