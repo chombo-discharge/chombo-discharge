@@ -1,16 +1,20 @@
 <map id="Source/KineticMonteCarlo/CD_KMCDualStateImplem.H" name="Source/KineticMonteCarlo/CD_KMCDualStateImplem.H">
-<area shape="rect" id="Node000001" title="Implementation of CD_KMCDualState.H." alt="" coords="152,5,363,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,104,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,48,98,91,96,86,208,43"/>
-<area shape="rect" id="Node000003" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="179,93,335,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,46,252,79,246,79,247,45"/>
-<area shape="rect" id="Node000005" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="17,167,202,192"/>
-<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="229,48,199,69,170,95,145,126,125,156,121,153,141,123,166,91,196,65,226,43"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="313,167,492,192"/>
-<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="290,43,320,65,350,92,374,122,393,152,388,155,370,125,346,95,317,69,287,48"/>
-<area shape="poly" id="edge6_Node000003_Node000001" title=" " alt="" coords="261,93,264,59,269,59,267,93"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="226,167,289,192"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="260,119,260,153,255,153,255,119"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="235,121,147,163,145,158,232,116"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="282,116,368,158,366,163,280,121"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_KMCDualState.H." alt="" coords="158,5,369,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="62,93,161,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,48,148,89,145,84,226,43"/>
+<area shape="rect" id="Node000003" href="$CD__KMCDualState_8H.html" title="Declaration of a simple state vector for running Kinetic Monte Carlo for plasma problems." alt="" coords="185,93,341,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="258,46,258,79,252,79,253,45"/>
+<area shape="rect" id="Node000007" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="287,167,472,192"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="300,43,329,64,355,92,370,122,378,153,373,154,365,124,350,95,325,68,297,48"/>
+<area shape="rect" id="Node000008" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="497,167,675,192"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="305,43,550,158,548,163,302,48"/>
+<area shape="poly" id="edge8_Node000003_Node000001" title=" " alt="" coords="267,93,270,59,275,59,273,93"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,167,68,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="228,121,82,167,80,162,226,116"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="92,167,163,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="243,121,163,163,160,158,240,116"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="187,167,263,192"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="259,120,240,156,235,153,255,118"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="283,116,350,157,347,162,281,121"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="316,116,521,161,520,166,315,121"/>
 </map>

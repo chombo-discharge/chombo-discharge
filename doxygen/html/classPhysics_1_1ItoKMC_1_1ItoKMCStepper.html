@@ -491,6 +491,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a0f2ff3044d33797d8b9f7149cc4b08fd" id="r_a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0f2ff3044d33797d8b9f7149cc4b08fd">computePhysicsDt</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute a physics-based maximum time step.  <br /></td></tr>
 <tr class="separator:a0f2ff3044d33797d8b9f7149cc4b08fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38962bd222ff6b86f2e3a462050f95f2" id="r_a38962bd222ff6b86f2e3a462050f95f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a38962bd222ff6b86f2e3a462050f95f2">computeDummyPhysicsDt</a> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a38962bd222ff6b86f2e3a462050f95f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Special routine which performs a dummy KMC advance over a zero time step.  <br /></td></tr>
+<tr class="separator:a38962bd222ff6b86f2e3a462050f95f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90eb59616f7bdf40384d9c807e3917f1" id="r_a90eb59616f7bdf40384d9c807e3917f1"><td class="memItemLeft" align="right" valign="top"><a id="a90eb59616f7bdf40384d9c807e3917f1" name="a90eb59616f7bdf40384d9c807e3917f1"></a>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>computeTotalCharge</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a90eb59616f7bdf40384d9c807e3917f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute total charge. <br /></td></tr>
@@ -1777,6 +1780,36 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <p>Implements <a class="el" href="classTimeStepper.html#a3b7cf2a18ad3aa6abf1f79098651cc02">TimeStepper</a>.</p>
 
 <p>Reimplemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a58394e1a439b71b163bc3c80900ba51c">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a38962bd222ff6b86f2e3a462050f95f2" name="a38962bd222ff6b86f2e3a462050f95f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38962bd222ff6b86f2e3a462050f95f2">&#9670;&#160;</a></span>computeDummyPhysicsDt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> , <a class="el" href="classTracerParticleSolver.html">typename</a> R , <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoKMCStepper::computeDummyPhysicsDt </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Special routine which performs a dummy KMC advance over a zero time step. </p>
+<p>This is only used in order to compute a good physics-based time step before the first time step </p>
 
 </div>
 </div>

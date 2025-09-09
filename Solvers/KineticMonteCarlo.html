@@ -316,7 +316,7 @@ Let <span class="math notranslate nohighlight">\(\Delta\tau_{\textrm{nc}} \right
 <span class="cm">  2. T R::computeCriticalNumberOfReactions(State) const -&gt; Computes the minimum number of reactions that exhausts one of the reactants. </span>
 <span class="cm">  3. void R::advanceState(State&amp;, const T numReactions) const -&gt; Advance state by numReactions</span>
 <span class="cm">  4. std::&lt;some_container&gt; getReactants() const -&gt; Get reactants involved in the reactions.</span>
-<span class="cm">  5. T R::population(const &lt;some_type&gt; reactant, const State&amp; a_state) -&gt; Get the population of the input reactant in the input state. </span>
+<span class="cm">  5. static T R::population(const &lt;some_type&gt; reactant, const State&amp; a_state) -&gt; Get the population of the input reactant in the input state. </span>
 
 <span class="cm">  The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.</span>
 <span class="cm">*/</span>

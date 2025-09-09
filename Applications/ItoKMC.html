@@ -106,18 +106,19 @@
 <li class="toctree-l3"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#d-chemistry">0D chemistry</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#itokmcphysics">ItoKMCPhysics</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#species-definitions">Species definitions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#plasma-reactions">Plasma reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">Photoionization</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#surface-reactions">Surface reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#transport-coefficients">Transport coefficients</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#d-chemistry">0D chemistry</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#itokmcphysics">ItoKMCPhysics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#species-definitions">Species definitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plasma-reactions">Plasma reactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#surface-reactions">Surface reactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport-coefficients">Transport coefficients</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#json-0d-chemistry-interface">JSON 0D chemistry interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#time-step-calculation">Time step calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#json-interface">JSON interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#gas-law">Gas law</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ideal-gas">Ideal gas</a></li>
 </ul>
@@ -229,6 +230,14 @@
              
   <section id="ito-kmc-plasma-model">
 <span id="chap-itokmc"></span><h1>Îto-KMC plasma model<a class="headerlink" href="#ito-kmc-plasma-model" title="Permalink to this heading"></a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This section is not very well documented. The following featurse are definitely missing:</p>
+<ul class="simple">
+<li><p>Use of hybrid models (PPC-fluid specifications)</p></li>
+<li><p>How the physics time step is restricted</p></li>
+</ul>
+</div>
 <section id="underlying-model">
 <h2>Underlying model<a class="headerlink" href="#underlying-model" title="Permalink to this heading"></a></h2>
 <section id="plasma-transport">
@@ -273,19 +282,20 @@ Currently, the time step can be restricted through several means:</p>
 </ol>
 <p>In addition, the user can specify the maximum permitted growth or reduction in the time step.</p>
 <p>These limits are given by the following input variables:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
-ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
-ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0     ## Advective time step CFL restriction
-ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0     ## Diffusive time step CFL restriction
-ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99   ## Diffusive time step CFL restriction
-ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0     ## Advection-diffusion time step CFL restriction
-ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99   ## Advection-diffusion time step CFL restriction
-ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5     ## Advection-diffusion time step CFL restriction
-ItoKMCGodunovStepper.relax_dt_factor                       = 100.0   ## Relaxation time step restriction.
-ItoKMCGodunovStepper.min_dt                                = 0.0     ## Minimum permitted time step
-ItoKMCGodunovStepper.max_dt                                = 1.E99   ## Maximum permitted time step
-ItoKMCGodunovStepper.max_growth_dt                         = 1.E99   ## Maximum permitted time step increase (dt * factor)
-ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99   ## Maximum permissible time step reduction (dt/factor)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
+ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl               = 1.0                ## Advective time step CFL restriction
+ItoKMCGodunovStepper.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
+ItoKMCGodunovStepper.max_particle_diffusion_cfl               = 1.E99              ## Diffusive time step CFL restriction
+ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl     = 0.0                ## Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl     = 1.E99              ## Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.fluid_advection_diffusion_cfl            = 0.5                ## Advection-diffusion time step CFL restriction
+ItoKMCGodunovStepper.relax_dt_factor                          = 100.0              ## Relaxation time step restriction.
+ItoKMCGodunovStepper.min_dt                                   = 0.0                ## Minimum permitted time step
+ItoKMCGodunovStepper.max_dt                                   = 1.E99              ## Maximum permitted time step
+ItoKMCGodunovStepper.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
+ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
+ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
 </pre></div>
 </div>
 </section>
@@ -302,7 +312,7 @@ Placing all new particles on the cell centroid has the advantage that there will
 Randomly distributing the new particles has the advantage that it generates secondary particles more evenly over the reaction region.
 Both these methods (<code class="docutils literal notranslate"><span class="pre">centroid</span></code> and <code class="docutils literal notranslate"><span class="pre">random</span></code>) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
-See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON 0D chemistry interface</span></a> for instructions on how to assign the particle placement method.</p>
+See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a> for instructions on how to assign the particle placement method.</p>
 </section>
 <section id="parallel-diffusion">
 <h3>Parallel diffusion<a class="headerlink" href="#parallel-diffusion" title="Permalink to this heading"></a></h3>
@@ -337,8 +347,9 @@ Users should exercise caution when using this feature.</p>
 <section id="particle-management">
 <h3>Particle management<a class="headerlink" href="#particle-management" title="Permalink to this heading"></a></h3>
 </section>
+</section>
 <section id="d-chemistry">
-<h3>0D chemistry<a class="headerlink" href="#d-chemistry" title="Permalink to this heading"></a></h3>
+<h2>0D chemistry<a class="headerlink" href="#d-chemistry" title="Permalink to this heading"></a></h2>
 <p>The user input interface to the Îto-KMC model consists of a zero-dimensional plasma kinetics interface called <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code>.
 This interface consists of the following main functionalities:</p>
 <ol class="arabic simple">
@@ -346,9 +357,9 @@ This interface consists of the following main functionalities:</p>
 <li><p>User-defined initial particles, reaction kinetics, and photoionization processes.</p></li>
 </ol>
 <section id="itokmcphysics">
-<span id="chap-itokmcphysics"></span><h4>ItoKMCPhysics<a class="headerlink" href="#itokmcphysics" title="Permalink to this heading"></a></h4>
+<span id="chap-itokmcphysics"></span><h3>ItoKMCPhysics<a class="headerlink" href="#itokmcphysics" title="Permalink to this heading"></a></h3>
 <p>The complete C++ interface specification is given below.
-Because the interface is fairly extensive, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supplies a JSON-based implementation called <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> (see <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON 0D chemistry interface</span></a>) for defining these things through file input.
+Because the interface is fairly extensive, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> also supplies a JSON-based implementation called <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> (see <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a>) for defining these things through file input.
 The difference between <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> and its implementation <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> is that the JSON-based implementation class only implements a subset of potential features supported by <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code>.</p>
 <details>
 <summary><a>Show/hide full 0D interface</a></summary><div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/* chombo-discharge</span>
@@ -638,10 +649,10 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                          </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                        </span><span class="n">a_matIndex</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
-<span class="cm">	@brief Advance particles. </span>
+<span class="cm">	@brief Advance the reaction network using the KMC algorithm.</span>
 <span class="cm">	@param[inout] a_numParticles  Number of physical particles</span>
 <span class="cm">	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)</span>
-<span class="cm">	@param[out]   a_physicsDt     Reasonable non-critical KMC time step computed at end of integration with eps = 1</span>
+<span class="cm">	@param[out]   a_physicsDt     Reasonable KMC time step computed at end of integration with eps = 1</span>
 <span class="cm">	@param[in]    a_phi           Plasma species densities. </span>
 <span class="cm">	@param[in]    a_gradPhi       Plasma species density gradients. </span>
 <span class="cm">	@param[in]    a_dt            Time step</span>
@@ -1011,7 +1022,7 @@ The difference between <code class="docutils literal notranslate"><span class="p
 </div>
 </details><br></section>
 <section id="species-definitions">
-<h4>Species definitions<a class="headerlink" href="#species-definitions" title="Permalink to this heading"></a></h4>
+<h3>Species definitions<a class="headerlink" href="#species-definitions" title="Permalink to this heading"></a></h3>
 <p>Species are defined either as input species for CDR solvers (see <a class="reference internal" href="../Solvers/CDR.html#chap-cdrsolver"><span class="std std-ref">CdrSolver</span></a>) or Îto solvers (see <a class="reference internal" href="../Solvers/Ito.html#chap-itosolver"><span class="std std-ref">ItoSolver</span></a>).
 It is sufficient to populate the <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> species vectors <code class="docutils literal notranslate"><span class="pre">m_cdrSpecies</span></code> and <code class="docutils literal notranslate"><span class="pre">m_itoSpecies</span></code> if one only wants to initialize the solvers.
 See <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for their C++ definition.
@@ -1020,7 +1031,7 @@ The interfaces permit initial particles and density functions for both both solv
 Additionally, one must define all species associated with radiative transfer solvers.</p>
 </section>
 <section id="plasma-reactions">
-<span id="chap-itokmcplasmareaction"></span><h4>Plasma reactions<a class="headerlink" href="#plasma-reactions" title="Permalink to this heading"></a></h4>
+<span id="chap-itokmcplasmareaction"></span><h3>Plasma reactions<a class="headerlink" href="#plasma-reactions" title="Permalink to this heading"></a></h3>
 <p>Plasma reactions in the Îto-KMC model are represented stoichiometrically as</p>
 <div class="math notranslate nohighlight">
 \[A + B + \ldots \xrightarrow{c} C + D + \ldots\]</div>
@@ -1048,7 +1059,7 @@ During the reaction advance the user only needs to update the <span class="math 
 This must be done in the routine <code class="docutils literal notranslate"><span class="pre">updateReactionRates(...)</span></code>, see <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> for the complete specification.</p>
 </section>
 <section id="id1">
-<h4>Photoionization<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h4>
+<h3>Photoionization<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>Photo-reactions are also represented stoichiometrically as</p>
 <div class="math notranslate nohighlight">
 \[\gamma \xrightarrow{\xi} A + B + \ldots,\]</div>
@@ -1086,14 +1097,14 @@ A + B &amp;\xrightarrow{k\rightarrow k\zeta}\gamma_s.\end{split}\]</div>
 <p>This type of pre-evaluation of the photo-reaction pathways is sensible in a statistical sense, but loses meaning if only a single photon is involved.</p>
 </section>
 <section id="surface-reactions">
-<h4>Surface reactions<a class="headerlink" href="#surface-reactions" title="Permalink to this heading"></a></h4>
+<h3>Surface reactions<a class="headerlink" href="#surface-reactions" title="Permalink to this heading"></a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Surface reactions are supported by <a class="reference internal" href="#chap-itokmcphysics"><span class="std std-ref">ItoKMCPhysics</span></a> but not implemented in the JSON interface (yet).</p>
 </div>
 </section>
 <section id="transport-coefficients">
-<h4>Transport coefficients<a class="headerlink" href="#transport-coefficients" title="Permalink to this heading"></a></h4>
+<h3>Transport coefficients<a class="headerlink" href="#transport-coefficients" title="Permalink to this heading"></a></h3>
 <p>Species mobilities and diffusion coefficients should be computed just as they are done in the fluid approximation.
 The <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> interface requires implementations of two functions that define the coefficients as functions of <span class="math notranslate nohighlight">\(\mu = \mu\left(t,\mathbf{x}, \mathbf{E}\right)\)</span>,
 and likewise for the diffusion coefficients.
@@ -1104,9 +1115,15 @@ Note that these functions should return the <em>fluid coefficients</em>.</p>
 </div>
 </section>
 </section>
+<section id="time-step-calculation">
+<h2>Time step calculation<a class="headerlink" href="#time-step-calculation" title="Permalink to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This section must be written, and also include the downsides of using <span class="math notranslate nohighlight">\(\Delta t = X/|\sum\mu|\)</span> in its pure form.</p>
+</div>
 </section>
-<section id="json-0d-chemistry-interface">
-<span id="chap-itokmcjson"></span><h2>JSON 0D chemistry interface<a class="headerlink" href="#json-0d-chemistry-interface" title="Permalink to this heading"></a></h2>
+<section id="json-interface">
+<span id="chap-itokmcjson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this heading"></a></h2>
 <p>The JSON-based chemistry interface (called <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code>) simplifies the definition of the plasma kinetics and initial conditions by permitting specifications through a JSON file.
 In addition, the JSON specification will permit the definition of background species that are not tracked as solvers (but that simply exist as a density function).
 The JSON interface thus provides a simple entry point for users that have no interest in defining the chemistry from scratch.</p>
