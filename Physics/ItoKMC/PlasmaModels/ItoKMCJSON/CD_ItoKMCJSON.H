@@ -193,31 +193,6 @@ namespace Physics {
       computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept override;
 
       /*!
-	@brief Advance the reaction network using the KMC algorithm.
-	@param[inout] a_numParticles  Number of physical particles
-	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
-	@param[out]   a_physicsDt     Reasonable KMC time step computed at end of integration with eps = 1
-	@param[in]    a_phi           Plasma species densities. 
-	@param[in]    a_gradPhi       Plasma species density gradients. 
-	@param[in]    a_dt            Time step
-	@param[in]    a_E             Electric field
-	@param[in]    a_pos           Physical position
-	@param[in]    a_dx            Grid resolution
-	@param[in]    a_kappa         Cut-cell volume fraction. 
-      */
-      virtual void
-      advanceKMC(Vector<FPR>&            a_numParticles,
-                 Vector<FPR>&            a_numNewPhotons,
-                 Real&                   a_physicsDt,
-                 const Vector<Real>&     a_phi,
-                 const Vector<RealVect>& a_gradPhi,
-                 const Real              a_dt,
-                 const RealVect          a_E,
-                 const RealVect          a_pos,
-                 const Real              a_dx,
-                 const Real              a_kappa) const override;      
-
-      /*!
 	@brief Resolve secondary emission at the EB.
 	@details Routine is here to handle charge injection, secondary emission etc.
 	@param[out] a_secondaryParticles Outgoing plasma species particles.
@@ -416,11 +391,6 @@ namespace Physics {
 	@brief Map of reactions that will be plotted.
       */
       std::vector<std::pair<bool, std::string>> m_kmcReactionRatePlots;
-
-      /*!
-        @brief List of reactions that will be exhausted before computing a time step.
-      */
-      std::vector<std::pair<bool, std::string>> m_kmcReactionDtCalculation;
 
       /*!
 	@brief Map of reactions that will be plotted.
@@ -754,13 +724,6 @@ namespace Physics {
       */
       virtual std::pair<bool, std::string>
       parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const;
-
-      /*!
-        @brief Parse whether or not a plasma reaction should be explicitly fired before computing a time step
-	@param[in] a_reactionJSON Reaction entry in JSON file        
-      */
-      virtual std::pair<bool, std::string>
-      parsePlasmaReactionDtCalculation(const nlohmann::json& a_reactionJSON) const;
 
       /*!
 	@brief Parse a table which is stored in E/N format

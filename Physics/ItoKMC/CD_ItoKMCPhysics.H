@@ -297,7 +297,7 @@ namespace Physics {
 	@param[in]    a_dx            Grid resolution
 	@param[in]    a_kappa         Cut-cell volume fraction. 
       */
-      virtual void
+      inline void
       advanceKMC(Vector<FPR>&            a_numParticles,
                  Vector<FPR>&            a_numNewPhotons,
                  Real&                   a_physicsDt,

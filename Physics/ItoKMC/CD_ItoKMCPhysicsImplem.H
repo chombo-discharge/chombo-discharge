@@ -464,6 +464,27 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   if (chargeAfter != chargeBefore) {
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
+
+  // This loop is for isolating reactions that the user will explicitly ask to fire before computing the physics-based time step. It exists
+  // because if there are no electrons but lots of ions, one may get a time step that is too large because X/|sum mu| is zero for the electrons.
+  // Similarly, one may get a time step that is too small away from ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron
+  // but lots of detachment. This hook fixes this, but requires that the user is aware of the problem in the first place.
+  //
+  // The below code iterates through all reactions that have been marked, and exhausts the reactants and then computes a time step. This seems
+  // to work relatively well. Note that reactions like "e -> e + e" do not consume reactants, and are pruned from the loop below.
+  for (const auto& reaction : m_kmcReactionsThreadLocal) {
+    auto       S = m_kmcState;
+    const auto N = reaction->computeCriticalNumberOfReactions(m_kmcState);
+
+    if (N < std::numeric_limits<FPR>::max()) {
+      reaction->advanceState(S, N);
+
+      const auto propensities = m_kmcSolver.propensities(S, m_kmcReactionsThreadLocal);
+      const Real physicsDt    = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensities, 1.0);
+      
+      a_physicsDt = std::min(a_physicsDt, physicsDt);
+    }
+  }
 }
 
 inline void
