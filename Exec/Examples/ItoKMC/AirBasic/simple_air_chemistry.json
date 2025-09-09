@@ -45,7 +45,7 @@
 	}
     },
     "particle placement": {     // Particle placement algorithm. 
-	"method": "random", // Method. Must be either 'centroid', 'random', or 'downstream'
+	"method": "downstream", // Method. Must be either 'centroid', 'random', or 'downstream'
 	"species": "e"		// Species. Must be one of the plasma species. 
     },    
     "alpha": {		// Specification of the Townsend ionization coefficient.
@@ -110,13 +110,65 @@
 		"eV scale": 1.0,
 		"spacing" : "exponential",
 		"points" : 1000
-	    }
+	    },
+	    "initial particles" : [
+		// Example of how to initialize particles using various methods (manual placement, distributions, reading
+		// from disk. All these specification are incrementing (i.e., not overriding one another)
+		{
+		    // Specification of single computational particles.
+		    "single particle" : {         
+			"position" : [ 0, -1E-3, 0 ], // Position is at (0,00)
+			"weight" : 1              // Physical particle with weight = 1
+		    }
+		},
+		{
+		    // Specification of initial particles sampled uniformly in space. This will distribute
+		    // the particles over the MPI rank. 
+		    "uniform distribution" : {
+			"low corner" : [ -0.04, -0.04, -0.04 ],    // Lower-left physical corner of sampling region
+			"high corner" : [ 0.04, 0.04, 0.04 ], // Upper-right physical corner of sampling region
+			"num particles": 1000,             // Number of computational particles
+			"weight" : 1                       // Particle weights
+		    } 
+		},
+		{
+		    // Specification of initial particles sampled uniformly inside of a sphere (circle in 2D). This 
+		    // will distribute the particles over the MPI rank. 			
+		    "sphere distribution" : {
+			"center" : [ 0, 0, 0 ], // Sphere center
+			"radius" : 1E-3,         // Sphere radius
+			"num particles": 100,     // Number computational particles
+			"weight" : 1            // Particle weights
+		    }
+		},
+		{
+		    // Specification of initial particles sampled from a Gaussian distribution. This
+		    // will distribute the particles over the MPI rank. 						
+		    "gaussian distribution" : {
+			"center" : [ 0, 0, 0 ], // Center of the gaussian distribution
+			"radius" : 2E-3,         // Gaussian radius
+			"num particles": 100,   // Number of computational particles
+			"weight" : 1            // Particle weights
+		    }
+		},
+		{
+		    // Specification of initial particles read from an input list. This
+		    // will put all the particles on the master MPI rank. 
+		    "list": {
+			"file": "initial_particles.dat", // File containing the particles
+			"x column": 0,                   // Optional specification of column containing x coordinate (defaults to 0)
+			"y column": 1,                   // Optional specification of column containing y coordinate (defaults to 1)
+			"z column": 2,                   // Optional specification of column containing z coordinate (defaults to 2)
+			"w column": 3                    // Optional specification of column containing the particle weight (defaults to 3)
+		    }
+		}
+	    ]
         },
 	{
 	    // Definition of O2+ plasma species.
             "id": "O2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -126,13 +178,29 @@
 	    "diffusion": {          // Specification of diffusion coefficient
 		"type": "constant", // Diffusion coefficient is constant
 		"value": 0.0        // Diffusion coefficient is 0.0
-	    }
+	    }		
 	},
+	{
+	    // Definition of O2- plasma species.
+            "id": "O2-",            // Species ID
+	    "Z" : -1,               // Charge number
+	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
+	    "mobile" : false,       // Mobile or not
+	    "diffusive" : false,    // Diffusive or not
+	    "mobility": {           // Specification of the mobility
+		"type": "constant", // Mobility is constant 
+		"value": 2E-4       // Mobility value is 2E-4
+	    },
+	    "diffusion": {          // Specification of diffusion coefficient
+		"type": "constant", // Diffusion coefficient is constant
+		"value": 0.0        // Diffusion coefficient is 0.0
+	    }		
+	},	
 	{
 	    // Definition of N2+ plasma species.
 	    "id": "N2+",            // Species ID
 	    "Z" : 1,                // Charge number
-	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
+	    "solver" : "ito",       // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : false,       // Mobile or not
 	    "diffusive" : false,    // Diffusive or not
 	    "mobility": {           // Specification of the mobility
@@ -143,25 +211,7 @@
 		"type": "constant", // Diffusion coefficient is constant
 		"value": 0.0        // Diffusion coefficient is 0.0
 	    }				
-	},	
-	{
-	    // Definition of O2- plasma species.
-            "id": "O2-",            // Species ID
-	    "Z" : -1,               // Charge number
-	    "solver" : "cdr",       // Solver type. Either 'ito' or 'cdr'
-	    "mobile" : false,       // Mobile or not
-	    "diffusive" : false,    // Diffusive or not
-	    "mobility": {           // Specification of the mobility
-		"type": "constant", // Mobility is constant 
-		"value": 2E-4       // Mobility value is 2E-4
-	    },
-	    "diffusion": {          // Specification of diffusion coefficient
-		"type": "constant", // Diffusion coefficient is constant
-		"value": 0.0        // Diffusion coefficient is 0.0
-	    },
-	    "initial density": 1E14
 	}
-
     ],
     "photon species":
     [
@@ -263,7 +313,7 @@
 	    // "dump" : "debug_r4.dat",          // Optional dump of internalized table to file. Useful for debugging.
 	    "scale": 1.0E-6,                     // Scaling as per BOLSIG+
 //            "gradient correction": "e",          // Use gradient correction to rate
-	    "plot": true
+	    "plot": true                         // Optional. If true, the reaction rate will be plotted.
 	},	
 	{
 	    // Tabulated reaction rate for e + N2 -> e + Y + N2
@@ -285,21 +335,8 @@
 	    "plot": true,                                    // Optional. If true, the reaction rate will be plotted.
 	    "efficiency": 0.06,                              // Reaction efficiency, assuming the number of photoionization events per ionization event
 	    "quenching pressure": 4000.0                     // Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
-	},
-	{
-	    "reaction": "O2- + @ -> e + (O2)",
-	    "@": ["O2", "N2"],
-	    "description": "Detachment",
-	    "type": "table vs E/N",              
-	    "file" : "detachment_rate.dat",       
-	    "E/N column" : 0,                    
-	    "rate/N column" : 1,                 
-	    "min E/N" : 1.0,                     
-	    "max E/N" : 1000.0,
-	    "num points" : 10000,                 
-	    "spacing" : "exponential",
-	    "dump": "debug.dat"
-	}        
+	}
+
     ],
     "photoionization":
     [
