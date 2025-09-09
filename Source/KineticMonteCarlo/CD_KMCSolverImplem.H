@@ -329,14 +329,17 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
           const Real& p    = a_nonCriticalPropensities[i];
           const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
 
-          mu += std::abs(muIJ * p);
-          sigma2 += std::abs(muIJ * muIJ * p);
+          mu += muIJ * p;
+          sigma2 += muIJ * muIJ * p;
         }
 
         Real dt1 = std::numeric_limits<Real>::max();
         Real dt2 = std::numeric_limits<Real>::max();
 
         const Real f = std::max(m_eps * Xi / gi, one);
+
+        mu     = std::abs(mu);
+        sigma2 = std::abs(sigma2);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt1 = f / mu;
@@ -356,26 +359,26 @@ KMCSolver<R, State, T>::getNonCriticalTimeStep(const State&             a_state,
 template <typename R, typename State, typename T>
 inline Real
 KMCSolver<R, State, T>::computeDt(const State&             a_state,
-                                  const ReactionList&      a_nonCriticalReactions,
-                                  const std::vector<Real>& a_nonCriticalPropensities,
+                                  const ReactionList&      a_reactions,
+                                  const std::vector<Real>& a_propensities,
                                   const Real               a_epsilon) const noexcept
 {
-  CH_TIME("KMCSolver::getNonCriticalTimeStep(State, ReactionList, std::vector<Real>, Real");
+  CH_TIME("KMCSolver::computeDt(State, ReactionList, std::vector<Real>, Real");
 
-  CH_assert(a_nonCriticalReactions.size() == a_nonCriticalPropensities.size());
+  CH_assert(a_reactions.size() == a_propensities.size());
 
   constexpr Real one = 1.0;
 
   Real dt = std::numeric_limits<Real>::max();
 
-  const size_t numReactions = a_nonCriticalReactions.size();
+  const size_t numReactions = a_reactions.size();
 
   if (numReactions > 0) {
 
-    // 1. Gather a list of all reactants involved in the non-critical reactions.
-    auto allReactants = a_nonCriticalReactions[0]->getReactants();
+    // 1. Gather a list of all reactants involved in the input reactions
+    auto allReactants = a_reactions[0]->getReactants();
     for (size_t i = 1; i < numReactions; i++) {
-      const auto& curReactants = a_nonCriticalReactions[i]->getReactants();
+      const auto& curReactants = a_reactions[i]->getReactants();
 
       allReactants.insert(allReactants.end(), curReactants.begin(), curReactants.end());
     }
@@ -392,7 +395,7 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
       // that it is the REACTION that determines how we index the state population. This is simply a
       // design choice that permits the user to apply different type of reactions without changing
       // the underlying state.
-      const T Xi = a_nonCriticalReactions[0]->population(reactant, a_state);
+      const T Xi = R::population(reactant, a_state);
 
       if (Xi > (T)0) {
         Real mu = 0.0;
@@ -402,13 +405,15 @@ KMCSolver<R, State, T>::computeDt(const State&             a_state,
         constexpr Real gi = 1.0;
 
         for (size_t i = 0; i < numReactions; i++) {
-          const Real& p    = a_nonCriticalPropensities[i];
-          const auto& muIJ = a_nonCriticalReactions[i]->getStateChange(reactant);
+          const Real& p    = a_propensities[i];
+          const auto& muIJ = a_reactions[i]->getStateChange(reactant);
 
-          mu += std::abs(muIJ * p);
+          mu += muIJ * p;
         }
 
         const Real f = std::max(a_epsilon * Xi / gi, one);
+
+        mu = std::abs(mu);
 
         if (mu > std::numeric_limits<Real>::min()) {
           dt = std::min(dt, f / mu);

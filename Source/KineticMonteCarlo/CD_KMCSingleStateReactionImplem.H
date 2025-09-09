@@ -102,7 +102,7 @@ KMCSingleStateReaction<State, T>::rate() const noexcept
 
 template <typename State, typename T>
 inline T
-KMCSingleStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) const noexcept
+KMCSingleStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) noexcept
 {
   return a_state[a_reactant];
 }

@@ -129,7 +129,7 @@ KMCDualStateReaction<State, T>::rate() const noexcept
 
 template <typename State, typename T>
 inline T
-KMCDualStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) const noexcept
+KMCDualStateReaction<State, T>::population(const size_t& a_reactant, const State& a_state) noexcept
 {
   CH_TIME("KMCDualStateReaction::population");
 
