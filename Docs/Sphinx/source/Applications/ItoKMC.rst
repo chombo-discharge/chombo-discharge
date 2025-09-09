@@ -130,7 +130,7 @@ Particle management
 -------------------
 
 0D chemistry
-------------
+============
 
 The user input interface to the Îto-KMC model consists of a zero-dimensional plasma kinetics interface called ``ItoKMCPhysics``.
 This interface consists of the following main functionalities:
@@ -141,7 +141,7 @@ This interface consists of the following main functionalities:
 .. _Chap:ItoKMCPhysics:
 
 ItoKMCPhysics
-_____________
+-------------
 
 The complete C++ interface specification is given below.
 Because the interface is fairly extensive, ``chombo-discharge`` also supplies a JSON-based implementation called ``ItoKMCJSON`` (see :ref:`Chap:ItoKMCJSON`) for defining these things through file input.
@@ -160,7 +160,7 @@ The difference between ``ItoKMCPhysics`` and its implementation ``ItoKMCJSON`` i
    </details><br>   
 
 Species definitions
-___________________
+-------------------
 
 Species are defined either as input species for CDR solvers (see :ref:`Chap:CdrSolver`) or Îto solvers (see :ref:`Chap:ItoSolver`).
 It is sufficient to populate the ``ItoKMCPhysics`` species vectors ``m_cdrSpecies`` and ``m_itoSpecies`` if one only wants to initialize the solvers.
@@ -172,7 +172,7 @@ Additionally, one must define all species associated with radiative transfer sol
 .. _Chap:ItoKMCPlasmaReaction:
 
 Plasma reactions
-________________
+----------------
 
 Plasma reactions in the Îto-KMC model are represented stoichiometrically as
 
@@ -212,7 +212,7 @@ During the reaction advance the user only needs to update the :math:`c_j` coeffi
 This must be done in the routine ``updateReactionRates(...)``, see :ref:`Chap:ItoKMCPhysics` for the complete specification.
 
 Photoionization
-_______________
+---------------
 
 Photo-reactions are also represented stoichiometrically as
 
@@ -265,14 +265,14 @@ Volumetric and surface absorption is then treated independently
 This type of pre-evaluation of the photo-reaction pathways is sensible in a statistical sense, but loses meaning if only a single photon is involved.
 
 Surface reactions
-_________________
+-----------------
 
 .. warning::
 
    Surface reactions are supported by :ref:`Chap:ItoKMCPhysics` but not implemented in the JSON interface (yet).
 
 Transport coefficients
-______________________
+----------------------
 
 Species mobilities and diffusion coefficients should be computed just as they are done in the fluid approximation.
 The ``ItoKMCPhysics`` interface requires implementations of two functions that define the coefficients as functions of :math:`\mu = \mu\left(t,\mathbf{x}, \mathbf{E}\right)`,
@@ -284,16 +284,16 @@ Note that these functions should return the *fluid coefficients*.
    There is currently no support for computing :math:`\mu` as a function of the species densities (e.g., the electron density), but this only requires modest extensions of the Îto-KMC module.
 
 Time step calculation
-_____________________
+=====================
 
 .. warning::
 
-   This section must be written, and also include the downsides of using :math:`\Delta t = X/|\sum\mu|`.
+   This section must be written, and also include the downsides of using :math:`\Delta t = X/|\sum\mu|` in its pure form. 
 
 .. _Chap:ItoKMCJSON:
 
-JSON 0D chemistry interface
-===========================
+JSON interface
+==============
 
 The JSON-based chemistry interface (called ``ItoKMCJSON``) simplifies the definition of the plasma kinetics and initial conditions by permitting specifications through a JSON file.
 In addition, the JSON specification will permit the definition of background species that are not tracked as solvers (but that simply exist as a density function).
