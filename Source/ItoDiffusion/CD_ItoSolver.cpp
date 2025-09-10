@@ -44,7 +44,6 @@ ItoSolver::ItoSolver()
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
   m_outerHaloBuffer      = 1;
-  m_innerHaloBuffer      = 2;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
   m_deposition           = DepositionType::CIC;
   m_plotDeposition       = DepositionType::CIC;
@@ -114,14 +113,6 @@ ItoSolver::parseOptions()
   if (m_verbosity > 5) {
     pout() << m_name + "::parseOptions" << endl;
   }
-
-  m_outerHaloBuffer = 1;
-  m_innerHaloBuffer = 2;
-
-  ParmParse pp("ItoSolver");
-
-  pp.query("outer_halo_buffer", m_outerHaloBuffer);
-  pp.query("inner_halo_buffer", m_innerHaloBuffer);
 
   this->parseVerbosity();
   this->parseRNG();
@@ -289,9 +280,6 @@ ItoSolver::parseDeposition()
   }
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
-  }
-  else if (str == "buffer") {
-    m_coarseFineDeposition = CoarseFineDeposition::Buffer;
   }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown coarse-fine deposition method requested.");
@@ -523,7 +511,6 @@ ItoSolver::registerOperators() const
 
     // Register mask for CIC deposition.
     m_amr->registerMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
-    m_amr->registerMask(s_inner_particle_halo, m_innerHaloBuffer, m_realm);
   }
 }
 
