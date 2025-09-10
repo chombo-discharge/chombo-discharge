@@ -226,7 +226,7 @@ The ``State`` representation *must* have a member function
 
 .. literalinclude:: ../../../../Source/KineticMonteCarlo/CD_KMCSingleState.H
    :language: c++
-   :lines: 85-90
+   :lines: 87-92
    :dedent: 2
 
 This function should return true if the state is a valid one (e.g., no negative populations) and false otherwise. 

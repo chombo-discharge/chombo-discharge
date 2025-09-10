@@ -285,10 +285,10 @@ namespace Physics {
                           const int                        a_matIndex) const noexcept = 0;
 
       /*!
-	@brief Advance particles. 
+	@brief Advance the reaction network using the KMC algorithm.
 	@param[inout] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
-	@param[out]   a_physicsDt     Reasonable non-critical KMC time step computed at end of integration with eps = 1
+	@param[out]   a_physicsDt     Reasonable KMC time step computed at end of integration with eps = 1
 	@param[in]    a_phi           Plasma species densities. 
 	@param[in]    a_gradPhi       Plasma species density gradients. 
 	@param[in]    a_dt            Time step
