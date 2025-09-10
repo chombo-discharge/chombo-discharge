@@ -518,7 +518,7 @@ protected:
     @details This is a mask which is true on the immediate outside of a refinement boundary.
   */
   void
-  defineCFIVS(const int a_lmin);  
+  defineCFIVS(const int a_lmin);
 
   /*!
     @brief Define the valid cell region mask. 
