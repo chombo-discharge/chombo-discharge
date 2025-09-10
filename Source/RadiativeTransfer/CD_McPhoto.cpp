@@ -705,7 +705,6 @@ McPhoto::registerOperators()
 
     // For CIC deposition
     m_amr->registerMask(s_outer_particle_halo, m_haloBuffer, m_realm);
-    m_amr->registerMask(s_inner_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
