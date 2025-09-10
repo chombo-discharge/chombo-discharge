@@ -38,7 +38,7 @@ Driver.verbosity                    = 2                   ## Engine verbosity
 Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
-Driver.output_dt                    = -0.1E-9             ## Output interval (values <= 0 enforces step-based output)
+Driver.output_dt                    = 0.1E-9              ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 50                  ## Checkpoint interval
 Driver.regrid_interval              = 5                   ## Regrid interval
@@ -47,7 +47,7 @@ Driver.write_restart_files          = false               ## Write restart files
 Driver.initial_regrids              = 3                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 150E-9              ## Stop time
+Driver.stop_time                    = 15E-9               ## Stop time
 Driver.max_steps                    = 1000                ## Maximum number of steps
 Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
 Driver.write_memory                 = false               ## Write MPI memory report
@@ -62,7 +62,7 @@ Driver.restart                      = 0                   ## Restart step (less 
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
 Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes            = 1                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes            = 3                   ## Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics           = 1                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
@@ -91,7 +91,7 @@ FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of i
 FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
 FieldSolverMultigrid.gmg_min_cells         = 8            ## Bottom drop
-FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_drop_order        = 128          ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order          = 2            ## Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order        = 2            ## Boundary condition order for jump conditions
@@ -119,7 +119,7 @@ ItoSolver.irr_ngp_interp         = true               ## Force irregular interpo
 ItoSolver.mobility_interp        = direct             ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition        = cic                ## Cloud-in-cell for plotting particles.
 ItoSolver.deposition             = cic                ## Deposition type.
-ItoSolver.deposition_cf          = interp             ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.deposition_cf          = halo               ## Coarse-fine deposition. interp, halo, or halo_ngp
 
 # ====================================================================================================
 # CdrCTU solver settings.
@@ -237,7 +237,7 @@ ItoKMCGodunovStepper.load_balance_particles                   = false           
 ItoKMCGodunovStepper.load_indices                             = -1                 ## Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                            = 1.0                ## Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                              = morton             ## Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                       = 32                 ## Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                       = 16                 ## Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                           = 1                  ## Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                    = false              ## Make superparticles during regrids
 ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
@@ -254,7 +254,7 @@ ItoKMCGodunovStepper.max_dt                                   = 100.E-12        
 ItoKMCGodunovStepper.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
-ItoKMCGodunovStepper.cond_filter_num                          = 1                  ## Number of filterings for conductivity
+ItoKMCGodunovStepper.cond_filter_num                          = 0                  ## Number of filterings for conductivity
 ItoKMCGodunovStepper.cond_filter_max_stride                   = 1                  ## Maximum stride for filter
 ItoKMCGodunovStepper.cond_filter_alpha                        = 0.5                ## Filtering factor (0.5 is a bilinear filter)
 ItoKMCGodunovStepper.rho_filter_num                           = 0                  ## Number of filterings for the space-density
@@ -275,7 +275,7 @@ ItoKMCJSON.max_new_particles     = 32                 ## Maximum number of compu
 ItoKMCJSON.max_new_photons       = 32                 ## Maximum number of computational photons to produce in reaction step
 ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
 ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps              = 1.E99              ## Maximum relative change in propensity function
+ItoKMCJSON.prop_eps              = 2.0                ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSA_lim               = 5.0                ## When to enter SSA instead of tau-leaping
 ItoKMCJSON.max_iter              = 50                 ## Maximum number of iterations for implicit algorithms
@@ -296,4 +296,4 @@ ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.0      ## Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl       = 4        ## Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl       = 7        ## Set max coarsening depth
