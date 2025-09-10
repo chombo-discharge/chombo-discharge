@@ -45,10 +45,6 @@
 
   When specifying CoarseFineDeposition::HaloNGP, the particles whose deposition clouds hang over the refinement boundary are deposited on the fine level, and the ghosted
   mass is then added to the coarse side. Particles that live on the coarse side of a refinement boundary are deposited using an NGP scheme.
-
-  When specifying CoarseFineDeposition::Buffer, the user MUST first take responsibility and transfer particles that live within a specified region of the refinement
-  boundary to the masked data holder. These particles are then moved to the coarser level, and particles then deposit on the entire level. Some of ths mass may then
-  fall underneath the fine grids. This mass is (piecewise constant) interpolated to the next level before depositing particles there. 
 */
 class EBAMRParticleMesh
 {
