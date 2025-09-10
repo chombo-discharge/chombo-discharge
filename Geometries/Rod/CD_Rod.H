@@ -20,7 +20,6 @@
 class Rod : public ComputationalGeometry
 {
 public:
-
   /*!
     @brief Full constructor.
     @details This function parses all input parameters and creates the geometry
