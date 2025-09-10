@@ -46,7 +46,7 @@ enum class KMCLeapPropagator
   2. T R::computeCriticalNumberOfReactions(State) const -> Computes the minimum number of reactions that exhausts one of the reactants. 
   3. void R::advanceState(State&, const T numReactions) const -> Advance state by numReactions
   4. std::<some_container> getReactants() const -> Get reactants involved in the reactions.
-  5. T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
+  5. static T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
 
   The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.
 */
@@ -239,15 +239,15 @@ public:
   /*!
     @brief Compute a time step, using the leap condition on the mean value with eps = 1.
     @details This is just like getNonCriticalTimeStep EXCEPT that the leap condition is not applied for the deviation
-    @param[in] a_state                   State vector
-    @param[in] a_nonCriticalReactions    Non-critical reactions
-    @param[in] a_nonCriticalPropensities Non-critical propensities
-    @param[in] a_epsilon                 Epsilon value for maximum change in propensities
+    @param[in] a_state        State vector
+    @param[in] a_reactions    Reactions
+    @param[in] a_propensities Propensities
+    @param[in] a_epsilon      Epsilon value for maximum change in propensities
   */
   inline Real
   computeDt(const State&             a_state,
-            const ReactionList&      a_nonCriticalReactions,
-            const std::vector<Real>& a_nonCriticalPropensities,
+            const ReactionList&      a_reactions,
+            const std::vector<Real>& a_propensities,
             const Real               a_epsilon) const noexcept;
 
   /*!

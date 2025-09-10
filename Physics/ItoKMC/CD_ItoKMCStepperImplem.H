@@ -1429,6 +1429,10 @@ ItoKMCStepper<I, C, R, F>::computeDt()
   const Real maxGrowthDt = m_prevDt > 0.0 ? m_prevDt * m_maxGrowthDt : dt;
   const Real minShrinkDt = m_prevDt > 0.0 ? m_prevDt / m_maxShrinkDt : 0.0;
 
+  if (m_timeStep == 0) {
+    this->computeDummyPhysicsDt();
+  }
+
   // Compute various time steps.
   timer.startEvent("Advection (Ito)");
   m_particleAdvectionDt = m_ito->computeAdvectiveDt();
@@ -5221,6 +5225,63 @@ ItoKMCStepper<I, C, R, F>::computePhysicsDt() noexcept
   DataOps::getMaxMin(maxDt, minDt, m_kmcDt, 0);
 
   m_physicsDt = minDt;
+}
+
+template <typename I, typename C, typename R, typename F>
+void
+ItoKMCStepper<I, C, R, F>::computeDummyPhysicsDt() noexcept
+{
+  CH_TIME("ItoKMCStepper::computeDummyPhysicsDt()");
+  if (m_verbosity > 5) {
+    pout() << m_name + "::computeDummyPhysicsDt()" << endl;
+  }
+
+  const int numItoSpecies    = m_physics->getNumItoSpecies();
+  const int numCdrSpecies    = m_physics->getNumCdrSpecies();
+  const int numPhotonSpecies = m_physics->getNumPhotonSpecies();
+
+  // Sort by cells
+  (this->m_ito)->organizeParticlesByCell(ItoSolver::WhichContainer::Bulk);
+  this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
+  this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
+
+  // Compute the number of reactive particles for both Ito and CDR species. Also do a backup of the initial number
+  // of particles per cell. This is required when reconciling the results lateron.
+  if (numItoSpecies > 0) {
+    this->computeReactiveItoParticlesPerCell(m_particleItoPPC);
+
+    const Interval srcInterv(0, numItoSpecies - 1);
+    const Interval dstInterv(0, numItoSpecies - 1);
+
+    m_amr->copyData(m_fluidPPC, m_particleItoPPC, dstInterv, srcInterv);
+
+    DataOps::copy(m_particleOldItoPPC, m_particleItoPPC);
+  }
+  if (numCdrSpecies > 0) {
+    this->computeReactiveCdrParticlesPerCell(m_fluidCdrPPC);
+
+    const Interval srcInterv(0, numCdrSpecies - 1);
+    const Interval dstInterv(numItoSpecies, numItoSpecies + numCdrSpecies - 1);
+
+    m_amr->copyData(m_fluidPPC, m_fluidCdrPPC, dstInterv, srcInterv);
+
+    DataOps::copy(m_fluidOldCdrPPC, m_fluidCdrPPC);
+  }
+
+  DataOps::setValue(m_fluidYPC, 0.0);
+  DataOps::setValue(m_particleYPC, 0.0);
+
+  // Advance the reaction network using a zero time step, which should not trigger any change in the state vector.
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    this->advanceReactionNetwork(*m_fluidPPC[lvl], *m_fluidYPC[lvl], *m_electricFieldFluid[lvl], lvl, 0.0);
+  }
+
+  // Reorganize into patch
+  (this->m_ito)->organizeParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+  this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
+  this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
+
+  this->computePhysicsDt();
 }
 
 template <typename I, typename C, typename R, typename F>
