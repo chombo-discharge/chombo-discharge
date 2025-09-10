@@ -655,8 +655,6 @@ EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
   // between the cell we're looking at and the particle position (in units of the grid resolution)
   const Real invVol = 1. / std::pow(a_dx[0], SpaceDim);
 
-  Real sum = 0.0;
-  
   auto particleDisplacement = [&](const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * a_dx - a_position) / a_dx;
   };
@@ -684,7 +682,7 @@ EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
       // the box corresponding to the cloud.
       const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.0 * a_dx);
       const Box     cic2Box = Box(loIndex, loIndex + 2 * IntVect::Unit);
-      
+
       // This is the kernel for a CIC particle with with 2*dx
       auto cic2Kernel = [&](const IntVect& iv) -> void {
         Real weight = invVol;
@@ -704,8 +702,6 @@ EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
         for (int comp = startComp; comp <= endComp; comp++) {
           rho(iv, comp) += a_strength[comp] * weight;
-
-	  sum += weight;
         }
       };
 
