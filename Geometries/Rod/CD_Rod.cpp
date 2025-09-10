@@ -14,11 +14,12 @@
 
 // Our includes
 #include <CD_Rod.H>
+#include <CD_NamespaceHeader.H>
 
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
 
-Rod::Rod()
+Rod::Rod() noexcept
 {
   ParmParse pp("Rod");
 
@@ -44,3 +45,5 @@ Rod::Rod()
 
   m_electrodes.push_back(Electrode(implicitFunction, live));
 }
+
+#include <CD_NamespaceFooter.H>
