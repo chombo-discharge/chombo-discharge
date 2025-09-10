@@ -344,7 +344,7 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
       auto fineKernel = [&](const IntVect& iv) {
         const IntVect ivFine = m_refRat * ivCoar + iv;
 
-        fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);        
+        fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
       };
 
       BoxLoops::loop(Box(IntVect::Zero, m_refRat * IntVect::Unit), fineKernel);

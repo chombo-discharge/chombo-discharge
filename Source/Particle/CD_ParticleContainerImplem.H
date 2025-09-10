@@ -1580,7 +1580,7 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
     for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
       const RealVect x  = lit().position();
       const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
-      
+
       if (!(maskBox.contains(iv))) {
         std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
 
@@ -1642,7 +1642,7 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
 
     for (ListIterator<P> lit(particles); lit.ok();) {
       const RealVect x  = lit().position();
-      const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);      
+      const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
       if (!(maskBox.contains(iv))) {
         //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;

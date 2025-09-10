@@ -427,7 +427,7 @@ protected:
                  const ParticleContainer<P>& a_particles,
                  const DepositionType        a_depositionType,
                  const bool                  a_forceIrregNGP = false);
-  
+
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
     @details See deposit() for details regarding the template arguments. When calling this routine the user does NOT need to fill the "halo" particles. Rather, the

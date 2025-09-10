@@ -274,7 +274,7 @@ ItoSolver::parseDeposition()
   }
   else if (str == "tsc") {
     m_deposition = DepositionType::TSC;
-  }  
+  }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
   }
@@ -292,7 +292,7 @@ ItoSolver::parseDeposition()
   }
   else if (str == "buffer") {
     m_coarseFineDeposition = CoarseFineDeposition::Buffer;
-  }  
+  }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }
@@ -592,7 +592,7 @@ ItoSolver::initialData()
 #warning "Development here"
 #warning "EBParticleMesh infrastructure uses temporary buffers. This should be prealloacted memory"
 #if 1
-  int ppc = 32;
+  int       ppc = 32;
   ParmParse pp("ItoSolver");
   pp.query("ppc", ppc);
   this->generateParticlesFromDensity(bulkParticles, initialDensity, ppc); // Dev code
