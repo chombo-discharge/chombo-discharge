@@ -209,13 +209,11 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
 
   // Redistribution magic.
-#if 0
   this->redistributeAMR(a_phi);
 
   // Average down and interpolate
   m_amr->conservativeAverage(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
-#endif
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>
@@ -232,11 +230,6 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-#warning "This needs to go"
-  {
-    DataOps::setValue(a_phi, 0.0);
-  }
-
   // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
   // refinement boundary.
   switch (a_coarseFineDeposition) {
@@ -245,14 +238,12 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
                                                     m_realm,
                                                     m_phase,
                                                     a_particles,
-                                                    DepositionType::TSC,
+                                                    a_deposition,
                                                     CoarseFineDeposition::Interp,
                                                     m_forceIrregDepositionNGP);
     break;
   }
   case CoarseFineDeposition::Halo: {
-
-#warning "Need to try to deposit the halo particles using HALF the grid width."
     // Copy the mask particles.
     const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
@@ -284,66 +275,6 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
                                                     m_forceIrregDepositionNGP);
 
     a_particles.transferParticles(a_particles.getMaskParticles());
-
-    break;
-  }
-  case CoarseFineDeposition::Buffer: {
-#warning "Some of this code should be moved to EBAMRParticleMesh"
-    // Transfer mask particles
-    const AMRMask& mask = m_amr->getMask(s_inner_particle_halo, m_innerHaloBuffer, m_realm);
-
-    a_particles.transferMaskParticles(mask);
-
-    for (int lvl = m_amr->getFinestLevel(); lvl > 0; lvl--) {
-      ParticleData<P>& coarParticles = a_particles[lvl - 1];
-      ParticleData<P>& maskParticles = *a_particles.getMaskParticles()[lvl];
-
-#warning "Could there be a bug here related to if there aren't enough MPI ranks...?"
-      List<P>& coarOutcasts = coarParticles.outcast();
-
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        coarOutcasts.catenate(maskParticles[dit()].listItems());
-      }
-
-      coarParticles.gatherOutcast();
-      coarParticles.remapOutcast();
-    }
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Interp,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.remap();
-
-#warning "Debug code here to test the halo"
-#if 0
-    DataOps::setValue(a_phi, 0.0);
-
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-      for (DataIterator dit(dbl); dit.ok(); ++dit) {
-        const auto& amrMask = m_amr->getMask(s_inner_particle_halo, m_innerHaloBuffer, m_realm);
-        const auto& mask    = (*amrMask[lvl])[dit()];
-
-        FArrayBox& phi = (*a_phi[lvl])[dit()].getFArrayBox();
-
-        auto kernel = [&](const IntVect& iv) -> void {
-          if (mask(iv, 0)) {
-            phi(iv) = 1.0;
-          }
-        };
-
-        BoxLoops::loop(dbl[dit()], kernel);
-      }
-    }
-#endif
 
     break;
   }
@@ -414,11 +345,6 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
                                                     m_forceIrregDepositionNGP);
 
     a_particles.transferParticles(a_particles.getMaskParticles());
-
-    break;
-  }
-  case CoarseFineDeposition::Buffer: {
-    MayDay::Warning("ItoSolverImplem.H -- copy code from other function once we're done");
 
     break;
   }
