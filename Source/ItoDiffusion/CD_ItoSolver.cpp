@@ -509,7 +509,6 @@ ItoSolver::registerOperators() const
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
 
-    // Register mask for CIC deposition.
     m_amr->registerMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
   }
 }

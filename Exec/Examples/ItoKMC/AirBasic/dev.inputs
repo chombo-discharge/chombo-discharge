@@ -11,15 +11,15 @@ AmrMesh.lo_corner            = -4E-2 -4E-2 -4E-2    ## Low corner of problem dom
 AmrMesh.hi_corner            = 4E-2  4E-2  4E-2     ## High corner of problem domain
 AmrMesh.verbosity            = -1                   ## Controls verbosity.
 AmrMesh.coarsest_domain      = 64 64 64             ## Number of cells on coarsest domain
-AmrMesh.max_amr_depth        = 5                    ## Maximum amr depth
+AmrMesh.max_amr_depth        = 1                    ## Maximum amr depth
 AmrMesh.max_sim_depth        = -1                   ## Maximum simulation depth
 AmrMesh.fill_ratio           = 1.0                  ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 2                    ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = tiled                ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton               ## 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor      = 32                   ## Blocking factor.
-AmrMesh.max_box_size         = 32                   ## Maximum allowed box size
-AmrMesh.max_ebis_box         = 32                   ## Maximum allowed box size for EBIS generation.
+AmrMesh.blocking_factor      = 16                   ## Blocking factor.
+AmrMesh.max_box_size         = 16                   ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 16                   ## Maximum allowed box size for EBIS generation.
 AmrMesh.ref_rat              = 2 2 2 2 2 2          ## Refinement ratios (mixed ratios are allowed).
 AmrMesh.num_ghost            = 2                    ## Number of ghost cells.
 AmrMesh.lsf_ghost            = 2                    ## Number of ghost cells when writing level-set to grid
@@ -194,7 +194,7 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 # RodNeedleDisk geometry class options
 # ====================================================================================================
 RodNeedleDisk.use_rod         = true     ## Turn on/off rod
-RodNeedleDisk.use_needle      = true     ## Turn on/off needle
+RodNeedleDisk.use_needle      = false     ## Turn on/off needle
 RodNeedleDisk.use_disk        = false    ## Turn on/off disk
 RodNeedleDisk.orientation     = "-y"     ## Orientation
 RodNeedleDisk.translate       = 0 0 0    ## Geometric translation
@@ -298,4 +298,4 @@ ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. L
 ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
 
-ItoSolver.ppc     = 1024
+ItoSolver.ppc     = 2048

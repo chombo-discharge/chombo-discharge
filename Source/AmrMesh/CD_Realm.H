@@ -31,6 +31,11 @@ static const std::string s_outer_particle_halo = "outer_particle_halo";
 static const std::string s_inner_particle_halo = "inner_particle_halo";
 
 /*!
+  @brief Identifier for coarse-fine interface
+*/
+static const std::string s_cfivs = "cfivs";
+
+/*!
   @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
 */
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
@@ -394,6 +399,11 @@ protected:
   int m_blockingFactor;
 
   /*!
+    @brief Number of ghost cells
+  */
+  int m_numGhost;
+
+  /*!
     @brief Physical coordinates of lower-left corner in simulation domain
   */
   RealVect m_probLo;
@@ -502,6 +512,13 @@ protected:
   */
   void
   defineInnerHaloMask(const int a_lmin);
+
+  /*!
+    @brief Define the coarse-fine interface. 
+    @details This is a mask which is true on the immediate outside of a refinement boundary.
+  */
+  void
+  defineCFIVS(const int a_lmin);  
 
   /*!
     @brief Define the valid cell region mask. 

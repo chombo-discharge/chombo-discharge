@@ -72,6 +72,7 @@ Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
   m_probLo               = a_probLo;
   m_finestLevel          = a_finestLevel;
   m_blockingFactor       = a_blockingFactor;
+  m_numGhost             = a_numGhost;
   m_baseif               = a_baseif;
   m_multifluidIndexSpace = a_mfis;
 
@@ -195,6 +196,7 @@ Realm::defineMasks(const int a_lmin)
   // Regrid all masks
   this->defineOuterHaloMask(a_lmin);
   this->defineInnerHaloMask(a_lmin);
+  this->defineCFIVS(a_lmin);
 }
 
 void
@@ -557,6 +559,71 @@ Realm::defineInnerHaloMask(const int a_lmin)
             };
 
             BoxLoops::loop(cellBox, kernel);
+          }
+        }
+      }
+    }
+  }
+}
+
+void
+Realm::defineCFIVS(const int a_lmin)
+{
+  CH_TIME("Realm::defineCFIVS");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineCFIVS" << endl;
+  }
+
+  // Loop through all masks and do something about the halo masks only.
+  for (auto& m : m_masks) {
+
+    // Get mask identifier and buffer.
+    const std::string which_mask = m.first.first;
+    const int         buffer     = m.first.second;
+
+    if (which_mask == s_cfivs) {
+      if (buffer < 0) {
+        MayDay::Abort("Realm::defineCFIVS -- cannot have buffer <= 0!");
+      }
+
+      AMRMask& amrMask = m.second;
+
+      amrMask.resize(1 + m_finestLevel);
+
+      const int comp    = 0;
+      const int numComp = 1;
+
+      for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+        const ProblemDomain&     domain   = m_domains[lvl];
+        const DisjointBoxLayout& dbl      = m_grids[lvl];
+        const DataIterator&      dit      = dbl.dataIterator();
+        const int                numBoxes = dit.size();
+
+        amrMask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+          new LevelData<BaseFab<bool>>(dbl, numComp, m_numGhost * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+        for (int mybox = 0; mybox < numBoxes; mybox++) {
+          const DataIndex& din      = dit[mybox];
+          const Box        cellBox  = dbl[din];
+          const Box        ghostBox = grow(cellBox, m_numGhost) & domain;
+
+          BaseFab<bool>& mask = (*amrMask[lvl])[din];
+
+          if (lvl == 0) {
+            mask.setVal(false);
+          }
+          else {
+
+            mask.setVal(true, ghostBox, comp);
+            mask.setVal(false, cellBox, comp);
+
+            NeighborIterator nit(dbl);
+            for (nit.begin(din); nit.ok(); ++nit) {
+              const Box neighborBox = dbl[nit()];
+
+              mask.setVal(false, neighborBox, comp);
+            }
           }
         }
       }
