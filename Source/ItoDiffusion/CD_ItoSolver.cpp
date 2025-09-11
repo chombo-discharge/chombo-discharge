@@ -43,7 +43,7 @@ ItoSolver::ItoSolver()
   m_className            = "ItoSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_haloBuffer           = 1;
+  m_outerHaloBuffer      = 1;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
   m_deposition           = DepositionType::CIC;
   m_plotDeposition       = DepositionType::CIC;
@@ -262,6 +262,9 @@ ItoSolver::parseDeposition()
   }
   else if (str == "cic") {
     m_deposition = DepositionType::CIC;
+  }
+  else if (str == "tsc") {
+    m_deposition = DepositionType::TSC;
   }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
@@ -506,8 +509,7 @@ ItoSolver::registerOperators() const
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
 
-    // Register mask for CIC deposition.
-    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
+    m_amr->registerMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
   }
 }
 
@@ -573,7 +575,16 @@ ItoSolver::initialData()
     return initialDensityFunc(x, m_time);
   };
 
+#warning "Development here"
+#warning "EBParticleMesh infrastructure uses temporary buffers. This should be prealloacted memory"
+#if 1
+  int       ppc = 32;
+  ParmParse pp("ItoSolver");
+  pp.query("ppc", ppc);
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, ppc); // Dev code
+#else
   this->generateParticlesFromDensity(bulkParticles, initialDensity, 32);
+#endif
 
   constexpr Real tolerance = 0.0;
 

@@ -337,7 +337,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
     // 4. The particles on the other side of the refinement bounadry should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -361,31 +361,10 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         dataFiCo.setVal(0.0);
 
+#warning "This routine was modified -- in the future we should simply add a new one"
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        switch (refRat) {
-        case 2: {
-          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        case 4: {
-          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        default: {
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo(Real)");
-
-          break;
-        }
-        }
+        interp.deposit<P, particleScalarField>(haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
       }
 
       // Add the result of the buffer deposition to this level.

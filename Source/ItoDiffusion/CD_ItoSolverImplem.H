@@ -244,9 +244,8 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
     break;
   }
   case CoarseFineDeposition::Halo: {
-
     // Copy the mask particles.
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
     m_amr->depositParticles<P, particleScalarField>(a_phi,
@@ -264,7 +263,7 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
   case CoarseFineDeposition::HaloNGP: {
 
     // Transfer mask particles
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
     a_particles.transferMaskParticles(mask);
 
     m_amr->depositParticles<P, particleScalarField>(a_phi,
@@ -316,7 +315,7 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
   case CoarseFineDeposition::Halo: {
 
     // Copy the mask particles.
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
     a_particles.copyMaskParticles(mask);
 
     m_amr->depositParticles<P, particleScalarField>(a_phi,
@@ -334,7 +333,7 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
   case CoarseFineDeposition::HaloNGP: {
 
     // Transfer mask particles
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
     a_particles.transferMaskParticles(mask);
 
     m_amr->depositParticles<P, particleScalarField>(a_phi,
