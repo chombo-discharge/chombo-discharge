@@ -52,6 +52,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
     break;
   }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
   default: {
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
 
@@ -87,6 +92,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   }
   case CoarseFineDeposition::HaloNGP: {
     this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -127,6 +137,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
     break;
   }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
   default: {
     MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
 
@@ -160,6 +175,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   }
   case CoarseFineDeposition::HaloNGP: {
     this->depositHaloNGP<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -639,6 +659,26 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   }
 
   particles.transferParticles(particles.getMaskParticles());
+}
+
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+}
+
+template <class P, Real (P::*particleScalarField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
 }
 
 template <class P, Real& (P::*particleScalarField)()>
@@ -1236,6 +1276,26 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   }
 
   particles.transferParticles(particles.getMaskParticles());
+}
+
+template <class P, const RealVect& (P::*particleVectorField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+}
+
+template <class P, RealVect (P::*particleVectorField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
 }
 
 #include <CD_NamespaceFooter.H>

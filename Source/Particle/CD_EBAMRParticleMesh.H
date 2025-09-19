@@ -298,20 +298,17 @@ protected:
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
 
   /*!
+    @brief Valid grid cells. 
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
+
+  /*!
     @brief Outer halo masks with various widths.
     @details These masks are true on the coarse side on the refinement boundary.
     @note We have purposefully undefined the mask in patches where the mask is always false. This means
     that one should never call the copy function with this mask.
   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
-
-  /*!
-    @brief Inner halo masks with various widths.
-    @details These masks are true on the fine side on the refinement boundary.
-    @note We have purposefully undefined the mask in patches where the mask is always false. This means
-    that one should never call the copy function with this mask.    
-  */
-  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_innerHaloMasks;
 
   /*!
     @brief Transition masks with various widths.
@@ -360,20 +357,13 @@ protected:
   defineOuterHaloMasks();
 
   /*!
-    @brief Define the inner halo masks
-  */
-  void
-  defineInnerHaloMasks();
-
-  /*!
     @brief Define the coarse-fine transition masks
   */
   void
   defineTransitionMasks();
 
   /*!
-    @brief Deposit
-    mass that is deposited on the part of the coarse grid that lies underneath the fine grid (i.e., the invalid region) is interpolated to the fine level. 
+    @brief Deposit particles on the mesh, interpolating the coarse-grid invalid mass to the fine grid.     
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
@@ -387,8 +377,7 @@ protected:
                 const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
-    @details Just like the above version, but with a different function signature. 
+    @brief Deposit particles on the mesh, interpolating the coarse-grid invalid mass to the fine grid. 
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
@@ -402,10 +391,7 @@ protected:
                 const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
-    to make any sense. This function will run special deposition routines with 2x or 4x the particle width near the refinement boundaries. 
-    @note This routine is currently limited to NGP and CIC.
+    @brief Deposit particles on the mesh, maintaining the coarse-grid particle width near the refinement boundary.    
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
@@ -419,9 +405,7 @@ protected:
               const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 
-    @details Just like the above version, but with a different function signature. 
-    @note This routine is currently limited to NGP and CIC.
+    @brief Deposit particles on the mesh, maintaining the coarse-grid particle width near the refinement boundary.
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
@@ -435,10 +419,7 @@ protected:
               const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "HaloNGP" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
-    to make any sense. This function will deposit as usual, but force the particles on the refinement boundary to be deposited with an NGP scheme. Essentially, this
-    means that the fine grid particles will deposit mass into the coarse grid but the coarse grid particles will NOT deposit mass into the fine grid. 
+    @brief Deposit particles on the mesh, forcing an NGP deposition at the refinement boundary. 
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
@@ -452,8 +433,7 @@ protected:
                  const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "HaloNGP" algorithm for handling refinement boundaries. 
-    @details Just like the above version, but with a different function signature. 
+    @brief Deposit particles on the mesh, forcing an NGP deposition at the refinement boundary.     
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
@@ -467,15 +447,41 @@ protected:
                  const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user does NOT need to fill the "halo" particles. Rather, the
-    mass that is deposited on the part of the coarse grid that lies underneath the fine grid (i.e., the invalid region) is interpolated to the fine level. 
+    @brief Deposit particles on the mesh, but using a transition zone where the particle width changes (on the coarse level)
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
-  template <class P, const RealVect& (P::*particleScalarField)() const>
+  template <class P, const Real& (P::*particleScalarField)() const>
+  void
+  depositTransition(EBAMRCellData&              a_meshData,
+                    const ParticleContainer<P>& a_particles,
+                    const DepositionType        a_depositionType,
+                    const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Deposit particles on the mesh, but using a transition zone where the particle width changes (on the coarse level)    
+    @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
+    @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, Real (P::*particleScalarField)() const>
+  void
+  depositTransition(EBAMRCellData&              a_meshData,
+                    const ParticleContainer<P>& a_particles,
+                    const DepositionType        a_depositionType,
+                    const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Deposit particles on the mesh, interpolating the coarse-grid invalid mass to the fine grid.         
+    @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
+    @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, const RealVect& (P::*particleVectorField)() const>
   void
   depositInterp(EBAMRCellData&              a_meshData,
                 const ParticleContainer<P>& a_particles,
@@ -483,15 +489,13 @@ protected:
                 const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user does NOT need to fill the "halo" particles. Rather, the
-    mass that is deposited on the part of the coarse grid that lies underneath the fine grid (i.e., the invalid region) is interpolated to the fine level. 
+    @brief Deposit particles on the mesh, interpolating the coarse-grid invalid mass to the fine grid.             
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
-  template <class P, RealVect (P::*particleScalarField)() const>
+  template <class P, RealVect (P::*particleVectorField)() const>
   void
   depositInterp(EBAMRCellData&              a_meshData,
                 const ParticleContainer<P>& a_particles,
@@ -499,16 +503,13 @@ protected:
                 const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
-    to make any sense. This function will run special deposition routines with 2x or 4x the particle width near the refinement boundaries. 
-    @note This routine is currently limited to NGP and CIC.
+    @brief Deposit particles on the mesh, maintaining the coarse-grid particle width near the refinement boundary.        
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
-  template <class P, const RealVect& (P::*particleScalarField)() const>
+  template <class P, const RealVect& (P::*particleVectorField)() const>
   void
   depositHalo(EBAMRCellData&              a_meshData,
               const ParticleContainer<P>& a_particles,
@@ -516,16 +517,13 @@ protected:
               const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "Halo" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
-    to make any sense. This function will run special deposition routines with 2x or 4x the particle width near the refinement boundaries. 
-    @note This routine is currently limited to NGP and CIC.
+    @brief Deposit particles on the mesh, maintaining the coarse-grid particle width near the refinement boundary.        
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
-  template <class P, RealVect (P::*particleScalarField)() const>
+  template <class P, RealVect (P::*particleVectorField)() const>
   void
   depositHalo(EBAMRCellData&              a_meshData,
               const ParticleContainer<P>& a_particles,
@@ -533,16 +531,13 @@ protected:
               const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "HaloNGP" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
-    to make any sense. This function will deposit as usual, but force the particles on the refinement boundary to be deposited with an NGP scheme. Essentially, this
-    means that the fine grid particles will deposit mass into the coarse grid but the coarse grid particles will NOT deposit mass into the fine grid. 
+    @brief Deposit particles on the mesh, forcing an NGP deposition at the refinement boundary.     
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
-  template <class P, const RealVect& (P::*particleScalarField)() const>
+  template <class P, const RealVect& (P::*particleVectorField)() const>
   void
   depositHaloNGP(EBAMRCellData&              a_meshData,
                  const ParticleContainer<P>& a_particles,
@@ -550,21 +545,46 @@ protected:
                  const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Just like the deposit function, but forced to use the "HaloNGP" algorithm for handling refinement boundaries. 
-    @details See deposit() for details regarding the template arguments. When calling this routine the user must have filled the "halo" particles for this routine
-    to make any sense. This function will deposit as usual, but force the particles on the refinement boundary to be deposited with an NGP scheme. Essentially, this
-    means that the fine grid particles will deposit mass into the coarse grid but the coarse grid particles will NOT deposit mass into the fine grid. 
+    @brief Deposit particles on the mesh, forcing an NGP deposition at the refinement boundary.         
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
-  template <class P, RealVect (P::*particleScalarField)() const>
+  template <class P, RealVect (P::*particleVectorField)() const>
   void
   depositHaloNGP(EBAMRCellData&              a_meshData,
                  const ParticleContainer<P>& a_particles,
                  const DepositionType        a_depositionType,
                  const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Deposit particles on the mesh, but using a transition zone where the particle width changes (on the coarse level)    
+    @param[out] a_meshData       Mesh data. Must have exactly SpaceDim components. 
+    @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, const RealVect& (P::*particleVectorField)() const>
+  void
+  depositTransition(EBAMRCellData&              a_meshData,
+                    const ParticleContainer<P>& a_particles,
+                    const DepositionType        a_depositionType,
+                    const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Deposit particles on the mesh, but using a transition zone where the particle width changes (on the coarse level)        
+    @param[out] a_meshData       Mesh data. Must have exactly SpaceDim components.. 
+    @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, RealVect (P::*particleVectorField)() const>
+  void
+  depositTransition(EBAMRCellData&              a_meshData,
+                    const ParticleContainer<P>& a_particles,
+                    const DepositionType        a_depositionType,
+                    const bool                  a_forceIrregNGP = false);
 };
 
 #include <CD_NamespaceFooter.H>

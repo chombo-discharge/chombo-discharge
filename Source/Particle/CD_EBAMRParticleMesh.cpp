@@ -18,8 +18,7 @@
 #include <CD_NamespaceHeader.H>
 
 // These should be removed when we merge
-#warning \
-  "EBAMRParticleMesh -- optimize the masked particle lookup by ignoring patches without masked cell values (maybe we can undefine if the mask is all false??)"
+#warning "Must update all solvers that use deposition and set transition to default"
 #warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
 #warning "CheckDocs.py has triggered"
 
@@ -72,7 +71,6 @@ EBAMRParticleMesh::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
   this->defineCoarseFineMotion();
   this->defineEBParticleMesh();
   this->defineOuterHaloMasks();
-  this->defineInnerHaloMasks();
   this->defineTransitionMasks();
 
   m_isDefined = true;
@@ -358,17 +356,6 @@ EBAMRParticleMesh::defineOuterHaloMasks()
 
     m_outerHaloMasks.emplace(ighost, mask);
   }
-}
-
-void
-EBAMRParticleMesh::defineInnerHaloMasks()
-{
-  CH_TIME("EBAMRParticleMesh::defineInnerHaloMasks");
-  if (m_verbose) {
-    pout() << "EBAMRParticleMesh::defineInnerHaloMasks" << endl;
-  }
-
-#warning "EBAMRParticleMesh::defineInnerHaloMasks -- not implemented";
 }
 
 void
