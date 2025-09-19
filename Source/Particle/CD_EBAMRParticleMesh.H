@@ -300,18 +300,24 @@ protected:
   /*!
     @brief Outer halo masks with various widths.
     @details These masks are true on the coarse side on the refinement boundary.
+    @note We have purposefully undefined the mask in patches where the mask is always false. This means
+    that one should never call the copy function with this mask.
   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
 
   /*!
     @brief Inner halo masks with various widths.
     @details These masks are true on the fine side on the refinement boundary.
+    @note We have purposefully undefined the mask in patches where the mask is always false. This means
+    that one should never call the copy function with this mask.    
   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_innerHaloMasks;
 
   /*!
     @brief Transition masks with various widths.
     @details These masks are true in the fine-grid ghost cells on the coarse-side of the refinement boundary.
+    @note We have purposefully undefined the mask in patches where the mask is always false. This means
+    that one should never call the copy function with this mask.    
   */
   std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 

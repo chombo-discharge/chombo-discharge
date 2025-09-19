@@ -380,12 +380,6 @@ protected:
   int m_verbosity;
 
   /*!
-    @brief Halo buffer for particle deposition. 
-    @details Used when fetching particles around the refinement boundary. 
-  */
-  int m_haloBuffer;
-
-  /*!
     @brief Hook for adding weight to plot file. 
   */
   bool m_plotWeight;

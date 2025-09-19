@@ -1568,26 +1568,29 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const BaseFab<bool>& mask    = a_mask[din];
-    const Box            gridBox = m_grids[a_level][din];
-    const Box            maskBox = mask.box();
+    const BaseFab<bool>& mask = a_mask[din];
 
-    CH_assert(gridBox == maskBox);
+    if (mask.isUsable()) {
+      const Box gridBox = m_grids[a_level][din];
+      const Box maskBox = mask.box();
 
-    List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
-    const List<P>& particles     = (*m_particles[a_level])[din].listItems();
+      CH_assert(gridBox == maskBox);
 
-    for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-      const RealVect x  = lit().position();
-      const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
+      List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
+      const List<P>& particles     = (*m_particles[a_level])[din].listItems();
 
-      if (!(maskBox.contains(iv))) {
-        std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const RealVect x  = lit().position();
+        const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
-        MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
-      }
-      else if (mask(iv)) {
-        maskParticles.add(lit());
+        if (!(maskBox.contains(iv))) {
+          std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+
+          MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
+        }
+        else if (mask(iv)) {
+          maskParticles.add(lit());
+        }
       }
     }
   }
@@ -1631,32 +1634,35 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const BaseFab<bool>& mask    = a_mask[din];
-    const Box            gridBox = m_grids[a_level][din];
-    const Box            maskBox = mask.box();
+    const BaseFab<bool>& mask = a_mask[din];
 
-    CH_assert(gridBox == maskBox);
+    if (mask.isUsable()) {
+      const Box gridBox = m_grids[a_level][din];
+      const Box maskBox = mask.box();
 
-    List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
-    const List<P>& particles     = (*m_particles[a_level])[din].listItems();
+      CH_assert(gridBox == maskBox);
 
-    for (ListIterator<P> lit(particles); lit.ok();) {
-      const RealVect x  = lit().position();
-      const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
+      List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
+      const List<P>& particles     = (*m_particles[a_level])[din].listItems();
 
-      if (!(maskBox.contains(iv))) {
-        //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+      for (ListIterator<P> lit(particles); lit.ok();) {
+        const RealVect x  = lit().position();
+        const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
-        MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
+        if (!(maskBox.contains(iv))) {
+          //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
 
-        ++lit;
-      }
-      else {
-        if (mask(iv)) {
-          maskParticles.transfer(lit);
+          MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
+
+          ++lit;
         }
         else {
-          ++lit;
+          if (mask(iv)) {
+            maskParticles.transfer(lit);
+          }
+          else {
+            ++lit;
+          }
         }
       }
     }

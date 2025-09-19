@@ -32,7 +32,6 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_className            = "TracerParticleSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_haloBuffer           = 1;
   m_plotVelocity         = true;
   m_plotWeight           = true;
   m_volumeScale          = false;
@@ -184,9 +183,6 @@ TracerParticleSolver<P>::registerOperators() const
   else {
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
-
-    // For CIC halo deposition.
-    m_amr->registerMask(s_outer_particle_halo, 1, m_realm);
   }
 }
 

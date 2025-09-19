@@ -325,7 +325,8 @@ EBAMRParticleMesh::defineOuterHaloMasks()
       copier.ghostDefine(gridsCoFi, grids, domain, ighost * IntVect::Unit);
       coFiMask.copyTo(Interval(comp, comp), coarMask, Interval(comp, comp), copier, LDaddOp<FArrayBox>());
 
-      // Go through the grids and make the boolean mask.
+      // Go through the grids and make the boolean mask. If there are no valid cells
+      // we undefine the BaseFab.
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < numBoxes; mybox++) {
         const DataIndex& din = dit[mybox];
@@ -334,13 +335,21 @@ EBAMRParticleMesh::defineOuterHaloMasks()
         BaseFab<bool>&   boolMask = levelMask[din];
         const FArrayBox& realMask = coarMask[din];
 
+        bool emptyMask = true;
+
         auto kernel = [&](const IntVect& iv) -> void {
           if (realMask(iv, comp) > 0.0) {
             boolMask(iv, comp) = true;
+            emptyMask          = false;
           }
         };
 
         BoxLoops::loop(box, kernel);
+
+        // Undefine the BaseFab if the mask is empty. This means we can never do a copy.
+        if (emptyMask) {
+          boolMask.clear();
+        }
       }
     }
 
