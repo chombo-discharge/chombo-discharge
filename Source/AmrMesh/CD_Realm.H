@@ -21,16 +21,6 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Identifier for particle halo masks
-*/
-static const std::string s_particle_halo = "particle_halo";
-
-/*!
-  @brief Identifier for particle valid region. 
-*/
-static const std::string s_particle_valid_region = "pvr";
-
-/*!
   @brief Alias for cutting down on the typic of booleans defined over AMR grids. 
 */
 using AMRMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
@@ -394,6 +384,11 @@ protected:
   int m_blockingFactor;
 
   /*!
+    @brief Number of ghost cells
+  */
+  int m_numGhost;
+
+  /*!
     @brief Physical coordinates of lower-left corner in simulation domain
   */
   RealVect m_probLo;
@@ -469,14 +464,15 @@ protected:
   defineMasks(const int a_lmin);
 
   /*!
-    @brief Define particle halo amsks
+    @brief Define outer particle halo mask.
+    @details This is a mask which is true on the OUTSIDE of a refinement boundary.
     @param[in] a_lmin Coarsest level that changed during regrid
   */
   void
-  defineHaloMasks(const int a_lmin);
+  defineOuterHaloMask(const int a_lmin);
 
   /*!
-    @brief Define particle halo masks. This is the level-version. 
+    @brief Define the outer particle halo masks. This is the level-version. 
     @param[out] a_coarMask   Mask
     @param[in]  a_domainCoar Coarse domain
     @param[in]  a_domainFine Fine domain
@@ -486,13 +482,28 @@ protected:
     @param[in]  a_refRat     Refinement ratio between the two levels
   */
   void
-  defineHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                 const ProblemDomain&      a_domainCoar,
-                 const ProblemDomain&      a_domainFine,
-                 const DisjointBoxLayout&  a_gridsCoar,
-                 const DisjointBoxLayout&  a_gridsFine,
-                 const int                 a_buffer,
-                 const int                 a_refRat);
+  defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+                      const ProblemDomain&      a_domainCoar,
+                      const ProblemDomain&      a_domainFine,
+                      const DisjointBoxLayout&  a_gridsCoar,
+                      const DisjointBoxLayout&  a_gridsFine,
+                      const int                 a_buffer,
+                      const int                 a_refRat);
+
+  /*!
+    @brief Define inner particle halo mask.
+    @details This is a mask which is true on the INSIDE of a refinement boundary.
+    @param[in] a_lmin Coarsest level that changed during regrid
+  */
+  void
+  defineInnerHaloMask(const int a_lmin);
+
+  /*!
+    @brief Define the coarse-fine interface. 
+    @details This is a mask which is true on the immediate outside of a refinement boundary.
+  */
+  void
+  defineCFIVS(const int a_lmin);
 
   /*!
     @brief Define the valid cell region mask. 

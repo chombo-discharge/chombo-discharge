@@ -557,11 +557,6 @@ protected:
   int m_seed;
 
   /*!
-    @brief Halo size for particles
-  */
-  int m_haloBuffer;
-
-  /*!
     @brief Bisection step for when we use the bisection intersection algorithm
   */
   Real m_bisectStep;

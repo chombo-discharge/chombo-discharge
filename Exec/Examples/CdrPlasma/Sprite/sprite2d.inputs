@@ -157,7 +157,7 @@ McPhoto.source_type              = volume_rate     ## 'number'      = Source ter
                                                    # 'volume'      = Source terms contains the number of photons produced per unit volume
                                                    # 'volume_rate' = Source terms contains the volumetric rate
                                                    # 'rate'        = Source terms contains the rate
-McPhoto.deposition_cf            = halo
+McPhoto.deposition_cf            = transition      ## 'interp', 'halo', 'halo_ngp', 'transition'.
 McPhoto.deposition               = cic             ## 'ngp'  = nearest grid point
                                                    # 'num'  = # of photons per cell
                                                    # 'cic'  = cloud-in-cell

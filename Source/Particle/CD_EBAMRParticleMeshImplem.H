@@ -52,6 +52,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
     break;
   }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
   default: {
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
 
@@ -87,6 +92,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   }
   case CoarseFineDeposition::HaloNGP: {
     this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -127,6 +137,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
     break;
   }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
   default: {
     MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - logic bust");
 
@@ -160,6 +175,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
   }
   case CoarseFineDeposition::HaloNGP: {
     this->depositHaloNGP<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+
+    break;
+  }
+  case CoarseFineDeposition::Transition: {
+    this->depositTransition<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
 
     break;
   }
@@ -304,6 +324,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
   DataOps::setValue(a_meshData, 0.0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  a_particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -335,9 +360,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -349,7 +374,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -392,6 +417,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl], bufferFiCo);
     }
   }
+
+  a_particles.clearMaskParticles();
 }
 
 template <class P, Real (P::*particleScalarField)() const>
@@ -415,6 +442,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   DataOps::setValue(a_meshData, 0.0);
 
   const Interval interv(0, 0);
+
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  a_particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
@@ -444,9 +476,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -458,7 +490,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -501,6 +533,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl], bufferFiCo);
     }
   }
+
+  a_particles.clearMaskParticles();
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>
@@ -518,9 +552,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   const Interval interv(0, 0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  // Doing the nasty here...
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
-  const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = particles.getParticles();
+  const AMRParticles<P>& haloParticles    = particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
@@ -553,6 +595,8 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
   }
+
+  particles.transferParticles(particles.getMaskParticles());
 }
 
 template <class P, Real (P::*particleScalarField)() const>
@@ -570,9 +614,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   const Interval interv(0, 0);
 
+  // Doing the nasty here...
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
-  const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = particles.getParticles();
+  const AMRParticles<P>& haloParticles    = particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
@@ -605,6 +657,28 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
   }
+
+  particles.transferParticles(particles.getMaskParticles());
+}
+
+template <class P, const Real& (P::*particleScalarField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+}
+
+template <class P, Real (P::*particleScalarField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
 }
 
 template <class P, Real& (P::*particleScalarField)()>
@@ -813,6 +887,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
   DataOps::setValue(a_meshData, 0.0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  a_particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -845,9 +924,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -859,7 +938,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -911,6 +990,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       }
     }
   }
+
+  a_particles.clearMaskParticles();
 }
 
 template <class P, RealVect (P::*particleVectorField)() const>
@@ -926,6 +1007,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
   DataOps::setValue(a_meshData, 0.0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  a_particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -958,9 +1044,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -972,7 +1058,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -1024,6 +1110,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       }
     }
   }
+
+  a_particles.clearMaskParticles();
 }
 
 template <class P, const RealVect& (P::*particleVectorField)() const>
@@ -1048,9 +1136,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   const Interval interv(0, 0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  // Doing the nasty here...
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
-  const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = particles.getParticles();
+  const AMRParticles<P>& haloParticles    = particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
@@ -1096,6 +1192,8 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       }
     }
   }
+
+  particles.transferParticles(particles.getMaskParticles());
 }
 
 template <class P, RealVect (P::*particleVectorField)() const>
@@ -1120,9 +1218,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   const Interval interv(0, 0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  // Doing the nasty here...
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
-  const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = particles.getParticles();
+  const AMRParticles<P>& haloParticles    = particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
@@ -1168,6 +1274,28 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       }
     }
   }
+
+  particles.transferParticles(particles.getMaskParticles());
+}
+
+template <class P, const RealVect& (P::*particleVectorField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+}
+
+template <class P, RealVect (P::*particleVectorField)() const>
+void
+EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
+                                     const ParticleContainer<P>& a_particles,
+                                     const DepositionType        a_depositionType,
+                                     const bool                  a_forceIrregNGP)
+{
+  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
 }
 
 #include <CD_NamespaceFooter.H>
