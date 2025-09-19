@@ -17,6 +17,12 @@
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
+// These should be removed when we merge
+#warning \
+  "EBAMRParticleMesh -- optimize the masked particle lookup by ignoring patches without masked cell values (maybe we can undefine if the mask is all false??)"
+#warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
+#warning "CheckDocs.py has triggered"
+
 EBAMRParticleMesh::EBAMRParticleMesh()
 {
   CH_TIME("EBAMRParticleMesh::EBAMRParticleMesh()");
