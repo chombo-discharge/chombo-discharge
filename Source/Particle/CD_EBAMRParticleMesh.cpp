@@ -27,13 +27,12 @@ EBAMRParticleMesh::EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a
                                      const Vector<int>&                        a_refRat,
                                      const Vector<Real>&                       a_dx,
                                      const RealVect&                           a_probLo,
-                                     const IntVect&                            a_ghost,
-                                     const int                                 a_maxParticleWidth,
+                                     const int&                                a_ghost,
                                      const int                                 a_finestLevel)
 {
   CH_TIME("EBAMRParticleMesh::EBAMRParticleMesh(full)");
 
-  this->define(a_eblgs, a_refRat, a_dx, a_probLo, a_ghost, a_maxParticleWidth, a_finestLevel);
+  this->define(a_eblgs, a_refRat, a_dx, a_probLo, a_ghost, a_finestLevel);
 }
 
 EBAMRParticleMesh::~EBAMRParticleMesh()
@@ -46,19 +45,17 @@ EBAMRParticleMesh::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
                           const Vector<int>&                        a_refRat,
                           const Vector<Real>&                       a_dx,
                           const RealVect&                           a_probLo,
-                          const IntVect&                            a_ghost,
-                          const int                                 a_maxParticleWidth,
+                          const int&                                a_ghost,
                           const int                                 a_finestLevel)
 {
   CH_TIME("EBAMRParticleMesh::define");
 
-  m_eblgs            = a_eblgs;
-  m_refRat           = a_refRat;
-  m_dx               = a_dx;
-  m_probLo           = a_probLo;
-  m_ghost            = a_ghost;
-  m_maxParticleWidth = a_maxParticleWidth;
-  m_finestLevel      = a_finestLevel;
+  m_eblgs       = a_eblgs;
+  m_refRat      = a_refRat;
+  m_dx          = a_dx;
+  m_probLo      = a_probLo;
+  m_ghost       = a_ghost;
+  m_finestLevel = a_finestLevel;
 
   this->defineLevelMotion();
   this->defineCoarseFineMotion();
@@ -85,7 +82,7 @@ EBAMRParticleMesh::defineLevelMotion()
     const bool doExchange = true;
 
     // Define Copier as going from valid -> valid+ghost.
-    m_levelCopiers[lvl].define(dbl, dbl, domain, m_ghost, doExchange);
+    m_levelCopiers[lvl].define(dbl, dbl, domain, m_ghost * IntVect::Unit, doExchange);
 
     // Define Copier as going from valid+ghost -> valid.
     m_levelCopiers[lvl].reverse();
@@ -105,7 +102,7 @@ EBAMRParticleMesh::defineCoarseFineMotion()
 
     if (hasCoar) {
       m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh>(
-        new EBCoarseFineParticleMesh(*m_eblgs[lvl - 1], *m_eblgs[lvl], m_refRat[lvl - 1], m_ghost));
+        new EBCoarseFineParticleMesh(*m_eblgs[lvl - 1], *m_eblgs[lvl], m_refRat[lvl - 1], m_ghost * IntVect::Unit));
     }
     else {
       m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh>(nullptr);

@@ -349,7 +349,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -361,10 +361,31 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         dataFiCo.setVal(0.0);
 
-#warning "This routine was modified -- in the future we should simply add a new one"
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        interp.deposit<P, particleScalarField>(haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
+        switch (refRat) {
+        case 2: {
+          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
+                                                  dataFiCo,
+                                                  a_depositionType,
+                                                  a_forceIrregNGP);
+
+          break;
+        }
+        case 4: {
+          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
+                                                  dataFiCo,
+                                                  a_depositionType,
+                                                  a_forceIrregNGP);
+
+          break;
+        }
+        default: {
+          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo(Real)");
+
+          break;
+        }
+        }
       }
 
       // Add the result of the buffer deposition to this level.
@@ -437,7 +458,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -838,7 +859,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -951,7 +972,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
       // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
       const int nboxFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)

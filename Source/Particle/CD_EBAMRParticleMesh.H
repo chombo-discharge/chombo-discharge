@@ -61,15 +61,13 @@ public:
     @param[in] a_dx               Grid resolutions.
     @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
-    @param[in] a_maxParticleWidth Maximum particle width that will be encountered.
     @param[in] a_finestLevel      Finest grid level
   */
   EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
                     const Vector<int>&                        a_refRat,
                     const Vector<Real>&                       a_dx,
                     const RealVect&                           a_probLo,
-                    const IntVect&                            a_ghost,
-                    const int                                 a_maxParticleWidth,
+                    const int&                                a_ghost,
                     const int                                 a_finestLevel);
 
   /*!
@@ -84,7 +82,6 @@ public:
     @param[in] a_dx               Grid resolutions.
     @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
-    @param[in] a_maxParticleWidth Maximum particle width that will be encountered.
     @param[in] a_finestLevel      Finest grid level
   */
   void
@@ -92,8 +89,7 @@ public:
          const Vector<int>&                        a_refRat,
          const Vector<Real>&                       a_dx,
          const RealVect&                           a_probLo,
-         const IntVect&                            a_ghost,
-         const int                                 a_maxParticleWidth,
+         const int&                                a_ghost,
          const int                                 a_finestLevel);
 
   /*!
@@ -262,12 +258,7 @@ protected:
   /*!
     @brief Number of ghost cells
   */
-  IntVect m_ghost;
-
-  /*!
-    @brief Maximum particle width that will ever be used. 
-  */
-  int m_maxParticleWidth;
+  int m_ghost;
 
   /*!
     @brief Finest AMR level
@@ -300,6 +291,16 @@ protected:
     to deposit coarse-grid particles on the fine grid. 
   */
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
+
+  /*!
+    @brief Outer halo masks with various widths. These masks are true on the coarse side on the refinement boundary.
+  */
+  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMask;
+
+  /*!
+    @brief Inner halo masks with various widths. These masks are true on the fine side on the refinement boundary.
+  */
+  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_innerHaloMask;
 
   /*!
     @brief Buffers for handling arithmetic for mass moving from coarse to fine level and vice versa. 
