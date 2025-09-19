@@ -24,6 +24,10 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
+#warning \
+  "EBAMRParticleMesh -- we should avoid iterating through all the particles that are present in regions where there are no masked cells."
+#warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
+
 template <class P, const Real& (P::*particleScalarField)() const>
 void
 EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
@@ -304,6 +308,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
   DataOps::setValue(a_meshData, 0.0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  a_particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -392,6 +401,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl], bufferFiCo);
     }
   }
+
+  a_particles.clearMaskParticles();
 }
 
 template <class P, Real (P::*particleScalarField)() const>
@@ -415,6 +426,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   DataOps::setValue(a_meshData, 0.0);
 
   const Interval interv(0, 0);
+
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  a_particles.copyMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
@@ -501,6 +517,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl], bufferFiCo);
     }
   }
+
+  a_particles.clearMaskParticles();
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>
@@ -518,9 +536,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   const Interval interv(0, 0);
 
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  // Doing the nasty here...
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
-  const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = particles.getParticles();
+  const AMRParticles<P>& haloParticles    = particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
@@ -553,6 +579,8 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
   }
+
+  particles.transferParticles(particles.getMaskParticles());
 }
 
 template <class P, Real (P::*particleScalarField)() const>
@@ -570,9 +598,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
   const Interval interv(0, 0);
 
+  // Doing the nasty here...
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  // Copy the required particles to a masked particle data holder -- this takes the first strip of cells on the coarse side of the refinemnt boundary.
+  constexpr int coarseMaskWidth = 1;
+
+  particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
+
   // nonHaloParticles will get deposited with the 'a_depositionType' scheme and haloParticles with an NGP scheme
-  const AMRParticles<P>& nonHaloParticles = a_particles.getParticles();
-  const AMRParticles<P>& haloParticles    = a_particles.getMaskParticles();
+  const AMRParticles<P>& nonHaloParticles = particles.getParticles();
+  const AMRParticles<P>& haloParticles    = particles.getMaskParticles();
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
@@ -605,6 +641,8 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
   }
+
+  particles.transferParticles(particles.getMaskParticles());
 }
 
 template <class P, Real& (P::*particleScalarField)()>

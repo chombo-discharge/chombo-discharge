@@ -76,60 +76,13 @@ McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::Interp: {
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Interp,
-                                                    false);
-
-    break;
-  }
-  case CoarseFineDeposition::Halo: {
-
-    // Copy particles living on the mask.
-    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_haloBuffer, m_realm);
-    a_particles.copyMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Halo,
-                                                    false);
-
-    // Clear out the mask particles.
-    a_particles.clearMaskParticles();
-
-    break;
-  }
-  case CoarseFineDeposition::HaloNGP: {
-    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_haloBuffer, m_realm);
-
-    // Transfer particles living on the mask.
-    a_particles.transferMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::HaloNGP,
-                                                    false);
-
-    // Transfer them back.
-    a_particles.transferParticles(a_particles.getMaskParticles());
-
-    break;
-  }
-  default: {
-    MayDay::Error("McPhoto::depositKappaConservative -- logic bust due to unsupported coarse-fine deposition");
-  }
-  }
+  m_amr->depositParticles<P, particleScalarField>(a_phi,
+                                                  m_realm,
+                                                  m_phase,
+                                                  a_particles,
+                                                  a_deposition,
+                                                  a_coarseFineDeposition,
+                                                  false);
 }
 
 #include <CD_NamespaceFooter.H>

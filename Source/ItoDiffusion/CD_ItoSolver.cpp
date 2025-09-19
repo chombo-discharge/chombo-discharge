@@ -43,7 +43,6 @@ ItoSolver::ItoSolver()
   m_className            = "ItoSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_outerHaloBuffer      = 1;
   m_coarseFineDeposition = CoarseFineDeposition::Halo;
   m_deposition           = DepositionType::CIC;
   m_plotDeposition       = DepositionType::CIC;
@@ -508,8 +507,6 @@ ItoSolver::registerOperators() const
     if (m_useRedistribution) {
       m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     }
-
-    m_amr->registerMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
   }
 }
 
@@ -576,7 +573,6 @@ ItoSolver::initialData()
   };
 
 #warning "Development here"
-#warning "EBParticleMesh infrastructure uses temporary buffers. This should be prealloacted memory"
 #if 1
   int       ppc = 32;
   ParmParse pp("ItoSolver");

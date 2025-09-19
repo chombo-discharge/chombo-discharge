@@ -230,61 +230,15 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
-  // refinement boundary.
-  switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::Interp: {
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Interp,
-                                                    m_forceIrregDepositionNGP);
-    break;
-  }
-  case CoarseFineDeposition::Halo: {
-    // Copy the mask particles.
-    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
-    a_particles.copyMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Halo,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.clearMaskParticles();
-
-    break;
-  }
-  case CoarseFineDeposition::HaloNGP: {
-
-    // Transfer mask particles
-    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
-    a_particles.transferMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::HaloNGP,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.transferParticles(a_particles.getMaskParticles());
-
-    break;
-  }
-  default: {
-    MayDay::Error("ItoSolverImplem.H in function ItoSolver::depositKappaConservative -- logic bust!");
-
-    break;
-  }
-  }
+  m_amr->depositParticles<P, particleScalarField>(a_phi,
+                                                  m_realm,
+                                                  m_phase,
+                                                  a_particles,
+                                                  a_deposition,
+                                                  a_coarseFineDeposition,
+                                                  m_forceIrregDepositionNGP);
 }
+
 template <class P, Real (P::*particleScalarField)() const>
 void
 ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
@@ -299,61 +253,13 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
-  // refinement boundary.
-  switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::Interp: {
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Interp,
-                                                    m_forceIrregDepositionNGP);
-    break;
-  }
-  case CoarseFineDeposition::Halo: {
-
-    // Copy the mask particles.
-    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
-    a_particles.copyMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Halo,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.clearMaskParticles();
-
-    break;
-  }
-  case CoarseFineDeposition::HaloNGP: {
-
-    // Transfer mask particles
-    const AMRMask& mask = m_amr->getMask(s_outer_particle_halo, m_outerHaloBuffer, m_realm);
-    a_particles.transferMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::HaloNGP,
-                                                    m_forceIrregDepositionNGP);
-
-    a_particles.transferParticles(a_particles.getMaskParticles());
-
-    break;
-  }
-  default: {
-    MayDay::Error("ItoSolverImplem.H in function ItoSolver::depositKappaConservative -- logic bust!");
-
-    break;
-  }
-  }
+  m_amr->depositParticles<P, particleScalarField>(a_phi,
+                                                  m_realm,
+                                                  m_phase,
+                                                  a_particles,
+                                                  a_deposition,
+                                                  a_coarseFineDeposition,
+                                                  m_forceIrregDepositionNGP);
 }
 
 #include <CD_NamespaceFooter.H>

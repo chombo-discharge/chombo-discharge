@@ -157,9 +157,6 @@ McPhoto::parseOptions()
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  // For registering the CIC deposition mask.
-  m_haloBuffer = 1;
-
   this->parseVerbosity();
   this->parseTransparentBoundaries();
   this->parsePseudoPhotons();
@@ -702,9 +699,6 @@ McPhoto::registerOperators()
     m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
-
-    // For CIC deposition
-    m_amr->registerMask(s_outer_particle_halo, m_haloBuffer, m_realm);
   }
 }
 

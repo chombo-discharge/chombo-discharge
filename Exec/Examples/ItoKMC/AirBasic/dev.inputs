@@ -61,7 +61,7 @@ Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank',
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
-Driver.refine_angles                = 1.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_angles                = 1.                  ## Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes            = 0                   ## Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics           = 0                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
@@ -104,22 +104,22 @@ FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. 'j
 # ====================================================================================================
 # ItoSolver class options
 # ====================================================================================================
-ItoSolver.verbosity              = -1                 ## Class verbosity
-ItoSolver.merge_algorithm        = none    ## Particle merging algorithm (see documentation)
-ItoSolver.plt_vars               = phi mu vel dco     ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
-ItoSolver.intersection_alg       = bisection          ## Intersection algorithm for EB-particle intersections.
-ItoSolver.bisect_step            = 1.E-3              ## Bisection step length for intersection tests
-ItoSolver.normal_max             = 5.0                ## Maximum value (absolute) that can be drawn from the exponential distribution.
-ItoSolver.redistribute           = false              ## Turn on/off redistribution.
-ItoSolver.blend_conservation     = false              ## Turn on/off blending with nonconservative divergenceo
-ItoSolver.checkpointing          = particles          ## 'particles' or 'numbers'
-ItoSolver.ppc_restart            = 32                 ## Maximum number of computational particles to generate for restarts.
-ItoSolver.irr_ngp_deposition     = false              ## Force irregular deposition in cut cells or not
-ItoSolver.irr_ngp_interp         = true               ## Force irregular interpolation in cut cells or not
-ItoSolver.mobility_interp        = direct             ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
-ItoSolver.plot_deposition        = cic                ## Cloud-in-cell for plotting particles.
-ItoSolver.deposition             = cic                ## Deposition type.
-ItoSolver.deposition_cf          = halo               ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.verbosity              = -1                ## Class verbosity
+ItoSolver.merge_algorithm        = none              ## Particle merging algorithm (see documentation)
+ItoSolver.plt_vars               = phi mu vel dco    ## 'phi', 'vel', 'dco', 'part', 'eb_part', 'dom_part', 'src_part', 'energy_density', 'energy'
+ItoSolver.intersection_alg       = bisection         ## Intersection algorithm for EB-particle intersections.
+ItoSolver.bisect_step            = 1.E-3             ## Bisection step length for intersection tests
+ItoSolver.normal_max             = 5.0               ## Maximum value (absolute) that can be drawn from the exponential distribution.
+ItoSolver.redistribute           = false             ## Turn on/off redistribution.
+ItoSolver.blend_conservation     = false             ## Turn on/off blending with nonconservative divergenceo
+ItoSolver.checkpointing          = particles         ## 'particles' or 'numbers'
+ItoSolver.ppc_restart            = 32                ## Maximum number of computational particles to generate for restarts.
+ItoSolver.irr_ngp_deposition     = false             ## Force irregular deposition in cut cells or not
+ItoSolver.irr_ngp_interp         = true              ## Force irregular interpolation in cut cells or not
+ItoSolver.mobility_interp        = direct            ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
+ItoSolver.plot_deposition        = cic               ## Cloud-in-cell for plotting particles.
+ItoSolver.deposition             = cic               ## Deposition type.
+ItoSolver.deposition_cf          = halo              ## Coarse-fine deposition. interp, halo, or halo_ngp
 
 # ====================================================================================================
 # CdrCTU solver settings.
@@ -194,7 +194,7 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 # RodNeedleDisk geometry class options
 # ====================================================================================================
 RodNeedleDisk.use_rod         = true     ## Turn on/off rod
-RodNeedleDisk.use_needle      = false     ## Turn on/off needle
+RodNeedleDisk.use_needle      = false    ## Turn on/off needle
 RodNeedleDisk.use_disk        = false    ## Turn on/off disk
 RodNeedleDisk.orientation     = "-y"     ## Orientation
 RodNeedleDisk.translate       = 0 0 0    ## Geometric translation
