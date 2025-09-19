@@ -366,7 +366,43 @@ EBAMRParticleMesh::defineTransitionMasks()
     pout() << "EBAMRParticleMesh::defineTransitionMasks" << endl;
   }
 
-#warning "EBAMRParticleMesh::defineTransitionMasks -- not implemented";
+  constexpr int comp    = 0;
+  constexpr int numComp = 1;
+
+  m_transitionMasks.clear();
+
+  for (int ighost = 1; ighost <= m_ghost; ighost++) {
+
+    Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> mask(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+      const DisjointBoxLayout& grids    = m_eblgs[lvl]->getDBL();
+      const ProblemDomain&     domain   = m_eblgs[lvl]->getDomain();
+      const DataIterator&      dit      = grids.dataIterator();
+      const int                numBoxes = dit.size();
+
+      // Allocate data on this level, and reset the mask.
+      mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(grids, numComp, IntVect::Zero));
+
+      LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxes; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        levelMask[din].setVal(false);
+      }
+
+#warning "At the end, we should undefined the BaseFab if there are no masked cells in the patch."
+    }
+
+    // Explicitly set mask on finest level to be nullptr, as there is no finer level.
+    mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+
+    m_transitionMasks.emplace(ighost, mask);
+  }
+
+  MayDay::Warning("EBAMRParticleMesh::defineTransitionMasks -- not implemented");
 }
 
 #include <CD_NamespaceFooter.H>

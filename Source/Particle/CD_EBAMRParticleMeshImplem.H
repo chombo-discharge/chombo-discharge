@@ -360,7 +360,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
       // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
@@ -476,9 +476,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -924,9 +924,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
@@ -1044,9 +1044,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
     }
 
-    // 4. The particles on the other side of the refinement bounadry should deposit into this level.
+    // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinment boundary. Must have
+      // Particles that live "around" the refinement boundary. Must have
       // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
