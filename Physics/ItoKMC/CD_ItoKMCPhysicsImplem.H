@@ -476,6 +476,12 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     auto       S = m_kmcState;
     const auto N = reaction->computeCriticalNumberOfReactions(m_kmcState);
 
+    // Trigger on both the reactions and the reactions with completely consumed reactants
+    const auto propensities = m_kmcSolver.propensities(S, m_kmcReactionsThreadLocal);
+    const Real physicsDt    = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensities, 1.0);
+
+    a_physicsDt = std::min(a_physicsDt, physicsDt);
+
     if (N < std::numeric_limits<FPR>::max()) {
       reaction->advanceState(S, N);
 
