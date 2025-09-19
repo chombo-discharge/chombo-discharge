@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <NeighborIterator.H>
 
 // Our includes
 #include <CD_EBAMRParticleMesh.H>
@@ -56,10 +57,17 @@ EBAMRParticleMesh::define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
   m_probLo      = a_probLo;
   m_ghost       = a_ghost;
   m_finestLevel = a_finestLevel;
+  m_verbose     = false;
+
+  ParmParse pp("EBAMRParticleMesh");
+  pp.query("verbose", m_verbose);
 
   this->defineLevelMotion();
   this->defineCoarseFineMotion();
   this->defineEBParticleMesh();
+  this->defineOuterHaloMasks();
+  this->defineInnerHaloMasks();
+  this->defineTransitionMasks();
 
   m_isDefined = true;
 }
@@ -68,6 +76,9 @@ void
 EBAMRParticleMesh::defineLevelMotion()
 {
   CH_TIME("EBAMRParticleMesh::defineLevelMotion");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::defineLevelMotion" << endl;
+  }
 
   // TLDR: Define level Copiers. These are defined such that we can move data from valid+ghost -> valid. We need this because when we deposit particles
   //       we will also deposit into ghost cells that overlap with patches on the same level. The data in those ghost cells needs to find its way into
@@ -93,6 +104,9 @@ void
 EBAMRParticleMesh::defineCoarseFineMotion()
 {
   CH_TIME("EBAMRParticleMesh::defineCoarseFineMotion");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::defineCoarseFineMotion" << endl;
+  }
 
   m_coarseFinePM.resize(1 + m_finestLevel);
 
@@ -117,6 +131,9 @@ EBAMRParticleMesh::defineEBParticleMesh()
   CH_TIMER("EBAMRParticleMesh::defineEBParticleMesh::basic_defines", t1);
   CH_TIMER("EBAMRParticleMesh::defineEBParticleMesh::define_level", t2);
   CH_TIMER("EBAMRParticleMesh::defineEBParticleMesh::define_fico", t3);
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::defineEBParticleMesh" << endl;
+  }
 
   m_ebParticleMesh.resize(1 + m_finestLevel);
   m_ebParticleMeshFiCo.resize(1 + m_finestLevel);
@@ -184,11 +201,170 @@ const EBParticleMesh&
 EBAMRParticleMesh::getEBParticleMesh(const int a_lvl, const DataIndex& a_dit) const
 {
   CH_TIME("EBAMRParticleMesh::getEBParticleMesh");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::getEBParticleMesh" << endl;
+  }
 
   CH_assert(a_lvl >= 0);
   CH_assert(a_lvl <= m_finestLevel);
 
   return (*m_ebParticleMesh[a_lvl])[a_dit];
+}
+
+void
+EBAMRParticleMesh::defineOuterHaloMasks()
+{
+  CH_TIME("EBAMRParticleMesh::defineOuterHaloMasks");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::defineOuterHaloMasks" << endl;
+  }
+
+  constexpr int comp    = 0;
+  constexpr int numComp = 1;
+
+  m_outerHaloMasks.clear();
+
+  for (int ighost = 1; ighost <= m_ghost; ighost++) {
+
+    Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> mask(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+      const DisjointBoxLayout& grids     = m_eblgs[lvl]->getDBL();
+      const DisjointBoxLayout& gridsFine = m_eblgs[lvl + 1]->getDBL();
+
+      const ProblemDomain& domain     = m_eblgs[lvl]->getDomain();
+      const ProblemDomain& domainFine = m_eblgs[lvl + 1]->getDomain();
+
+      // Create the coarsened fine grid.
+      DisjointBoxLayout gridsCoFi;
+      coarsen(gridsCoFi, gridsFine, m_refRat[lvl]);
+
+      const DataIterator& dit     = grids.dataIterator();
+      const DataIterator& ditFine = gridsFine.dataIterator();
+      const DataIterator& ditCoFi = gridsCoFi.dataIterator();
+
+      const int numBoxes     = dit.size();
+      const int numBoxesFine = ditFine.size();
+      const int numBoxesCoFi = ditCoFi.size();
+
+      // Allocate data on this level, and reset the mask.
+      mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(grids, numComp, IntVect::Zero));
+
+      LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxes; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        levelMask[din].setVal(false);
+      }
+
+      IntVectSet halo;
+
+      // Go through the coarsened fine grid and set the halo to true
+#pragma omp parallel for schedule(runtime) reduction(+ : halo)
+      for (int mybox = 0; mybox < numBoxesCoFi; mybox++) {
+        const DataIndex& din      = ditCoFi[mybox];
+        const Box&       coFiBox  = gridsCoFi[din];
+        const Box        grownBox = grow(coFiBox, ighost) & domain;
+
+        // Subtract non-ghosted box and neighbor boxes
+        IntVectSet myHalo(grownBox);
+        myHalo -= coFiBox;
+
+        NeighborIterator nit(gridsCoFi);
+        for (nit.begin(din); nit.ok(); ++nit) {
+          myHalo -= gridsCoFi[nit()];
+        }
+
+        halo |= myHalo;
+      }
+
+      // TLDR: In the above, we found the coarse-grid cells surrounding the fine level, viewed from the fine grids.
+      //       Below, we create that view from the coarse grid. We use a LevelData<FArrayBox> on the coarsened fine grid,
+      //       whose "ghost cells" can added to the _actual_ coarse grid. We then loop through those cells and set the
+      //       mask directly.
+      LevelData<FArrayBox> coFiMask(gridsCoFi, numComp, ighost * IntVect::Unit);
+      LevelData<FArrayBox> coarMask(grids, numComp, IntVect::Zero);
+
+#pragma omp parallel
+      {
+#pragma omp for schedule(runtime)
+        for (int mybox = 0; mybox < numBoxesFine; mybox++) {
+          coFiMask[ditFine[mybox]].setVal(0.0);
+        }
+
+#pragma omp for schedule(runtime)
+        for (int mybox = 0; mybox < numBoxes; mybox++) {
+          coarMask[dit[mybox]].setVal(0.0);
+        }
+
+        // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of the fine
+        // grid, the mask value in the valid region (i.e., not including ghosts) is always zero.
+#pragma omp for schedule(runtime)
+        for (int mybox = 0; mybox < numBoxesFine; mybox++) {
+          const DataIndex& din = ditFine[mybox];
+
+          const Box        region  = coFiMask[din].box();
+          const IntVectSet curHalo = halo & region;
+
+          for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit) {
+            coFiMask[din](ivsit(), comp) = 1.0;
+          }
+        }
+      }
+
+      // Add the result to the coarse-grid data holder.
+      Copier copier;
+      copier.ghostDefine(gridsCoFi, grids, domain, ighost * IntVect::Unit);
+      coFiMask.copyTo(Interval(comp, comp), coarMask, Interval(comp, comp), copier, LDaddOp<FArrayBox>());
+
+      // Go through the grids and make the boolean mask.
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxes; mybox++) {
+        const DataIndex& din = dit[mybox];
+        const Box        box = grids[din];
+
+        BaseFab<bool>&   boolMask = levelMask[din];
+        const FArrayBox& realMask = coarMask[din];
+
+        auto kernel = [&](const IntVect& iv) -> void {
+          if (realMask(iv, comp) > 0.0) {
+            boolMask(iv, comp) = true;
+          }
+        };
+
+        BoxLoops::loop(box, kernel);
+      }
+    }
+
+    // Explicitly set mask on finest level to be nullptr, as there is no finer level.
+    mask[m_finestLevel] = RefCountedPtr<LevelData<BaseFab<bool>>>(nullptr);
+
+    m_outerHaloMasks.emplace(ighost, mask);
+  }
+}
+
+void
+EBAMRParticleMesh::defineInnerHaloMasks()
+{
+  CH_TIME("EBAMRParticleMesh::defineInnerHaloMasks");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::defineInnerHaloMasks" << endl;
+  }
+
+#warning "EBAMRParticleMesh::defineInnerHaloMasks -- not implemented";
+}
+
+void
+EBAMRParticleMesh::defineTransitionMasks()
+{
+  CH_TIME("EBAMRParticleMesh::defineTransitionMasks");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::defineTransitionMasks" << endl;
+  }
+
+#warning "EBAMRParticleMesh::defineTransitionMasks -- not implemented";
 }
 
 #include <CD_NamespaceFooter.H>

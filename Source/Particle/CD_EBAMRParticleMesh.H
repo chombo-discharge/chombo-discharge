@@ -251,6 +251,11 @@ protected:
   bool m_isDefined;
 
   /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
+
+  /*!
     @brief Lower-left corner of physical domain
   */
   RealVect m_probLo;
@@ -293,14 +298,22 @@ protected:
   Vector<RefCountedPtr<LayoutData<EBParticleMesh>>> m_ebParticleMeshFiCo;
 
   /*!
-    @brief Outer halo masks with various widths. These masks are true on the coarse side on the refinement boundary.
+    @brief Outer halo masks with various widths.
+    @details These masks are true on the coarse side on the refinement boundary.
   */
-  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMask;
+  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_outerHaloMasks;
 
   /*!
-    @brief Inner halo masks with various widths. These masks are true on the fine side on the refinement boundary.
+    @brief Inner halo masks with various widths.
+    @details These masks are true on the fine side on the refinement boundary.
   */
-  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_innerHaloMask;
+  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_innerHaloMasks;
+
+  /*!
+    @brief Transition masks with various widths.
+    @details These masks are true in the fine-grid ghost cells on the coarse-side of the refinement boundary.
+  */
+  std::map<int, Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>> m_transitionMasks;
 
   /*!
     @brief Buffers for handling arithmetic for mass moving from coarse to fine level and vice versa. 
@@ -333,6 +346,24 @@ protected:
   */
   void
   defineEBParticleMesh();
+
+  /*!
+    @brief Define the outer halo masks
+  */
+  void
+  defineOuterHaloMasks();
+
+  /*!
+    @brief Define the inner halo masks
+  */
+  void
+  defineInnerHaloMasks();
+
+  /*!
+    @brief Define the coarse-fine transition masks
+  */
+  void
+  defineTransitionMasks();
 
   /*!
     @brief Deposit
