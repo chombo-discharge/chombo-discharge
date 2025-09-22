@@ -69,10 +69,13 @@ public:
 
   /*!
     @brief Deposit a particle onto the mesh.
-    @details The template parameters indicate the particle type and a pointer to a particle function.
+    @details The template parameters indicate the particle type and a pointer to a particle function. The user can scale
+    the particle width by changing a_widthScale. If this is set to one, the standard width for CIC becomes the grid cell size,
+    and the standard width for TSC becomes twice the grid size. 
     @param[inout] a_rho            Mesh data
     @param[in]    a_particles      Particles to be deposited    
     @param[in]    a_depositionType Deposition method
+    @param[in]    a_widthScale     Particle scale multiplier.  
     @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
   */
@@ -81,6 +84,7 @@ public:
   deposit(EBCellFAB&           a_meshData,
           const List<P>&       a_particles,
           const DepositionType a_depositionType,
+          const Real           a_widthScale,
           const bool           a_forceIrregNGP = false) const;
 
   /*!
@@ -120,82 +124,6 @@ public:
           EBCellFAB&           a_rho,
           const DepositionType a_depositionType,
           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using twice the standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
-    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  deposit2(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using twice the standard cloud width. 
-    @details Justl ike the version above, except that the function signature is Real P::particleScalarField() const.
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, Real (P::*particleScalarField)() const>
-  void
-  deposit2(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
-    const Real& P::a_particleScalarField. E.g. if we are depositing mass through a function const Real& P::mass() we will specifiy
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  deposit4(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
-    @details Just like the version above except that the function signature is Real P::particleScalarField() const
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, Real (P::*particleScalarField)() const>
-  void
-  deposit4(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
 
   /*!
     @brief Deposit particle onto the mesh using a standard cloud width. 

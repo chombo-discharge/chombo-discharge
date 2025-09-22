@@ -407,29 +407,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        switch (refRat) {
-        case 2: {
-          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        case 4: {
-          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        default: {
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo(Real)");
-
-          break;
-        }
-        }
+        interp.deposit<P, const Real&, particleScalarField>(dataFiCo,
+                                                            haloParticles.listItems(),
+                                                            a_depositionType,
+                                                            refRat,
+                                                            a_forceIrregNGP);
       }
 
       // Add the result of the buffer deposition to this level.
@@ -526,29 +508,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        switch (refRat) {
-        case 2: {
-          interp.deposit2<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        case 4: {
-          interp.deposit4<P, particleScalarField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        default: {
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo(Real)");
-
-          break;
-        }
-        }
+        interp.deposit<P, Real, particleScalarField>(dataFiCo,
+                                                     haloParticles.listItems(),
+                                                     a_depositionType,
+                                                     1.0 * refRat,
+                                                     a_forceIrregNGP);
       }
 
       // Add the result of the buffer deposition to this level.

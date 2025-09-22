@@ -29,6 +29,7 @@ void
 EBParticleMesh::deposit(EBCellFAB&           a_meshData,
                         const List<P>&       a_particles,
                         const DepositionType a_depositionType,
+                        const Real           a_widthScale,
                         const bool           a_forceIrregNGP) const
 {
   CH_TIME("EBParticleMesh::deposit");
@@ -48,11 +49,21 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     invVol /= m_dx[dir];
   }
 
-  const RealVect cicWidth = 1 * RealVect::Unit;
-  const RealVect tscWidth = 2 * RealVect::Unit;
+  const RealVect cicWidth = 1 * a_widthScale * RealVect::Unit;
+  const RealVect tscWidth = 2 * a_widthScale * RealVect::Unit;
 
   const Box cicBox(-1 * IntVect::Unit, 1 * IntVect::Unit);
   const Box tscBox(-2 * IntVect::Unit, 2 * IntVect::Unit);
+
+  Real ngpFactor = invVol;
+  Real cicFactor = invVol;
+  Real tscFactor = invVol;
+
+  // Various scaling factors since particle deposition functions require different normalizations.
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    cicFactor *= 1.0 / cicWidth[dir];
+    tscFactor *= 1.0 / (tscWidth[dir] / 2);
+  }
 
   // Switch between deposition types.
   switch (a_depositionType) {
@@ -60,7 +71,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
       const Ret w = (lit().*MemberFunc)();
 
-      this->depositParticleNGP(a_meshData, lit().position(), invVol, &w, numComp);
+      this->depositParticleNGP(a_meshData, lit().position(), ngpFactor, &w, numComp);
     }
 
     break;
@@ -69,7 +80,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
       const Ret w = (lit().*MemberFunc)();
 
-      this->depositParticleCIC(a_meshData, lit().position(), cicWidth, cicBox, invVol, &w, numComp, a_forceIrregNGP);
+      this->depositParticleCIC(a_meshData, lit().position(), cicWidth, cicBox, cicFactor, &w, numComp, a_forceIrregNGP);
     }
 
     break;
@@ -78,7 +89,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
       const Ret w = (lit().*MemberFunc)();
 
-      this->depositParticleTSC(a_meshData, lit().position(), tscWidth, tscBox, invVol, &w, numComp, a_forceIrregNGP);
+      this->depositParticleTSC(a_meshData, lit().position(), tscWidth, tscBox, tscFactor, &w, numComp, a_forceIrregNGP);
     }
 
     break;
@@ -98,9 +109,11 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP) const
 {
+#warning "Marked for removal"
   EBParticleMesh::deposit<P, const Real&, particleScalarField>(a_rho,
                                                                a_particleList,
                                                                a_depositionType,
+                                                               1.0,
                                                                a_forceIrregNGP);
 }
 
@@ -111,113 +124,8 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP) const
 {
-  EBParticleMesh::deposit<P, Real, particleScalarField>(a_rho, a_particleList, a_depositionType, a_forceIrregNGP);
-}
-
-template <class P, const Real& (P::*particleScalarField)() const>
-void
-EBParticleMesh::deposit2(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  const Interval variables(0, 0);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();
-
-    this->depositParticle2(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           &curStrength,
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
-}
-
-template <class P, Real (P::*particleScalarField)() const>
-void
-EBParticleMesh::deposit2(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit2");
-
-  const Interval variables(0, 0);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();
-
-    this->depositParticle2(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           &curStrength,
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
-}
-
-template <class P, const Real& (P::*particleScalarField)() const>
-void
-EBParticleMesh::deposit4(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit4");
-
-  const Interval variables(0, 0);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();
-
-    this->depositParticle4(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           &curStrength,
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
-}
-
-template <class P, Real (P::*particleScalarField)() const>
-void
-EBParticleMesh::deposit4(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit4");
-
-  const Interval variables(0, 0);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();
-
-    this->depositParticle4(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           &curStrength,
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
+#warning "Marked for removal"
+  EBParticleMesh::deposit<P, Real, particleScalarField>(a_rho, a_particleList, a_depositionType, 1.0, a_forceIrregNGP);
 }
 
 template <class P, const RealVect& (P::*particleVectorField)() const>
@@ -552,12 +460,13 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
     auto cicKernel = [&](const IntVect& iv) -> void {
       Real weight = a_volumeFactor;
 
-      // Below, we've transformed coordinates to [-0.5,0.5] around with the cell center at the origin.
+      // Below, we've transformed the coordinates so that the cell center of cell iv is at the origin.
       for (int dir = 0; dir < SpaceDim; dir++) {
-        const Real& x = (a_position[dir] - m_probLo[dir]) / m_dx[dir] - iv[dir] - 0.5;
-        const Real& d = a_particleWidth[dir];
+        const Real a = (m_probLo[dir] - a_position[dir]) / m_dx[dir] + iv[dir];
+        const Real b = a + 1.0;
+        const Real L = a_particleWidth[dir];
 
-        weight *= std::max(0.0, std::min(0.5, x + 0.5 * d) - std::max(-0.5, x - 0.5 * d));
+        weight *= std::max(0.0, std::min(b, 0.5 * L) - std::max(a, -0.5 * L));
       }
 
       for (int comp = 0; comp < a_numComp; comp++) {
@@ -589,6 +498,10 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
 
   FArrayBox& rho = a_rho.getFArrayBox();
 
+  auto F = [](const Real x) -> Real {
+    return (x <= 0.0) ? 2 * x * (1 + x) : 2 * x * (1 - x);
+  };
+
   if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
     for (int comp = 0; comp < a_numComp; comp++) {
       rho(particleIV, comp) += a_strength[comp] * a_volumeFactor;
@@ -596,23 +509,14 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
   }
   else {
     auto tscKernel = [&](const IntVect& iv) -> void {
-      //      Real weight = a_volumeFactor / (0.5 * std::pow(a_particleWidth[0], SpaceDim));
+      Real weight = a_volumeFactor;
 
-      // Below, we've transformed coordinates so that the particle is at the origin.
       for (int dir = 0; dir < SpaceDim; dir++) {
-        const Real lo = m_probLo[dir] + (iv[dir] - 0.5) * m_dx[dir] - a_position[dir];
-        const Real hi = m_probLo[dir] + (iv[dir] + 0.5) * m_dx[dir] - a_position[dir];
-        const Real d  = 0.5 * a_particleWidth[dir];
+        const Real a = (m_probLo[dir] - a_position[dir]) / m_dx[dir] + iv[dir];
+        const Real b = a + 1.0;
+        const Real L = a_particleWidth[dir];
 
-        const Real alpha = std::max(lo, -d);
-        const Real beta  = std::min(hi, +d);
-
-        if (alpha >= beta) {
-          weight *= 0.0;
-        }
-        else {
-          weight *= (beta - alpha - (beta * std::abs(beta) - alpha * std::abs(alpha)) / (2 * d));
-        }
+        weight *= F(std::min(b, 0.5 * L) / L) - F(std::max(a, -0.5 * L) / L);
       }
 
       for (int comp = 0; comp < a_numComp; comp++) {
