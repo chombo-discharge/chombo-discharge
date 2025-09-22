@@ -575,15 +575,7 @@ ItoSolver::initialData()
     return initialDensityFunc(x, m_time);
   };
 
-#warning "Development here"
-#if 1
-  int       ppc = 32;
-  ParmParse pp("ItoSolver");
-  pp.query("ppc", ppc);
-  this->generateParticlesFromDensity(bulkParticles, initialDensity, ppc); // Dev code
-#else
-  this->generateParticlesFromDensity(bulkParticles, initialDensity, 32);
-#endif
+  this->generateParticlesFromDensity(bulkParticles, initialDensity, m_restartPPC);
 
   constexpr Real tolerance = 0.0;
 

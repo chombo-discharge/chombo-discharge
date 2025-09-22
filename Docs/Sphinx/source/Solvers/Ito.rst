@@ -122,9 +122,9 @@ When sampling particles from a mesh-based density, the solver will generate the 
 If the density that is supplied does not lead to an integer number of particles in the grid cell (which is virtually always the case), the evaluation of the number of particles is stochastically evaluated.
 E.g., if the density is :math:`\phi` and then grid cell volume is :math:`\Delta V`, and :math:`\phi\Delta V = 1.2`, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.
 
-.. warning::
+.. tip::
    
-   There is currently a hard limit that restricts the number of initial computational particles per cell to 32. 
+   The number of initially sampled particles is set through ``ItoSolver.ppc_restart``.
 
 Particle containers
 -------------------
