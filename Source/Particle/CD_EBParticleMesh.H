@@ -354,8 +354,6 @@ public:
               const bool           a_forceIrregNGP = false) const;
 
 protected:
-
-
   /*!
     @brief Problem domain
   */
@@ -385,6 +383,38 @@ protected:
     @brief Lower-left corner of computational domain.
   */
   RealVect m_probLo;
+
+  /*!
+    @brief Wrapper function for depositing a single particle with a standard NGP scheme. 
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_position       Particle position
+    @param[in]    a_volumeFactor   Volume factor to multiply by
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_numComp     Number of components to deposit
+  */
+  inline void
+  depositParticleNGP(EBCellFAB&      a_rho,
+                     const RealVect& a_position,
+                     const Real&     a_volumeFactor,
+                     const Real*     a_strength,
+                     const int&      a_numComp) const noexcept;
+
+  /*!
+    @brief Wrapper function for depositing a single particle with a standard CIC scheme. 
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_position       Particle position
+    @param[in]    a_volumeFactor   Volume factor to multiply by
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_numCOmp        Number of components to deposit
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells or not
+  */
+  inline void
+  depositParticleCIC(EBCellFAB&      a_rho,
+                     const RealVect& a_position,
+                     const Real&     a_volumeFactor,
+                     const Real*     a_strength,
+                     const int&      a_numComp,
+                     const bool      a_forceIrregNGP) const noexcept;
 
   /*!
     @brief Wrapper function for depositing a single particle.
@@ -472,7 +502,7 @@ protected:
                       const RealVect&      a_position,
                       const Interval&      a_interval,
                       const DepositionType a_interpType,
-                      const bool           a_forceIrregNGP) const;  
+                      const bool           a_forceIrregNGP) const;
 };
 
 #include <CD_NamespaceFooter.H>

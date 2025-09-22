@@ -40,10 +40,9 @@ EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar
                                                    const IntVect      a_ghost) noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
-  if (m_verbose) {
-    pout() << "EBCoarseFineParticleMesh::EBCoarseFineParticleMesh" << endl;
-  }
 
+  m_verbose = false;
+  
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_ghost);
 }
 
@@ -59,6 +58,10 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
                                  const IntVect      a_ghost) noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::define");
+
+  ParmParse pp("EBCoarseFineParticleMesh");
+  pp.query("verbose", m_verbose);
+  
   if (m_verbose) {
     pout() << "EBCoarseFineParticleMesh::define" << endl;
   }
@@ -70,10 +73,6 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   m_eblgFine = a_eblgFine;
   m_refRat   = a_refRat;
   m_ghost    = a_ghost;
-  m_verbose  = false;
-
-  ParmParse pp("EBCoarseFineParticleMesh");
-  pp.query("verbose", m_verbose);
 
   // Make the coarsened and refine grids.
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);

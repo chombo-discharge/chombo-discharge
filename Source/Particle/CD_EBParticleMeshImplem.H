@@ -21,6 +21,7 @@
 // Our includes
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
+#include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
 template <class P, class Ret, Ret (P::*MemberFunc)() const>
@@ -31,7 +32,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
                         const bool           a_forceIrregNGP) const
 {
   CH_TIME("EBParticleMesh::deposit");
-  if(m_verbose) {
+  if (m_verbose) {
     pout() << "EBParticleMesh::deposit" << endl;
   }
 
@@ -40,17 +41,47 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
 
   static_assert(std::is_same<Base, Real>::value || std::is_same<Base, RealVect>::value, "Ret must be Real or RealVect");
 
-  constexpr int numComp = std::is_same<Base, Real>::value ? 1 : SpaceDim - 1;
+  constexpr int numComp = std::is_same<Base, Real>::value ? 1 : SpaceDim;
 
-  const Interval variables(0, numComp);
+  Real invVol = 1.0;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    invVol /= m_dx[dir];
+  }
 
-  for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
-    const P&        p = lit();
-    const RealVect& x = p.position();
-    const Ret       w = (p.*MemberFunc)();
+  // Switch between deposition types.
+  switch (a_depositionType) {
+  case DepositionType::NGP: {
+    for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
+      const Ret w = (lit().*MemberFunc)();
 
-#warning "New signature should only care about the number of components and not the variables"
-    this->depositParticle(a_meshData, m_probLo, m_dx, x, &w, variables, a_depositionType, a_forceIrregNGP);
+      this->depositParticleNGP(a_meshData, lit().position(), invVol, &w, numComp);
+    }
+
+    break;
+  }
+  case DepositionType::CIC: {
+    for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
+      const Ret w = (lit().*MemberFunc)();
+
+      this->depositParticleCIC(a_meshData, lit().position(), invVol, &w, numComp, a_forceIrregNGP);
+    }
+
+    break;
+  }
+  case DepositionType::TSC: {
+    for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
+      const Ret w = (lit().*MemberFunc)();
+
+      //      this->depositParticleTSC(a_meshData, lit().position(), invVol, &w, numComp);
+    }
+
+    break;
+  }
+  default: {
+    MayDay::Abort("EBParticleMesh::deposit -- logic bust");
+
+    break;
+  }
   }
 }
 
@@ -415,7 +446,6 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
                             const bool           a_forceIrregNGP) const
 {
   CH_TIME("EBParticleMesh::interpolate(RealVect)");
-
   CH_assert(a_meshVectorField.nComp() == SpaceDim);
 
   const Interval variables(0, SpaceDim - 1);
@@ -466,6 +496,69 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
                               variables,
                               a_interpType,
                               a_forceIrregNGP);
+  }
+}
+
+inline void
+EBParticleMesh::depositParticleNGP(EBCellFAB&      a_rho,
+                                   const RealVect& a_position,
+                                   const Real&     a_invVol,
+                                   const Real*     a_strength,
+                                   const int&      a_numComp) const noexcept
+{
+  CH_TIME("EBParticleMesh::depositParticleNGP");
+
+  const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
+
+  CH_assert(m_region.contains(iv));
+
+  FArrayBox& rho = a_rho.getFArrayBox();
+
+  for (int comp = 0; comp < a_numComp; comp++) {
+    rho(particleIV, comp) += a_strength[comp] * a_invVol;
+  }
+}
+
+inline void
+EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
+                                   const RealVect& a_position,
+                                   const Real&     a_invVol,
+                                   const Real*     a_strength,
+                                   const int&      a_numComp,
+                                   const bool      a_forceIrregNGP) const noexcept
+{
+  CH_TIME("EBParticleMesh::depositParticleCIC");
+
+  const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
+
+  CH_assert(m_region.contains(iv));
+
+  FArrayBox& rho = a_rho.getFArrayBox();
+
+  if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
+    for (int comp = 0; comp < a_numComp; comp++) {
+      rho(particleIV, comp) += a_strength[comp] * a_invVol;
+    }
+  }
+  else {
+    auto cicKernel = [&](const IntVect& iv) -> void {
+      Real weight = a_invVol;
+
+      // Below, we've transformed coordinates to [-0.5,0.5] around with the cell center at the origin.
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Real& x = (a_position[dir] - m_probLo[dir]) / m_dx[dir] - iv[dir] - 0.5;
+
+        weight *= std::max(0.0, std::min(0.5, x + 0.5) - std::max(-0.5, x - 0.5));
+      }
+
+      for (int comp = 0; comp < a_numComp; comp++) {
+        rho(iv, comp) += weight * a_strength[comp];
+      }
+    };
+
+    const Box cicBox = Box(particleIV - IntVect::Unit, particleIV + IntVect::Unit);
+
+    BoxLoops::loop(cicBox, cicKernel);
   }
 }
 
