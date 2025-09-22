@@ -12,6 +12,9 @@
 #ifndef CD_EBParticleMeshImplem_H
 #define CD_EBParticleMeshImplem_H
 
+// Std incldues
+#include <type_traits>
+
 // Chombo includes
 #include <CH_Timer.H>
 
@@ -20,6 +23,34 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
+template <class P, class Ret, Ret (P::*MemberFunc)() const>
+void
+EBParticleMesh::deposit(EBCellFAB&           a_meshData,
+                        const List<P>&       a_particles,
+                        const DepositionType a_depositionType,
+                        const bool           a_forceIrregNGP) const
+{
+  CH_TIME("EBParticleMesh::deposit");
+
+  using NoRef = typename std::remove_reference<Ret>::type;
+  using Base  = typename std::remove_cv<NoRef>::type;
+
+  static_assert(std::is_same<Base, Real>::value || std::is_same<Base, RealVect>::value, "Ret must be Real or RealVect");
+
+  constexpr int numComp = std::is_same<Base, Real>::value ? 1 : SpaceDim - 1;
+
+  const Interval variables(0, numComp);
+
+  for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
+    const P&        p = lit();
+    const RealVect& x = p.position();
+    const Ret       w = (p.*MemberFunc)();
+
+#warning "New signature should only care about the number of components and not the variables"
+    this->depositParticle(a_meshData, m_probLo, m_dx, x, &w, variables, a_depositionType, a_forceIrregNGP);
+  }
+}
+
 template <class P, const Real& (P::*particleScalarField)() const>
 void
 EBParticleMesh::deposit(const List<P>&       a_particleList,
@@ -27,18 +58,10 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP) const
 {
-  CH_TIME("EBParticleMesh::deposit");
-
-  const Interval variables(0, 0);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();
-
-    this
-      ->depositParticle(a_rho, m_probLo, m_dx, curPosition, &curStrength, variables, a_depositionType, a_forceIrregNGP);
-  }
+  EBParticleMesh::deposit<P, const Real&, particleScalarField>(a_rho,
+                                                               a_particleList,
+                                                               a_depositionType,
+                                                               a_forceIrregNGP);
 }
 
 template <class P, Real (P::*particleScalarField)() const>
@@ -48,18 +71,7 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP) const
 {
-  CH_TIME("EBParticleMesh::deposit");
-
-  const Interval variables(0, 0);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const Real&     curStrength = (curParticle.*particleScalarField)();
-
-    this
-      ->depositParticle(a_rho, m_probLo, m_dx, curPosition, &curStrength, variables, a_depositionType, a_forceIrregNGP);
-  }
+  EBParticleMesh::deposit<P, Real, particleScalarField>(a_rho, a_particleList, a_depositionType, a_forceIrregNGP);
 }
 
 template <class P, const Real& (P::*particleScalarField)() const>

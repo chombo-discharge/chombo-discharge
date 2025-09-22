@@ -68,6 +68,22 @@ public:
          const RealVect&      a_probLo);
 
   /*!
+    @brief Deposit a particle onto the mesh.
+    @details The template parameters indicate the particle type and a pointer to a particle function.
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_particles      Particles to be deposited    
+    @param[in]    a_depositionType Deposition method
+    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
+    @note This routine will INCREMENT a_rho. 
+  */
+  template <class P, class Ret, Ret (P::*MemberFunc)() const>
+  void
+  deposit(EBCellFAB&           a_meshData,
+          const List<P>&       a_particles,
+          const DepositionType a_depositionType,
+          const bool           a_forceIrregNGP = false) const;
+
+  /*!
     @brief Deposit particle onto the mesh using a standard cloud width. 
     @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
     is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
