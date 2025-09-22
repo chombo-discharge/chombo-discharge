@@ -1178,29 +1178,12 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        switch (refRat) {
-        case 2: {
-          interp.deposit2<P, particleVectorField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
+        interp.deposit<P, const RealVect&, particleVectorField>(dataFiCo,
+                                                                haloParticles.listItems(),
+                                                                a_depositionType,
+                                                                refRat,
+                                                                a_forceIrregNGP);
 
-          break;
-        }
-        case 4: {
-          interp.deposit4<P, particleVectorField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        default: {
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo(RealVect)");
-
-          break;
-        }
-        }
       }
 
       // Add the result of the buffer deposition to this level. The buffer above had SpaceDim// components but coarseFinePM works with only one component, so we just alias the data.
@@ -1300,29 +1283,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        switch (refRat) {
-        case 2: {
-          interp.deposit2<P, particleVectorField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        case 4: {
-          interp.deposit4<P, particleVectorField>(haloParticles.listItems(),
-                                                  dataFiCo,
-                                                  a_depositionType,
-                                                  a_forceIrregNGP);
-
-          break;
-        }
-        default: {
-          MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo(RealVect)");
-
-          break;
-        }
-        }
+        interp.deposit<P, const RealVect&, particleVectorField>(dataFiCo,
+                                                                haloParticles.listItems(),
+                                                                a_depositionType,
+                                                                refRat,
+                                                                a_forceIrregNGP);	
       }
 
       // Add the result of the buffer deposition to this level. The buffer above had SpaceDim

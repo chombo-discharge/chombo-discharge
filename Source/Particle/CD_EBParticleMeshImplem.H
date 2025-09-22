@@ -135,27 +135,12 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP) const
 {
-  CH_TIME("EBParticleMesh::deposit");
-
-  // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
-  //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'
-
-  const Interval variables(0, SpaceDim - 1);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const RealVect& curStrength = (curParticle.*particleVectorField)();
-
-    this->depositParticle(a_rho,
-                          m_probLo,
-                          m_dx,
-                          curPosition,
-                          curStrength.dataPtr(),
-                          variables,
-                          a_depositionType,
-                          a_forceIrregNGP);
-  }
+#warning "Marked for removal"
+  EBParticleMesh::deposit<P, const RealVect&, particleVectorField>(a_rho,
+                                                                   a_particleList,
+                                                                   a_depositionType,
+                                                                   1.0,
+                                                                   a_forceIrregNGP);
 }
 
 template <class P, RealVect (P::*particleVectorField)() const>
@@ -165,132 +150,12 @@ EBParticleMesh::deposit(const List<P>&       a_particleList,
                         const DepositionType a_depositionType,
                         const bool           a_forceIrregNGP) const
 {
-  CH_TIME("EBParticleMesh::deposit");
-
-  const Interval variables(0, SpaceDim - 1);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const RealVect& curStrength = (curParticle.*particleVectorField)();
-
-    this->depositParticle(a_rho,
-                          m_probLo,
-                          m_dx,
-                          curPosition,
-                          curStrength.dataPtr(),
-                          variables,
-                          a_depositionType,
-                          a_forceIrregNGP);
-  }
-}
-
-template <class P, const RealVect& (P::*particleVectorField)() const>
-void
-EBParticleMesh::deposit2(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit2");
-
-  const Interval variables(0, SpaceDim - 1);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const RealVect& curStrength = (curParticle.*particleVectorField)();
-
-    this->depositParticle2(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           curStrength.dataPtr(),
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
-}
-
-template <class P, RealVect (P::*particleVectorField)() const>
-void
-EBParticleMesh::deposit2(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit2");
-
-  const Interval variables(0, SpaceDim - 1);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const RealVect& curStrength = (curParticle.*particleVectorField)();
-
-    this->depositParticle2(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           curStrength.dataPtr(),
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
-}
-
-template <class P, const RealVect& (P::*particleVectorField)() const>
-void
-EBParticleMesh::deposit4(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit4");
-
-  const Interval variables(0, SpaceDim - 1);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const RealVect& curStrength = (curParticle.*particleVectorField)();
-
-    this->depositParticle4(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           curStrength.dataPtr(),
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
-}
-
-template <class P, RealVect (P::*particleVectorField)() const>
-void
-EBParticleMesh::deposit4(const List<P>&       a_particleList,
-                         EBCellFAB&           a_rho,
-                         const DepositionType a_depositionType,
-                         const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::deposit4");
-
-  const Interval variables(0, SpaceDim - 1);
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    const P&        curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-    const RealVect& curStrength = (curParticle.*particleVectorField)();
-
-    this->depositParticle4(a_rho,
-                           m_probLo,
-                           m_dx,
-                           curPosition,
-                           curStrength.dataPtr(),
-                           variables,
-                           a_depositionType,
-                           a_forceIrregNGP);
-  }
+#warning "Marked for removal"
+  EBParticleMesh::deposit<P, RealVect, particleVectorField>(a_rho,
+                                                            a_particleList,
+                                                            a_depositionType,
+                                                            1.0,
+                                                            a_forceIrregNGP);
 }
 
 template <class P, Real& (P::*particleScalarField)()>
