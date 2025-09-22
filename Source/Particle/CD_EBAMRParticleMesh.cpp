@@ -25,6 +25,7 @@
 #warning "CIC and refinement factor 4 using the transition method. This should be a mask width of 2!"
 #warning "EBAMRSurfaceDeposition should also be updated with the new signatures"
 #warning "McPhoto, ItoSolver, and CdrSolver should not be allowed to use EBParticleMesh directly"
+#warning "Should double-check that something like a velocity/current can be properly deposited"
 #warning "CheckDocs.py has triggered"
 
 EBAMRParticleMesh::EBAMRParticleMesh()
