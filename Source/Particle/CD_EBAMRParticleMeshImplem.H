@@ -241,7 +241,11 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, const Real&, particleScalarField>(meshData,
+                                                          boxParticles.listItems(),
+                                                          a_depositionType,
+                                                          1.0,
+                                                          a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
@@ -301,7 +305,11 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, Real, particleScalarField>(meshData,
+                                                   boxParticles.listItems(),
+                                                   a_depositionType,
+                                                   1.0,
+                                                   a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
@@ -368,7 +376,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Note: EBParticleMesh construction is cheap.
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, const Real&, particleScalarField>(meshData,
+                                                          boxParticles.listItems(),
+                                                          a_depositionType,
+                                                          1.0,
+                                                          a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -381,8 +393,6 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
     // 4. The particles on the other side of the refinement boundary should deposit into this level.
     if (hasCoar) {
-      // Particles that live "around" the refinement boundary. Must have
-      // been filled by the user.
       const ParticleData<P>& coarHaloParticles = *a_particles.getMaskParticles()[lvl - 1];
 
       // Get the refined coarse grid stuff.
@@ -395,6 +405,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
+      // Deposit with a larger particle width.
       const int numBoxesFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
@@ -469,7 +480,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleScalarField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, Real, particleScalarField>(meshData,
+                                                   boxParticles.listItems(),
+                                                   a_depositionType,
+                                                   1.0,
+                                                   a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -511,7 +526,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
         interp.deposit<P, Real, particleScalarField>(dataFiCo,
                                                      haloParticles.listItems(),
                                                      a_depositionType,
-                                                     1.0 * refRat,
+                                                     refRat,
                                                      a_forceIrregNGP);
       }
 
@@ -572,8 +587,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleScalarField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
-      interp.deposit<P, particleScalarField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
+      interp.deposit<P, const Real&, particleScalarField>(meshData,
+                                                          particlesCloud.listItems(),
+                                                          a_depositionType,
+                                                          1.0,
+                                                          a_forceIrregNGP);
+
+      interp.deposit<P, const Real&, particleScalarField>(meshData,
+                                                          particlesNGP.listItems(),
+                                                          DepositionType::NGP,
+                                                          1.0,
+                                                          a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -637,8 +661,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleScalarField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
-      interp.deposit<P, particleScalarField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
+      interp.deposit<P, Real, particleScalarField>(meshData,
+                                                   particlesCloud.listItems(),
+                                                   a_depositionType,
+                                                   1.0,
+                                                   a_forceIrregNGP);
+
+      interp.deposit<P, Real, particleScalarField>(meshData,
+                                                   particlesNGP.listItems(),
+                                                   DepositionType::NGP,
+                                                   1.0,
+                                                   a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -670,7 +703,6 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
   // If we're calling with NGP, call a simpler function.
   if (a_depositionType == DepositionType::NGP) {
     depositInterp<P, particleScalarField>(a_meshData, a_particles, DepositionType::NGP, a_forceIrregNGP);
-
     return;
   }
 
@@ -706,7 +738,11 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       const List<P>&        amrParticles = (*particles.getParticles()[lvl])[din].listItems();
       const EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[din];
 
-      particleMesh.deposit<P, particleScalarField>(amrParticles, meshData, a_depositionType, a_forceIrregNGP);
+      particleMesh.deposit<P, const Real&, particleScalarField>(meshData,
+                                                                amrParticles,
+                                                                a_depositionType,
+                                                                1.0,
+                                                                a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level so that all the mass is on this level.
@@ -751,8 +787,11 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
         const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
 
         if (mask.isUsable()) {
-          //          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, DepositionType::NGP, a_forceIrregNGP);
-          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, a_depositionType, a_forceIrregNGP);
+          particleMesh.deposit<P, const Real&, particleScalarField>(dataFiCo,
+                                                                    maskParticles,
+                                                                    a_depositionType,
+                                                                    1.0,
+                                                                    a_forceIrregNGP);
         }
       }
 
@@ -826,7 +865,11 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       const List<P>&        amrParticles = (*particles.getParticles()[lvl])[din].listItems();
       const EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[din];
 
-      particleMesh.deposit<P, particleScalarField>(amrParticles, meshData, a_depositionType, a_forceIrregNGP);
+      particleMesh.deposit<P, Real, particleScalarField>(meshData,
+                                                         amrParticles,
+                                                         a_depositionType,
+                                                         1.0,
+                                                         a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level so that all the mass is on this level.
@@ -871,8 +914,11 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
         const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
 
         if (mask.isUsable()) {
-          //          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, DepositionType::NGP, a_forceIrregNGP);
-          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, a_depositionType, a_forceIrregNGP);
+          particleMesh.deposit<P, Real, particleScalarField>(dataFiCo,
+                                                             maskParticles,
+                                                             a_depositionType,
+                                                             1.0,
+                                                             a_forceIrregNGP);
         }
       }
 
@@ -1007,7 +1053,11 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, const RealVect&, particleVectorField>(meshData,
+                                                              boxParticles.listItems(),
+                                                              a_depositionType,
+                                                              1.0,
+                                                              a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
@@ -1069,7 +1119,11 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
       const ListBox<P>&     boxParticles = a_particles[lvl][din];
       const EBParticleMesh& interp       = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, RealVect, particleVectorField>(meshData,
+                                                       boxParticles.listItems(),
+                                                       a_depositionType,
+                                                       1.0,
+                                                       a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
@@ -1140,7 +1194,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Note: EBParticleMesh construction is cheap.
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, const RealVect&, particleVectorField>(meshData,
+                                                              boxParticles.listItems(),
+                                                              a_depositionType,
+                                                              1.0,
+                                                              a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -1183,7 +1241,6 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                                                 a_depositionType,
                                                                 refRat,
                                                                 a_forceIrregNGP);
-
       }
 
       // Add the result of the buffer deposition to this level. The buffer above had SpaceDim// components but coarseFinePM works with only one component, so we just alias the data.
@@ -1244,7 +1301,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Note: EBParticleMesh construction is cheap.
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleVectorField>(boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, RealVect, particleVectorField>(meshData,
+                                                       boxParticles.listItems(),
+                                                       a_depositionType,
+                                                       1.0,
+                                                       a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -1283,11 +1344,11 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
         const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[din];
 
-        interp.deposit<P, const RealVect&, particleVectorField>(dataFiCo,
-                                                                haloParticles.listItems(),
-                                                                a_depositionType,
-                                                                refRat,
-                                                                a_forceIrregNGP);	
+        interp.deposit<P, RealVect, particleVectorField>(dataFiCo,
+                                                         haloParticles.listItems(),
+                                                         a_depositionType,
+                                                         refRat,
+                                                         a_forceIrregNGP);
       }
 
       // Add the result of the buffer deposition to this level. The buffer above had SpaceDim
@@ -1363,8 +1424,15 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleVectorField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
-      interp.deposit<P, particleVectorField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
+      interp.deposit<P, const RealVect&, particleVectorField>(particlesCloud.listItems(),
+                                                              meshData,
+                                                              a_depositionType,
+                                                              a_forceIrregNGP);
+
+      interp.deposit<P, const RealVect&, particleVectorField>(particlesNGP.listItems(),
+                                                              meshData,
+                                                              DepositionType::NGP,
+                                                              a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.
@@ -1448,8 +1516,17 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.deposit<P, particleVectorField>(particlesCloud.listItems(), meshData, a_depositionType, a_forceIrregNGP);
-      interp.deposit<P, particleVectorField>(particlesNGP.listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);
+      interp.deposit<P, RealVect, particleVectorField>(meshData,
+                                                       particlesCloud.listItems(),
+                                                       a_depositionType,
+                                                       1.0,
+                                                       a_forceIrregNGP);
+
+      interp.deposit<P, RealVect, particleVectorField>(meshData,
+                                                       particlesNGP.listItems(),
+                                                       DepositionType::NGP,
+                                                       1.0,
+                                                       a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level.

@@ -1290,10 +1290,11 @@ CdrSolver::initialDataParticles()
         constexpr bool forceIrregNGP = true;
         EBParticleMesh interp(domain, cellBox, ebisbox, dx, probLo);
 
-        interp.deposit<PointParticle, &PointParticle::weight>(particles[lvl][din].listItems(),
-                                                              (*m_phi[lvl])[din],
-                                                              DepositionType::NGP,
-                                                              forceIrregNGP);
+        interp.deposit<PointParticle, const Real&, &PointParticle::weight>((*m_phi[lvl])[din],
+                                                                           particles[lvl][din].listItems(),
+                                                                           DepositionType::NGP,
+                                                                           1.0,
+                                                                           forceIrregNGP);
       }
     }
   }

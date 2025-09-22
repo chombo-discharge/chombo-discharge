@@ -1268,7 +1268,11 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
         EBCellFAB&                 output  = (*a_phi[lvl])[din];
         const List<PointParticle>& photons = a_photons[lvl][din].listItems();
 
-        particleMesh.deposit<PointParticle, &PointParticle::weight>(photons, output, DepositionType::NGP, true);
+        particleMesh.deposit<PointParticle, const Real&, &PointParticle::weight>(output,
+                                                                                 photons,
+                                                                                 DepositionType::NGP,
+                                                                                 1.0,
+                                                                                 true);
       }
     }
   }
@@ -1393,7 +1397,7 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
 
     output.setVal(0.0);
 
-    particleMesh.deposit<Photon, &Photon::weight>(photons, output, DepositionType::NGP, true);
+    particleMesh.deposit<Photon, const Real&, &Photon::weight>(output, photons, DepositionType::NGP, 1.0, true);
   }
 
   a_output.exchange();

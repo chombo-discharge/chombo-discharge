@@ -117,7 +117,7 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
     EBCellFAB&     output    = a_output[din];
     const List<P>& particles = a_particles[a_level][din].listItems();
 
-    particleMesh.deposit<P, particleScalarField>(particles, output, DepositionType::NGP, true);
+    particleMesh.deposit<P, const Real&, particleScalarField>(output, particles, DepositionType::NGP, 1.0, true);
   }
 }
 
@@ -158,7 +158,7 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
     EBCellFAB&     output    = a_output[din];
     const List<P>& particles = a_particles[a_level][din].listItems();
 
-    particleMesh.deposit<P, particleScalarField>(particles, output, DepositionType::NGP, true);
+    particleMesh.deposit<P, Real, particleScalarField>(output, particles, DepositionType::NGP, 1.0, true);
   }
 }
 

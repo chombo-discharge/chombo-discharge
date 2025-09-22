@@ -42,7 +42,7 @@ EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
 
   m_verbose = false;
-  
+
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_ghost);
 }
 
@@ -61,7 +61,7 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
 
   ParmParse pp("EBCoarseFineParticleMesh");
   pp.query("verbose", m_verbose);
-  
+
   if (m_verbose) {
     pout() << "EBCoarseFineParticleMesh::define" << endl;
   }
