@@ -38,6 +38,15 @@ class EBCoarseFineParticleMesh
 {
 public:
   /*!
+    @brief Simple enum for switch between arithmetic and conservative averaging
+  */
+  enum Average
+  {
+    Arithmetic,
+    Conservative
+  };
+
+  /*!
     @brief Default constructor. Leaves object in undefined state and subsequently requires a call to define. 
   */
   EBCoarseFineParticleMesh() noexcept;
@@ -110,10 +119,15 @@ public:
   exchangeAndAddFiCoData(LevelData<EBCellFAB>& a_fiCoData) const noexcept;
 
   /*!
-    @brief Conservatively coarsen the data on the refined coarse grid to the coarse grid. The grids must be the same.
+    @brief Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout
+    @param[inout] a_coarData Coarse-grid data
+    @param[in] a_fineData Data on the refined coarse grid
+    @param[in] a_average Averaging method. Either arithmetic or conservative.
   */
   virtual void
-  restrictAndAddFiCoDataToCoar(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fiCoData) const noexcept;
+  restrictAndAddFiCoDataToCoar(LevelData<EBCellFAB>&                   a_coarData,
+                               const LevelData<EBCellFAB>&             a_fiCoData,
+                               const EBCoarseFineParticleMesh::Average a_average) const noexcept;
 
   /*!
     @brief Get the refined version of the coarse eblevelgrid
@@ -198,14 +212,21 @@ protected:
   mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;
 
   /*!
-    @brief VoFIterator for coarse cells, including ghost cells
+    @brief VoFIterator for coarse cells
   */
   mutable LayoutData<VoFIterator> m_vofIterCoar;
 
   /*!
-    @brief Function for coarsening data from the refined coarse level to the coarse level
+    @brief Stencils for arithmetic coarsening of volume data.
+    @details This is defined on the coarse grid, and indexes into the refined coarse grid. 
   */
-  mutable EBCoarAve m_ebCoarAveFiCoToCoar;
+  LayoutData<BaseIVFAB<VoFStencil>> m_cellArithmeticStencils;
+
+  /*!
+    @brief Stencils for conservative coarsening of volume data
+    @details This is defined on the coarse grid, and indexes into the refined coarse grid.     
+  */
+  LayoutData<BaseIVFAB<VoFStencil>> m_cellConservativeStencils;
 
   /*!
     @brief Refinement ratio between the two levels
@@ -222,6 +243,30 @@ protected:
   */
   void
   defineVoFIterators() noexcept;
+
+  /*!
+    @brief Define the vof iterators
+  */
+  void
+  defineStencils() noexcept;
+
+  /*!
+    @brief Conservatively average and add data from the refined coarse data to the coarse data
+    @param[inout] a_coarData Coarse-grid data
+    @param[in] a_fineData Fine-grid data (must be on a refined layout of the coarse grid)
+    @param[in] a_din Grid index
+  */
+  void
+  conservativeAverageAndAdd(EBCellFAB& a_coarData, const EBCellFAB& a_fineData, const DataIndex& a_din) const noexcept;
+
+  /*!
+    @brief Arithmetically average and add data from the refined coarse data to the coarse data
+    @param[inout] a_coarData Coarse-grid data
+    @param[in] a_fineData Fine-grid data (must be on a refined layout of the coarse grid)
+    @param[in] a_din Grid idnex
+  */
+  void
+  arithmeticAverageAndAdd(EBCellFAB& a_coarData, const EBCellFAB& a_fineData, const DataIndex& a_din) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

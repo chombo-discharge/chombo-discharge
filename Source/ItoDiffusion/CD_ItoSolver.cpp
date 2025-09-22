@@ -282,7 +282,7 @@ ItoSolver::parseDeposition()
   }
   else if (str == "transition") {
     m_coarseFineDeposition = CoarseFineDeposition::Transition;
-  }  
+  }
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }

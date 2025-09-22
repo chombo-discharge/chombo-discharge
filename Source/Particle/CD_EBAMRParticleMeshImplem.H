@@ -771,8 +771,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       // Make a buffer we can deposit into. This is a refined version of this level.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
-#warning "Must set the mask width here -- it must be based on the deposition type and the refinement factor"
-      const int maskWidth = 1;
+      const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
 
       // a) Deposit the particles on the refined coarse level.
 #pragma omp parallel for schedule(runtime)
@@ -788,18 +787,21 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
         const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
 
         if (mask.isUsable()) {
+          //          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, DepositionType::NGP, a_forceIrregNGP);
           particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, a_depositionType, a_forceIrregNGP);
         }
       }
 
-      // b) Add the data to the fine level.
+      // b) Add the data to the fine level. This moves from valid+ghost -> valid
       m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
 
       // c) Exchange data on this level
       m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
 
       // d) Coarsen data from the refined grid to this grid.
-      m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl], bufferFiCo);
+      m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
+                                                            bufferFiCo,
+                                                            EBCoarseFineParticleMesh::Average::Arithmetic);
     }
   }
 
@@ -819,7 +821,112 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
     pout() << "EBAMRParticleMesh::depositTransition" << endl;
   }
 
-  MayDay::Warning("EBAMRParticleMesh::depositTransition - not implemented");
+  CH_assert(a_meshData[0]->nComp() == 1);
+
+  // If we're calling with NGP, call a simpler function.
+  if (a_depositionType == DepositionType::NGP) {
+    depositInterp<P, particleScalarField>(a_meshData, a_particles, DepositionType::NGP, a_forceIrregNGP);
+
+    return;
+  }
+
+  const int      numComp = 1;
+  const int      comp    = 0;
+  const Interval interv  = Interval(comp, comp);
+
+  DataOps::setValue(a_meshData, 0.0);
+
+  // This piece of code transfer the particles that lie on the coarse-side interface to a different particle container than
+  // a_particles. We can not use ParticleContainer::transferMaskParticles because the mask is defined on the refined coarse
+  // level. So we do this transfer directly.
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  this->transferMaskParticlesTransition(particles, a_depositionType);
+
+  // Main deposition loop.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl      = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl    = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit      = dbl.dataIterator();
+    const int                numBoxes = dit.size();
+
+    const bool hasCoar = (lvl > 0);
+    const bool hasFine = (lvl < m_finestLevel);
+
+    // 1. Deposit particles on this level.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&            meshData     = (*a_meshData[lvl])[din];
+      const List<P>&        amrParticles = (*particles.getParticles()[lvl])[din].listItems();
+      const EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[din];
+
+      particleMesh.deposit<P, particleScalarField>(amrParticles, meshData, a_depositionType, a_forceIrregNGP);
+    }
+
+    // 2. Exchange ghost data on this level so that all the mass is on this level.
+    a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
+
+    // 3. Deposition into ghost cells across the refinement boundary must end up on the coarse level.
+    if (hasCoar) {
+      m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
+    }
+
+    // 4. If there is a finer level, not all of the particles on this level have yet been deposited because some of them were transferred into another
+    //    particle container. We now run the following steps:
+    //
+    //    a) Deposit the particles around the refinement boundary on the refined coarse level, using the fine-grid particle width.
+    //    b) Add mass from the refined coarse level to the fine level -- this puts some mass into the fine side of the refinement boundary
+    //    c) Exchange data on the refined coarse level to update ghost cells, so that all special mass is contained in the refined coarse grid
+    //    d) Coarsen mass from the refined level onto this level.
+    if (hasFine) {
+      // Note: eblgFiCo is for transferring data between lvl and lvl+1. It stores the refinement of grid level 'lvl' in eblgFiCo
+      const EBLevelGrid&       eblgFiCo     = m_coarseFinePM[lvl + 1]->getEblgFiCo();
+      const DisjointBoxLayout& dblFiCo      = eblgFiCo.getDBL();
+      const EBISLayout&        ebislFiCo    = eblgFiCo.getEBISL();
+      const DataIterator&      ditFiCo      = dblFiCo.dataIterator();
+      const int                numBoxesFiCo = ditFiCo.size();
+
+      // Make a buffer we can deposit into. This is a refined version of this level.
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
+
+      const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
+
+      // a) Deposit the particles on the refined coarse level.
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB& dataFiCo = bufferFiCo[din];
+
+        dataFiCo.setVal(0.0);
+
+        const BaseFab<bool>&  mask          = (*m_transitionMasks.at(maskWidth)[lvl])[din];
+        const List<P>&        maskParticles = (*particles.getMaskParticles()[lvl])[din].listItems();
+        const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
+
+        if (mask.isUsable()) {
+          //          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, DepositionType::NGP, a_forceIrregNGP);
+          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, a_depositionType, a_forceIrregNGP);
+        }
+      }
+
+      // b) Add the data to the fine level. This moves from valid+ghost -> valid
+      m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
+
+      // c) Exchange data on this level
+      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
+
+      // d) Coarsen data from the refined grid to this grid.
+      m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
+                                                            bufferFiCo,
+                                                            EBCoarseFineParticleMesh::Average::Arithmetic);
+    }
+  }
+
+  // Masked particles are but back in their correct mesh.
+  particles.transferParticles(particles.getMaskParticles());
 }
 
 template <class P, Real& (P::*particleScalarField)()>
@@ -1497,21 +1604,8 @@ EBAMRParticleMesh::transferMaskParticlesTransition(ParticleContainer<P>& a_parti
     const Real dx     = m_dx[lvl];
     const Real dxFine = m_dx[lvl + 1];
 
-    const int refRat = m_refRat[lvl];
-
     if (a_depositionType != DepositionType::NGP) {
-      int maskWidth = 0;
-
-      if (a_depositionType == DepositionType::CIC) {
-        maskWidth = refRat / 2;
-      }
-      else if (a_depositionType == DepositionType::TSC) {
-        maskWidth = refRat;
-      }
-
-      if (maskWidth > m_ghost) {
-        MayDay::Abort("EBAMRParticleMesh::transferMaskParticlesTransition -- not enough ghost cells!");
-      }
+      const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < numBoxes; mybox++) {

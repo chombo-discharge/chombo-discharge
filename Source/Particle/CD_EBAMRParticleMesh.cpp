@@ -474,4 +474,31 @@ EBAMRParticleMesh::defineTransitionMasks()
   }
 }
 
+int
+EBAMRParticleMesh::getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) const
+{
+  CH_TIME("EBAMRParticleMesh::getTransitionMaskWidth");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::getTransitionMaskWidth" << endl;
+  }
+
+  int maskWidth = 0;
+
+  if (a_depositionType == DepositionType::CIC) {
+    maskWidth = a_refRat / 2;
+  }
+  else if (a_depositionType == DepositionType::TSC) {
+    maskWidth = a_refRat;
+  }
+  else {
+    MayDay::Abort("EBAMRParticleMesh::getTransitionMaskWidth - logic bust");
+  }
+
+  if (maskWidth > m_ghost) {
+    MayDay::Abort("EBAMRParticleMesh::transferMaskParticlesTransition -- not enough ghost cells!");
+  }
+
+  return maskWidth;
+}
+
 #include <CD_NamespaceFooter.H>

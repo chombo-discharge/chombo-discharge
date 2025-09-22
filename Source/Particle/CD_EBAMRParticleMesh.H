@@ -363,6 +363,15 @@ protected:
   defineTransitionMasks();
 
   /*!
+    @brief Get transition mask width
+    @details Used when depositing with a transition zone.
+    @param[in] a_depositionType Deposition type
+    @param[in] a_refRat Refinement ratio between levels
+  */
+  int
+  getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) const;
+
+  /*!
     @brief Deposit particles on the mesh, interpolating the coarse-grid invalid mass to the fine grid.     
     @param[out] a_meshData       Mesh data. Must have exactly one compnent. 
     @param[in]  a_particles      Particle container. Must be in "usable state" for deposition.
