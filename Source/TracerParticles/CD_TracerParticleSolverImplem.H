@@ -37,7 +37,7 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_volumeScale          = false;
   m_deposition           = DepositionType::CIC;
   m_interpolation        = DepositionType::CIC;
-  m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  m_coarseFineDeposition = CoarseFineDeposition::Transition;
 }
 
 template <typename P>
@@ -119,6 +119,9 @@ TracerParticleSolver<P>::parseDeposition()
   }
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
+  }
+  else if (str == "transition") {
+    m_coarseFineDeposition = CoarseFineDeposition::Transition;
   }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");

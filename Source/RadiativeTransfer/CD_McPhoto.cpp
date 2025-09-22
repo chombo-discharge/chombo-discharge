@@ -390,6 +390,9 @@ McPhoto::parseDeposition()
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
   }
+  else if (str == "transition") {
+    m_coarseFineDeposition = CoarseFineDeposition::Transition;
+  }  
   else {
     MayDay::Error("McPhoto::parseDeposition - unknown coarse-fine deposition method requested.");
   }

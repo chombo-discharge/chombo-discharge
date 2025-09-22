@@ -43,7 +43,7 @@ ItoSolver::ItoSolver()
   m_className            = "ItoSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  m_coarseFineDeposition = CoarseFineDeposition::Transition;
   m_deposition           = DepositionType::CIC;
   m_plotDeposition       = DepositionType::CIC;
   m_checkpointing        = WhichCheckpoint::Particles;
@@ -280,6 +280,9 @@ ItoSolver::parseDeposition()
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
   }
+  else if (str == "transition") {
+    m_coarseFineDeposition = CoarseFineDeposition::Transition;
+  }  
   else {
     MayDay::Error("ItoSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }
