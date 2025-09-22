@@ -33,6 +33,9 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
                            const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::deposit(scalar)");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::deposit(scalar)" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -74,9 +77,11 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
                            const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::deposit(scalar)");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::deposit(scalar)" << endl;
+  }
 
   // Note: This is just like the other version except that the function signature is Real P::particleScalarField() const
-
   CH_assert(a_meshData[0]->nComp() == 1);
 
   switch (a_coarseFineDeposition) {
@@ -116,8 +121,10 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
                            const CoarseFineDeposition  a_coarseFineDeposition,
                            const bool                  a_forceIrregNGP)
 {
-
   CH_TIME("EBAMRParticleMesh::deposit(vector)");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::deposit(vector)" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -159,6 +166,9 @@ EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
                            const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::deposit(vector)");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::deposit(vector)" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -199,6 +209,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
                                  const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositInterp");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositInterp" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -213,14 +226,14 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
   const Interval interv(0, 0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl     = m_eblgs[lvl]->getDBL();
-    const bool               hasCoar = lvl > 0;
-    const DataIterator&      dit     = dbl.dataIterator();
-    const int                nbox    = dit.size();
+    const DisjointBoxLayout& dbl      = m_eblgs[lvl]->getDBL();
+    const bool               hasCoar  = lvl > 0;
+    const DataIterator&      dit      = dbl.dataIterator();
+    const int                numBoxes = dit.size();
 
     // 1. Deposit particles on this level.
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -255,6 +268,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
                                  const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositInterp");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositInterp" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -275,9 +291,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     const bool               hasCoar = lvl > 0;
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -312,6 +328,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositHalo");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHalo" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -338,9 +357,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
     const bool               hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -376,9 +395,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
-      const int nboxFiCo = ditFiCo.size();
+      const int numBoxesFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
         const DataIndex& din = ditFiCo[mybox];
 
         EBCellFAB&        dataFiCo      = bufferFiCo[din];
@@ -429,6 +448,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositHalo");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHalo" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -455,9 +477,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
     const bool               hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -492,9 +514,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
-      const int nboxFiCo = ditFiCo.size();
+      const int numBoxesFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
         const DataIndex& din = ditFiCo[mybox];
 
         EBCellFAB&        dataFiCo      = bufferFiCo[din];
@@ -545,6 +567,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
                                   const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositHaloNGP");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHaloNGP" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -572,9 +597,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
@@ -607,6 +632,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
                                   const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositHaloNGP");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHaloNGP" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == 1);
 
@@ -634,9 +662,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
@@ -668,7 +696,115 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
                                      const DepositionType        a_depositionType,
                                      const bool                  a_forceIrregNGP)
 {
-  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+  CH_TIME("EBAMRParticleMesh::depositTransition");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositTransition" << endl;
+  }
+
+  CH_assert(a_meshData[0]->nComp() == 1);
+
+  // If we're calling with NGP, call a simpler function.
+  if (a_depositionType == DepositionType::NGP) {
+    depositInterp<P, particleScalarField>(a_meshData, a_particles, DepositionType::NGP, a_forceIrregNGP);
+
+    return;
+  }
+
+  const int      numComp = 1;
+  const int      comp    = 0;
+  const Interval interv  = Interval(comp, comp);
+
+  DataOps::setValue(a_meshData, 0.0);
+
+  // This piece of code transfer the particles that lie on the coarse-side interface to a different particle container than
+  // a_particles. We can not use ParticleContainer::transferMaskParticles because the mask is defined on the refined coarse
+  // level. So we do this transfer directly.
+  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+
+  this->transferMaskParticlesTransition(particles, a_depositionType);
+
+  // Main deposition loop.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl      = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl    = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit      = dbl.dataIterator();
+    const int                numBoxes = dit.size();
+
+    const bool hasCoar = (lvl > 0);
+    const bool hasFine = (lvl < m_finestLevel);
+
+    // 1. Deposit particles on this level.
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      EBCellFAB&            meshData     = (*a_meshData[lvl])[din];
+      const List<P>&        amrParticles = (*particles.getParticles()[lvl])[din].listItems();
+      const EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[din];
+
+      particleMesh.deposit<P, particleScalarField>(amrParticles, meshData, a_depositionType, a_forceIrregNGP);
+    }
+
+    // 2. Exchange ghost data on this level so that all the mass is on this level.
+    a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
+
+    // 3. Deposition into ghost cells across the refinement boundary must end up on the coarse level.
+    if (hasCoar) {
+      m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl - 1], *a_meshData[lvl]);
+    }
+
+    // 4. If there is a finer level, not all of the particles on this level have yet been deposited because some of them were transferred into another
+    //    particle container. We now run the following steps:
+    //
+    //    a) Deposit the particles around the refinement boundary on the refined coarse level, using the fine-grid particle width.
+    //    b) Add mass from the refined coarse level to the fine level -- this puts some mass into the fine side of the refinement boundary
+    //    c) Exchange data on the refined coarse level to update ghost cells, so that all special mass is contained in the refined coarse grid
+    //    d) Coarsen mass from the refined level onto this level.
+    if (hasFine) {
+      // Note: eblgFiCo is for transferring data between lvl and lvl+1. It stores the refinement of grid level 'lvl' in eblgFiCo
+      const EBLevelGrid&       eblgFiCo     = m_coarseFinePM[lvl + 1]->getEblgFiCo();
+      const DisjointBoxLayout& dblFiCo      = eblgFiCo.getDBL();
+      const EBISLayout&        ebislFiCo    = eblgFiCo.getEBISL();
+      const DataIterator&      ditFiCo      = dblFiCo.dataIterator();
+      const int                numBoxesFiCo = ditFiCo.size();
+
+      // Make a buffer we can deposit into. This is a refined version of this level.
+      LevelData<EBCellFAB> bufferFiCo(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
+
+#warning "Must set the mask width here -- it must be based on the deposition type and the refinement factor"
+      const int maskWidth = 1;
+
+      // a) Deposit the particles on the refined coarse level.
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
+
+        EBCellFAB& dataFiCo = bufferFiCo[din];
+
+        dataFiCo.setVal(0.0);
+
+        const BaseFab<bool>&  mask          = (*m_transitionMasks.at(maskWidth)[lvl])[din];
+        const List<P>&        maskParticles = (*particles.getMaskParticles()[lvl])[din].listItems();
+        const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
+
+        if (mask.isUsable()) {
+          particleMesh.deposit<P, particleScalarField>(maskParticles, dataFiCo, a_depositionType, a_forceIrregNGP);
+        }
+      }
+
+      // b) Add the data to the fine level.
+      m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
+
+      // c) Exchange data on this level
+      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
+
+      // d) Coarsen data from the refined grid to this grid.
+      m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl], bufferFiCo);
+    }
+  }
+
+  // Masked particles are but back in their correct mesh.
+  particles.transferParticles(particles.getMaskParticles());
 }
 
 template <class P, Real (P::*particleScalarField)() const>
@@ -678,7 +814,12 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
                                      const DepositionType        a_depositionType,
                                      const bool                  a_forceIrregNGP)
 {
-  MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+  CH_TIME("EBAMRParticleMesh::depositTransition");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositTransition" << endl;
+  }
+
+  MayDay::Warning("EBAMRParticleMesh::depositTransition - not implemented");
 }
 
 template <class P, Real& (P::*particleScalarField)()>
@@ -688,7 +829,10 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
                                const DepositionType  a_interpType,
                                const bool            a_forceIrregNGP) const
 {
-  CH_TIME("EBAMRParticleMesh::interpolate(scalar)");
+  CH_TIME("EBAMRParticleMesh::interpolate");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::interpolate" << endl;
+  }
 
   CH_assert(m_isDefined);
 
@@ -702,9 +846,9 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
 
     CH_assert(a_meshScalarField[lvl]->nComp() == 1);
 
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       List<P>& particles = a_particles[lvl][din].listItems();
@@ -724,7 +868,10 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
                                const DepositionType  a_interpType,
                                const bool            a_forceIrregNGP) const
 {
-  CH_TIME("EBAMRParticleMesh::interpolate(vector)");
+  CH_TIME("EBAMRParticleMesh::interpolate");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::interpolate" << endl;
+  }
 
   CH_assert(m_isDefined);
 
@@ -740,9 +887,9 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
 
     CH_assert(a_meshVectorField[lvl]->nComp() == SpaceDim);
 
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       List<P>& particles = a_particles[lvl][din].listItems();
@@ -763,6 +910,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
                                  const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositInterp");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositInterp" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -776,9 +926,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     const bool               hasCoar = lvl > 0;
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -823,6 +973,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
                                  const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositInterp");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositInterp" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -836,9 +989,9 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     const bool               hasCoar = lvl > 0;
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&            meshData     = (*a_meshData[lvl])[din];
@@ -881,7 +1034,10 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                const DepositionType        a_depositionType,
                                const bool                  a_forceIrregNGP)
 {
-  CH_TIME("EBAMRParticleMesh::depositHalo(RealVect)");
+  CH_TIME("EBAMRParticleMesh::depositHalo");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHalo" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -902,9 +1058,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -940,11 +1096,10 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
-      const int nboxFiCo = ditFiCo.size();
+      const int numBoxesFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
-        const DataIndex& din = ditFiCo[mybox];
-
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
+        const DataIndex&  din           = ditFiCo[mybox];
         EBCellFAB&        dataFiCo      = bufferFiCo[din];
         const ListBox<P>& haloParticles = coarHaloParticles[din];
 
@@ -977,8 +1132,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
         }
       }
 
-      // Add the result of the buffer deposition to this level. The buffer above had SpaceDim
-      // components but coarseFinePM works with only one component, so we just alias the data.
+      // Add the result of the buffer deposition to this level. The buffer above had SpaceDim// components but coarseFinePM works with only one component, so we just alias the data.
       for (int dir = 0; dir < SpaceDim; dir++) {
         LevelData<EBCellFAB> meshDataAlias;
         LevelData<EBCellFAB> bufferFiCoAlias;
@@ -1001,7 +1155,10 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                const DepositionType        a_depositionType,
                                const bool                  a_forceIrregNGP)
 {
-  CH_TIME("EBAMRParticleMesh::depositHalo(RealVect)");
+  CH_TIME("EBAMRParticleMesh::depositHalo");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHalo" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -1022,9 +1179,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData     = (*a_meshData[lvl])[din];
@@ -1060,9 +1217,9 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       // Make a buffer we can deposit into.
       LevelData<EBCellFAB> bufferFiCo(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 
-      const int nboxFiCo = ditFiCo.size();
+      const int numBoxesFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nboxFiCo; mybox++) {
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
         const DataIndex& din = ditFiCo[mybox];
 
         EBCellFAB&        dataFiCo      = bufferFiCo[din];
@@ -1122,6 +1279,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
                                   const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositHaloNGP");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHaloNGP" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -1156,9 +1316,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
@@ -1204,6 +1364,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
                                   const bool                  a_forceIrregNGP)
 {
   CH_TIME("EBAMRParticleMesh::depositHaloNGP");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositHaloNGP" << endl;
+  }
 
   CH_assert(a_meshData[0]->nComp() == SpaceDim);
 
@@ -1238,9 +1401,9 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
-    const int nbox = dit.size();
+    const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex& din = dit[mybox];
 
       EBCellFAB&        meshData       = (*a_meshData[lvl])[din];
@@ -1285,6 +1448,11 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
                                      const DepositionType        a_depositionType,
                                      const bool                  a_forceIrregNGP)
 {
+  CH_TIME("EBAMRParticleMesh::depositTransition");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositTransition" << endl;
+  }
+
   MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
 }
 
@@ -1295,7 +1463,85 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
                                      const DepositionType        a_depositionType,
                                      const bool                  a_forceIrregNGP)
 {
+  CH_TIME("EBAMRParticleMesh::depositTransition");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::depositTransition" << endl;
+  }
+
   MayDay::Abort("EBAMRParticleMesh::depositTransition - not implemented");
+}
+
+template <class P>
+void
+EBAMRParticleMesh::transferMaskParticlesTransition(ParticleContainer<P>& a_particles,
+                                                   const DepositionType  a_depositionType) const
+{
+  CH_TIME("EBAMRParticleMesh::transferMaskParticlesTransition");
+  if (m_verbose) {
+    pout() << "EBAMRParticleMesh::transferMaskParticlesTransition" << endl;
+  }
+
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    const EBLevelGrid& eblg     = *m_eblgs[lvl];
+    const EBLevelGrid& eblgFiCo = m_coarseFinePM[lvl + 1]->getEblgFiCo();
+
+    const DisjointBoxLayout& dbl     = eblg.getDBL();
+    const DisjointBoxLayout& dblFiCo = eblgFiCo.getDBL();
+
+    const DataIterator& dit     = dbl.dataIterator();
+    const DataIterator& ditFiCo = dblFiCo.dataIterator();
+
+    const int numBoxes     = dit.size();
+    const int numBoxesFiCo = ditFiCo.size();
+
+    const Real dx     = m_dx[lvl];
+    const Real dxFine = m_dx[lvl + 1];
+
+    const int refRat = m_refRat[lvl];
+
+    if (a_depositionType != DepositionType::NGP) {
+      int maskWidth = 0;
+
+      if (a_depositionType == DepositionType::CIC) {
+        maskWidth = refRat / 2;
+      }
+      else if (a_depositionType == DepositionType::TSC) {
+        maskWidth = refRat;
+      }
+
+      if (maskWidth > m_ghost) {
+        MayDay::Abort("EBAMRParticleMesh::transferMaskParticlesTransition -- not enough ghost cells!");
+      }
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxes; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
+
+        if (mask.isUsable()) {
+          List<P>& amrParticles  = (*a_particles.getParticles()[lvl])[din].listItems();
+          List<P>& maskParticles = (*a_particles.getMaskParticles()[lvl])[din].listItems();
+
+          const Box cellBox = dblFiCo[din];
+          const Box maskBox = mask.box();
+
+          CH_assert(cellBox == maskBox);
+
+          for (ListIterator<P> lit(amrParticles); lit.ok();) {
+            const IntVect iv = ParticleOps::getParticleCellIndex(lit().position(), m_probLo, dxFine);
+
+            if (mask(iv)) {
+              maskParticles.transfer(lit);
+            }
+            else {
+              ++lit;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

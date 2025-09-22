@@ -13,6 +13,7 @@
 #include <CH_Timer.H>
 #include <EBCellFactory.H>
 #include <EBAverageF_F.H>
+#include <ParmParse.H>
 #include <EBAlias.H>
 
 // Our includes
@@ -30,6 +31,7 @@ EBCoarseFineParticleMesh::EBCoarseFineParticleMesh() noexcept
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
 
   m_isDefined = false;
+  m_verbose = false;
 }
 
 EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
@@ -38,6 +40,9 @@ EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar
                                                    const IntVect      a_ghost) noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::EBCoarseFineParticleMesh" << endl;
+  }
 
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_ghost);
 }
@@ -54,9 +59,15 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
                                  const IntVect      a_ghost) noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::define");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::define" << endl;
+  }  
 
   CH_assert(a_refRat % 2 == 0);
   CH_assert(a_refRat >= 2);
+
+  ParmParse pp("EBCoarseFineParticleMesh");
+  pp.query("verbose", m_verbose);
 
   m_eblgCoar = a_eblgCoar;
   m_eblgFine = a_eblgFine;
@@ -81,6 +92,9 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   // valid -> valid+ghost
   m_copierFiCoToFineNoGhosts.define(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost);
 
+  // valid+ghost -> valid on the m_eblgFICo only.
+  m_copierFiCoToFiCo.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFiCo.getDBL(), m_eblgFine.getDomain(), m_ghost);
+
   // Define VoF iterators
   this->defineVoFIterators();
 
@@ -91,6 +105,9 @@ void
 EBCoarseFineParticleMesh::defineVoFIterators() noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::defineVoFIterators");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::defineVoFIterators" << endl;
+  }    
 
   const DisjointBoxLayout& dblCoar    = m_eblgCoar.getDBL();
   const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();
@@ -160,6 +177,9 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
                                                 const LevelData<EBCellFAB>& a_fineData) const noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::addFineGhostsToCoarse");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::addFineGhostsToCoarse" << endl;
+  }      
 
   CH_assert(m_isDefined);
   CH_assert(a_coarData.nComp() == 1);
@@ -275,11 +295,25 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   bufferCoFi.copyTo(interv, a_coarData, interv, m_copierCoFiToCoarIncludeGhosts, EBAddOp());
 }
 
+const EBLevelGrid&
+EBCoarseFineParticleMesh::getEblgFiCo() const
+{
+  CH_TIME("EBCoarseFineParticleMesh::getEblgFiCo");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::getEblgFiCo" << endl;
+  }        
+
+  return m_eblgFiCo;
+}
+
 void
 EBCoarseFineParticleMesh::addFiCoDataToFine(LevelData<EBCellFAB>&       a_fineData,
                                             const LevelData<EBCellFAB>& a_fiCoData) const noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::addFiCoDataToFine");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::addFiCoDataToFine" << endl;
+  }          
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() == 1);
@@ -297,6 +331,9 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
                                                  const LevelData<EBCellFAB>& a_coarData) const noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::addInvalidCoarseToFine");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::addInvalidCoarseToFine" << endl;
+  }            
 
   CH_assert(m_isDefined);
   CH_assert(a_fineData.nComp() == 1);
@@ -374,12 +411,29 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
   bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineNoGhosts, EBAddOp());
 }
 
-const EBLevelGrid&
-EBCoarseFineParticleMesh::getEblgFiCo() const
-{
-  CH_TIME("EBCoarseFineParticleMesh::getEblgFiCo");
+void
+EBCoarseFineParticleMesh::restrictAndAddFiCoDataToCoar(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fiCoData) const noexcept {
+  CH_TIME("EBCoarseFineParticleMesh::restrictAndAddFiCoDataToCoar");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::restrictAndAddFiCoDataToCoar" << endl;
+  }              
+}
 
-  return m_eblgFiCo;
+void
+EBCoarseFineParticleMesh::exchangeAndAddFiCoData(LevelData<EBCellFAB>& a_fiCoData) const noexcept
+{
+  CH_TIME("EBCoarseFineParticleMesh::addInvalidCoarseToFine");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::addInvalidCoarseToFine" << endl;
+  }                
+
+  CH_assert(m_isDefined);
+  CH_assert(a_fiCoData.ghostVect() == m_ghost);
+  CH_assert(a_fiCoData.nComp() == 1);
+
+  const Interval interv(0, m_nComp - 1);
+
+  a_fiCoData.exchange(interv, m_copierFiCoToFiCo, EBAddOp());
 }
 
 #include <CD_NamespaceFooter.H>

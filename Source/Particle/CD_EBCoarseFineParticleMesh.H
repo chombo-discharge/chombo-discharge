@@ -19,18 +19,20 @@
 #include <ProblemDomain.H>
 
 // Our includes
+#include <CD_EBCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief A class for handling particle deposition clouds that hang over refinement boundaries. This class does not include any deposition functionality but provides
   buffers for moving mass between two levels. 
-  @details To use this class, the user can directly call three functions:
+  @details To use this class, the user can directly some functions:
      1. addFineGhostsToCoarse which adds the contribution of the fine level's particles to the coarse level. This
         will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for
         getting a temporary data holder on which he can use special deposition procedures.
      2. addFiCoDataToFine where the user will have deposited coarse-level particles on a fine-grid buffer, and he/she wants to add the result back to the fine grid.
      3. addInvalidCoarseToFine where the coarse-grid deposition clouds are interpolated to the fine grid. This is the case when e.g. the coarse-grid clouds
         deposit underneath the fine level but the mass should end up on the fine level.
+     4. exchangeAndAddFiCoData where deposited particles on the refined coarse grids have their masses synchronized (ghost cells are added across patches).
 */
 class EBCoarseFineParticleMesh
 {
@@ -85,7 +87,6 @@ public:
     @brief Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.
     @details This routine is used when the user have deposited coarse-level particles into a_fiCoData (which is a refinement of the coarse level). This 
     routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -> valid, which is what we want.
-    However, note that a_fiCo data should only contain the mass from the so-called "halo" particles.
     @param[inout] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
@@ -101,6 +102,18 @@ public:
   */
   virtual void
   addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const noexcept;
+
+  /*!
+    @brief Function which performs an exchange+add operation on the refined coarse data
+  */
+  virtual void
+  exchangeAndAddFiCoData(LevelData<EBCellFAB>& a_fiCoData) const noexcept;
+
+  /*!
+    @brief Conservatively coarsen the data on the refined coarse grid to the coarse grid. The grids must be the same.
+  */
+  virtual void
+  restrictAndAddFiCoDataToCoar(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fiCoData) const noexcept;
 
   /*!
     @brief Get the refined version of the coarse eblevelgrid
@@ -123,6 +136,11 @@ protected:
     @brief Is defined or not
   */
   bool m_isDefined;
+
+  /*!
+    @brief Verbose or not. Useful for debugging
+  */
+  bool m_verbose;
 
   /*!
     @brief Coarse EBLevelGrid
@@ -163,6 +181,12 @@ protected:
   Copier m_copierFiCoToFineNoGhosts;
 
   /*!
+    @brief Copier for that moves data from valid+ghost -> valid on the refined coarse level.
+    @details Needed for some of the deposition methods that deposit on the refined coarse level and then later needs to synchronize their data
+  */
+  Copier m_copierFiCoToFiCo;
+
+  /*!
     @brief VoFIterator for fine-grid irregular ghost cells. 
   */
   mutable LayoutData<VoFIterator> m_vofIterFineGhosts;
@@ -177,6 +201,11 @@ protected:
     @brief VoFIterator for coarse cells, including ghost cells
   */
   mutable LayoutData<VoFIterator> m_vofIterCoar;
+
+  /*!
+    @brief Function for coarsening data from the refined coarse level to the coarse level
+  */
+  mutable EBCoarAve m_ebCoarAveFiCoToCoar;
 
   /*!
     @brief Refinement ratio between the two levels

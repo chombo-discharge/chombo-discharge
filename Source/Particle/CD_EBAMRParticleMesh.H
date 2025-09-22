@@ -585,6 +585,15 @@ protected:
                     const ParticleContainer<P>& a_particles,
                     const DepositionType        a_depositionType,
                     const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Support function for transferring particles that lie in the transition zone around a refinement boundary
+    @param[inout] a_particles Input particles
+    @param[in] a_depositionType Deposition type.
+  */
+  template <class P>
+  void
+  transferMaskParticlesTransition(ParticleContainer<P>& a_particles, const DepositionType a_depositionType) const;
 };
 
 #include <CD_NamespaceFooter.H>

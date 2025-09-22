@@ -20,6 +20,9 @@
 // These should be removed when we merge
 #warning "Must update all solvers that use deposition and set transition to default"
 #warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
+#warning "The deposition routines would probably do well to update using non-nested box loops"
+#warning "The deposition routines should be single-signature only -- with a return function on the component"
+#warning "CIC and refinement factor 4 using the transition method. This should be a mask width of 2!"
 #warning "CheckDocs.py has triggered"
 
 EBAMRParticleMesh::EBAMRParticleMesh()
@@ -366,8 +369,9 @@ EBAMRParticleMesh::defineTransitionMasks()
     pout() << "EBAMRParticleMesh::defineTransitionMasks" << endl;
   }
 
-  constexpr int comp    = 0;
-  constexpr int numComp = 1;
+  constexpr int  comp    = 0;
+  constexpr int  numComp = 1;
+  const Interval interv  = Interval(comp, comp);
 
   m_transitionMasks.clear();
 
@@ -376,24 +380,91 @@ EBAMRParticleMesh::defineTransitionMasks()
     Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> mask(1 + m_finestLevel);
 
     for (int lvl = 0; lvl < m_finestLevel; lvl++) {
-      const DisjointBoxLayout& grids    = m_eblgs[lvl]->getDBL();
-      const ProblemDomain&     domain   = m_eblgs[lvl]->getDomain();
-      const DataIterator&      dit      = grids.dataIterator();
-      const int                numBoxes = dit.size();
+      const EBLevelGrid& eblgCoar = *m_eblgs[lvl];
+      const EBLevelGrid& eblgFine = *m_eblgs[lvl + 1];
+      const EBLevelGrid& eblgFiCo = m_coarseFinePM[lvl + 1]->getEblgFiCo();
 
-      // Allocate data on this level, and reset the mask.
-      mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(grids, numComp, IntVect::Zero));
+      const DisjointBoxLayout& gridsCoar = eblgCoar.getDBL();
+      const DisjointBoxLayout& gridsFine = eblgFine.getDBL();
+      const DisjointBoxLayout& gridsFiCo = eblgFiCo.getDBL();
+
+      const ProblemDomain& domainCoar = eblgCoar.getDomain();
+      const ProblemDomain& domainFine = eblgFine.getDomain();
+
+      const DataIterator& ditCoar = gridsCoar.dataIterator();
+      const DataIterator& ditFine = gridsFine.dataIterator();
+      const DataIterator& ditFiCo = gridsFiCo.dataIterator();
+
+      const int numBoxesCoar = ditCoar.size();
+      const int numBoxesFine = ditFine.size();
+      const int numBoxesFiCo = ditFiCo.size();
+
+      // Allocate data on this level, and set the mask to false everywhere. We should not need ghost cells because
+      // the mask is true only on the valid region.
+      mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
+        new LevelData<BaseFab<bool>>(gridsFiCo, numComp, IntVect::Zero));
 
       LevelData<BaseFab<bool>>& levelMask = *mask[lvl];
+      LevelData<FArrayBox>      cfivsFine(gridsFine, numComp, ighost * IntVect::Unit);
+      LevelData<FArrayBox>      cfivsFiCo(gridsFiCo, numComp, IntVect::Zero);
 
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < numBoxes; mybox++) {
-        const DataIndex& din = dit[mybox];
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
+        const DataIndex& din = ditFiCo[mybox];
 
         levelMask[din].setVal(false);
+        cfivsFiCo[din].setVal(0.0);
       }
 
-#warning "At the end, we should undefined the BaseFab if there are no masked cells in the patch."
+      // Build the CFIVS on the fine level.
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxesFine; mybox++) {
+        const DataIndex& din      = ditFine[mybox];
+        const Box&       cellBox  = gridsFine[din];
+        const Box&       ghostBox = grow(cellBox, ighost) & domainFine;
+
+        cfivsFine[din].setVal(1.0, ghostBox, comp);
+        cfivsFine[din].setVal(0.0, cellBox, comp);
+
+        NeighborIterator nit(gridsFine);
+        for (nit.begin(din); nit.ok(); ++nit) {
+          const Box neighborBox = gridsFine[nit()];
+          const Box mutualBox   = ghostBox & neighborBox;
+
+          cfivsFine[din].setVal(0.0, mutualBox, comp);
+        }
+      }
+
+      // Copy the result over to the refined coarse grids.
+      Copier copier;
+      copier.ghostDefine(gridsFine, gridsFiCo, domainFine, ighost * IntVect::Unit);
+      cfivsFine.copyTo(interv, cfivsFiCo, interv, copier, LDaddOp<FArrayBox>());
+
+      // Iterate through the coarse grid and set the mask.
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
+        const DataIndex& din     = ditFiCo[mybox];
+        const Box&       cellBox = gridsFiCo[din];
+
+        BaseFab<bool>&   boolMask = levelMask[din];
+        const FArrayBox& realMask = cfivsFiCo[din];
+
+        bool emptyMask = true;
+
+        auto kernel = [&](const IntVect& iv) -> void {
+          if (realMask(iv, comp) > 0.5) {
+            boolMask(iv, comp) = true;
+            emptyMask          = false;
+          }
+        };
+
+        BoxLoops::loop(cellBox, kernel);
+
+        // Undefine the BaseFab if the mask is empty. This means we can never do a copy.
+        if (emptyMask) {
+          boolMask.clear();
+        }
+      }
     }
 
     // Explicitly set mask on finest level to be nullptr, as there is no finer level.
@@ -401,8 +472,6 @@ EBAMRParticleMesh::defineTransitionMasks()
 
     m_transitionMasks.emplace(ighost, mask);
   }
-
-  MayDay::Warning("EBAMRParticleMesh::defineTransitionMasks -- not implemented");
 }
 
 #include <CD_NamespaceFooter.H>
