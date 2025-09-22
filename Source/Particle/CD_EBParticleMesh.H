@@ -390,7 +390,7 @@ protected:
     @param[in]    a_position       Particle position
     @param[in]    a_volumeFactor   Volume factor to multiply by
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
-    @param[in]    a_numComp     Number of components to deposit
+    @param[in]    a_numComp        Number of components to deposit
   */
   inline void
   depositParticleNGP(EBCellFAB&      a_rho,
@@ -400,9 +400,14 @@ protected:
                      const int&      a_numComp) const noexcept;
 
   /*!
-    @brief Wrapper function for depositing a single particle with a standard CIC scheme. 
+    @brief Function for depositing a single particle with a CIC scheme.
+    @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
+    box a_particleBox must be large enough to contain the particle. E.g., if a_particleWidth = 1, then the box must be at least
+    Box(-IntVect::Unit, IntVect::Unit).
     @param[inout] a_rho            Mesh data
     @param[in]    a_position       Particle position
+    @param[in]    a_particleWidth  Particle width (relative to grid resolution)
+    @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
     @param[in]    a_volumeFactor   Volume factor to multiply by
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_numCOmp        Number of components to deposit
@@ -411,6 +416,32 @@ protected:
   inline void
   depositParticleCIC(EBCellFAB&      a_rho,
                      const RealVect& a_position,
+                     const RealVect& a_particleWidth,
+                     const Box&      a_particleBox,
+                     const Real&     a_volumeFactor,
+                     const Real*     a_strength,
+                     const int&      a_numComp,
+                     const bool      a_forceIrregNGP) const noexcept;
+
+  /*!
+    @brief Function for depositing a single particle with a TSC scheme.
+    @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
+    box (a_cicBox) must be large enough to contain a particle. E.g., if a_particleWidth = 2, then the box must be at least
+    Box(-2*IntVect::Unit, 2*IntVect::Unit).
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_position       Particle position
+    @param[in]    a_particleWidth  Particle width (relative to grid resolution)
+    @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
+    @param[in]    a_volumeFactor   Volume factor to multiply by
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_numCOmp        Number of components to deposit
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells or not
+  */
+  inline void
+  depositParticleTSC(EBCellFAB&      a_rho,
+                     const RealVect& a_position,
+                     const RealVect& a_particleWidth,
+                     const Box&      a_particleBox,
                      const Real&     a_volumeFactor,
                      const Real*     a_strength,
                      const int&      a_numComp,

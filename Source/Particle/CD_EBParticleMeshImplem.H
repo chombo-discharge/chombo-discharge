@@ -48,6 +48,12 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     invVol /= m_dx[dir];
   }
 
+  const RealVect cicWidth = 1 * RealVect::Unit;
+  const RealVect tscWidth = 2 * RealVect::Unit;
+
+  const Box cicBox(-1 * IntVect::Unit, 1 * IntVect::Unit);
+  const Box tscBox(-2 * IntVect::Unit, 2 * IntVect::Unit);
+
   // Switch between deposition types.
   switch (a_depositionType) {
   case DepositionType::NGP: {
@@ -63,7 +69,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
       const Ret w = (lit().*MemberFunc)();
 
-      this->depositParticleCIC(a_meshData, lit().position(), invVol, &w, numComp, a_forceIrregNGP);
+      this->depositParticleCIC(a_meshData, lit().position(), cicWidth, cicBox, invVol, &w, numComp, a_forceIrregNGP);
     }
 
     break;
@@ -72,7 +78,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     for (ListIterator<P> lit(a_particles); lit.ok(); ++lit) {
       const Ret w = (lit().*MemberFunc)();
 
-      //      this->depositParticleTSC(a_meshData, lit().position(), invVol, &w, numComp);
+      this->depositParticleTSC(a_meshData, lit().position(), tscWidth, tscBox, invVol, &w, numComp, a_forceIrregNGP);
     }
 
     break;
@@ -502,7 +508,7 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 inline void
 EBParticleMesh::depositParticleNGP(EBCellFAB&      a_rho,
                                    const RealVect& a_position,
-                                   const Real&     a_invVol,
+                                   const Real&     a_volumeFactor,
                                    const Real*     a_strength,
                                    const int&      a_numComp) const noexcept
 {
@@ -515,14 +521,16 @@ EBParticleMesh::depositParticleNGP(EBCellFAB&      a_rho,
   FArrayBox& rho = a_rho.getFArrayBox();
 
   for (int comp = 0; comp < a_numComp; comp++) {
-    rho(particleIV, comp) += a_strength[comp] * a_invVol;
+    rho(particleIV, comp) += a_strength[comp] * a_volumeFactor;
   }
 }
 
 inline void
 EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
                                    const RealVect& a_position,
-                                   const Real&     a_invVol,
+                                   const RealVect& a_particleWidth,
+                                   const Box&      a_particleBox,
+                                   const Real&     a_volumeFactor,
                                    const Real*     a_strength,
                                    const int&      a_numComp,
                                    const bool      a_forceIrregNGP) const noexcept
@@ -537,18 +545,19 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
 
   if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
     for (int comp = 0; comp < a_numComp; comp++) {
-      rho(particleIV, comp) += a_strength[comp] * a_invVol;
+      rho(particleIV, comp) += a_strength[comp] * a_volumeFactor;
     }
   }
   else {
     auto cicKernel = [&](const IntVect& iv) -> void {
-      Real weight = a_invVol;
+      Real weight = a_volumeFactor;
 
       // Below, we've transformed coordinates to [-0.5,0.5] around with the cell center at the origin.
       for (int dir = 0; dir < SpaceDim; dir++) {
         const Real& x = (a_position[dir] - m_probLo[dir]) / m_dx[dir] - iv[dir] - 0.5;
+        const Real& d = a_particleWidth[dir];
 
-        weight *= std::max(0.0, std::min(0.5, x + 0.5) - std::max(-0.5, x - 0.5));
+        weight *= std::max(0.0, std::min(0.5, x + 0.5 * d) - std::max(-0.5, x - 0.5 * d));
       }
 
       for (int comp = 0; comp < a_numComp; comp++) {
@@ -556,9 +565,64 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
       }
     };
 
-    const Box cicBox = Box(particleIV - IntVect::Unit, particleIV + IntVect::Unit);
+    const Box particleBox = a_particleBox + particleIV;
 
-    BoxLoops::loop(cicBox, cicKernel);
+    BoxLoops::loop(particleBox, cicKernel);
+  }
+}
+
+inline void
+EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
+                                   const RealVect& a_position,
+                                   const RealVect& a_particleWidth,
+                                   const Box&      a_particleBox,
+                                   const Real&     a_volumeFactor,
+                                   const Real*     a_strength,
+                                   const int&      a_numComp,
+                                   const bool      a_forceIrregNGP) const noexcept
+{
+  CH_TIME("EBParticleMesh::depositParticleTSC");
+
+  const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
+
+  CH_assert(m_region.contains(iv));
+
+  FArrayBox& rho = a_rho.getFArrayBox();
+
+  if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
+    for (int comp = 0; comp < a_numComp; comp++) {
+      rho(particleIV, comp) += a_strength[comp] * a_volumeFactor;
+    }
+  }
+  else {
+    auto tscKernel = [&](const IntVect& iv) -> void {
+      //      Real weight = a_volumeFactor / (0.5 * std::pow(a_particleWidth[0], SpaceDim));
+
+      // Below, we've transformed coordinates so that the particle is at the origin.
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Real lo = m_probLo[dir] + (iv[dir] - 0.5) * m_dx[dir] - a_position[dir];
+        const Real hi = m_probLo[dir] + (iv[dir] + 0.5) * m_dx[dir] - a_position[dir];
+        const Real d  = 0.5 * a_particleWidth[dir];
+
+        const Real alpha = std::max(lo, -d);
+        const Real beta  = std::min(hi, +d);
+
+        if (alpha >= beta) {
+          weight *= 0.0;
+        }
+        else {
+          weight *= (beta - alpha - (beta * std::abs(beta) - alpha * std::abs(alpha)) / (2 * d));
+        }
+      }
+
+      for (int comp = 0; comp < a_numComp; comp++) {
+        rho(iv, comp) += weight * a_strength[comp];
+      }
+    };
+
+    const Box particleBox = a_particleBox + particleIV;
+
+    BoxLoops::loop(particleBox, tscKernel);
   }
 }
 
