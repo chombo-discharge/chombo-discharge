@@ -78,7 +78,7 @@ EBAMRParticleMesh::depositInterp(EBAMRCellData&              a_meshData,
     pout() << "EBAMRParticleMesh::depositInterp" << endl;
   }
 
-  constexpr int numComp = EBAMRParticleMesh::sanitize<Ret>();
+  constexpr int numComp = EBParticleMesh::sanitize<Ret>();
 
   CH_assert(a_meshData[0]->nComp() == numComp);
 
@@ -142,7 +142,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
     pout() << "EBAMRParticleMesh::depositHalo" << endl;
   }
 
-  constexpr int numComp = EBAMRParticleMesh::sanitize<Ret>();
+  constexpr int numComp = EBParticleMesh::sanitize<Ret>();
 
   CH_assert(a_meshData[0]->nComp() == numComp);
 
@@ -242,7 +242,7 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
     pout() << "EBAMRParticleMesh::depositHaloNGP" << endl;
   }
 
-  constexpr int numComp = EBAMRParticleMesh::sanitize<Ret>();
+  constexpr int numComp = EBParticleMesh::sanitize<Ret>();
 
   CH_assert(a_meshData[0]->nComp() == numComp);
 
@@ -321,7 +321,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
     pout() << "EBAMRParticleMesh::depositTransition" << endl;
   }
 
-  constexpr int numComp = EBAMRParticleMesh::sanitize<Ret>();
+  constexpr int numComp = EBParticleMesh::sanitize<Ret>();
 
   CH_assert(a_meshData[0]->nComp() == numComp);
 

@@ -459,23 +459,6 @@ protected:
   template <class P>
   void
   transferMaskParticlesTransition(ParticleContainer<P>& a_particles, const DepositionType a_depositionType) const;
-
-  /*!
-    @brief Sanitize the return function type, ensuring it is either Real or RealVect.
-    @return Returns the number of components corresponding to Ret
-  */
-  template <typename Ret>
-  static inline constexpr int
-  sanitize() noexcept
-  {
-    using NoRef = typename std::remove_reference<Ret>::type;
-    using Base  = typename std::remove_cv<NoRef>::type;
-
-    static_assert(std::is_same<Base, Real>::value || std::is_same<Base, RealVect>::value,
-                  "Ret should be Real or RealVect");
-
-    return std::is_same<Base, Real>::value ? 1 : SpaceDim;
-  }
 };
 
 #include <CD_NamespaceFooter.H>

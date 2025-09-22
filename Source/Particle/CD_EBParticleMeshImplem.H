@@ -37,18 +37,14 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
     pout() << "EBParticleMesh::deposit" << endl;
   }
 
-  using NoRef = typename std::remove_reference<Ret>::type;
-  using Base  = typename std::remove_cv<NoRef>::type;
-
-  static_assert(std::is_same<Base, Real>::value || std::is_same<Base, RealVect>::value, "Ret must be Real or RealVect");
-
-  constexpr int numComp = std::is_same<Base, Real>::value ? 1 : SpaceDim;
+  constexpr int numComp = EBParticleMesh::sanitize<Ret>();
 
   Real invVol = 1.0;
   for (int dir = 0; dir < SpaceDim; dir++) {
     invVol /= m_dx[dir];
   }
 
+  // These are the default _total_ particle widths.
   const RealVect cicWidth = 1 * a_widthScale * RealVect::Unit;
   const RealVect tscWidth = 2 * a_widthScale * RealVect::Unit;
 
@@ -62,7 +58,7 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
   // Various scaling factors since particle deposition functions require different normalizations.
   for (int dir = 0; dir < SpaceDim; dir++) {
     cicFactor *= 1.0 / cicWidth[dir];
-    tscFactor *= 1.0 / (tscWidth[dir] / 2);
+    tscFactor *= 2.0 / tscWidth[dir];
   }
 
   // Switch between deposition types.
@@ -273,9 +269,9 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
       for (int dir = 0; dir < SpaceDim; dir++) {
         const Real a = (m_probLo[dir] - a_position[dir]) / m_dx[dir] + iv[dir];
         const Real b = a + 1.0;
-        const Real L = a_particleWidth[dir];
+        const Real L = 0.5 * a_particleWidth[dir];
 
-        weight *= std::max(0.0, std::min(b, 0.5 * L) - std::max(a, -0.5 * L));
+        weight *= std::max(0.0, std::min(b, L) - std::max(a, -L));
       }
 
       for (int comp = 0; comp < a_numComp; comp++) {
@@ -308,7 +304,9 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
   FArrayBox& rho = a_rho.getFArrayBox();
 
   auto F = [](const Real x) -> Real {
-    return (x <= 0.0) ? 2 * x * (1 + x) : 2 * x * (1 - x);
+    const Real a = (x <= 0.0) ? 2 * x * (1 + x) : 2 * x * (1 - x);
+
+    return (std::abs(x) <= 0.5) ? a : 0.0;
   };
 
   if (m_ebisbox.isIrregular(particleIV) && a_forceIrregNGP) {
@@ -325,7 +323,11 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
         const Real b = a + 1.0;
         const Real L = a_particleWidth[dir];
 
-        weight *= F(std::min(b, 0.5 * L) / L) - F(std::max(a, -0.5 * L) / L);
+        const Real alpha  = std::max(a, -0.5 * L);
+        const Real beta   = std::min(b, +0.5 * L);
+        const Real factor = (alpha < beta) ? 1.0 : 0.0;
+
+        weight *= factor * (beta - alpha) - (beta * std::abs(beta) - alpha * std::abs(alpha)) / L;
       }
 
       for (int comp = 0; comp < a_numComp; comp++) {
