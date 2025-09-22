@@ -23,6 +23,8 @@
 #warning "The deposition routines would probably do well to update using non-nested box loops"
 #warning "The deposition routines should be single-signature only -- with a return function on the component"
 #warning "CIC and refinement factor 4 using the transition method. This should be a mask width of 2!"
+#warning "EBAMRSurfaceDeposition should also be updated with the new signatures"
+#warning "McPhoto, ItoSolver, and CdrSolver should not be allowed to use EBParticleMesh directly"
 #warning "CheckDocs.py has triggered"
 
 EBAMRParticleMesh::EBAMRParticleMesh()

@@ -22,8 +22,6 @@
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "This class should also be updated with the new signatures"
-
 /*!
   @brief class for handling surface deposition of particles with EB and AMR.
 */
