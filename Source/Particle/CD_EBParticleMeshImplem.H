@@ -31,6 +31,9 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
                         const bool           a_forceIrregNGP) const
 {
   CH_TIME("EBParticleMesh::deposit");
+  if(m_verbose) {
+    pout() << "EBParticleMesh::deposit" << endl;
+  }
 
   using NoRef = typename std::remove_reference<Ret>::type;
   using Base  = typename std::remove_cv<NoRef>::type;
@@ -81,8 +84,6 @@ EBParticleMesh::deposit2(const List<P>&       a_particleList,
                          const DepositionType a_depositionType,
                          const bool           a_forceIrregNGP) const
 {
-  CH_TIME("EBParticleMesh::deposit2");
-
   const Interval variables(0, 0);
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {

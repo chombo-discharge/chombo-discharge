@@ -354,6 +354,38 @@ public:
               const bool           a_forceIrregNGP = false) const;
 
 protected:
+
+
+  /*!
+    @brief Problem domain
+  */
+  ProblemDomain m_domain;
+
+  /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
+
+  /*!
+    @brief Cell-centered box, i.e. valid region. 
+  */
+  Box m_region;
+
+  /*!
+    @brief EBIS box
+  */
+  EBISBox m_ebisbox;
+
+  /*!
+    @brief Grid resolution
+  */
+  RealVect m_dx;
+
+  /*!
+    @brief Lower-left corner of computational domain.
+  */
+  RealVect m_probLo;
+
   /*!
     @brief Wrapper function for depositing a single particle.
     @param[inout] a_rho            Mesh data
@@ -440,32 +472,7 @@ protected:
                       const RealVect&      a_position,
                       const Interval&      a_interval,
                       const DepositionType a_interpType,
-                      const bool           a_forceIrregNGP) const;
-
-  /*!
-    @brief Problem domain
-  */
-  ProblemDomain m_domain;
-
-  /*!
-    @brief Cell-centered box, i.e. valid region. 
-  */
-  Box m_region;
-
-  /*!
-    @brief EBIS box
-  */
-  EBISBox m_ebisbox;
-
-  /*!
-    @brief Grid resolution
-  */
-  RealVect m_dx;
-
-  /*!
-    @brief Lower-left corner of computational domain.
-  */
-  RealVect m_probLo;
+                      const bool           a_forceIrregNGP) const;  
 };
 
 #include <CD_NamespaceFooter.H>
