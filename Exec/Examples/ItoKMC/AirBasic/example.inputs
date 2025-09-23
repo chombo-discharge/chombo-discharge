@@ -38,7 +38,7 @@ Driver.verbosity                    = 2                   ## Engine verbosity
 Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
-Driver.output_dt                    = -0.1E-9              ## Output interval (values <= 0 enforces step-based output)
+Driver.output_dt                    = -0.1E-9             ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 50                  ## Checkpoint interval
 Driver.regrid_interval              = 3                   ## Regrid interval
@@ -91,13 +91,13 @@ FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of i
 FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
 FieldSolverMultigrid.gmg_min_cells         = 8            ## Bottom drop
-FieldSolverMultigrid.gmg_drop_order        = 0          ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order          = 2            ## Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order        = 2            ## Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight       = 1            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_reduce_order      = false        ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverMultigrid.gmg_bottom_solver     = simple 32     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverMultigrid.gmg_bottom_solver     = simple 32    ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
@@ -275,7 +275,7 @@ ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of compu
 ItoKMCJSON.max_new_photons       = 32                 ## Maximum number of computational photons to produce in reaction step
 ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
 ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps              = 0.5              ## Maximum relative change in propensity function
+ItoKMCJSON.prop_eps              = 0.5                ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSA_lim               = 5.0                ## When to enter SSA instead of tau-leaping
 ItoKMCJSON.max_iter              = 50                 ## Maximum number of iterations for implicit algorithms
