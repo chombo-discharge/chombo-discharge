@@ -214,8 +214,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                            a_forceIrregNGP);
       }
 
-      // Add the result of the buffer deposition to this level. The buffer above could have more than one component, while coarseFinePM works with only one component. The
-      // solution is just to alias the damn thing.
+      // Add the result of the buffer deposition to this level. The buffer above could have more than one
+      // component, while coarseFinePM works with only one component. 
       for (int comp = 0; comp < numComp; comp++) {
         LevelData<EBCellFAB> meshDataAlias;
         LevelData<EBCellFAB> bufferFiCoAlias;
@@ -473,6 +473,7 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     }
   }
 }
+
 
 template <class P>
 void

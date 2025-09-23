@@ -21,7 +21,6 @@
 #warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
 #warning "EBAMRSurfaceDeposition should also be updated with the new signatures"
 #warning "Should double-check that something like a velocity/current can be properly deposited"
-#warning "There is probably a bug in the transition deposition near the CF -- need to double check!"
 #warning "CheckDocs.py has triggered"
 
 EBAMRParticleMesh::EBAMRParticleMesh()

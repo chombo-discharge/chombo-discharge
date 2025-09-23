@@ -135,6 +135,13 @@ public:
   const EBLevelGrid&
   getEblgFiCo() const;
 
+  /*!
+    @brief Get buffer storage on the refined coarse level
+  */
+  template <int NCOMP>
+  LevelData<EBCellFAB>&
+  getBufferFiCo() const noexcept;
+
 protected:
   /*!
     @brief Default component
@@ -201,6 +208,16 @@ protected:
   Copier m_copierFiCoToFiCo;
 
   /*!
+    @brief Buffer storage on the refined coarse level. One component only.
+  */
+  mutable LevelData<EBCellFAB> m_bufferFiCoReal;
+
+  /*!
+    @brief Buffer storage on the refined coarse level. One component only.
+  */
+  mutable LevelData<EBCellFAB> m_bufferFiCoRealVect;
+
+  /*!
     @brief VoFIterator for fine-grid irregular ghost cells. 
   */
   mutable LayoutData<VoFIterator> m_vofIterFineGhosts;
@@ -249,6 +266,12 @@ protected:
   */
   void
   defineStencils() noexcept;
+
+  /*!
+    @brief Define the buffer storages.
+  */
+  void
+  defineBufferFiCo() noexcept;
 
   /*!
     @brief Conservatively average and add data from the refined coarse data to the coarse data

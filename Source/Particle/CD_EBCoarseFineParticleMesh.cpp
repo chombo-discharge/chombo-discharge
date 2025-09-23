@@ -99,6 +99,7 @@ EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   // Define VoF iterators and stencils.
   this->defineVoFIterators();
   this->defineStencils();
+  this->defineBufferFiCo();
 
   m_isDefined = true;
 }
@@ -177,7 +178,10 @@ EBCoarseFineParticleMesh::defineVoFIterators() noexcept
 void
 EBCoarseFineParticleMesh::defineStencils() noexcept
 {
-  CH_TIME("EBCoarAve::defnieStencils");
+  CH_TIME("EBCoarseFineParticleMesh::defineStencils");
+  if(m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::defineStencils" << endl;
+  }
 
   const DisjointBoxLayout& dblCoar = m_eblgCoar.getDBL();
   const DisjointBoxLayout& dblFiCo = m_eblgFiCo.getDBL();
@@ -241,6 +245,21 @@ EBCoarseFineParticleMesh::defineStencils() noexcept
 
     BoxLoops::loop(m_vofIterCoar[din], buildStencils);
   }
+}
+
+void
+EBCoarseFineParticleMesh::defineBufferFiCo() noexcept
+{
+  CH_TIME("EBCoarseFineParticleMesh::defineBufferFiCo");
+  if (m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::defineBufferFiCo" << endl;
+  }
+
+  const DisjointBoxLayout& dblFiCo   = m_eblgFiCo.getDBL();
+  const EBISLayout&        ebislFiCo = m_eblgFiCo.getEBISL();
+
+  m_bufferFiCoReal.define(dblFiCo, 1, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
+  m_bufferFiCoRealVect.define(dblFiCo, SpaceDim, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
 }
 
 void
@@ -375,6 +394,30 @@ EBCoarseFineParticleMesh::getEblgFiCo() const
   }
 
   return m_eblgFiCo;
+}
+
+template <>
+LevelData<EBCellFAB>&
+EBCoarseFineParticleMesh::getBufferFiCo<1>() const noexcept
+{
+  CH_TIME("EBCoarseFineParticleMesh::getBufferFiCo<1>");
+  if (m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::getBufferFiCo<1>" << endl;
+  }
+
+  return m_bufferFiCoReal;
+}
+
+template <>
+LevelData<EBCellFAB>&
+EBCoarseFineParticleMesh::getBufferFiCo<SpaceDim>() const noexcept
+{
+  CH_TIME("EBCoarseFineParticleMesh::getBufferFiCo<SpaceDim>");
+  if (m_verbose) {
+    pout() << "EBCoarseFineParticleMesh::getBufferFiCo<SpaceDim>" << endl;
+  }
+
+  return m_bufferFiCoRealVect;
 }
 
 void
