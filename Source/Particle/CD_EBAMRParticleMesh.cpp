@@ -18,15 +18,12 @@
 #include <CD_NamespaceHeader.H>
 
 // These should be removed when we merge
-#warning "Must update all solvers that use deposition and set transition to default"
 #warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
-#warning "The deposition routines would probably do well to update using non-nested box loops"
-#warning "The deposition routines should be single-signature only -- with a return function on the component"
-#warning "CIC and refinement factor 4 using the transition method. This should be a mask width of 2!"
 #warning "EBAMRSurfaceDeposition should also be updated with the new signatures"
-#warning "McPhoto, ItoSolver, and CdrSolver should not be allowed to use EBParticleMesh directly"
 #warning "Should double-check that something like a velocity/current can be properly deposited"
+#warning "There is probably a bug in the transition deposition near the CF -- need to double check!"
 #warning "CheckDocs.py has triggered"
+#warning "Interpolation is not yet single-signature"
 
 EBAMRParticleMesh::EBAMRParticleMesh()
 {

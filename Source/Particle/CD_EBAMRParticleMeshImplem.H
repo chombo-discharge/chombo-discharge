@@ -214,7 +214,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
                                            a_forceIrregNGP);
       }
 
-      // Add the result of the buffer deposition to this level. The buffer above had SpaceDim// components but coarseFinePM works with only one component, so we just alias the data.
+      // Add the result of the buffer deposition to this level. The buffer above could have more than one component, while coarseFinePM works with only one component. The
+      // solution is just to alias the damn thing.
       for (int comp = 0; comp < numComp; comp++) {
         LevelData<EBCellFAB> meshDataAlias;
         LevelData<EBCellFAB> bufferFiCoAlias;
@@ -422,12 +423,12 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
 
       // c) Exchange data on this level
-      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
+      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);      
 
       // d) Coarsen data from the refined grid to this grid.
       m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
                                                             bufferFiCo,
-                                                            EBCoarseFineParticleMesh::Average::Arithmetic);
+                                                            EBCoarseFineParticleMesh::Average::Conservative);
     }
   }
 
@@ -532,6 +533,9 @@ EBAMRParticleMesh::transferMaskParticlesTransition(ParticleContainer<P>& a_parti
     const DisjointBoxLayout& dbl     = eblg.getDBL();
     const DisjointBoxLayout& dblFiCo = eblgFiCo.getDBL();
 
+    const EBISLayout& ebisl = eblg.getEBISL();
+    const EBISLayout& ebislFiCo = eblgFiCo.getEBISL();    
+
     const DataIterator& dit     = dbl.dataIterator();
     const DataIterator& ditFiCo = dblFiCo.dataIterator();
 
@@ -547,7 +551,8 @@ EBAMRParticleMesh::transferMaskParticlesTransition(ParticleContainer<P>& a_parti
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < numBoxes; mybox++) {
         const DataIndex& din = dit[mybox];
-
+        const EBISBox& ebisbox = ebislFiCo[din];
+        
         const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
 
         if (mask.isUsable()) {
