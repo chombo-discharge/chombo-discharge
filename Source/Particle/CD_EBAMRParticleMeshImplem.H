@@ -215,7 +215,7 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       }
 
       // Add the result of the buffer deposition to this level. The buffer above could have more than one
-      // component, while coarseFinePM works with only one component. 
+      // component, while coarseFinePM works with only one component.
       for (int comp = 0; comp < numComp; comp++) {
         LevelData<EBCellFAB> meshDataAlias;
         LevelData<EBCellFAB> bufferFiCoAlias;
@@ -397,7 +397,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       const int                numBoxesFiCo = ditFiCo.size();
 
       // Make a buffer we can deposit into. This is a refined version of this level.
-      LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl]->getBufferFiCo<numComp>();      
+      LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl + 1]->getBufferFiCo<numComp>();
 
       const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
 
@@ -473,7 +473,6 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     }
   }
 }
-
 
 template <class P>
 void
