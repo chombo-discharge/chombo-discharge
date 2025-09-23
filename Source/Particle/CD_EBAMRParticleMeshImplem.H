@@ -193,8 +193,8 @@ EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
       const DataIterator&      ditFiCo   = dblFiCo.dataIterator();
 
-      // Make a buffer we can deposit into.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, numComp, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
+      // Get a buffer we can deposit into
+      LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl]->getBufferFiCo<numComp>();
 
       const int numBoxesFiCo = ditFiCo.size();
 #pragma omp parallel for schedule(runtime)
@@ -397,7 +397,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       const int                numBoxesFiCo = ditFiCo.size();
 
       // Make a buffer we can deposit into. This is a refined version of this level.
-      LevelData<EBCellFAB> bufferFiCo(dblFiCo, numComp, m_ghost * IntVect::Unit, EBCellFactory(ebislFiCo));
+      LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl]->getBufferFiCo<numComp>();      
 
       const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
 

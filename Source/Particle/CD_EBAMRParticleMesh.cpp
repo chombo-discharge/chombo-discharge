@@ -18,7 +18,6 @@
 #include <CD_NamespaceHeader.H>
 
 // These should be removed when we merge
-#warning "EBParticleMesh infrastructure uses temporary buffers, but this should be prealloacted memory."
 #warning "EBAMRSurfaceDeposition should also be updated with the new signatures"
 #warning "Should double-check that something like a velocity/current can be properly deposited"
 #warning "CheckDocs.py has triggered"
