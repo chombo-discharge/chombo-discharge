@@ -219,7 +219,7 @@ EBParticleMesh::depositParticleNGP(EBCellFAB&      a_rho,
 
   const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
 
-  CH_assert(m_region.contains(iv));
+  CH_assert(m_region.contains(particleIV));
 
   FArrayBox& rho = a_rho.getFArrayBox();
 
@@ -242,7 +242,7 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
 
   const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
 
-  CH_assert(m_region.contains(iv));
+  CH_assert(m_region.contains(particleIV));
 
   FArrayBox& rho = a_rho.getFArrayBox();
 
@@ -289,7 +289,7 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
 
   const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
 
-  CH_assert(m_region.contains(iv));
+  CH_assert(m_region.contains(particleIV));
 
   FArrayBox& rho = a_rho.getFArrayBox();
 

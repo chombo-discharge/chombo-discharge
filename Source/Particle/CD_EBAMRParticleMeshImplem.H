@@ -457,8 +457,6 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     const EBISLayout&        ebisl = eblg.getEBISL();
     const DataIterator&      dit   = dbl.dataIterator();
 
-    CH_assert(a_meshScalarField[lvl]->nComp() == 1);
-
     const int numBoxes = dit.size();
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < numBoxes; mybox++) {
