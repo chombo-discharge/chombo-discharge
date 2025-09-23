@@ -603,7 +603,7 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
     const Real meanNumParticles   = a_volume * a_density;
     const Real remainingParticles = meanNumParticles - std::floor(meanNumParticles);
 
-    long long numParticles = std::floor(meanNumParticles);
+    long long numParticles = llround(std::floor(meanNumParticles));
     if (Random::getUniformReal01() < remainingParticles) {
       numParticles += 1LL;
     }

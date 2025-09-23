@@ -67,7 +67,7 @@
 	    "solver" : "ito",   // Solver type. Either 'ito' or 'cdr'
 	    "mobile" : true,    // Mobile or not
 	    "diffusive" : true, // Diffusive or not
-            "initial density": 1E17,
+            "initial density": 1E14,
 	    "mobility" : {
 		// Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
 		// tabulated vs E/N
