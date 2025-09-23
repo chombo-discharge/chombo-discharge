@@ -90,24 +90,6 @@ public:
   void
   deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
 
-  /*!
-    @brief Deposit function. Deposits particle on surface.
-    @details P is the particle type
-    @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
-  */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
-
-  /*!
-    @brief Deposit function. Deposits particle on surface.
-    @details P is the particle type
-    @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
-  */
-  template <class P, Real (P::*particleScalarField)()>
-  void
-  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
-
 protected:
   /*!
     @brief Debug or not

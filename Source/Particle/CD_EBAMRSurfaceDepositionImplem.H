@@ -106,22 +106,6 @@ EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer
   }
 }
 
-template <class P, const Real& (P::*particleScalarField)() const>
-void
-EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept
-{
-#warning "Marked for removal"
-  EBAMRSurfaceDeposition::deposit<P, const Real&, particleScalarField>(a_meshData, a_particles);
-}
-
-template <class P, Real (P::*particleScalarField)()>
-void
-EBAMRSurfaceDeposition::deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept
-{
-#warning "Marked for removal"
-  EBAMRSurfaceDeposition::deposit<P, const Real&, particleScalarField>(a_meshData, a_particles);
-}
-
 #include <CD_NamespaceFooter.H>
 
 #endif

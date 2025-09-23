@@ -941,7 +941,7 @@ public:
   /*!
     @brief Deposit scalar particle quantities on the mesh.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
-    RealVect. MemFunc is a pointer to a member function of P. E.g., deposit<P, const RealVect&, &P::position>.    
+    RealVect. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const RealVect&, &P::position>.    
     @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
     @param[in]  a_realm                Realm where data is registered.
     @param[in]  a_phase                Phase where data is registered.
@@ -961,35 +961,15 @@ public:
                    const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Deposit scalar particle quantities on the mesh. 
-    @details Usage has signature depositParticles<P, &P::mass> (...)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-
+    @brief Deposit scalar particle quantities on the mesh.
+    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
+    const Real&. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const Real&, &P::weight>.        
     @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
     @param[in]  a_realm      Realm where data is registered.
     @param[in]  a_phase      Phase where data is registered.
     @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  depositParticles(EBAMRIVData&                a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles) const noexcept;
-
-  /*!
-    @brief Deposit scalar particle quantities on the mesh. 
-    @details Usage has signature depositParticles<P, &P::mass> (...)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-
-    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
-    @param[in]  a_realm      Realm where data is registered.
-    @param[in]  a_phase      Phase where data is registered.
-    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
-  */
-  template <class P, Real (P::*particleScalarField)() const>
+  template <class P, typename Ret, Ret (P::*MemberFunc)() const>
   void
   depositParticles(EBAMRIVData&                a_meshData,
                    const std::string&          a_realm,

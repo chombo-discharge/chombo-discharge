@@ -17,11 +17,6 @@
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
-// These should be removed when we merge
-#warning "EBAMRSurfaceDeposition should also be updated with the new signatures"
-#warning "Should double-check that something like a velocity/current can be properly deposited"
-#warning "CheckDocs.py has triggered"
-
 EBAMRParticleMesh::EBAMRParticleMesh()
 {
   CH_TIME("EBAMRParticleMesh::EBAMRParticleMesh()");

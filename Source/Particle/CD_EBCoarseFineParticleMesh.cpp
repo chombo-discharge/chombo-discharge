@@ -179,7 +179,7 @@ void
 EBCoarseFineParticleMesh::defineStencils() noexcept
 {
   CH_TIME("EBCoarseFineParticleMesh::defineStencils");
-  if(m_verbose) {
+  if (m_verbose) {
     pout() << "EBCoarseFineParticleMesh::defineStencils" << endl;
   }
 

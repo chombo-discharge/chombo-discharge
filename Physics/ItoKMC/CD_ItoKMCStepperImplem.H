@@ -5144,19 +5144,19 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
     if (Z != 0) {
 
       // Add charge from primary particles
-      m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
-                                                                 m_particleRealm,
-                                                                 m_plasmaPhase,
-                                                                 *a_primaryParticles[idx]);
+      m_amr->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(m_particleScratchEB,
+                                                                              m_particleRealm,
+                                                                              m_plasmaPhase,
+                                                                              *a_primaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0 * Z * Units::Qe);
 
       // Subtract charge from secondary particles
-      m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
-                                                                 m_particleRealm,
-                                                                 m_plasmaPhase,
-                                                                 *a_secondaryParticles[idx]);
+      m_amr->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(m_particleScratchEB,
+                                                                              m_particleRealm,
+                                                                              m_plasmaPhase,
+                                                                              *a_secondaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0 * Z * Units::Qe);
