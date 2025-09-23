@@ -23,7 +23,6 @@
 #warning "Should double-check that something like a velocity/current can be properly deposited"
 #warning "There is probably a bug in the transition deposition near the CF -- need to double check!"
 #warning "CheckDocs.py has triggered"
-#warning "Interpolation kernels must be split into separate functions and also used components not intervals"
 
 EBAMRParticleMesh::EBAMRParticleMesh()
 {

@@ -396,7 +396,12 @@ TracerParticleSolver<P>::interpolateVelocities()
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
-  m_amr->interpolateParticles<P, RealVect&, &P::velocity>(m_particles, m_realm, m_phase, m_velocityField, m_interpolation, true);
+  m_amr->interpolateParticles<P, RealVect&, &P::velocity>(m_particles,
+                                                          m_realm,
+                                                          m_phase,
+                                                          m_velocityField,
+                                                          m_interpolation,
+                                                          true);
 }
 
 template <typename P>

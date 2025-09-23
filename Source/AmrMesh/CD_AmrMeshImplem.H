@@ -442,7 +442,7 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
   surfaceDeposition.deposit<P, particleScalarField>(a_meshData, a_particles);
 }
 
-template <class P, class Ret, Ret (P::*MemberFunc)()>    
+template <class P, class Ret, Ret (P::*MemberFunc)()>
 void
 AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
                               const std::string&        a_realm,

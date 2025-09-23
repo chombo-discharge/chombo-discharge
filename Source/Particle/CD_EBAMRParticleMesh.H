@@ -122,7 +122,7 @@ public:
     @param[in]    a_interpType    Interpolation type. 
     @param[in]    a_forceIrregNGP Force NGP interpolation in cut-cells. 
   */
-  template <class P, class Ret, Ret (P::*MemberFunc)()>  
+  template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
   interpolate(ParticleContainer<P>& a_particles,
               const EBAMRCellData&  a_meshData,

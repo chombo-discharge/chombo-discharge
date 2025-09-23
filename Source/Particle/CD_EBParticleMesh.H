@@ -23,12 +23,9 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A class for depositing and interpolating particles. Contains various useful routines for interpolation of different fields in the
-  base particle class (e.g., mass, "mobility"). This class also contains functions for depositing particles with 2/4 times the usual particle width,
-  which is included because we want to support deposition of particles over refinement boundaries. 
-  @details Currently, this class is cheap to construct and thus does not need to stored for each box during regrids. 
-  @note If the user sets the object to force ngp deposition in cut-cells, the result is not kappa-weighted in any form, i.e. the cut-cell will contain
-  the full deposited mass (without multiplying or dividing by kappa). Likewise, it will force NGP interpolation in cut-cells. 
+  @brief A class for depositing and interpolating particles on a single grid patch. 
+  @details Currently, this class is cheap to construct and thus does not need to stored for each box during regrids.
+  @note When depositing, this class will never divide by kappa. 
 */
 class EBParticleMesh
 {
@@ -216,29 +213,55 @@ protected:
                      const bool      a_forceIrregNGP) const noexcept;
 
   /*!
-    @brief Wrapper function that interpolates a particle fields onto positions. 
-    @details This switches between various possible kernels, NGP, CIC, TSC, W4. It can interpolate both vectors and scalars, the user inputs the data holder 
-    as a Real[] and specifies the components to interpolate. 
-    @param[out] a_particleField  Field evaluations at the particle position. Must be of type Real[]. 
-    @param[in]  a_field          Field. 
-    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
-    @param[in]  a_probLo         Lower-left corner of domain
-    @param[in]  a_dx             Grid resolution
+    @brief Particle interpolation function using an NGP scheme. 
+    @param[out] a_particleField  Particle quantity to interpolate into.
+    @param[in]  a_meshData       Mesh data
     @param[in]  a_position       Particle position
-    @param[in]  a_interval       Components to interpolate
-    @param[in]  a_interpType     Interpolation type. 
+    @param[in]  a_numComp        Number of components to interpolate.
+  */
+  inline void
+  interpolateParticleNGP(Real*            a_particleField,
+                         const EBCellFAB& a_meshData,
+                         const RealVect&  a_position,
+                         const int&       a_numComp) const noexcept;
+
+  /*!
+    @brief Particle interpolation function using a CIC scheme. 
+    @param[out] a_particleField  Particle quantity to interpolate into.
+    @param[in]  a_meshData       Mesh data
+    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
+    @param[in]  a_particleBox    Box that is sufficiently large to contain the particle, computed from the clouds lower-left corner
+    @param[in]  a_position       Particle position
+    @param[in]  a_numComp        Number of components to interpolate.
     @param[in]  a_forceIrregNGP  Force NGP in cut-cells
   */
   inline void
-  interpolateParticle(Real*                a_particleField,
-                      const EBCellFAB&     a_field,
-                      const Box&           a_validBox,
-                      const RealVect&      a_probLo,
-                      const RealVect&      a_dx,
-                      const RealVect&      a_position,
-                      const Interval&      a_interval,
-                      const DepositionType a_interpType,
-                      const bool           a_forceIrregNGP) const;
+  interpolateParticleCIC(Real*            a_particleField,
+                         const EBCellFAB& a_meshData,
+                         const Box&       a_validBox,
+                         const Box&       a_particleBox,
+                         const RealVect&  a_position,
+                         const int&       a_numComp,
+                         const bool       a_forceIrregNGP) const noexcept;
+
+  /*!
+    @brief Particle interpolation function using a TSC scheme. 
+    @param[out] a_particleField  Particle quantity to interpolate into.
+    @param[in]  a_meshData       Mesh data
+    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
+    @param[in]  a_particleBox    Box that is sufficiently large to contain the particle, computed from the clouds lower-left corner
+    @param[in]  a_position       Particle position
+    @param[in]  a_numComp        Number of components to interpolate.
+    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
+  */
+  inline void
+  interpolateParticleTSC(Real*            a_particleField,
+                         const EBCellFAB& a_meshData,
+                         const Box&       a_validBox,
+                         const Box&       a_particleBox,
+                         const RealVect&  a_position,
+                         const int&       a_numComp,
+                         const bool       a_forceIrregNGP) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

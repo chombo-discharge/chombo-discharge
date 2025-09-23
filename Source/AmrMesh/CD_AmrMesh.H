@@ -1007,7 +1007,7 @@ public:
     @param[in]    a_interpType           Interpolation type. 
     @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
   */
-  template <class P, class Ret, Ret (P::*MemberFunc)()>    
+  template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
   interpolateParticles(ParticleContainer<P>&     a_particles,
                        const std::string&        a_realm,
