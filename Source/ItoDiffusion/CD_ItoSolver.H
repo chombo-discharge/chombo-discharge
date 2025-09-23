@@ -288,19 +288,7 @@ public:
     @param[in] a_particles Particles
     @param[in] a_level Grid level
   */
-  template <class P, const Real& (P ::*particleScalarField)() const>
-  void
-  depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
-                      const ParticleContainer<P>& a_particles,
-                      const int                   a_level) const noexcept;
-
-  /*!
-    @brief Do an NGP deposit on a specific grid level. Used for IO.
-    @param[out] a_output Contains NGP deposition of particles. Ignores cut-cells.
-    @param[in] a_particles Particles
-    @param[in] a_level Grid level
-  */
-  template <class P, Real (P ::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
                       const ParticleContainer<P>& a_particles,
@@ -313,7 +301,7 @@ public:
     @param[out] a_phi                  Mesh data -- must have exactly one component. 
     @param[in]  a_particles            Particles to be deposited
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const;
 
@@ -326,22 +314,7 @@ public:
     @param[in]  a_deposition           Deposition method
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  depositParticles(EBAMRCellData&             a_phi,
-                   ParticleContainer<P>&      a_particles,
-                   const DepositionType       a_deposition,
-                   const CoarseFineDeposition a_coarseFineDeposition) const;
-
-  /*!
-    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
-    @details Just like the version above, but with a different function signature.
-    @param[out] a_phi                  Mesh data -- must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited
-    @param[in]  a_deposition           Deposition method
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
-  */
-  template <class P, Real (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositParticles(EBAMRCellData&             a_phi,
                    ParticleContainer<P>&      a_particles,
@@ -1439,22 +1412,7 @@ protected:
     @param[in]  a_deposition           Deposition type
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<P>&      a_particles,
-                           const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition) const;
-
-  /*!
-    @brief Compute the cell-centered deposition -- this is the main deposition function.
-    @details Just like the version above except that the function signature is Real P::particleScalarField() const.
-    @param[out] a_phi                  Cell-centered mesh data. Must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited. 
-    @param[in]  a_deposition           Deposition type
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
-  */
-  template <class P, Real (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositKappaConservative(EBAMRCellData&             a_phi,
                            ParticleContainer<P>&      a_particles,

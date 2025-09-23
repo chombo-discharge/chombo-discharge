@@ -113,7 +113,7 @@ ItoSolver.normal_max             = 5.0               ## Maximum value (absolute)
 ItoSolver.redistribute           = false             ## Turn on/off redistribution.
 ItoSolver.blend_conservation     = false             ## Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing          = particles         ## 'particles' or 'numbers'
-ItoSolver.ppc_restart            = 256                ## Maximum number of computational particles to generate for restarts.
+ItoSolver.ppc_restart            = 1024                ## Maximum number of computational particles to generate for restarts.
 ItoSolver.irr_ngp_deposition     = false             ## Force irregular deposition in cut cells or not
 ItoSolver.irr_ngp_interp         = true              ## Force irregular interpolation in cut cells or not
 ItoSolver.mobility_interp        = direct            ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
@@ -237,7 +237,7 @@ ItoKMCGodunovStepper.load_balance_particles                   = false           
 ItoKMCGodunovStepper.load_indices                             = -1                 ## Which particle containers to use for load balancing (-1 => all)
 ItoKMCGodunovStepper.load_per_cell                            = 1.0                ## Default load per grid cell.
 ItoKMCGodunovStepper.box_sorting                              = morton             ## Box sorting when load balancing
-ItoKMCGodunovStepper.particles_per_cell                       = 256                 ## Max computational particles per cell
+ItoKMCGodunovStepper.particles_per_cell                       = 512                 ## Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                           = 1                  ## Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                    = false              ## Make superparticles during regrids
 ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
@@ -297,5 +297,3 @@ ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
-
-ItoSolver.ppc     = 1024

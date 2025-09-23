@@ -3949,12 +3949,12 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
     m_cdrPhotoiProducts[i].organizeParticlesByPatch();
 
-    m_amr->depositParticles<PointParticle, &PointParticle::weight>(m_particleScratch1,
-                                                                   m_particleRealm,
-                                                                   m_plasmaPhase,
-                                                                   m_cdrPhotoiProducts[i],
-                                                                   DepositionType::NGP,
-                                                                   CoarseFineDeposition::Halo);
+    m_amr->depositParticles<PointParticle, const Real&, &PointParticle::weight>(m_particleScratch1,
+                                                                                m_particleRealm,
+                                                                                m_plasmaPhase,
+                                                                                m_cdrPhotoiProducts[i],
+                                                                                DepositionType::NGP,
+                                                                                CoarseFineDeposition::Halo);
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
@@ -5967,12 +5967,13 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       computationParticles.remap();
 
       // Deposit the particles
-      m_amr->depositParticles<CompParticle, &CompParticle::template real<0>>(m_particleScratch1,
-                                                                             m_particleRealm,
-                                                                             m_plasmaPhase,
-                                                                             computationParticles,
-                                                                             solver->getDeposition(),
-                                                                             solver->getCoarseFineDeposition());
+      m_amr->depositParticles<CompParticle, const Real&, &CompParticle::template real<0>>(
+        m_particleScratch1,
+        m_particleRealm,
+        m_plasmaPhase,
+        computationParticles,
+        solver->getDeposition(),
+        solver->getCoarseFineDeposition());
 
       // Copy data back onto the fluid realm.
       m_amr->copyData(m_fluidScratch1, m_particleScratch1);

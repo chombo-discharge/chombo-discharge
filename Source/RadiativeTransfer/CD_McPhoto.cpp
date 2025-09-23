@@ -106,7 +106,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
         this->advancePhotonsInstantaneous(scratchPhotons, m_ebPhotons, m_domainPhotons, m_photons);
 
         // Absorb the bulk photons on the mesh.
-        this->depositPhotons<Photon, &Photon::weight>(phi, scratchPhotons, m_deposition);
+        this->depositPhotons<Photon, const Real&, &Photon::weight>(phi, scratchPhotons, m_deposition);
         DataOps::incr(a_phi, phi, 1.0);
 
         // Store the photons that were absorbed.
@@ -118,7 +118,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
       this->generateComputationalPhotons(m_photons, numPhysPhotonsTotal, m_maxPhotonsGeneratedPerCell);
       this->advancePhotonsTransient(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons, a_dt);
       this->remap(m_photons);
-      this->depositPhotons<Photon, &Photon::weight>(a_phi, m_bulkPhotons, m_deposition);
+      this->depositPhotons<Photon, const Real&, &Photon::weight>(a_phi, m_bulkPhotons, m_deposition);
     }
   }
   else {
@@ -1277,7 +1277,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
     }
   }
   else {
-    this->depositPhotons<PointParticle, &PointParticle::weight>(a_phi, a_photons, m_deposition);
+    this->depositPhotons<PointParticle, const Real&, &PointParticle::weight>(a_phi, a_photons, m_deposition);
   }
 
   a_photons.clearParticles();
@@ -1291,7 +1291,7 @@ McPhoto::depositPhotons()
     pout() << m_name + "::depositPhotons()" << endl;
   }
 
-  this->depositPhotons<Photon, &Photon::weight>(m_phi, m_photons, m_deposition);
+  this->depositPhotons<Photon, const Real&, &Photon::weight>(m_phi, m_photons, m_deposition);
 }
 
 void

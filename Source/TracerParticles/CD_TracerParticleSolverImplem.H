@@ -367,7 +367,8 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const noexcept
   }
 
   DataOps::setValue(a_phi, 0.0);
-  this->depositParticles<P, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+
+  this->depositParticles<P, const Real&, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
   if (m_volumeScale) {
     DataOps::volumeScale(a_phi, m_amr->getDx());
@@ -724,7 +725,7 @@ TracerParticleSolver<P>::getInterpolationType() const
 }
 
 template <typename P>
-template <typename T, const Real& (T::*particleScalarFunction)() const>
+template <class T, class Ret, Ret (T::*MemberFunc)() const>
 void
 TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
                                           const ParticleContainer<T>& a_particles,
@@ -738,13 +739,13 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  m_amr->depositParticles<T, particleScalarFunction>(a_phi,
-                                                     m_realm,
-                                                     m_phase,
-                                                     a_particles,
-                                                     a_baseDeposition,
-                                                     a_coarseFineDeposition,
-                                                     false);
+  m_amr->depositParticles<T, Ret, MemberFunc>(a_phi,
+                                              m_realm,
+                                              m_phase,
+                                              a_particles,
+                                              a_baseDeposition,
+                                              a_coarseFineDeposition,
+                                              false);
 }
 
 #include <CD_NamespaceFooter.H>

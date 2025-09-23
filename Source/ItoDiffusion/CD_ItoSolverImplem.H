@@ -68,7 +68,7 @@ ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles,
   }
 }
 
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, class Ret, Ret (P ::*MemberFunc)() const>
 void
 ItoSolver::depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const
 {
@@ -77,18 +77,18 @@ ItoSolver::depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_partic
     pout() << m_name + "::depositParticles" << endl;
   }
 
-  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
+  this->depositParticles<P, Ret, MemberFunc>(a_phi, a_particles, m_deposition, m_coarseFineDeposition);
 }
 
-template <class P, const Real& (P ::*particleScalarField)() const>
+template <class P, class Ret, Ret (P ::*MemberFunc)() const>
 void
 ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
                                const ParticleContainer<P>& a_particles,
                                const int                   a_level) const noexcept
 {
-  CH_TIME("ItoSolver::depositParticles(NGP)");
+  CH_TIME("ItoSolver::depositParticlesNGP");
   if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticles(NGP)" << endl;
+    pout() << m_name + "::depositParticlesNGP" << endl;
   }
 
   CH_assert(a_level >= 0);
@@ -117,52 +117,11 @@ ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
     EBCellFAB&     output    = a_output[din];
     const List<P>& particles = a_particles[a_level][din].listItems();
 
-    particleMesh.deposit<P, const Real&, particleScalarField>(output, particles, DepositionType::NGP, 1.0, true);
+    particleMesh.deposit<P, Ret, MemberFunc>(output, particles, DepositionType::NGP, 1.0, true);
   }
 }
 
-template <class P, Real (P ::*particleScalarField)() const>
-void
-ItoSolver::depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
-                               const ParticleContainer<P>& a_particles,
-                               const int                   a_level) const noexcept
-{
-  CH_TIME("ItoSolver::depositParticles(NGP)");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticles(NGP)" << endl;
-  }
-
-  CH_assert(a_level >= 0);
-  CH_assert(a_level <= m_amr->getFinestLevel());
-
-  const ProblemDomain&     domain = m_amr->getDomains()[a_level];
-  const DisjointBoxLayout& dbl    = m_amr->getGrids(a_particles.getRealm())[a_level];
-  const DataIterator&      dit    = dbl.dataIterator();
-  const EBISLayout&        ebisl  = m_amr->getEBISLayout(a_particles.getRealm(), m_phase)[a_level];
-  const Real               dx     = m_amr->getDx()[a_level];
-  const RealVect           probLo = m_amr->getProbLo();
-
-  CH_assert(a_output.disjointBoxLayout() == dbl);
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    const Box      cellBox = dbl[din];
-    const EBISBox& ebisbox = ebisl[din];
-
-    EBParticleMesh particleMesh(domain, cellBox, ebisbox, dx * RealVect::Unit, probLo);
-
-    EBCellFAB&     output    = a_output[din];
-    const List<P>& particles = a_particles[a_level][din].listItems();
-
-    particleMesh.deposit<P, Real, particleScalarField>(output, particles, DepositionType::NGP, 1.0, true);
-  }
-}
-
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, class Ret, Ret (P ::*MemberFunc)() const>
 void
 ItoSolver::depositParticles(EBAMRCellData&             a_phi,
                             ParticleContainer<P>&      a_particles,
@@ -179,7 +138,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
 
   // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
   //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
-  this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
+  this->depositKappaConservative<P, Ret, MemberFunc>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
 
   // Redistribution magic.
   this->redistributeAMR(a_phi);
@@ -189,34 +148,7 @@ ItoSolver::depositParticles(EBAMRCellData&             a_phi,
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
-template <class P, Real (P::*particleScalarField)() const>
-void
-ItoSolver::depositParticles(EBAMRCellData&             a_phi,
-                            ParticleContainer<P>&      a_particles,
-                            const DepositionType       a_deposition,
-                            const CoarseFineDeposition a_coarseFineDeposition) const
-{
-  CH_TIME("ItoSolver::depositParticles");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositParticles" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(!a_particles.isOrganizedByCell());
-
-  // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
-  //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.
-  this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition, a_coarseFineDeposition);
-
-  // Redistribution magic.
-  this->redistributeAMR(a_phi);
-
-  // Average down and interpolate
-  m_amr->conservativeAverage(a_phi, m_realm, m_phase);
-  m_amr->interpGhost(a_phi, m_realm, m_phase);
-}
-
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, class Ret, Ret (P ::*MemberFunc)() const>
 void
 ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
                                     ParticleContainer<P>&      a_particles,
@@ -230,36 +162,13 @@ ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                  m_realm,
-                                                  m_phase,
-                                                  a_particles,
-                                                  a_deposition,
-                                                  a_coarseFineDeposition,
-                                                  m_forceIrregDepositionNGP);
-}
-
-template <class P, Real (P::*particleScalarField)() const>
-void
-ItoSolver::depositKappaConservative(EBAMRCellData&             a_phi,
-                                    ParticleContainer<P>&      a_particles,
-                                    const DepositionType       a_deposition,
-                                    const CoarseFineDeposition a_coarseFineDeposition) const
-{
-  CH_TIME("ItoSolver::depositKappaConservative");
-  if (m_verbosity > 5) {
-    pout() << m_name + "::depositKappaConservative" << endl;
-  }
-
-  CH_assert(a_phi[0]->nComp() == 1);
-
-  m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                  m_realm,
-                                                  m_phase,
-                                                  a_particles,
-                                                  a_deposition,
-                                                  a_coarseFineDeposition,
-                                                  m_forceIrregDepositionNGP);
+  m_amr->depositParticles<P, Ret, MemberFunc>(a_phi,
+                                              m_realm,
+                                              m_phase,
+                                              a_particles,
+                                              a_deposition,
+                                              a_coarseFineDeposition,
+                                              m_forceIrregDepositionNGP);
 }
 
 #include <CD_NamespaceFooter.H>
