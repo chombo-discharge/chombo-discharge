@@ -12,9 +12,6 @@
 #ifndef CD_EBParticleMeshImplem_H
 #define CD_EBParticleMeshImplem_H
 
-// Std incldues
-#include <type_traits>
-
 // Chombo includes
 #include <CH_Timer.H>
 
