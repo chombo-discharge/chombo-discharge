@@ -41,7 +41,7 @@ Driver.ebis_memory_load_balance     = false               ## If using Chombo geo
 Driver.output_dt                    = -0.1E-9              ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 50                  ## Checkpoint interval
-Driver.regrid_interval              = 5                   ## Regrid interval
+Driver.regrid_interval              = 2                   ## Regrid interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
 Driver.initial_regrids              = 3                   ## Number of initial regrids
@@ -228,7 +228,7 @@ ItoKMCGodunovStepper.secondary_emission                       = after_reactions 
 ItoKMCGodunovStepper.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
 ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
-ItoKMCGodunovStepper.limit_parallel_diffusion                 = true               ## If true, particles do not diffuse against their drift direction
+ItoKMCGodunovStepper.limit_parallel_diffusion                 = false              ## If true, particles do not diffuse against their drift direction
 ItoKMCGodunovStepper.profile                                  = true               ## Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                                 = none               ## 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                                = false              ## Turn on/off dual-grid functionality
@@ -290,10 +290,10 @@ ItoKMCStreamerTagger.plot              = false          ## Turn on/off plotting 
 ItoKMCStreamerTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0    ## Only allow tags that fall between
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0    ## these two corners
-ItoKMCStreamerTagger.buffer            = 4              ## Grow tagged cells
+ItoKMCStreamerTagger.buffer            = 0              ## Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.0      ## Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl       = 7        ## Set max coarsening depth
+ItoKMCStreamerTagger.max_coarsen_lvl       = 5        ## Set max coarsening depth
