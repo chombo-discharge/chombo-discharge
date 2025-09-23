@@ -88,44 +88,19 @@ public:
           const bool           a_forceIrregNGP = false) const;
 
   /*!
-    @brief Interpolate a scalar field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalar' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
-    expression is e.g.
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
-	
-    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
-    @param[inout] a_particleList    Particles to be interpolated. 
-    @param[in]    a_meshScalarField Scalar field on the mesh 
-    @param[in]    a_interpType      Interpolation type. 
+    @brief Interpolate mesh data onto a particle. 
+    @details The template parameters indicate the particle type and a pointer to a particle function. 
+    @param[inout] a_particles      Particles to be deposited
+    @param[in]    a_meshData       Mesh data    
+    @param[in]    a_depositionType Deposition method
+    @param[in]    a_widthScale     Particle scale multiplier.  
+    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
+    @note This routine will INCREMENT a_rho. 
   */
-  template <class P, Real& (P::*particleScalarField)()>
+  template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
-  interpolate(List<P>&             a_particleList,
-              const EBCellFAB&     a_meshScalarField,
-              const DepositionType a_interpType,
-              const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Interpolate a vector field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have SpaceDim components and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid 
-    expression is e.g.
-    
-    interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
-	
-    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
-    @param[inout] a_particleList    Particles to be interpolated. 
-    @param[in]    a_meshVectorField Vector field on the mesh
-    @param[in]    a_interpType      Interpolation type. 
-  */
-  template <class P, RealVect& (P::*particleVectorField)()>
-  void
-  interpolate(List<P>&             a_particleList,
-              const EBCellFAB&     a_meshVectorField,
+  interpolate(List<P>&             a_particles,
+              const EBCellFAB&     a_meshData,
               const DepositionType a_interpType,
               const bool           a_forceIrregNGP = false) const;
 

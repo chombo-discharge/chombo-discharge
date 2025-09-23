@@ -24,6 +24,17 @@
 #include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
+inline Real*
+to_bar_arg(Real& r)
+{
+  return &r;
+}
+inline auto
+to_bar_arg(RealVect& v) -> decltype(v.dataPtr())
+{
+  return v.dataPtr();
+}
+
 template <class P, class Ret, Ret (P::*MemberFunc)() const>
 void
 EBParticleMesh::deposit(EBCellFAB&           a_meshData,
@@ -98,18 +109,23 @@ EBParticleMesh::deposit(EBCellFAB&           a_meshData,
   }
 }
 
-template <class P, Real& (P::*particleScalarField)()>
+template <class P, class Ret, Ret (P::*MemberFunc)()>
 void
 EBParticleMesh::interpolate(List<P>&             a_particleList,
-                            const EBCellFAB&     a_meshScalarField,
+                            const EBCellFAB&     a_meshData,
                             const DepositionType a_interpType,
                             const bool           a_forceIrregNGP) const
 {
   CH_TIME("EBParticleMesh::interpolate(Real)");
 
-  CH_assert(a_meshScalarField.nComp() == 1);
+  static_assert(std::is_same<Ret, Real&>::value || std::is_same<Ret, RealVect&>::value,
+                "Ret should be Real& or RealVect&");
 
-  const Interval variables(0, 0);
+  constexpr int numComp = std::is_same<Ret, Real&>::value ? 1 : SpaceDim;
+
+  CH_assert(a_meshData.nComp() == numComp);
+
+  const Interval variables = Interval(0, numComp - 1);
 
   Box validBox = m_domain.domainBox();
 
@@ -119,6 +135,7 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 
     break;
   }
+
   case DepositionType::CIC: {
     validBox = grow(validBox, -1);
 
@@ -129,89 +146,48 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 
     break;
   }
-  case DepositionType::W4: {
-    validBox = grow(validBox, -3);
-
-    break;
-  }
   default: {
     MayDay::Error("EBParticleMesh::interpolate - logic bust");
   }
   }
 
+  /*!
+    @brief Local helper class for turning a Real or a RealVect into a pointer to the beginning of the object. I'm doing this so that I can
+    use a single version of interpolateParticle that does not require template specialization. 
+  */
+  struct GetPointer
+  {
+    /*!
+      @brief Return as pointer
+    */
+    Real*
+    operator()(Real& r) const
+    {
+      return &r;
+    }
+
+    /*!
+      @brief Return pointer to start of RealVect object
+    */    
+    auto
+    operator()(RealVect& r) const
+    {
+      return r.dataPtr();
+    }
+  };
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    P&              curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
+    P&              p = lit();
+    const RealVect& x = p.position();
 
-    Real& curParticleField = (curParticle.*particleScalarField)();
+    auto&& w = (p.*MemberFunc)();
 
-    this->interpolateParticle(&curParticleField,
-                              a_meshScalarField,
+    this->interpolateParticle(GetPointer{}(w),
+                              a_meshData,
                               validBox,
                               m_probLo,
                               m_dx,
-                              curPosition,
-                              variables,
-                              a_interpType,
-                              a_forceIrregNGP);
-  }
-}
-
-template <class P, RealVect& (P::*particleVectorField)()>
-void
-EBParticleMesh::interpolate(List<P>&             a_particleList,
-                            const EBCellFAB&     a_meshVectorField,
-                            const DepositionType a_interpType,
-                            const bool           a_forceIrregNGP) const
-{
-  CH_TIME("EBParticleMesh::interpolate(RealVect)");
-  CH_assert(a_meshVectorField.nComp() == SpaceDim);
-
-  const Interval variables(0, SpaceDim - 1);
-
-  // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
-  //       interpolated to. As per API, this function must be of the type 'RealVect& myParticleClass::myVectorVariable()'
-
-  Box validBox = m_domain.domainBox();
-
-  switch (a_interpType) {
-  case DepositionType::NGP: {
-    validBox = m_domain.domainBox();
-
-    break;
-  }
-  case DepositionType::CIC: {
-    validBox = grow(validBox, -1);
-
-    break;
-  }
-  case DepositionType::TSC: {
-    validBox = grow(validBox, -2);
-
-    break;
-  }
-  case DepositionType::W4: {
-    validBox = grow(validBox, -3);
-
-    break;
-  }
-  default: {
-    MayDay::Error("EBParticleMesh::interpolate - logic bust");
-  }
-  }
-
-  for (ListIterator<P> lit(a_particleList); lit; ++lit) {
-    P&              curParticle = lit();
-    const RealVect& curPosition = curParticle.position();
-
-    RealVect& curParticleField = (curParticle.*particleVectorField)();
-
-    this->interpolateParticle(curParticleField.dataPtr(),
-                              a_meshVectorField,
-                              validBox,
-                              m_probLo,
-                              m_dx,
-                              curPosition,
+                              x,
                               variables,
                               a_interpType,
                               a_forceIrregNGP);
@@ -473,44 +449,6 @@ EBParticleMesh::interpolateParticle(Real*                a_particleField,
       }
 
       BoxLoops::loop(tscBox, tscKernel);
-
-      break;
-    }
-    case DepositionType::W4: // Hook for fourth order interpolation.
-    {
-      // Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
-      // the box corresponding to the cloud. This region contains the cells where we gather the field.
-      const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5 * a_dx);
-      const Box     w4Box   = Box(loIndex, loIndex + 3 * IntVect::Unit);
-
-      // This is the fourth order kernel.
-      auto w4Kernel = [&](const IntVect& iv) -> void {
-        Real weight = 1.0;
-
-        // L is the distance between the grid cell and the particle.
-        const RealVect L = particleDisplacement(iv);
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          const Real l = std::abs(L[dir]);
-
-          if (l < 1.0) {
-            weight *= 1.0 - 2.5 * l * l + 1.5 * l * l * l;
-          }
-          else {
-            weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
-          }
-        }
-
-        for (int comp = startComp; comp <= endComp; comp++) {
-          a_particleField[comp] += weight * meshField(iv, comp);
-        }
-      };
-
-      // Run kernel and gather field from mesh.
-      for (int comp = startComp; comp <= endComp; comp++) {
-        a_particleField[comp] = 0.0;
-      }
-
-      BoxLoops::loop(w4Box, w4Kernel);
 
       break;
     }

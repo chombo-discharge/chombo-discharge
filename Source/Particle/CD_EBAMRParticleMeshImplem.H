@@ -423,7 +423,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
 
       // c) Exchange data on this level
-      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);      
+      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
 
       // d) Coarsen data from the refined grid to this grid.
       m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
@@ -436,7 +436,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
   particles.transferParticles(particles.getMaskParticles());
 }
 
-template <class P, Real& (P::*particleScalarField)()>
+template <class P, class Ret, Ret (P::*MemberFunc)()>
 void
 EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
                                const EBAMRCellData&  a_meshScalarField,
@@ -451,7 +451,6 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
   CH_assert(m_isDefined);
 
   // TLDR: Run through each patch and interpolate to the particle positions.
-
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const EBLevelGrid&       eblg  = *m_eblgs[lvl];
     const DisjointBoxLayout& dbl   = eblg.getDBL();
@@ -470,48 +469,7 @@ EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
       const EBCellFAB&      data   = (*a_meshScalarField[lvl])[din];
       const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
 
-      interp.interpolate<P, particleScalarField>(particles, data, a_interpType, a_forceIrregNGP);
-    }
-  }
-}
-
-template <class P, RealVect& (P::*particleVectorField)()>
-void
-EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
-                               const EBAMRCellData&  a_meshVectorField,
-                               const DepositionType  a_interpType,
-                               const bool            a_forceIrregNGP) const
-{
-  CH_TIME("EBAMRParticleMesh::interpolate");
-  if (m_verbose) {
-    pout() << "EBAMRParticleMesh::interpolate" << endl;
-  }
-
-  CH_assert(m_isDefined);
-
-  // TLDR: Run through each patch and interpolate to the particle positions.
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const EBLevelGrid&       eblg   = *m_eblgs[lvl];
-    const DisjointBoxLayout& dbl    = eblg.getDBL();
-    const ProblemDomain&     domain = eblg.getDomain();
-    const EBISLayout&        ebisl  = eblg.getEBISL();
-    const Real&              dx     = m_dx[lvl];
-    const DataIterator&      dit    = dbl.dataIterator();
-
-    CH_assert(a_meshVectorField[lvl]->nComp() == SpaceDim);
-
-    const int numBoxes = dit.size();
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < numBoxes; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      List<P>& particles = a_particles[lvl][din].listItems();
-
-      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[din];
-      const EBCellFAB&      data   = (*a_meshVectorField[lvl])[din];
-
-      interp.interpolate<P, particleVectorField>(particles, data, a_interpType, a_forceIrregNGP);
+      interp.interpolate<P, Ret, MemberFunc>(particles, data, a_interpType, a_forceIrregNGP);
     }
   }
 }
@@ -533,8 +491,8 @@ EBAMRParticleMesh::transferMaskParticlesTransition(ParticleContainer<P>& a_parti
     const DisjointBoxLayout& dbl     = eblg.getDBL();
     const DisjointBoxLayout& dblFiCo = eblgFiCo.getDBL();
 
-    const EBISLayout& ebisl = eblg.getEBISL();
-    const EBISLayout& ebislFiCo = eblgFiCo.getEBISL();    
+    const EBISLayout& ebisl     = eblg.getEBISL();
+    const EBISLayout& ebislFiCo = eblgFiCo.getEBISL();
 
     const DataIterator& dit     = dbl.dataIterator();
     const DataIterator& ditFiCo = dblFiCo.dataIterator();
@@ -550,9 +508,9 @@ EBAMRParticleMesh::transferMaskParticlesTransition(ParticleContainer<P>& a_parti
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < numBoxes; mybox++) {
-        const DataIndex& din = dit[mybox];
-        const EBISBox& ebisbox = ebislFiCo[din];
-        
+        const DataIndex& din     = dit[mybox];
+        const EBISBox&   ebisbox = ebislFiCo[din];
+
         const BaseFab<bool>& mask = (*m_transitionMasks.at(maskWidth)[lvl])[din];
 
         if (mask.isUsable()) {

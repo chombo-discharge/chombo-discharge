@@ -5901,12 +5901,12 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       }
 
       // Interpolate the potential to the current particle position which gives us V(B) for the particles.
-      m_amr->interpolateParticles<CompParticle, &CompParticle::template real<1>>(computationParticles,
-                                                                                 m_particleRealm,
-                                                                                 m_plasmaPhase,
-                                                                                 m_particleScratch1,
-                                                                                 solver->getDeposition(),
-                                                                                 false);
+      m_amr->interpolateParticles<CompParticle, Real&, &CompParticle::template real<1>>(computationParticles,
+                                                                                        m_particleRealm,
+                                                                                        m_plasmaPhase,
+                                                                                        m_particleScratch1,
+                                                                                        solver->getDeposition(),
+                                                                                        false);
 
       // Move the particles back to their old positions and interpolate the potential there.
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -5936,11 +5936,11 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       computationParticles.remap();
 
       // Interpolate the potential to the previous particle position which gives us V(A) for the particles.
-      m_amr->interpolateParticles<CompParticle, &CompParticle::template real<2>>(computationParticles,
-                                                                                 m_particleRealm,
-                                                                                 m_plasmaPhase,
-                                                                                 m_particleScratch1,
-                                                                                 solver->getDeposition());
+      m_amr->interpolateParticles<CompParticle, Real&, &CompParticle::template real<2>>(computationParticles,
+                                                                                        m_particleRealm,
+                                                                                        m_plasmaPhase,
+                                                                                        m_particleScratch1,
+                                                                                        solver->getDeposition());
 
       // Move the particles back again and multiply the weight by Z * (V(A) - V(B))/a_dt
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {

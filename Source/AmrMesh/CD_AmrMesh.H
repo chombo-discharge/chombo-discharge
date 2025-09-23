@@ -997,16 +997,9 @@ public:
                    const ParticleContainer<P>& a_particles) const noexcept;
 
   /*!
-    @brief Interpolate a scalar field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalarField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
-    expression is e.g.
-    
-        interpolate<P, &P::mass> (...)
-	
-    To interpolate onto a different field, replace ::mass by the other scalar field.
-
+    @brief Interpolate mesh data onto a particle position.
+    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real& or a
+    RealVect&. MemFunc is a pointer to a member function of P. E.g., interpolate<P, Real&, &P::weight>.        
     @param[inout] a_particles            Particles to be interpolated. 
     @param[in]    a_realm                Realm where data is registered.
     @param[in]    a_phase                Phase where data is registered.
@@ -1014,39 +1007,12 @@ public:
     @param[in]    a_interpType           Interpolation type. 
     @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
   */
-  template <class P, Real& (P::*particleScalarField)()>
+  template <class P, class Ret, Ret (P::*MemberFunc)()>    
   void
   interpolateParticles(ParticleContainer<P>&     a_particles,
                        const std::string&        a_realm,
                        const phase::which_phase& a_phase,
                        const EBAMRCellData&      a_meshScalarField,
-                       const DepositionType      a_interpType,
-                       const bool                a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Interpolate a vector field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly SpaceDim components and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid
-    expression is e.g.
-    
-        interpolate<P, &P::velocity> (...)
-	
-    To interpolate onto a different field, replace ::velocity by another vector field. 
-
-    @param[inout] a_particles            Particles to be interpolated. 
-    @param[in]    a_realm                Realm where data is registered.
-    @param[in]    a_phase                Phase where data is registered.
-    @param[in]    a_meshScalarField      Scalar field on the mesh 
-    @param[in]    a_interpType           Interpolation type. 
-    @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
-  */
-  template <class P, RealVect& (P::*particleVectorField)()>
-  void
-  interpolateParticles(ParticleContainer<P>&     a_particles,
-                       const std::string&        a_realm,
-                       const phase::which_phase& a_phase,
-                       const EBAMRCellData&      a_meshVectorField,
                        const DepositionType      a_interpType,
                        const bool                a_forceIrregNGP = false) const;
 

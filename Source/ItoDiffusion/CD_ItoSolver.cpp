@@ -2254,10 +2254,10 @@ ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit)
     // This interpolates the velocity function on to the particle velocities
     const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
-    meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList,
-                                                                velo_func,
-                                                                m_deposition,
-                                                                m_forceIrregInterpolationNGP);
+    meshInterp.interpolate<ItoParticle, RealVect&, &ItoParticle::velocity>(particleList,
+                                                                           velo_func,
+                                                                           m_deposition,
+                                                                           m_forceIrregInterpolationNGP);
 
     // Go through the particles and set their velocities to velo_func*mobility
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
@@ -2367,10 +2367,10 @@ ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit) 
   // Interpolate onto the mobility field
   const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
-  meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList,
-                                                              mobilityFunction,
-                                                              m_deposition,
-                                                              m_forceIrregInterpolationNGP);
+  meshInterp.interpolate<ItoParticle, Real&, &ItoParticle::mobility>(particleList,
+                                                                     mobilityFunction,
+                                                                     m_deposition,
+                                                                     m_forceIrregInterpolationNGP);
 }
 
 void
@@ -2406,15 +2406,15 @@ ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
   muV *= mobilityFunction;
 
   // First, interpolate |V| to the particle position, it will be stored on m_tmp.
-  meshInterp.interpolate<ItoParticle, &ItoParticle::tmpReal>(particleList,
-                                                             a_velocityMagnitude,
-                                                             m_deposition,
-                                                             m_forceIrregInterpolationNGP);
+  meshInterp.interpolate<ItoParticle, Real&, &ItoParticle::tmpReal>(particleList,
+                                                                    a_velocityMagnitude,
+                                                                    m_deposition,
+                                                                    m_forceIrregInterpolationNGP);
 
-  meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList,
-                                                              muV,
-                                                              m_deposition,
-                                                              m_forceIrregInterpolationNGP);
+  meshInterp.interpolate<ItoParticle, Real&, &ItoParticle::mobility>(particleList,
+                                                                     muV,
+                                                                     m_deposition,
+                                                                     m_forceIrregInterpolationNGP);
 
   // We now have ItoParticle::tmp = |V(Xp)| and ItoParticle::mobility = |mu*V|(Xp). Now let the mobility be mu(Xp) = |mu*V|(Xp)/|V|(Xp)
   for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
@@ -2519,10 +2519,10 @@ ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit)
     const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
     // Interpolator
-    meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList,
-                                                                 Dcoef,
-                                                                 m_deposition,
-                                                                 m_forceIrregInterpolationNGP);
+    meshInterp.interpolate<ItoParticle, Real&, &ItoParticle::diffusion>(particleList,
+                                                                        Dcoef,
+                                                                        m_deposition,
+                                                                        m_forceIrregInterpolationNGP);
   }
 }
 

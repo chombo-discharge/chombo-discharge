@@ -2400,12 +2400,12 @@ DischargeInceptionStepper<P, F, C>::interpolateGradAlphaToParticles() noexcept
   }
 
   // Interpolate onto the particle weight structure
-  m_amr->interpolateParticles<P, &P::template vect<2>>(m_tracerParticleSolver->getParticles(),
-                                                       m_realm,
-                                                       m_phase,
-                                                       m_gradAlpha,
-                                                       m_tracerParticleSolver->getInterpolationType(),
-                                                       true);
+  m_amr->interpolateParticles<P, RealVect&, &P::template vect<2>>(m_tracerParticleSolver->getParticles(),
+                                                                  m_realm,
+                                                                  m_phase,
+                                                                  m_gradAlpha,
+                                                                  m_tracerParticleSolver->getInterpolationType(),
+                                                                  true);
 }
 
 template <typename P, typename F, typename C>
