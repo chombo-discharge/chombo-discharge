@@ -145,7 +145,7 @@ The particles are available from the solver through the function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 635-640
+   :lines: 608-613
    :dedent: 2
 
 Usually, ``ItoSolver`` will perform a drift-diffusion advance and the user will then check if some of the particles crossed into the EB.
@@ -158,7 +158,7 @@ Remapping particles
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 875-886
+   :lines: 848-859
    :dedent: 2
 
 The bottom function lets the user remap any ``ParticleContainer<ItoParticle>`` that lives in the solver.
@@ -172,7 +172,7 @@ The most general version is given below:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 309-318
+   :lines: 308-322
    :dedent: 2
 
 This version permits the user to select any particle container ``a_particles`` and deposit them onto some pre-allocated mesh storage ``a_phi``.
@@ -195,7 +195,7 @@ This data can then be fetched with
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 656-661
+   :lines: 629-634
    :dedent: 2
    
 For the full list of available deposition functions, see the ``ItoSolver`` C++ API `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classItoSolver.html>`_.
@@ -243,7 +243,7 @@ Complete interpolation of the particle velocity consists of calling two function
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 751-756, 732-739
+   :lines: 724-729, 705-712
    :dedent: 2
 
 Here, the calling sequence is such that the mobilities must be interpolated first, and then the velocity fields. 
@@ -282,7 +282,7 @@ The function signatures is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 765-770
+   :lines: 738-743
    :dedent: 2
 
 Particle intersections
@@ -295,7 +295,7 @@ The most relevant function is
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 416-431
+   :lines: 389-404
    :dedent: 2
 
 Here, ``EbIntersection`` is a just an enum for putting logic into how the intersection is computed.
@@ -322,7 +322,7 @@ This routine is implemented as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 989-993
+   :lines: 962-966
    :dedent: 2
 
 which returns a CFL-like condition
@@ -338,7 +338,7 @@ The signatures for the diffusion time step are similar to the ones for drift:
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 1010-1014
+   :lines: 983-987
    :dedent: 2
 
 which returns a CFL-like condition
@@ -356,7 +356,7 @@ A combination of the advection and diffusion time step routines also exists as
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 908-917
+   :lines: 881-890
    :dedent: 2
 
 This time step limitation is inspired by fully explicit and non-split fluid models, and is calculated as
@@ -375,7 +375,7 @@ The function for splitting and merging the particles is in all cases
 
 .. literalinclude:: ../../../../Source/ItoDiffusion/CD_ItoSolver.H
    :language: c++
-   :lines: 793-799
+   :lines: 766-772
    :dedent: 2
 
 Calling this function will merge/split the particles.

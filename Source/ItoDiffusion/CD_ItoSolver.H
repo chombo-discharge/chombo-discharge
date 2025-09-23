@@ -268,7 +268,7 @@ public:
   /*!
     @brief Deposit particles onto mesh. 
     @details This will deposit the mass (i.e., computational weight) "bulk" particles into m_phi. 
-    @note Cells the other version with a_container = WhichContainer::Bulk
+    @note Calls the other version with a_container = WhichContainer::Bulk
   */
   virtual void
   depositParticles();
