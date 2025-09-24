@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential     = 30E3
+ItoKMC.potential     = 35E3
 ItoKMC.basename      = pout
 
 # ====================================================================================================
@@ -41,13 +41,13 @@ Driver.ebis_memory_load_balance     = false               ## If using Chombo geo
 Driver.output_dt                    = -0.1E-9             ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 50                  ## Checkpoint interval
-Driver.regrid_interval              = 3                   ## Regrid interval
+Driver.regrid_interval              = 2                   ## Regrid interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
 Driver.initial_regrids              = 3                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 15E-9               ## Stop time
+Driver.stop_time                    = 100E-9              ## Stop time
 Driver.max_steps                    = 1000                ## Maximum number of steps
 Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
 Driver.write_memory                 = false               ## Write MPI memory report
@@ -82,7 +82,7 @@ FieldSolverMultigrid.kappa_source          = true              ## Volume weighte
 FieldSolverMultigrid.filter_rho            = 0                 ## Number of filterings of space charge before Poisson solve
 FieldSolverMultigrid.filter_potential      = 0                 ## Number of filterings of potential after Poisson solve
 
-FieldSolverMultigrid.gmg_verbosity         = 10           ## GMG verbosity
+FieldSolverMultigrid.gmg_verbosity         = 2            ## GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth        = 24           ## Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth       = 24           ## Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth       = 24           ## Number of at bottom level (before dropping to bottom solver)
@@ -90,7 +90,7 @@ FieldSolverMultigrid.gmg_min_iter          = 5            ## Minimum number of i
 FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
-FieldSolverMultigrid.gmg_min_cells         = 8            ## Bottom drop
+FieldSolverMultigrid.gmg_min_cells         = 4            ## Bottom drop
 FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order          = 2            ## Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
@@ -229,7 +229,7 @@ ItoKMCGodunovStepper.abort_on_failure                         = true            
 ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
 ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
 ItoKMCGodunovStepper.limit_parallel_diffusion                 = false              ## If true, particles do not diffuse against their drift direction
-ItoKMCGodunovStepper.profile                                  = true               ## Turn on/off run-time profiling
+ItoKMCGodunovStepper.profile                                  = false              ## Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                                 = none               ## 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                                = false              ## Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                       = false              ## Turn on/off fluid realm load balancing.
@@ -266,9 +266,9 @@ ItoKMCGodunovStepper.algorithm                                = euler_maruyama  
 # ====================================================================================================
 # ItoKMCJSON class options
 # ====================================================================================================
-ItoKMCJSON.verbose            = false                        ## Turn on/off verbosity
-ItoKMCJSON.debug              = true                         ## Turn on/off debugging
-ItoKMCJSON.chemistry_file     = simple_air_chemistry.json    ## Chemistry file
+ItoKMCJSON.verbose            = false             ## Turn on/off verbosity
+ItoKMCJSON.debug              = true              ## Turn on/off debugging
+ItoKMCJSON.chemistry_file     = chemistry.json    ## Chemistry file
 
 # Kinetic Monte Carlo solver settings.
 ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of computational particles to produce in reaction step
@@ -290,7 +290,7 @@ ItoKMCStreamerTagger.plot              = false          ## Turn on/off plotting 
 ItoKMCStreamerTagger.num_tag_boxes     = 0              ## Number of allowed tag boxes (0 = tags allowe everywhere)
 ItoKMCStreamerTagger.tag_box1_lo       = 0.0 0.0 0.0    ## Only allow tags that fall between
 ItoKMCStreamerTagger.tag_box1_hi       = 0.0 0.0 0.0    ## these two corners
-ItoKMCStreamerTagger.buffer            = 0              ## Grow tagged cells
+ItoKMCStreamerTagger.buffer            = 4              ## Grow tagged cells
 
 ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening

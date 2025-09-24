@@ -47,8 +47,8 @@ Driver.write_restart_files          = false               ## Write restart files
 Driver.initial_regrids              = 3                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 1.0                 ## Stop time
-Driver.max_steps                    = 100                 ## Maximum number of steps
+Driver.stop_time                    = 100.E-9             ## Stop time
+Driver.max_steps                    = 10000               ## Maximum number of steps
 Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
 Driver.write_memory                 = false               ## Write MPI memory report
 Driver.write_loads                  = false               ## Write (accumulated) computational loads
@@ -256,16 +256,16 @@ ItoKMCJSON.debug              = false             ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = chemistry.json    ## Chemistry file. Must be supplied by the user.
 
 # Kinetic Monte Carlo solver settings.
-ItoKMCJSON.max_new_particles     = 32                ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons       = 128               ## Maximum number of computational photons to produce in reaction step
-ItoKMCJSON.increment_weights     = false             ## If true, increment existing particle weights rather than creating new ones
-ItoKMCJSON.crit_num              = 5                 ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps              = 1.E99             ## Maximum relative change in propensity function
-ItoKMCJSON.SSA_num               = 10                ## How many SSA steps to run when tau-leaping is inefficient
-ItoKMCJSON.SSA_lim               = 1.0               ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.max_iter              = 50                ## Maximum number of iterations for implicit algorithms
-ItoKMCJSON.exit_tolerance        = 1.E-6             ## Exit tolerance for implicit algorithms
-ItoKMCJSON.algorithm             = explicit_euler    ## Integration algorithm
+ItoKMCJSON.max_new_particles     = 32                 ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_photons       = 128                ## Maximum number of computational photons to produce in reaction step
+ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
+ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
+ItoKMCJSON.prop_eps              = 1.E99              ## Maximum relative change in propensity function
+ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
+ItoKMCJSON.SSA_lim               = 5.0                ## When to enter SSA instead of tau-leaping
+ItoKMCJSON.max_iter              = 50                 ## Maximum number of iterations for implicit algorithms
+ItoKMCJSON.exit_tolerance        = 1.E-6              ## Exit tolerance for implicit algorithms
+ItoKMCJSON.algorithm             = hybrid_midpoint    ## Integration algorithm
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
