@@ -58,7 +58,7 @@ main(int argc, char* argv[])
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger));
   engine->setupAndRun(input_file);
-  
+
 #ifdef CH_MPI
   CH_TIMER_REPORT();
   MPI_Finalize();
