@@ -112,6 +112,7 @@ Timer::stopEvent(const std::string a_event) noexcept
 inline void
 Timer::printReportHeader(std::ostream& a_outputStream) const noexcept
 {
+  std::ios::fmtflags oldFlags = a_outputStream.flags();
 #ifdef _OPENMP
   if (omp_get_thread_num() == 0) {
 #endif
@@ -137,11 +138,13 @@ Timer::printReportHeader(std::ostream& a_outputStream) const noexcept
 #ifdef _OPENMP
   }
 #endif
+  a_outputStream.flags(oldFlags);
 }
 
 inline void
 Timer::printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept
 {
+  std::ios::fmtflags oldFlags = a_outputStream.flags();
 #ifdef _OPENMP
   if (omp_get_thread_num() == 0) {
 #endif
@@ -159,6 +162,7 @@ Timer::printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real>
 #ifdef _OPENMP
   }
 #endif
+  a_outputStream.flags(oldFlags);
 }
 
 inline void
@@ -166,6 +170,7 @@ Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOnly) c
 {
   // This routine prints a header, the timing report for the various event, and a tail. All events are included
   // but unfinished ones are not counted towards the elapsed time.
+  std::ios::fmtflags oldFlags = a_outputStream.flags();
 #ifdef _OPENMP
   if (omp_get_thread_num() == 0) {
 #endif
@@ -295,6 +300,7 @@ Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOnly) c
 #ifdef _OPENMP
   }
 #endif
+  a_outputStream.flags(oldFlags);
 }
 
 inline std::pair<Real, Real>
