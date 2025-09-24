@@ -1864,12 +1864,14 @@ ItoKMCJSON::initializePlasmaReactions()
       const auto reactionRates      = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
       const auto reactionPlot       = this->parsePlasmaReactionPlot(reactionJSON);
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
+      const auto useReactionDt      = this->parsePlasmaReactionDt(reactionJSON);
 
       m_kmcReactions.emplace_back(KMCReaction(plasmaReactants, plasmaProducts, photonProducts));
       m_kmcReactionRates.emplace_back(reactionRates.first);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
       m_fluidRates.emplace_back(reactionRates.second);
+      m_reactiveDtFactors.emplace_back(useReactionDt);
 
       // Store the list of reactants/products.
       m_plasmaReactionPlasmaReactants.emplace_back(plasmaReactants);
@@ -3078,6 +3080,30 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
     }
     else {
       this->throwParserError(baseError + " but species '" + species + "' is not mobile and diffusive!");
+    }
+  }
+
+  return ret;
+}
+
+Real
+ItoKMCJSON::parsePlasmaReactionDt(const nlohmann::json& a_reactionJSON) const
+{
+  CH_TIME("ItoKMCJSON::parsePlasmaReactionDt");
+  if (m_verbose) {
+    pout() << m_className + "::parsePlasmaReactionDt" << endl;
+  }
+
+  Real ret = 1.0;
+
+  if (a_reactionJSON.contains("include_dt_calc")) {
+    const bool useDt = a_reactionJSON["include_dt_calc"].get<bool>();
+
+    if (useDt) {
+      ret = 1.0;
+    }
+    else {
+      ret = 0.0;
     }
   }
 

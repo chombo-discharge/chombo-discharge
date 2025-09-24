@@ -10,6 +10,7 @@
 */
 
 // Chombo includes
+#include <ParmParse.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -19,6 +20,8 @@
 EBParticleMesh::EBParticleMesh()
 {
   CH_TIME("EBParticleMesh::EBParticleMesh");
+
+  m_verbose = false;
 }
 
 EBParticleMesh::EBParticleMesh(const ProblemDomain& a_domain,
@@ -41,6 +44,7 @@ EBParticleMesh::define(const ProblemDomain& a_domain,
 {
   CH_TIME("EBParticleMesh::define");
 
+  m_verbose = false;
   m_domain  = a_domain;
   m_region  = a_region;
   m_ebisbox = a_ebisbox;
@@ -48,6 +52,9 @@ EBParticleMesh::define(const ProblemDomain& a_domain,
   m_dx      = a_dx;
 
   CH_assert(m_domain.contains(m_region));
+
+  ParmParse pp("EBParticleMesh");
+  pp.query("verbose", m_verbose);
 }
 
 #include <CD_NamespaceFooter.H>

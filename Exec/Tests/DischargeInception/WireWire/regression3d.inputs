@@ -62,13 +62,13 @@ Driver.refine_dielectrics           = 0                   ## Refine dielectric s
 # ====================================================================================================
 # TracerParticleSolver class options
 # ====================================================================================================
-TracerParticleSolver.verbosity         = -1       ## Solver verbosity level.
-TracerParticleSolver.deposition        = cic      ## Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.interpolation     = cic      ## Interpolation method. Must be 'ngp' or 'cic'
-TracerParticleSolver.deposition_cf     = halo     ## Coarse-fine deposition. Must be interp or halo
-TracerParticleSolver.plot_weight       = true     ## Turn on/off plotting of the particle weight.
-TracerParticleSolver.plot_velocity     = true     ## Turn on/off plotting of the particle velocities.
-TracerParticleSolver.volume_scale      = false    ## If true, depositions yield density * volume instead of just volume
+TracerParticleSolver.verbosity         = -1            ## Solver verbosity level.
+TracerParticleSolver.deposition        = cic           ## Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.interpolation     = cic           ## Interpolation method. Must be 'ngp' or 'cic'
+TracerParticleSolver.deposition_cf     = transition    ## 'interp', 'halo', 'halo_ngp', 'transition'.
+TracerParticleSolver.plot_weight       = true          ## Turn on/off plotting of the particle weight.
+TracerParticleSolver.plot_velocity     = true          ## Turn on/off plotting of the particle velocities.
+TracerParticleSolver.volume_scale      = false         ## If true, depositions yield density * volume instead of just volume
 
 # ====================================================================================================
 # FieldSolverMultigrid class options
@@ -79,8 +79,8 @@ FieldSolverMultigrid.bc.x.lo               = dirichlet 0.0     ## Bc type (see d
 FieldSolverMultigrid.bc.x.hi               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo               = dirichlet 0.0     ## Bc type (see docs)
 FieldSolverMultigrid.bc.y.hi               = dirichlet 0.0     ## Bc type (see docs)
-FieldSolverMultigrid.bc.z.lo               = neumann   0.0     ## Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi               = neumann   0.0     ## Bc type (see docs)
+FieldSolverMultigrid.bc.z.lo               = neumann 0.0       ## Bc type (see docs)
+FieldSolverMultigrid.bc.z.hi               = neumann 0.0       ## Bc type (see docs)
 FieldSolverMultigrid.plt_vars              = phi rho E Esol    ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverMultigrid.use_regrid_slopes     = true              ## Use slopes when regridding or not
 FieldSolverMultigrid.kappa_source          = true              ## Volume weighted space charge density or not (depends on algorithm)
@@ -95,7 +95,7 @@ FieldSolverMultigrid.gmg_min_iter          = 5            ## Minimum number of i
 FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
-FieldSolverMultigrid.gmg_min_cells         = 32           ## Bottom drop
+FieldSolverMultigrid.gmg_min_cells         = 4            ## Bottom drop
 FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order          = 1            ## Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
@@ -179,8 +179,8 @@ DischargeInceptionStepper.grad_alpha_dx        = 0.1       ## Maximum step size 
 DischargeInceptionStepper.townsend_grid_dx     = 2.0       ## Space step to use for Townsend tracking
 
 # Static mode
-DischargeInceptionStepper.rel_step_dU     = 0.05    ## Relative (%) voltage increase for each step
-DischargeInceptionStepper.limit_max_K     = 15.0    ## Limit the maximum K-value
+DischargeInceptionStepper.rel_step_dU     = 0.1    ## Relative (%) voltage increase for each step
+DischargeInceptionStepper.limit_max_K     = 1.0    ## Limit the maximum K-value
 
 # Dynamic mode
 DischargeInceptionStepper.ion_transport     = true     ## Turn on/off ion transport

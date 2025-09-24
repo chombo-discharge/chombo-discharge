@@ -205,14 +205,14 @@ This process adheres to the following rules:
 The signatures for updating the ghost cells are:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1308-1315
+   :lines: 1172-1179
    :language: c++
    :dedent: 2
 
 As one alternative, one can update ghost cells on a single grid level:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1317-1330
+   :lines: 1181-1194
    :language: c++
    :dedent: 2
 
@@ -234,7 +234,7 @@ If one needs data on a grid level where no data already exists, it is possible t
 The interpolation function that fill fine-grid data from a coarse grid has the following signature:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1399-1418
+   :lines: 1263-1282
    :language: c++
    :dedent: 2
 

@@ -47,8 +47,8 @@ Driver.write_restart_files          = false               ## Write restart files
 Driver.initial_regrids              = 3                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 1.0                 ## Stop time
-Driver.max_steps                    = 100                 ## Maximum number of steps
+Driver.stop_time                    = 100.E-9             ## Stop time
+Driver.max_steps                    = 10000               ## Maximum number of steps
 Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
 Driver.write_memory                 = false               ## Write MPI memory report
 Driver.write_loads                  = false               ## Write (accumulated) computational loads
@@ -148,7 +148,7 @@ ItoSolver.irr_ngp_interp         = true            ## Force irregular interpolat
 ItoSolver.mobility_interp        = direct          ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition        = cic             ## Cloud-in-cell for plotting particles.
 ItoSolver.deposition             = cic             ## Deposition type.
-ItoSolver.deposition_cf          = halo            ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.deposition_cf          = transition      ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
 # SurfaceODESolver solver settings.
@@ -181,7 +181,7 @@ McPhoto.source_type              = number           ## 'number'      -> Source t
                                                     # 'volume_rate' -> Source terms contains the volumetric rate
                                                     # 'rate'        -> Source terms contains the rate
 McPhoto.deposition               = cic              ## 'ngp'  -> nearest grid point, 'cic' -> cloud-in-cell
-McPhoto.deposition_cf            = halo             ## Coarse-fine deposition. Must be 'interp' or 'halo'
+McPhoto.deposition_cf            = transition       ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
 # WireWire geometry class options
@@ -225,7 +225,7 @@ ItoKMCGodunovStepper.box_sorting                              = morton          
 ItoKMCGodunovStepper.particles_per_cell                       = 32                 ## Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                           = 1                  ## Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                    = false              ## Make superparticles during regrids
-ItoKMCGodunovStepper.physics_dt_factor                        = 1.E99              ## Physics-based time step factor
+ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
 ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl               = 1.0                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
@@ -234,7 +234,7 @@ ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl     = 0.0             
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl     = 1.E99              ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl            = 0.5                ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                          = 100.0              ## Relaxation time step restriction.
-ItoKMCGodunovStepper.min_dt                                   = 10E-12             ## Minimum permitted time step
+ItoKMCGodunovStepper.min_dt                                   = 20E-12             ## Minimum permitted time step
 ItoKMCGodunovStepper.max_dt                                   = 1.E-9              ## Maximum permitted time step
 ItoKMCGodunovStepper.max_growth_dt                            = 2.0                ## Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                            = 2.0                ## Maximum permissible time step reduction (dt/factor)
@@ -256,16 +256,16 @@ ItoKMCJSON.debug              = false             ## Turn on/off debugging
 ItoKMCJSON.chemistry_file     = chemistry.json    ## Chemistry file. Must be supplied by the user.
 
 # Kinetic Monte Carlo solver settings.
-ItoKMCJSON.max_new_particles     = 32                ## Maximum number of computational particles to produce in reaction step
-ItoKMCJSON.max_new_photons       = 128               ## Maximum number of computational photons to produce in reaction step
-ItoKMCJSON.increment_weights     = false             ## If true, increment existing particle weights rather than creating new ones
-ItoKMCJSON.crit_num              = 5                 ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps              = 1.E99             ## Maximum relative change in propensity function
-ItoKMCJSON.SSA_num               = 10                ## How many SSA steps to run when tau-leaping is inefficient
-ItoKMCJSON.SSA_lim               = 1.0               ## When to enter SSA instead of tau-leaping
-ItoKMCJSON.max_iter              = 50                ## Maximum number of iterations for implicit algorithms
-ItoKMCJSON.exit_tolerance        = 1.E-6             ## Exit tolerance for implicit algorithms
-ItoKMCJSON.algorithm             = explicit_euler    ## Integration algorithm
+ItoKMCJSON.max_new_particles     = 32                 ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_photons       = 128                ## Maximum number of computational photons to produce in reaction step
+ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
+ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
+ItoKMCJSON.prop_eps              = 1.E99              ## Maximum relative change in propensity function
+ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
+ItoKMCJSON.SSA_lim               = 5.0                ## When to enter SSA instead of tau-leaping
+ItoKMCJSON.max_iter              = 50                 ## Maximum number of iterations for implicit algorithms
+ItoKMCJSON.exit_tolerance        = 1.E-6              ## Exit tolerance for implicit algorithms
+ItoKMCJSON.algorithm             = hybrid_midpoint    ## Integration algorithm
 
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS

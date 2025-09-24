@@ -12,7 +12,10 @@
 #ifndef CD_EBParticleMesh_H
 #define CD_EBParticleMesh_H
 
-// CHombo includes
+// Std includes
+#include <type_traits>
+
+// Chombo includes
 #include <EBISBox.H>
 #include <EBCellFAB.H>
 #include <Vector.H>
@@ -23,12 +26,9 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A class for depositing and interpolating particles. Contains various useful routines for interpolation of different fields in the
-  base particle class (e.g., mass, "mobility"). This class also contains functions for depositing particles with 2/4 times the usual particle width,
-  which is included because we want to support deposition of particles over refinement boundaries. 
-  @details Currently, this class is cheap to construct and thus does not need to stored for each box during regrids. 
-  @note If the user sets the object to force ngp deposition in cut-cells, the result is not kappa-weighted in any form, i.e. the cut-cell will contain
-  the full deposited mass (without multiplying or dividing by kappa). Likewise, it will force NGP interpolation in cut-cells. 
+  @brief A class for depositing and interpolating particles on a single grid patch. 
+  @details Currently, this class is cheap to construct and thus does not need to stored for each box during regrids.
+  @note When depositing, this class will never divide by kappa. 
 */
 class EBParticleMesh
 {
@@ -68,368 +68,69 @@ public:
          const RealVect&      a_probLo);
 
   /*!
-    @brief Deposit particle onto the mesh using a standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
-    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
-    
-    deposit<Particle, &Particle::mass>(a_particleList, a_rho, a_depositionType, a_forceIrregNGP)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
+    @brief Deposit a particle onto the mesh.
+    @details The template parameters indicate the particle type and a pointer to a particle function. The user can scale
+    the particle width by changing a_widthScale. If this is set to one, the standard width for CIC becomes the grid cell size,
+    and the standard width for TSC becomes twice the grid size. 
     @param[inout] a_rho            Mesh data
+    @param[in]    a_particles      Particles to be deposited    
     @param[in]    a_depositionType Deposition method
+    @param[in]    a_widthScale     Particle scale multiplier.  
     @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
-  deposit(const List<P>&       a_particleList,
-          EBCellFAB&           a_rho,
+  deposit(EBCellFAB&           a_meshData,
+          const List<P>&       a_particles,
           const DepositionType a_depositionType,
+          const Real           a_widthScale,
           const bool           a_forceIrregNGP = false) const;
 
   /*!
-    @brief Deposit particle onto the mesh using a standard cloud width. 
-    @details Just like the version above, except that the function signature is Real P::particleScalarField() const.
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
+    @brief Interpolate mesh data onto a particle. 
+    @details The template parameters indicate the particle type and a pointer to a particle function. 
+    @param[inout] a_particles      Particles to be deposited
+    @param[in]    a_meshData       Mesh data    
     @param[in]    a_depositionType Deposition method
+    @param[in]    a_widthScale     Particle scale multiplier.  
     @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
   */
-  template <class P, Real (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
-  deposit(const List<P>&       a_particleList,
-          EBCellFAB&           a_rho,
-          const DepositionType a_depositionType,
-          const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using twice the standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
-    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  deposit2(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using twice the standard cloud width. 
-    @details Justl ike the version above, except that the function signature is Real P::particleScalarField() const.
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, Real (P::*particleScalarField)() const>
-  void
-  deposit2(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
-    const Real& P::a_particleScalarField. E.g. if we are depositing mass through a function const Real& P::mass() we will specifiy
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  deposit4(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
-    @details Just like the version above except that the function signature is Real P::particleScalarField() const
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, Real (P::*particleScalarField)() const>
-  void
-  deposit4(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using a standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleVectorField' This should be a pointer to a member function with signature 
-    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
-    
-    deposit<Particle, &Particle::mass>(a_particleList, a_rho, a_depositionType, a_forceIrregNGP)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const RealVect& (P::*particleVectorField)() const>
-  void
-  deposit(const List<P>&       a_particleList,
-          EBCellFAB&           a_rho,
-          const DepositionType a_depositionType,
-          const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using a standard cloud width. 
-    @details Just like the version above, except that the function signature is Real P::particleVectorField() const.
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, RealVect (P::*particleVectorField)() const>
-  void
-  deposit(const List<P>&       a_particleList,
-          EBCellFAB&           a_rho,
-          const DepositionType a_depositionType,
-          const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using twice the standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleVectorField' This should be a pointer to a member function with signature 
-    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const RealVect& (P::*particleVectorField)() const>
-  void
-  deposit2(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using twice the standard cloud width. 
-    @details Justl ike the version above, except that the function signature is Real P::particleVectorField() const.
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, RealVect (P::*particleVectorField)() const>
-  void
-  deposit2(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
-    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
-    is fetched from the specified template parameter 'a_particleVectorField' This should be a pointer to a member function with signature 
-    const Real& P::a_particleVectorField. E.g. if we are depositing mass through a function const Real& P::mass() we will specifiy
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, const RealVect& (P::*particleVectorField)() const>
-  void
-  deposit4(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
-    @details Just like the version above except that the function signature is Real P::particleVectorField() const
-    @param[in]    a_particleList   Particles to be deposited
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
-    @note This routine will INCREMENT a_rho. 
-  */
-  template <class P, RealVect (P::*particleVectorField)() const>
-  void
-  deposit4(const List<P>&       a_particleList,
-           EBCellFAB&           a_rho,
-           const DepositionType a_depositionType,
-           const bool           a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Interpolate a scalar field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalar' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
-    expression is e.g.
-    
-    interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
-	
-    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
-    @param[inout] a_particleList    Particles to be interpolated. 
-    @param[in]    a_meshScalarField Scalar field on the mesh 
-    @param[in]    a_interpType      Interpolation type. 
-  */
-  template <class P, Real& (P::*particleScalarField)()>
-  void
-  interpolate(List<P>&             a_particleList,
-              const EBCellFAB&     a_meshScalarField,
+  interpolate(List<P>&             a_particles,
+              const EBCellFAB&     a_meshData,
               const DepositionType a_interpType,
               const bool           a_forceIrregNGP = false) const;
 
   /*!
-    @brief Interpolate a vector field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have SpaceDim components and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid 
-    expression is e.g.
-    
-    interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
-	
-    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
-    @param[inout] a_particleList    Particles to be interpolated. 
-    @param[in]    a_meshVectorField Vector field on the mesh
-    @param[in]    a_interpType      Interpolation type. 
+    @brief Sanitize the return function type, ensuring it is either Real or RealVect.
+    @return Returns the number of components corresponding to Ret
   */
-  template <class P, RealVect& (P::*particleVectorField)()>
-  void
-  interpolate(List<P>&             a_particleList,
-              const EBCellFAB&     a_meshVectorField,
-              const DepositionType a_interpType,
-              const bool           a_forceIrregNGP = false) const;
+  template <typename Ret>
+  static inline constexpr int
+  sanitize() noexcept
+  {
+    using NoRef = typename std::remove_reference<Ret>::type;
+    using Base  = typename std::remove_cv<NoRef>::type;
+
+    static_assert(std::is_same<Base, Real>::value || std::is_same<Base, RealVect>::value,
+                  "Ret should be Real or RealVect");
+
+    return std::is_same<Base, Real>::value ? 1 : SpaceDim;
+  }
 
 protected:
-  /*!
-    @brief Wrapper function for depositing a single particle.
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_probLo         Lower-left corner of domain
-    @param[in]    a_dx             Grid resolution
-    @param[in]    a_position       Particle position
-    @param[in]    a_strength       Mass (or similar quantity) to be deposited. Must be of type Real[] (or &Real if single comopnent)
-    @param[in]    a_components     Components to deposit
-    @param[in]    a_depositionType Deposition type
-    @param[in]    a_forceIrregNGP  Force NGP in cut-cells
-  */
-  inline void
-  depositParticle(EBCellFAB&           a_rho,
-                  const RealVect&      a_probLo,
-                  const RealVect&      a_dx,
-                  const RealVect&      a_position,
-                  const Real*          a_strength,
-                  const Interval       a_components,
-                  const DepositionType a_depositionType,
-                  const bool           a_forceIrregNGP) const;
-
-  /*!
-    @brief Wrapper function for depositing a single particle which has twice the usual cloud width. 
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_probLo         Lower-left corner of domain
-    @param[in]    a_dx             Grid resolution
-    @param[in]    a_position       Particle position
-    @param[in]    a_strength       Mass (or similar quantity) to be deposited. Must be of type Real[] (or &Real if single comopnent)
-    @param[in]    a_components     Components to deposit
-    @param[in]    a_depositionType Deposition type
-    @param[in]    a_forceIrregNGP  Force NGP in cut-cells
-  */
-  inline void
-  depositParticle2(EBCellFAB&           a_rho,
-                   const RealVect&      a_probLo,
-                   const RealVect&      a_dx,
-                   const RealVect&      a_position,
-                   const Real*          a_strength,
-                   const Interval       a_components,
-                   const DepositionType a_depositionType,
-                   const bool           a_forceIrregNGP) const;
-
-  /*!
-    @brief Wrapper function for depositing a single particle which has four times the usual cloud width.
-    @param[inout] a_rho            Mesh data
-    @param[in]    a_probLo         Lower-left corner of domain
-    @param[in]    a_dx             Grid resolution
-    @param[in]    a_position       Particle position
-    @param[in]    a_strength       Mass (or similar quantity) to be deposited. Must be of type Real[] (or &Real if single comopnent)
-    @param[in]    a_components     Components to deposit
-    @param[in]    a_depositionType Deposition type
-    @param[in]    a_forceIrregNGP  Force NGP in cut-cells
-  */
-  inline void
-  depositParticle4(EBCellFAB&           a_rho,
-                   const RealVect&      a_probLo,
-                   const RealVect&      a_dx,
-                   const RealVect&      a_position,
-                   const Real*          a_strength,
-                   const Interval       a_components,
-                   const DepositionType a_depositionType,
-                   const bool           a_forceIrregNGP) const;
-
-  /*!
-    @brief Wrapper function that interpolates a particle fields onto positions. 
-    @details This switches between various possible kernels, NGP, CIC, TSC, W4. It can interpolate both vectors and scalars, the user inputs the data holder 
-    as a Real[] and specifies the components to interpolate. 
-    @param[out] a_particleField  Field evaluations at the particle position. Must be of type Real[]. 
-    @param[in]  a_field          Field. 
-    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
-    @param[in]  a_probLo         Lower-left corner of domain
-    @param[in]  a_dx             Grid resolution
-    @param[in]  a_position       Particle position
-    @param[in]  a_interval       Components to interpolate
-    @param[in]  a_interpType     Interpolation type. 
-    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
-  */
-  inline void
-  interpolateParticle(Real*                a_particleField,
-                      const EBCellFAB&     a_field,
-                      const Box&           a_validBox,
-                      const RealVect&      a_probLo,
-                      const RealVect&      a_dx,
-                      const RealVect&      a_position,
-                      const Interval&      a_interval,
-                      const DepositionType a_interpType,
-                      const bool           a_forceIrregNGP) const;
-
   /*!
     @brief Problem domain
   */
   ProblemDomain m_domain;
+
+  /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
 
   /*!
     @brief Cell-centered box, i.e. valid region. 
@@ -450,6 +151,120 @@ protected:
     @brief Lower-left corner of computational domain.
   */
   RealVect m_probLo;
+
+  /*!
+    @brief Wrapper function for depositing a single particle with a standard NGP scheme. 
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_position       Particle position
+    @param[in]    a_volumeFactor   Volume factor to multiply by
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_numComp        Number of components to deposit
+  */
+  inline void
+  depositParticleNGP(EBCellFAB&      a_rho,
+                     const RealVect& a_position,
+                     const Real&     a_volumeFactor,
+                     const Real*     a_strength,
+                     const int&      a_numComp) const noexcept;
+
+  /*!
+    @brief Function for depositing a single particle with a CIC scheme.
+    @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
+    box a_particleBox must be large enough to contain the particle. E.g., if a_particleWidth = 1, then the box must be at least
+    Box(-IntVect::Unit, IntVect::Unit).
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_position       Particle position
+    @param[in]    a_particleWidth  Particle width (relative to grid resolution)
+    @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
+    @param[in]    a_volumeFactor   Volume factor to multiply by
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_numCOmp        Number of components to deposit
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells or not
+  */
+  inline void
+  depositParticleCIC(EBCellFAB&      a_rho,
+                     const RealVect& a_position,
+                     const RealVect& a_particleWidth,
+                     const Box&      a_particleBox,
+                     const Real&     a_volumeFactor,
+                     const Real*     a_strength,
+                     const int&      a_numComp,
+                     const bool      a_forceIrregNGP) const noexcept;
+
+  /*!
+    @brief Function for depositing a single particle with a TSC scheme.
+    @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
+    box (a_cicBox) must be large enough to contain a particle. E.g., if a_particleWidth = 2, then the box must be at least
+    Box(-2*IntVect::Unit, 2*IntVect::Unit).
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_position       Particle position
+    @param[in]    a_particleWidth  Particle width (relative to grid resolution)
+    @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
+    @param[in]    a_volumeFactor   Volume factor to multiply by
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_numCOmp        Number of components to deposit
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells or not
+  */
+  inline void
+  depositParticleTSC(EBCellFAB&      a_rho,
+                     const RealVect& a_position,
+                     const RealVect& a_particleWidth,
+                     const Box&      a_particleBox,
+                     const Real&     a_volumeFactor,
+                     const Real*     a_strength,
+                     const int&      a_numComp,
+                     const bool      a_forceIrregNGP) const noexcept;
+
+  /*!
+    @brief Particle interpolation function using an NGP scheme. 
+    @param[out] a_particleField  Particle quantity to interpolate into.
+    @param[in]  a_meshData       Mesh data
+    @param[in]  a_position       Particle position
+    @param[in]  a_numComp        Number of components to interpolate.
+  */
+  inline void
+  interpolateParticleNGP(Real*            a_particleField,
+                         const EBCellFAB& a_meshData,
+                         const RealVect&  a_position,
+                         const int&       a_numComp) const noexcept;
+
+  /*!
+    @brief Particle interpolation function using a CIC scheme. 
+    @param[out] a_particleField  Particle quantity to interpolate into.
+    @param[in]  a_meshData       Mesh data
+    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
+    @param[in]  a_particleBox    Box that is sufficiently large to contain the particle, computed from the clouds lower-left corner
+    @param[in]  a_position       Particle position
+    @param[in]  a_numComp        Number of components to interpolate.
+    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
+  */
+  inline void
+  interpolateParticleCIC(Real*            a_particleField,
+                         const EBCellFAB& a_meshData,
+                         const Box&       a_validBox,
+                         const Box&       a_particleBox,
+                         const RealVect&  a_position,
+                         const int&       a_numComp,
+                         const bool       a_forceIrregNGP) const noexcept;
+
+  /*!
+    @brief Particle interpolation function using a TSC scheme. 
+    @param[out] a_particleField  Particle quantity to interpolate into.
+    @param[in]  a_meshData       Mesh data
+    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
+    @param[in]  a_particleBox    Box that is sufficiently large to contain the particle, computed from the clouds lower-left corner
+    @param[in]  a_position       Particle position
+    @param[in]  a_numComp        Number of components to interpolate.
+    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
+  */
+  inline void
+  interpolateParticleTSC(Real*            a_particleField,
+                         const EBCellFAB& a_meshData,
+                         const Box&       a_validBox,
+                         const Box&       a_particleBox,
+                         const RealVect&  a_position,
+                         const int&       a_numComp,
+                         const bool       a_forceIrregNGP) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

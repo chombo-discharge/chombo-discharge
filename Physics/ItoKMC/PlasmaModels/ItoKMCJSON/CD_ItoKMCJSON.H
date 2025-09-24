@@ -726,6 +726,12 @@ namespace Physics {
       parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const;
 
       /*!
+        @brief Parse whether or not a reaction should be a part of the time step calculation. Returns 1 if the reaction is a part of it.
+      */
+      virtual Real
+      parsePlasmaReactionDt(const nlohmann::json& a_reactionJSON) const;
+
+      /*!
 	@brief Parse a table which is stored in E/N format
 	@param[in] a_tableEntry Table entry in JSON format. 
 	@param[in] a_dataID     Data identifier

@@ -56,19 +56,13 @@ Aerosol::Aerosol()
 
   // Construct tht CSG union of spheres
   if (numSpheres > 0) {
-    const int ndigits = (int)log10((double)numSpheres) + 1;
-
-    char* cstr = new char[ndigits];
-
     std::vector<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>> spheres;
 
     for (int i = 0; i < numSpheres; i++) {
-
-      sprintf(cstr, "%d", 1 + i);
-      const std::string str = "Aerosol.sphere" + std::string(cstr);
-      ParmParse         pp2(str);
+      const std::string str = "Aerosol.sphere" + std::to_string(1 + i);
 
       // Get center and radius.
+      ParmParse pp2(str);
       pp2.get("radius", radius);
       pp2.getarr("center", v, 0, SpaceDim);
 
@@ -83,8 +77,6 @@ Aerosol::Aerosol()
     const auto unionChombo = RefCountedPtr<BaseIF>(new EBGeometryIF<>(EBGeometry::Union<Real>(spheres), !invert, 0.0));
 
     m_dielectrics.push_back(Dielectric(unionChombo, solidPermittivity));
-
-    delete[] cstr;
   }
 }
 

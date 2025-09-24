@@ -45,7 +45,7 @@
 	}
     },
     "particle placement": {     // Particle placement algorithm. 
-	"method": "downstream", // Method. Must be either 'centroid', 'random', or 'downstream'
+	"method": "random", // Method. Must be either 'centroid', 'random', or 'downstream'
 	"species": "e"		// Species. Must be one of the plasma species. 
     },    
     "alpha": {		// Specification of the Townsend ionization coefficient.
@@ -240,101 +240,96 @@
 	// biparticle reactions, or scaling for reactions involving the same species).
 	{
 	    // Tabulated reaction rate for e + N2 -> e + e + N2+
-	    "reaction": "e + N2 -> e + e + N2+",             // Reaction. Must contain the '->'
-	    "description": "Rate/N2 ionization",             // Optional description of the reaction. Used when plotting the rate
-	    "type": "table vs E/N",                          // Specification of reaction rate type
-	    "file" : "bolsig_air.dat",                       // File containing the data
-	    "header" : "C25   N2    Ionization    15.60 eV", // Header line preceding data
-	    "E/N column" : 0,                                // Optional specification of column containing E/N (defaults to 0)
-	    "rate/N column" : 1,                             // Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,                                 // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	    "max E/N" : 1000.0,                              // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	    "num points" : 1000,                             // Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
-	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
-	    //"dump" : "debug_r1.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-//            "gradient correction": "e",                      // Use gradient correction to rate
-	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
+	    "reaction": "e + N2 -> e + e + N2+",		// Reaction. Must contain the '->'
+	    "description": "Rate/N2 ionization",		// Optional description of the reaction. Used when plotting the rate
+	    "type": "table vs E/N",				// Specification of reaction rate type
+	    "file" : "bolsig_air.dat",				// File containing the data
+	    "header" : "C25   N2    Ionization    15.60 eV",	// Header line preceding data
+	    "E/N column" : 0,					// Optional specification of column containing E/N (defaults to 0)
+	    "rate/N column" : 1,				// Optional specification of column containing alpha/N (defaults to 1)
+	    "min E/N" : 1.0,					// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
+	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "scale E/N" : 1.0,					// Optional scaling of the column containing E/N
+	    "scale rate/N" : 1.0,				// Optional scaling of the column containing rate/E
+	    "include_dt_calc": true,				// Optional inclusion/exclusion in calculation of dt
+	    "plot": true					// Optional. If true, the reaction rate will be plotted.
 	},
 	{
 	    // Tabulated reaction rate for e + O2 -> e + e + O2+	    
-	    "reaction": "e + O2 -> e + e + O2+",             // Reaction. Must contain the '->'
-	    "description": "Rate/O2 ionization",             // Optional description of the reaction. Used when plotting the rate
-	    "type": "table vs E/N",                          // Specification of reaction rate type
-	    "file" : "bolsig_air.dat",                       // File containing the data
-	    "header" : "C42   O2    Ionization    12.06 eV", // Header line preceding data
-	    "E/N column" : 0,                                // Optional specification of column containing E/N (defaults to 0)
-	    "rate/N column" : 1,                             // Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,                                 // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	    "max E/N" : 1000.0,                              // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	    "num points" : 1000,                             // Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
-	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
-	    //"dump" : "debug_r2.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-//            "gradient correction": "e",                      // Use gradient correction to rate
-	    "plot": true                                     // Optional. If true, the reaction rate will be plotted.
+	    "reaction": "e + O2 -> e + e + O2+",		// Reaction. Must contain the '->'
+	    "description": "Rate/O2 ionization",		// Optional description of the reaction. Used when plotting the rate
+	    "type": "table vs E/N",				// Specification of reaction rate type
+	    "file" : "bolsig_air.dat",				// File containing the data
+	    "header" : "C42   O2    Ionization    12.06 eV",	// Header line preceding data
+	    "E/N column" : 0,					// Optional specification of column containing E/N (defaults to 0)
+	    "rate/N column" : 1,				// Optional specification of column containing alpha/N (defaults to 1)
+	    "min E/N" : 1.0,					// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
+	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "scale E/N" : 1.0,					// Optional scaling of the column containing E/N
+	    "scale rate/N" : 1.0,				// Optional scaling of the column containing rate/E
+	    "include_dt_calc": true,				// Optional inclusion/exclusion in calculation of dt
+	    "plot": true					// Optional. If true, the reaction rate will be plotted.
 	},
 	{
 	    // Tabulated reaction rate for e + O2 -> e + e + O2+	    
-	    "reaction": "e + O2 -> O2-",         // Reaction. Must contain the '->'
-	    "description": "Rate/O2 attachment", // Optional description of the reaction. Used when plotting the rate
-	    "type": "table vs E/N",              // Specification of reaction rate type
-	    "file" : "bolsig_air.dat",           // File containing the data
-	    "header" : "C27   O2    Attachment", // Header line preceding data
-	    "E/N column" : 0,                    // Optional specification of column containing E/N (defaults to 0)
-	    "rate/N column" : 1,                 // Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,                     // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	    "max E/N" : 1000.0,                  // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	    "num points" : 1000,                 // Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",           // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	    "scale E/N" : 1.0,                   // Optional scaling of the column containing E/N
-	    "scale rate/N" : 1.0,                // Optional scaling of the column containing rate/E
-	    //"dump" : "debug_r3.dat",           // Optional dump of internalized table to file. Useful for debugging.
-//            "gradient correction": "e",          // Use gradient correction to rate
-	    "plot": true                         // Optional. If true, the reaction rate will be plotted.
+	    "reaction": "e + O2 -> O2-",		// Reaction. Must contain the '->'
+	    "description": "Rate/O2 attachment",	// Optional description of the reaction. Used when plotting the rate
+	    "type": "table vs E/N",			// Specification of reaction rate type
+	    "file" : "bolsig_air.dat",			// File containing the data
+	    "header" : "C27   O2    Attachment",	// Header line preceding data
+	    "E/N column" : 0,				// Optional specification of column containing E/N (defaults to 0)
+	    "rate/N column" : 1,			// Optional specification of column containing alpha/N (defaults to 1)
+	    "min E/N" : 1.0,				// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "max E/N" : 1000.0,				// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	    "num points" : 1000,			// Optional number of points kept when resamplnig the table (defaults to 1000)
+	    "spacing" : "exponential",			// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "scale E/N" : 1.0,				// Optional scaling of the column containing E/N
+	    "scale rate/N" : 1.0,			// Optional scaling of the column containing rate/E
+	    "include_dt_calc": false,			// Optional inclusion/exclusion in calculation of dt	    
+	    "plot": true				// Optional. If true, the reaction rate will be plotted.
 	},
 	{
 	    // Tabulated reaction rate for e + O2 -> e + e + O2+	    
-	    "reaction": "e + O2 + O2 -> O2- + O2",         // Reaction. Must contain the '->'
-	    "description": "Rate/O2 attachment", // Optional description of the reaction. Used when plotting the rate
-	    "type": "table vs E/N",              // Specification of reaction rate type
-	    "file" : "bolsig_air.dat",           // File containing the data
-	    "header" : "C26   O2    Attachment", // Header line preceding data
-	    "E/N column" : 0,                    // Optional specification of column containing E/N (defaults to 0)
-	    "rate/N column" : 1,                 // Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,                     // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	    "max E/N" : 1000.0,                  // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	    "num points" : 1000,                 // Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",           // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	    "scale E/N" : 1.0,                   // Optional scaling of the column containing E/N
-	    "scale rate/N" : 1.0,                // Optional scaling of the column containing rate/E
-	    // "dump" : "debug_r4.dat",          // Optional dump of internalized table to file. Useful for debugging.
-	    "scale": 1.0E-6,                     // Scaling as per BOLSIG+
-//            "gradient correction": "e",          // Use gradient correction to rate
-	    "plot": true                         // Optional. If true, the reaction rate will be plotted.
+	    "reaction": "e + O2 + O2 -> O2- + O2",      // Reaction. Must contain the '->'
+	    "description": "Rate/O2 attachment",	// Optional description of the reaction. Used when plotting the rate
+	    "type": "table vs E/N",			// Specification of reaction rate type
+	    "file" : "bolsig_air.dat",			// File containing the data
+	    "header" : "C26   O2    Attachment",	// Header line preceding data
+	    "E/N column" : 0,				// Optional specification of column containing E/N (defaults to 0)
+	    "rate/N column" : 1,			// Optional specification of column containing alpha/N (defaults to 1)
+	    "min E/N" : 1.0,				// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "max E/N" : 1000.0,				// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	    "num points" : 1000,			// Optional number of points kept when resamplnig the table (defaults to 1000)
+	    "spacing" : "exponential",			// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "scale E/N" : 1.0,				// Optional scaling of the column containing E/N
+	    "scale rate/N" : 1.0,			// Optional scaling of the column containing rate/E
+	    "scale": 1.0E-6,				// Scaling as per BOLSIG+
+	    "include_dt_calc": false,			// Optional inclusion/exclusion in calculation of dt	    	    
+	    "plot": true				// Optional. If true, the reaction rate will be plotted.
 	},	
 	{
 	    // Tabulated reaction rate for e + N2 -> e + Y + N2
-	    "reaction": "e + N2 -> e + Y + (N2)",            // Reaction. Must contain the '->'
-	    "description": "Rate/Photon generation",         // Optional description of the reaction. Used when plotting the rate
-	    "type": "table vs E/N",                          // Specification of reaction rate type
-	    "file" : "bolsig_air.dat",                       // File containing the data
-	    "header" : "C25   N2    Ionization    15.60 eV", // Header line preceding data
-	    "E/N column" : 0,                                // Optional specification of column containing E/N (defaults to 0)
-	    "rate/N column" : 1,                             // Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,                                 // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
-	    "max E/N" : 1000.0,                              // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
-	    "num points" : 1000,                             // Optional number of points kept when resamplnig the table (defaults to 1000)
-	    "spacing" : "exponential",                       // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
-	    "scale E/N" : 1.0,                               // Optional scaling of the column containing E/N
-	    "scale rate/N" : 1.0,                            // Optional scaling of the column containing rate/E
-	    //"dump" : "debug_r5.dat",                       // Optional dump of internalized table to file. Useful for debugging.
-//            "gradient correction": "e",                      // Use gradient correction to rate
-	    "plot": true,                                    // Optional. If true, the reaction rate will be plotted.
-	    "efficiency": 0.06,                              // Reaction efficiency, assuming the number of photoionization events per ionization event
-	    "quenching pressure": 4000.0                     // Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
+	    "reaction": "e + N2 -> e + Y + (N2)",		// Reaction. Must contain the '->'
+	    "description": "Rate/Photon generation",		// Optional description of the reaction. Used when plotting the rate
+	    "type": "table vs E/N",				// Specification of reaction rate type
+	    "file" : "bolsig_air.dat",				// File containing the data
+	    "header" : "C25   N2    Ionization    15.60 eV",	// Header line preceding data
+	    "E/N column" : 0,					// Optional specification of column containing E/N (defaults to 0)
+	    "rate/N column" : 1,				// Optional specification of column containing alpha/N (defaults to 1)
+	    "min E/N" : 1.0,					// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
+	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
+	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
+	    "scale E/N" : 1.0,					// Optional scaling of the column containing E/N
+	    "scale rate/N" : 1.0,				// Optional scaling of the column containing rate/E
+	    "plot": true,					// Optional. If true, the reaction rate will be plotted.
+	    "include_dt_calc": false,				// Optional inclusion/exclusion in calculation of dt	    	    	    
+	    "efficiency": 0.06,					// Reaction efficiency, assuming the number of photoionization events per ionization event
+	    "quenching pressure": 4000.0			// Pressure quenching for collisional de-excitation (plus predissociation) of excited N2.
 	}
 
     ],

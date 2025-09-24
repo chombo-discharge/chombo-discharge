@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_ParticleOps.H>
+#include <CD_ParallelOps.H>
 #include <CD_PolyUtils.H>
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>

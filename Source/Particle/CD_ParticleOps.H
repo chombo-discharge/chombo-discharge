@@ -19,9 +19,11 @@
 #include <RealVect.H>
 
 // Our includes
-#include <CD_ParticleContainer.H>
 #include <CD_EBAMRData.H>
 #include <CD_NamespaceHeader.H>
+
+template <typename P>
+class ParticleContainer;
 
 /*!
   @brief A shallow static class for doing various kinds of particle-related operations.

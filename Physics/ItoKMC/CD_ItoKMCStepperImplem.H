@@ -3949,12 +3949,12 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(const EBAMRCellData& a_electri
   for (int i = 0; i < m_cdrPhotoiProducts.size(); i++) {
     m_cdrPhotoiProducts[i].organizeParticlesByPatch();
 
-    m_amr->depositParticles<PointParticle, &PointParticle::weight>(m_particleScratch1,
-                                                                   m_particleRealm,
-                                                                   m_plasmaPhase,
-                                                                   m_cdrPhotoiProducts[i],
-                                                                   DepositionType::NGP,
-                                                                   CoarseFineDeposition::Halo);
+    m_amr->depositParticles<PointParticle, const Real&, &PointParticle::weight>(m_particleScratch1,
+                                                                                m_particleRealm,
+                                                                                m_plasmaPhase,
+                                                                                m_cdrPhotoiProducts[i],
+                                                                                DepositionType::NGP,
+                                                                                CoarseFineDeposition::Halo);
 
     m_amr->copyData(m_fluidScratch1, m_particleScratch1);
     DataOps::volumeScale(m_fluidScratch1, m_amr->getDx());
@@ -5144,19 +5144,19 @@ ItoKMCStepper<I, C, R, F>::resolveSecondaryEmissionEB(Vector<ParticleContainer<I
     if (Z != 0) {
 
       // Add charge from primary particles
-      m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
-                                                                 m_particleRealm,
-                                                                 m_plasmaPhase,
-                                                                 *a_primaryParticles[idx]);
+      m_amr->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(m_particleScratchEB,
+                                                                              m_particleRealm,
+                                                                              m_plasmaPhase,
+                                                                              *a_primaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, 1.0 * Z * Units::Qe);
 
       // Subtract charge from secondary particles
-      m_amr->depositParticles<ItoParticle, &ItoParticle::weight>(m_particleScratchEB,
-                                                                 m_particleRealm,
-                                                                 m_plasmaPhase,
-                                                                 *a_secondaryParticles[idx]);
+      m_amr->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(m_particleScratchEB,
+                                                                              m_particleRealm,
+                                                                              m_plasmaPhase,
+                                                                              *a_secondaryParticles[idx]);
 
       m_amr->copyData(m_fluidScratchEB, m_particleScratchEB);
       DataOps::incr(a_surfaceChargeDensity, m_fluidScratchEB, -1.0 * Z * Units::Qe);
@@ -5901,12 +5901,12 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       }
 
       // Interpolate the potential to the current particle position which gives us V(B) for the particles.
-      m_amr->interpolateParticles<CompParticle, &CompParticle::template real<1>>(computationParticles,
-                                                                                 m_particleRealm,
-                                                                                 m_plasmaPhase,
-                                                                                 m_particleScratch1,
-                                                                                 solver->getDeposition(),
-                                                                                 false);
+      m_amr->interpolateParticles<CompParticle, Real&, &CompParticle::template real<1>>(computationParticles,
+                                                                                        m_particleRealm,
+                                                                                        m_plasmaPhase,
+                                                                                        m_particleScratch1,
+                                                                                        solver->getDeposition(),
+                                                                                        false);
 
       // Move the particles back to their old positions and interpolate the potential there.
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -5936,11 +5936,11 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       computationParticles.remap();
 
       // Interpolate the potential to the previous particle position which gives us V(A) for the particles.
-      m_amr->interpolateParticles<CompParticle, &CompParticle::template real<2>>(computationParticles,
-                                                                                 m_particleRealm,
-                                                                                 m_plasmaPhase,
-                                                                                 m_particleScratch1,
-                                                                                 solver->getDeposition());
+      m_amr->interpolateParticles<CompParticle, Real&, &CompParticle::template real<2>>(computationParticles,
+                                                                                        m_particleRealm,
+                                                                                        m_plasmaPhase,
+                                                                                        m_particleScratch1,
+                                                                                        solver->getDeposition());
 
       // Move the particles back again and multiply the weight by Z * (V(A) - V(B))/a_dt
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
@@ -5967,12 +5967,13 @@ ItoKMCStepper<I, C, R, F>::computeEdotJSource(const Real a_dt) noexcept
       computationParticles.remap();
 
       // Deposit the particles
-      m_amr->depositParticles<CompParticle, &CompParticle::template real<0>>(m_particleScratch1,
-                                                                             m_particleRealm,
-                                                                             m_plasmaPhase,
-                                                                             computationParticles,
-                                                                             solver->getDeposition(),
-                                                                             solver->getCoarseFineDeposition());
+      m_amr->depositParticles<CompParticle, const Real&, &CompParticle::template real<0>>(
+        m_particleScratch1,
+        m_particleRealm,
+        m_plasmaPhase,
+        computationParticles,
+        solver->getDeposition(),
+        solver->getCoarseFineDeposition());
 
       // Copy data back onto the fluid realm.
       m_amr->copyData(m_fluidScratch1, m_particleScratch1);

@@ -17,14 +17,13 @@
 
 /*!
   @brief Deposition types. 
-  @details NGP = Nearest grid point, CIC = Cloud-in-cell, TSC = Triangle-shaped cloud, W4=Fourth order. 
+  @details NGP = Nearest grid point, CIC = Cloud-in-cell, TSC = Triangle-shaped cloud
 */
 enum class DepositionType
 {
   NGP,
   CIC,
-  TSC,
-  W4
+  TSC
 };
 
 #include <CD_NamespaceFooter.H>

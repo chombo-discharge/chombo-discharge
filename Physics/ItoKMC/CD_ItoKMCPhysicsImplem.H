@@ -468,25 +468,34 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
   // This loop is for isolating reactions that the user will explicitly ask to fire before computing the physics-based time step. It exists
   // because if there are no electrons but lots of ions, one may get a time step that is too large because X/|sum mu| is zero for the electrons.
   // Similarly, one may get a time step that is too small away from ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron
-  // but lots of detachment. This hook fixes this, but requires that the user is aware of the problem in the first place.
-  //
-  // The below code iterates through all reactions that have been marked, and exhausts the reactants and then computes a time step. This seems
-  // to work relatively well. Note that reactions like "e -> e + e" do not consume reactants, and are pruned from the loop below.
+  // but lots of detachment.
+  auto getPropensitiesDt = [&](const KMCState& a_state) -> std::vector<Real> {
+    std::vector<Real> propensities = m_kmcSolver.propensities(a_state, m_kmcReactionsThreadLocal);
+
+    for (int i = 0; i < propensities.size(); i++) {
+      propensities[i] *= m_reactiveDtFactors[i];
+    }
+
+    return propensities;
+  };
+
+  // Do a time step limitation on the complete state, using the user-specified reactions.
+  const auto propensitiesDt = getPropensitiesDt(m_kmcState);
+  const auto physicsDt      = m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, propensitiesDt, 1.0);
+
+  a_physicsDt = std::min(a_physicsDt, physicsDt);
+
+  // Go through reactions that are potentially detaching species and do the calculation again.
   for (const auto& reaction : m_kmcReactionsThreadLocal) {
     auto       S = m_kmcState;
     const auto N = reaction->computeCriticalNumberOfReactions(m_kmcState);
 
     // Trigger on both the reactions and the reactions with completely consumed reactants
-    const auto propensities = m_kmcSolver.propensities(S, m_kmcReactionsThreadLocal);
-    const Real physicsDt    = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensities, 1.0);
-
-    a_physicsDt = std::min(a_physicsDt, physicsDt);
-
     if (N < std::numeric_limits<FPR>::max()) {
       reaction->advanceState(S, N);
 
-      const auto propensities = m_kmcSolver.propensities(S, m_kmcReactionsThreadLocal);
-      const Real physicsDt    = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensities, 1.0);
+      const auto propensitiesDt = getPropensitiesDt(S);
+      const auto physicsDt      = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensitiesDt, 1.0);
 
       a_physicsDt = std::min(a_physicsDt, physicsDt);
     }

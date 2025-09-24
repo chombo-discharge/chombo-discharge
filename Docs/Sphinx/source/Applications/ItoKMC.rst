@@ -283,12 +283,31 @@ Note that these functions should return the *fluid coefficients*.
 
    There is currently no support for computing :math:`\mu` as a function of the species densities (e.g., the electron density), but this only requires modest extensions of the Îto-KMC module.
 
+.. _Chap:ItoKMCPhysicsDt:
+
 Time step calculation
 =====================
 
-.. warning::
+The time step calculation in ``ItoKMCPhysics`` is based on the approximation of a reasonable time step as
 
-   This section must be written, and also include the downsides of using :math:`\Delta t = X/|\sum\mu|` in its pure form. 
+.. math::
+
+   \Delta t = \frac{X_i}{\left|\sum_r \nu_{ri} a_r\right|},
+
+where :math:`\nu_{ri}` is the state change in species :math:`i` due to firing of exactly one reaction of type :math:`r`.
+By default, the above is evaluated for all reactions, but the user can specify a subset of reactions for which the above constraint is applied.
+
+Caveats
+-------
+
+There are some caveats with using the time step limitation given above.
+For example, if there are no electrons in the simulation region, the above method will (correctly) return a very large time step based on the behavior of the other species.
+But one may very have *detachment* of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
+Because of this, the above constraint is also applied on proxy-states of :math:`\vec{X}` that have been completely exhausted through critical reactions, which provides a much more reasonable time step.
+
+A second factor involved in the time step calculation above is that one may have regions where :math:`X_i` is very small, but where :math:`\sum_r \nu_{ri} a_r` is very high.
+Outside of electron avalanching regions, detachment may completely dominate the time step calculation and cause a much smaller time step than necessary.
+Our resolution to this behavior is to permit the user to manually specify which reactions are important when computing the time step, see :ref:`Chap:ItoKMCJSONDt`.
 
 .. _Chap:ItoKMCJSON:
 
@@ -1912,6 +1931,31 @@ Setting ``ItoKMCJSON.print_rates`` to true in the input file will write all reac
 Here, :math:`k` indicates the *fluid rate*, so for a reaction :math:`A + B + C \xrightarrow{k}\ldots` it will include the rate :math:`k`.
 Reactions are ordered identical to the order of the reactions in the JSON specification.
 This feature is mostly used for debugging or development efforts.
+
+
+.. _Chap:ItoKMCJSONDt:
+
+Time step calculation
+_____________________
+
+The user can manually specify which reactions are to be used when computing a chemistry time step :math:`\Delta t`, as discussed in :ref:`Chap:ItoKMCPhysicsDt`.
+To enable a time step calculation, specify the ``include_dt_calc`` flag in the reaction specifier, as shown below:
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+",
+	    "type": "alpha*v",     
+	    "species": "e",        
+	    "include_dt_calc": true
+	}	
+    ]
+
+.. tip::
+
+   It is normally sufficient to enable :math:`\Delta t` calculations for the ionizing reactions.
 
 Particle placement
 ------------------
