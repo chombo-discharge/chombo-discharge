@@ -475,6 +475,11 @@ namespace Physics {
       std::vector<ItoKMCPhotoReaction> m_photoReactions;
 
       /*!
+        @brief List of reactions that are a part of the time step limitation. 
+      */
+      std::vector<Real> m_reactiveDtFactors;
+
+      /*!
 	@brief Random number generators for photoionization pathways. 
 	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the
 	map is an RNG generator for selecting photo-reactions, and a map which associates the returned
