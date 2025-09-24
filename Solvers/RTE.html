@@ -523,12 +523,11 @@ It derives from <code class="docutils literal notranslate"><span class="pre">Gen
 <p>Photons can then be added directly.</p>
 </li>
 <li><p>If the source term <span class="math notranslate nohighlight">\(\eta\)</span> has been filled, the user can call <code class="docutils literal notranslate"><span class="pre">McPhoto::advance</span></code> to have the solver generate the computational photons and then advance them.
-This is the correct approach for, e.g., applications that always use mesh-based photon source terms and want to have the computational photons be generated on the fly.
-.. warning:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The ``advance`` function is *only* meant to be used together with a mesh-based source term that the user has filled prior to calling the method.
-
-When using the ``advance``, the number of photons that are generated are limit to a user-specified number (see :ref:`Chap:McPhotoOptions` for further details).
-</pre></div>
+This is the correct approach for, e.g., applications that always use mesh-based photon source terms and want to have the computational photons be generated on the fly.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">advance</span></code> function is <em>only</em> meant to be used together with a mesh-based source term that the user has filled prior to calling the method.</p>
+<p>When using the <code class="docutils literal notranslate"><span class="pre">advance</span></code>, the number of photons that are generated are limit to a user-specified number (see <a class="reference internal" href="#chap-mcphotooptions"><span class="std std-ref">Solver configuration</span></a> for further details).</p>
 </div>
 </li>
 </ol>
@@ -600,7 +599,7 @@ For each photon, do the following:</p>
                                                     <span class="c1"># &#39;volume_rate&#39; -&gt; Source terms contains the volumetric rate</span>
                                                     <span class="c1"># &#39;rate&#39;        -&gt; Source terms contains the rate</span>
 <span class="n">McPhoto</span><span class="o">.</span><span class="n">deposition</span>               <span class="o">=</span> <span class="n">cic</span>              <span class="c1">## &#39;ngp&#39;  -&gt; nearest grid point, &#39;cic&#39; -&gt; cloud-in-cell</span>
-<span class="n">McPhoto</span><span class="o">.</span><span class="n">deposition_cf</span>            <span class="o">=</span> <span class="n">halo</span>             <span class="c1">## Coarse-fine deposition. Must be &#39;interp&#39; or &#39;halo&#39;</span>
+<span class="n">McPhoto</span><span class="o">.</span><span class="n">deposition_cf</span>            <span class="o">=</span> <span class="n">transition</span>       <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
 </pre></div>
 </div>
 <div class="admonition tip">

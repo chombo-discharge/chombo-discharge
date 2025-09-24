@@ -292,6 +292,7 @@ There are several ways users can generate computational photons that are to be t
 
 #. If the source term :math:`\eta` has been filled, the user can call ``McPhoto::advance`` to have the solver generate the computational photons and then advance them.
    This is the correct approach for, e.g., applications that always use mesh-based photon source terms and want to have the computational photons be generated on the fly.
+   
    .. warning::
 
       The ``advance`` function is *only* meant to be used together with a mesh-based source term that the user has filled prior to calling the method.

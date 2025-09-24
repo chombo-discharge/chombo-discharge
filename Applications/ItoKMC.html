@@ -117,7 +117,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#transport-coefficients">Transport coefficients</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#time-step-calculation">Time step calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-step-calculation">Time step calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#caveats">Caveats</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#json-interface">JSON interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#gas-law">Gas law</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#ideal-gas">Ideal gas</a></li>
@@ -159,15 +162,16 @@
 <li class="toctree-l4"><a class="reference internal" href="#understanding-reaction-rates">Understanding reaction rates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#plotting-rates">Plotting rates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#printing-rates">Printing rates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#chap-itokmcjsondt">Time step calculation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id12">Particle placement</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id13">Photoionization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Particle placement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Photoionization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#secondary-emission">Secondary emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#field-emission">Field emission</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#warnings-and-caveats">Warnings and caveats</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#higher-order-reactions">Higher-order reactions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id14">Townsend coefficients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">Townsend coefficients</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#tips-and-tricks">Tips and tricks</a></li>
@@ -839,6 +843,11 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">ItoKMCPhotoReaction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_photoReactions</span><span class="p">;</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">        @brief List of reactions that are a part of the time step limitation. </span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_reactiveDtFactors</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Random number generators for photoionization pathways. </span>
 <span class="cm">	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the</span>
 <span class="cm">	map is an RNG generator for selecting photo-reactions, and a map which associates the returned</span>
@@ -1116,11 +1125,22 @@ Note that these functions should return the <em>fluid coefficients</em>.</p>
 </section>
 </section>
 <section id="time-step-calculation">
-<h2>Time step calculation<a class="headerlink" href="#time-step-calculation" title="Permalink to this heading"></a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This section must be written, and also include the downsides of using <span class="math notranslate nohighlight">\(\Delta t = X/|\sum\mu|\)</span> in its pure form.</p>
-</div>
+<span id="chap-itokmcphysicsdt"></span><h2>Time step calculation<a class="headerlink" href="#time-step-calculation" title="Permalink to this heading"></a></h2>
+<p>The time step calculation in <code class="docutils literal notranslate"><span class="pre">ItoKMCPhysics</span></code> is based on the approximation of a reasonable time step as</p>
+<div class="math notranslate nohighlight">
+\[\Delta t = \frac{X_i}{\left|\sum_r \nu_{ri} a_r\right|},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu_{ri}\)</span> is the state change in species <span class="math notranslate nohighlight">\(i\)</span> due to firing of exactly one reaction of type <span class="math notranslate nohighlight">\(r\)</span>.
+By default, the above is evaluated for all reactions, but the user can specify a subset of reactions for which the above constraint is applied.</p>
+<section id="caveats">
+<h3>Caveats<a class="headerlink" href="#caveats" title="Permalink to this heading"></a></h3>
+<p>There are some caveats with using the time step limitation given above.
+For example, if there are no electrons in the simulation region, the above method will (correctly) return a very large time step based on the behavior of the other species.
+But one may very have <em>detachment</em> of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
+Because of this, the above constraint is also applied on proxy-states of <span class="math notranslate nohighlight">\(\vec{X}\)</span> that have been completely exhausted through critical reactions, which provides a much more reasonable time step.</p>
+<p>A second factor involved in the time step calculation above is that one may have regions where <span class="math notranslate nohighlight">\(X_i\)</span> is very small, but where <span class="math notranslate nohighlight">\(\sum_r \nu_{ri} a_r\)</span> is very high.
+Outside of electron avalanching regions, detachment may completely dominate the time step calculation and cause a much smaller time step than necessary.
+Our resolution to this behavior is to permit the user to manually specify which reactions are important when computing the time step, see <a class="reference internal" href="#chap-itokmcjsondt"><span class="std std-ref">Time step calculation</span></a>.</p>
+</section>
 </section>
 <section id="json-interface">
 <span id="chap-itokmcjson"></span><h2>JSON interface<a class="headerlink" href="#json-interface" title="Permalink to this heading"></a></h2>
@@ -2480,9 +2500,29 @@ Here, <span class="math notranslate nohighlight">\(k\)</span> indicates the <em>
 Reactions are ordered identical to the order of the reactions in the JSON specification.
 This feature is mostly used for debugging or development efforts.</p>
 </section>
+<section id="chap-itokmcjsondt">
+<span id="id12"></span><h4>Time step calculation<a class="headerlink" href="#chap-itokmcjsondt" title="Permalink to this heading"></a></h4>
+<p>The user can manually specify which reactions are to be used when computing a chemistry time step <span class="math notranslate nohighlight">\(\Delta t\)</span>, as discussed in <a class="reference internal" href="#chap-itokmcphysicsdt"><span class="std std-ref">Time step calculation</span></a>.
+To enable a time step calculation, specify the <code class="docutils literal notranslate"><span class="pre">include_dt_calc</span></code> flag in the reaction specifier, as shown below:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;plasma reactions&quot;</span><span class="p">:</span>
+<span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;reaction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e -&gt; e + e + M+&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alpha*v&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;species&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;include_dt_calc&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>It is normally sufficient to enable <span class="math notranslate nohighlight">\(\Delta t\)</span> calculations for the ionizing reactions.</p>
+</div>
 </section>
-<section id="id12">
-<h3>Particle placement<a class="headerlink" href="#id12" title="Permalink to this heading"></a></h3>
+</section>
+<section id="id13">
+<h3>Particle placement<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
 <p>Specification of secondary particle placement is done through the JSON file by specifying the <code class="docutils literal notranslate"><span class="pre">particle</span> <span class="pre">placement</span></code> field.
 Currently, new particles may be placed on the centroid, uniformly distributed in the grid cell, or placed randomly in the downstream region of some user-defined species.
 The method is specified through the <code class="docutils literal notranslate"><span class="pre">method</span></code> specifier, which must either be <code class="docutils literal notranslate"><span class="pre">centroid</span></code>, <code class="docutils literal notranslate"><span class="pre">random</span></code>, or <code class="docutils literal notranslate"><span class="pre">downstream</span></code>.
@@ -2506,8 +2546,8 @@ The following three specifies are all valid:</p>
 </pre></div>
 </div>
 </section>
-<section id="id13">
-<h3>Photoionization<a class="headerlink" href="#id13" title="Permalink to this heading"></a></h3>
+<section id="id14">
+<h3>Photoionization<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h3>
 <p>Photoionization reactions are specified by including a <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> array of JSON entries that specify each reaction.
 The left-hand side of the reaction must contain a photon species (plasma and background species can be present but will be ignored), and the right-hand side can consist of any species except other photon species.
 Each entry <em>must</em> contain a reaction string specifier and optionally also an efficiency (which defaults to 1).
@@ -2681,8 +2721,8 @@ This is particularly the case for three-body reactions with BOLSIG+ that may req
 <p>For three-body reactions the units given by BOLSIG+ in the output file may or may not be incorrect (depending on whether or not the user scaled the cross sections).</p>
 </div>
 </section>
-<section id="id14">
-<h4>Townsend coefficients<a class="headerlink" href="#id14" title="Permalink to this heading"></a></h4>
+<section id="id15">
+<h4>Townsend coefficients<a class="headerlink" href="#id15" title="Permalink to this heading"></a></h4>
 <p>Townsend coefficients are not fundamentally required for specifying the reactions, but as with the higher-order reactions some of the output rates for three-body reactions might be inconsistently represented in the BOLSIG+ output files.
 For example, some care might be required when using the Townsend attachment coefficient for air when the reaction <span class="math notranslate nohighlight">\(\textrm{e} + \textrm{O}_2 + \textrm{O}_2\rightarrow \textrm{O}_2^- + \textrm{O}_2\)</span> is included because the rate constant might require proper scaling after running the Boltzmann solver, but this scaling is invisible to the BOLSIG+’s calculation of the attachment coefficient <span class="math notranslate nohighlight">\(\eta/N\)</span>.</p>
 <div class="admonition warning">

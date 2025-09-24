@@ -1,15 +1,30 @@
 <map id="Source/Particle/CD_EBCoarseFineParticleMesh.H" name="Source/Particle/CD_EBCoarseFineParticleMesh.H">
-<area shape="rect" id="Node000001" title="Declaration of a class for handling particle deposition arithmetics near refinement boundaries." alt="" coords="341,5,555,45"/>
+<area shape="rect" id="Node000001" title="Declaration of a class for handling particle deposition arithmetics near refinement boundaries." alt="" coords="326,5,541,45"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,93,160,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="361,48,150,93,149,88,360,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="184,93,299,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="399,48,285,91,283,86,398,43"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="323,93,426,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="432,47,397,85,393,81,428,44"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="451,93,592,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="468,44,503,81,499,85,464,47"/>
-<area shape="rect" id="Node000006" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="617,93,802,119"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="511,43,659,87,657,92,510,48"/>
-<area shape="rect" id="Node000007" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="827,93,1005,119"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="556,42,835,88,834,94,555,47"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="350,48,148,93,147,88,349,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="249,167,364,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="472,43,495,59,514,77,524,98,524,109,518,120,496,137,461,150,378,170,377,165,460,145,494,132,514,117,519,108,519,99,510,80,492,63,469,48"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="235,93,338,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="399,48,322,89,319,84,397,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="363,93,504,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="436,46,436,79,431,79,431,46"/>
+<area shape="rect" id="Node000006" href="$CD__EBCoarAve_8H.html" title="Declaration of conservative coarsening utility." alt="" coords="579,93,712,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="485,43,602,86,600,91,483,48"/>
+<area shape="rect" id="Node000011" href="$CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="309,240,494,265"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="327,37,298,45,270,57,245,74,225,95,218,114,218,140,225,167,239,190,272,217,311,234,309,239,269,221,235,194,221,169,213,141,213,113,220,92,242,70,267,53,296,40,325,32"/>
+<area shape="rect" id="Node000012" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="899,240,1077,265"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="542,35,666,53,800,80,863,97,918,117,962,139,991,165,999,180,1002,196,999,227,993,226,996,196,994,181,987,168,959,144,916,122,862,102,799,85,665,58,541,41"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="591,121,375,166,374,161,590,116"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="578,167,683,192"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="646,120,638,154,633,153,640,118"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="708,167,815,192"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="665,116,732,157,729,162,663,121"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="839,167,951,192"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="686,116,842,160,840,165,685,121"/>
+<area shape="rect" id="Node000010" href="$CD__Average_8H.html" title="Declaration of averaging methods." alt="" coords="439,167,553,192"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="622,121,534,163,532,158,620,116"/>
+<area shape="poly" id="edge13_Node000006_Node000011" title=" " alt="" coords="579,121,490,141,453,154,428,169,419,181,412,196,405,227,400,226,407,194,414,178,425,165,451,149,489,136,578,116"/>
+<area shape="poly" id="edge14_Node000006_Node000012" title=" " alt="" coords="712,109,781,116,855,127,921,143,946,153,964,165,975,178,983,194,990,225,985,226,978,196,971,181,961,169,944,158,919,148,854,132,780,121,712,114"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="482,194,429,234,426,229,479,190"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="554,188,566,189,890,236,889,241,565,195,553,193"/>
 </map>

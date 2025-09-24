@@ -302,9 +302,9 @@ The <code class="docutils literal notranslate"><span class="pre">ParticleOps</sp
 <p>When sampling particles from a mesh-based density, the solver will generate the particles so that the specified density is approximately reached within each grid cell.
 If the density that is supplied does not lead to an integer number of particles in the grid cell (which is virtually always the case), the evaluation of the number of particles is stochastically evaluated.
 E.g., if the density is <span class="math notranslate nohighlight">\(\phi\)</span> and then grid cell volume is <span class="math notranslate nohighlight">\(\Delta V\)</span>, and <span class="math notranslate nohighlight">\(\phi\Delta V = 1.2\)</span>, then there is a 20% chance that there will be generated two particles within the grid cell, and 80% chance that only one particle will be generated.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>There is currently a hard limit that restricts the number of initial computational particles per cell to 32.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The number of initially sampled particles is set through <code class="docutils literal notranslate"><span class="pre">ItoSolver.ppc_restart</span></code>.</p>
 </div>
 </section>
 </section>
@@ -363,10 +363,15 @@ The most general version is given below:</p>
 <span class="cm">  the particle class with signature &#39;const Real&amp; P::function() const&#39;. E.g. &#39;const Real&amp; P::mass() const&#39; which is the default quantity to be deposited. </span>
 <span class="cm">  @param[out] a_phi                  Mesh data -- must have exactly one component. </span>
 <span class="cm">  @param[in]  a_particles            Particles to be deposited</span>
+<span class="cm">  @param[in]  a_deposition           Deposition method</span>
+<span class="cm">  @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy</span>
 <span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Ret</span><span class="p">,</span><span class="w"> </span><span class="n">Ret</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="w"> </span><span class="o">::*</span><span class="n">MemberFunc</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
 <span class="kt">void</span>
-<span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phi</span><span class="p">,</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+<span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">             </span><span class="n">a_phi</span><span class="p">,</span>
+<span class="w">                 </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">      </span><span class="n">a_particles</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">       </span><span class="n">a_deposition</span><span class="p">,</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w"> </span><span class="n">a_coarseFineDeposition</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This version permits the user to select any particle container <code class="docutils literal notranslate"><span class="pre">a_particles</span></code> and deposit them onto some pre-allocated mesh storage <code class="docutils literal notranslate"><span class="pre">a_phi</span></code>.
@@ -380,7 +385,7 @@ Both the base deposition scheme (e.g., NGP or CIC) must be specified, as well as
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
 <span class="cm">  @brief Deposit particles onto mesh. </span>
 <span class="cm">  @details This will deposit the mass (i.e., computational weight) &quot;bulk&quot; particles into m_phi. </span>
-<span class="cm">  @note Cells the other version with a_container = WhichContainer::Bulk</span>
+<span class="cm">  @note Calls the other version with a_container = WhichContainer::Bulk</span>
 <span class="cm">*/</span>
 <span class="k">virtual</span><span class="w"> </span><span class="kt">void</span>
 <span class="nf">depositParticles</span><span class="p">();</span>
@@ -680,7 +685,7 @@ All options are run-time configurable.</span><a class="headerlink" href="#itoinp
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">mobility_interp</span>        <span class="o">=</span> <span class="n">direct</span>             <span class="c1">## How to interpolate mobility, &#39;direct&#39; or &#39;velocity&#39;, i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">plot_deposition</span>        <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Cloud-in-cell for plotting particles.</span>
 <span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition</span>             <span class="o">=</span> <span class="n">cic</span>                <span class="c1">## Deposition type.</span>
-<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>          <span class="o">=</span> <span class="n">halo</span>               <span class="c1">## Coarse-fine deposition. interp, halo, or halo_ngp</span>
+<span class="n">ItoSolver</span><span class="o">.</span><span class="n">deposition_cf</span>          <span class="o">=</span> <span class="n">transition</span>         <span class="c1">## &#39;interp&#39;, &#39;halo&#39;, &#39;halo_ngp&#39;, &#39;transition&#39;.</span>
 </pre></div>
 </div>
 </div>

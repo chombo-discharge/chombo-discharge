@@ -95,10 +95,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#allocating-particles">Allocating particles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#particle-mapping">Particle mapping</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#regridding">Regridding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#masked-particles">Masked particles</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#creating-particle-halo-masks">Creating particle halo masks</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#masked-particles">Masked particles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#boundary-interaction">Boundary interaction</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#signed-distance-function">Signed distance function</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#domain-edges">Domain edges</a></li>
@@ -558,7 +555,8 @@ Failure to do so will lead to loss of all particles.</p>
 <section id="masked-particles">
 <span id="chap-maskedparticles"></span><h2>Masked particles<a class="headerlink" href="#masked-particles" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> also supports the concept of <em>masked particles</em>, where one can fetch a subset of particles that live only in specified grid cells.
-Typically, this “specified region” is the refinement boundary, but the functionality is generic and might prove useful also in other cases.</p>
+Typically, this “specified region” is the refinement boundary, but the functionality is generic and might prove useful also in other cases.
+This functionality is unlikely to be used directly by users of chombo-discharge, but it is nonetheless fruitful to understand the concept in order to more easily fathom how deposition across refinement boundaries proceed.</p>
 <p>When <em>masked particles</em> are used, the user can provide a boolean mask over the AMR hierarchy and obtain the subset of particles that live in regions where the mask evaluates to true.
 This functionality is for example used for some of the particle deposition methods in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> where we deposit particles that live near the refinement boundary with special deposition functions.</p>
 <p>To fill the masked particles, <code class="docutils literal notranslate"><span class="pre">ParticleContainer&lt;P&gt;</span></code> has members functions for copying the particles into internal data containers which the user can later fetch.
@@ -605,31 +603,6 @@ After the user is done with the particles, they should be deleted through the fu
 <span class="n">myParticles</span><span class="p">.</span><span class="n">clearMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
-<section id="creating-particle-halo-masks">
-<h3>Creating particle halo masks<a class="headerlink" href="#creating-particle-halo-masks" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> can register a <em>halo</em> mask with a specified width:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Register a boolean mask over a realm. </span>
-<span class="cm">  @param[in] a_mask     Mask name to be registered. </span>
-<span class="cm">  @param[in] a_phase    Phase (gas or solid). </span>
-<span class="cm">  @param[in] a_buffer   Relevant buffer for the mask.</span>
-<span class="cm">  @note The meaning of a_buffer differs for different masks.</span>
-<span class="cm">  @note Run-time errors will occur if the mask or realm do not exist.</span>
-<span class="cm">*/</span>
-<span class="kt">void</span>
-<span class="nf">registerMask</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_mask</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_buffer</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_realm</span><span class="p">);</span>
-</pre></div>
-</div>
-<p>where <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> must be <code class="docutils literal notranslate"><span class="pre">&quot;s_particle_halo&quot;</span></code>.
-This will register a mask which is false everywhere except in coarse-grid cells that are within a distance <code class="docutils literal notranslate"><span class="pre">a_buffer</span></code> from the refinement boundary, see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 11</span></a>.
-This functionality is useful when processing particles on the refinement boundary using special deposition functions since the halo mask allows us to straightforwardly extract those particles.</p>
-<figure class="align-center" id="id1">
-<span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 40%;" /></a>
-<figcaption>
-<p><span class="caption-number">Fig. 11 </span><span class="caption-text">Example of a particle halo mask (shaded green color) surrounding refined grid levels.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
-</figcaption>
-</figure>
-</section>
 </section>
 <section id="boundary-interaction">
 <span id="chap-particleeb"></span><h2>Boundary interaction<a class="headerlink" href="#boundary-interaction" title="Permalink to this heading"></a></h2>
@@ -782,7 +755,9 @@ There are two main operations involved:</p>
 <h3>Particle deposition<a class="headerlink" href="#particle-deposition" title="Permalink to this heading"></a></h3>
 <p>To deposit particles on the mesh, the user can call the templated function <code class="docutils literal notranslate"><span class="pre">AmrMesh::depositParticles</span></code> which have a signatures</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Deposit scalar particle quantities on the mesh. </span>
+<span class="cm">  @brief Deposit scalar particle quantities on the mesh.</span>
+<span class="cm">  @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a</span>
+<span class="cm">  RealVect. MemFunc is a pointer to a member function of P. E.g., depositParticles&lt;P, const RealVect&amp;, &amp;P::position&gt;.    </span>
 <span class="cm">  @param[out] a_meshData             Mesh data. Must have exactly one compnent. </span>
 <span class="cm">  @param[in]  a_realm                Realm where data is registered.</span>
 <span class="cm">  @param[in]  a_phase                Phase where data is registered.</span>
@@ -791,7 +766,7 @@ There are two main operations involved:</p>
 <span class="cm">  @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.</span>
 <span class="cm">  @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. </span>
 <span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Ret</span><span class="p">,</span><span class="w"> </span><span class="n">Ret</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">MemberFunc</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
 <span class="kt">void</span>
 <span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_meshData</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
@@ -800,33 +775,28 @@ There are two main operations involved:</p>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">        </span><span class="n">a_depositionType</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">  </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                  </span><span class="n">a_forceIrregNGP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+
 <span class="cm">/*!</span>
-<span class="cm">  @brief Deposit vector particle quantities on the mesh. </span>
-<span class="cm">  @param[out] a_meshData             Mesh data. Must have exactly one compnent. </span>
-<span class="cm">  @param[in]  a_realm                Realm where data is registered.</span>
-<span class="cm">  @param[in]  a_phase                Phase where data is registered.</span>
-<span class="cm">  @param[in]  a_particles            Particle container. Must be in &quot;usable state&quot; for deposition.</span>
-<span class="cm">  @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)</span>
-<span class="cm">  @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.</span>
-<span class="cm">  @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. </span>
+<span class="cm">  @brief Deposit scalar particle quantities on the mesh.</span>
+<span class="cm">  @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a</span>
+<span class="cm">  const Real&amp;. MemFunc is a pointer to a member function of P. E.g., depositParticles&lt;P, const Real&amp;, &amp;P::weight&gt;.        </span>
+<span class="cm">  @param[out] a_meshData   Mesh data. MUST have exactly one compnent. </span>
+<span class="cm">  @param[in]  a_realm      Realm where data is registered.</span>
+<span class="cm">  @param[in]  a_phase      Phase where data is registered.</span>
+<span class="cm">  @param[in]  a_particles  Particle container. Must be in &quot;usable state&quot; for deposition.</span>
 <span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Ret</span><span class="p">,</span><span class="w"> </span><span class="n">Ret</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">MemberFunc</span><span class="p">)()</span><span class="w"> </span><span class="k">const</span><span class="o">&gt;</span>
 <span class="kt">void</span>
-<span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_meshData</span><span class="p">,</span>
+<span class="n">depositParticles</span><span class="p">(</span><span class="n">EBAMRIVData</span><span class="o">&amp;</span><span class="w">                </span><span class="n">a_meshData</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_realm</span><span class="p">,</span>
 <span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w">   </span><span class="n">a_phase</span><span class="p">,</span>
-<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">,</span>
-<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">        </span><span class="n">a_depositionType</span><span class="p">,</span>
-<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">CoarseFineDeposition</span><span class="w">  </span><span class="n">a_coarseFineDeposition</span><span class="p">,</span>
-<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                  </span><span class="n">a_forceIrregNGP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+<span class="w">                 </span><span class="k">const</span><span class="w"> </span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_particles</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Here, the template parameter <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type and the template parameter <code class="docutils literal notranslate"><span class="pre">particleScalarField</span></code> is a C++ pointer-to-member-function that returns a <code class="docutils literal notranslate"><span class="pre">Real</span></code>.
-This function must have the indicated signature <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">Real&amp;</span> <span class="pre">P::particleScalarField()</span> <span class="pre">const</span></code> <em>or</em> the signature <code class="docutils literal notranslate"><span class="pre">Real</span> <span class="pre">P::particleScalarField()</span> <span class="pre">const</span></code>.
-The pointer-to-member <code class="docutils literal notranslate"><span class="pre">particleScalarField</span></code> indicates the variable to be deposited on the mesh.
-This function pointer does not need to return a member in the particle class.</p>
-<p>When depositing vector-quantities (such as electric currents), one must call the version which takes <code class="docutils literal notranslate"><span class="pre">RealVect</span> <span class="pre">P::particleVectorField()</span> <span class="pre">const</span></code> as a template parameter.
-The supplied function must return a <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> and <code class="docutils literal notranslate"><span class="pre">a_meshData</span></code> must then have <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components.</p>
+<p>Here, the template parameter <code class="docutils literal notranslate"><span class="pre">P</span></code> is the particle type and the template parameter <code class="docutils literal notranslate"><span class="pre">MemberFunc</span></code> is a C++ pointer-to-member-function that returns <code class="docutils literal notranslate"><span class="pre">Ret</span></code>, which must either be a <code class="docutils literal notranslate"><span class="pre">Real</span></code> or a <code class="docutils literal notranslate"><span class="pre">RealVect</span></code>.
+In addition, the function will accept <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">Real&amp;</span></code> or <code class="docutils literal notranslate"><span class="pre">const</span> <span class="pre">RealVect&amp;</span></code>.
+The pointer-to-member <code class="docutils literal notranslate"><span class="pre">MemberFunc</span></code> indicates the variable to be deposited on the mesh, and must have return type <code class="docutils literal notranslate"><span class="pre">Ret</span></code>.
+This function pointer does not need to return a member in the particle class, but it must be marked <code class="docutils literal notranslate"><span class="pre">const</span></code>.</p>
 <p>Next, the input arguments to <code class="docutils literal notranslate"><span class="pre">depositParticles</span></code> are the output mesh data holder (must have exactly one or <code class="docutils literal notranslate"><span class="pre">SpaceDim</span></code> components), the realm and phase where the particles live, and the particles themselves (<code class="docutils literal notranslate"><span class="pre">a_particles</span></code>).
 Finally, the flag <code class="docutils literal notranslate"><span class="pre">a_forceIrregNGP</span></code> permits the user to enforce nearest grid-point deposition in cut-cells.
 This option is motivated by the fact that some applications might require hard mass conservation, and the user can then ensure that mass is never deposited into covered grid cells.</p>
@@ -839,8 +809,8 @@ These are discussed below.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::NGP</span></code> (Nearest grid-point).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::CIC</span></code> (Cloud-In-Cell).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::TSC</span></code> (Triangle-Shaped Cloud).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DepositionType::W4</span></code>  (Fourth order weighted).</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> supports all of the above methods, which can be combined with various types of modifications near refinement boundaries.</p>
 </section>
 <section id="coarse-fine-deposition">
 <h4>Coarse-fine deposition<a class="headerlink" href="#coarse-fine-deposition" title="Permalink to this heading"></a></h4>
@@ -850,35 +820,56 @@ Refinement boundaries introduce additional complications in the deposition schem
 <li><p>Fine-grid particles whose deposition clouds hang over the refinement boundary and onto the coarse level.</p></li>
 <li><p>Coarse-grid particles whose deposition clouds stick underneath the fine-level.</p></li>
 </ol>
-<figure class="align-center" id="id2">
+<p>In addition, there can be complicated near physical boundaries, such as domain or embedded boundaries.</p>
+<figure class="align-center" id="id1">
 <span id="fig-particledeposition"></span><a class="reference internal image-reference" href="../_images/ParticleDeposition.png"><img alt="../_images/ParticleDeposition.png" src="../_images/ParticleDeposition.png" style="width: 75%;" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 12 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+<p><span class="caption-number">Fig. 11 </span><span class="caption-text">Sketch of deposition schemes near refinement boundaries and cut-cells.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
-<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> currently supports two methods for handling coarse-fine deposition.
-In all of these methods the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
+<p><code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> support various ways of handling deposition across the refinement boundary.
+In all of these methods, the mass on the fine grid particles whose deposition clouds hang over the refinement boundaries is simply added to the coarse grid.
+The main modifications to the deposition scheme is performed for the coarse-grid particles that live around the refinement boundary (see <a class="reference internal" href="#fig-halomask"><span class="std std-numref">Fig. 12</span></a>).
 For the coarse-grid particles the following processes then occur:</p>
-<ul>
+<figure class="align-center" id="id2">
+<span id="fig-halomask"></span><a class="reference internal image-reference" href="../_images/HaloMask.png"><img alt="../_images/HaloMask.png" src="../_images/HaloMask.png" style="width: 40%;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 12 </span><span class="caption-text">Example regions containing coarse-grid particles that deposit with custom deposition rules.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<p>The following coarse-fine deposition methods are currently supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Interp</span></code>
+This method permits the coarse-grid particles to deposit into the region underneath the fine grid.
+The deposited mass that falls underneath the fine grid is then interpolated from the coarse grid to the fine grid.
+For example, see the indicated coarse-grid particle cloud in the left panel <a class="reference internal" href="#fig-particledeposition"><span class="std std-numref">Fig. 11</span></a>.
+While this particle has a width given by the coarse-grid cell size, it will deposit into the coarse grid cells underneath the fine grid.
+The mass that ends up in these cells is interpolated to the fine grid, which in this case will inject mass into two layers of fine-grid cells.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code>
-This method extracts the coarse-grid particles that live on the refinement boundary.
-These particles are then transferred to the fine level and they are then deposit on the fine grid using the original particle width.
-For example, if using a CIC scheme and having a refinement factor of 2 between the coarse grid and fine grid, the particle width on the fine grid will be <span class="math notranslate nohighlight">\(2\Delta x_{\textrm{fine}}\)</span> rather then <span class="math notranslate nohighlight">\(\Delta x_{\textrm{fine}}\)</span>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This functionality is currently limited to NGP and CIC schemes.</p>
-</div>
-</li>
+This method extracts the coarse-grid particles that live on the refinement boundary and deposit them with their original width on both the coarse and fine levels.
+This is done by first depositing the particles on the coarse level, and then transferring them to the fine level and redepositing them there with the original particle width.
+Taking the left panel in <a class="reference internal" href="#fig-particledeposition"><span class="std std-numref">Fig. 11</span></a> as an example, the green particle will then deposit into the coarse-grid cell as well as the first layer of fine-grid cells.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::HaloNGP</span></code>
-Like <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code>, this method also extracts the coarse-grid particles on the coarse side of the refinement boundary, but rather than using the original scheme these particles are deposited with an NGP scheme.</p></li>
+Similar to <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Halo</span></code> discussed above, this method also extracts the coarse-grid particles on the coarse side of the refinement boundary.
+However, rather than using the original deposition scheme, these particles are deposited with an NGP scheme.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Transition</span></code>
+This is a method that was developed in order to minimize spurious gradients in the density across the EB.
+This method operates by extracting the coarse-grid particles that live around the refinement zone (within some radius), and <em>depositing them with the fine-grid particle width</em>.</p></li>
 </ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Most coarse-fine particle deposition schemes exhibit some artifacts around the refinement boundary, especially when the particle width exceeds the grid cell size (e.g., for TSC).
+The <code class="docutils literal notranslate"><span class="pre">CoarseFineDeposition::Transition</span></code> method is the one that we recommend, especially when used with CIC, as it eliminates spurious gradients across the refinement boundary.</p>
+</div>
 </section>
 </section>
 <section id="particle-interpolation">
 <h3>Particle interpolation<a class="headerlink" href="#particle-interpolation" title="Permalink to this heading"></a></h3>
 <p>To interpolate mesh data onto a particle property, the user can call the <code class="docutils literal notranslate"><span class="pre">AmrMesh</span></code> member functions</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
-<span class="cm">  @brief Interpolate a scalar field onto the particle position. </span>
+<span class="cm">  @brief Interpolate mesh data onto a particle position.</span>
+<span class="cm">  @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real&amp; or a</span>
+<span class="cm">  RealVect&amp;. MemFunc is a pointer to a member function of P. E.g., interpolate&lt;P, Real&amp;, &amp;P::weight&gt;.        </span>
 <span class="cm">  @param[inout] a_particles            Particles to be interpolated. </span>
 <span class="cm">  @param[in]    a_realm                Realm where data is registered.</span>
 <span class="cm">  @param[in]    a_phase                Phase where data is registered.</span>
@@ -886,7 +877,7 @@ Like <code class="docutils literal notranslate"><span class="pre">CoarseFineDepo
 <span class="cm">  @param[in]    a_interpType           Interpolation type. </span>
 <span class="cm">  @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. </span>
 <span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleScalarField</span><span class="p">)()</span><span class="o">&gt;</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Ret</span><span class="p">,</span><span class="w"> </span><span class="n">Ret</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">MemberFunc</span><span class="p">)()</span><span class="o">&gt;</span>
 <span class="kt">void</span>
 <span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_particles</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">        </span><span class="n">a_realm</span><span class="p">,</span>
@@ -894,21 +885,6 @@ Like <code class="docutils literal notranslate"><span class="pre">CoarseFineDepo
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">      </span><span class="n">a_meshScalarField</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">DepositionType</span><span class="w">      </span><span class="n">a_interpType</span><span class="p">,</span>
 <span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="w">                </span><span class="n">a_forceIrregNGP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
-<span class="cm">/*!</span>
-<span class="cm">  @brief Interpolate a vector field onto the particle position. </span>
-<span class="cm">  @param[inout] a_particles            Particles to be interpolated. </span>
-<span class="cm">  @param[in]    a_realm                Realm where data is registered.</span>
-<span class="cm">  @param[in]    a_phase                Phase where data is registered.</span>
-<span class="cm">  @param[in]    a_meshScalarField      Scalar field on the mesh </span>
-<span class="cm">  @param[in]    a_interpType           Interpolation type. </span>
-<span class="cm">  @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. </span>
-<span class="cm">*/</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">P</span><span class="p">,</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">P</span><span class="o">::*</span><span class="n">particleVectorField</span><span class="p">)()</span><span class="o">&gt;</span>
-<span class="kt">void</span>
-<span class="n">interpolateParticles</span><span class="p">(</span><span class="n">ParticleContainer</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span><span class="w">     </span><span class="n">a_particles</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w">        </span><span class="n">a_realm</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">phase</span><span class="o">::</span><span class="n">which_phase</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_phase</span><span class="p">,</span>
-<span class="w">                     </span><span class="k">const</span><span class="w"> </span><span class="n">EBAMRCellData</span><span class="o">&amp;</span><span class="w">      </span><span class="n">a_meshVectorField</span><span class="p">,</span>
 </pre></div>
 </div>
 <p>The function signature for particle interpolation is pretty much the same as for particle deposition, with the exception of the interpolated field.
@@ -916,7 +892,7 @@ The template parameter <code class="docutils literal notranslate"><span class="p
 For example, in order to interpolate the particle acceleration, the particle class (let’s call it <code class="docutils literal notranslate"><span class="pre">MyParticleClass</span></code>) will typically have a member function <code class="docutils literal notranslate"><span class="pre">RealVect&amp;</span> <span class="pre">acceleration()</span></code>, and in this case one can interpolate the acceleration by</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">MyParticleClass</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">MyParticleClass</span><span class="o">::</span><span class="n">acceleration</span><span class="o">&gt;</span><span class="p">(...)</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">MyParticleClass</span><span class="p">,</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">MyParticleClass</span><span class="o">::</span><span class="n">acceleration</span><span class="o">&gt;</span><span class="p">(...)</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -956,16 +932,16 @@ Likewise, if interpolating a vector variable, the mesh variable must have <code 
 <p>To deposit the weight, velocity, and momentum on the grid we would call</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">momentum</span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="p">,</span><span class="w">     </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">depositParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">momentum</span><span class="o">&gt;</span><span class="p">(...);</span>
 </pre></div>
 </div>
 <p>Likewise, to interpolate onto these fields we can call</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">amr</span><span class="p">;</span>
 
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span>
-<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="p">,</span><span class="w">     </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">mass</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(...);</span>
+<span class="n">amr</span><span class="o">-&gt;</span><span class="n">interpolateParticles</span><span class="o">&lt;</span><span class="n">KineticParticle</span><span class="p">,</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">KineticParticle</span><span class="o">::</span><span class="n">velocity</span><span class="o">&gt;</span><span class="p">(...);</span>
 </pre></div>
 </div>
 </section>
