@@ -113,26 +113,30 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
 
   const Interval variables = Interval(0, numComp - 1);
 
+  // validBox is the domain in which we can use the specified interpolation scheme. E.g., TSC fails nears the domain boundaries
+  // since we don't have enough ghost cells to interpolate from.
+  //
+  // gatherBox is the box from which we gather the field.
+  //
   Box validBox;
-  Box particleBox;
+  Box gatherBox;
 
   switch (a_interpType) {
   case DepositionType::NGP: {
-    validBox    = m_domain.domainBox();
-    particleBox = Box(IntVect::Zero, IntVect::Zero);
+    validBox  = m_domain.domainBox();
+    gatherBox = Box(IntVect::Zero, IntVect::Zero);
 
     break;
   }
-
   case DepositionType::CIC: {
-    validBox    = grow(validBox, -1);
-    particleBox = Box(IntVect::Zero, IntVect::Unit);
+    validBox  = grow(m_domain.domainBox(), -1);
+    gatherBox = Box(IntVect::Zero, IntVect::Unit);
 
     break;
   }
   case DepositionType::TSC: {
-    validBox    = grow(validBox, -2);
-    particleBox = Box(IntVect::Zero, 2 * IntVect::Unit);
+    validBox  = grow(m_domain.domainBox(), -2);
+    gatherBox = Box(IntVect::Zero, 2 * IntVect::Unit);
 
     break;
   }
@@ -184,7 +188,7 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
       auto&&      w = (p.*MemberFunc)();
       const auto& x = p.position();
 
-      this->interpolateParticleCIC(GetPointer{}(w), a_meshData, validBox, particleBox, x, numComp, a_forceIrregNGP);
+      this->interpolateParticleCIC(GetPointer{}(w), a_meshData, validBox, gatherBox, x, numComp, a_forceIrregNGP);
     }
 
     break;
@@ -195,7 +199,7 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
       auto&&      w = (p.*MemberFunc)();
       const auto& x = p.position();
 
-      this->interpolateParticleTSC(GetPointer{}(w), a_meshData, validBox, particleBox, x, numComp, a_forceIrregNGP);
+      this->interpolateParticleTSC(GetPointer{}(w), a_meshData, validBox, gatherBox, x, numComp, a_forceIrregNGP);
     }
 
     break;
@@ -352,13 +356,15 @@ inline void
 EBParticleMesh::interpolateParticleCIC(Real*            a_particleField,
                                        const EBCellFAB& a_meshData,
                                        const Box&       a_validBox,
-                                       const Box&       a_cicBox,
+                                       const Box&       a_gatherBox,
                                        const RealVect&  a_position,
                                        const int&       a_numComp,
                                        const bool       a_forceIrregNGP) const noexcept
 {
   CH_TIME("EBParticleMesh::interpolateParticleCIC");
 
+  // particleIV is the cell index where the particle center lies.
+  // loIndex is the cell index of the lower-left corner of the particle.
   const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
   const IntVect loIndex    = ParticleOps::getParticleCellIndex(a_position - 0.5 * m_dx, m_probLo, m_dx);
 
@@ -378,7 +384,7 @@ EBParticleMesh::interpolateParticleCIC(Real*            a_particleField,
       a_particleField[comp] = meshData(particleIV, comp);
     }
   }
-  else if (m_ebisbox.isRegular(particleIV)) {
+  else if (!(m_ebisbox.isCovered(particleIV))) {
     auto cicKernel = [&](const IntVect& iv) -> void {
       Real weight = 1.0;
 
@@ -393,9 +399,9 @@ EBParticleMesh::interpolateParticleCIC(Real*            a_particleField,
       }
     };
 
-    const Box particleBox = a_cicBox + particleIV;
+    const Box gatherBox = a_gatherBox + loIndex;
 
-    BoxLoops::loop(particleBox, cicKernel);
+    BoxLoops::loop(gatherBox, cicKernel);
   }
 }
 
@@ -403,13 +409,15 @@ inline void
 EBParticleMesh::interpolateParticleTSC(Real*            a_particleField,
                                        const EBCellFAB& a_meshData,
                                        const Box&       a_validBox,
-                                       const Box&       a_particleBox,
+                                       const Box&       a_gatherBox,
                                        const RealVect&  a_position,
                                        const int&       a_numComp,
                                        const bool       a_forceIrregNGP) const noexcept
 {
   CH_TIME("EBParticleMesh::interpolateParticleTSC");
 
+  // particleIV is the cell index where the particle center lies.
+  // loIndex is the cell index of the lower-left corner of the particle.
   const IntVect particleIV = ParticleOps::getParticleCellIndex(a_position, m_probLo, m_dx);
   const IntVect loIndex    = ParticleOps::getParticleCellIndex(a_position - m_dx, m_probLo, m_dx);
 
@@ -429,7 +437,7 @@ EBParticleMesh::interpolateParticleTSC(Real*            a_particleField,
       a_particleField[comp] = meshData(particleIV, comp);
     }
   }
-  else if (m_ebisbox.isRegular(particleIV)) {
+  else if (!(m_ebisbox.isCovered(particleIV))) {
     auto tscKernel = [&](const IntVect& iv) -> void {
       Real weight = 1.0;
 
@@ -451,9 +459,9 @@ EBParticleMesh::interpolateParticleTSC(Real*            a_particleField,
       }
     };
 
-    const Box particleBox = a_particleBox + particleIV;
+    const Box gatherBox = a_gatherBox + loIndex;
 
-    BoxLoops::loop(particleBox, tscKernel);
+    BoxLoops::loop(gatherBox, tscKernel);
   }
 }
 
