@@ -194,7 +194,7 @@ protected:
   /*!
     @brief Function for depositing a single particle with a TSC scheme.
     @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
-    box (a_cicBox) must be large enough to contain a particle. E.g., if a_particleWidth = 2, then the box must be at least
+    box (a_particleBox) must be large enough to contain a particle. E.g., if a_particleWidth = 2, then the box must be at least
     Box(-2*IntVect::Unit, 2*IntVect::Unit).
     @param[inout] a_rho            Mesh data
     @param[in]    a_position       Particle position
@@ -233,7 +233,7 @@ protected:
     @param[out] a_particleField  Particle quantity to interpolate into.
     @param[in]  a_meshData       Mesh data
     @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
-    @param[in]  a_particleBox    Box that is sufficiently large to contain the particle, computed from the clouds lower-left corner
+    @param[in]  a_gatherBox      Box from which we gather the field.
     @param[in]  a_position       Particle position
     @param[in]  a_numComp        Number of components to interpolate.
     @param[in]  a_forceIrregNGP  Force NGP in cut-cells
@@ -242,7 +242,7 @@ protected:
   interpolateParticleCIC(Real*            a_particleField,
                          const EBCellFAB& a_meshData,
                          const Box&       a_validBox,
-                         const Box&       a_particleBox,
+                         const Box&       a_gatherBox,
                          const RealVect&  a_position,
                          const int&       a_numComp,
                          const bool       a_forceIrregNGP) const noexcept;
@@ -252,7 +252,7 @@ protected:
     @param[out] a_particleField  Particle quantity to interpolate into.
     @param[in]  a_meshData       Mesh data
     @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
-    @param[in]  a_particleBox    Box that is sufficiently large to contain the particle, computed from the clouds lower-left corner
+    @param[in]  a_gatherBox      Box from which we gather the field.
     @param[in]  a_position       Particle position
     @param[in]  a_numComp        Number of components to interpolate.
     @param[in]  a_forceIrregNGP  Force NGP in cut-cells
@@ -261,7 +261,7 @@ protected:
   interpolateParticleTSC(Real*            a_particleField,
                          const EBCellFAB& a_meshData,
                          const Box&       a_validBox,
-                         const Box&       a_particleBox,
+                         const Box&       a_gatherBox,
                          const RealVect&  a_position,
                          const int&       a_numComp,
                          const bool       a_forceIrregNGP) const noexcept;
