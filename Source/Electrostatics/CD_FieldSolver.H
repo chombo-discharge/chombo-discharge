@@ -437,7 +437,8 @@ public:
   /*!
     @brief Compute the capacitance. 
     @details This will first obtain a solution without any sources, and then compute the energy density. The capacitance is then C = 2*EnergyDensity/(V*V)
-    @return Capacitance for system. 
+    @return Capacitance for system.
+    @note This will set up a new solve and change the underlying solver coefficients. Use with caution!
   */
   Real
   computeCapacitance();
