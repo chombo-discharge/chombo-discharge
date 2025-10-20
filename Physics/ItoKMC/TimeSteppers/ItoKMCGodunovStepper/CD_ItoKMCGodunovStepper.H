@@ -175,11 +175,6 @@ namespace Physics {
       bool m_extendConductivityEB;
 
       /*!
-	@brief If true, the algorithm will limit particle diffusion against the drift direction
-      */
-      bool m_limitParallelDiffusion;
-
-      /*!
 	@brief If true, particles will be emitted before the reactive step
       */
       bool m_emitSecondaryParticlesBeforeReactions;

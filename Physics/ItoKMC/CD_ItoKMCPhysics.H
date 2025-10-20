@@ -59,6 +59,11 @@ namespace Physics {
     using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
     /*!
+      @brief Basic function for diffusing a particle
+    */
+    using DiffusionFunction = std::function<RealVect(const ItoParticle& p, const Real& a_dt)>;
+
+    /*!
       @brief Map to species type
       @details This is just for distinguishing between species that are treated with an Ito or CDR formalism
     */
@@ -144,6 +149,12 @@ namespace Physics {
       */
       const Vector<RefCountedPtr<RtSpecies>>&
       getRtSpecies() const;
+
+      /*!
+        @brief Get diffusion functions
+      */
+      const Vector<DiffusionFunction>&
+      getItoDiffusionFunctions() const noexcept;
 
       /*!
 	@brief Get number of plot variables
@@ -493,6 +504,11 @@ namespace Physics {
       ItoKMCSurfaceReactionSet m_surfaceReactions;
 
       /*!
+        @brief Diffusion functions for the various Ito species
+      */
+      Vector<DiffusionFunction> m_itoDiffusionFunctions;
+
+      /*!
 	@brief List of solver-tracked particle drift-diffusion species. 
       */
       Vector<RefCountedPtr<ItoSpecies>> m_itoSpecies;
@@ -650,6 +666,33 @@ namespace Physics {
                               const RealVect&          a_electricField,
                               const RealVect&          a_cellPos,
                               const Real&              a_dx) const noexcept;
+
+      /*!
+        @brief No diffusion function for a particle
+        @param[in] a_particle Particle to diffuse
+        @param[in] a_dt Time step
+        @return Returns the zero vector.
+      */
+      inline RealVect
+      noDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept;
+
+      /*!
+        @brief Isotropic diffusion function for a particle
+        @param[in] a_particle Particle to diffuse
+        @param[in] a_dt Time step
+        @return Returns sqrt(2 * D * a_dt) * N(0,1), where N(0,1) is a normal distribution
+      */
+      inline RealVect
+      isotropicDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept;
+
+      /*!
+        @brief Quasi-isotropic diffusion function for a particle which does not permit backward diffusion.
+        @param[in] a_particle Particle to diffuse
+        @param[in] a_dt Time step
+        @return Same as isotropic diffusion, but ensures that the particle cannot diffuse backward
+      */
+      inline RealVect
+      forwardIsotropicDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept;
     };
   } // namespace ItoKMC
 } // namespace Physics

@@ -299,6 +299,12 @@ ItoKMCPhysics::getRtSpecies() const
   return m_rtSpecies;
 }
 
+inline const Vector<DiffusionFunction>&
+ItoKMCPhysics::getItoDiffusionFunctions() const noexcept
+{
+  return m_itoDiffusionFunctions;
+}
+
 inline int
 ItoKMCPhysics::getNumItoSpecies() const
 {
@@ -847,6 +853,41 @@ ItoKMCPhysics::reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParti
       }
     }
   }
+}
+
+inline RealVect
+ItoKMCPhysics::noDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept
+{
+  return RealVect::Zero;
+}
+
+inline RealVect
+ItoKMCPhysics::isotropicDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept
+{
+  RealVect r = RealVect::Zero;
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    r[dir] = Random::getNormal01();
+  }
+
+  return sqrt(2.0 * a_particle.diffusion() * a_dt) * r;
+}
+
+inline RealVect
+ItoKMCPhysics::forwardIsotropicDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept
+{
+  RealVect hop = this->isotropicDiffusion(a_particle, a_dt);
+
+  const RealVect v = a_particle.velocity();
+
+  if (v != RealVect::Zero) {
+    const RealVect u = v / v.vectorLength();
+    const Real     d = u.dotProduct(hop);
+
+    hop -= std::min(d, 0.0) * u;
+  }
+
+  return hop;
 }
 
 #include <CD_NamespaceFooter.H>

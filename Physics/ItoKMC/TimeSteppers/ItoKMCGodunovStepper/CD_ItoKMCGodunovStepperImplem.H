@@ -38,7 +38,6 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_writeCheckpointParticles = false;
   this->m_readCheckpointParticles  = false;
   this->m_extendConductivityEB     = false;
-  this->m_limitParallelDiffusion   = false;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
   this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
@@ -187,7 +186,6 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   std::string str;
 
   pp.get("extend_conductivity", m_extendConductivityEB);
-  pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
   pp.get("abort_max_field", m_maxFieldAbort);
 
@@ -1599,6 +1597,8 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
     const bool diffusive = solver->isDiffusive();
     const int  Z         = species->getChargeNumber();
 
+    const auto& diffusionFunction = (this->m_physics)->getItoDiffusionFunctions()[idx];
+
     for (int lvl = 0; lvl <= (this->m_amr)->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = (this->m_amr)->getGrids((this->m_particleRealm))[lvl];
       const DataIterator&      dit = dbl.dataIterator();
@@ -1613,7 +1613,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
         List<ItoParticle>&   itoParticles   = particles[din].listItems();
         List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din].listItems();
-
+ 
         for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
           ItoParticle&    p      = lit();
           const Real&     weight = p.weight();
@@ -1621,29 +1621,8 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
           // Compute a particle hop and store it on the run-time storage.
           RealVect& hop = p.tmpVect();
-          if (diffusive) {
-            if (mobile && m_limitParallelDiffusion) {
-              // If the user asks for it, diffusion against the drift direction is not permitted
-              const RealVect& v = p.velocity();
-              const Real      V = v.vectorLength();
-              const RealVect  u = v / V;
-
-              bool goodHop = false;
-
-              while (!goodHop) {
-                hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
-
-                goodHop = ((hop.dotProduct(u) + V * a_dt) >= 0.0);
-              }
-            }
-            else {
-              // Otherwise -- just do a standard hop. This is the "correct" way anyways.
-              hop = sqrt(2.0 * p.diffusion() * a_dt) * solver->randomGaussian();
-            }
-          }
-          else {
-            hop = RealVect::Zero;
-          }
+          
+          hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
 
           if (Z != 0) {
             pointParticles.add(PointParticle(pos + hop, weight));
