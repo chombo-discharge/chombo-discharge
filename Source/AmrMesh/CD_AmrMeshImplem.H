@@ -378,7 +378,7 @@ AmrMesh::remapToNewGrids(ParticleContainer<P>& a_particles, const int a_lmin, co
                      a_newFinestLevel);
 }
 
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, class Ret, Ret (P::*MemberFunc)() const>
 void
 AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
                           const std::string&          a_realm,
@@ -395,62 +395,14 @@ AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
-  particleMesh.deposit<P, particleScalarField>(a_meshData,
-                                               a_particles,
-                                               a_depositionType,
-                                               a_coarseFineDeposition,
-                                               a_forceIrregNGP);
+  particleMesh.deposit<P, Ret, MemberFunc>(a_meshData,
+                                           a_particles,
+                                           a_depositionType,
+                                           a_coarseFineDeposition,
+                                           a_forceIrregNGP);
 }
 
-template <class P, Real (P::*particleScalarField)() const>
-void
-AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
-                          const std::string&          a_realm,
-                          const phase::which_phase&   a_phase,
-                          const ParticleContainer<P>& a_particles,
-                          const DepositionType        a_depositionType,
-                          const CoarseFineDeposition  a_coarseFineDeposition,
-                          const bool                  a_forceIrregNGP)
-{
-  CH_TIME("AmrMesh::depositParticles");
-  if (m_verbosity > 5) {
-    pout() << "AmrMesh::depositParticles" << endl;
-  }
-
-  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
-
-  particleMesh.deposit<P, particleScalarField>(a_meshData,
-                                               a_particles,
-                                               a_depositionType,
-                                               a_coarseFineDeposition,
-                                               a_forceIrregNGP);
-}
-
-template <class P, const RealVect& (P::*particleVectorField)() const>
-void
-AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
-                          const std::string&          a_realm,
-                          const phase::which_phase&   a_phase,
-                          const ParticleContainer<P>& a_particles,
-                          const DepositionType        a_depositionType,
-                          const CoarseFineDeposition  a_coarseFineDeposition,
-                          const bool                  a_forceIrregNGP)
-{
-  CH_TIME("AmrMesh::depositParticles");
-  if (m_verbosity > 5) {
-    pout() << "AmrMesh::depositParticles" << endl;
-  }
-
-  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
-
-  particleMesh.deposit<P, particleVectorField>(a_meshData,
-                                               a_particles,
-                                               a_depositionType,
-                                               a_coarseFineDeposition,
-                                               a_forceIrregNGP);
-}
-
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, typename Ret, Ret (P::*MemberFunc)() const>
 void
 AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
                           const std::string&          a_realm,
@@ -467,30 +419,10 @@ AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
 
   EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
 
-  surfaceDeposition.deposit<P, particleScalarField>(a_meshData, a_particles);
+  surfaceDeposition.deposit<P, Ret, MemberFunc>(a_meshData, a_particles);
 }
 
-template <class P, Real (P::*particleScalarField)() const>
-void
-AmrMesh::depositParticles(EBAMRIVData&                a_meshData,
-                          const std::string&          a_realm,
-                          const phase::which_phase&   a_phase,
-                          const ParticleContainer<P>& a_particles) const noexcept
-{
-  CH_TIME("AmrMesh::depositParticles(surface)");
-  if (m_verbosity > 5) {
-    pout() << "AmrMesh::depositParticles(surface)" << endl;
-  }
-
-  CH_assert(a_meshData[0]->nComp() == 1);
-  CH_assert(a_meshData.getRealm() == a_particles.getRealm());
-
-  EBAMRSurfaceDeposition& surfaceDeposition = this->getSurfaceDeposition(a_realm, a_phase);
-
-  surfaceDeposition.deposit<P, particleScalarField>(a_meshData, a_particles);
-}
-
-template <class P, Real& (P::*particleScalarField)()>
+template <class P, class Ret, Ret (P::*MemberFunc)()>
 void
 AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
                               const std::string&        a_realm,
@@ -509,29 +441,7 @@ AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
-  particleMesh.interpolate<P, particleScalarField>(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
-}
-
-template <class P, RealVect& (P::*particleVectorField)()>
-void
-AmrMesh::interpolateParticles(ParticleContainer<P>&     a_particles,
-                              const std::string&        a_realm,
-                              const phase::which_phase& a_phase,
-                              const EBAMRCellData&      a_meshVectorField,
-                              const DepositionType      a_interpType,
-                              const bool                a_forceIrregNGP) const
-{
-  CH_TIME("AmrMesh::interpolateParticles(vector)");
-  if (m_verbosity > 5) {
-    pout() << "AmrMesh::interpolateParticles(vector)" << endl;
-  }
-
-  CH_assert(a_realm == a_particles.getRealm());
-  CH_assert(a_realm == a_meshVectorField.getRealm());
-
-  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
-
-  particleMesh.interpolate<P, particleVectorField>(a_particles, a_meshVectorField, a_interpType, a_forceIrregNGP);
+  particleMesh.interpolate<P, Ret, MemberFunc>(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
 }
 
 template <class P>

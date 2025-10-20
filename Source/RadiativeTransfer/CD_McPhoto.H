@@ -202,7 +202,7 @@ public:
     @param[inout] a_photons    Computational photons to be deposited
     @param[in]    a_deposition Deposition method
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
   depositPhotons(EBAMRCellData&        a_phi,
                  ParticleContainer<P>& a_particles,
@@ -557,11 +557,6 @@ protected:
   int m_seed;
 
   /*!
-    @brief Halo size for particles
-  */
-  int m_haloBuffer;
-
-  /*!
     @brief Bisection step for when we use the bisection intersection algorithm
   */
   Real m_bisectStep;
@@ -663,7 +658,7 @@ protected:
     @param[in] a_deposition Deposition method
     @param[in] a_coarseFineDeposition Coarse-fine deposition strategy.
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
   depositKappaConservative(EBAMRCellData&             a_phi,
                            ParticleContainer<P>&      a_particles,

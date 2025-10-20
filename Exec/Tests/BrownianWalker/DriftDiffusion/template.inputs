@@ -61,17 +61,17 @@ Driver.refine_dielectrics           = -1                  ## Refine dielectric s
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ItoSolver.plt_vars             = phi          ## Currently available is 'phi' only
-ItoSolver.intersection_alg     = bisection    ## Intersection algorithm for EB-particle intersections.
-ItoSolver.bisect_step          = 1.E-4        ## Bisection step length for intersection tests
-ItoSolver.seed                 = 0            ## Seed for RNG
-ItoSolver.redistribute         = true         ## Turn on/off redistribution.
-ItoSolver.plot_deposition      = cic          ## Cloud-in-cell for plotting particles.
-ItoSolver.deposition           = cic          ## 'ngp' = nearest grid point
-ItoSolver.deposition_cf        = halo         ## Coarse-fine deposition. interp, halo, or halo_ngp
-                                              # 'cic' = cloud-in-cell
-                                              # 'tsc' = triangle-shaped-cloud
-                                              # 'w4'  = 3rd order interpolation
+ItoSolver.plt_vars             = phi           ## Currently available is 'phi' only
+ItoSolver.intersection_alg     = bisection     ## Intersection algorithm for EB-particle intersections.
+ItoSolver.bisect_step          = 1.E-4         ## Bisection step length for intersection tests
+ItoSolver.seed                 = 0             ## Seed for RNG
+ItoSolver.redistribute         = true          ## Turn on/off redistribution.
+ItoSolver.plot_deposition      = cic           ## Cloud-in-cell for plotting particles.
+ItoSolver.deposition           = cic           ## 'ngp' = nearest grid point
+ItoSolver.deposition_cf        = transition    ## 'interp', 'halo', 'halo_ngp', 'transition'.
+                                               # 'cic' = cloud-in-cell
+                                               # 'tsc' = triangle-shaped-cloud
+                                               # 'w4'  = 3rd order interpolation
 
 # ====================================================================================================
 # ROD_SPHERE CLASS OPTIONS
@@ -111,4 +111,3 @@ BrownianWalker.cfl        = 0.5    ## CFL number
 BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
 BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
 BrownianWalker.buffer          = 0       ## Grow tagged cells
-

@@ -81,7 +81,7 @@ ItoSolver.irr_ngp_interp         = true            ## Force irregular interpolat
 ItoSolver.mobility_interp        = direct          ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition        = cic             ## Cloud-in-cell for plotting particles.
 ItoSolver.deposition             = cic             ## 'ngp' = nearest grid point
-ItoSolver.deposition_cf          = halo            ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.deposition_cf          = transition      ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
@@ -131,4 +131,3 @@ BrownianWalker.omega        = 1.0     ## Rotation velocity
 BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
 BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
 BrownianWalker.buffer          = 0       ## Grow tagged cells
-

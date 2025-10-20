@@ -1,0 +1,273 @@
+{
+    "gas" : {
+	"background species" : [
+	    {
+		"id": "O2",             
+		"molar fraction" : {    
+		    "type" : "constant",
+		    "value" : 0.2 
+		}
+	    },
+	    {
+		"id" : "N2",             
+		"molar fraction" : {     
+		    "type" : "constant", 
+		    "value" : 0.8        
+		}
+	    }
+	],
+	"law" : {
+	    "id" : "my_ideal_gas",
+	    "plot" : true,        
+	    "my_ideal_gas" : {
+		"type" : "ideal",
+		"temperature" : 300,
+		"pressure" : 1E5
+	    }
+	}
+    },
+    "particle placement": {     
+	"method": "downstream",	
+	"species": "e"		
+    },        
+    "alpha": {
+	"type" : "table vs E/N",                                   
+	"file" : "bolsig_air.dat",                                 
+	"header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)", 
+	"E/N column" : 0,                                          
+	"alpha/N column" : 1,                                      
+	"min E/N" : 1.0,                                           
+	"max E/N" : 1000.0,                                        
+	"num points" : 1000,                                       
+	"spacing" : "exponential",                                 
+	"scale E/N" : 1.0,                                         
+	"scale alpha/N" : 1.0                                      
+    },
+    "eta" : {
+	"type" : "table vs E/N",                                 
+	"file" : "bolsig_air.dat",                               
+	"header" : "E/N (Td)\tTownsend attach. coef. eta/N (m2)",
+	"E/N column" : 0,         
+	"eta/N column" : 1,       
+	"min E/N" : 1.0,          
+	"max E/N" : 1000.0,       
+	"num points" : 1000,      
+	"spacing" : "exponential",
+	"scale E/N" : 1.0,  
+	"scale eta/N" : 1.0 
+    },
+    "plasma species" :
+    [
+	{
+            "id": "e",         
+	    "Z" : -1,          
+	    "solver" : "ito",  
+	    "mobile" : true,   
+	    "diffusive" : true,
+	    "mobility" : {
+		"type" : "table vs E/N",			
+		"file" : "bolsig_air.dat",			
+		"header" : "E/N (Td)\tMobility *N (1/m/V/s)",	
+		"E/N column" : 0,                               
+		"mu*N column" : 1,                              
+		"min E/N" : 1,					
+		"max E/N" : 2E6,				
+		"points" : 1000,				
+		"spacing" : "exponential",			
+		"E/N scale" : 1.0,				
+		"mu*N scale" : 1.0				
+	    },
+	    "diffusion" : {
+		"type" : "table vs E/N",
+		"file" : "bolsig_air.dat",
+		"header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
+		"E/N column" : 0,
+		"D*N column" : 1,
+		"min E/N" : 10,
+		"max E/N" : 2E6,
+		"spacing" : "exponential",
+		"points" : 1000
+	    },
+	    "temperature": {
+		"type": "table vs E/N",
+		"file": "bolsig_air.dat",
+		"header" : "E/N (Td)\tMean energy (eV)",
+		"E/N column" : 0,
+		"eV column" : 1,
+		"min E/N" : 10,
+		"max E/N" : 2E6,
+		"E/N scale": 1.0,
+		"eV scale": 1.0,
+		"spacing" : "exponential",
+		"points" : 1000
+	    },
+	    "initial particles" : [
+		{
+		    "single particle" : {         
+			"position" : [ 0, 0, 0 ], 
+			"weight" : 1000           
+		    }
+		}
+	    ]
+        },
+	{
+            "id": "O2+",            
+	    "Z" : 1,                
+	    "solver" : "ito",       
+	    "mobile" : true,       
+	    "diffusive" : true,    
+	    "mobility": {          
+		"type": "constant",
+		"value": 2E-4      
+	    },
+	    "diffusion": {         
+		"type": "constant",
+		"value": 5E-6      
+	    }
+	},
+	{
+            "id": "O-",            
+	    "Z" : -1,              
+	    "solver" : "ito",      
+	    "mobile" : true,       
+	    "diffusive" : true,    
+	    "mobility": {          
+		"type": "constant",
+		"value": 2E-4      
+	    },
+	    "diffusion": {         
+		"type": "constant",
+		"value": 5E-6      
+	    }		
+	},	
+	{
+	    "id": "N2+",            
+	    "Z" : 1,                
+	    "solver" : "ito",       
+	    "mobile" : true,       
+	    "diffusive" : true,    
+	    "mobility": {          
+		"type": "constant",
+		"value": 2E-4      
+	    },
+	    "diffusion": {         
+		"type": "constant",
+		"value": 5E-6      
+	    }				
+	}
+    ],
+    "photon species":
+    [
+	{
+	    "id": "Y",                  
+	    "kappa": {                  
+		"type": "stochastic B", 
+		"chi min": 2.625E-2,    
+		"chi max": 1.5,         
+		"neutral": "O2"         
+	    }
+	}
+    ],
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e + N2 -> e + e + N2+",
+	    "description": "Rate/N2 ionization",	
+	    "type": "table vs E/N",				
+	    "file" : "bolsig_air.dat",				
+	    "header" : "C25   N2    Ionization    15.60 eV",	
+	    "E/N column" : 0,					
+	    "rate/N column" : 1,				
+	    "min E/N" : 1.0,					
+	    "max E/N" : 1000.0,					
+	    "num points" : 1000,				
+	    "spacing" : "exponential",				
+	    "scale E/N" : 1.0,					
+	    "scale rate/N" : 1.0,				
+	    "include_dt_calc": true,				
+            "gradient correction": "e",				
+	    "plot": true					
+	},
+	{
+	    "reaction": "e + O2 -> e + e + O2+",		
+	    "description": "Rate/O2 ionization",		
+	    "type": "table vs E/N",				
+	    "file" : "bolsig_air.dat",				
+	    "header" : "C42   O2    Ionization    12.06 eV",	
+	    "E/N column" : 0,					
+	    "rate/N column" : 1,				
+	    "min E/N" : 1.0,					
+	    "max E/N" : 1000.0,					
+	    "num points" : 1000,				
+	    "spacing" : "exponential",				
+	    "scale E/N" : 1.0,					
+	    "scale rate/N" : 1.0,				
+	    "include_dt_calc": true,				
+            "gradient correction": "e",				
+	    "plot": true					
+	},
+	{
+	    "reaction": "e + O2 -> O-",			
+	    "description": "Rate/O2 attachment",	
+	    "type": "table vs E/N",			
+	    "file" : "bolsig_air.dat",			
+	    "header" : "C27   O2    Attachment",	
+	    "E/N column" : 0,				
+	    "rate/N column" : 1,			
+	    "min E/N" : 1.0,				
+	    "max E/N" : 1000.0,				
+	    "num points" : 1000,			
+	    "spacing" : "exponential",			
+	    "scale E/N" : 1.0,				
+	    "scale rate/N" : 1.0,			
+	    "include_dt_calc": false,			
+            "gradient correction": "e",			
+	    "plot": true				
+	},	
+	{
+	    "reaction": "e + N2 -> e + Y + (N2)",		
+	    "description": "Rate/Photon generation",		
+	    "type": "table vs E/N",				
+	    "file" : "bolsig_air.dat",				
+	    "header" : "C25   N2    Ionization    15.60 eV",	
+	    "E/N column" : 0,					
+	    "rate/N column" : 1,				
+	    "min E/N" : 1.0,					
+	    "max E/N" : 1000.0,					
+	    "num points" : 1000,				
+	    "spacing" : "exponential",				
+	    "scale E/N" : 1.0,					
+	    "scale rate/N" : 1.0,				
+	    "include_dt_calc": false,				
+            "gradient correction": "e",				
+	    "plot": true,					
+	    "efficiency": 0.06,					
+	    "quenching pressure": 4000.0			
+	}
+
+    ],
+    "photoionization":
+    [
+	{
+	    "reaction": "Y + (O2) -> e + O2+"
+	}
+    ],
+    "dielectric emission":
+    [
+	{
+	    "reaction": "Y -> @",
+	    "@": ["e", "(null)"],
+	    "efficiencies": [0.01, 0.99]
+	},
+	{
+	    "reaction": "N2+ -> @",
+	    "@": ["e", "(null)"],
+	    "efficiencies": [0.01,0.99]
+	},
+	{
+	    "reaction": "O2+ -> @",
+	    "@": ["e", "(null)"],
+	    "efficiencies": [0.01,0.99]	    
+	}		
+    ]        
+}

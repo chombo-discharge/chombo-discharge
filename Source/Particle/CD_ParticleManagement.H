@@ -33,6 +33,7 @@ namespace ParticleManagement {
   /*!
     @brief Concept for splitting/merging particles
     @param[inout] a_particles Particles to be merged/split
+    @param[in] a_cellInfo Cell info
     @param[in] a_numTargetParticles Number of target particles
   */
   template <class P>

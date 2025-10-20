@@ -1568,27 +1568,29 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const BaseFab<bool>& mask    = a_mask[din];
-    const Box            gridBox = m_grids[a_level][din];
-    const Box            maskBox = mask.box();
+    const BaseFab<bool>& mask = a_mask[din];
 
-    CH_assert(gridBox == maskBox);
+    if (mask.isUsable()) {
+      const Box gridBox = m_grids[a_level][din];
+      const Box maskBox = mask.box();
 
-    List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
-    const List<P>& particles     = (*m_particles[a_level])[din].listItems();
+      CH_assert(gridBox == maskBox);
 
-    for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
-      const RealVect x  = lit().position();
-      const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
-                                        std::floor((x[1] - m_probLo[1]) / dx[1]),
-                                        std::floor((x[2] - m_probLo[2]) / dx[2])));
-      if (!(maskBox.contains(iv))) {
-        std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+      List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
+      const List<P>& particles     = (*m_particles[a_level])[din].listItems();
 
-        MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
-      }
-      else if (mask(iv)) {
-        maskParticles.add(lit());
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
+        const RealVect x  = lit().position();
+        const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
+
+        if (!(maskBox.contains(iv))) {
+          std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+
+          MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
+        }
+        else if (mask(iv)) {
+          maskParticles.add(lit());
+        }
       }
     }
   }
@@ -1632,33 +1634,35 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const BaseFab<bool>& mask    = a_mask[din];
-    const Box            gridBox = m_grids[a_level][din];
-    const Box            maskBox = mask.box();
+    const BaseFab<bool>& mask = a_mask[din];
 
-    CH_assert(gridBox == maskBox);
+    if (mask.isUsable()) {
+      const Box gridBox = m_grids[a_level][din];
+      const Box maskBox = mask.box();
 
-    List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
-    const List<P>& particles     = (*m_particles[a_level])[din].listItems();
+      CH_assert(gridBox == maskBox);
 
-    for (ListIterator<P> lit(particles); lit.ok();) {
-      const RealVect x  = lit().position();
-      const IntVect  iv = IntVect(D_DECL(std::floor((x[0] - m_probLo[0]) / dx[0]),
-                                        std::floor((x[1] - m_probLo[1]) / dx[1]),
-                                        std::floor((x[2] - m_probLo[2]) / dx[2])));
-      if (!(maskBox.contains(iv))) {
-        //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+      List<P>&       maskParticles = (*m_maskParticles[a_level])[din].listItems();
+      const List<P>& particles     = (*m_particles[a_level])[din].listItems();
 
-        MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
+      for (ListIterator<P> lit(particles); lit.ok();) {
+        const RealVect x  = lit().position();
+        const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
-        ++lit;
-      }
-      else {
-        if (mask(iv)) {
-          maskParticles.transfer(lit);
+        if (!(maskBox.contains(iv))) {
+          //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+
+          MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
+
+          ++lit;
         }
         else {
-          ++lit;
+          if (mask(iv)) {
+            maskParticles.transfer(lit);
+          }
+          else {
+            ++lit;
+          }
         }
       }
     }

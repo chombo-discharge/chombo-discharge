@@ -13,4 +13,3 @@ ItoKMCStreamerTagger.coarsen_curvature     = 10.0    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 2.0     ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.1     ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 0       ## Set max coarsening depth
-

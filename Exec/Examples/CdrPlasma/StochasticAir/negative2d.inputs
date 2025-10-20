@@ -156,7 +156,7 @@ McPhoto.source_type              = number           ## 'number'      = Source te
                                                     # 'volume_rate' = Source terms contains the volumetric rate
                                                     # 'rate'        = Source terms contains the rate
 McPhoto.deposition               = cic              ## 'ngp'  = nearest grid point
-McPhoto.deposition_cf            = halo             ## Coarse-fine deposition. Must be interp or halo
+McPhoto.deposition_cf            = transition       ## 'interp', 'halo', 'halo_ngp', 'transition'.
                                                     # 'num'  = # of photons per cell
                                                     # 'cic'  = cloud-in-cell
                                                     # 'tsc'  = triangle-shaped-cloud
@@ -240,4 +240,3 @@ CdrPlasmaStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 CdrPlasmaStreamerTagger.refine_alpha          = 1.5      ## Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha         = 0.2      ## Set alpha coarsening. Higher => Less mesh
 CdrPlasmaStreamerTagger.max_coarsen_lvl       = 6        ## Set max coarsening depth
-

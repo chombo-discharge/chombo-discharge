@@ -41,6 +41,7 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_limitParallelDiffusion   = false;
   this->m_canRegridOnRestart       = true;
   this->m_prevDt                   = 0.0;
+  this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
 
   this->parseOptions();
 }
@@ -188,6 +189,7 @@ ItoKMCGodunovStepper<I, C, R, F>::parseAlgorithm() noexcept
   pp.get("extend_conductivity", m_extendConductivityEB);
   pp.get("limit_parallel_diffusion", m_limitParallelDiffusion);
   pp.get("algorithm", str);
+  pp.get("abort_max_field", m_maxFieldAbort);
 
   // Get algorithm
   if (str == "euler_maruyama") {
@@ -281,6 +283,26 @@ ItoKMCGodunovStepper<I, C, R, F>::parseSecondaryEmissionSpecification() noexcept
 
 template <typename I, typename C, typename R, typename F>
 Real
+ItoKMCGodunovStepper<I, C, R, F>::computeDt()
+{
+  CH_TIME("ItoKMCGodunovStepper::computeDt");
+  if (this->m_verbosity > 5) {
+    pout() << this->m_name + "::computeDt" << endl;
+  }
+
+  Real dt = ItoKMCStepper<I, C, R, F>::computeDt();
+
+  if ((this->m_maxReducedField > m_maxFieldAbort) && (m_maxFieldAbort > 0.0)) {
+    pout() << this->m_name + " aborting because maximum field is too high (" << this->m_maxReducedField << ")" << endl;
+
+    dt = 0.0;
+  }
+
+  return dt;
+}
+
+template <typename I, typename C, typename R, typename F>
+Real
 ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
 {
   CH_TIME("ItoKMCGodunovStepper::advance");
@@ -316,7 +338,7 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
     EBAMRCellData&             phi     = solver->getPhi();
     ParticleContainer<Photon>& photons = solver->getBulkPhotons();
 
-    solver->depositPhotons<Photon, &Photon::weight>(phi, photons, DepositionType::NGP);
+    solver->depositPhotons<Photon, const Real&, &Photon::weight>(phi, photons, DepositionType::NGP);
   }
   m_timer.stopEvent("Deposit photons");
 
@@ -519,6 +541,9 @@ ItoKMCGodunovStepper<I, C, R, F>::advance(const Real a_dt)
   }
 
   m_timer.clear();
+
+  // Compute the maximum field (in Townsend).
+  this->m_maxReducedField = this->computeMaxReducedElectricField(this->m_plasmaPhase);
 
   return a_dt;
 }
@@ -871,72 +896,82 @@ ItoKMCGodunovStepper<I, C, R, F>::depositPointParticles(
 
     switch (a_subset) {
     case SpeciesSubset::All: {
-      solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+      solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
 
       break;
     }
     case SpeciesSubset::AllMobile: {
       if (mobile) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllDiffusive: {
       if (diffusive) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::AllMobileOrDiffusive: {
       if (mobile || diffusive) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::AllMobileAndDiffusive: {
       if (mobile && diffusive) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::Charged: {
       if (charged) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedMobile: {
       if (charged && mobile) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
       break;
     }
     case SpeciesSubset::ChargedDiffusive: {
       if (charged && diffusive) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileOrDiffusive: {
       if (charged && (mobile || diffusive)) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::ChargedMobileAndDiffusive: {
       if (charged && (mobile && diffusive)) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
 
       break;
     }
     case SpeciesSubset::Stationary: {
       if (!mobile && !diffusive) {
-        solver->depositParticles<PointParticle, &PointParticle::weight>(solver->getPhi(), *a_particles[idx]);
+        solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(solver->getPhi(),
+                                                                                     *a_particles[idx]);
       }
 
       break;
@@ -1094,7 +1129,8 @@ ItoKMCGodunovStepper<I, C, R, F>::computeCellConductivity(
     if (Z != 0 && solver->isMobile()) {
       // Deposit on the particle realm.
       DataOps::setValue(this->m_particleScratch1, 0.0);
-      solver->depositParticles<PointParticle, &PointParticle::weight>(this->m_particleScratch1, *a_particles[idx]);
+      solver->depositParticles<PointParticle, const Real&, &PointParticle::weight>(this->m_particleScratch1,
+                                                                                   *a_particles[idx]);
 
       // Copy to fluid realm and add to total conductivity.
       (this->m_amr)->copyData(this->m_fluidScratch1, this->m_particleScratch1);
@@ -1244,13 +1280,14 @@ ItoKMCGodunovStepper<I, C, R, F>::computeSemiImplicitRho() noexcept
         DataOps::setValue(fluidScratch, 0.0);
 
         (this->m_amr)
-          ->template depositParticles<PointParticle, &PointParticle::weight>(particleScratch,
-                                                                             this->m_particleRealm,
-                                                                             phase::solid,
-                                                                             *m_rhoDaggerParticles[solverIt.index()],
-                                                                             DepositionType::CIC,
-                                                                             CoarseFineDeposition::Halo,
-                                                                             true);
+          ->template depositParticles<PointParticle, const Real&, &PointParticle::weight>(
+            particleScratch,
+            this->m_particleRealm,
+            phase::solid,
+            *m_rhoDaggerParticles[solverIt.index()],
+            DepositionType::CIC,
+            CoarseFineDeposition::Halo,
+            true);
 
         (this->m_amr)->copyData(fluidScratch, particleScratch);
 
@@ -1771,7 +1808,7 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointHeader(HDF5HeaderData& a_header)
   }
 
   this->m_prevDt    = a_header.m_real["prev_dt"];
-  this->m_physicsDt = a_header.m_real["physicsDt_dt"];
+  this->m_physicsDt = a_header.m_real["physics_dt"];
 
   m_readCheckpointParticles = (a_header.m_int["checkpoint_particles"] != 0) ? true : false;
   m_canRegridOnRestart      = m_readCheckpointParticles;

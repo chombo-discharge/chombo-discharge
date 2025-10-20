@@ -332,8 +332,7 @@ ItoKMCPhysics::initialSigma(const Real a_time, const RealVect a_pos) const
 inline void
 ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
                           Vector<FPR>&            a_numNewPhotons,
-                          Real&                   a_criticalDt,
-                          Real&                   a_nonCriticalDt,
+                          Real&                   a_physicsDt,
                           const Vector<Real>&     a_phi,
                           const Vector<RealVect>& a_gradPhi,
                           const Real              a_dt,
@@ -466,17 +465,41 @@ ItoKMCPhysics::advanceKMC(Vector<FPR>&            a_numParticles,
     MayDay::Warning("ItoKMCPhysics::advanceKMC -- charge not conserved!");
   }
 
-  // Compute the critical and non-critical time steps
-  const auto partitionedReactions = m_kmcSolver.partitionReactions(m_kmcState);
+  // This loop is for isolating reactions that the user will explicitly ask to fire before computing the physics-based time step. It exists
+  // because if there are no electrons but lots of ions, one may get a time step that is too large because X/|sum mu| is zero for the electrons.
+  // Similarly, one may get a time step that is too small away from ionization regions because X/|sum mu| may be tiny if there is, say, 1 electron
+  // but lots of detachment.
+  auto getPropensitiesDt = [&](const KMCState& a_state) -> std::vector<Real> {
+    std::vector<Real> propensities = m_kmcSolver.propensities(a_state, m_kmcReactionsThreadLocal);
 
-  const auto& criticalReactions    = partitionedReactions.first;
-  const auto& nonCriticalReactions = partitionedReactions.second;
+    for (int i = 0; i < propensities.size(); i++) {
+      propensities[i] *= m_reactiveDtFactors[i];
+    }
 
-  const auto criticalPropensities    = m_kmcSolver.propensities(m_kmcState, criticalReactions);
-  const auto nonCriticalPropensities = m_kmcSolver.propensities(m_kmcState, nonCriticalReactions);
+    return propensities;
+  };
 
-  a_criticalDt    = m_kmcSolver.getCriticalTimeStep(criticalPropensities);
-  a_nonCriticalDt = m_kmcSolver.getNonCriticalTimeStep(m_kmcState, nonCriticalReactions, nonCriticalPropensities);
+  // Do a time step limitation on the complete state, using the user-specified reactions.
+  const auto propensitiesDt = getPropensitiesDt(m_kmcState);
+  const auto physicsDt      = m_kmcSolver.computeDt(m_kmcState, m_kmcReactionsThreadLocal, propensitiesDt, 1.0);
+
+  a_physicsDt = std::min(a_physicsDt, physicsDt);
+
+  // Go through reactions that are potentially detaching species and do the calculation again.
+  for (const auto& reaction : m_kmcReactionsThreadLocal) {
+    auto       S = m_kmcState;
+    const auto N = reaction->computeCriticalNumberOfReactions(m_kmcState);
+
+    // Trigger on both the reactions and the reactions with completely consumed reactants
+    if (N < std::numeric_limits<FPR>::max()) {
+      reaction->advanceState(S, N);
+
+      const auto propensitiesDt = getPropensitiesDt(S);
+      const auto physicsDt      = m_kmcSolver.computeDt(S, m_kmcReactionsThreadLocal, propensitiesDt, 1.0);
+
+      a_physicsDt = std::min(a_physicsDt, physicsDt);
+    }
+  }
 }
 
 inline void

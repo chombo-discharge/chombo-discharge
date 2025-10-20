@@ -1,7 +1,7 @@
 # ====================================================================================================
 # Voltage curve
 # ====================================================================================================
-ItoKMC.potential     = 40E3
+ItoKMC.potential     = 35E3
 ItoKMC.basename      = pout
 
 # ====================================================================================================
@@ -38,16 +38,16 @@ Driver.verbosity                    = 2                   ## Engine verbosity
 Driver.geometry_generation          = chombo-discharge    ## Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level          = 0                   ## Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance     = false               ## If using Chombo geo-gen, use memory as loads for EBIS generation
-Driver.output_dt                    = 0.1E-9              ## Output interval (values <= 0 enforces step-based output)
+Driver.output_dt                    = -0.1E-9             ## Output interval (values <= 0 enforces step-based output)
 Driver.plot_interval                = 10                  ## Plot interval
 Driver.checkpoint_interval          = 50                  ## Checkpoint interval
-Driver.regrid_interval              = 5                   ## Regrid interval
+Driver.regrid_interval              = 2                   ## Regrid interval
 Driver.write_regrid_files           = false               ## Write regrid files or not.
 Driver.write_restart_files          = false               ## Write restart files or not
 Driver.initial_regrids              = 3                   ## Number of initial regrids
 Driver.do_init_load_balance         = false               ## If true, load balance the first step in a fresh simulation.
 Driver.start_time                   = 0                   ## Start time (fresh simulations only)
-Driver.stop_time                    = 15E-9               ## Stop time
+Driver.stop_time                    = 100E-9              ## Stop time
 Driver.max_steps                    = 1000                ## Maximum number of steps
 Driver.geometry_only                = false               ## Special option that ONLY plots the geometry
 Driver.write_memory                 = false               ## Write MPI memory report
@@ -61,8 +61,8 @@ Driver.plt_vars                     = 0                   ## 'tags', 'mpi_rank',
 Driver.restart                      = 0                   ## Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening             = true                ## Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                = 2                   ## How much to grow tags when using geometry-based refinement.
-Driver.refine_angles                = 30.                 ## Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes            = 3                   ## Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_angles                = 45.                 ## Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes            = 2                   ## Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics           = 1                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
@@ -82,7 +82,7 @@ FieldSolverMultigrid.kappa_source          = true              ## Volume weighte
 FieldSolverMultigrid.filter_rho            = 0                 ## Number of filterings of space charge before Poisson solve
 FieldSolverMultigrid.filter_potential      = 0                 ## Number of filterings of potential after Poisson solve
 
-FieldSolverMultigrid.gmg_verbosity         = 10           ## GMG verbosity
+FieldSolverMultigrid.gmg_verbosity         = 2            ## GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth        = 24           ## Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth       = 24           ## Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth       = 24           ## Number of at bottom level (before dropping to bottom solver)
@@ -90,14 +90,14 @@ FieldSolverMultigrid.gmg_min_iter          = 5            ## Minimum number of i
 FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
-FieldSolverMultigrid.gmg_min_cells         = 8            ## Bottom drop
-FieldSolverMultigrid.gmg_drop_order        = 128          ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_min_cells         = 4            ## Bottom drop
+FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverMultigrid.gmg_bc_order          = 2            ## Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order        = 2            ## Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight       = 1            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_reduce_order      = false        ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverMultigrid.gmg_bottom_solver     = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverMultigrid.gmg_bottom_solver     = simple 32    ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
@@ -119,7 +119,7 @@ ItoSolver.irr_ngp_interp         = true               ## Force irregular interpo
 ItoSolver.mobility_interp        = direct             ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition        = cic                ## Cloud-in-cell for plotting particles.
 ItoSolver.deposition             = cic                ## Deposition type.
-ItoSolver.deposition_cf          = halo               ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.deposition_cf          = transition         ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
 # CdrCTU solver settings.
@@ -177,7 +177,7 @@ McPhoto.source_type              = number           ## 'number'      = Source te
                                                     # 'volume_rate' = Source terms contains the volumetric rate
                                                     # 'rate'        = Source terms contains the rate
 McPhoto.deposition               = cic              ## 'ngp'  = nearest grid point
-McPhoto.deposition_cf            = halo             ## Coarse-fine deposition. Must be interp or halo
+McPhoto.deposition_cf            = transition       ## 'interp', 'halo', 'halo_ngp', 'transition'.
                                                     # 'num'  = # of photons per cell
                                                     # 'cic'  = cloud-in-cell
                                                     # 'tsc'  = triangle-shaped-cloud
@@ -226,9 +226,10 @@ ItoKMCGodunovStepper.checkpoint_particles                     = true            
 ItoKMCGodunovStepper.verbosity                                = -1                 ## Verbosity
 ItoKMCGodunovStepper.secondary_emission                       = after_reactions    ## When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
+ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
 ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
-ItoKMCGodunovStepper.limit_parallel_diffusion                 = true               ## If true, particles do not diffuse against their drift direction
-ItoKMCGodunovStepper.profile                                  = true               ## Turn on/off run-time profiling
+ItoKMCGodunovStepper.limit_parallel_diffusion                 = false              ## If true, particles do not diffuse against their drift direction
+ItoKMCGodunovStepper.profile                                  = false              ## Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                                 = none               ## 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                                = false              ## Turn on/off dual-grid functionality
 ItoKMCGodunovStepper.load_balance_fluid                       = false              ## Turn on/off fluid realm load balancing.
@@ -239,19 +240,19 @@ ItoKMCGodunovStepper.box_sorting                              = morton          
 ItoKMCGodunovStepper.particles_per_cell                       = 16                 ## Max computational particles per cell
 ItoKMCGodunovStepper.merge_interval                           = 1                  ## Time steps between superparticle merging
 ItoKMCGodunovStepper.regrid_superparticles                    = false              ## Make superparticles during regrids
-ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
-ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.5                ## Advective time step CFL restriction
-ItoKMCGodunovStepper.max_particle_advection_cfl               = 5.0                ## Advective time step CFL restriction
+ItoKMCGodunovStepper.physics_dt_factor                        = 2.0                ## Physics-based time step factor
+ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.1                ## Advective time step CFL restriction
+ItoKMCGodunovStepper.max_particle_advection_cfl               = 10.0               ## Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
 ItoKMCGodunovStepper.max_particle_diffusion_cfl               = 1.E99              ## Diffusive time step CFL restriction
 ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl     = 0.0                ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl     = 1.E99              ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.fluid_advection_diffusion_cfl            = 0.5                ## Advection-diffusion time step CFL restriction
 ItoKMCGodunovStepper.relax_dt_factor                          = 500.0              ## Relaxation time step restriction.
-ItoKMCGodunovStepper.min_dt                                   = 10.E-12            ## Minimum permitted time step
+ItoKMCGodunovStepper.min_dt                                   = 1.E-12             ## Minimum permitted time step
 ItoKMCGodunovStepper.max_dt                                   = 100.E-12           ## Maximum permitted time step
-ItoKMCGodunovStepper.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
-ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
+ItoKMCGodunovStepper.max_growth_dt                            = 1.2                ## Maximum permitted time step increase (dt * factor)
+ItoKMCGodunovStepper.max_shrink_dt                            = 1.2                ## Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
 ItoKMCGodunovStepper.cond_filter_num                          = 0                  ## Number of filterings for conductivity
 ItoKMCGodunovStepper.cond_filter_max_stride                   = 1                  ## Maximum stride for filter
@@ -265,16 +266,16 @@ ItoKMCGodunovStepper.algorithm                                = euler_maruyama  
 # ====================================================================================================
 # ItoKMCJSON class options
 # ====================================================================================================
-ItoKMCJSON.verbose            = false                        ## Turn on/off verbosity
-ItoKMCJSON.debug              = true                         ## Turn on/off debugging
-ItoKMCJSON.chemistry_file     = simple_air_chemistry.json    ## Chemistry file
+ItoKMCJSON.verbose            = false             ## Turn on/off verbosity
+ItoKMCJSON.debug              = true              ## Turn on/off debugging
+ItoKMCJSON.chemistry_file     = chemistry.json    ## Chemistry file
 
 # Kinetic Monte Carlo solver settings.
-ItoKMCJSON.max_new_particles     = 32                 ## Maximum number of computational particles to produce in reaction step
+ItoKMCJSON.max_new_particles     = 16                 ## Maximum number of computational particles to produce in reaction step
 ItoKMCJSON.max_new_photons       = 32                 ## Maximum number of computational photons to produce in reaction step
 ItoKMCJSON.increment_weights     = false              ## If true, increment existing particle weights rather than creating new ones
 ItoKMCJSON.crit_num              = 5                  ## How many firings away from a Negative particle number?
-ItoKMCJSON.prop_eps              = 2.0                ## Maximum relative change in propensity function
+ItoKMCJSON.prop_eps              = 0.5                ## Maximum relative change in propensity function
 ItoKMCJSON.SSA_num               = 5                  ## How many SSA steps to run when tau-leaping is inefficient
 ItoKMCJSON.SSA_lim               = 5.0                ## When to enter SSA instead of tau-leaping
 ItoKMCJSON.max_iter              = 50                 ## Maximum number of iterations for implicit algorithms
@@ -294,6 +295,5 @@ ItoKMCStreamerTagger.buffer            = 4              ## Grow tagged cells
 ItoKMCStreamerTagger.refine_curvature      = 1.E99    ## Curvature refinement
 ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
-ItoKMCStreamerTagger.coarsen_alpha         = 0.0      ## Set alpha coarsening. Higher => Less mesh
-ItoKMCStreamerTagger.max_coarsen_lvl       = 7        ## Set max coarsening depth
-
+ItoKMCStreamerTagger.coarsen_alpha         = 0.1      ## Set alpha coarsening. Higher => Less mesh
+ItoKMCStreamerTagger.max_coarsen_lvl       = 4        ## Set max coarsening depth

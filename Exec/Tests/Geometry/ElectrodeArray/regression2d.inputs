@@ -78,4 +78,3 @@ ElectrodeArray.num_x         = 4          ## Number of electrodes in the x-direc
 ElectrodeArray.num_y         = 4          ## Number of electrodes in the y-direction
 ElectrodeArray.delta_x       = 0.5        ## Electrode spacing in the x-direction
 ElectrodeArray.delta_y       = 0.5        ## Electrode spacing in the y-direction
-

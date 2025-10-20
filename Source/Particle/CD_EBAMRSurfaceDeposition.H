@@ -80,20 +80,13 @@ public:
          const int                                 a_radius) noexcept;
 
   /*!
-    @brief Deposit function. Deposits particle on surface.
-    @details P is the particle type
+    @brief Deposition function which deposites the particles on the surface. 
+    @details P is the particle type, Ret is a Real or a const Real&, and MemberFunc is a member function of P.
+    @param[inout] a_meshData Mesh data. Must defined on cut-cells only.
+    @param[in] a_particles Particles to deposit
     @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
-
-  /*!
-    @brief Deposit function. Deposits particle on surface.
-    @details P is the particle type
-    @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
-  */
-  template <class P, Real (P::*particleScalarField)()>
+  template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
   deposit(EBAMRIVData& a_meshData, const ParticleContainer<P>& a_particles) const noexcept;
 

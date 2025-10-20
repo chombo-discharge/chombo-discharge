@@ -119,6 +119,17 @@ public:
   initialData();
 
   /*!
+    @brief Fill a particle container randomly with particles such that we obtain the target uniform density.
+    @param[inout] a_particles Particle container to fill. Particles already in the container will be kept.
+    @param[in] a_densityFunc Density function.
+    @param[in] a_maxParticlesPerCell Maximum number of computational particles generated per cell. 
+  */
+  virtual void
+  generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
+                               const std::function<Real(const RealVect x)>& a_densityFunc,
+                               const int                                    a_maxParticlesPerCell) const noexcept;
+
+  /*!
     @brief Regrid this solver. 
     @param[in] a_lmin           Coarsest level where grids did not change. 
     @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
@@ -257,7 +268,7 @@ public:
   /*!
     @brief Deposit particles onto mesh. 
     @details This will deposit the mass (i.e., computational weight) "bulk" particles into m_phi. 
-    @note Cells the other version with a_container = WhichContainer::Bulk
+    @note Calls the other version with a_container = WhichContainer::Bulk
   */
   virtual void
   depositParticles();
@@ -277,19 +288,7 @@ public:
     @param[in] a_particles Particles
     @param[in] a_level Grid level
   */
-  template <class P, const Real& (P ::*particleScalarField)() const>
-  void
-  depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
-                      const ParticleContainer<P>& a_particles,
-                      const int                   a_level) const noexcept;
-
-  /*!
-    @brief Do an NGP deposit on a specific grid level. Used for IO.
-    @param[out] a_output Contains NGP deposition of particles. Ignores cut-cells.
-    @param[in] a_particles Particles
-    @param[in] a_level Grid level
-  */
-  template <class P, Real (P ::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
                       const ParticleContainer<P>& a_particles,
@@ -302,7 +301,7 @@ public:
     @param[out] a_phi                  Mesh data -- must have exactly one component. 
     @param[in]  a_particles            Particles to be deposited
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositParticles(EBAMRCellData& a_phi, ParticleContainer<P>& a_particles) const;
 
@@ -315,22 +314,7 @@ public:
     @param[in]  a_deposition           Deposition method
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  depositParticles(EBAMRCellData&             a_phi,
-                   ParticleContainer<P>&      a_particles,
-                   const DepositionType       a_deposition,
-                   const CoarseFineDeposition a_coarseFineDeposition) const;
-
-  /*!
-    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
-    @details Just like the version above, but with a different function signature.
-    @param[out] a_phi                  Mesh data -- must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited
-    @param[in]  a_deposition           Deposition method
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
-  */
-  template <class P, Real (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositParticles(EBAMRCellData&             a_phi,
                    ParticleContainer<P>&      a_particles,
@@ -898,8 +882,8 @@ public:
     @brief Compute a time step for the advance -- this calls the level function. 
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
-    If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
-    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA.
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
   */
   virtual Real
@@ -910,7 +894,7 @@ public:
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
     If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
-    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
   */
@@ -922,7 +906,7 @@ public:
     @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
     time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
     If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
-    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
@@ -997,20 +981,20 @@ public:
   computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
-    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles
   */
   virtual Real
   computeDiffusiveDt() const;
 
   /*!
-    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level
     @param[in] a_lvl Grid level
   */
   virtual Real
   computeDiffusiveDt(const int a_lvl) const;
 
   /*!
-    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input grid patch
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input grid patch
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
@@ -1145,11 +1129,6 @@ protected:
     @brief Time step
   */
   int m_timeStep;
-
-  /*!
-    @brief Size of refinement boundary halo
-  */
-  int m_haloBuffer;
 
   /*!
     @brief Current time
@@ -1433,22 +1412,7 @@ protected:
     @param[in]  a_deposition           Deposition type
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
-  void
-  depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<P>&      a_particles,
-                           const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition) const;
-
-  /*!
-    @brief Compute the cell-centered deposition -- this is the main deposition function.
-    @details Just like the version above except that the function signature is Real P::particleScalarField() const.
-    @param[out] a_phi                  Cell-centered mesh data. Must have exactly one component. 
-    @param[in]  a_particles            Particles to be deposited. 
-    @param[in]  a_deposition           Deposition type
-    @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy
-  */
-  template <class P, Real (P::*particleScalarField)() const>
+  template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
   depositKappaConservative(EBAMRCellData&             a_phi,
                            ParticleContainer<P>&      a_particles,

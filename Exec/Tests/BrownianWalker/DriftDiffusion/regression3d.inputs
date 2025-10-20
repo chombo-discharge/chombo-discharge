@@ -82,7 +82,7 @@ ItoSolver.mobility_interp        = direct          ## How to interpolate mobilit
 ItoSolver.plot_deposition        = cic             ## Cloud-in-cell for plotting particles.
 ItoSolver.halo_deposition        = native          ## Native or NGP (see documentation)
 ItoSolver.deposition             = cic             ## 'ngp' = nearest grid point
-ItoSolver.deposition_cf          = halo            ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.deposition_cf          = transition      ## 'interp', 'halo', 'halo_ngp', 'transition'.
                                                    # 'cic' = cloud-in-cell
                                                    # 'tsc' = triangle-shaped-cloud
                                                    # 'w4'  = 3rd order interpolation
@@ -135,4 +135,3 @@ BrownianWalker.omega        = 1.0     ## Rotation velocity
 BrownianWalker.refine_curv     = 0.1     ## Refine if curvature exceeds this
 BrownianWalker.refine_magn     = 1E-2    ## Only tag if magnitude eceeds this
 BrownianWalker.buffer          = 0       ## Grow tagged cells
-

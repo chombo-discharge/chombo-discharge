@@ -291,7 +291,7 @@ public:
 
   /*!
     @brief Return the velocity field
-    @return *m_velocityField
+    @return m_velocityField
   */
   const EBAMRCellData&
   getVelocityField() const;
@@ -380,12 +380,6 @@ protected:
   int m_verbosity;
 
   /*!
-    @brief Halo buffer for particle deposition. 
-    @details Used when fetching particles around the refinement boundary. 
-  */
-  int m_haloBuffer;
-
-  /*!
     @brief Hook for adding weight to plot file. 
   */
   bool m_plotWeight;
@@ -435,7 +429,7 @@ protected:
     @param[in]  a_baseDeposition       Base deposition method.
     @param[in]  a_coarseFineDeposition Coarse-fine deposition strategy.
   */
-  template <typename T, const Real& (T::*particleScalarFunction)() const>
+  template <class T, class Ret, Ret (T::*MemberFunc)() const>
   void
   depositParticles(EBAMRCellData&              a_phi,
                    const ParticleContainer<T>& a_particles,

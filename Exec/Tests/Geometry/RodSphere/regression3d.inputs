@@ -95,4 +95,3 @@ RodDielectric.perlin_box.noise_reseed      = false        ## Reseed noise or not
 # Subsettings for sphere
 RodDielectric.sphere.center     = 0 0 -0.5    ## Low corner
 RodDielectric.sphere.radius     = 0.25        ## Radius
-

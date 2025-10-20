@@ -306,12 +306,53 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
   m_amr->conservativeAverage(EdotD, m_realm);
 
   // This defines a lambda which computes the energy in a specified phase
-  auto phaseEnergy = [&EdotD, &amr = this->m_amr](const phase::which_phase a_phase) -> Real {
+  auto phaseEnergy = [&EdotD, &amr = this->m_amr, this](const phase::which_phase a_phase) -> Real {
     const EBAMRCellData phaseEdotD = amr->alias(a_phase, EdotD);
 
-    const Real energy = DataOps::norm(*phaseEdotD[0], 1);
+    Real energy = 0.0;
 
-    return energy;
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const Real               dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const Real               dV     = std::pow(dx, SpaceDim);
+
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const Box        cellBox = dbl[din];
+        const EBISBox&   ebisbox = ebisl[din];
+
+        const EBCellFAB&     data       = (*phaseEdotD[lvl])[din];
+        const FArrayBox&     dataReg    = data.getFArrayBox();
+        const BaseFab<bool>& validCells = (*m_amr->getValidCells(m_realm)[lvl])[din];
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          if (validCells(iv) && ebisbox.isRegular(iv)) {
+            energy += dataReg(iv, 0) * dV;
+          }
+        };
+
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          const IntVect iv = vof.gridIndex();
+          if (validCells(iv) && ebisbox.isIrregular(iv)) {
+            const Real kappa = ebisbox.volFrac(vof);
+
+            energy += data(vof, 0) * kappa * dV;
+          }
+        };
+
+        VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, a_phase)[lvl])[din];
+
+        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
+      }
+    }
+
+    return ParallelOps::sum(energy);
   };
 
   // Contributions from each phase.
@@ -361,6 +402,7 @@ FieldSolver::computeCapacitance()
   this->setVoltage(voltageOne);
 
   // Do a solve without a source term.
+  this->setPermittivities();
   this->solve(phi, source, sigma, true);
   this->computeElectricField(E, phi);
 

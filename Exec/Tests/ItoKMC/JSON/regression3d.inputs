@@ -119,7 +119,7 @@ ItoSolver.irr_ngp_interp         = true              ## Force irregular interpol
 ItoSolver.mobility_interp        = direct            ## How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition        = cic               ## Cloud-in-cell for plotting particles.
 ItoSolver.deposition             = cic               ## Deposition type.
-ItoSolver.deposition_cf          = halo              ## Coarse-fine deposition. interp, halo, or halo_ngp
+ItoSolver.deposition_cf          = transition        ## 'interp', 'halo', 'halo_ngp', 'transition'.
 
 # ====================================================================================================
 # CdrCTU solver settings.
@@ -177,7 +177,7 @@ McPhoto.source_type              = number           ## 'number'      = Source te
                                                     # 'volume_rate' = Source terms contains the volumetric rate
                                                     # 'rate'        = Source terms contains the rate
 McPhoto.deposition               = cic              ## 'ngp'  = nearest grid point
-McPhoto.deposition_cf            = halo             ## Coarse-fine deposition. Must be interp or halo
+McPhoto.deposition_cf            = transition       ## 'interp', 'halo', 'halo_ngp', 'transition'.
                                                     # 'num'  = # of photons per cell
                                                     # 'cic'  = cloud-in-cell
                                                     # 'tsc'  = triangle-shaped-cloud
@@ -226,6 +226,7 @@ ItoKMCGodunovStepper.checkpoint_particles                     = true            
 ItoKMCGodunovStepper.verbosity                                = -1                 ## Verbosity
 ItoKMCGodunovStepper.secondary_emission                       = after_reactions    ## When to emit secondary particles. Either 'before_reactions' or 'after_reactions
 ItoKMCGodunovStepper.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
+ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
 ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
 ItoKMCGodunovStepper.limit_parallel_diffusion                 = true               ## If true, particles do not diffuse against their drift direction
 ItoKMCGodunovStepper.profile                                  = false              ## Turn on/off run-time profiling
@@ -296,4 +297,3 @@ ItoKMCStreamerTagger.coarsen_curvature     = 1.E99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0      ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.0      ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 6        ## Set max coarsening depth
-

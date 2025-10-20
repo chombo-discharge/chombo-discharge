@@ -14,6 +14,8 @@
 
 // Std includes
 #include <vector>
+#include <cstddef>
+#include <ostream>
 
 // Our includes
 #include <CD_NamespaceHeader.H>

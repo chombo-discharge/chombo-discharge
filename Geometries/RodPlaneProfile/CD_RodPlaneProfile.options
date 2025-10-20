@@ -36,4 +36,3 @@ RodPlaneProfile.circle_radius     = 1E-3
 # Square specific parameters
 RodPlaneProfile.square_width      = 1E-3
 RodPlaneProfile.square_height     = 1E-3
-

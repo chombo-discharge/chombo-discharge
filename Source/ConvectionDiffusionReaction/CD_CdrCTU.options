@@ -26,4 +26,3 @@ CdrCTU.gmg_min_cells            = 16                        ## Bottom drop
 CdrCTU.gmg_bottom_solver        = bicgstab                  ## Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrCTU.gmg_cycle                = vcycle                    ## Cycle type. Only 'vcycle' supported for now
 CdrCTU.gmg_smoother             = red_black                 ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-

@@ -7,4 +7,3 @@ CdrPlasmaJSON.discrete_photons     = false                ## Use discrete photon
 CdrPlasmaJSON.skip_reactions       = false                ## If true, turn off all reactions
 CdrPlasmaJSON.integrator           = explicit_midpoint    ## Reaction network integrator
 CdrPlasmaJSON.chemistry_dt         = 1.E99                ## Maximum allowed chemistry time step.
-

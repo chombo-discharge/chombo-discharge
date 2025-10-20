@@ -4,19 +4,17 @@ Realm
 =====
 
 ``Realm`` is a class for centralizing EBAMR-related grids and operators for a specific AMR grid. 
-For example, a ``Realm`` consists of a set of grids (i.e. a ``Vector<DisjointBoxLayout>``) as well as *operators*, e.g. functionality for filling ghost cells or averaging down a solution from a fine level to a coarse level.
-One may think of a ``Realm`` as a fully-fledged AMR hierarchy with associated multilevel operators, i.e. how one would usually do AMR.
-
-
+For example, a ``Realm`` consists of a set of grids (i.e. a ``Vector<DisjointBoxLayout>``) as well as *operators*, i.e., functionality for filling ghost cells or averaging down a solution from a fine level to a coarse level.
+One may think of a ``Realm`` as a fully-fledged AMR hierarchy with associated multilevel operators, i.e., how one would usually do AMR.
 
 Dual grid
 ---------
 
 The reason why ``Realm`` exists at all is due to individual load balancing of algorithmic components. 
 The terminology *dual grid* is used when more than one ``Realm`` is used in a simulation, and in this case the user/developer has chosen to solve the equations of motion over a different set of ``DisjointBoxLayout`` on each level.
-This approach is very useful when using computational particles since users can quickly generate separate Eulerian sets of grids for fluids and particles, and the grids can then be load balanced separately.
-Note that every ``Realm`` consists of the same boxes, i.e. the physical domain and computational grids are the same for all realms. 
-The difference lies primarily in the assignment of MPI ranks to grids; i.e. the load-balancing and domain decomposition.
+This approach is very useful when using computational particles since users can load balance the grids for the fluid and particle algorithms separately.
+Note that every ``Realm`` consists of the same boxes, i.e., the physical domain and computational grids are the same for all realms. 
+The only difference lies primarily in the assignment of MPI ranks to grids, i.e., the load-balancing.
 
 .. _Fig:DualMesh:
 .. figure:: /_static/figures/DualMesh.png
@@ -37,24 +35,6 @@ Interacting with realms
 -----------------------
 
 Users will not interact with ``Realm`` directly.
-Every ``Realm`` is owned by ``AmrMesh``, and the user will only interact with realms through the public ``AmrMesh`` interface, for example by fetching operators for performing AMR operations. 
-In addition, data that is defined on one realm can be copied to another; ``EBAMRData<T>`` takes care of this.
-You will simply call a copier:
-
-.. code-block:: c++
-
-   EBAMRCellData realmOneData;
-   EBAMRCellData realmTwoData;
-
-   realmOneData.copy(realmTwoData);
-
-The rest of the functionality uses the public interface of :ref:`Chap:AmrMesh`.
-For example for coarsening of multifluid data:
-
-.. code-block:: c++
-
-   std::string multifluidRealm;
-   MFAMRCellData multifluidData;
-   AmrMesh amrMesh;
-
-   amrMesh.averageDown(multifluidData, multifluidRealm);
+Every ``Realm`` is owned by :ref:`Chap:AmrMesh`, and the user will only interact with realms through the public :ref:`Chap:AmrMesh` interface, for example by fetching operators for performing AMR operations. 
+It is important, however, to keep track of what data is allocated where.
+Fortunately, :ref:`Chap:AmrMesh` will issue plenty of warnings if the user calls a function where the input arguments are realm-wise inconsistent.

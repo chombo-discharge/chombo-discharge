@@ -103,4 +103,3 @@ MechanicalShaft.dielectric.profile.circular.profile_period           = 0.25    #
 MechanicalShaft.dielectric.profile.circular.profile_repeat_lo        = 10      ## Profile repetition
 MechanicalShaft.dielectric.profile.circular.profile_repeat_hi        = 10      ## Profile repetition
 MechanicalShaft.dielectric.profile.circular.profile_smooth           = 0.05    ## Profile smoothing
-

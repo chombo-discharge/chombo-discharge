@@ -5,7 +5,7 @@ Least squares
 
 Least squares routines are useful for reconstructing a local polynomial in the vicinity of the embedded boundary.
 ``chombo-discharge`` supports the expansion of such solutions in a fairly general way.
-These routines are often needed because the embedded boundary introduces grid pathologies which are difficult to meet with pure finite differencing, see e.g. :ref:`Chap:MultigridInterpolation`.
+These routines are often needed because the embedded boundary introduces grid pathologies which are difficult to meet with pure finite differencing, see, e.g., :ref:`Chap:MultigridInterpolation`.
 
 Polynomial expansion
 --------------------
@@ -201,7 +201,6 @@ Thus, when evaluating the terms in the polynomial expansion the user must accoun
 The modification to the right-hand side also depends on which terms are pruned from the expansion. 
 
 
-Source code
------------
+.. tip::
 
-The source code for the least squares routines is found in :file:`$DISCHARGE_HOME/Source/Utilities/CD_LeastSquares.*`, and the neighborhood algorithms are found in :file:`$DISCHARGE_HOME/Source/Utilities/CD_VofUtils.*`.
+   The source code for the least squares routines is found in :file:`$DISCHARGE_HOME/Source/Utilities/CD_LeastSquares.*`, and the neighborhood algorithms are found in :file:`$DISCHARGE_HOME/Source/Utilities/CD_VofUtils.*`.

@@ -32,13 +32,12 @@ inline TracerParticleSolver<P>::TracerParticleSolver()
   m_className            = "TracerParticleSolver";
   m_realm                = Realm::primal;
   m_phase                = phase::gas;
-  m_haloBuffer           = 1;
   m_plotVelocity         = true;
   m_plotWeight           = true;
   m_volumeScale          = false;
   m_deposition           = DepositionType::CIC;
   m_interpolation        = DepositionType::CIC;
-  m_coarseFineDeposition = CoarseFineDeposition::Halo;
+  m_coarseFineDeposition = CoarseFineDeposition::Transition;
 }
 
 template <typename P>
@@ -121,6 +120,9 @@ TracerParticleSolver<P>::parseDeposition()
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
   }
+  else if (str == "transition") {
+    m_coarseFineDeposition = CoarseFineDeposition::Transition;
+  }
   else {
     MayDay::Error("TracerParticleSolver::parseDeposition - unknown coarse-fine deposition method requested.");
   }
@@ -184,9 +186,6 @@ TracerParticleSolver<P>::registerOperators() const
   else {
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_eb_coar_ave, m_realm, m_phase);
-
-    // For CIC halo deposition.
-    m_amr->registerMask(s_particle_halo, 1, m_realm);
   }
 }
 
@@ -368,7 +367,8 @@ TracerParticleSolver<P>::deposit(EBAMRCellData& a_phi) const noexcept
   }
 
   DataOps::setValue(a_phi, 0.0);
-  this->depositParticles<P, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
+
+  this->depositParticles<P, const Real&, &P::weight>(a_phi, m_particles, m_deposition, m_coarseFineDeposition);
 
   if (m_volumeScale) {
     DataOps::volumeScale(a_phi, m_amr->getDx());
@@ -384,7 +384,7 @@ TracerParticleSolver<P>::interpolateWeight(const EBAMRCellData& a_scalar) noexce
     pout() << m_name + "::interpolateWeight(EBAMRCellData)" << endl;
   }
 
-  m_amr->interpolateParticles<P, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, true);
+  m_amr->interpolateParticles<P, Real&, &P::weight>(m_particles, m_realm, m_phase, a_scalar, m_interpolation, true);
 }
 
 template <typename P>
@@ -396,7 +396,12 @@ TracerParticleSolver<P>::interpolateVelocities()
     pout() << m_name + "::interpolateVelocities()" << endl;
   }
 
-  m_amr->interpolateParticles<P, &P::velocity>(m_particles, m_realm, m_phase, m_velocityField, m_interpolation, true);
+  m_amr->interpolateParticles<P, RealVect&, &P::velocity>(m_particles,
+                                                          m_realm,
+                                                          m_phase,
+                                                          m_velocityField,
+                                                          m_interpolation,
+                                                          true);
 }
 
 template <typename P>
@@ -725,7 +730,7 @@ TracerParticleSolver<P>::getInterpolationType() const
 }
 
 template <typename P>
-template <typename T, const Real& (T::*particleScalarFunction)() const>
+template <class T, class Ret, Ret (T::*MemberFunc)() const>
 void
 TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
                                           const ParticleContainer<T>& a_particles,
@@ -739,64 +744,13 @@ TracerParticleSolver<P>::depositParticles(EBAMRCellData&              a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  // I HATE it when other people do this. Yet I keep doing it.
-  ParticleContainer<T>& mutableParticles = (ParticleContainer<T>&)a_particles;
-
-  switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::Interp: {
-    m_amr->depositParticles<T, particleScalarFunction>(a_phi,
-                                                       m_realm,
-                                                       m_phase,
-                                                       a_particles,
-                                                       a_baseDeposition,
-                                                       CoarseFineDeposition::Interp,
-                                                       false);
-
-    break;
-  }
-  case CoarseFineDeposition::Halo: {
-
-    // Copy particles living on the mask.
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-
-    mutableParticles.copyMaskParticles(mask);
-
-    m_amr->depositParticles<T, particleScalarFunction>(a_phi,
-                                                       m_realm,
-                                                       m_phase,
-                                                       a_particles,
-                                                       a_baseDeposition,
-                                                       CoarseFineDeposition::Halo,
-                                                       false);
-
-    // Clear out the mask particles.
-    mutableParticles.clearMaskParticles();
-
-    break;
-  }
-  case CoarseFineDeposition::HaloNGP: {
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-
-    // Transfer particles living on the mask.
-    mutableParticles.transferMaskParticles(mask);
-
-    m_amr->depositParticles<T, particleScalarFunction>(a_phi,
-                                                       m_realm,
-                                                       m_phase,
-                                                       a_particles,
-                                                       a_baseDeposition,
-                                                       CoarseFineDeposition::HaloNGP,
-                                                       false);
-
-    // Transfer them back.
-    mutableParticles.transferParticles(mutableParticles.getMaskParticles());
-
-    break;
-  }
-  default: {
-    MayDay::Error("TracerParticleSolver::depositParticles -- logic bust due to unsupported coarse-fine deposition");
-  }
-  }
+  m_amr->depositParticles<T, Ret, MemberFunc>(a_phi,
+                                              m_realm,
+                                              m_phase,
+                                              a_particles,
+                                              a_baseDeposition,
+                                              a_coarseFineDeposition,
+                                              false);
 }
 
 #include <CD_NamespaceFooter.H>

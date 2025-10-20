@@ -18,4 +18,3 @@ CoaxialCable.inner.live       = false
 CoaxialCable.dielectric.on         = true
 CoaxialCable.dielectric.radius     = 0.5
 CoaxialCable.dielectric.eps        = 4
-

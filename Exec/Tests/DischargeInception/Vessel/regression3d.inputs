@@ -62,13 +62,13 @@ Driver.refine_dielectrics           = 2                   ## Refine dielectric s
 # ====================================================================================================
 # TracerParticleSolver class options
 # ====================================================================================================
-TracerParticleSolver.verbosity         = -1       ## Solver verbosity level.
-TracerParticleSolver.deposition        = ngp      ## Deposition method. Must be 'ngp' or 'cic'
-TracerParticleSolver.interpolation     = ngp      ## Interpolation method. Must be 'ngp' or 'cic'
-TracerParticleSolver.deposition_cf     = halo     ## Coarse-fine deposition. Must be interp or halo
-TracerParticleSolver.plot_weight       = true     ## Turn on/off plotting of the particle weight.
-TracerParticleSolver.plot_velocity     = true     ## Turn on/off plotting of the particle velocities.
-TracerParticleSolver.volume_scale      = false    ## If true, depositions yield density * volume instead of just volume
+TracerParticleSolver.verbosity         = -1            ## Solver verbosity level.
+TracerParticleSolver.deposition        = ngp           ## Deposition method. Must be 'ngp' or 'cic'
+TracerParticleSolver.interpolation     = ngp           ## Interpolation method. Must be 'ngp' or 'cic'
+TracerParticleSolver.deposition_cf     = transition    ## 'interp', 'halo', 'halo_ngp', 'transition'.
+TracerParticleSolver.plot_weight       = true          ## Turn on/off plotting of the particle weight.
+TracerParticleSolver.plot_velocity     = true          ## Turn on/off plotting of the particle velocities.
+TracerParticleSolver.volume_scale      = false         ## If true, depositions yield density * volume instead of just volume
 
 # ====================================================================================================
 # FieldSolverMultigrid class options
@@ -181,9 +181,8 @@ DischargeInceptionStepper.grad_alpha_dx        = 0.1       ## Maximum step size 
 DischargeInceptionStepper.townsend_grid_dx     = 2.0       ## Space step to use for Townsend tracking
 
 # Static mode
-DischargeInceptionStepper.voltage_lo        = 30E3    ## Low voltage multiplier
-DischargeInceptionStepper.voltage_hi        = 40E3    ## Highest voltage multiplier
-DischargeInceptionStepper.voltage_steps     = 3       ## Number of voltage steps
+DischargeInceptionStepper.rel_step_dU     = 0.05    ## Relative (%) voltage increase for each step
+DischargeInceptionStepper.limit_max_K     = 15.0    ## Limit the maximum K-value
 
 # Dynamic mode
 DischargeInceptionStepper.ion_transport     = true      ## Turn on/off ion transport
@@ -211,4 +210,3 @@ lightning_impulse.peak           = 50E3
 lightning_impulse.start          = 1.E-9
 lightning_impulse.front_time     = 1.2E-6
 lightning_impulse.tail_time      = 50E-6
-

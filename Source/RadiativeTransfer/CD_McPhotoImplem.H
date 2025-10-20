@@ -16,7 +16,7 @@
 #include <CD_McPhoto.H>
 #include <CD_NamespaceHeader.H>
 
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, class Ret, Ret (P::*MemberFunc)() const>
 void
 McPhoto::depositPhotons(EBAMRCellData&        a_phi,
                         ParticleContainer<P>& a_photons,
@@ -28,7 +28,7 @@ McPhoto::depositPhotons(EBAMRCellData&        a_phi,
   }
 
   // a_phi contains only weights, i.e. not divided by kappa
-  this->depositKappaConservative<P, particleScalarField>(a_phi, a_photons, a_deposition, m_coarseFineDeposition);
+  this->depositKappaConservative<P, Ret, MemberFunc>(a_phi, a_photons, a_deposition, m_coarseFineDeposition);
 
   // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
   this->depositNonConservative(m_depositionNC, a_phi);
@@ -62,7 +62,7 @@ McPhoto::depositPhotons(EBAMRCellData&        a_phi,
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
-template <class P, const Real& (P::*particleScalarField)() const>
+template <class P, class Ret, Ret (P::*MemberFunc)() const>
 void
 McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
                                   ParticleContainer<P>&      a_particles,
@@ -76,60 +76,13 @@ McPhoto::depositKappaConservative(EBAMRCellData&             a_phi,
 
   CH_assert(a_phi[0]->nComp() == 1);
 
-  switch (a_coarseFineDeposition) {
-  case CoarseFineDeposition::Interp: {
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Interp,
-                                                    false);
-
-    break;
-  }
-  case CoarseFineDeposition::Halo: {
-
-    // Copy particles living on the mask.
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-    a_particles.copyMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::Halo,
-                                                    false);
-
-    // Clear out the mask particles.
-    a_particles.clearMaskParticles();
-
-    break;
-  }
-  case CoarseFineDeposition::HaloNGP: {
-    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-
-    // Transfer particles living on the mask.
-    a_particles.transferMaskParticles(mask);
-
-    m_amr->depositParticles<P, particleScalarField>(a_phi,
-                                                    m_realm,
-                                                    m_phase,
-                                                    a_particles,
-                                                    a_deposition,
-                                                    CoarseFineDeposition::HaloNGP,
-                                                    false);
-
-    // Transfer them back.
-    a_particles.transferParticles(a_particles.getMaskParticles());
-
-    break;
-  }
-  default: {
-    MayDay::Error("McPhoto::depositKappaConservative -- logic bust due to unsupported coarse-fine deposition");
-  }
-  }
+  m_amr->depositParticles<P, Ret, MemberFunc>(a_phi,
+                                              m_realm,
+                                              m_phase,
+                                              a_particles,
+                                              a_deposition,
+                                              a_coarseFineDeposition,
+                                              false);
 }
 
 #include <CD_NamespaceFooter.H>

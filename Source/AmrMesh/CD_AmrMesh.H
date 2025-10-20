@@ -939,18 +939,9 @@ public:
   conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Deposit scalar particle quantities on the mesh. 
-    @details This routine will switch between various algorithms depending on the user input. If the user chooses to deposit with "halos" near the refinement boundaries
-    then this function requires the "halo" particles to be filled before entering this routine. Thus, if depositing with halos (which requires kernels with 2x or 4x 
-    the particle width), the user must first call ParticleContainer::copyMaskParticles(AMRMask). If the user does not do this, he will lose mass near the refinement
-    boundaries. Other than that, this function is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be
-    deposited is fetched from the specified template parameter 'a_particleScalarField'. This should be a pointer to a member function with signature 
-    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
-    
-    interpolate<P, &P::mass> (...)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-
+    @brief Deposit scalar particle quantities on the mesh.
+    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
+    RealVect. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const RealVect&, &P::position>.    
     @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
     @param[in]  a_realm                Realm where data is registered.
     @param[in]  a_phase                Phase where data is registered.
@@ -959,7 +950,7 @@ public:
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, typename Ret, Ret (P::*MemberFunc)() const>
   void
   depositParticles(EBAMRCellData&              a_meshData,
                    const std::string&          a_realm,
@@ -970,90 +961,15 @@ public:
                    const bool                  a_forceIrregNGP = false);
 
   /*!
-    @brief Deposit scalar particle quantities on the mesh. 
-    @details Precisely like the above function, except that the function signature is Real P::particleScalarField() const (C++ is not too smart about these things)
-    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
-    @param[in]  a_realm                Realm where data is registered.
-    @param[in]  a_phase                Phase where data is registered.
-    @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
-    @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
-    @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
-    @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
-  */
-  template <class P, Real (P::*particleScalarField)() const>
-  void
-  depositParticles(EBAMRCellData&              a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles,
-                   const DepositionType        a_depositionType,
-                   const CoarseFineDeposition  a_coarseFineDeposition,
-                   const bool                  a_forceIrregNGP = false);
-
-  /*!
-    @brief Deposit vector particle quantities on the mesh. 
-    @details This routine will switch between various algorithms depending on the user input. If the user chooses to deposit with "halos" near the refinement boundaries
-    then this function requires the "halo" particles to be filled before entering this routine. Thus, if depositing with halos (which requires kernels with 2x or 4x 
-    the particle width), the user must first call ParticleContainer::copyMaskParticles(AMRMask). If the user does not do this, he will lose mass near the refinement
-    boundaries. Other than that, this function is just like regular particle-mesh deposition. The mesh field should have exactly SpaceDim components and the quantity to be
-    deposited is fetched from the specified template parameter 'a_particleVectorField'. This should be a pointer to a member function with signature 
-    const RealVect& P::function() const. E.g. if we are depositing current through a function const RealVect& P::current() const we will specifiy
-    
-    interpolate<P, &P::current> (...)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-
-    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
-    @param[in]  a_realm                Realm where data is registered.
-    @param[in]  a_phase                Phase where data is registered.
-    @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
-    @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
-    @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
-    @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
-  */
-  template <class P, const RealVect& (P::*particleVectorField)() const>
-  void
-  depositParticles(EBAMRCellData&              a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles,
-                   const DepositionType        a_depositionType,
-                   const CoarseFineDeposition  a_coarseFineDeposition,
-                   const bool                  a_forceIrregNGP = false);
-
-  /*!
-    @brief Deposit vector particle quantities on the mesh. 
-    @details Precisely like the above function, except that the function signature is RealVect P::particleVectorField() const (C++ is not too smart about these things)
-    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
-    @param[in]  a_realm                Realm where data is registered.
-    @param[in]  a_phase                Phase where data is registered.
-    @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
-    @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
-    @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
-    @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
-  */
-  template <class P, RealVect (P::*particleVectorField)() const>
-  void
-  depositParticles(EBAMRCellData&              a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles,
-                   const DepositionType        a_depositionType,
-                   const CoarseFineDeposition  a_coarseFineDeposition,
-                   const bool                  a_forceIrregNGP = false);
-
-  /*!
-    @brief Deposit scalar particle quantities on the mesh. 
-    @details Usage has signature depositParticles<P, &P::mass> (...)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-
+    @brief Deposit scalar particle quantities on the mesh.
+    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
+    const Real&. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const Real&, &P::weight>.        
     @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
     @param[in]  a_realm      Realm where data is registered.
     @param[in]  a_phase      Phase where data is registered.
     @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
   */
-  template <class P, const Real& (P::*particleScalarField)() const>
+  template <class P, typename Ret, Ret (P::*MemberFunc)() const>
   void
   depositParticles(EBAMRIVData&                a_meshData,
                    const std::string&          a_realm,
@@ -1061,34 +977,9 @@ public:
                    const ParticleContainer<P>& a_particles) const noexcept;
 
   /*!
-    @brief Deposit scalar particle quantities on the mesh. 
-    @details Usage has signature depositParticles<P, &P::mass> (...)
-	
-    To deposit a different quantity, simply change the function pointer in the input parameter. 
-
-    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
-    @param[in]  a_realm      Realm where data is registered.
-    @param[in]  a_phase      Phase where data is registered.
-    @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
-  */
-  template <class P, Real (P::*particleScalarField)() const>
-  void
-  depositParticles(EBAMRIVData&                a_meshData,
-                   const std::string&          a_realm,
-                   const phase::which_phase&   a_phase,
-                   const ParticleContainer<P>& a_particles) const noexcept;
-
-  /*!
-    @brief Interpolate a scalar field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalarField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
-    expression is e.g.
-    
-        interpolate<P, &P::mass> (...)
-	
-    To interpolate onto a different field, replace ::mass by the other scalar field.
-
+    @brief Interpolate mesh data onto a particle position.
+    @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real& or a
+    RealVect&. MemFunc is a pointer to a member function of P. E.g., interpolate<P, Real&, &P::weight>.        
     @param[inout] a_particles            Particles to be interpolated. 
     @param[in]    a_realm                Realm where data is registered.
     @param[in]    a_phase                Phase where data is registered.
@@ -1096,39 +987,12 @@ public:
     @param[in]    a_interpType           Interpolation type. 
     @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
   */
-  template <class P, Real& (P::*particleScalarField)()>
+  template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
   interpolateParticles(ParticleContainer<P>&     a_particles,
                        const std::string&        a_realm,
                        const phase::which_phase& a_phase,
                        const EBAMRCellData&      a_meshScalarField,
-                       const DepositionType      a_interpType,
-                       const bool                a_forceIrregNGP = false) const;
-
-  /*!
-    @brief Interpolate a vector field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly SpaceDim components and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid
-    expression is e.g.
-    
-        interpolate<P, &P::velocity> (...)
-	
-    To interpolate onto a different field, replace ::velocity by another vector field. 
-
-    @param[inout] a_particles            Particles to be interpolated. 
-    @param[in]    a_realm                Realm where data is registered.
-    @param[in]    a_phase                Phase where data is registered.
-    @param[in]    a_meshScalarField      Scalar field on the mesh 
-    @param[in]    a_interpType           Interpolation type. 
-    @param[in]    a_forceIrregNGP        Force NGP interpolation in cut-cells. 
-  */
-  template <class P, RealVect& (P::*particleVectorField)()>
-  void
-  interpolateParticles(ParticleContainer<P>&     a_particles,
-                       const std::string&        a_realm,
-                       const phase::which_phase& a_phase,
-                       const EBAMRCellData&      a_meshVectorField,
                        const DepositionType      a_interpType,
                        const bool                a_forceIrregNGP = false) const;
 

@@ -106,7 +106,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
         this->advancePhotonsInstantaneous(scratchPhotons, m_ebPhotons, m_domainPhotons, m_photons);
 
         // Absorb the bulk photons on the mesh.
-        this->depositPhotons<Photon, &Photon::weight>(phi, scratchPhotons, m_deposition);
+        this->depositPhotons<Photon, const Real&, &Photon::weight>(phi, scratchPhotons, m_deposition);
         DataOps::incr(a_phi, phi, 1.0);
 
         // Store the photons that were absorbed.
@@ -118,7 +118,7 @@ McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_s
       this->generateComputationalPhotons(m_photons, numPhysPhotonsTotal, m_maxPhotonsGeneratedPerCell);
       this->advancePhotonsTransient(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons, a_dt);
       this->remap(m_photons);
-      this->depositPhotons<Photon, &Photon::weight>(a_phi, m_bulkPhotons, m_deposition);
+      this->depositPhotons<Photon, const Real&, &Photon::weight>(a_phi, m_bulkPhotons, m_deposition);
     }
   }
   else {
@@ -156,9 +156,6 @@ McPhoto::parseOptions()
   if (m_verbosity > 5) {
     pout() << m_name + "::parseOptions" << endl;
   }
-
-  // For registering the CIC deposition mask.
-  m_haloBuffer = 1;
 
   this->parseVerbosity();
   this->parseTransparentBoundaries();
@@ -392,6 +389,9 @@ McPhoto::parseDeposition()
   }
   else if (str == "halo_ngp") {
     m_coarseFineDeposition = CoarseFineDeposition::HaloNGP;
+  }
+  else if (str == "transition") {
+    m_coarseFineDeposition = CoarseFineDeposition::Transition;
   }
   else {
     MayDay::Error("McPhoto::parseDeposition - unknown coarse-fine deposition method requested.");
@@ -702,9 +702,6 @@ McPhoto::registerOperators()
     m_amr->registerOperator(s_eb_redist, m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     m_amr->registerOperator(s_noncons_div, m_realm, m_phase);
-
-    // For CIC deposition
-    m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
@@ -1271,12 +1268,16 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
         EBCellFAB&                 output  = (*a_phi[lvl])[din];
         const List<PointParticle>& photons = a_photons[lvl][din].listItems();
 
-        particleMesh.deposit<PointParticle, &PointParticle::weight>(photons, output, DepositionType::NGP, true);
+        particleMesh.deposit<PointParticle, const Real&, &PointParticle::weight>(output,
+                                                                                 photons,
+                                                                                 DepositionType::NGP,
+                                                                                 1.0,
+                                                                                 true);
       }
     }
   }
   else {
-    this->depositPhotons<PointParticle, &PointParticle::weight>(a_phi, a_photons, m_deposition);
+    this->depositPhotons<PointParticle, const Real&, &PointParticle::weight>(a_phi, a_photons, m_deposition);
   }
 
   a_photons.clearParticles();
@@ -1290,7 +1291,7 @@ McPhoto::depositPhotons()
     pout() << m_name + "::depositPhotons()" << endl;
   }
 
-  this->depositPhotons<Photon, &Photon::weight>(m_phi, m_photons, m_deposition);
+  this->depositPhotons<Photon, const Real&, &Photon::weight>(m_phi, m_photons, m_deposition);
 }
 
 void
@@ -1396,7 +1397,7 @@ McPhoto::depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
 
     output.setVal(0.0);
 
-    particleMesh.deposit<Photon, &Photon::weight>(photons, output, DepositionType::NGP, true);
+    particleMesh.deposit<Photon, const Real&, &Photon::weight>(output, photons, DepositionType::NGP, 1.0, true);
   }
 
   a_output.exchange();

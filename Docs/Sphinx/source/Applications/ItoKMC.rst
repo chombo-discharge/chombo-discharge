@@ -3,6 +3,13 @@
 Îto-KMC plasma model
 ********************
 
+.. warning::
+
+   This section is not very well documented. The following featurse are definitely missing:
+
+   * Use of hybrid models (PPC-fluid specifications)
+   * How the physics time step is restricted
+
 Underlying model
 ================
 
@@ -60,22 +67,9 @@ In addition, the user can specify the maximum permitted growth or reduction in t
 
 These limits are given by the following input variables:
 
-.. code-block:: txt
-
-   ItoKMCGodunovStepper.physics_dt_factor                     = 1.0     ## Physics-based time step factor
-   ItoKMCGodunovStepper.min_particle_advection_cfl            = 0.0     ## Advective time step CFL restriction
-   ItoKMCGodunovStepper.max_particle_advection_cfl            = 1.0     ## Advective time step CFL restriction
-   ItoKMCGodunovStepper.min_particle_diffusion_cfl            = 0.0     ## Diffusive time step CFL restriction
-   ItoKMCGodunovStepper.max_particle_diffusion_cfl            = 1.E99   ## Diffusive time step CFL restriction
-   ItoKMCGodunovStepper.min_particle_advection_diffusion_cfl  = 0.0     ## Advection-diffusion time step CFL restriction
-   ItoKMCGodunovStepper.max_particle_advection_diffusion_cfl  = 1.E99   ## Advection-diffusion time step CFL restriction
-   ItoKMCGodunovStepper.fluid_advection_diffusion_cfl         = 0.5     ## Advection-diffusion time step CFL restriction
-   ItoKMCGodunovStepper.relax_dt_factor                       = 100.0   ## Relaxation time step restriction.
-   ItoKMCGodunovStepper.min_dt                                = 0.0     ## Minimum permitted time step
-   ItoKMCGodunovStepper.max_dt                                = 1.E99   ## Maximum permitted time step
-   ItoKMCGodunovStepper.max_growth_dt                         = 1.E99   ## Maximum permitted time step increase (dt * factor)
-   ItoKMCGodunovStepper.max_shrink_dt                         = 1.E99   ## Maximum permissible time step reduction (dt/factor)
-
+.. literalinclude:: ../../../../Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepper.options
+   :language: text
+   :lines: 22-35
 
 Particle placement
 ------------------
@@ -115,7 +109,7 @@ Filters are applied as follows:
 where :math:`\alpha` is a filtering factor and :math:`s` a stride.
 Users can apply this filtering by adjusting the following input options:
 
-.. code-block:: txt
+.. code-block:: text
 
    ItoKMCGodunovStepper.rho_filter_num        = 0    # Number of filterings for the space-density
    ItoKMCGodunovStepper.rho_filter_max_stride = 1    # Maximum stride for filter
@@ -136,7 +130,7 @@ Particle management
 -------------------
 
 0D chemistry
-------------
+============
 
 The user input interface to the Îto-KMC model consists of a zero-dimensional plasma kinetics interface called ``ItoKMCPhysics``.
 This interface consists of the following main functionalities:
@@ -147,7 +141,7 @@ This interface consists of the following main functionalities:
 .. _Chap:ItoKMCPhysics:
 
 ItoKMCPhysics
-_____________
+-------------
 
 The complete C++ interface specification is given below.
 Because the interface is fairly extensive, ``chombo-discharge`` also supplies a JSON-based implementation called ``ItoKMCJSON`` (see :ref:`Chap:ItoKMCJSON`) for defining these things through file input.
@@ -166,19 +160,19 @@ The difference between ``ItoKMCPhysics`` and its implementation ``ItoKMCJSON`` i
    </details><br>   
 
 Species definitions
-___________________
+-------------------
 
 Species are defined either as input species for CDR solvers (see :ref:`Chap:CdrSolver`) or Îto solvers (see :ref:`Chap:ItoSolver`).
 It is sufficient to populate the ``ItoKMCPhysics`` species vectors ``m_cdrSpecies`` and ``m_itoSpecies`` if one only wants to initialize the solvers.
 See :ref:`Chap:ItoKMCPhysics` for their C++ definition.
 In addition to actually populating the vectors, users will typically also include initial conditions for the species.
-The interfaces permit initial particles for the Îto solvers, while the CDR solvers permit particles *and* initial density functions.
+The interfaces permit initial particles and density functions for both both solver types.
 Additionally, one must define all species associated with radiative transfer solvers.
 
 .. _Chap:ItoKMCPlasmaReaction:
 
 Plasma reactions
-________________
+----------------
 
 Plasma reactions in the Îto-KMC model are represented stoichiometrically as
 
@@ -213,12 +207,12 @@ since there are :math:`\frac{1}{2}X_A\left(X_A-1\right)` distinct pairs of parti
 Likewise, the fluid rate coefficient would be :math:`k_2 = c_2\Delta V/2`.
 
 The distinction between KMC and fluid rates is an important one; the reaction representation used in the Îto-KMC model only operates with the KMC rates :math:`c_j`, and it is us to the user to ensure that these are consistent with the fluid limit.
-Internally, these reactions are implemented through the dual state KMC implementation, see :ref:`Chap:KMCDualState`.
+Internally, these reactions are implemented through the dual state KMC implementation, see :ref:`Chap:KineticMonteCarlo`.
 During the reaction advance the user only needs to update the :math:`c_j` coefficients (typically done via an interface implementation); the calculation of the propensity is automatic and follows the standard KMC rules (e.g., the KMC solver accounts for the number of distinct pairs of particles).
 This must be done in the routine ``updateReactionRates(...)``, see :ref:`Chap:ItoKMCPhysics` for the complete specification.
 
 Photoionization
-_______________
+---------------
 
 Photo-reactions are also represented stoichiometrically as
 
@@ -271,14 +265,14 @@ Volumetric and surface absorption is then treated independently
 This type of pre-evaluation of the photo-reaction pathways is sensible in a statistical sense, but loses meaning if only a single photon is involved.
 
 Surface reactions
-_________________
+-----------------
 
 .. warning::
 
    Surface reactions are supported by :ref:`Chap:ItoKMCPhysics` but not implemented in the JSON interface (yet).
 
 Transport coefficients
-______________________
+----------------------
 
 Species mobilities and diffusion coefficients should be computed just as they are done in the fluid approximation.
 The ``ItoKMCPhysics`` interface requires implementations of two functions that define the coefficients as functions of :math:`\mu = \mu\left(t,\mathbf{x}, \mathbf{E}\right)`,
@@ -289,10 +283,36 @@ Note that these functions should return the *fluid coefficients*.
 
    There is currently no support for computing :math:`\mu` as a function of the species densities (e.g., the electron density), but this only requires modest extensions of the Îto-KMC module.
 
+.. _Chap:ItoKMCPhysicsDt:
+
+Time step calculation
+=====================
+
+The time step calculation in ``ItoKMCPhysics`` is based on the approximation of a reasonable time step as
+
+.. math::
+
+   \Delta t = \frac{X_i}{\left|\sum_r \nu_{ri} a_r\right|},
+
+where :math:`\nu_{ri}` is the state change in species :math:`i` due to firing of exactly one reaction of type :math:`r`.
+By default, the above is evaluated for all reactions, but the user can specify a subset of reactions for which the above constraint is applied.
+
+Caveats
+-------
+
+There are some caveats with using the time step limitation given above.
+For example, if there are no electrons in the simulation region, the above method will (correctly) return a very large time step based on the behavior of the other species.
+But one may very have *detachment* of electrons enabled, and the combination of a detachment event and a large time step is quite unfortunate.
+Because of this, the above constraint is also applied on proxy-states of :math:`\vec{X}` that have been completely exhausted through critical reactions, which provides a much more reasonable time step.
+
+A second factor involved in the time step calculation above is that one may have regions where :math:`X_i` is very small, but where :math:`\sum_r \nu_{ri} a_r` is very high.
+Outside of electron avalanching regions, detachment may completely dominate the time step calculation and cause a much smaller time step than necessary.
+Our resolution to this behavior is to permit the user to manually specify which reactions are important when computing the time step, see :ref:`Chap:ItoKMCJSONDt`.
+
 .. _Chap:ItoKMCJSON:
 
-JSON 0D chemistry interface
-===========================
+JSON interface
+==============
 
 The JSON-based chemistry interface (called ``ItoKMCJSON``) simplifies the definition of the plasma kinetics and initial conditions by permitting specifications through a JSON file.
 In addition, the JSON specification will permit the definition of background species that are not tracked as solvers (but that simply exist as a density function).
@@ -494,14 +514,14 @@ Tabulated versus height
 The molar fraction can be set as a tabulated value versus one of the Cartesian coordinate axis by setting the ``type`` specifier to ``table vs height``.
 The input data should be tabulated in column form, e.g.
 
-.. code-block:: txt
+.. code-block:: text
 
    # height       molar fraction
    0              0.1
    1              0.1 
    2              0.1
 
-The file parser (see :ref:`LookupTable`) will ignore the header file if it starts with a hashtag (#).
+The file parser (see :ref:`Chap:LookupTable`) will ignore the header file if it starts with a hashtag (#).
 Various other inputs are then also required:
 
 * ``file`` File name containing the height vs. molar fraction data (required).
@@ -519,7 +539,7 @@ Various other inputs are then also required:
 An example JSON specification is
 
 .. code-block:: json
-   :emphasize-lines: 6-18
+   :emphasize-lines: 6-19
       
    {
       "gas" : {
@@ -642,7 +662,7 @@ To set the coefficient as functions :math:`f = f\left(E/N\right)`, set the ``typ
 
 * ``file`` For specifying the file containing the input data, which must be organized as column data, e.g.
 
-  .. code-block:: txt
+  .. code-block:: text
 
      # E/N   alpha/N
      0       1E5
@@ -692,7 +712,8 @@ ________
 To include the Townsend coefficients as mesh variables in HDF5 files, include the ``plot`` specifier, e.g.
 
 .. code-block:: json
-   
+   :emphasize-lines: 5
+      
    {
       "alpha": {
          "type": "auto",
@@ -773,8 +794,9 @@ To set a constant coefficient, set the ``type`` specifier to constant and then a
 For example,
 
 .. code-block:: json
-   :emphasize-lines: 12-19
+   :emphasize-lines: 10-11
 
+                     
     "plasma species" :
     [
 	{
@@ -801,7 +823,7 @@ To set a coefficient that is constant vs :math:`N`, set the ``type`` specifier t
 For example,
 
 .. code-block:: json
-   :emphasize-lines: 12-19
+   :emphasize-lines: 10-11
 
     "plasma species" :
     [
@@ -829,7 +851,7 @@ To set the transport coefficients as functions :math:`f = f\left(E/N\right)`, se
 
 * ``file`` For specifying the file containing the input data, which must be organized as column data, e.g.
 
-  .. code-block:: txt
+  .. code-block:: text
 
      # E/N   mu/N
      0       1E5
@@ -946,7 +968,7 @@ To set the species temperature as a function :math:`T = T\left(E/N\right)`, set 
 
 * ``file`` For specifying the file containing the input data, which must be organized as column data *versus the mean energy*, e.g.
 
-  .. code-block:: txt
+  .. code-block:: text
 
      # E/N   energy (eV)
      0       1
@@ -1236,7 +1258,7 @@ For example:
 Initial densities
 _________________
 
-If a species is defined by a convection-diffusion-reaction solver, one may include an initial density by setting the ``initial density``parameter.
+One may include an initial density by setting the ``initial density`` parameter.
 For example:
 
 .. code-block:: json
@@ -1252,6 +1274,8 @@ For example:
 	  "initial density": 1E10
       }
     ]
+
+If the species is defined as a particle species, computational particles will be generated within each grid so that the density is approximately as specified.
 
 Photon species
 --------------
@@ -1703,7 +1727,7 @@ An example file is e.g.
    500  0.8
    1000 1.0
    
-This data is then internally convered to a uniformly spaced lookup table (see :ref:`LookupTable`).
+This data is then internally convered to a uniformly spaced lookup table (see :ref:`Chap:LookupTable`).
 
 Efficiency vs E
 ^^^^^^^^^^^^^^^^^
@@ -1907,6 +1931,31 @@ Setting ``ItoKMCJSON.print_rates`` to true in the input file will write all reac
 Here, :math:`k` indicates the *fluid rate*, so for a reaction :math:`A + B + C \xrightarrow{k}\ldots` it will include the rate :math:`k`.
 Reactions are ordered identical to the order of the reactions in the JSON specification.
 This feature is mostly used for debugging or development efforts.
+
+
+.. _Chap:ItoKMCJSONDt:
+
+Time step calculation
+_____________________
+
+The user can manually specify which reactions are to be used when computing a chemistry time step :math:`\Delta t`, as discussed in :ref:`Chap:ItoKMCPhysicsDt`.
+To enable a time step calculation, specify the ``include_dt_calc`` flag in the reaction specifier, as shown below:
+
+.. code-block:: json
+		
+    "plasma reactions":
+    [
+	{
+	    "reaction": "e -> e + e + M+",
+	    "type": "alpha*v",     
+	    "species": "e",        
+	    "include_dt_calc": true
+	}	
+    ]
+
+.. tip::
+
+   It is normally sufficient to enable :math:`\Delta t` calculations for the ionizing reactions.
 
 Particle placement
 ------------------
@@ -2200,9 +2249,9 @@ Simulations that fail to stabilize, i.e., where the field strength diverges, may
       }
    ]
 
-   This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
-   I.e., all background species are first absorbed into the rate calculation before the rate is limited.
-   We point out that limiting is not possible if both species on the left hand side are solver variables.
+This will limit the rate such that :math:`k \left[\text[N]_2\right]\Delta t = 2`.
+I.e., all background species are first absorbed into the rate calculation before the rate is limited.
+We point out that limiting is not possible if both species on the left hand side are solver variables.
 
 
 .. important::

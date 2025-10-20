@@ -4,4 +4,3 @@
 MeshODESolver.verbosity             = -1         ## Verbosity level
 MeshODESolver.plt_vars              = phi rhs    ## Stuff that can be plotted. 'phi' and/or 'rhs
 MeshODESolver.use_regrid_slopes     = false      ## Use or don't use slopes when regridding
-

@@ -81,4 +81,3 @@ Aerosol.permittivity       = 5.0         ## Dielectric permittivity, if the geom
 Aerosol.eps0               = 1           ## Permittivity
 Aerosol.sphere1.radius     = 0.5         ## Sphere radius
 Aerosol.sphere1.center     = 0. 0. 0.    ## Sphere center
-

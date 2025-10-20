@@ -606,10 +606,10 @@ namespace Physics {
       initializeParticles();
 
       /*!
-	@brief Parse initial densities for CDR equations.
+	@brief Parse initial densities for CDR and Ito species. 
       */
       virtual void
-      initializeDensitiesCDR();
+      initializeDensities();
 
       /*!
 	@brief Initialize mobility functions
@@ -724,6 +724,12 @@ namespace Physics {
       */
       virtual std::pair<bool, std::string>
       parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const;
+
+      /*!
+        @brief Parse whether or not a reaction should be a part of the time step calculation. Returns 1 if the reaction is a part of it.
+      */
+      virtual Real
+      parsePlasmaReactionDt(const nlohmann::json& a_reactionJSON) const;
 
       /*!
 	@brief Parse a table which is stored in E/N format

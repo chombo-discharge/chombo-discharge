@@ -39,14 +39,14 @@ enum class KMCLeapPropagator
 
 /*!
   @brief Class for running Kinetic Monte-Carlo simulations. 
-  @details The template parameter State is the underlying state type that KMC operators on. There are no required member functions on the State parameter,
+  @details The template parameter State is the underlying state type that KMC operators on. There are rather simple required member functions on the State parameter,
   but the reaction type (template parameter R) MUST be able to operate on the state through the following functions:
 
   1. Real R::propensity(State) const -> Computes the reaction propensity for the input state.
   2. T R::computeCriticalNumberOfReactions(State) const -> Computes the minimum number of reactions that exhausts one of the reactants. 
   3. void R::advanceState(State&, const T numReactions) const -> Advance state by numReactions
   4. std::<some_container> getReactants() const -> Get reactants involved in the reactions.
-  5. T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
+  5. static T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
 
   The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.
 */
@@ -235,6 +235,20 @@ public:
   getNonCriticalTimeStep(const State&             a_state,
                          const ReactionList&      a_nonCriticalReactions,
                          const std::vector<Real>& a_nonCriticalPropensities) const noexcept;
+
+  /*!
+    @brief Compute a time step, using the leap condition on the mean value with eps = 1.
+    @details This is just like getNonCriticalTimeStep EXCEPT that the leap condition is not applied for the deviation
+    @param[in] a_state        State vector
+    @param[in] a_reactions    Reactions
+    @param[in] a_propensities Propensities
+    @param[in] a_epsilon      Epsilon value for maximum change in propensities
+  */
+  inline Real
+  computeDt(const State&             a_state,
+            const ReactionList&      a_reactions,
+            const std::vector<Real>& a_propensities,
+            const Real               a_epsilon) const noexcept;
 
   /*!
     @brief Perform a single SSA step.

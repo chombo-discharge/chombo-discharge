@@ -285,11 +285,10 @@ namespace Physics {
                           const int                        a_matIndex) const noexcept = 0;
 
       /*!
-	@brief Advance particles. 
+	@brief Advance the reaction network using the KMC algorithm.
 	@param[inout] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
-	@param[out]   a_criticalDt    Critical KMC time step computed at end of integration
-	@param[out]   a_nonCriticalDt Non-critical KMC time step computed at end of integration	
+	@param[out]   a_physicsDt     Reasonable KMC time step computed at end of integration with eps = 1
 	@param[in]    a_phi           Plasma species densities. 
 	@param[in]    a_gradPhi       Plasma species density gradients. 
 	@param[in]    a_dt            Time step
@@ -301,8 +300,7 @@ namespace Physics {
       inline void
       advanceKMC(Vector<FPR>&            a_numParticles,
                  Vector<FPR>&            a_numNewPhotons,
-                 Real&                   a_criticalDt,
-                 Real&                   a_nonCriticalDt,
+                 Real&                   a_physicsDt,
                  const Vector<Real>&     a_phi,
                  const Vector<RealVect>& a_gradPhi,
                  const Real              a_dt,
@@ -475,6 +473,11 @@ namespace Physics {
 	@brief List of photoionization reactions
       */
       std::vector<ItoKMCPhotoReaction> m_photoReactions;
+
+      /*!
+        @brief List of reactions that are a part of the time step limitation. 
+      */
+      std::vector<Real> m_reactiveDtFactors;
 
       /*!
 	@brief Random number generators for photoionization pathways. 

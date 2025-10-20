@@ -51,7 +51,7 @@ ItoKMCJSON::ItoKMCJSON()
   // Initialize the plasma species
   this->initializePlasmaSpecies();
   this->initializeParticles();
-  this->initializeDensitiesCDR();
+  this->initializeDensities();
   this->initializeMobilities();
   this->initializeDiffusionCoefficients();
   this->initializeTemperatures();
@@ -1307,14 +1307,14 @@ ItoKMCJSON::initializeParticles()
 }
 
 void
-ItoKMCJSON::initializeDensitiesCDR()
+ItoKMCJSON::initializeDensities()
 {
-  CH_TIME("ItoKMCJSON::initializeDensitiesCDR");
+  CH_TIME("ItoKMCJSON::initializeDensities");
   if (m_verbose) {
-    pout() << m_className + "::initializeDensitiesCDR" << endl;
+    pout() << m_className + "::initializeDensities" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::initializeDensitiesCDR";
+  const std::string baseError = "ItoKMCJSON::initializeDensities";
 
   for (const auto& species : m_json["plasma species"]) {
     const std::string speciesID   = species["id"].get<std::string>();
@@ -1324,7 +1324,7 @@ ItoKMCJSON::initializeDensitiesCDR()
 
     // Put the particles in the solvers.
     const SpeciesType& speciesType = m_plasmaSpeciesTypes.at(speciesID);
-    if ((speciesType == SpeciesType::CDR) && species.contains("initial density")) {
+    if (species.contains("initial density")) {
       const Real density = species["initial density"].get<Real>();
 
       if (density < 0.0) {
@@ -1336,12 +1336,18 @@ ItoKMCJSON::initializeDensitiesCDR()
         return density;
       };
 
-      const int idx = m_cdrSpeciesMap.at(speciesID);
+      if (speciesType == SpeciesType::CDR) {
+        const int idx = m_cdrSpeciesMap.at(speciesID);
 
-      // Doing the ugly, but I happen to KNOW that we can cast here.
-      auto species = static_cast<ItoKMCCDRSpecies*>(&(*m_cdrSpecies[idx]));
+        auto species = static_cast<ItoKMCCDRSpecies*>(&(*m_cdrSpecies[idx]));
 
-      species->setInitialData(initFunc);
+        species->setInitialData(initFunc);
+      }
+      else if (speciesType == SpeciesType::Ito) {
+        const int idx = m_itoSpeciesMap.at(speciesID);
+
+        m_itoSpecies[idx]->setInitialDensity(initFunc);
+      }
     }
   }
 }
@@ -1858,12 +1864,14 @@ ItoKMCJSON::initializePlasmaReactions()
       const auto reactionRates      = this->parsePlasmaReactionRate(reactionJSON, backgroundReactants, plasmaReactants);
       const auto reactionPlot       = this->parsePlasmaReactionPlot(reactionJSON);
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
+      const auto useReactionDt      = this->parsePlasmaReactionDt(reactionJSON);
 
       m_kmcReactions.emplace_back(KMCReaction(plasmaReactants, plasmaProducts, photonProducts));
       m_kmcReactionRates.emplace_back(reactionRates.first);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
       m_fluidRates.emplace_back(reactionRates.second);
+      m_reactiveDtFactors.emplace_back(useReactionDt);
 
       // Store the list of reactants/products.
       m_plasmaReactionPlasmaReactants.emplace_back(plasmaReactants);
@@ -3072,6 +3080,30 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
     }
     else {
       this->throwParserError(baseError + " but species '" + species + "' is not mobile and diffusive!");
+    }
+  }
+
+  return ret;
+}
+
+Real
+ItoKMCJSON::parsePlasmaReactionDt(const nlohmann::json& a_reactionJSON) const
+{
+  CH_TIME("ItoKMCJSON::parsePlasmaReactionDt");
+  if (m_verbose) {
+    pout() << m_className + "::parsePlasmaReactionDt" << endl;
+  }
+
+  Real ret = 1.0;
+
+  if (a_reactionJSON.contains("include_dt_calc")) {
+    const bool useDt = a_reactionJSON["include_dt_calc"].get<bool>();
+
+    if (useDt) {
+      ret = 1.0;
+    }
+    else {
+      ret = 0.0;
     }
   }
 

@@ -3,14 +3,6 @@
 CDR plasma model
 ****************
 
-The CDR plasma model resides in :file:`/Physics/CdrPlasma` and describes plasmas in the drift-diffusion approximation.
-This physics model also includes the following subfolders:
-
-* :file:`/Physics/CdrPlasma/PlasmaModel` which contains various implementation of some plasma models that we have used.
-* :file:`/Physics/CdrPlasma/TimeSteppers` contains various algorithms for advancing the equations of motion. 
-* :file:`/Physics/CdrPlasma/CellTaggers` contains various algorithms for flagging cells for refinement and coarsening. 
-* :file:`/Physics/CdrPlasma/python` contains Python source files for quickly setting up new applications.
-
 In the CDR plasma model we are solving
 
 
@@ -23,8 +15,8 @@ In the CDR plasma model we are solving
    
 The above equations must be supported by additional boundary conditions on electrodes and insulating surfaces. 
 
-Radiative transport can be done either in the diffusive approximation or by means of Monte Carlo methods.
-Diffusive RTE methods involve solving
+Radiative transport can be done either in the diffusive approximation or by means of Monte Carlo methods (see :ref:`Chap:RtSolver`).
+Diffusive RTE methods (see :ref:`Chap:EddingtonSP1`) involve solving
 
 .. math::
    
@@ -34,11 +26,10 @@ where :math:`\Psi` is the isotropic photon density, :math:`\kappa` is an absorpt
 I.e., :math:`\eta` is the number of photons produced per unit time and volume.
 The time dependent term can be turned off and the equation can be solved stationary.
 
-The module also supports discrete photons where photon transport and absorption is done by sampling discrete photons.
-In general, discrete photon methods incorporate better physics (like shadows)
-They can easily be adapted to e.g. scattering media.
+The module also supports discrete photons where photon transport and absorption is done by sampling discrete photons (see :ref:`Chap:MonteCarloRTE`).
+In general, discrete photon methods incorporate better physics (like shadows).
+They can also be more easily adapted to scattering media.
 They are, on the other hand, inherently stochastic which implies that some extra caution must be exercised when integrating the equations of motion.
-
 
 The coupling that is (currently) available in ``chombo-discharge`` is
 
@@ -57,323 +48,23 @@ where :math:`F` is the boundary flux on insulators or electrodes (which must be 
 
 ``chombo-discharge`` works by embedding the equations above into an abstract C++ framework (see :ref:`Chap:CdrPlasmaPhysics`) that the user must implement or reuse existing pieces of, and then compile into an executable.
 
-.. _Chap:CdrPlasmaNewProblem:
+.. tip::
+   
+   The CDR plasma model resides in :file:`/Physics/CdrPlasma` and describes plasmas in the drift-diffusion approximation.
+   This physics model also includes the following subfolders:
 
-Simulation quick start
-======================
+   * :file:`/Physics/CdrPlasma/PlasmaModel` which contains various implementation of some plasma models that we have used.
+   * :file:`/Physics/CdrPlasma/TimeSteppers` contains various algorithms for advancing the equations of motion. 
+   * :file:`/Physics/CdrPlasma/CellTaggers` contains various algorithms for flagging cells for refinement and coarsening.
 
-New problems that use the ``CdrPlasma`` physics model are best set up by using the Python tools provided with the module.
-Navigate to :file:`$DISCHARGE_HOME/Physics/CdrPlasma`` and set up the problem with.
-To see the list of available options type
-
-.. code-block:: bash
-
-   cd $DISCHARGE_HOME/Physics/CdrPlasma
-   ./setup.py --help
-
-The following options are helpful for setting up the problem:
-
-* ``base_dir`` The base directory where the application will be placed.
-  Defaults to :file:`$DISCHARGE_HOME/MyApplications`. 
-* ``app_name`` The application name.
-  The application will be put in :file:`base_dir/app_name`.
-* ``geometry`` The geometry to be used.
-  The geometry must be one of the ones provided in :file:`$DISCHARGE_HOME/Geometries` (users can also provide their own models).
-* ``physics`` The plasma physics model.
-  This must be one of the folders/class in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/PlasmaModel` (users can also provide their own models).
-  Defaults to ``CdrPlasmaJSON`` (see :ref:`Chap:CdrPlasmaJSON`). 
-* ``time_stepper`` Time integrator.
-  This must derive from ``CdrPlasmaStepper`` and must be one of the time steppers in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/TimeSteppers`.
-  The default integrator is ``CdrPlasmaGodunovStepper``. 
-* ``cell_tagger`` Cell tagger
-  This must derive from ``CdrPlasmaTagger`` and must be one of the cell taggers in :file:`$DISCHARGE_HOME/Physics/CdrPlasma/CellTaggers`.
-
-For example, to set up a geometry-less that does not use AMR, do
-
-.. code-block:: bash
-
-   cd $DISCHARGE_HOME
-   ./setup.py -app_name=MyApplication
-
-Solvers
-=======
+   See `CdrPlasmaStepper <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html>`_ for the overall C++ API.
 
 This module uses the following solvers:
 
 #. Advection-diffusion-reaction solver, :ref:`Chap:CdrSolver`.
 #. Electrostatics solvers, :ref:`Chap:FieldSolver`.
 #. Radiative transfer solver (either Monte-Carlo or continuum approximation), :ref:`Chap:RtSolver`.
-#. Surface charge solver, see :ref:`Chap:SurfaceODESolver`. 
-
-.. _Chap:CdrPlasmaPhysics:
-
-CdrPlasmaPhysics
-================
-
-:ref:`Chap:CdrPlasmaPhysics` is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in :eq:`CdrPlasmaCoupling`.
-The source code for the class resides in :file:`/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H`.
-Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.
-
-There are no default input parameters for :ref:`Chap:CdrPlasmaPhysics`, as users must generally implement their own kinetics.
-The class exists solely for providing the integrators with the necessary fundamentals for filling solvers with the correct quantities at the same time, for example filling source terms and drift velocities.
-
-A successful implementation of :ref:`Chap:CdrPlasmaPhysics` has the following:
-
-#. Instantiated a list of :ref:`Chap:CdrSpecies`.
-   These become :ref:`Chap:CDR` solvers and contain initial conditions and basic transport settings for the convection-diffusion-reaction solvers.
-  
-#. Instantiated a list :ref:`Chap:RtSpecies`.
-   These become :ref:`Chap:RadiativeTransfer` solvers and contain metadata for the radiative transport solvers.
-  
-#. Implemented the core functionality that couple the solvers together. 
-
-``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
-For information on how to interface into the CDR solvers, see :ref:`Chap:CdrSpecies`.
-Likewise, see :ref:`Chap:RtSpecies` for how to interface into the RTE solvers.
-
-Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
-For this reason we also provide an implementation layer :ref:`Chap:CdrPlasmaJSON` that provides a plug-and-play interface for specifying the plasma physics.
-
-API
----
-
-The API for ``CdrPlasmaPhysics`` is as follows:
-
-.. code-block:: c++
-
-      virtual Real computeAlpha(const RealVect a_E) const  = 0;
-      
-      virtual void advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-					  Vector<Real>&          a_rteSources,
-					  const Vector<Real>     a_cdrDensities,
-					  const Vector<RealVect> a_cdrGradients,
-					  const Vector<Real>     a_rteDensities,
-					  const RealVect         a_E,
-					  const RealVect         a_pos,
-					  const Real             a_dx,
-					  const Real             a_dt,
-					  const Real             a_time,
-					  const Real             a_kappa) const  = 0;
-
-      virtual Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdrDensities) const  = 0;
-
-      virtual Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
-							   const RealVect     a_pos,
-							   const RealVect     a_E,
-							   const Vector<Real> a_cdrDensities) const  = 0;
-
-      virtual Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_normal,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdrDensities,
-						     const Vector<Real> a_cdrVelocities,
-						     const Vector<Real> a_cdrGradients,
-						     const Vector<Real> a_rteFluxes,
-						     const Vector<Real> a_extrapCdrFluxes) const  = 0;
-
-      virtual Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_normal,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdrDensities,
-						      const Vector<Real> a_cdrVelocities,
-						      const Vector<Real> a_cdrGradients,
-						      const Vector<Real> a_rteFluxes,
-						      const Vector<Real> a_extrapCdrFluxes) const  = 0;
-
-      virtual Vector<Real> computeCdrDomainFluxes(const Real           a_time,
-						  const RealVect       a_pos,
-						  const int            a_dir,
-						  const Side::LoHiSide a_side,
-						  const RealVect       a_E,
-						  const Vector<Real>   a_cdrDensities,
-						  const Vector<Real>   a_cdrVelocities,
-						  const Vector<Real>   a_cdrGradients,
-						  const Vector<Real>   a_rteFluxes,
-						  const Vector<Real>   a_extrapCdrFluxes) const  = 0;
-
-      virtual Real initialSigma(const Real a_time, const RealVect a_pos) const  = 0;      		
-		
-
-The above code blocks do the following:
-
-* ``computeAlpha`` computes the Townsend ionization coefficient.
-  This is used by the cell tagger.
-* ``advanceReactionNetwork`` provides the coupling :math:`S = S(t, \mathbf{x}, \mathbf{E}, \nabla\mathbf{E}, n, \nabla n, \Psi)`.
-* ``computeCdrDriftVelocities`` provides the coupling :math:`\mathbf{v} = \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right)`.
-* ``computeCdrDiffusionCoefficients`` provides the coupling :math:`D = \mathbf{v}\left(t, \mathbf{x}, \mathbf{E}, n\right)`.
-* ``computeCdrElectrodeFluxes`` provides the coupling :math:`F = F(t, \mathbf{x}, \mathbf{E}, n)` on electrode EBs.
-* ``computeCdrDielectricFluxes`` provides the coupling :math:`F = F(t, \mathbf{x}, \mathbf{E}, n)` on dielectric EBs.
-* ``computeCdrDomainFluxes`` provides the coupling :math:`F = F(t, \mathbf{x}, \mathbf{E}, n)` on domain sides. 
-
-For a fully documented API, see the `doxygen API <doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaPhysics.html>`_.
-
-Below, we include a brief overview of how ``CdrPlasmaPhysics`` can be directly implemented.
-Note that direct implements like these tend to become boilerplate, we also include an interface which implements these functions with pre-defined rules, see :ref:`Chap:CdrPlasmaJSON`.
-
-Initializing species
---------------------
-
-In the constructor, the user should define the advected/diffused species and the radiative transfer species.
-These are stored in vectors ``Vector<RefCountedPtr<CdrSpecies> > m_CdrSpecies`` and ``Vector<RefCountedPtr<RtSpecies> > m_RtSpecies``.
-Each species in these vectors become a convection-diffusion-reaction solver or a radiative transfer solver.
-See :ref:`Chap:CdrSpecies` and :ref:`Chap:RtSpecies` for details on how to implement these.
-
-Defining drift velocities
--------------------------
-
-To set the drift velocities, implement ``computeCdrDriftVelocities`` -- this will set the drift velocity :math:`\mathbf{v}` in the CDR equations:
-
-.. code-block:: c++
-
-   Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
-       					      const RealVect     a_pos,
-					      const RealVect     a_E,
-					      const Vector<Real> a_cdrDensities) const  {
-      return Vector<RealVect>(m_numCdrSpecies, a_E);
-   }
-
-This implementation is set the advection velocity equal to :math:`\mathbf{E}`.
-For a full plasma simulation, there will also be mobilities involved, which the user is reponsible for obtaining.
-
-Defining diffusion coefficients
--------------------------------
-
-To set the diffusion coefficients, implement ``computeCdrDiffusionCoefficients`` -- this will set the diffusion coefficient :math:`D` in the CDR equations:
-
-.. code-block:: c++
-
-   Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
-		                                const RealVect     a_pos,
-						const RealVect     a_E,
-						const Vector<Real> a_cdrDensities) const {
-      return Vector<Real>(m_numCdrSpecies, 1.0);
-   }
-
-This sets :math:`D = 1` for all species involved.
-
-
-Defining chemistry terms
-------------------------
-
-To set the source terms :math:`S`, implement ``advanceReactionNetwork``.
-This routine should set the reaction terms for both the CDR equations *and* the radiative transfer equations.
-
-.. note::
-
-   For the radiative transfer equations we set the isotropic source term :math:`\eta` which is the number of ionizing photons produced per unit volume and time.
-
-.. code-block:: c++
-		
-   virtual void advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-		                       Vector<Real>&          a_rteSources,
-				       const Vector<Real>     a_cdrDensities,
-				       const Vector<RealVect> a_cdrGradients,
-				       const Vector<Real>     a_rteDensities,
-				       const RealVect         a_E,
-				       const RealVect         a_pos,
-				       const Real             a_dx,
-				       const Real             a_dt,
-				       const Real             a_time,
-				       const Real             a_kappa) const {
-      a_cdrSources = Vector<Real>(m_numCdrSpecies, 1.0);
-      a_rteSources = Vector<Real>(m_numRteSpecies, 1.0);      
-   }
-
-The above code will set :math:`S = \eta = 1` for all species.
-
-We point out that in the plasma module the source terms are *always* used in the form
-
-.. math::
-
-   n^{k+1} = n^k + \Delta t S,
-
-where :math:`S` is the source term obtained from ``advanceReactionNetwork``.
-This implies that it *is* possible to define fully implicit integrators directly in ``advanceReactionNetwork``.
-For example, if the reactive problem consisted only of :math:`\partial_t n = -\frac{n}{\tau}`, one could form a reactive integrator with the implicit Euler rule by first computing :math:`n^{k+1} = \frac{n^k}{1 + \Delta t/\tau}` and then linearizing :math:`S = \frac{n^{k+1} - n^k}{\Delta t}`.
-
-Fluxes at electrode boundaries
-------------------------------
-
-To set the fluxes :math:`F` on electrode EBs, implement ``computeCdrElectrodeFluxes``.
-Note that the fluxes :math:`F` are those occuring in a finite-volume context; i.e. the total injected or extracted mass.
-
-.. code-block::
-   
-   Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
-                                          const RealVect     a_pos,
-					  const RealVect     a_normal,
-					  const RealVect     a_E,
-					  const Vector<Real> a_cdrDensities,
-					  const Vector<Real> a_cdrVelocities,
-					  const Vector<Real> a_cdrGradients,
-					  const Vector<Real> a_rteFluxes,
-					  const Vector<Real> a_extrapCdrFluxes) const {
-      return Vector<Real>(m_numCdrSpecies, 0.0);
-   }
-
-The input variable ``a_extrapCdrFluxes`` are cell-centered fluxes extrapolated to the EBs.
-
-Fluxes at dielectric boundaries
--------------------------------
-
-To set the fluxes :math:`F` on dielectric EBs, implement ``computeCdrDielectricFluxes``.
-Note that the fluxes :math:`F` are those occuring in a finite-volume context; i.e. the total injected or extracted mass.
-
-.. code-block::
-   
-   Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
-                                           const RealVect     a_pos,
-					   const RealVect     a_normal,
-					   const RealVect     a_E,
-					   const Vector<Real> a_cdrDensities,
-					   const Vector<Real> a_cdrVelocities,
-					   const Vector<Real> a_cdrGradients,
-					   const Vector<Real> a_rteFluxes,
-					   const Vector<Real> a_extrapCdrFluxes) const {
-      return Vector<Real>(m_numCdrSpecies, 0.0);
-   }
-
-The input variable ``a_extrapCdrFluxes`` are cell-centered fluxes extrapolated to the EBs.
-
-Fluxes at domain boundaries
----------------------------
-
-To set the fluxes :math:`F` on dielectric EBs, implement ``computeCdrDielectricFluxes``.
-Note that the fluxes :math:`F` are those occuring in a finite-volume context; i.e. the total injected or extracted mass.
-
-
-.. code-block:: c++
-		
-   Vector<Real> computeCdrDomainFluxes(const Real           a_time,
-		                       const RealVect       a_pos,
-				       const int            a_dir,
-				       const Side::LoHiSide a_side,
-				       const RealVect       a_E,
-				       const Vector<Real>   a_cdrDensities,
-				       const Vector<Real>   a_cdrVelocities,
-				       const Vector<Real>   a_cdrGradients,
-				       const Vector<Real>   a_rteFluxes,
-				       const Vector<Real>   a_extrapCdrFluxes) const {
-      return Vector<Real>(m_numCdrSpecies, 0.0);
-   }
-
-The input variable ``a_extrapCdrFluxes`` are cell-centered fluxes extrapolated to the domain sides.
-
-Setting initial surface charge
-------------------------------
-
-To set the initial surface charge on dielectric boundaries, implement
-
-.. code-block:: c++
-		
-   Real initialSigma(const Real a_time, const RealVect a_pos) const{
-      return 0.0;
-   }
+#. Surface charge solver, see :ref:`Chap:SurfaceODESolver`.
 
 Time discretizations
 ====================
@@ -465,8 +156,6 @@ In addition, diffusion can be treated
    When setting up a new problem with the Godunov time integrator, the default setting is to use automatic diffusion and a semi-implicit coupling.
    These settings tend to work for most problems.
 
-   
-
 Specifying transport algorithm
 ______________________________
 
@@ -512,7 +201,14 @@ The basic time step limitations for the Godunov integrator are:
 * The dielectric relaxation time.
 
 The user is responsible for setting these when running the simulation.
-Note when the semi-implicit scheme is used, it is not necessary to restrict the time step by the dielectric relaxation time. 
+Note when the semi-implicit scheme is used, it is not necessary to restrict the time step by the dielectric relaxation time.
+
+Solver configuration
+____________________
+
+``CdrPlasmaGodunovStepper`` contains several options that can be configured when running the solver, which are listed below:
+
+.. literalinclude:: ../../../../Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.options
 
 .. _Chap:SISDC:
 
@@ -520,7 +216,7 @@ Spectral deferred corrections
 -----------------------------
 
 The ``CdrPlasmaImExSdcStepper`` uses implicit-explicit (ImEx) spectral deferred corrections (SDCs) to advance the equations.
-This integrator implements the ``advance`` method for ``CdrPlasmStepper``, and is a high-order method with implicit diffusion. 
+This integrator implements the ``advance`` method for ``CdrPlasmStepper``, and is a high-order method with implicit diffusion.
 
 SDC basics
 __________
@@ -687,7 +383,49 @@ In addition to this, the user can specify maximum/minimum allowed time steps.
 
    Next, we provide some remarks on the extra computational work involved for higher order methods. Broadly speaking, the total amount of floating point operations increases quadratically with the order. Each node requires evaluation of one advection-reaction operator, at least one electric field update, and one radiative transfer update. Likewise, each substep requires one diffusion solve. Thus, :math:`\verb|SISDC|_K^K` requires :math:`K^2` advection-reaction evaluations, :math:`(K-1)^2` diffusion solves, :math:`(K-1)^2` radiative transfer updates, and at least :math:`K^2` electric field updates. In these estimates we have assumed that the diffusion solve couples semi-implicitly to the electric field, thus each corrector iteration requires one electric field update per node, giving a total cost :math:`K^2`. Strictly speaking, the number of advection-reaction evaluations is slightly less since :math:`\mathcal{F}_{\textrm{AR}}\left(t_0, \phi_0^k\right)` does not require re-evaluation in the corrector, and :math:`\mathcal{F}_{\textrm{AR}}\left(t_p,\phi_p^{K-1}\right)` does not need to be computed for the final iteration since the lagged quadrature is not further needed. Nonetheless, the computational work is quadratically increasing, but this is partially compensated by allowance of larger time steps since the :math:`\verb|SISDC|_K^K` has a stability limit of :math:`(K-1)\Delta t_{\textrm{cfl}}` rather than :math:`\Delta t_{\textrm{cfl}}` for uniformly spaced nodes. For comparison with the predictor :math:`\verb|SISDC|_K^1` which is a first order method, the work done for integration over :math:`(K-1)\Delta t_{\textrm{cfl}}` amounts to :math:`K-1` advection-reaction updates, :math:`K-1` diffusion updates, :math:`K-1` radiative transfer updates, and :math:`K` electric field updates. If we take the electric field updates as a reasonable metric for the computational work, the efficiency of the :math:`K` th order method over the first order method is about :math:`K` for integration over the same time interval, i.e. it increases linearly rather than quadratically. However, this estimate is only valid if we do not take accuracy into account. In practice, the predictor does not provide the same accuracy as the corrector over the same integration interval. A fair comparison of the extra computational work involved would require that the accuracy of the two methods be the same after integration over a time :math:`(K-1)\Delta t_{\textrm{cfl}}`, which will generally require more substeps for the first order method. While we do not further pursue this quantification in this paper, the pertinent point is that the extra computational work involved for tolerance-bound higher order discretizations increases sub-linearly rather than quadratically when compared to lower-order equivalents.
 
-   We have implemented the SISDC algorithm in the ``imex_sdc`` class in :file:`physics/CdrPlasma/time_steppers/imex_sdc`.   
+   We have implemented the SISDC algorithm in the ``imex_sdc`` class in :file:`physics/CdrPlasma/time_steppers/imex_sdc`.      
+
+.. _Chap:CdrPlasmaPhysics:
+
+CdrPlasmaPhysics
+================
+
+Overview
+--------
+
+:ref:`Chap:CdrPlasmaPhysics` is an abstract class which represents the plasma physics for the CDR plasma module, i.e. it provides the coupling functions in :eq:`CdrPlasmaCoupling`.
+The source code for the class resides in :file:`/Physics/CdrPlasma/CD_CdrPlasmaPhysics.H`.
+Note that the entire class is an interface, whose implementations are used by the time integrators that advance the equations.
+
+There are no default input parameters for :ref:`Chap:CdrPlasmaPhysics`, as users must generally implement their own kinetics.
+The class exists solely for providing the integrators with the necessary fundamentals for filling solvers with the correct quantities at the same time, for example filling source terms and drift velocities.
+
+A successful implementation of :ref:`Chap:CdrPlasmaPhysics` has the following:
+
+#. Instantiated a list of :ref:`Chap:CdrSpecies`.
+   These become :ref:`Chap:CDR` solvers and contain initial conditions and basic transport settings for the convection-diffusion-reaction solvers.
+  
+#. Instantiated a list :ref:`Chap:RtSpecies`.
+   These become :ref:`Chap:RadiativeTransfer` solvers and contain metadata for the radiative transport solvers.
+  
+#. Implemented the core functionality that couple the solvers together. 
+
+``chombo-discharge`` automatically allocates the specified number of convection-diffusion-reaction and radiative transport solvers from the list of species the is intantiated.
+For information on how to interface into the CDR solvers, see :ref:`Chap:CdrSpecies`.
+Likewise, see :ref:`Chap:RtSpecies` for how to interface into the RTE solvers.
+
+Implementation of the core functionality is comparatively straightforward, but can lead to boilerplate code.
+For this reason we also provide an implementation layer :ref:`Chap:CdrPlasmaJSON` that provides a plug-and-play interface for specifying the plasma physics by using a JSON schema for description the physics.
+
+Complete API
+------------
+
+The full API for the ``CdrPlasmaPhysics`` class is given below:
+
+.. literalinclude:: ../../../../Physics/CdrPlasma/CD_CdrPlasmaPhysics.H
+   :language: c++
+   :dedent: 4
+   :lines: 28-264
 
 .. _Chap:CdrPlasmaJSON:
 
@@ -987,7 +725,7 @@ Currently, the following fields are supported:
 * ``height profile`` For specifying a height profile along :math:`y` in 2D, and :math:`z` in 3D.
   To include it, prepare an ASCII files with at least two columns.
   The height (in meters) must be specified in one column and the density (in units of :math:`m^{-3}`) in another.
-  Internally, this data is stored in a lookup table (see :ref:`Chap:LookupTable1D`). 
+  Internally, this data is stored in a lookup table (see :ref:`Chap:LookupTable`). 
   Required fields are
   
   * ``file`` , for specifying the file.
@@ -1071,8 +809,9 @@ The current implementation supports
 * ``copy`` For using an already initialized particle distribution.
   The only mandatory fields is ``copy``, e.g.
 
-  .. code-block:: json  
-   {"plasma species":
+  .. code-block:: json
+		  
+     {"plasma species":
      [
        {
          "name": "e",
@@ -1089,21 +828,21 @@ The current implementation supports
 	 }
        },
        {
-         "name": O2+,
+         "name": "O2+",
          "Z": 1,
 	 "mobile": true,
 	 "diffusive": true,
 	 "initial particles": {
 	    "copy": "e"
 	 }
-     ]
-   }
+       }
+     ]}
 
-   This will copy the particles from the species ``e`` to the species ``O2+``.
+  This will copy the particles from the species ``e`` to the species ``O2+``.
 
-   .. warning::
+  .. warning::
 
-      The species one copies from must be defined *before* the species one copies *to*.
+     The species one copies from must be defined *before* the species one copies *to*.
 
 
 Complex example
@@ -1240,7 +979,7 @@ Supported functions are:
 
 Specifying ``lookup`` to ``table E/N`` lets the user set the mobility from a tabulated value of the reduced electric field.
 BOLSIG-like files can be parsed by specifying the header which contains the tabulated data, and the columns that identify the reduced electric field and mobilities.
-This data is then stored in a lookup table, see :ref:`Chap:LookupTable1D`.
+This data is then stored in a lookup table, see :ref:`Chap:LookupTable`.
 
 For example:
 
@@ -1279,7 +1018,7 @@ In the above, the fields have the following meaning:
 * ``dump``, an optional argument (useful for debugging) which will write the table to file. 
 
 Note that the input file does *not* need regularly spaced or sorted data.
-For performance reasons, the tables are always resampled, see :ref:`Chap:LookupTable1D`.
+For performance reasons, the tables are always resampled, see :ref:`Chap:LookupTable`.
 
 Diffusion coefficients
 ______________________
@@ -2144,11 +1883,37 @@ For example, the following specification will set secondary emission efficiencie
      }
    ] 		
 
-Domain boundary conditions
---------------------------
+Adaptive mesh refinement
+========================
 
-TODO.
+The AMR functionality for ``CdrPlasmaStepper`` is implemented by subclassing ``CellTagger`` through a series of intermediate classes.
+Currently, we mostly use the ``CdrPlasmaStreamerTagger`` class for tagging cells based on the evaluation of the Townsend ionization coefficient as
 
+.. math::
 
+   \left(\alpha-\eta\right)\Delta x > \epsilon,
 
+where :math:`\epsilon` is a refinement threshold.
+A similar threshold is used when coarsening grid cells.
 
+.. tip::
+
+   See `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classPhysics_1_1CdrPlasma_1_1CdrPlasmaStreamerTagger.html>`_ for the C++ API for ``CdrPlasmaStreamerTagger``. 
+
+.. _Chap:CdrPlasmaNewProblem:
+
+Setting up a new problem
+========================
+
+New problems that use the ``CdrPlasma`` physics model are best set up by using the Python tools provided with the module.
+A full description is available in the ``README.md`` file contained in the folder:
+
+.. literalinclude:: ../../../../Physics/CdrPlasma/README.md
+   :language: markdown
+              
+To see the list of available options type
+
+.. code-block:: bash
+
+   cd $DISCHARGE_HOME/Physics/CdrPlasma
+   ./setup.py --help

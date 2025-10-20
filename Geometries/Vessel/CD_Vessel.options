@@ -19,4 +19,3 @@ Vessel.shroom_curv      = 0.05          ## Mushroom corner curvatures
 
 Vessel.live_rod        = true     ## Rod is live or not
 Vessel.live_shroom     = false    ## Mushroom is live or not
-

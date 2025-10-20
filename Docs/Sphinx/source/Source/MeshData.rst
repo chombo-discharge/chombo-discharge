@@ -4,9 +4,11 @@ Mesh data
 =========
 
 Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hiearchy.
-Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T> > >``.
+A requirement on the datatype ``T`` is that it must be linearizable so that it can be communicated across MPI ranks. 
+Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T>>>``.
 Here, the ``Vector`` holds data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`.
-The first entry in the Vector is base AMR level and finer levels follow later in the Vector, see e.g. :numref:`Fig:EBAMRData`.
+The first entry in the ``Vector`` is base AMR level and finer levels follow later in the ``Vector``.
+:numref:`Fig:EBAMRData` shows a sketch of the data layout in a two-level AMR hierarchy. 
 
 .. _Fig:EBAMRData:
 .. figure:: /_static/figures/PatchBasedAMR.png
@@ -14,11 +16,13 @@ The first entry in the Vector is base AMR level and finer levels follow later in
    :align: center
 
    Cartesian patch-based refinement showing two grid levels.
-   This is encapsulated by ``EBAMRData`` where the levels are stored in a ``Vector`` and the grid patches in the ``LevelData`` object. 
+   The finer level consists of two patches (red and blue zones), and these zones each have a ghost cell layer 2 cells wide.
+   The data lies on top of a coarse-grid data, i.e., data simultaneously exists on both the fine and the coarse levels. 
+   This data type is encapsulated by ``EBAMRData<T>``.
 
 The reason for having class encapsulation of mesh data is due to :ref:`Chap:Realm`, so that we can only keep track on which ``Realm`` the mesh data is defined.
 Users will interact with ``EBAMRData<T>`` through application code, or interacting with the core AMR functionality in :ref:`Chap:AmrMesh` (such as computing gradients, interpolating ghost cells etc.).
-``AmrMesh`` (see :ref:`Chap:AmrMesh`) has functionality for defining most ``EBAMRData<T>`` types on a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
+:ref:`Chap:AmrMesh` has functionality for constructing most ``EBAMRData<T>`` types on a ``Realm``, and ``EBAMRData<T>`` itself it typically not used anywhere elsewhere within ``chombo-discharge``.
 
 A number of explicit template specifications exist and are frequently used.
 These are outlined below: 
@@ -40,8 +44,8 @@ These are outlined below:
 For example, ``EBAMRCellData`` is a ``Vector<RefCountedPtr<LevelData<EBCellFAB> > >``, describing cell-centered data across the entire AMR hierarchy.
 There are many more data structures in place, but the above data structures are the most commonly used ones.
 Here, ``EBAMRFluxData`` is precisely like ``EBAMRCellData``, except that the data is stored on *cell faces* rather than cell centers.
-Likewise, ``EBAMRIVData`` is a typedef'ed data holder that holds data on each cut-cell center across the entire AMR hierachy.
-In the same way, ``EBAMRIFData`` holds data on each face of all cut cells. 
+Likewise, ``EBAMRIVData`` is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierachy.
+In the same way, ``EBAMRIFData`` holds data on each face of all cut-cells in the hierarchy. 
 
 Allocating mesh data
 --------------------
@@ -50,11 +54,11 @@ To allocate data over a particular ``Realm``, the user will interact with :ref:`
 
 .. code-block:: c++
 
-   int nComps = 1;
+   const int numComps = 1;
    EBAMRCellData myData;
-   m_amr->allocate(myData, "myRealm", phase::gas, nComps);
+   m_amr->allocate(myData, "myRealm", phase::gas, numComps);
 
-Here, ``nComps`` determine the number of cell-centered data components.
+Here, ``numCOmps`` determine the number of data components.
 Note that it *does* matter on which ``Realm`` and on which ``phase`` the data is defined.
 See :ref:`Chap:Realm` for details.
 
@@ -62,18 +66,18 @@ The user *can* specify a number of ghost cells for his/hers application code dir
 
 .. code-block:: c++
 
-   int nComps = 1;
+   int numComps = 1;
    EBAMRCellData myData;
-   m_amr->allocate(myData, "myRealm", phase::gas, nComps, 5*IntVect::Unit);
+   m_amr->allocate(myData, "myRealm", phase::gas, numComps, 5*IntVect::Unit);
 
-If the user does not specify the number of ghost cells when calling ``AmrMesh::allocate``, ``AmrMesh`` will use the default number of ghost cells specified in the input file.
+If the user does not specify the number of ghost cells when calling ``AmrMesh::allocate``, :ref:`Chap:AmrMesh` will use the default number of ghost cells specified in the input file.
 
 .. _Chap:MeshIteration:
 
-Iterating over patches
-----------------------
+Iterating over the AMR hierarchy
+--------------------------------
 
-To iterate over data in an AMR hierarchy, you will first iterate over levels and the patches in levels:
+To iterate over data in an AMR hierarchy, you will first iterate over levels and then the patches on each level:
 
 .. code-block:: c++
 
@@ -84,6 +88,26 @@ To iterate over data in an AMR hierarchy, you will first iterate over levels and
       
       for (DataIterator dit = levelGrids.dataIterator(); dit.ok(); ++dit){
          EBCellFAB& patchData = levelData[dit()];
+      }
+   }
+
+Throughout ``chombo-discharge`` it will be common to see the above implemented explicitly as a loop that supports OpenMP:
+
+.. code-block::
+
+   for (int lvl = 0; lvl < myData.size(); lvl++){
+      LevelData<EBCellFAB>& levelData = *myData[lvl];
+
+      const DisjointBoxLayout& levelGrids = levelData.disjointBoxLayout();
+      const DataIterator& dataIterator    = levelGrids.dataIterator();
+
+      const int numBoxes = dataIterator.size();
+
+   #pragma omp parallel for schedule(runtime)
+      for (int currentBox = 0; currentBox < numBoxes; currentBox++) {
+         const DataIndex& dataIndex = dataIterator[currentBox];
+	 
+         EBCellFAB& patchData = levelData[dataIndex];
       }
    }
 
@@ -108,8 +132,7 @@ For example, the standard loops for iterating over cell-centered data are
 
 Here, the ``Functor`` argument is a C++ lambda or ``std::function`` which takes a grid cell as a single argument.
 For the first loop, we iterate over all grid cells in ``a_computeBox``.
-In the second function we use a ``VoFIterator``, which 
-Iterating over the cells in a patch data holder (like the ``EBCellFAB``) can be done with a ``VoFIterator``, which can iterate through cells on an ``EBCellFAB`` that are not covered by the geometry
+Iterating over the cut-cells in a patch data holder (like the ``EBCellFAB``) can be done with a ``VoFIterator``, which can iterate through cells on an ``EBCellFAB`` that are not covered by the geometry.
 For example:
 
 .. code-block:: c++
@@ -122,8 +145,6 @@ For example:
       const DisjointBoxLayout& levelGrids = levelData.disjointBoxLayout();
       
       for (DataIterator dit = levelGrids.dataIterator(); dit.ok(); ++dit){
-
-	 
          EBCellFAB& patchData       = levelData[dit()];
 	 BaseFab<Real>& regularData = patchData.getSingleValuedFab();
 
@@ -136,8 +157,8 @@ For example:
 	 };
 
 	 // Kernel regions (defined by user)
-	 Box computeBox;
-	 VoFIterator vofit;
+	 Box computeBox = ...
+	 VoFIterator vofit = ...
 
 	 BoxLoops::loop(computeBox, regularKernel);
 	 BoxLoops::loop(vofit, irregularKernel);	 
@@ -146,36 +167,28 @@ For example:
 
 There are loops available for other types of data (e.g., face-centered data), see the `BoxLoop documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/CD__BoxLoops_8H.html>`_.
 
-
-
 .. _Chap:Coarsening:
 
 Coarsening data
 ---------------
 
-Conservative coarsening of data is done using the ``averageDown(...)`` functions in :ref:`Chap:AmrMesh`.
-When using these functions, coarse-grid data is replaced by a conservative average of fine grid data throughout the entire AMR hierarchy.
-The signatures for various types of data are as follows:
+Coarsening of data implies replacing the coarse-grid data that lies underneath a fine grid by some average of the fine-grid data.
+We currently support the following coarsening algorithms:
 
-.. code-block:: c++
+* Arithmetic coarsening, in which the coarse-grid value is simply the average of the fine-grid values.
+* Conservative coarsening, in which the coarse-grid value is the conservative average of the fine-grid values.
+  This implies that the total mass on the coarse-grid cell is identical to the total mass in the fine-grid cells from which one coarsened. 
+* Harmonic, in which the coarse-grid value is the harmonic average of the fine-grid cell values.
 
-   // Conservatively coarsen multifluid cell-centered data
-   void averageDown(MFAMRCellData& a_data, const std::string a_realm) const;
+These functions are available for both cell-centered data, cut-cell data, and face-centered data.
+Multiply signatures for this functionality exists, see the code-block below.
 
-   // Conservatively coarsen multifluid face-centered data
-   void averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
-
-   // Conservatively coarsen cell-centered data
-   void averageDown(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
-
-   // Conservatively coarsen face-centered data   
-   void averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
-
-   // Conservatively coarsen EB-centered data      
-   void averageDown(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
-
-There are other types of coarsening available also.
-For example, the ``averageFaces(...)`` will use unweighted averaging, see the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 697-704, 729-737, 764-776
+   :language: c++
+   :dedent: 2
+	    
+See the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
 
 .. _Chap:GhostCells:
 
@@ -183,47 +196,84 @@ Filling ghost cells
 -------------------
 
 Filling ghost cells is done using the ``interpGhost(...)`` functions in :ref:`Chap:AmrMesh`.
+This process adheres to the following rules:
 
-.. code-block:: c++
+#. Within a grid level, cells are always filled from neighboring grid patches without interpolation.
+#. Around the halo zone (see :numref:`Fig:EBAMRData`), ghost cells are filled using slope-limited interpolation *from the coarse grid only*.
+   Currently, this slope is calculated with a minmod limiter, although support for superbee, piecewise constant, and van Leer limiters are also implemented.
 
-   void interpGhost(MFAMRCellData& a_data, const std::string a_realm) const;
+The signatures for updating the ghost cells are:
 
-   void interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1172-1179
+   :language: c++
+   :dedent: 2
 
-This will fill the specified number of ghost cells using data from the coarse level only, using piecewise linear interpolation. 
+As one alternative, one can update ghost cells on a single grid level:
 
-As an alternative, one *can* interpolate a single layer of ghost cells using the multigrid interpolator (see :ref:`Chap:MultigridInterpolation`).
-In this case only a single layer of ghost cells are filled in regular regions, but additional ghost cells (up to some specified range) are filled near the EB.
-This is often required when computing gradients (to avoid reaching into invalid cut-cells), see :ref:`Chap:Gradients` for details.
-The functions for filling ghost cells in this way are
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1181-1194
+   :language: c++
+   :dedent: 2
 
-.. code-block:: c++
 
-   void interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const;
+Strictly speaking it is also possible to update ghost cells using the multigrid interpolator, but this will only fill a single layer of ghost cells around the halo zone (except near the cut-cells where additional cells are filled).
 
-   void interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+.. _Chap:CoarseGridInterpolation:
 
-See the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details. 
+Interpolating from the coarse grid
+----------------------------------
+
+Coarse-grid interpolation occurs, e.g., when the AMR hierarchy changes.
+If one needs data on a grid level where no data already exists, it is possible to fill this data by interpolating from the coarse grid to a finer one.
+
+.. important::
+
+   This type of interpolation is distinctly different from the ghost cell interpolation, as it affects data across the whole grid patch.
+
+The interpolation function that fill fine-grid data from a coarse grid has the following signature:
+
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 1263-1282
+   :language: c++
+   :dedent: 2
+
+Here, the user must supply both the old data and the new data, as well as on which grid levels the interpolation will take place.
+The final argument ``a_type`` is the interpolation type.
+We currently support the following interpolation methods:
+
+* ``Type::PWC``, which is piecewise-constant interpolation where the fine-cell data is filled with the coarse-cell values.
+* ``Type::ConservativePWC``, which is a piecewise-constant interpolation that is also conservative (i.e., volume-weighted).
+* ``Type::ConservativeMinMod``, which is a conservative interpolation method that uses the minmod limiter.
+* ``Type::ConservativeMonotonizedCentral``, which is a conservative interpolation method that uses the van Leer limiter. 
+* ``Type::Superbee``, which is a conservative interpolation method that uses the superbeed limiter. 
+  
+Note that there is "correct" interpolation method, but we note that we typically use a conservative minmod limiter in ``chombo-discharge``.
 
 .. _Chap:Gradients:
 
 Computing gradients
 -------------------
 
-In ``chombo-discharge`` gradients are computed using a standard second-order stencil based on finite differences.
-This is true everywhere except near the refinement boundary and EB where the coarse-side stencil will avoid using the coarsened data beneath the fine level.
+In ``chombo-discharge``, gradients are computed using a standard second-order stencil based on finite differences.
+This is true everywhere except near the EB where the coarse-side stencil will avoid using the coarsened data beneath the fine level.
 This is shown in :numref:`Fig:EBGradient` which shows the typical 5-point stencil in regular grid regions, and also a much larger and more complex stencil.
 
 In :numref:`Fig:EBGradient` we have shown two regular 5-point stencils (red and green).
 The coarse stencil (red) reaches underneath the fine level and uses the data defined by coarsening of the fine-level data.
-The coarsened data in this case is just an average of the fine-level data.
+The coarsened data in this case is just a conservative average of the fine-level data.
 Likewise, the green stencil reaches over the refinement boundary and into one of the ghost cells on the coarse level.
 
-:numref:`Fig:EBGradient` also shows a much larger stencil (blue stencil).
+.. note::
+
+   It is up to the user to ensure that ghost cells are filled prior to computing the gradient.
+   This can be done either using multigrid interpolation (see :ref:`Chap:MultigridInterpolation`), or standard interpolation (see :ref:`Chap:GhostCells`).
+
+:numref:`Fig:EBGradient` also shows a much larger stencil (blue stencil) on the coarse side of the refinement interface.
 The larger stencil is necessary because computing the :math:`y` component of the gradient using a regular 5-point stencil would have the stencil reach underneath the fine level and into coarse data that is also irregular data.
-Since there is no unique way (that we know of) for coarsening the cut-cell fine-level data onto the coarse cut-cell without introducing spurious artifacts into the gradient, we reconstruct the gradient using a least squares procedure.
+Since there is no unique way (that we know of) for coarsening the cut-cell fine-level data onto the coarse cut-cell without introducing spurious artifacts into the gradient, we reconstruct the gradient using a least squares procedure that entirely avoids using coarsened data.
 In this case we fetch a sufficiently large neighborhood of cells for computing a least squares minimization of a local solution reconstruction in the neighborhood of the coarse cell.
-In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses *valid* grid cells, i.e. the stencil does not reach underneath the fine level at all.
+In order to avoid fetching potentially badly coarsened data, this neighborhood of cells only uses *valid* grid cells, i.e., the stencil does not reach underneath the fine level at all.
 Once this neighborhood of cells is obtained, we compute the gradient using the procedure in :ref:`Chap:LeastSquares`. 
 
 .. _Fig:EBGradient:
@@ -238,15 +288,12 @@ Once this neighborhood of cells is obtained, we compute the gradient using the p
 
 To compute gradients of a scalar, one can simply call ``AmrMesh::computeGradient(...)`` functions:
 
-.. code-block:: c++
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 444-457
+   :language: c++
+   :dedent: 2		    
 
-  void computeGradient(EBAMRCellData&           a_gradient,
-		       const EBAMRCellData&     a_phi,
-                       const std::string        a_realm,
-                       const phase::which_phase a_phase) const;
-
-  void computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;		
-
+We reiterate that ghost cells must be updated *before* calling this routine.
 See :ref:`Chap:AmrMesh` or refer to the `AmrMesh API <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classAmrMesh.html>`_ for further details.
 
 .. _Chap:CopyingData:
@@ -254,15 +301,23 @@ See :ref:`Chap:AmrMesh` or refer to the `AmrMesh API <https://chombo-discharge.g
 Copying data
 ------------
 
-To copy data, one may use the ``EBAMRData<T>::copy(...)`` function *or* ``DataOps::copy`` (see :ref:`Chap:DataOps`).
-These differ in the following way:
+To copy data between data holders, one may use the ``AmrMesh<T>::copyData(...)`` function *or* ``DataOps::copy`` (see :ref:`Chap:DataOps`).
 
-* ``EBAMRData<T>::copy`` works across realms, but will not copy ghost cells. 
-* ``DataOps::copy`` will always do a local copy, and thus the data that is copied *must* be defined on the same realm.
-  
-If you call ``EBAMRData<T>::copy(...)``, the data holders will first check if they are both defined on the same realm.
-If they are, a purely local copy is perform, which will include ghost cells. 
-Communication copies involving MPI are performed otherwise, in which case ghost cells are *not* copied into the new data holder. 
+The simplest way of copying data between data holders is via ``DataOps::copy``, which does a *local-only* direct copy that also includes ghost cells.
+This version requires that the source and destination data holders are defined on the same realm, and does not invoke MPI calls.
+
+A more general version is supplied by :ref:`Chap:AmrMesh`, and has the following structure:
+
+.. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
+   :lines: 97-115
+   :language: c++
+   :dedent: 2
+
+In the above code, ``a_dst`` and ``a_src`` are the destination and source data holders for the copy.
+These need not be defined on the same :ref:`Chap:Realm`.
+Similarly, the ``a_dstComps`` and ``a_srcComps`` indicate the source and destination variables to be copied, which must have the same size.
+The final two arguments indicate which regions will be copied from.
+These are enums that are either ``CopyStrategy::Valid`` or ``CopyStrategy::ValidGhost``, and indicates whether or not we will perform the copy only into *valid* cells (``CopyStrategy::Valid``) or also into the ghost cells (``CopyStrategy::ValidGhost``).
 
 .. _Chap:DataOps:
 
@@ -270,16 +325,15 @@ DataOps
 -------
 
 We have prototyped functions for many common data operations in a static class ``DataOps``.
-For example, setting the value of various data holders can be done with
 
-.. code-block:: c++
-
-   EBAMRFluxData cellData;
-   EBAMRFluxData fluxData;
-   EBAMRIVData   irreData;
+.. tip::
    
-   DataOps::setValue(cellData, 0.0);
-   DataOps::setValue(fluxData, 1.0);
-   DataOps::setValue(irreData, 2.0);
+   For the full ``DataOps`` API, see the `DataOps documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDataOps.html>`_.
+   
+``DataOps`` contains numerous functions for operating on various template specializations of ``EBAMRData<T>`` (see :ref:`Chap:MeshData`).
+For example, ``DataOps`` contains functions for scaling data, incrementing data, averaging cell-centered data onto faces, and many more.
 
-For the full API, see the `DataOps documentation <https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classDataOps.html>`_.   
+.. important::
+
+   ``DataOps`` is designed to operate only within a single realm.
+   This means that *all* arguments into the ``DataOps`` functions *must* be defined on the same realm.
