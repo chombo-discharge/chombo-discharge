@@ -213,7 +213,6 @@ ItoKMCGodunovStepper.secondary_emission                       = after_reactions 
 ItoKMCGodunovStepper.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
 ItoKMCGodunovStepper.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
 ItoKMCGodunovStepper.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
-ItoKMCGodunovStepper.limit_parallel_diffusion                 = true               ## If true, particles do not diffuse against their drift direction
 ItoKMCGodunovStepper.profile                                  = false              ## Turn on/off run-time profiling
 ItoKMCGodunovStepper.plt_vars                                 = none               ## 'conductivity', 'current_density', 'particles_per_patch'
 ItoKMCGodunovStepper.dual_grid                                = true               ## Turn on/off dual-grid functionality
