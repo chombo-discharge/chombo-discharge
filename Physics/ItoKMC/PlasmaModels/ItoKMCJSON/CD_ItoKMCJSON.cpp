@@ -619,25 +619,25 @@ ItoKMCJSON::initializePlasmaSpecies()
 
     // Figure out the diffusion method for this object.
     std::string diffusionType = "isotropic";
-    
-    if(species.contains("diffusion model") && solver == "ito") {
+
+    if (species.contains("diffusion model") && solver == "ito") {
       diffusionType = species["diffusion model"].get<std::string>();
-      
-      if(diffusionType == "none") {
+
+      if (diffusionType == "none") {
         (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
           return this->noDiffusion(p, dt);
         });
       }
-      else if(diffusionType == "isotropic") {
+      else if (diffusionType == "isotropic") {
         (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
           return this->isotropicDiffusion(p, dt);
         });
       }
-      else if(diffusionType == "forward isotropic") {
+      else if (diffusionType == "forward isotropic") {
         (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
           return this->forwardIsotropicDiffusion(p, dt);
         });
-      }            
+      }
       else {
         this->throwParserError(baseErrorID + " but diffusionType = '" + diffusionType + "' is not supported");
       }

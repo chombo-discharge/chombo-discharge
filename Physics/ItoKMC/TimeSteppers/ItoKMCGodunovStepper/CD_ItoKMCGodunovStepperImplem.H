@@ -1613,7 +1613,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
         List<ItoParticle>&   itoParticles   = particles[din].listItems();
         List<PointParticle>& pointParticles = (*a_rhoDaggerParticles[idx])[lvl][din].listItems();
- 
+
         for (ListIterator<ItoParticle> lit(itoParticles); lit.ok(); ++lit) {
           ItoParticle&    p      = lit();
           const Real&     weight = p.weight();
@@ -1621,7 +1621,7 @@ ItoKMCGodunovStepper<I, C, R, F>::diffuseParticlesEulerMaruyama(
 
           // Compute a particle hop and store it on the run-time storage.
           RealVect& hop = p.tmpVect();
-          
+
           hop = diffusive ? diffusionFunction(p, a_dt) : RealVect::Zero;
 
           if (Z != 0) {
