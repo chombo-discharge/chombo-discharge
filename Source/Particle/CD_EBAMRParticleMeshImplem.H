@@ -336,24 +336,20 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
   // Reset mesh data
   DataOps::setValue(a_meshData, 0.0);
 
-  // This piece of code transfer the particles that lie on the coarse-side interface to a different particle container than
+  // This piece of code transfers the particles that lie on the coarse-side interface to a different particle container than
   // a_particles. We can not use ParticleContainer::transferMaskParticles because the mask is defined on the refined coarse
   // level. So we do this transfer directly.
   ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
 
   this->transferMaskParticlesTransition(particles, a_depositionType);
 
-  // Main deposition loop.
+  // Main deposition loop -- this deposits all particles that do not lie along the refinement boundary.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl      = m_eblgs[lvl]->getDBL();
     const EBISLayout&        ebisl    = m_eblgs[lvl]->getEBISL();
     const DataIterator&      dit      = dbl.dataIterator();
     const int                numBoxes = dit.size();
 
-    const bool hasCoar = (lvl > 0);
-    const bool hasFine = (lvl < m_finestLevel);
-
-    // 1. Deposit particles on this level.
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < numBoxes; mybox++) {
       const DataIndex&      din          = dit[mybox];
@@ -364,11 +360,16 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
 
       particleMesh.deposit<P, Ret, MemberFunc>(meshData, amrParticles, a_depositionType, 1.0, a_forceIrregNGP);
     }
+  }
 
-    // 2. Exchange ghost data on this level so that all the mass is on this level.
+  // 2. Exchange ghost data on each level. Mass that hangs from the fine level across the refinement boundary is put on the coarse level.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const bool hasCoar = (lvl > 0);
+
+    // Exchange+add on this level.
     a_meshData[lvl]->exchange(Interval(0, numComp - 1), m_levelCopiers[lvl], EBAddOp());
 
-    // 3. Deposition into ghost cells across the refinement boundary must end up on the coarse level.
+    // Deposition into ghost cells across the refinement boundary must end up on the coarse level.
     if (hasCoar) {
       for (int comp = 0; comp < numComp; comp++) {
         LevelData<EBCellFAB> coarAlias;
@@ -380,56 +381,68 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
         m_coarseFinePM[lvl]->addFineGhostsToCoarse(coarAlias, fineAlias);
       }
     }
+  }
 
-    // 4. If there is a finer level, not all of the particles on this level have yet been deposited because some of them were transferred into another
-    //    particle container. We now run the following steps:
-    //
-    //    a) Deposit the particles around the refinement boundary on the refined coarse level, using the fine-grid particle width.
-    //    b) Add mass from the refined coarse level to the fine level -- this puts some mass into the fine side of the refinement boundary
-    //    c) Exchange data on the refined coarse level to update ghost cells, so that all special mass is contained in the refined coarse grid
-    //    d) Coarsen mass from the refined level onto this level.
-    if (hasFine) {
-      // Note: eblgFiCo is for transferring data between lvl and lvl+1. It stores the refinement of grid level 'lvl' in eblgFiCo
-      const EBLevelGrid&       eblgFiCo     = m_coarseFinePM[lvl + 1]->getEblgFiCo();
-      const DisjointBoxLayout& dblFiCo      = eblgFiCo.getDBL();
-      const EBISLayout&        ebislFiCo    = eblgFiCo.getEBISL();
-      const DataIterator&      ditFiCo      = dblFiCo.dataIterator();
-      const int                numBoxesFiCo = ditFiCo.size();
+  // 3. If there is a finer level, not all of the particles on this level have yet been deposited because some of them were transferred into another
+  //    particle container. We now run the following steps:
+  //
+  //    a) Deposit the particles around the refinement boundary on the refined coarse level, using the fine-grid particle width.
+  //    b) Add mass from the refined coarse level to the fine level -- this puts some mass into the fine side of the refinement boundary
+  //    c) Exchange data on the refined coarse level to update ghost cells, so that all special mass is contained in the refined coarse grid
+  //    d) Coarsen mass from the refined level onto this level.
+  //
+  //    The above steps are split into step a), which is local on each rank, and steps b)+c)+d), which require MPI calls.
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl      = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl    = m_eblgs[lvl]->getEBISL();
+    const DataIterator&      dit      = dbl.dataIterator();
+    const int                numBoxes = dit.size();
 
-      // Make a buffer we can deposit into. This is a refined version of this level.
-      LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl + 1]->getBufferFiCo<numComp>();
+    // Note: eblgFiCo is for transferring data between lvl and lvl+1. It stores the refinement of grid level 'lvl' in eblgFiCo
+    const EBLevelGrid&       eblgFiCo     = m_coarseFinePM[lvl + 1]->getEblgFiCo();
+    const DisjointBoxLayout& dblFiCo      = eblgFiCo.getDBL();
+    const EBISLayout&        ebislFiCo    = eblgFiCo.getEBISL();
+    const DataIterator&      ditFiCo      = dblFiCo.dataIterator();
+    const int                numBoxesFiCo = ditFiCo.size();
 
-      const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
+    // Make a buffer we can deposit into. This is a refined version of this level.
+    LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl + 1]->getBufferFiCo<numComp>();
 
-      // a) Deposit the particles on the refined coarse level.
+    const int maskWidth = this->getTransitionMaskWidth(a_depositionType, m_refRat[lvl]);
+
+    // a) Deposit the particles on the refined coarse level.
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
-        const DataIndex& din = ditFiCo[mybox];
+    for (int mybox = 0; mybox < numBoxesFiCo; mybox++) {
+      const DataIndex& din = ditFiCo[mybox];
 
-        EBCellFAB& dataFiCo = bufferFiCo[din];
+      EBCellFAB& dataFiCo = bufferFiCo[din];
 
-        dataFiCo.setVal(0.0);
+      dataFiCo.setVal(0.0);
 
-        const BaseFab<bool>&  mask          = (*m_transitionMasks.at(maskWidth)[lvl])[din];
-        const List<P>&        maskParticles = (*particles.getMaskParticles()[lvl])[din].listItems();
-        const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
+      const BaseFab<bool>&  mask          = (*m_transitionMasks.at(maskWidth)[lvl])[din];
+      const List<P>&        maskParticles = (*particles.getMaskParticles()[lvl])[din].listItems();
+      const EBParticleMesh& particleMesh  = (*m_ebParticleMeshFiCo[lvl + 1])[din];
 
-        if (mask.isUsable()) {
-          particleMesh.deposit<P, Ret, MemberFunc>(dataFiCo, maskParticles, a_depositionType, 1.0, a_forceIrregNGP);
-        }
+      if (mask.isUsable()) {
+        particleMesh.deposit<P, Ret, MemberFunc>(dataFiCo, maskParticles, a_depositionType, 1.0, a_forceIrregNGP);
       }
-
-      // b) Add the data to the fine level. This moves from valid+ghost -> valid
-      m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
-
-      // c) Exchange data on this level
-      m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
-
-      // d) Coarsen data from the refined grid to this grid.
-      m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
-                                                            bufferFiCo,
-                                                            EBCoarseFineParticleMesh::Average::Conservative);
     }
+  }
+
+  // Perform steps b), c), and d) of step #3 above.
+  for (int lvl = 0; lvl < m_finestLevel; lvl++) {
+    LevelData<EBCellFAB>& bufferFiCo = m_coarseFinePM[lvl + 1]->getBufferFiCo<numComp>();
+
+    // b) Add the data to the fine level. This moves from valid+ghost -> valid
+    m_coarseFinePM[lvl + 1]->addFiCoDataToFine(*a_meshData[lvl + 1], bufferFiCo);
+
+    // c) Exchange data on this level
+    m_coarseFinePM[lvl + 1]->exchangeAndAddFiCoData(bufferFiCo);
+
+    // d) Coarsen data from the refined grid to this grid.
+    m_coarseFinePM[lvl + 1]->restrictAndAddFiCoDataToCoar(*a_meshData[lvl],
+                                                          bufferFiCo,
+                                                          EBCoarseFineParticleMesh::Average::Conservative);
   }
 
   // Masked particles are but back in their correct mesh.
