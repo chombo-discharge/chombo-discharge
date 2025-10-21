@@ -642,6 +642,11 @@ ItoKMCJSON::initializePlasmaSpecies()
         this->throwParserError(baseErrorID + " but diffusionType = '" + diffusionType + "' is not supported");
       }
     }
+    else {
+      (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
+        return this->isotropicDiffusion(p, dt);
+      });
+    }
 
     if (m_verbose) {
       // clang-format off
