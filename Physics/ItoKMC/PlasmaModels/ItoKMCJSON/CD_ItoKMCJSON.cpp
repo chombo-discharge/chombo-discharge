@@ -617,6 +617,37 @@ ItoKMCJSON::initializePlasmaSpecies()
 
     m_allSpecies.emplace(speciesID);
 
+    // Figure out the diffusion method for this object.
+    std::string diffusionType = "isotropic";
+
+    if (species.contains("diffusion model") && solver == "ito") {
+      diffusionType = species["diffusion model"].get<std::string>();
+
+      if (diffusionType == "none") {
+        (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
+          return this->noDiffusion(p, dt);
+        });
+      }
+      else if (diffusionType == "isotropic") {
+        (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
+          return this->isotropicDiffusion(p, dt);
+        });
+      }
+      else if (diffusionType == "forward isotropic") {
+        (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
+          return this->forwardIsotropicDiffusion(p, dt);
+        });
+      }
+      else {
+        this->throwParserError(baseErrorID + " but diffusionType = '" + diffusionType + "' is not supported");
+      }
+    }
+    else {
+      (this->m_itoDiffusionFunctions).push_back([this](const ItoParticle& p, const Real dt) -> RealVect {
+        return this->isotropicDiffusion(p, dt);
+      });
+    }
+
     if (m_verbose) {
       // clang-format off
       pout() << "ItoKMCJSON::initializePlasmaSpecies, instantiating species:" << "\n"
@@ -624,6 +655,7 @@ ItoKMCJSON::initializePlasmaSpecies()
              << "\tZ                = " << Z << "\n"
              << "\tMobile           = " << mobile << "\n"
              << "\tDiffusive        = " << diffusive << "\n"
+             << "\tDiffusion model  = " << diffusionType << "\n"        
              << "\tSolver type      = " << solver << "\n"
              << "\n";
       // clang-format on
