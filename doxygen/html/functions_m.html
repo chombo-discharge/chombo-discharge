@@ -613,6 +613,7 @@ $(function() {
 <li>m_isVoltageSet&#160;:&#160;<a class="el" href="classFieldSolver.html#a2890d7ccf6497ba9fc9451e27657f4d5">FieldSolver</a></li>
 <li>m_iter&#160;:&#160;<a class="el" href="classMultiIndex.html#a2075dcd3e0281d1614296b8ca4989bea">MultiIndex</a></li>
 <li>m_ito&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ac606ad398ad5f49eaae68a5ee685462e">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
+<li>m_itoDiffusionFunctions&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a20ccb1a4219a8612a296164710717e59">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_itoSpecies&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a539eba97f3e484c832ba50232336fea7">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_itoSpeciesMap&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html#ae291c9c106d918aacecb1e330e8689b6">Physics::ItoKMC::ItoKMCJSON</a></li>
 <li>m_ivs&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBC.html#aaa5d12da508639b1d2ed06b7f3ae7045">MFHelmholtzJumpBC</a>, <a class="el" href="classMFInterfaceFAB.html#a82646e4c1c0583f76fd9e3eb5d78d9fc">MFInterfaceFAB&lt; T &gt;</a></li>
@@ -650,7 +651,6 @@ $(function() {
 <li>m_levelTiles&#160;:&#160;<a class="el" href="classParticleContainer.html#a63ef5313089f21becb56785d3abeb86f">ParticleContainer&lt; P &gt;</a>, <a class="el" href="classRealm.html#abd2a204518222c34f1cf2b2cd44ed5f2">Realm</a></li>
 <li>m_lhsReactives&#160;:&#160;<a class="el" href="classKMCDualStateReaction.html#a2dbb89102d10c61859f8703a8a7e15b3">KMCDualStateReaction&lt; State, T &gt;</a></li>
 <li>m_limiter&#160;:&#160;<a class="el" href="classCdrCTU.html#ae0d198b254c963ff42852a3eb5bb98ff">CdrCTU</a></li>
-<li>m_limitParallelDiffusion&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html#a8fa23078d51fe6ffc20ef366ca367340">Physics::ItoKMC::ItoKMCGodunovStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_limitSlopes&#160;:&#160;<a class="el" href="classCdrGodunov.html#a7327b1af8f8ce67966d1ae0502e35e94">CdrGodunov</a></li>
 <li>m_lo&#160;:&#160;<a class="el" href="classRealBox.html#a4f9785dcd4d7d8dfde5fd087ba97435b">RealBox</a></li>
 <li>m_loadBalance&#160;:&#160;<a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#a578ba5737514eb3e0b990e355afc43b0">Physics::BrownianWalker::BrownianWalkerStepper</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#aa1aa299a2ce0bd90d3677e812b5c6df2">Physics::Electrostatics::FieldStepper&lt; T &gt;</a></li>
@@ -1102,8 +1102,8 @@ $(function() {
 <li>m_shroom_center&#160;:&#160;<a class="el" href="classVessel.html#a5b1ba0ed38ba64370437e48221d2f361">Vessel</a></li>
 <li>m_shroom_d&#160;:&#160;<a class="el" href="classVessel.html#ab15b39718083bcc28422e18b45ede478">Vessel</a></li>
 <li>m_shroom_live&#160;:&#160;<a class="el" href="classVessel.html#aa2add00ec06e29cd6482fbc95bdb03a9">Vessel</a></li>
-<li>m_shroom_R&#160;:&#160;<a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a></li>
 <li>m_shroom_r&#160;:&#160;<a class="el" href="classVessel.html#adc6b2dd667bb3ab8a90b4b18489ef992">Vessel</a></li>
+<li>m_shroom_R&#160;:&#160;<a class="el" href="classVessel.html#acaa7e92cf60b067ab42ac485d438901d">Vessel</a></li>
 <li>m_sideBox&#160;:&#160;<a class="el" href="classEBHelmholtzOp.html#ac102826540a335e1087e506e6c87a38d">EBHelmholtzOp</a></li>
 <li>m_sideStringToSide&#160;:&#160;<a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaJSON.html#ab949b998f2f448d82e1706a1f3b790fd">Physics::CdrPlasma::CdrPlasmaJSON</a></li>
 <li>m_sigma&#160;:&#160;<a class="el" href="classFieldSolver.html#aa107b33dfc038e5b9cafaa5bd17a5e0f">FieldSolver</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a2a62a6b2bf39641c3b779b0326160fed">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a0b8099b57751f5f4de54c93d63088909">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#adcb62f7b314e6d00065c9f9de482ea5c">Physics::Electrostatics::FieldStepper&lt; T &gt;</a></li>
@@ -1295,8 +1295,8 @@ $(function() {
 <li>minmod()&#160;:&#160;<a class="el" href="classEBGhostCellInterpolator.html#a630b6bb2e321b58b186a112e46171433">EBGhostCellInterpolator</a></li>
 <li>MixedDerivStencil&#160;:&#160;<a class="el" href="classCoarseInterpQuadCF.html#a8af23d838b680eb8c8db1f953c5a6139">CoarseInterpQuadCF</a></li>
 <li>mobility()&#160;:&#160;<a class="el" href="classItoParticle.html#a9bcd6efe926f67357da3361e7f9b9069">ItoParticle</a>, <a class="el" href="classItoSpecies.html#a60ffd4cb59f0fd5daf7e3fe7db381c1b">ItoSpecies</a></li>
-<li>MolarFraction&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">Physics::ItoKMC::ItoKMCBackgroundSpecies</a></li>
 <li>molarFraction()&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#a99902a6282a0f4be6233964f916abf81">Physics::ItoKMC::ItoKMCBackgroundSpecies</a></li>
+<li>MolarFraction&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCBackgroundSpecies.html#ae6b85c38b93061f5f3f5d5280b4855c3">Physics::ItoKMC::ItoKMCBackgroundSpecies</a></li>
 <li>monotonizedCentral()&#160;:&#160;<a class="el" href="classCdrCTU.html#a75db786ac708eedb214e2bb4583aa1bf">CdrCTU</a></li>
 <li>MonotonizedCentral()&#160;:&#160;<a class="el" href="classCellCentroidInterpolation.html#a417aab93202cf62a357a25ea07be6804">CellCentroidInterpolation</a>, <a class="el" href="classEBCentroidInterpolation.html#a0c7be552b6bd88f0568268d797ee7937">EBCentroidInterpolation</a></li>
 <li>monotonizedCentral()&#160;:&#160;<a class="el" href="classEBGhostCellInterpolator.html#ac225d1ed480fa58cbec028a3ec36b338">EBGhostCellInterpolator</a></li>

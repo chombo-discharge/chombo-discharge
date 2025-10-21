@@ -87,13 +87,7 @@ Both these methods (``centroid`` and ``random``) are, however, sources of numeri
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See :ref:`Chap:ItoKMCJSON` for instructions on how to assign the particle placement method.
 
-Parallel diffusion
-------------------
 
-``ItoKMCGodunovStepper`` can limit diffusion against the electric field (or strictly speaking, the particle drift direction) by setting the flag ``ItoKMCGodunovStepper.limit_parallel_diffusion`` to ``true``.
-The logic behind this functionality is that in a drift-diffusion approximation, and regardless of whether or one uses particles or fluids, electrons that back-diffuse against the electric field will rapidly lose their energy and can then no longer ionize the gas.
-When limiting parallel diffusion, the diffusion hop of the particles is restricted to being along or transverse to the drift direction.
-In practice, this leads to greatly enhanced stability in, especially in cathode sheaths.
 
 
 Spatial filtering
@@ -905,7 +899,39 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 .. tip::
 
    The parser for the diffusion coefficient is analogous; simply replace ``mu*N`` by ``D*N``.
-    
+
+Parallel diffusion
+^^^^^^^^^^^^^^^^^^
+
+``ItoKMCJSON`` can limit diffusion against the electric field (or strictly speaking, the particle drift direction).
+The species specification permits a flag ``diffusion model`` that defauls to isotropic diffusion.
+However, it is possible to set this to other types of diffusion models.
+Currently, the available options are
+
+#. ``isotropic``, which sets an isotropic diffusion model.
+#. ``forward isotropic``, which uses isotropic diffusion but does not permit diffusion against the drift direction (this component is set to zero).
+
+The code block below shows an example:
+
+.. code-block:: json
+   :emphasize-lines: 9
+
+    "plasma species" :
+    [
+       {
+          "id": "e",          
+          "Z" : -1,           
+          "solver" : "ito",   
+          "mobile" : true,    
+          "diffusive" : true,
+          "diffusion model": "forward isotropic"
+       }
+    ]
+
+.. warning::
+
+   Changing the diffusion model to anything other than isotropic can have unintended physical side effects.
+   Although this functionality can enhance stability in e.g. cathode sheaths, it can have other unintended consequences. 
 
 Temperature
 ___________
@@ -2208,9 +2234,8 @@ This is a process which has been linked both to the local field approximation an
 Simulations that fail to stabilize, i.e., where the field strength diverges, may benefit from the following stabilizing features:
 
 #. **Turn off parallel diffusion.**
-   
-   With the ``ItoKMCGodunovStepper`` class, this option is given by ``ItoKMCGodunovStepper.limit_parallel_diffusion``.
-   Using this option will ensure that particles do not diffuse against their drift direction.
+
+   The :ref:`Chap:ItoKMCJSON` class permits various diffusion models, some of which turn off backward diffusion completely.
    Note that this also modifies the amount of *physical* diffusion in this direction.
 
 #. **Use gradient corrections.**

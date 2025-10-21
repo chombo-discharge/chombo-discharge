@@ -102,7 +102,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#time-stepping">Time stepping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-placement">Particle placement</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#parallel-diffusion">Parallel diffusion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spatial-filtering">Spatial filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reaction-network">Reaction network</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#particle-management">Particle management</a></li>
@@ -286,8 +285,7 @@ Currently, the time step can be restricted through several means:</p>
 </ol>
 <p>In addition, the user can specify the maximum permitted growth or reduction in the time step.</p>
 <p>These limits are given by the following input variables:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.physics_dt_factor                        = 1.0                ## Physics-based time step factor
-ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ItoKMCGodunovStepper.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.max_particle_advection_cfl               = 1.0                ## Advective time step CFL restriction
 ItoKMCGodunovStepper.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
 ItoKMCGodunovStepper.max_particle_diffusion_cfl               = 1.E99              ## Diffusive time step CFL restriction
@@ -300,6 +298,7 @@ ItoKMCGodunovStepper.max_dt                                   = 1.E99           
 ItoKMCGodunovStepper.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
 ItoKMCGodunovStepper.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
 ItoKMCGodunovStepper.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
+ItoKMCGodunovStepper.cond_filter_num                          = 0                  ## Number of filterings for conductivity
 </pre></div>
 </div>
 </section>
@@ -317,13 +316,6 @@ Randomly distributing the new particles has the advantage that it generates seco
 Both these methods (<code class="docutils literal notranslate"><span class="pre">centroid</span></code> and <code class="docutils literal notranslate"><span class="pre">random</span></code>) are, however, sources of numerical diffusion since the secondary particles are potentially placed in the wake of the primary particles (which is non-physical).
 The downstream method circumvents this source of numerical diffusion by only placing secondary particles in the downstream region of some user-defined species (typically the electrons).
 See <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a> for instructions on how to assign the particle placement method.</p>
-</section>
-<section id="parallel-diffusion">
-<h3>Parallel diffusion<a class="headerlink" href="#parallel-diffusion" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper</span></code> can limit diffusion against the electric field (or strictly speaking, the particle drift direction) by setting the flag <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper.limit_parallel_diffusion</span></code> to <code class="docutils literal notranslate"><span class="pre">true</span></code>.
-The logic behind this functionality is that in a drift-diffusion approximation, and regardless of whether or one uses particles or fluids, electrons that back-diffuse against the electric field will rapidly lose their energy and can then no longer ionize the gas.
-When limiting parallel diffusion, the diffusion hop of the particles is restricted to being along or transverse to the drift direction.
-In practice, this leads to greatly enhanced stability in, especially in cathode sheaths.</p>
 </section>
 <section id="spatial-filtering">
 <h3>Spatial filtering<a class="headerlink" href="#spatial-filtering" title="Permalink to this heading"></a></h3>
@@ -427,6 +419,11 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">KMCSolverType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">KMCSolver</span><span class="o">&lt;</span><span class="n">KMCReaction</span><span class="p">,</span><span class="w"> </span><span class="n">KMCState</span><span class="p">,</span><span class="w"> </span><span class="n">FPR</span><span class="o">&gt;</span><span class="p">;</span>
 
 <span class="w">    </span><span class="cm">/*!</span>
+<span class="cm">      @brief Basic function for diffusing a particle</span>
+<span class="cm">    */</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">DiffusionFunction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">RealVect</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/*!</span>
 <span class="cm">      @brief Map to species type</span>
 <span class="cm">      @details This is just for distinguishing between species that are treated with an Ito or CDR formalism</span>
 <span class="cm">    */</span>
@@ -512,6 +509,12 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="cm">      */</span>
 <span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">RtSpecies</span><span class="o">&gt;&gt;&amp;</span>
 <span class="w">      </span><span class="n">getRtSpecies</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">        @brief Get diffusion functions</span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DiffusionFunction</span><span class="o">&gt;&amp;</span>
+<span class="w">      </span><span class="n">getItoDiffusionFunctions</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief Get number of plot variables</span>
@@ -861,6 +864,11 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">      </span><span class="n">ItoKMCSurfaceReactionSet</span><span class="w"> </span><span class="n">m_surfaceReactions</span><span class="p">;</span>
 
 <span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">        @brief Diffusion functions for the various Ito species</span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DiffusionFunction</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_itoDiffusionFunctions</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
 <span class="cm">	@brief List of solver-tracked particle drift-diffusion species. </span>
 <span class="cm">      */</span>
 <span class="w">      </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ItoSpecies</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">m_itoSpecies</span><span class="p">;</span>
@@ -1018,6 +1026,33 @@ The difference between <code class="docutils literal notranslate"><span class="p
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_electricField</span><span class="p">,</span>
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">RealVect</span><span class="o">&amp;</span><span class="w">          </span><span class="n">a_cellPos</span><span class="p">,</span>
 <span class="w">                              </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span><span class="w">              </span><span class="n">a_dx</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">        @brief No diffusion function for a particle</span>
+<span class="cm">        @param[in] a_particle Particle to diffuse</span>
+<span class="cm">        @param[in] a_dt Time step</span>
+<span class="cm">        @return Returns the zero vector.</span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
+<span class="w">      </span><span class="nf">noDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_particle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">        @brief Isotropic diffusion function for a particle</span>
+<span class="cm">        @param[in] a_particle Particle to diffuse</span>
+<span class="cm">        @param[in] a_dt Time step</span>
+<span class="cm">        @return Returns sqrt(2 * D * a_dt) * N(0,1), where N(0,1) is a normal distribution</span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
+<span class="w">      </span><span class="nf">isotropicDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_particle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
+
+<span class="w">      </span><span class="cm">/*!</span>
+<span class="cm">        @brief Quasi-isotropic diffusion function for a particle which does not permit backward diffusion.</span>
+<span class="cm">        @param[in] a_particle Particle to diffuse</span>
+<span class="cm">        @param[in] a_dt Time step</span>
+<span class="cm">        @return Same as isotropic diffusion, but ensures that the particle cannot diffuse backward</span>
+<span class="cm">      */</span>
+<span class="w">      </span><span class="kr">inline</span><span class="w"> </span><span class="n">RealVect</span>
+<span class="w">      </span><span class="nf">forwardIsotropicDiffusion</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">ItoParticle</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_particle</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Real</span><span class="w"> </span><span class="n">a_dt</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">noexcept</span><span class="p">;</span>
 <span class="w">    </span><span class="p">};</span>
 <span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="c1">// namespace ItoKMC</span>
 <span class="p">}</span><span class="w"> </span><span class="c1">// namespace Physics</span>
@@ -1637,6 +1672,36 @@ This is an optional argument that defaults to <code class="docutils literal notr
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The parser for the diffusion coefficient is analogous; simply replace <code class="docutils literal notranslate"><span class="pre">mu*N</span></code> by <code class="docutils literal notranslate"><span class="pre">D*N</span></code>.</p>
+</div>
+</section>
+<section id="parallel-diffusion">
+<h5>Parallel diffusion<a class="headerlink" href="#parallel-diffusion" title="Permalink to this heading"></a></h5>
+<p><code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> can limit diffusion against the electric field (or strictly speaking, the particle drift direction).
+The species specification permits a flag <code class="docutils literal notranslate"><span class="pre">diffusion</span> <span class="pre">model</span></code> that defauls to isotropic diffusion.
+However, it is possible to set this to other types of diffusion models.
+Currently, the available options are</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">isotropic</span></code>, which sets an isotropic diffusion model.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">forward</span> <span class="pre">isotropic</span></code>, which uses isotropic diffusion but does not permit diffusion against the drift direction (this component is set to zero).</p></li>
+</ol>
+<p>The code block below shows an example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="w"> </span><span class="nt">&quot;plasma species&quot;</span><span class="w"> </span><span class="p">:</span>
+<span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">       </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;Z&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;solver&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ito&quot;</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;mobile&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">       </span><span class="nt">&quot;diffusive&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="hll"><span class="w">       </span><span class="nt">&quot;diffusion model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;forward isotropic&quot;</span>
+</span><span class="w">    </span><span class="p">}</span>
+<span class="w"> </span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Changing the diffusion model to anything other than isotropic can have unintended physical side effects.
+Although this functionality can enhance stability in e.g. cathode sheaths, it can have other unintended consequences.</p>
 </div>
 </section>
 </section>
@@ -2738,8 +2803,7 @@ This is a process which has been linked both to the local field approximation an
 Simulations that fail to stabilize, i.e., where the field strength diverges, may benefit from the following stabilizing features:</p>
 <ol class="arabic">
 <li><p><strong>Turn off parallel diffusion.</strong></p>
-<p>With the <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper</span></code> class, this option is given by <code class="docutils literal notranslate"><span class="pre">ItoKMCGodunovStepper.limit_parallel_diffusion</span></code>.
-Using this option will ensure that particles do not diffuse against their drift direction.
+<p>The <a class="reference internal" href="#chap-itokmcjson"><span class="std std-ref">JSON interface</span></a> class permits various diffusion models, some of which turn off backward diffusion completely.
 Note that this also modifies the amount of <em>physical</em> diffusion in this direction.</p>
 </li>
 <li><p><strong>Use gradient corrections.</strong></p>
