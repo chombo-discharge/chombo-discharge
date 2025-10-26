@@ -619,7 +619,7 @@ ParticleOps::scatterParticles(ParticleMap<List<P>>&              a_receivedParti
     }
   }
 
-  // MPI requires stuff as int
+  // MPI requires stuff as int -- make sure that we can convert properly
   auto uint64ToInt = [](const std::vector<uint64_t>& v64) -> std::vector<int> {
     std::vector<int> v(v64.size());
 
