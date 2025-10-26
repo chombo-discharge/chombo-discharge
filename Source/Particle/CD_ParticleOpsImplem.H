@@ -23,6 +23,8 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "scatterParticles should use collectives rather than multiple small send messages"
+
 inline IntVect
 ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
                                   const RealVect& a_probLo,
@@ -519,9 +521,8 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value)
 #ifdef CH_MPI
 template <typename P>
 inline void
-ParticleOps::scatterParticles(
-  std::map<std::pair<unsigned int, unsigned int>, List<P>>&              a_receivedParticles,
-  std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_sentParticles) noexcept
+ParticleOps::scatterParticles(ParticleMap<List<P>>&              a_receivedParticles,
+                              std::vector<ParticleMap<List<P>>>& a_sentParticles) noexcept
 {
   CH_TIME("ParticleOps::scatterParticles");
 
@@ -533,15 +534,15 @@ ParticleOps::scatterParticles(
 
   const size_t linearSize = P().size();
 
-  std::vector<unsigned int> sendSizes(numProc(), 0);
-  std::vector<unsigned int> recvSizes(numProc(), 0);
+  std::vector<uint32_t> sendSizes(numProc(), 0);
+  std::vector<uint32_t> recvSizes(numProc(), 0);
 
   // Figure out the size of a_sentParticles[irank]
   for (int irank = 0; irank < numRanks; irank++) {
     sendSizes[irank] = 0;
 
     // Figure out the message size sent from this rank.
-    const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particlesToRank = a_sentParticles[irank];
+    const ParticleMap<List<P>>& particlesToRank = a_sentParticles[irank];
 
     // Size of particles along.
     for (const auto& m : particlesToRank) {
@@ -550,7 +551,7 @@ ParticleOps::scatterParticles(
     sendSizes[irank] *= linearSize;
 
     // Add in the map keys and the list length
-    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(unsigned int) + sizeof(size_t));
+    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(uint32_t) + sizeof(size_t));
   }
 
   mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UNSIGNED, &recvSizes[0], 1, MPI_UNSIGNED, Chombo_MPI::comm);
@@ -589,16 +590,16 @@ ParticleOps::scatterParticles(
 
       char* data = sendBuf[irank];
 
-      const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particles = a_sentParticles[irank];
+      const ParticleMap<List<P>>& particles = a_sentParticles[irank];
 
       // Linearize each entry in the map onto the send buffer. We encode this by (level, index, list length, List<P>)
       for (const auto& cur : particles) {
 
         // and grid index
-        *((unsigned int*)data) = cur.first.first;
-        data += sizeof(unsigned int);
-        *((unsigned int*)data) = cur.first.second;
-        data += sizeof(unsigned int);
+        *((uint32_t*)data) = cur.first.first;
+        data += sizeof(uint32_t);
+        *((uint32_t*)data) = cur.first.second;
+        data += sizeof(uint32_t);
 
         // List length aka number of particles
         *((size_t*)data) = cur.second.length();
@@ -647,16 +648,16 @@ ParticleOps::scatterParticles(
 
       char* data = recvBuf[irank];
 
-      unsigned int in = 0;
+      uint32_t in = 0;
 
       while (in < recvSizes[irank]) {
 
         // Level and grid index
-        unsigned int lvl = *((unsigned int*)data);
-        data += sizeof(unsigned int);
+        uint32_t lvl = *((uint32_t*)data);
+        data += sizeof(uint32_t);
 
-        unsigned int idx = *((unsigned int*)data);
-        data += sizeof(unsigned int);
+        uint32_t idx = *((uint32_t*)data);
+        data += sizeof(uint32_t);
 
         // List length aka number of particles
         size_t numParticles = *((size_t*)data);
@@ -666,10 +667,10 @@ ParticleOps::scatterParticles(
           p.linearIn((void*)data);
           data += linearSize;
 
-          a_receivedParticles[std::pair<unsigned int, unsigned int>(lvl, idx)].add(p);
+          a_receivedParticles[std::pair<uint32_t, uint32_t>(lvl, idx)].add(p);
         }
 
-        in += 2 * sizeof(unsigned int) + sizeof(size_t) + numParticles * linearSize;
+        in += 2 * sizeof(uint32_t) + sizeof(size_t) + numParticles * linearSize;
       }
     }
   }

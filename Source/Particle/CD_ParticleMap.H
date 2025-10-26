@@ -62,14 +62,11 @@ struct PairHash
 };
 
 /*!
-  @brief Underlying particle map when gathering/scattering particles
+  @brief Underlying particle map when gathering/scattering particles.
+  @detail This is a map that maps a list of particles to a specific grid level and grid patch.
 */
 template <typename T>
-#if 0
 using ParticleMap = std::unordered_map<std::pair<uint32_t, uint32_t>, T, PairHash>;
-#else
-using ParticleMap = std::map<std::pair<unsigned int, unsigned int>, T>;
-#endif
 
 #include <CD_NamespaceFooter.H>
 
