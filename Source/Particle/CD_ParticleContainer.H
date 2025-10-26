@@ -25,6 +25,7 @@
 // Our includes
 #include <CD_OpenMP.H>
 #include <CD_LevelTiles.H>
+#include <CD_ParticleMap.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

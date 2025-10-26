@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
+#include <CD_ParticleMap.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P>
@@ -219,6 +220,8 @@ public:
   template <typename P, RealVect& (P::*particleVectorField)()>
   static inline void
   setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept;
+
+
 
 #ifdef CH_MPI
   /*!
