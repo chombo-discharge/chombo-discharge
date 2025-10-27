@@ -26,8 +26,6 @@
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "scatterParticles should use collectives rather than multiple small send messages"
-
 inline IntVect
 ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
                                   const RealVect& a_probLo,
