@@ -1447,6 +1447,11 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
               fabGas(iv, comp) = 0.0;
             }
           }
+	  else if(irregSolid) {
+	    if(a_phase == phase::solid) {
+	      fabGas(iv,comp) = fabSolid(iv,comp);
+	    }
+	  }
         };
 
         if (isSolidRegular) {
