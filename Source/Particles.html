@@ -485,7 +485,6 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <span class="cm">  @brief Remap over the entire AMR hierarchy</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">remap</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>This is simply used as follows:</p>
@@ -515,7 +514,6 @@ This is relatively simple to achieve, and is done as follows:</p>
 <span class="cm">  @param[in] a_base Coarsest grid level which will not change. </span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_base</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).</p>
@@ -534,14 +532,13 @@ This is relatively simple to achieve, and is done as follows:</p>
 <span class="cm">  @param[in] a_newFinestLevel New finest grid level</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w">         </span><span class="n">a_grids</span><span class="p">,</span>
+<span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w">         </span><span class="n">a_grids</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;&amp;</span><span class="w">             </span><span class="n">a_domains</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                      </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w">                       </span><span class="n">a_refRat</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ValidMask</span><span class="o">&gt;&amp;</span><span class="w">                 </span><span class="n">a_validMask</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelTiles</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_levelTiles</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                </span><span class="n">a_base</span><span class="p">,</span>
-<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                </span><span class="n">a_newFinestLevel</span><span class="p">);</span>
 </pre></div>
 </div>
 </li>
@@ -567,7 +564,6 @@ The function signatures for this is</p>
 <span class="cm">  @note If the mask is nullptr on any of the levels, those levels will be ignored. </span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">copyMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The argument <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> holds a bool at each cell in the AMR hierarchy.
@@ -577,7 +573,6 @@ Particles that live in cells where <code class="docutils literal notranslate"><s
 <span class="cm">  @return m_maskParticles</span>
 <span class="cm">*/</span>
 <span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
-<span class="n">getMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>In the above functions the mask particles are <em>copied</em>, and the original particles are left untouched.
@@ -586,7 +581,6 @@ After the user is done with the particles, they should be deleted through the fu
 <span class="cm">  @brief Clear the &quot;mask&quot; particles. </span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="nf">clearMaskParticles</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>An example pseudocode for working with masked particles is given below:</p>
