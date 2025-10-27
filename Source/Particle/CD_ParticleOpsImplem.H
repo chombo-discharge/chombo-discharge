@@ -624,7 +624,7 @@ ParticleOps::scatterParticles(ParticleMap<List<P>>&              a_receivedParti
     std::vector<int> v(v64.size());
 
     for (size_t i = 0; i < v64.size(); ++i) {
-      CH_assert(v64[i] <= static_cast<u64>(std::numeric_limits<int>::max()));
+      CH_assert(v64[i] <= static_cast<uint64_t>(std::numeric_limits<int>::max()));
 
       v[i] = static_cast<int>(v64[i]);
     }
