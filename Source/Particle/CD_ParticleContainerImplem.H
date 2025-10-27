@@ -12,8 +12,6 @@
 #ifndef CD_ParticleContainerImplem_H
 #define CD_ParticleContainerImplem_H
 
-#warning "The particle map we send should probably be ParticleMap<std::vector<P>> rather than List<P>"
-
 // Std includes
 #include <bitset>
 
