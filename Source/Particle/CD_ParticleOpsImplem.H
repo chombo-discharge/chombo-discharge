@@ -12,6 +12,9 @@
 #ifndef CD_ParticleOpsImplem_H
 #define CD_ParticleOpsImplem_H
 
+// Std includes
+#include <cstdint>
+
 // Chombo includes
 #include <CH_Timer.H>
 #include <PolyGeom.H>
@@ -22,6 +25,8 @@
 #include <CD_PolyUtils.H>
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
+
+#warning "scatterParticles should use collectives rather than multiple small send messages"
 
 inline IntVect
 ParticleOps::getParticleCellIndex(const RealVect& a_particlePosition,
@@ -519,9 +524,8 @@ ParticleOps::setValue(ParticleContainer<P>& a_particles, const RealVect a_value)
 #ifdef CH_MPI
 template <typename P>
 inline void
-ParticleOps::scatterParticles(
-  std::map<std::pair<unsigned int, unsigned int>, List<P>>&              a_receivedParticles,
-  std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_sentParticles) noexcept
+ParticleOps::scatterParticles(ParticleMap<List<P>>&              a_receivedParticles,
+                              std::vector<ParticleMap<List<P>>>& a_sentParticles) noexcept
 {
   CH_TIME("ParticleOps::scatterParticles");
 
@@ -533,29 +537,30 @@ ParticleOps::scatterParticles(
 
   const size_t linearSize = P().size();
 
-  std::vector<unsigned int> sendSizes(numProc(), 0);
-  std::vector<unsigned int> recvSizes(numProc(), 0);
+  std::vector<uint64_t> sendSizes(numProc(), 0);
+  std::vector<uint64_t> recvSizes(numProc(), 0);
 
-  // Figure out the size of a_sentParticles[irank]
+  // Figure out the size sent from this rank to other ranks.
   for (int irank = 0; irank < numRanks; irank++) {
     sendSizes[irank] = 0;
 
     // Figure out the message size sent from this rank.
-    const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particlesToRank = a_sentParticles[irank];
+    const ParticleMap<List<P>>& particlesToRank = a_sentParticles[irank];
 
     // Size of particles along.
     for (const auto& m : particlesToRank) {
-      sendSizes[irank] += m.second.length();
+      sendSizes[irank] += (uint64_t)m.second.length();
     }
     sendSizes[irank] *= linearSize;
 
-    // Add in the map keys and the list length
-    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(unsigned int) + sizeof(size_t));
+    // Send size = #particles * linearSize + level index (uint32_t) + grid index(uint32_t) + list length (size_t)
+    sendSizes[irank] += particlesToRank.size() * (2 * sizeof(uint32_t) + sizeof(size_t));
   }
 
-  mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UNSIGNED, &recvSizes[0], 1, MPI_UNSIGNED, Chombo_MPI::comm);
+  // Collectively exchange send & receive sizes
+  mpiErr = MPI_Alltoall(&sendSizes[0], 1, MPI_UINT64_T, &recvSizes[0], 1, MPI_UINT64_T, Chombo_MPI::comm);
   if (mpiErr != MPI_SUCCESS) {
-    MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll");
+    MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll(1)");
   }
 
   // Sanity check
@@ -563,126 +568,128 @@ ParticleOps::scatterParticles(
     MayDay::Error("ParticleOps::scatterParticles - 'recvSizes[procID()] != 0' failed");
   }
 
-  std::vector<MPI_Request> recvReq(numRanks - 1);
-  std::vector<char*>       recvBuf(numRanks, nullptr);
+  // Lambda for computing message displacements
+  auto computeDisplacements = [](const std::vector<uint64_t>& counts) -> std::vector<uint64_t> {
+    std::vector<uint64_t> displacements(counts.size(), 0);
 
-  std::vector<MPI_Request> sendReq(numRanks - 1);
-  std::vector<char*>       sendBuf(numRanks, nullptr);
-
-  int recvReqCount = 0;
-  int sendReqCount = 0;
-
-  for (int irank = 0; irank < numRanks; irank++) {
-    if (recvSizes[irank] > 0) {
-      recvBuf[irank] = new char[recvSizes[irank]];
-
-      MPI_Irecv(recvBuf[irank], recvSizes[irank], MPI_CHAR, irank, 1, Chombo_MPI::comm, &recvReq[recvReqCount]);
-
-      recvReqCount++;
+    for (size_t i = 1; i < counts.size(); i++) {
+      displacements[i] = displacements[i - 1] + counts[i - 1];
     }
-  }
 
-  // Pack data into buffers
+    return displacements;
+  };
+
+  const std::vector<uint64_t> sendDisplacements = computeDisplacements(sendSizes);
+  const std::vector<uint64_t> recvDisplacements = computeDisplacements(recvSizes);
+
+  const uint64_t totalSend = sendDisplacements.back() + sendSizes.back();
+  const uint64_t totalRecv = recvDisplacements.back() + recvSizes.back();
+
+  std::vector<char> sendBuffer(totalSend);
+  std::vector<char> recvBuffer(totalRecv);
+
+  // Pack data sent from this rank into buffers
   for (int irank = 0; irank < numRanks; irank++) {
-    if (sendSizes[irank] > 0) {
-      sendBuf[irank] = new char[sendSizes[irank]];
+    if (sendSizes[irank] == 0) {
+      continue;
+    }
 
-      char* data = sendBuf[irank];
+    char* data = sendBuffer.data() + sendDisplacements[irank];
 
-      const std::map<std::pair<unsigned int, unsigned int>, List<P>>& particles = a_sentParticles[irank];
+    // Linearize each entry in the map onto the send buffer. We encode this by (level, index, list length, List<P>)
+    for (const auto& cur : a_sentParticles[irank]) {
 
-      // Linearize each entry in the map onto the send buffer. We encode this by (level, index, list length, List<P>)
-      for (const auto& cur : particles) {
+      // and grid index
+      *((uint32_t*)data) = cur.first.first;
+      data += sizeof(uint32_t);
+      *((uint32_t*)data) = cur.first.second;
+      data += sizeof(uint32_t);
 
-        // and grid index
-        *((unsigned int*)data) = cur.first.first;
-        data += sizeof(unsigned int);
-        *((unsigned int*)data) = cur.first.second;
-        data += sizeof(unsigned int);
+      // List length aka number of particles
+      *((size_t*)data) = cur.second.length();
+      data += sizeof(size_t);
 
-        // List length aka number of particles
-        *((size_t*)data) = cur.second.length();
-        data += sizeof(size_t);
+      // Linearize the particle list
+      for (ListIterator<P> lit(cur.second); lit.ok(); ++lit) {
+        const P& p = lit();
 
-        // Linearize the particle list
-        for (ListIterator<P> lit(cur.second); lit.ok(); ++lit) {
-          const P& p = lit();
-
-          p.linearOut((void*)data);
-          data += linearSize;
-        }
+        p.linearOut((void*)data);
+        data += linearSize;
       }
-
-      // Send from me to the other rank.
-      MPI_Isend(sendBuf[irank], sendSizes[irank], MPI_CHAR, irank, 1, Chombo_MPI::comm, &sendReq[sendReqCount]);
-
-      sendReqCount++;
     }
   }
 
-  std::vector<MPI_Status> recvStatus(numRanks - 1);
-  std::vector<MPI_Status> sendStatus(numRanks - 1);
+  // MPI requires stuff as int -- make sure that we can convert properly
+  auto uint64ToInt = [](const std::vector<uint64_t>& v64) -> std::vector<int> {
+    std::vector<int> v(v64.size());
 
-  if (sendReqCount > 0) {
-    mpiErr = MPI_Waitall(sendReqCount, &sendReq[0], &sendStatus[0]);
+    for (size_t i = 0; i < v64.size(); ++i) {
+      CH_assert(v64[i] <= static_cast<uint64_t>(std::numeric_limits<int>::max()));
 
-    if (mpiErr != MPI_SUCCESS) {
-      MayDay::Error("ParticleOps::scatterParticles: send communication failed");
+      v[i] = static_cast<int>(v64[i]);
     }
+
+    return v;
+  };
+
+  std::vector<int> sendCounts = uint64ToInt(sendSizes);
+  std::vector<int> recvCounts = uint64ToInt(recvSizes);
+  std::vector<int> sendDispl  = uint64ToInt(sendDisplacements);
+  std::vector<int> recvDispl  = uint64ToInt(recvDisplacements);
+
+  mpiErr = MPI_Alltoallv(sendBuffer.data(),
+                         sendCounts.data(),
+                         sendDispl.data(),
+                         MPI_CHAR,
+                         recvBuffer.data(),
+                         recvCounts.data(),
+                         recvDispl.data(),
+                         MPI_CHAR,
+                         Chombo_MPI::comm);
+
+  if (mpiErr != MPI_SUCCESS) {
+    MayDay::Error("ParticleOps::scatterParticles - MPI communication error in MPI_AlltoAll(2)");
   }
 
-  if (recvReqCount > 0) {
-    mpiErr = MPI_Waitall(recvReqCount, &recvReq[0], &recvStatus[0]);
-
-    if (mpiErr != MPI_SUCCESS) {
-      MayDay::Error("ParticleOps::scatterParticles: receive communication failed");
-    }
-  }
-
-  // Unpack the send buffers
+  // Clear the send buffers.
   for (int irank = 0; irank < numRanks; irank++) {
-    P p;
+    a_sentParticles[irank].clear();
+  }
 
-    if (recvSizes[irank] > 0) {
+  // Unpack data
+  for (int irank = 0; irank < numRanks; irank++) {
+    if (recvSizes[irank] == 0) {
+      continue;
+    }
+    else {
+      char* data = recvBuffer.data() + recvDisplacements[irank];
 
-      char* data = recvBuf[irank];
-
-      unsigned int in = 0;
+      uint64_t in = 0;
 
       while (in < recvSizes[irank]) {
 
         // Level and grid index
-        unsigned int lvl = *((unsigned int*)data);
-        data += sizeof(unsigned int);
+        uint32_t lvl = *((uint32_t*)data);
+        data += sizeof(uint32_t);
 
-        unsigned int idx = *((unsigned int*)data);
-        data += sizeof(unsigned int);
+        uint32_t idx = *((uint32_t*)data);
+        data += sizeof(uint32_t);
 
         // List length aka number of particles
         size_t numParticles = *((size_t*)data);
         data += sizeof(size_t);
 
         for (size_t ipart = 0; ipart < numParticles; ipart++) {
-          p.linearIn((void*)data);
+          P p;
+
+          p.linearIn(static_cast<void*>(data));
           data += linearSize;
 
-          a_receivedParticles[std::pair<unsigned int, unsigned int>(lvl, idx)].add(p);
+          a_receivedParticles[std::pair<uint32_t, uint32_t>(lvl, idx)].add(p);
         }
 
-        in += 2 * sizeof(unsigned int) + sizeof(size_t) + numParticles * linearSize;
+        in += 2 * sizeof(uint32_t) + sizeof(size_t) + numParticles * linearSize;
       }
-    }
-  }
-
-  // Delete buffers
-  for (int irank = 0; irank < numRanks; irank++) {
-    a_sentParticles[irank].clear();
-
-    if (sendSizes[irank] > 0) {
-      delete[] sendBuf[irank];
-    }
-    if (recvSizes[irank] > 0) {
-      delete[] recvBuf[irank];
     }
   }
 }

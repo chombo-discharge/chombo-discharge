@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
+#include <CD_ParticleMap.H>
 #include <CD_NamespaceHeader.H>
 
 template <typename P>
@@ -232,8 +233,8 @@ public:
   */
   template <typename P>
   static inline void
-  scatterParticles(std::map<std::pair<unsigned int, unsigned int>, List<P>>&              a_receivedParticles,
-                   std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_sentParticles) noexcept;
+  scatterParticles(ParticleMap<List<P>>&              a_receivedParticles,
+                   std::vector<ParticleMap<List<P>>>& a_sentParticles) noexcept;
 
 #endif
 };

@@ -25,6 +25,7 @@
 // Our includes
 #include <CD_OpenMP.H>
 #include <CD_LevelTiles.H>
+#include <CD_ParticleMap.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -685,8 +686,8 @@ protected:
     @param[inout] a_unmappedParticles Particles that are not mapped (yet)
   */
   inline void
-  mapParticlesToAMRGrid(std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_mappedParticles,
-                        List<P>& a_unmappedParticles) const noexcept;
+  mapParticlesToAMRGrid(std::vector<ParticleMap<List<P>>>& a_mappedParticles,
+                        List<P>&                           a_unmappedParticles) const noexcept;
 
   /*!
     @brief Catenate the particles. This is usually called within OpenMP parallel regions.
@@ -694,9 +695,8 @@ protected:
     @param[inout] a_localParticles Local particle map
    */
   inline void
-  catenateParticleMaps(
-    std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_globalParticles,
-    std::vector<std::map<std::pair<unsigned int, unsigned int>, List<P>>>& a_localParticles) const noexcept;
+  catenateParticleMaps(std::vector<ParticleMap<List<P>>>& a_globalParticles,
+                       std::vector<ParticleMap<List<P>>>& a_localParticles) const noexcept;
 
   /*!
     @brief Gather particles locally
@@ -704,8 +704,7 @@ protected:
     @param[inout] a_particleData Where to assign the mapped particles
   */
   inline void
-  assignLocalParticles(std::map<std::pair<unsigned int, unsigned int>, List<P>>& a_mappedParticles,
-                       AMRParticles<P>&                                          a_particleData) const noexcept;
+  assignLocalParticles(ParticleMap<List<P>>& a_mappedParticles, AMRParticles<P>& a_particleData) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
