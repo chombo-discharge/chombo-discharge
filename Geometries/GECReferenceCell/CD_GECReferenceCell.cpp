@@ -53,8 +53,15 @@ GECReferenceCell::GECReferenceCell()
   insulatorHi      = EBGeometry::Reflect<Real>(insulatorLo, 1);
   outerElectrodeHi = EBGeometry::Reflect<Real>(outerElectrodeLo, 1);
 
-  // Cylindrical vessel.
+  // Cylindrical vessel -- subtract all the other parts.
   vessel = std::make_shared<CylinderSDF<Real>>(-0.5 * H * yhat, 0.5 * H * yhat, r4);
+  vessel = EBGeometry::Complement<Real>(vessel);
+  vessel = EBGeometry::Difference<Real>(vessel, innerElectrodeLo);
+  vessel = EBGeometry::Difference<Real>(vessel, outerElectrodeLo);
+  vessel = EBGeometry::Difference<Real>(vessel, insulatorLo);
+  vessel = EBGeometry::Difference<Real>(vessel, innerElectrodeHi);
+  vessel = EBGeometry::Difference<Real>(vessel, outerElectrodeHi);
+  vessel = EBGeometry::Difference<Real>(vessel, insulatorHi);      
 
   // Create electrodes and dielectrics with associated BCs for chombo-discharge
   m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(innerElectrodeLo, true)), true));
@@ -65,7 +72,7 @@ GECReferenceCell::GECReferenceCell()
   m_dielectrics.push_back(Dielectric(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(insulatorHi, true)), eps));
   m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(outerElectrodeHi, true)), false));
 
-  m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(vessel, false)), false));
+  m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(vessel, true)), false));
 }
 
 GECReferenceCell::~GECReferenceCell()

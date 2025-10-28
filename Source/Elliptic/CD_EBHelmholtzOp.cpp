@@ -1169,7 +1169,7 @@ EBHelmholtzOp::applyOp(EBCellFAB&             a_Lphi,
   //       5/7 point stencil. Once those are done we apply the operator in the cut-cells.
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
-  if (true){//!ebisbox.isAllCovered()) {
+  if (!ebisbox.isAllCovered()) {
     this->applyOpRegular(a_Lphi, a_phi, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, a_homogeneousPhysBC);
     this->applyOpIrregular(a_Lphi,
                            a_phi,
@@ -1669,7 +1669,7 @@ EBHelmholtzOp::pointJacobiKernel(EBCellFAB&             a_Lcorr,
 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
-  if (true){//!ebisbox.isAllCovered()) {
+  if (!ebisbox.isAllCovered()) {
     this->applyOp(a_Lcorr, a_correction, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, true);
 
     a_Lcorr -= a_residual;
@@ -1746,7 +1746,7 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
   const EBISBox&   ebisbox = m_eblg.getEBISL()[a_dit];
   const EBCellFAB& relCoef = m_relCoef[a_dit];
 
-  if (true){//!ebisbox.isAllCovered()) {
+  if (!ebisbox.isAllCovered()) {
     this->applyOp(a_Lcorr, a_corr, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, true);
 
     BaseFab<Real>&       phiReg  = a_corr.getSingleValuedFAB();
@@ -1852,7 +1852,7 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
   const EBISBox&   ebisbox = m_eblg.getEBISL()[a_dit];
   const EBCellFAB& relCoef = m_relCoef[a_dit];
 
-  if (true){//!ebisbox.isAllCovered()) {
+  if (!ebisbox.isAllCovered()) {
     this->applyOp(a_Lcorr, a_corr, a_Acoef, a_Bcoef, a_BcoefIrreg, a_cellBox, a_dit, true);
 
     BaseFab<Real>&       phiReg  = a_corr.getSingleValuedFAB();
