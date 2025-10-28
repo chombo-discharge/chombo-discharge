@@ -368,6 +368,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ad56bad582bead0d15a607c18c712558a" id="r_ad56bad582bead0d15a607c18c712558a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#ad56bad582bead0d15a607c18c712558a">makeBcString</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> <a class="el" href="classTracerParticleSolver.html">a_side</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:ad56bad582bead0d15a607c18c712558a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcut for making a boundary condition string.  <br /></td></tr>
 <tr class="separator:ad56bad582bead0d15a607c18c712558a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13fd859a86309a25f10cbee4b610fb42" id="r_a13fd859a86309a25f10cbee4b610fb42"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classFieldSolver.html#a13fd859a86309a25f10cbee4b610fb42">fillCoveredPotential</a> (<a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phi</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a13fd859a86309a25f10cbee4b610fb42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility routine that fills the gas-side covered cells by the potential from the closest electrode.  <br /></td></tr>
+<tr class="separator:a13fd859a86309a25f10cbee4b610fb42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -955,6 +958,40 @@ Static Protected Attributes</h2></td></tr>
 <p>The default implementation returns the number of cells in the grid patch as a proxy for the load. </p>
 
 <p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a7ba9896c4c868488216cf9835961479e">FieldSolverMultigrid</a>.</p>
+
+</div>
+</div>
+<a id="a13fd859a86309a25f10cbee4b610fb42" name="a13fd859a86309a25f10cbee4b610fb42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13fd859a86309a25f10cbee4b610fb42">&#9670;&#160;</a></span>fillCoveredPotential()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> FieldSolver::fillCoveredPotential </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classEBAMRData.html">MFAMRCellData</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_phi</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Utility routine that fills the gas-side covered cells by the potential from the closest electrode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">a_phi</td><td>Potential </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$classGenericParticle.html" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,5,185,31"/>
 <area shape="rect" id="Node000001" href="$classTracerParticle.html" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="233,5,403,31"/>
-<area shape="poly" id="edge99_Node000000_Node000001" title=" " alt="" coords="199,15,233,15,233,21,199,21"/>
+<area shape="poly" id="edge100_Node000000_Node000001" title=" " alt="" coords="199,15,233,15,233,21,199,21"/>
 </map>

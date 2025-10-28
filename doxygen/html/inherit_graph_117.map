@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html" title="Base class for interaction between Kinetic Monte Carlo and Ito&#45;based plasma solvers." alt="" coords="5,5,236,31"/>
 <area shape="rect" id="Node000001" href="$classPhysics_1_1ItoKMC_1_1ItoKMCJSON.html" title="Implementation of ItoKMCPhysics which parses input data from a JSON file." alt="" coords="284,5,497,31"/>
-<area shape="poly" id="edge117_Node000000_Node000001" title=" " alt="" coords="250,15,284,15,284,21,250,21"/>
+<area shape="poly" id="edge118_Node000000_Node000001" title=" " alt="" coords="250,15,284,15,284,21,250,21"/>
 </map>
