@@ -341,6 +341,17 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
   }
 
+  // Hook for filling the electrode potentials directly from the geometry. Useful only for visualization purposes.
+  ParmParse pp(m_className.c_str());
+
+  bool fillElectrodePotential = false;
+
+  pp.query("fill_electrode_potential", fillElectrodePotential);
+
+  if (fillElectrodePotential) {
+    this->fillCoveredPotential(a_phi);
+  }
+
   return converged;
 }
 

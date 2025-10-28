@@ -1,0 +1,6 @@
+# ====================================================================================================
+# GECReferenceCell class options
+#
+# This class does not have any options since the geometry is hardwired into a simplified version
+# of the GEC reference cell.
+# ====================================================================================================
