@@ -12,6 +12,10 @@
 #ifndef CD_FieldStepperImplem_H
 #define CD_FieldStepperImplem_H
 
+#warning "There must be a bug or unintended behavior or precision issue in EBLeastSquaresMultigrid::coarseFineInterp because when we pass in a constant phi = 1 we get somethign other than 1 out"
+#warning "Need to look at how the deeper multigrid levels operate on badly coarsened data -- maybe we can work this out a bit different"
+#warning "EBLeastSquaresMultigridInterpolator defines the phiCoFi on every iteration -- we should have prebuilt buffers for this"
+
 // Std includes
 #include <math.h>
 
@@ -203,6 +207,18 @@ namespace Physics {
       if (!converged) {
         MayDay::Warning("FieldStepper<T>::solvePoisson - did not converge");
       }
+
+      EBAMRCellData phiGas = m_amr->alias(phase::gas, m_fieldSolver->getPotential());
+      EBAMRCellData phiSol = m_amr->alias(phase::solid, m_fieldSolver->getPotential());
+
+      //      m_amr->interpToCentroids(Egas, m_realm, phase::gas);
+      //      m_amr->interpToCentroids(Esol, m_realm, phase::solid);
+
+      DataOps::setValue(phiGas, 1.0);
+      DataOps::setValue(phiSol, 1.0);
+
+      m_amr->arithmeticAverage(m_fieldSolver->getPotential(), m_realm);
+      m_amr->interpGhost(m_fieldSolver->getPotential(), m_realm);      
 
       // Compute the electric field.
       m_fieldSolver->computeElectricField();

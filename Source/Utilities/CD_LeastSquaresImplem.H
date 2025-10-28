@@ -211,6 +211,8 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
           }
         }
       }
+
+#warning "Should make sure that A * inv(A) == 1"
     }
     else {
       MayDay::Warning("LeastSquares::computeDualLevelStencils - could not perform singular value decomposition");
