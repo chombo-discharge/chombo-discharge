@@ -824,6 +824,13 @@ protected:
   */
   virtual std::string
   makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
+
+  /*!
+    @brief Utility routine that fills the gas-side covered cells by the potential from the closest electrode
+    @param[in,out] a_phi Potential
+  */
+  virtual void
+  fillCoveredPotential(MFAMRCellData& a_phi) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

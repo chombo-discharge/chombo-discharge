@@ -61,7 +61,7 @@ GECReferenceCell::GECReferenceCell()
   vessel = EBGeometry::Difference<Real>(vessel, insulatorLo);
   vessel = EBGeometry::Difference<Real>(vessel, innerElectrodeHi);
   vessel = EBGeometry::Difference<Real>(vessel, outerElectrodeHi);
-  vessel = EBGeometry::Difference<Real>(vessel, insulatorHi);      
+  vessel = EBGeometry::Difference<Real>(vessel, insulatorHi);
 
   // Create electrodes and dielectrics with associated BCs for chombo-discharge
   m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(innerElectrodeLo, true)), true));
