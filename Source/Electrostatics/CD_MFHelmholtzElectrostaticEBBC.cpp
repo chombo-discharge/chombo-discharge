@@ -227,7 +227,7 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
   if (!a_homogeneousPhysBC && hasElectrode) {
     auto kernel = [&](const VolIndex& vof) -> void {
       const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
-      Real           value = this->getElectrodePotential(pos);
+      const Real     value = this->getElectrodePotential(pos);
       const Real     Bcoef = a_Bcoef(vof, m_comp);
 
       a_Lphi(vof, m_comp) += a_beta * Bcoef * value * m_boundaryWeights[a_dit](vof, m_comp);
