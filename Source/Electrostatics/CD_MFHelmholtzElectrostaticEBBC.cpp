@@ -227,15 +227,8 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
   if (!a_homogeneousPhysBC && hasElectrode) {
     auto kernel = [&](const VolIndex& vof) -> void {
       const RealVect pos   = this->getBoundaryPosition(vof, a_dit);
-      Real     value = this->getElectrodePotential(pos);
+      Real           value = this->getElectrodePotential(pos);
       const Real     Bcoef = a_Bcoef(vof, m_comp);
-
-#warning "The potential must be written correctly in cut-cells in the solid phase. This still seems wrong!"
-#warning "Debug hook in here -- something must have gone wrong when we fetch the potential"
-#warning "Potential inside conductors should probably be set to the correct value (after the solve, that is)"
-      // if(pos[1] < 0.0 && std::abs(pos[0]) < 0.0523) {
-      //   //	value = 1.0;
-      // }
 
       a_Lphi(vof, m_comp) += a_beta * Bcoef * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
