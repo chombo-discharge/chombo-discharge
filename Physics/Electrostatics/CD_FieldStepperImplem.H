@@ -12,9 +12,9 @@
 #ifndef CD_FieldStepperImplem_H
 #define CD_FieldStepperImplem_H
 
-#warning "There must be a bug or unintended behavior or precision issue in EBLeastSquaresMultigrid::coarseFineInterp because when we pass in a constant phi = 1 we get somethign other than 1 out"
-#warning "Need to look at how the deeper multigrid levels operate on badly coarsened data -- maybe we can work this out a bit different"
-#warning "EBLeastSquaresMultigridInterpolator defines the phiCoFi on every iteration -- we should have prebuilt buffers for this"
+#warning \
+  "Need to look at how the deeper multigrid levels operate on badly coarsened data -- maybe we can work this out a bit different"
+#warning "SHould update the matrix notation in the least squares sphinx documentation"
 
 // Std includes
 #include <math.h>
@@ -218,7 +218,7 @@ namespace Physics {
       DataOps::setValue(phiSol, 1.0);
 
       m_amr->arithmeticAverage(m_fieldSolver->getPotential(), m_realm);
-      m_amr->interpGhost(m_fieldSolver->getPotential(), m_realm);      
+      m_amr->interpGhost(m_fieldSolver->getPotential(), m_realm);
 
       // Compute the electric field.
       m_fieldSolver->computeElectricField();
