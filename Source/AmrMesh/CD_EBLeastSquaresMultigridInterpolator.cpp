@@ -612,7 +612,7 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     coarVofsTrimmedSize.resize(std::min(2 * numUnknowns, curCoarSize));
     CH_STOP(t2);
 
-    // Build displacement vectors
+    // Build displacement vectors.
     CH_START(t3);
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
@@ -643,7 +643,7 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
     IntVectSet knownTerms      = IntVectSet();
 
     std::map<IntVect, std::pair<VoFStencil, VoFStencil>> stencils = LeastSquares::computeDualLevelStencils<
-      float>(derivs, knownTerms, fineVofs, coarVofs, fineDisplacements, coarDisplacements, a_weight, a_order);
+      Real>(derivs, knownTerms, fineVofs, coarVofs, fineDisplacements, coarDisplacements, a_weight, a_order);
 
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
