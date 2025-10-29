@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
+#include <limits>
 
 // Chombo includes
 #include <LoadBalance.H>
@@ -307,45 +308,12 @@ LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
 
   auto vec = packPairs(a_boxes, a_loads);
 
-  // Get max bits
-  std::vector<Box>& b    = a_boxes.stdVector();
-  int               bits = maxBits(b.begin(), b.end());
-
-  // Morton sort.
-  std::sort(std::begin(vec), std::end(vec), [bits](const std::pair<Box, T>& v1, const std::pair<Box, T>& v2) -> bool {
-    return mortonComparator(bits, v1, v2);
+  std::sort(std::begin(vec), std::end(vec), [&](const std::pair<Box, T>& v1, const std::pair<Box, T>& v2) -> bool {
+    return mortonCode21(v1.first.smallEnd()) < mortonCode21(v2.first.smallEnd());
   });
 
   // Put back in normal form
   unpackPairs(a_boxes, a_loads, vec);
-}
-
-template <class T>
-bool
-LoadBalancing::mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_lhs, const std::pair<Box, T>& a_rhs)
-{
-  const Box& lbox = a_lhs.first;
-  const Box& rbox = a_rhs.first;
-
-  const IntVect l = lbox.smallEnd();
-  const IntVect r = rbox.smallEnd();
-
-  for (int i = a_maxBits; i > 0; i--) {
-
-    // March from most significant bit to least.
-    const int N = (1 << i);
-
-    for (int dir = CH_SPACEDIM - 1; dir >= 0; dir--) {
-      if ((l[dir] / N) < (r[dir] / N)) {
-        return true;
-      }
-      else if ((l[dir] / N) > (r[dir] / N)) {
-        return false;
-      }
-    }
-  }
-
-  return false;
 }
 
 #include <CD_NamespaceFooter.H>

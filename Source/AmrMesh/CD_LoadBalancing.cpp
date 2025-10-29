@@ -275,31 +275,30 @@ LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads)
 #endif
 }
 
-int
-LoadBalancing::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last)
+uint64_t
+LoadBalancing::mortonCode21(const IntVect a_iv) noexcept
 {
-  CH_TIME("LoadBalancing::maxBits");
+  uint64_t code = 0;
 
-  int maxSize = 0;
-  for (std::vector<Box>::iterator p = a_first; p < a_last; ++p) {
-    IntVect small = p->smallEnd();
-    D_EXPR6(maxSize = Max(maxSize, std::abs(small[0])),
-            maxSize = Max(maxSize, std::abs(small[1])),
-            maxSize = Max(maxSize, std::abs(small[2])),
-            maxSize = Max(maxSize, std::abs(small[3])),
-            maxSize = Max(maxSize, std::abs(small[4])),
-            maxSize = Max(maxSize, std::abs(small[5])));
-  }
-  int bits;
-  for (bits = 8 * sizeof(int) - 2; bits > 0; bits--) {
-    const int N = (1 << bits);
+  // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
+  // by their blocking factors, or switch to 128/256 bit integers.
+  constexpr int maxDim = std::pow(2, 21);
 
-    if (maxSize / N > 0) {
-      break;
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (a_iv[dir] > maxDim) {
+      MayDay::Abort("LoadBalancing::mortonCode21 - logic bust");
     }
   }
-  bits++;
-  return bits;
+
+  for (int bit = 20; bit >= 0; --bit) {
+    for (int dir = CH_SPACEDIM - 1; dir >= 0; --dir) {
+      const uint64_t b = (static_cast<uint64_t>(static_cast<uint32_t>(a_iv[dir])) >> bit) & 1ull;
+
+      code = (code << 1) | b;
+    }
+  }
+
+  return code;
 }
 
 #include <CD_NamespaceFooter.H>
