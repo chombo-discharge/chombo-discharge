@@ -538,6 +538,10 @@ void
 MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual)
 {
   CH_TIME("MFHelmholtzOp::preCond");
+
+  // Turn off the preconditioner -- it seems to make things worse!
+  return;
+
 #if 1
   this->relax(a_corr, a_residual, 40);
 #else
