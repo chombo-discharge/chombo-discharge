@@ -100,6 +100,7 @@ public:
     @param[in] a_jumpOrder     Stencil order to use on jump cells
     @param[in] a_jumpWeights   Weights for least squares stencils on jump cells
     @param[in] a_smoother      Which smoother to use
+    @param[in] a_relaxFactor   Relaxation factor
   */
   MFHelmholtzOp(const Location::Cell                             a_dataLocation,
                 const MFLevelGrid&                               a_mflgFine,
@@ -131,7 +132,8 @@ public:
                 const IntVect&                                   a_ghostRhs,
                 const int&                                       a_jumpOrder,
                 const int&                                       a_jumpWeight,
-                const Smoother&                                  a_smoother);
+                const Smoother&                                  a_smoother,
+                const Real&                                      a_relaxFactor);
 
   /*!
     @brief Destructor. 

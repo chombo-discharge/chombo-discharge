@@ -58,7 +58,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const IntVect&                                   a_ghostRhs,
                              const int&                                       a_jumpOrder,
                              const int&                                       a_jumpWeight,
-                             const Smoother&                                  a_relaxType)
+                             const Smoother&                                  a_relaxType,
+                             const Real&                                      a_relaxFactor)
 {
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp(...)");
 
@@ -203,7 +204,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        BcoefIrreg,
                                                                                        a_ghostPhi,
                                                                                        a_ghostRhs,
-                                                                                       ebHelmRelax));
+                                                                                       ebHelmRelax,
+                                                                                       a_relaxFactor));
 
     m_helmOps.insert({iphase, oper});
   }
@@ -376,7 +378,7 @@ MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
 void
 MFHelmholtzOp::assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Copier& a_copier)
 {
-  CH_TIME("EBHelmholtzOp::assignCopier");
+  CH_TIME("MFHelmholtzOp::assignCopier");
 
   a_rhs.copyTo(a_lhs, a_copier);
 }

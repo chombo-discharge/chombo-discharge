@@ -405,6 +405,11 @@ We explain these options below:
   Currently, only V-cycles are supported.
 * ``FieldSolverMultigrid.gmg_smoother``.
   Sets the multigrid smoother.
+* ``FieldSolverMultigrid.gmg_relax_factor``.
+  Sets the multigrid relaxation factor.
+* ``FieldSolverMultigrid.gmg_use_fallback_settings``.
+  Sets the relaxation factor to 1.5 and uses first order boundary conditions with weights = 1.
+  Enabling this setting tends to make most problems converge.
 
 
 .. warning::

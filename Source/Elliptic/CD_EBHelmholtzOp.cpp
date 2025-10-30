@@ -56,7 +56,8 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
                              const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg,
                              const IntVect&                                   a_ghostPhi,
                              const IntVect&                                   a_ghostRhs,
-                             const Smoother&                                  a_smoother)
+                             const Smoother&                                  a_smoother,
+                             const Real&                                      a_relaxFactor)
   : LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
     m_smoother(a_smoother),
     m_dataLocation(a_dataLocation),
@@ -99,12 +100,13 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid.
-  m_doInterpCF = true;
-  m_doCoarsen  = true;
-  m_doExchange = true;
-  m_refluxFree = false;
-  m_profile    = false;
-  m_interval   = Interval(m_comp, m_comp);
+  m_doInterpCF  = true;
+  m_doCoarsen   = true;
+  m_doExchange  = true;
+  m_refluxFree  = false;
+  m_profile     = false;
+  m_interval    = Interval(m_comp, m_comp);
+  m_relaxFactor = a_relaxFactor;
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
@@ -1963,11 +1965,6 @@ EBHelmholtzOp::computeRelaxationCoefficient()
   // TLDR: Compute the relaxation coefficient in the operator. This is just the inverted diagonal of kappa*L(phi). It is inverted
   //       for performance reasons (because we divide by the diagonal in the relaxation steps).
 
-  Real sor_factor = 1.0;
-
-  ParmParse pp("EBHelmholtzOp");
-  pp.query("sor_factor", sor_factor);
-
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const DataIterator&      dit = dbl.dataIterator();
 
@@ -2000,7 +1997,7 @@ EBHelmholtzOp::computeRelaxationCoefficient()
 
     // At this point we have computed kappa*diag(L), but we need to invert it.
     auto inversionKernel = [&](const IntVect& iv) -> void {
-      regRel(iv, m_comp) = sor_factor / regRel(iv, m_comp);
+      regRel(iv, m_comp) = m_relaxFactor / regRel(iv, m_comp);
     };
     BoxLoops::loop(cellBox, inversionKernel);
 
@@ -2012,7 +2009,7 @@ EBHelmholtzOp::computeRelaxationCoefficient()
       // m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells.
       const Real betaWeight = m_beta * m_betaDiagWeight[din](vof, m_comp);
 
-      m_relCoef[din](vof, m_comp) = sor_factor / (alphaWeight + betaWeight);
+      m_relCoef[din](vof, m_comp) = m_relaxFactor / (alphaWeight + betaWeight);
     };
 
     BoxLoops::loop(m_vofIterStenc[din], irregularKernel);

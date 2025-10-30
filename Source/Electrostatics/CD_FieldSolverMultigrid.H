@@ -342,6 +342,11 @@ protected:
   Real m_multigridExitHang;
 
   /*!
+    @brief Multigrid relaxation factor
+  */
+  Real m_multigridRelaxFactor;
+
+  /*!
     @brief Multigrid operator factory. 
   */
   RefCountedPtr<MFHelmholtzOpFactory> m_helmholtzOpFactory;

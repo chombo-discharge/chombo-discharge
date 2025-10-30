@@ -97,6 +97,7 @@ public:
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_smoother      Which smoother to use
+    @param[in] a_relaxFactor   Relaxation factor
   */
   EBHelmholtzOp(const Location::Cell                             a_dataLocation,
                 const EBLevelGrid&                               a_eblgFine,
@@ -124,7 +125,8 @@ public:
                 const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoIrreg,
                 const IntVect&                                   a_ghostCellsPhi,
                 const IntVect&                                   a_ghostCellsRHS,
-                const Smoother&                                  a_smoother);
+                const Smoother&                                  a_smoother,
+                const Real&                                      a_relaxFactor);
 
   /*!
     @brief Dtor
@@ -948,6 +950,11 @@ protected:
     @brief Grid resolution;
   */
   Real m_dx;
+
+  /*!
+    @brief Successive over-relaxation factor (Must be >= 1).
+  */
+  Real m_relaxFactor;
 
   /*!
     @brief Vector resolution
