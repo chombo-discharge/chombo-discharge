@@ -181,7 +181,7 @@ FieldSolverMultigrid::parseMultigridSettings()
 
   // Switch for using safer solver settings.
   bool useFallbackSettings = false;
-  pp.query("gmg_use_fallback_settings", useFallbackSettings);
+  pp.query("gmg_fallback_settings", useFallbackSettings);
   if (useFallbackSettings) {
     m_multigridBcOrder     = 1;
     m_multigridBcWeight    = 1;
