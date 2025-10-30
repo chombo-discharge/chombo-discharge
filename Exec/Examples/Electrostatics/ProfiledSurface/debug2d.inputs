@@ -76,24 +76,26 @@ FieldSolverMultigrid.kappa_source          = true                    ## Volume w
 FieldSolverMultigrid.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
 FieldSolverMultigrid.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
-FieldSolverMultigrid.gmg_verbosity         = 10           ## GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth        = 20           ## Number of relaxations in downsweep
-FieldSolverMultigrid.gmg_post_smooth       = 20           ## Number of relaxations in upsweep
-FieldSolverMultigrid.gmg_bott_smooth       = 0            ## NUmber of relaxations before dropping to bottom solver
-FieldSolverMultigrid.gmg_min_iter          = 5            ## Minimum number of iterations
-FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of iterations
-FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
-FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
-FieldSolverMultigrid.gmg_min_cells         = 16            ## Bottom drop
-FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
-FieldSolverMultigrid.gmg_bc_order          = 1            ## Boundary condition order for multigrid
-FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
-FieldSolverMultigrid.gmg_jump_order        = 1            ## Boundary condition order for jump conditions
-FieldSolverMultigrid.gmg_jump_weight       = 1            ## Boundary condition weight for jump conditions (for least squares)
-FieldSolverMultigrid.gmg_reduce_order      = false        ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverMultigrid.gmg_bottom_solver     = simple 64     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-FieldSolverMultigrid.gmg_cycle             = vcycle       ## Cycle type. Only 'vcycle' supported for now
-FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+FieldSolverMultigrid.gmg_verbosity             = 10           ## GMG verbosity
+FieldSolverMultigrid.gmg_pre_smooth            = 20           ## Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_post_smooth           = 20           ## Number of relaxations in upsweep
+FieldSolverMultigrid.gmg_bott_smooth           = 0            ## NUmber of relaxations before dropping to bottom solver
+FieldSolverMultigrid.gmg_min_iter              = 5            ## Minimum number of iterations
+FieldSolverMultigrid.gmg_max_iter              = 32           ## Maximum number of iterations
+FieldSolverMultigrid.gmg_exit_tol              = 1.E-10       ## Residue tolerance
+FieldSolverMultigrid.gmg_exit_hang             = 0.2          ## Solver hang
+FieldSolverMultigrid.gmg_min_cells             = 4            ## Bottom drop
+FieldSolverMultigrid.gmg_drop_order            = 0            ## Drop stencil order to 1 if domain is coarser than this.
+FieldSolverMultigrid.gmg_bc_order              = 1            ## Boundary condition order for multigrid
+FieldSolverMultigrid.gmg_bc_weight             = 1            ## Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_jump_order            = 1            ## Boundary condition order for jump conditions
+FieldSolverMultigrid.gmg_jump_weight           = 1            ## Boundary condition weight for jump conditions (for least squares)
+FieldSolverMultigrid.gmg_reduce_order          = false        ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverMultigrid.gmg_bottom_solver         = bicgstab    ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverMultigrid.gmg_cycle                 = vcycle       ## Cycle type. Only 'vcycle' supported for now
+FieldSolverMultigrid.gmg_smoother              = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+FieldSolverMultigrid.gmg_relax_factor          = 1.0          ## Adjustable SOR factor
+FieldSolverMultigrid.gmg_fallback_settings     = false        ## Setting this to true tends to make most problems converge.
 
 # ====================================================================================================
 # SurfaceODESolver solver settings.
@@ -108,13 +110,13 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 DiskProfiledPlane.use_electrode      = true    ## Turn on/off electrode
 DiskProfiledPlane.use_dielectric     = true    ## Turn on/off dielectric
 
-DiskProfiledPlane.wheel_live                = true          ## Live electrode or not
-DiskProfiledPlane.wheel_radius              = 3E-2          ## Wheel radius
+DiskProfiledPlane.wheel_live                = true           ## Live electrode or not
+DiskProfiledPlane.wheel_radius              = 3E-2           ## Wheel radius
 DiskProfiledPlane.wheel_center              = 0 3.54E-2 0    ## Wheel center
-DiskProfiledPlane.wheel_curvature           = 500E-6        ## Wheel curvature (thickness)
+DiskProfiledPlane.wheel_curvature           = 500E-6         ## Wheel curvature (thickness)
 DiskProfiledPlane.wheel_stem_radius         = -1
 DiskProfiledPlane.wheel_smooth              = 1E-3
-DiskProfiledPlane.wheel_extra_thickness     = 0.0           ## Extra wheel thickness
+DiskProfiledPlane.wheel_extra_thickness     = 0.0            ## Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions       = 7.2000123E-2 0.020012 1    ## Box dimensions
 DiskProfiledPlane.box_translate        = 0 5.0123E-3 0              ## Box translation

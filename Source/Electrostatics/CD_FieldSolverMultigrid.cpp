@@ -183,11 +183,14 @@ FieldSolverMultigrid::parseMultigridSettings()
   bool useFallbackSettings = false;
   pp.query("gmg_fallback_settings", useFallbackSettings);
   if (useFallbackSettings) {
-    m_multigridBcOrder     = 1;
-    m_multigridBcWeight    = 1;
-    m_multigridJumpOrder   = 1;
-    m_multigridJumpWeight  = 1;
-    m_multigridRelaxFactor = 1.5;
+    m_multigridRelaxMethod  = MFHelmholtzOp::Smoother::GauSaiRedBlack;
+    m_multigridBcOrder      = 1;
+    m_multigridBcWeight     = 1;
+    m_multigridJumpOrder    = 1;
+    m_multigridJumpWeight   = 1;
+    m_multigridRelaxFactor  = 1.5;
+    m_multigridBottomSmooth = 0;
+    m_minCellsBottom        = std::max(8, m_minCellsBottom);
   }
 
   // Things won't run unless this is fulfilled.
