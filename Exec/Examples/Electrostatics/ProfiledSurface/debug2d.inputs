@@ -77,7 +77,7 @@ FieldSolverMultigrid.filter_rho            = 0                       ## Number o
 FieldSolverMultigrid.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity             = 10           ## GMG verbosity
-FieldSolverMultigrid.gmg_pre_smooth            = 20           ## Number of relaxations in downsweep
+FieldSolverMultigrid.gmg_pre_smooth            = 10           ## Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth           = 20           ## Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth           = 0            ## NUmber of relaxations before dropping to bottom solver
 FieldSolverMultigrid.gmg_min_iter              = 5            ## Minimum number of iterations

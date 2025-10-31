@@ -91,6 +91,7 @@ public:
     @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
     @param[in] a_jumpOrder        Stencil order in multiphase cells
     @param[in] a_jumpWeight       Equation weighting in multiphase cells
+    @param[in] a_preCondSmooth    Number of smoothings in the preconditioner
     @param[in] a_relaxationMethod Relaxation method.
     @param[in] a_relaxFactor      Relaxation factor
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
@@ -121,6 +122,7 @@ public:
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_jumpOrder,
                        const int&              a_jumpWeight,
+                       const int&              a_preCondSmooth,
                        const int&              a_blockingFactor,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
@@ -214,6 +216,11 @@ protected:
     @brief Number of AMR levels
   */
   int m_numAmrLevels;
+
+  /*!
+    @brief Number of smoothings in the preconditioner. Passed directly to the operators.
+  */
+  int m_numPreCondSmooth;
 
   /*!
     @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 

@@ -99,9 +99,11 @@ FieldSolverMultigrid::parseMultigridSettings()
 
   std::string str;
   pp.get("gmg_verbosity", m_multigridVerbosity);
+  pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
   pp.get("gmg_pre_smooth", m_multigridPreSmooth);
   pp.get("gmg_post_smooth", m_multigridPostSmooth);
   pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
+  pp.get("gmg_precond_smooth", m_multigridPreCondSmooth);
   pp.get("gmg_max_iter", m_multigridMaxIterations);
   pp.get("gmg_min_iter", m_multigridMinIterations);
   pp.get("gmg_exit_tol", m_multigridExitTolerance);
@@ -180,17 +182,18 @@ FieldSolverMultigrid::parseMultigridSettings()
   }
 
   // Switch for using safer solver settings.
-  bool useFallbackSettings = false;
-  pp.query("gmg_fallback_settings", useFallbackSettings);
-  if (useFallbackSettings) {
-    m_multigridRelaxMethod  = MFHelmholtzOp::Smoother::GauSaiRedBlack;
-    m_multigridBcOrder      = 1;
-    m_multigridBcWeight     = 1;
-    m_multigridJumpOrder    = 1;
-    m_multigridJumpWeight   = 1;
-    m_multigridRelaxFactor  = 1.5;
-    m_multigridBottomSmooth = 0;
-    m_minCellsBottom        = std::max(8, m_minCellsBottom);
+  if (m_multigridUseDefaultSettings) {
+    m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
+    m_multigridBcOrder       = 1;
+    m_multigridBcWeight      = 1;
+    m_multigridJumpOrder     = 1;
+    m_multigridJumpWeight    = 1;
+    m_multigridRelaxFactor   = 1.5;
+    m_multigridPreSmooth     = 12;
+    m_multigridPostSmooth    = 12;
+    m_multigridBottomSmooth  = 0;
+    m_multigridPreCondSmooth = 12;
+    m_minCellsBottom         = std::max(8, m_minCellsBottom);
   }
 
   // Things won't run unless this is fulfilled.
@@ -710,6 +713,7 @@ FieldSolverMultigrid::setupHelmholtzFactory()
                              bottomDomain,
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
+                             m_multigridPreCondSmooth,
                              m_amr->getMaxBoxSize()));
 }
 

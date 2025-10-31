@@ -16,6 +16,7 @@
 #include <EBLevelGrid.H>
 #include <EBFluxFactory.H>
 #include <EBCellFactory.H>
+#include <EBLevelDataOps.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -100,17 +101,19 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid.
-  m_doInterpCF  = true;
-  m_doCoarsen   = true;
-  m_doExchange  = true;
-  m_refluxFree  = false;
-  m_profile     = false;
-  m_interval    = Interval(m_comp, m_comp);
-  m_relaxFactor = a_relaxFactor;
+  m_doInterpCF       = true;
+  m_doCoarsen        = true;
+  m_doExchange       = true;
+  m_refluxFree       = false;
+  m_profile          = false;
+  m_interval         = Interval(m_comp, m_comp);
+  m_relaxFactor      = a_relaxFactor;
+  m_numSmoothPreCond = 10;
 
   ParmParse pp("EBHelmholtzOp");
   pp.query("reflux_free", m_refluxFree);
   pp.query("profile", m_profile);
+  pp.query("precond_smooth", m_numSmoothPreCond);
 
   m_timer = Timer("EBHelmholtzOp");
 
@@ -267,6 +270,14 @@ EBHelmholtzOp::getFlux() const
   CH_TIME("EBHelmholtzOp::getFlux()");
 
   return *m_flux;
+}
+
+const LevelData<EBCellFAB>&
+EBHelmholtzOp::getRelaxationCoeff() const noexcept
+{
+  CH_TIME("EBHelmholtzOp::getRelaxationCoeff");
+
+  return m_relCoef;
 }
 
 void
@@ -515,7 +526,10 @@ EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>&
 {
   CH_TIME("EBHelmholtzOp::preCond");
 
-  this->relax(a_corr, a_residual, 40);
+  this->assignLocal(a_corr, a_residual);
+  this->scaleLocal(a_corr, m_relCoef);
+
+  this->relax(a_corr, a_residual, m_numSmoothPreCond);
 }
 
 void
@@ -642,7 +656,29 @@ EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("EBHelmholtzOp::scale");
 
+#warning "This function should be optimized"
   DataOps::scale(a_lhs, a_scale);
+}
+
+void
+EBHelmholtzOp::scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) const noexcept
+{
+  CH_TIME("EBHelmholtzOp::scaleLocal");
+
+  CH_assert(a_lhs.disjointBoxLayout() == a_rhs.disjointBoxLayout());
+
+  const DataIterator& dit = a_lhs.dataIterator();
+
+  const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+  for (int mybox = 0; mybox < nbox; mybox++) {
+    const DataIndex& din = dit[mybox];
+
+    EBCellFAB&       lhs = a_lhs[din];
+    const EBCellFAB& rhs = a_rhs[din];
+
+    lhs *= rhs;
+  }
 }
 
 Real

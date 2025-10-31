@@ -99,6 +99,7 @@ public:
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_jumpOrder     Stencil order to use on jump cells
     @param[in] a_jumpWeights   Weights for least squares stencils on jump cells
+    @param[in] a_smoothPreCond Number of smoothings in the preconditioner
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
   */
@@ -132,6 +133,7 @@ public:
                 const IntVect&                                   a_ghostRhs,
                 const int&                                       a_jumpOrder,
                 const int&                                       a_jumpWeight,
+                const int&                                       a_preCondSmooth,
                 const Smoother&                                  a_smoother,
                 const Real&                                      a_relaxFactor);
 
@@ -686,6 +688,11 @@ protected:
     @brief Has MG objects or not.
   */
   bool m_hasMGObjects;
+
+  /*!
+    @brief Number of smoothings in the preconditioner
+  */
+  int m_numSmoothPreCond;
 
   /*!
     @brief Number of phases

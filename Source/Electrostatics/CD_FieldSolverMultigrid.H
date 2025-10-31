@@ -260,6 +260,11 @@ protected:
   bool m_multigridDropOrder;
 
   /*!
+    @brief Use default multigrid settings
+  */
+  bool m_multigridUseDefaultSettings;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
@@ -328,6 +333,11 @@ protected:
     @brief Set bc jump weight (used for weighted least squares)
   */
   int m_multigridJumpWeight;
+
+  /*!
+    @brief Multigrid smoothing steps for preconditioner
+  */
+  int m_multigridPreCondSmooth;
 
   /*!
     @brief Exit tolerance for multigrid. 

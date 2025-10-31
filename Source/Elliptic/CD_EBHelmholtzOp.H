@@ -556,6 +556,14 @@ public:
   scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) override final;
 
   /*!
+    @brief Local scaling function. Multiplies the left-hand side by the right-hand side.
+    @param[out] a_lhs. Equal to a_lhs*a_rhs on output
+    @param[in]  a_rhs. Scaling data
+  */
+  void
+  scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) const noexcept;
+
+  /*!
     @brief Compute norm of data
     @param[in]
     @details a_order is currently ignored as we call a static routine in EBAMRPoissonOp for now. 
@@ -842,6 +850,12 @@ public:
   LevelData<EBFluxFAB>&
   getFlux() const;
 
+  /*!
+    @brief Returns m_relCoef. Used by MFHelmholtzOp
+  */
+  const LevelData<EBCellFAB>&
+  getRelaxationCoeff() const noexcept;
+
 protected:
   /*!
     @brief Number of components that we solve for (always one..)
@@ -907,6 +921,11 @@ protected:
     @brief Refinement factor to fine level
   */
   int m_refToFine;
+
+  /*!
+    @brief Number of smoothings in the preconditioner
+  */
+  int m_numSmoothPreCond;
 
   /*!
     @brief Do coarse-fine interpolation or not. 
