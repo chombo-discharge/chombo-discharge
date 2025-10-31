@@ -406,6 +406,8 @@ CdrMultigrid::setupHelmholtzFactory()
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
+  const Real relaxFactor = 1.0;
+
   m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(
     new EBHelmholtzOpFactory(Location::Cell::Center,
                              alpha,
@@ -426,6 +428,7 @@ CdrMultigrid::setupHelmholtzFactory()
                              ghostPhi,
                              ghostRhs,
                              m_smoother,
+                             relaxFactor,
                              bottomDomain,
                              m_amr->getMaxBoxSize()));
 }

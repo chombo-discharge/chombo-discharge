@@ -33,10 +33,10 @@ E.g., for :math:`Q = 1` in two dimensions:
 .. math::
 
    \begin{pmatrix}
-   1 & (x_1 - x) & (y - y_1) \\
-   1 & (x_2 - x) & (y - y_2) \\
+   1 & (x_1 - x) & (y_1 - y) \\
+   1 & (x_2 - x) & (y_1 - y) \\
    \vdots & \ddots & \vdots \\
-   1 & (x_N - x) & (y - y_N) \\   
+   1 & (x_N - x) & (y_N - y) \\   
    \end{pmatrix}
    \begin{pmatrix}
    f            \\
@@ -85,10 +85,10 @@ Weights can also be added to each equation, e.g. to ensure that close grid point
 .. math::
    
    \begin{pmatrix}
-   w_1 & w_1(x_1 - x) & w_N(y - y_1) \\
-   w_2 & w_2(x_2 - x) & w_N(y - y_2) \\
+   w_1 & w_1(x_1 - x) & w_1(y_1 - y) \\
+   w_2 & w_2(x_2 - x) & w_2(y_2 - y) \\
    \vdots & \ddots & \vdots \\
-   w_N & w_N(x_N - x) & w_N(y - y_N) \\   
+   w_N & w_N(x_N - x) & w_N(y_N - y) \\   
    \end{pmatrix}
    \begin{pmatrix}
    f            \\
@@ -160,10 +160,10 @@ E.g. if :math:`f\left(\mathbf{x}\right)` happens to be known, the system of equa
 .. math::
    
    \begin{pmatrix}
-   w_1(x_1 - x) & w_N(y - y_1) \\
-   w_2(x_2 - x) & w_N(y - y_2) \\
+   w_1(x_1 - x) & w_1(y_1 - y) \\
+   w_2(x_2 - x) & w_2(y_2 - y) \\
    \vdots & \vdots \\
-   w_N(x_N - x) & w_N(y - y_N) \\   
+   w_N(x_N - x) & w_N(y_N - y) \\   
    \end{pmatrix}
    \begin{pmatrix}
    \partial_x f \\

@@ -68,11 +68,13 @@ public:
     @param[in] a_eblgCoFi     Coarsened fine grids
     @param[in] a_eblgCoar     Coarse grids
     @param[in] a_dataLocation Interpration of data centering. Either on the cell center or the cell centroid. 
-    @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
+    @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data.
     @param[in] a_refRat       Refinement ratio
     @param[in] a_ghostCF      Width of the ghost region to be filled. Only relevant near the EBCF. 
     @param[in] a_order        Interpolation order
-    @param[in] a_weighting    Weighting factor least squares. 
+    @param[in] a_weighting    Weighting factor least squares.
+    @note This class does not need the full grid resolution since we are only interested in least squares reconstruction of the 0th order term, so the
+    other unknowns in the Taylor expansion that is computed are scaled by the grid resolution and then promptly discarded.
   */
   EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
                                       const EBLevelGrid& a_eblgCoFi,

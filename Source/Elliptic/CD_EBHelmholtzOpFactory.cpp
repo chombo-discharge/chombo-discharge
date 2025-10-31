@@ -41,6 +41,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
                                            const IntVect&          a_ghostPhi,
                                            const IntVect&          a_ghostRhs,
                                            const Smoother&         a_smoother,
+                                           const Real&             a_relaxFactor,
                                            const ProblemDomain&    a_bottomDomain,
                                            const int&              a_mgBlockingFactor,
                                            const AmrLevelGrids&    a_deeperLevelGrids)
@@ -73,6 +74,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
   m_ghostRhs = a_ghostRhs;
 
   m_smoother         = a_smoother;
+  m_relaxFactor      = a_relaxFactor;
   m_bottomDomain     = a_bottomDomain;
   m_mgBlockingFactor = a_mgBlockingFactor;
   m_deeperLevelGrids = a_deeperLevelGrids;
@@ -546,7 +548,8 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              BcoefIrreg,
                              m_ghostPhi,
                              m_ghostRhs,
-                             m_smoother);
+                             m_smoother,
+                             m_relaxFactor);
   }
 
   return mgOp;
@@ -628,7 +631,8 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                          m_amrBcoefIrreg[amrLevel],
                          m_ghostPhi,
                          m_ghostRhs,
-                         m_smoother);
+                         m_smoother,
+                         m_relaxFactor);
 
   return op;
 }

@@ -15,6 +15,7 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <CH_Timer.H>
+#include <EBLevelDataOps.H>
 
 // Our includes
 #include <CD_Timer.H>
@@ -58,7 +59,9 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                              const IntVect&                                   a_ghostRhs,
                              const int&                                       a_jumpOrder,
                              const int&                                       a_jumpWeight,
-                             const Smoother&                                  a_relaxType)
+                             const int&                                       a_preCondSmooth,
+                             const Smoother&                                  a_relaxType,
+                             const Real&                                      a_relaxFactor)
 {
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp(...)");
 
@@ -66,21 +69,22 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   CH_assert(!a_Bcoef.isNull());
   CH_assert(!a_BcoefIrreg.isNull());
 
-  m_dataLocation = a_dataLocation;
-  m_mflg         = a_mflg;
-  m_validCells   = a_validCells;
-  m_numPhases    = m_mflg.numPhases();
-  m_multifluid   = m_numPhases > 1;
-  m_hasMGObjects = a_hasMGObjects;
-  m_refToCoar    = a_refToCoar;
-  m_smoother     = a_relaxType;
-  m_hasCoar      = a_hasCoar;
-  m_hasFine      = a_hasFine;
-  m_Acoef        = a_Acoef;
-  m_Bcoef        = a_Bcoef;
-  m_BcoefIrreg   = a_BcoefIrreg;
-  m_ghostPhi     = a_ghostPhi;
-  m_ghostRhs     = a_ghostRhs;
+  m_dataLocation     = a_dataLocation;
+  m_mflg             = a_mflg;
+  m_validCells       = a_validCells;
+  m_numPhases        = m_mflg.numPhases();
+  m_multifluid       = m_numPhases > 1;
+  m_hasMGObjects     = a_hasMGObjects;
+  m_refToCoar        = a_refToCoar;
+  m_smoother         = a_relaxType;
+  m_hasCoar          = a_hasCoar;
+  m_hasFine          = a_hasFine;
+  m_Acoef            = a_Acoef;
+  m_Bcoef            = a_Bcoef;
+  m_BcoefIrreg       = a_BcoefIrreg;
+  m_ghostPhi         = a_ghostPhi;
+  m_ghostRhs         = a_ghostRhs;
+  m_numSmoothPreCond = a_preCondSmooth;
 
   if (a_hasCoar) {
     m_mflgCoFi = a_mflgCoFi;
@@ -203,7 +207,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
                                                                                        BcoefIrreg,
                                                                                        a_ghostPhi,
                                                                                        a_ghostRhs,
-                                                                                       ebHelmRelax));
+                                                                                       ebHelmRelax,
+                                                                                       a_relaxFactor));
 
     m_helmOps.insert({iphase, oper});
   }
@@ -376,7 +381,7 @@ MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
 void
 MFHelmholtzOp::assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Copier& a_copier)
 {
-  CH_TIME("EBHelmholtzOp::assignCopier");
+  CH_TIME("MFHelmholtzOp::assignCopier");
 
   a_rhs.copyTo(a_lhs, a_copier);
 }
@@ -538,21 +543,21 @@ void
 MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual)
 {
   CH_TIME("MFHelmholtzOp::preCond");
-#if 1
-  this->relax(a_corr, a_residual, 40);
-#else
-  m_jumpBC->resetBC();
 
-  for (auto& op : m_helmOps) {
-    LevelData<EBCellFAB> corr;
-    LevelData<EBCellFAB> resi;
+  if (m_numSmoothPreCond > 0) {
+    for (auto& op : m_helmOps) {
+      LevelData<EBCellFAB> corr;
+      LevelData<EBCellFAB> resi;
 
-    MultifluidAlias::aliasMF(corr, op.first, a_corr);
-    MultifluidAlias::aliasMF(resi, op.first, a_residual);
+      MultifluidAlias::aliasMF(corr, op.first, a_corr);
+      MultifluidAlias::aliasMF(resi, op.first, a_residual);
 
-    op.second->preCond(corr, resi);
+      op.second->assignLocal(corr, resi);
+      op.second->scaleLocal(corr, op.second->getRelaxationCoeff());
+    }
+
+    this->relax(a_corr, a_residual, m_numSmoothPreCond);
   }
-#endif
 }
 
 void

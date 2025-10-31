@@ -947,6 +947,8 @@ EddingtonSP1::setupHelmholtzFactory()
   }
 
   // Set up the operator
+  const Real relaxFactor = 1.0;
+
   m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory>(new EBHelmholtzOpFactory(m_dataLocation,
                                                                                       m_alpha,
                                                                                       m_beta,
@@ -966,6 +968,7 @@ EddingtonSP1::setupHelmholtzFactory()
                                                                                       ghostPhi,
                                                                                       ghostRhs,
                                                                                       m_multigridRelaxMethod,
+                                                                                      relaxFactor,
                                                                                       bottomDomain,
                                                                                       m_amr->getMaxBoxSize()));
 }

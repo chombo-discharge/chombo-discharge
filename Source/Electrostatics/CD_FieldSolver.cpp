@@ -653,20 +653,27 @@ FieldSolver::parsePlotVariables()
     pp.getarr("plt_vars", str, 0, num);
 
     for (int i = 0; i < num; i++) {
-      if (str[i] == "phi")
+      if (str[i] == "phi") {
         m_plotPotential = true;
-      else if (str[i] == "rho")
+      }
+      else if (str[i] == "rho") {
         m_plotRho = true;
-      else if (str[i] == "resid")
+      }
+      else if (str[i] == "resid") {
         m_plotResidue = true;
-      else if (str[i] == "E")
+      }
+      else if (str[i] == "E") {
         m_plotElectricField = true;
-      else if (str[i] == "Esol")
+      }
+      else if (str[i] == "Esol") {
         m_plotElectricFieldSolid = true;
-      else if (str[i] == "sigma")
+      }
+      else if (str[i] == "sigma") {
         m_plotSigma = true;
-      else if (str[i] == "perm")
+      }
+      else if (str[i] == "perm") {
         m_plotPermittivity = true;
+      }
     }
   }
 }

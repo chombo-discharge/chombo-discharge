@@ -368,7 +368,10 @@ We explain these options below:
 
 * ``FieldSolverMultigrid.gmg_verbosity``.
   Controls the multigrid verbosity.
-  Setting it to a number :math:`> 0` will print multigrid convergence information.
+  Setting it to a number :math:`> 0` will print multigrid convergence information.  
+* ``FieldSolverMultigrid.gmg_use_default_settings``.
+  Use default multigrid settings.
+  This tends to make most problems converge.
 * ``FieldSolverMultigrid.gmg_pre_smooth``.
   Controls the number of relaxations on each level during multigrid downsweeps.
 * ``FieldSolverMultigrid.gmg_post_smooth``.
@@ -405,6 +408,13 @@ We explain these options below:
   Currently, only V-cycles are supported.
 * ``FieldSolverMultigrid.gmg_smoother``.
   Sets the multigrid smoother.
+* ``FieldSolverMultigrid.gmg_relax_factor``.
+  Sets the multigrid relaxation factor.
+
+
+  .. tip::
+     
+     Enabling this setting tends to make most problems converge quite well.
 
 
 .. warning::

@@ -12,6 +12,9 @@
 #ifndef CD_LoadBalancing_H
 #define CD_LoadBalancing_H
 
+// Std includes
+#include <cstdint>
+
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_BoxSorting.H>
@@ -169,23 +172,11 @@ protected:
   mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
-    @brief Morton comparator
-    @param[in] a_maxBits Maximum bits
-    @param[in] a_lhs     Left hand side
-    @param[in] a_rhs     Right hand side
-    @return Returns true if a_lhs.first has a lower Morton index than a_rhs.first. 
+    @brief Compute Morton code using 21 bits per direction. 
+    @param[in] a_p Integer index
   */
-  template <class T>
-  static bool
-  mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_lhs, const std::pair<Box, T>& a_rhs);
-
-  /*!
-    @brief Utility function for Morton sorting which needs the maximum bits
-    @param[in] a_first Iterator 
-    @param[in] a_second Iterator 
-  */
-  static int
-  maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last);
+  static uint64_t
+  mortonCode21(const IntVect a_iv) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

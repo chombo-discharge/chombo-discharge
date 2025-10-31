@@ -99,9 +99,11 @@ FieldSolverMultigrid::parseMultigridSettings()
 
   std::string str;
   pp.get("gmg_verbosity", m_multigridVerbosity);
+  pp.get("gmg_use_default_settings", m_multigridUseDefaultSettings);
   pp.get("gmg_pre_smooth", m_multigridPreSmooth);
   pp.get("gmg_post_smooth", m_multigridPostSmooth);
   pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
+  pp.get("gmg_precond_smooth", m_multigridPreCondSmooth);
   pp.get("gmg_max_iter", m_multigridMaxIterations);
   pp.get("gmg_min_iter", m_multigridMinIterations);
   pp.get("gmg_exit_tol", m_multigridExitTolerance);
@@ -113,6 +115,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   pp.get("gmg_jump_order", m_multigridJumpOrder);
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
   pp.get("gmg_reduce_order", m_multigridDropOrder);
+  pp.get("gmg_relax_factor", m_multigridRelaxFactor);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -176,6 +179,24 @@ FieldSolverMultigrid::parseMultigridSettings()
   // No lower than 2.
   if (m_minCellsBottom < 2) {
     m_minCellsBottom = 2;
+  }
+
+  // Switch for using safer solver settings.
+  if (m_multigridUseDefaultSettings) {
+    m_multigridBcOrder       = 1;
+    m_multigridBcWeight      = 1;
+    m_multigridJumpOrder     = 1;
+    m_multigridJumpWeight    = 1;
+    m_multigridRelaxFactor   = 1.5;
+    m_multigridPreSmooth     = 12;
+    m_multigridPostSmooth    = 12;
+    m_multigridBottomSmooth  = 0;
+    m_multigridPreCondSmooth = 12;
+    m_minCellsBottom         = std::max(8, m_minCellsBottom);
+    m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
+    m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
+    m_multigridType          = MultigridType::VCycle;
+    m_bottomSolverType       = BottomSolverType::BiCGStab;
   }
 
   // Things won't run unless this is fulfilled.
@@ -344,7 +365,7 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Hook for filling the electrode potentials directly from the geometry. Useful only for visualization purposes.
   ParmParse pp(m_className.c_str());
 
-  bool fillElectrodePotential = false;
+  bool fillElectrodePotential = true;
 
   pp.query("fill_electrode_potential", fillElectrodePotential);
 
@@ -546,6 +567,17 @@ FieldSolverMultigrid::setupHelmholtzFactory()
     pout() << "FieldSolverMultigrid::setupHelmholtzFactory()" << endl;
   }
 
+  // Kill the simulation if the use asked for stencils that are unreachable due to too few ghost cells.
+  if (m_multigridBcOrder > m_amr->getNumberOfGhostCells()) {
+    MayDay::Abort("FieldSolverMultigrid.gmg_bc_order is larger than number of ghost cells");
+  }
+  if (m_multigridJumpOrder > m_amr->getNumberOfGhostCells()) {
+    MayDay::Abort("FieldSolverMultigrid.gmg_jump_order is larger than number of ghost cells");
+  }
+  if (!(m_multigridRelaxFactor >= 1.0 && m_multigridRelaxFactor <= 2.0)) {
+    MayDay::Abort("FieldSolverMultigrid.gmg_relax_factor must be 1 <= gmg_relax_factor <= 2 ");
+  }
+
   // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We
   //       should already have registered the operators when we come to this routine.
 
@@ -680,9 +712,11 @@ FieldSolverMultigrid::setupHelmholtzFactory()
                              ghostPhi,
                              ghostRhs,
                              m_multigridRelaxMethod,
+                             m_multigridRelaxFactor,
                              bottomDomain,
                              m_multigridJumpOrder,
                              m_multigridJumpWeight,
+                             m_multigridPreCondSmooth,
                              m_amr->getMaxBoxSize()));
 }
 
