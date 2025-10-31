@@ -183,7 +183,6 @@ FieldSolverMultigrid::parseMultigridSettings()
 
   // Switch for using safer solver settings.
   if (m_multigridUseDefaultSettings) {
-    m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     m_multigridBcOrder       = 1;
     m_multigridBcWeight      = 1;
     m_multigridJumpOrder     = 1;
@@ -193,6 +192,9 @@ FieldSolverMultigrid::parseMultigridSettings()
     m_multigridPostSmooth    = 12;
     m_multigridBottomSmooth  = 0;
     m_multigridPreCondSmooth = 12;
+    m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
+    m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
+    m_multigridType          = MultigridType::VCycle;
     m_minCellsBottom         = std::max(8, m_minCellsBottom);
   }
 
