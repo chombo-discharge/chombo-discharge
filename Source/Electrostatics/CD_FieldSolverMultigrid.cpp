@@ -192,10 +192,11 @@ FieldSolverMultigrid::parseMultigridSettings()
     m_multigridPostSmooth    = 12;
     m_multigridBottomSmooth  = 0;
     m_multigridPreCondSmooth = 12;
+    m_minCellsBottom         = std::max(8, m_minCellsBottom);
     m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     m_multigridType          = MultigridType::VCycle;
-    m_minCellsBottom         = std::max(8, m_minCellsBottom);
+    m_bottomSolverType       = BottomSolverType::BiCGStab;
   }
 
   // Things won't run unless this is fulfilled.
