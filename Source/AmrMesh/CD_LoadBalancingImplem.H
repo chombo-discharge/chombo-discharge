@@ -251,12 +251,12 @@ LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a
     break;
   }
   case BoxSorting::Morton: {
-    LoadBalancing::mortonSort(a_boxes, a_loads);
+    LoadBalancing::sortSFC<T, SpaceDim>(a_boxes, a_loads, LoadBalancing::mortonIndex<SpaceDim>);
 
     break;
   }
   case BoxSorting::Hilbert: {
-    LoadBalancing::hilbertSort(a_boxes, a_loads);
+    LoadBalancing::sortSFC<T, SpaceDim>(a_boxes, a_loads, LoadBalancing::hilbertIndex<SpaceDim>);
 
     break;
   }
@@ -303,24 +303,82 @@ LoadBalancing::shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
   std::shuffle(vec.begin(), vec.end(), e);
 
   // Split boxes and loads
-
   unpackPairs(a_boxes, a_loads, vec);
 }
 
-template <class T>
+template <class T, int DIM>
 void
-LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
+LoadBalancing::sortSFC(Vector<Box>&                                                    a_boxes,
+                       Vector<T>&                                                      a_loads,
+                       const std::function<uint64_t(const std::array<uint32_t, DIM>)>& a_sfcEncoder) noexcept
+
 {
-  CH_TIME("LoadBalancing::mortonSort");
+  CH_TIME("LoadBalancing::sortSFC");
 
-  auto vec = packPairs(a_boxes, a_loads);
+  using Bundle = std::tuple<Box, T, uint64_t>;
 
-  std::sort(std::begin(vec), std::end(vec), [&](const std::pair<Box, T>& v1, const std::pair<Box, T>& v2) -> bool {
-    return mortonCode21(v1.first.smallEnd()) < mortonCode21(v2.first.smallEnd());
+  const int n = a_boxes.size();
+  if (n == 0 || n != a_loads.size()) {
+    return;
+  }
+
+  // Pack data into a vecor of tuples. Tuple contains (box, load, key).
+  std::vector<Bundle> buf;
+  for (std::size_t i = 0; i < n; ++i) {
+    buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});
+  }
+
+  // Compute Hilbert keys
+  for (std::size_t i = 0; i < n; ++i) {
+    const auto& b  = std::get<0>(buf[i]);
+    const auto  iv = b.smallEnd();
+
+    std::array<uint32_t, SpaceDim> c;
+
+    for (int d = 0; d < SpaceDim; ++d) {
+      c[d] = static_cast<uint32_t>(iv[d]);
+    }
+
+    std::get<2>(buf[i]) = a_sfcEncoder(c);
+  }
+
+  // 3) Sort by hilbert key.
+  std::sort(buf.begin(), buf.end(), [](const Bundle& a, const Bundle& b) noexcept {
+    return std::get<2>(a) < std::get<2>(b);
   });
 
-  // Put back in normal form
-  unpackPairs(a_boxes, a_loads, vec);
+  // Unpack into original containers.
+  for (std::size_t i = 0; i < n; ++i) {
+    a_boxes[i] = std::move(std::get<0>(buf[i]));
+    a_loads[i] = std::move(std::get<1>(buf[i]));
+  }
+}
+
+template <int DIM>
+uint64_t
+LoadBalancing::mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept
+{
+  uint64_t code = 0;
+
+  // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
+  // by their blocking factors, or switch to 128/256 bit integers.
+  constexpr int maxDim = std::pow(2, 21);
+
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (a_coords[dir] > maxDim) {
+      MayDay::Abort("LoadBalancing::mortonIndex - logic bust");
+    }
+  }
+
+  for (int bit = 20; bit >= 0; --bit) {
+    for (int dir = CH_SPACEDIM - 1; dir >= 0; --dir) {
+      const uint64_t b = (static_cast<uint64_t>(static_cast<uint32_t>(a_coords[dir])) >> bit) & 1ull;
+
+      code = (code << 1) | b;
+    }
+  }
+
+  return code;
 }
 
 template <int DIM>
@@ -379,53 +437,6 @@ LoadBalancing::hilbertIndex(const std::array<uint32_t, DIM>& a_coords)
   }
 
   return idx;
-}
-
-template <class T>
-void
-LoadBalancing::hilbertSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
-{
-  CH_TIME("LoadBalancing::hilbertSort");
-
-  CH_assert(a_boxes.size() == a_loads.size());
-
-  using Bundle = std::tuple<Box, T, uint64_t>;
-
-  const int n = a_boxes.size();
-  if (n == 0 || n != a_loads.size()) {
-    return;
-  }
-
-  // Pack data into a vecor of tuples. Tuple contains (box, load, key).
-  std::vector<Bundle> buf;
-  for (std::size_t i = 0; i < n; ++i) {
-    buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});
-  }
-
-  // Compute Hilbert keys
-  for (std::size_t i = 0; i < n; ++i) {
-    const auto& b  = std::get<0>(buf[i]);
-    const auto  iv = b.smallEnd();
-
-    std::array<uint32_t, SpaceDim> c;
-
-    for (int d = 0; d < SpaceDim; ++d) {
-      c[d] = static_cast<uint32_t>(iv[d]);
-    }
-
-    std::get<2>(buf[i]) = hilbertIndex<SpaceDim>(c);
-  }
-
-  // 3) Sort by hilbert key.
-  std::sort(buf.begin(), buf.end(), [](const Bundle& a, const Bundle& b) noexcept {
-    return std::get<2>(a) < std::get<2>(b);
-  });
-
-  // Unpack into original containers.
-  for (std::size_t i = 0; i < n; ++i) {
-    a_boxes[i] = std::move(std::get<0>(buf[i]));
-    a_loads[i] = std::move(std::get<1>(buf[i]));
-  }
 }
 
 #include <CD_NamespaceFooter.H>

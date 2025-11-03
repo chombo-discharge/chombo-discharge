@@ -275,30 +275,6 @@ LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads)
 #endif
 }
 
-uint64_t
-LoadBalancing::mortonCode21(const IntVect a_iv) noexcept
-{
-  uint64_t code = 0;
 
-  // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
-  // by their blocking factors, or switch to 128/256 bit integers.
-  constexpr int maxDim = std::pow(2, 21);
-
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    if (a_iv[dir] > maxDim) {
-      MayDay::Abort("LoadBalancing::mortonCode21 - logic bust");
-    }
-  }
-
-  for (int bit = 20; bit >= 0; --bit) {
-    for (int dir = CH_SPACEDIM - 1; dir >= 0; --dir) {
-      const uint64_t b = (static_cast<uint64_t>(static_cast<uint32_t>(a_iv[dir])) >> bit) & 1ull;
-
-      code = (code << 1) | b;
-    }
-  }
-
-  return code;
-}
 
 #include <CD_NamespaceFooter.H>
