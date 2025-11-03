@@ -23,6 +23,7 @@
 // Chombo includes
 #include <LoadBalance.H>
 #include <BoxLayout.H>
+#include <ParmParse.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -322,7 +323,7 @@ LoadBalancing::sortSFC(Vector<Box>&                                             
     return;
   }
 
-  // Pack data into a vecor of tuples. Tuple contains (box, load, key).
+  // Pack data into a vector of tuples. Tuple contains (box, load, key).
   std::vector<Bundle> buf;
   for (std::size_t i = 0; i < n; ++i) {
     buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});
