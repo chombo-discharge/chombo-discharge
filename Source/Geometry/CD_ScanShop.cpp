@@ -61,6 +61,9 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   else if (str == "morton") {
     m_boxSorting = BoxSorting::Morton;
   }
+  else if (str == "hilbert") {
+    m_boxSorting = BoxSorting::Hilbert;
+  }
   else if (str == "shuffle") {
     m_boxSorting = BoxSorting::Shuffle;
   }

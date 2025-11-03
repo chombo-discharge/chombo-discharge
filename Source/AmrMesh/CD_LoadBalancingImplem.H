@@ -17,6 +17,8 @@
 #include <random>
 #include <chrono>
 #include <limits>
+#include <array>
+#include <tuple>
 
 // Chombo includes
 #include <LoadBalance.H>
@@ -253,6 +255,11 @@ LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a
 
     break;
   }
+  case BoxSorting::Hilbert: {
+    LoadBalancing::hilbertSort(a_boxes, a_loads);
+
+    break;
+  }
   default: {
     MayDay::Abort("LoadBalancing::sort_boxes - unknown algorithm requested");
 
@@ -314,6 +321,111 @@ LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
 
   // Put back in normal form
   unpackPairs(a_boxes, a_loads, vec);
+}
+
+template <int DIM>
+uint64_t
+LoadBalancing::hilbertIndex(const std::array<uint32_t, DIM>& a_coords)
+{
+  CH_TIME("LoadBalancing::hilbertIndex");
+
+  constexpr int nbits = 21;
+
+  uint32_t x[DIM];
+
+  for (int i = 0; i < DIM; ++i) {
+    x[i] = a_coords[i];
+  }
+
+  const uint32_t M = 1u << (nbits - 1);
+
+  for (uint32_t Q = M; Q > 1; Q >>= 1) {
+    const uint32_t P = Q - 1;
+
+    for (int i = 0; i < DIM; ++i) {
+      if (x[i] & Q) {
+        x[0] ^= P;
+      }
+      else {
+        const uint32_t t = (x[0] ^ x[i]) & P;
+
+        x[0] ^= t;
+        x[i] ^= t;
+      }
+    }
+  }
+
+  for (int i = 1; i < DIM; ++i) {
+    x[i] ^= x[i - 1];
+  }
+
+  uint32_t t = 0;
+  for (uint32_t Q = M; Q > 1; Q >>= 1) {
+    if (x[DIM - 1] & Q) {
+      t ^= (Q - 1);
+    }
+  }
+
+  for (int i = 0; i < DIM; ++i) {
+    x[i] ^= t;
+  }
+
+  uint64_t idx = 0;
+
+  for (int b = nbits - 1; b >= 0; --b) {
+    for (int i = 0; i < DIM; ++i) {
+      idx = (idx << 1) | ((x[i] >> b) & 1u);
+    }
+  }
+
+  return idx;
+}
+
+template <class T>
+void
+LoadBalancing::hilbertSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
+{
+  CH_TIME("LoadBalancing::hilbertSort");
+
+  CH_assert(a_boxes.size() == a_loads.size());
+
+  using Bundle = std::tuple<Box, T, uint64_t>;
+
+  const int n = a_boxes.size();
+  if (n == 0 || n != a_loads.size()) {
+    return;
+  }
+
+  // Pack data into a vecor of tuples. Tuple contains (box, load, key).
+  std::vector<Bundle> buf;
+  for (std::size_t i = 0; i < n; ++i) {
+    buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});
+  }
+
+  // Compute Hilbert keys
+  for (std::size_t i = 0; i < n; ++i) {
+    const auto& b  = std::get<0>(buf[i]);
+    const auto  iv = b.smallEnd();
+
+    std::array<uint32_t, SpaceDim> c;
+
+    for (int d = 0; d < SpaceDim; ++d) {
+      c[d] = static_cast<uint32_t>(iv[d]);
+    }
+
+    std::get<2>(buf[i]) = hilbertIndex<SpaceDim>(c);
+  }
+
+  // 3) Sort by hilbert key.
+  std::sort(buf.begin(), buf.end(), [](const Bundle& a, const Bundle& b) noexcept {
+    return std::get<2>(a) < std::get<2>(b);
+  });
+
+  // Unpack into original containers.
+  for (std::size_t i = 0; i < n; ++i) {
+    a_boxes[i] = std::move(std::get<0>(buf[i]));
+    a_loads[i] = std::move(std::get<1>(buf[i]));
+  }
 }
 
 #include <CD_NamespaceFooter.H>

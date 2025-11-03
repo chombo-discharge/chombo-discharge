@@ -177,6 +177,23 @@ protected:
   */
   static uint64_t
   mortonCode21(const IntVect a_iv) noexcept;
+
+  /*!
+    @brief Sort boxes using Hilbert code.
+    @param[inout] a_boxes Grid boxes to be sorted. 
+    @param[inout] a_loads Computational loads to be sorted.
+    @details On output, a_boxes and a_loads are Hilbert sorted. 
+  */
+  template <class T>
+  static void
+  hilbertSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+
+  /*!
+    @brief Helper function for computing a Hilbert index
+  */
+  template <int DIM>
+  static uint64_t
+  hilbertIndex(const std::array<uint32_t, DIM>& a_coords);
 };
 
 #include <CD_NamespaceFooter.H>
