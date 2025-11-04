@@ -574,8 +574,8 @@ FieldSolverMultigrid::setupHelmholtzFactory()
   if (m_multigridJumpOrder > m_amr->getNumberOfGhostCells()) {
     MayDay::Abort("FieldSolverMultigrid.gmg_jump_order is larger than number of ghost cells");
   }
-  if (!(m_multigridRelaxFactor >= 1.0 && m_multigridRelaxFactor <= 2.0)) {
-    MayDay::Abort("FieldSolverMultigrid.gmg_relax_factor must be 1 <= gmg_relax_factor <= 2 ");
+  if (!(m_multigridRelaxFactor > 0.0 && m_multigridRelaxFactor <= 2.0)) {
+    MayDay::Abort("FieldSolverMultigrid.gmg_relax_factor must be 0 < gmg_relax_factor <= 2 ");
   }
 
   // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We

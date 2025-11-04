@@ -656,7 +656,6 @@ EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("EBHelmholtzOp::scale");
 
-#warning "This function should be optimized"
   DataOps::scale(a_lhs, a_scale);
 }
 
@@ -1759,6 +1758,7 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
                                    dbl[din],
                                    din,
                                    redBlack);
+
       }
     }
   }
