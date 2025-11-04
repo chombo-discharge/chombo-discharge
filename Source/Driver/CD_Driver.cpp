@@ -288,7 +288,8 @@ Driver::getGeometryTags()
       if (!(ebis.isNull())) {
         DisjointBoxLayout irregGrids = ebis->getIrregGrids(curDomain);
         EBISLayout        ebisl;
-        ebis->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
+#warning "Beware of this change -- I've filled two ghost cells to narrow gaps and find stencils that way"
+        ebis->fillEBISLayout(ebisl, irregGrids, curDomain, 2);
 
         const RealVect     probLo = m_amr->getProbLo();
         const DataIterator dit    = irregGrids.dataIterator();
@@ -314,7 +315,7 @@ Driver::getGeometryTags()
             // angle exceeds a specified threshold the cell is refined.
             const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof,
                                                                          ebisbox,
-                                                                         1,
+                                                                         2,
                                                                          VofUtils::Connectivity::MonotonePath,
                                                                          false);
 
