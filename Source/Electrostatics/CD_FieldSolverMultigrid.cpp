@@ -184,9 +184,9 @@ FieldSolverMultigrid::parseMultigridSettings()
   // Switch for using safer solver settings.
   if (m_multigridUseDefaultSettings) {
     m_multigridBcOrder       = 1;
-    m_multigridBcWeight      = 3;
+    m_multigridBcWeight      = 1;
     m_multigridJumpOrder     = 1;
-    m_multigridJumpWeight    = 3;
+    m_multigridJumpWeight    = 1;
     m_multigridRelaxFactor   = 1.5;
     m_multigridPreSmooth     = 12;
     m_multigridPostSmooth    = 12;
