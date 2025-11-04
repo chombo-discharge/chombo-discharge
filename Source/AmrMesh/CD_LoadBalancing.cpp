@@ -275,6 +275,4 @@ LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads)
 #endif
 }
 
-
-
 #include <CD_NamespaceFooter.H>
