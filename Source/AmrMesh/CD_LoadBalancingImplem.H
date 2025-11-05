@@ -363,7 +363,7 @@ LoadBalancing::mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept
 
   // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
   // by their blocking factors, or switch to 128/256 bit integers.
-  constexpr int maxDim = std::pow(2, 21);
+  const int maxDim = std::pow(2, 21);
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (a_coords[dir] > maxDim) {
