@@ -318,7 +318,7 @@ CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFa
   CH_assert(a_factor >= 0.0);
 
   // First, the field solver must set the permittivities as usual. The "permittivities" that we are after are
-  // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase). Also note that FieldSolverMultigrid
+  // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase). Also note that FieldSolverGMG
   // fills the ghost faces for the b-coefficient here.
   m_fieldSolver->setPermittivities();
 

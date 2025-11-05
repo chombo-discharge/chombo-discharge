@@ -28,7 +28,7 @@ FieldSolver
 ``FieldSolver`` can solve over three phases, gas, dielectric, and electrode, and thus it is uses ``MFAMRCellData`` functionality where data is defined over multiple phases (see :ref:`Chap:MeshData`).
 
 Note that in order to separate the electrostatic solver interface from the implementation, ``FieldSolver`` is a pure class without knowledge of numerical discretizations.
-Currently, our only supported subclass is :ref:`Chap:FieldSolverMultigrid`, which supplies a finite-volume discretization that is solved with geometric multigrid.
+Currently, our only supported subclass is :ref:`Chap:FieldSolverGMG`, which supplies a finite-volume discretization that is solved with geometric multigrid.
 
 .. tip::
    
@@ -46,7 +46,7 @@ where :math:`\mathbf{n}_1 = -\mathbf{n}_2` are the normal vectors pointing away 
 We point out that this equation can be enforced in various formats. 
 The most common case is that :math:`\partial_n\Phi` are free parameters and :math:`\sigma` is a fixed parameter.
 However, we *can* also fix :math:`\partial_n\Phi` on one side of the boundary and let :math:`\sigma` be the free parameter.
-When using ``FieldSolverMultigrid`` (see :ref:`Chap:FieldSolverMultigrid`), users can choose between these two natural boundary conditions, see :ref:`Chap:PoissonEBBC`.
+When using ``FieldSolverGMG`` (see :ref:`Chap:FieldSolverGMG`), users can choose between these two natural boundary conditions, see :ref:`Chap:PoissonEBBC`.
 
 Using FieldSolver
 -----------------
@@ -105,8 +105,8 @@ For setting general types of Neumann or Dirichlet BCs on the domain sides, one w
 
 .. code-block:: text
 
-   FieldSolverMultigrid.bc.x.low  = dirichlet_custom
-   FieldSolverMultigrid.bc.x.high = dirichlet_neumann   
+   FieldSolverGMG.bc.x.low  = dirichlet_custom
+   FieldSolverGMG.bc.x.high = dirichlet_neumann   
 
 Unfortunately, due to the many degrees of freedom in setting domain boundary conditions, the procedure is a bit convoluted.
 We first explain the general procedure. 
@@ -143,8 +143,8 @@ In this case one will use an identifier ``<string> <float>`` in the input script
 
 .. code-block:: text
 
-   FieldSolverMultigrid.bc.x.low  = neumann   0.0
-   FieldSolverMultigrid.bc.x.high = dirichlet 1.0
+   FieldSolverGMG.bc.x.low  = neumann   0.0
+   FieldSolverGMG.bc.x.high = dirichlet 1.0
 
 The floating point number has a slightly different interpretation for the two types of BCs.
 Moreover, when using the simplified format the function specified through ``setDomainSideBcFunction`` will be used as a multiplier rather than being parsed directly into the numerical discretization.
@@ -174,8 +174,8 @@ For example, using
 
 .. code-block:: text
 
-   FieldSolverMultigrid.bc.y.low  = dirichlet 0.0
-   FieldSolverMultigrid.bc.y.high = dirichlet 1.0
+   FieldSolverGMG.bc.y.low  = dirichlet 0.0
+   FieldSolverGMG.bc.y.high = dirichlet 1.0
 
 will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
 Specifically, on the upper y-plane this specification will generate a potential boundary condition function of the type
@@ -234,7 +234,7 @@ __________
 
 For the current ``FieldSolver`` the natural BC at the EB is Dirichlet with a specified voltage, whereas on dielectrics we enforce :eq:`GaussBC`.
 The voltage on the electrodes are automatically retrieved from the specified voltages on the electrodes in the geometry being used (see :ref:`Chap:ComputationalGeometry`).
-The exception to this is that while :ref:`Chap:ComputationalGeometry` specifies that an electrode will be at some fraction of a specified voltage, ``FieldSolverMultigrid`` uses this fraction *and* the specified voltage wave form in ``setVoltage``.
+The exception to this is that while :ref:`Chap:ComputationalGeometry` specifies that an electrode will be at some fraction of a specified voltage, ``FieldSolverGMG`` uses this fraction *and* the specified voltage wave form in ``setVoltage``.
 
 To understand how the voltage on the electrode is being set, we first remark that our implementation uses a completely general specification of the voltage on each electrode in both space and time.
 This voltage has the form
@@ -307,28 +307,28 @@ This is encapsulated by the pure member function
 
 where ``a_phi`` is the resulting potential that was computing with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
    
-.. _Chap:FieldSolverMultigrid:   
+.. _Chap:FieldSolverGMG:   
 
-FieldSolverMultigrid
+FieldSolverGMG
 --------------------
 
-``FieldSolverMultigrid`` implements a multigrid routine for solving :eq:`Poisson`, and is currently the only implementation of ``FieldSolver``.
+``FieldSolverGMG`` implements a multigrid routine for solving :eq:`Poisson`, and is currently the only implementation of ``FieldSolver``.
 
-The discretization used by ``FieldSolverMultigrid`` is described in :ref:`Chap:LinearSolvers`.
-The underlying solver type is a Helmholtz solver, but ``FieldSolverMultigrid`` considers only the Laplacian term.
+The discretization used by ``FieldSolverGMG`` is described in :ref:`Chap:LinearSolvers`.
+The underlying solver type is a Helmholtz solver, but ``FieldSolverGMG`` considers only the Laplacian term.
 For further details on the spatial discretization, see :ref:`Chap:LinearSolvers`.
 
 Solver configuration
 ____________________
 
-``FieldSolverMultigrid`` has a number of switches for determining how it operates.
+``FieldSolverGMG`` has a number of switches for determining how it operates.
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below
 
-.. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolverMultigrid.options
+.. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolverGMG.options
    :language: text
    :emphasize-lines: 4,13-16,18-35
-   :caption: Input options for the ``FieldSolverMultigrid`` class. Runtime adjustable options are highlighted.	      
+   :caption: Input options for the ``FieldSolverGMG`` class. Runtime adjustable options are highlighted.	      
 
 Note that *all* options pertaining to IO or multigrid are run-time configurable (see :ref:`Chap:RuntimeConfig`).
 
@@ -353,7 +353,7 @@ By default, the Helmholtz operator uses a diagonally weighting of the operator u
 This means that the quantity that is passed into ``AMRMultiGrid`` should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag ``kappa_source`` indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
 If this flag is set to ``false``, it is an indication that the user has taken responsibility to perform this weighting prior to calling ``FieldSolver::solve(...)``.
-If this flag is set to ``true``, ``FieldSolverMultigrid`` will perform the multiplication before the multigrid solve.
+If this flag is set to ``true``, ``FieldSolverGMG`` will perform the multiplication before the multigrid solve.
 
 .. _Chap:MultigridTuning:
 
@@ -366,49 +366,49 @@ Often the most critical factors are the radius of the cut-cell stencils and how 
 In addition, the multigrid convergence is improved by increasing the number of smoothings per grid level (up to a certain point), as well as the type of smoother and bottom solver being used.
 We explain these options below:
 
-* ``FieldSolverMultigrid.gmg_verbosity``.
+* ``FieldSolverGMG.gmg_verbosity``.
   Controls the multigrid verbosity.
   Setting it to a number :math:`> 0` will print multigrid convergence information.  
-* ``FieldSolverMultigrid.gmg_use_default_settings``.
+* ``FieldSolverGMG.gmg_use_default_settings``.
   Use default multigrid settings.
   This tends to make most problems converge.
-* ``FieldSolverMultigrid.gmg_pre_smooth``.
+* ``FieldSolverGMG.gmg_pre_smooth``.
   Controls the number of relaxations on each level during multigrid downsweeps.
-* ``FieldSolverMultigrid.gmg_post_smooth``.
+* ``FieldSolverGMG.gmg_post_smooth``.
   Controls the number of relaxations on each level during multigrid upsweeps.
-* ``FieldSolverMultigrid.gmg_bott_smooth``.
+* ``FieldSolverGMG.gmg_bott_smooth``.
   Controls the number of relaxations before entering the bottom solve. 
-* ``FieldSolverMultigrid.gmg_min_iter``.
+* ``FieldSolverGMG.gmg_min_iter``.
   Sets the minimum number of iterations that multigrid will perform. 
-* ``FieldSolverMultigrid.gmg_max_iter``.
+* ``FieldSolverGMG.gmg_max_iter``.
   Sets the maximum number of iterations that multigrid will perform. 
-* ``FieldSolverMultigrid.gmg_exit_tol``.
+* ``FieldSolverGMG.gmg_exit_tol``.
   Sets the exit tolerance for multigrid.
   Multigrid will exit the iterations if :math:`r < \lambda r_0` where :math:`\lambda` is the specified tolerance, :math:`r = |L\Phi -\rho|` is the residual and :math:`r_0` is the residual for :math:`\Phi = 0`.  
-* ``FieldSolverMultigrid.gmg_exit_hang``.
+* ``FieldSolverGMG.gmg_exit_hang``.
   Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
   Letting :math:`r^k` be the residual after :math:`k` multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of :math:`r^{k+1} < (1-h)r^k`, where :math:`h` is the "hang" factor.
-* ``FieldSolverMultigrid.gmg_min_cells``.
+* ``FieldSolverGMG.gmg_min_cells``.
   Sets the minimum amount of cells along any coordinate direction for coarsened levels.
   Note that this will control how far multigrid will coarsen. Setting a number ``gmg_min_cells = 16`` will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction. 
-* ``FieldSolverMultigrid.gmg_bc_order``.
+* ``FieldSolverGMG.gmg_bc_order``.
   Sets the stencil order for Dirichlet boundary conditions (on electrodes).
   Note that this is also the stencil radius. 
-* ``FieldSolverMultigrid.gmg_bc_weight``. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
+* ``FieldSolverGMG.gmg_bc_weight``. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
   See :ref:`Chap:LeastSquares` for details. 
-* ``FieldSolverMultigrid.gmg_jump_order``. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
+* ``FieldSolverGMG.gmg_jump_order``. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
   Note that this is also the stencil radius. 
-* ``FieldSolverMultigrid.gmg_jump_weight``.
+* ``FieldSolverGMG.gmg_jump_weight``.
   Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
   See :ref:`Chap:LeastSquares` for details. 
-* ``FieldSolverMultigrid.gmg_bottom_solver``.
+* ``FieldSolverGMG.gmg_bottom_solver``.
   Sets the bottom solver type. 
-* ``FieldSolverMultigrid.gmg_cycle``.
+* ``FieldSolverGMG.gmg_cycle``.
   Sets the multigrid method.
   Currently, only V-cycles are supported.
-* ``FieldSolverMultigrid.gmg_smoother``.
+* ``FieldSolverGMG.gmg_smoother``.
   Sets the multigrid smoother.
-* ``FieldSolverMultigrid.gmg_relax_factor``.
+* ``FieldSolverGMG.gmg_relax_factor``.
   Sets the multigrid relaxation factor.
 
 
@@ -420,7 +420,7 @@ We explain these options below:
 .. warning::
 
    When setting the bottom solver (which by default is a biconjugate gradient stabilized method) to a regular smoother, one must also specify the number of smoothings to perform.
-   E.g., ``FieldSolverMultigrid.gmg_bottom_solver = simple 64``.
+   E.g., ``FieldSolverGMG.gmg_bottom_solver = simple 64``.
    Setting the bottom solver to ``simple`` without specifying the number of smoothings that will be performed will issue a run-time error. 
 		
 
@@ -431,7 +431,7 @@ The user may plot the potential, the space charge, the electric, and the GMG res
 
 .. code-block:: text
 
-   FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+   FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 
 .. _Chap:PoissonDielectricBC:   
 
@@ -443,13 +443,13 @@ If the user wants the natural form in which the surface charge is the free param
 
 .. code-block:: text
 
-   FieldSolverMultigrid.which_jump = natural
+   FieldSolverGMG.which_jump = natural
 
 To use the other format (in which one of the fluxes is specified), use
 
 .. code-block:: text
 
-   FieldSolverMultigrid.which_jump = saturation_charge
+   FieldSolverGMG.which_jump = saturation_charge
 
 .. note::
    

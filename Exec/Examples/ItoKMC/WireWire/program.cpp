@@ -1,6 +1,6 @@
 #include <CD_Driver.H>
 #include <CD_FieldSolverFactory.H>
-#include <CD_FieldSolverMultigrid.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_ItoLayout.H>
 #include <CD_ItoSolver.H>
 #include <CD_RtLayout.H>

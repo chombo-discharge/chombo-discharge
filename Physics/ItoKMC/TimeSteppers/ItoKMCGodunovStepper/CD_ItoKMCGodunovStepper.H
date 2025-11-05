@@ -24,7 +24,7 @@ namespace Physics {
     /*!
       @brief Implementation of ItoKMCStepper that uses a semi-implicit split-step formalism for advancing the Ito-Poisson-KMC system. 
     */
-    template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMultigrid>
+    template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG>
     class ItoKMCGodunovStepper : public ItoKMCStepper<I, C, R, F>
     {
     public:

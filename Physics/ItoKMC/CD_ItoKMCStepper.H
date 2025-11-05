@@ -26,7 +26,7 @@
 #include "CD_FieldSolver.H"
 #include "CD_ItoSolver.H"
 #include "CD_CdrCTU.H"
-#include "CD_FieldSolverMultigrid.H"
+#include "CD_FieldSolverGMG.H"
 #include "CD_SurfaceODESolver.H"
 #include <CD_NamespaceHeader.H>
 
@@ -55,14 +55,14 @@ namespace Physics {
       @brief Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a different
       underlying solver, change the template arguments. 
     */
-    template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverMultigrid>
+    template <typename I = ItoSolver, typename C = CdrCTU, typename R = McPhoto, typename F = FieldSolverGMG>
     class ItoKMCStepper : public TimeStepper
     {
     public:
       static_assert(std::is_base_of<ItoSolver, I>::value, "I must derive from ItoSolver");
       static_assert(std::is_base_of<CdrSolver, C>::value, "C must derive from CdrSolver");
       static_assert(std::is_base_of<McPhoto, R>::value, "R must derive from McPhoto");
-      static_assert(std::is_base_of<FieldSolver, FieldSolverMultigrid>::value, "F must derive from FieldSolver");
+      static_assert(std::is_base_of<FieldSolver, FieldSolverGMG>::value, "F must derive from FieldSolver");
 
       /*!
 	@brief Default constructor. Sets default options. 

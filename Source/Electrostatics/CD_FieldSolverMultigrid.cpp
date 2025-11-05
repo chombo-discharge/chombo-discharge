@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   FieldSolverMultigrid.cpp
-  @brief  Implementation of FieldSolverMultigrid.H
+  @file   FieldSolverGMG.cpp
+  @brief  Implementation of FieldSolverGMG.H
   @author Robert Marskar
   @todo   Once the new operator is in, check the computeLoads routine. 
 */
@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_FieldSolverMultigrid.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_DataOps.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_MFMultigridInterpolator.H>
@@ -25,29 +25,29 @@
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
-constexpr Real FieldSolverMultigrid::m_alpha;
-constexpr Real FieldSolverMultigrid::m_beta;
+constexpr Real FieldSolverGMG::m_alpha;
+constexpr Real FieldSolverGMG::m_beta;
 
-FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver()
+FieldSolverGMG::FieldSolverGMG() : FieldSolver()
 {
-  CH_TIME("FieldSolverMultigrid::FieldSolverMultigrid()");
+  CH_TIME("FieldSolverGMG::FieldSolverGMG()");
 
   // Default settings
   m_isSolverSetup = false;
-  m_className     = "FieldSolverMultigrid";
+  m_className     = "FieldSolverGMG";
 }
 
-FieldSolverMultigrid::~FieldSolverMultigrid()
+FieldSolverGMG::~FieldSolverGMG()
 {
-  CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()");
+  CH_TIME("FieldSolverGMG::~FieldSolverGMG()");
 }
 
 void
-FieldSolverMultigrid::parseOptions()
+FieldSolverGMG::parseOptions()
 {
-  CH_TIME("FieldSolverMultigrid::parseOptions()");
+  CH_TIME("FieldSolverGMG::parseOptions()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::parseOptions()" << endl;
+    pout() << "FieldSolverGMG::parseOptions()" << endl;
   }
 
   this->parseVerbosity();
@@ -60,11 +60,11 @@ FieldSolverMultigrid::parseOptions()
 }
 
 void
-FieldSolverMultigrid::parseRuntimeOptions()
+FieldSolverGMG::parseRuntimeOptions()
 {
-  CH_TIME("FieldSolverMultigrid::parseRuntimeOptions()");
+  CH_TIME("FieldSolverGMG::parseRuntimeOptions()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::parseRuntimeOptions()" << endl;
+    pout() << "FieldSolverGMG::parseRuntimeOptions()" << endl;
   }
 
   this->parseVerbosity();
@@ -75,11 +75,11 @@ FieldSolverMultigrid::parseRuntimeOptions()
 }
 
 void
-FieldSolverMultigrid::parseKappaSource()
+FieldSolverGMG::parseKappaSource()
 {
-  CH_TIME("FieldSolverMultigrid::parseKappaSource()");
+  CH_TIME("FieldSolverGMG::parseKappaSource()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::parseKappaSource()" << endl;
+    pout() << "FieldSolverGMG::parseKappaSource()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -88,11 +88,11 @@ FieldSolverMultigrid::parseKappaSource()
 }
 
 void
-FieldSolverMultigrid::parseMultigridSettings()
+FieldSolverGMG::parseMultigridSettings()
 {
-  CH_TIME("FieldSolverMultigrid::parseMultigridSettings()");
+  CH_TIME("FieldSolverGMG::parseMultigridSettings()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::parseMultigridSettings()" << endl;
+    pout() << "FieldSolverGMG::parseMultigridSettings()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -117,7 +117,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
 
-  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
+  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
   const int num = pp.countval("gmg_bottom_solver");
   if (num == 1) {
@@ -130,7 +130,7 @@ FieldSolverMultigrid::parseMultigridSettings()
     }
     else {
       MayDay::Error(
-        "FieldSolverMultigrid::parseMultigridSettings() - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+        "FieldSolverGMG::parseMultigridSettings() - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
     }
   }
   else if (num == 2) {
@@ -143,12 +143,12 @@ FieldSolverMultigrid::parseMultigridSettings()
     }
     else {
       MayDay::Error(
-        "FieldSolverMultigrid::parseMultigridSettings() - logic bust, you've specified two parameters and I expected 'simple <number>'");
+        "FieldSolverGMG::parseMultigridSettings() - logic bust, you've specified two parameters and I expected 'simple <number>'");
     }
   }
   else {
     MayDay::Error(
-      "FieldSolverMultigrid::parseMultigridSettings() - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
+      "FieldSolverGMG::parseMultigridSettings() - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
   // Get a string for the multigrid smoother. This must either be "jacobi", "red_black", or "multi_color".
@@ -163,7 +163,7 @@ FieldSolverMultigrid::parseMultigridSettings()
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else {
-    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings() - unsupported relaxation method requested");
+    MayDay::Error("FieldSolverGMG::parseMultigridSettings() - unsupported relaxation method requested");
   }
 
   // Cycle type
@@ -173,7 +173,7 @@ FieldSolverMultigrid::parseMultigridSettings()
   }
   else {
     MayDay::Error(
-      "FieldSolverMultigrid::parseMultigridSettings - unsupported multigrid cycle type requested. Only vcycle supported for now. ");
+      "FieldSolverGMG::parseMultigridSettings - unsupported multigrid cycle type requested. Only vcycle supported for now. ");
   }
 
   // No lower than 2.
@@ -210,11 +210,11 @@ FieldSolverMultigrid::parseMultigridSettings()
 }
 
 void
-FieldSolverMultigrid::parseJumpBC()
+FieldSolverGMG::parseJumpBC()
 {
-  CH_TIME("FieldSolverMultigrid::parseJumpBC()");
+  CH_TIME("FieldSolverGMG::parseJumpBC()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::parseJumpBC()" << endl;
+    pout() << "FieldSolverGMG::parseJumpBC()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -230,22 +230,22 @@ FieldSolverMultigrid::parseJumpBC()
     m_jumpBcType = JumpBCType::SaturationCharge;
   }
   else {
-    const std::string errorString = "FieldSolverMultigrid::parseJumpBC -- error, argument '" + str + "' not recognized";
+    const std::string errorString = "FieldSolverGMG::parseJumpBC -- error, argument '" + str + "' not recognized";
     MayDay::Error(errorString.c_str());
   }
 }
 
 bool
-FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
-                            const MFAMRCellData& a_rho,
-                            const EBAMRIVData&   a_sigma,
-                            const bool           a_zeroPhi)
+FieldSolverGMG::solve(MFAMRCellData&       a_phi,
+                      const MFAMRCellData& a_rho,
+                      const EBAMRIVData&   a_sigma,
+                      const bool           a_zeroPhi)
 {
-  CH_TIMERS("FieldSolverMultigrid::solve");
-  CH_TIMER("FieldSolverMultigrid::solve::alloc_temps", t1);
-  CH_TIMER("FieldSolverMultigrid::solve::set_temps", t2);
+  CH_TIMERS("FieldSolverGMG::solve");
+  CH_TIMER("FieldSolverGMG::solve::alloc_temps", t1);
+  CH_TIMER("FieldSolverGMG::solve::set_temps", t2);
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)" << endl;
+    pout() << "FieldSolverGMG::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)" << endl;
   }
 
   // TLDR: This is the main solve routine. The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi))
@@ -376,11 +376,11 @@ FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 }
 
 void
-FieldSolverMultigrid::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+FieldSolverGMG::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 {
-  CH_TIME("FieldSolverMultigrid::preRegrid(int, int)");
+  CH_TIME("FieldSolverGMG::preRegrid(int, int)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::preRegrid(int, int)" << endl;
+    pout() << "FieldSolverGMG::preRegrid(int, int)" << endl;
   }
 
   FieldSolver::preRegrid(a_lbase, a_oldFinestLevel);
@@ -390,11 +390,11 @@ FieldSolverMultigrid::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 }
 
 void
-FieldSolverMultigrid::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+FieldSolverGMG::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
 {
-  CH_TIME("FieldSolverMultigrid::regrid(int, int, int)");
+  CH_TIME("FieldSolverGMG::regrid(int, int, int)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::regrid(int, int, int)" << endl;
+    pout() << "FieldSolverGMG::regrid(int, int, int)" << endl;
   }
 
   FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
@@ -403,11 +403,11 @@ FieldSolverMultigrid::regrid(const int a_lmin, const int a_oldFinestLevel, const
 }
 
 void
-FieldSolverMultigrid::registerOperators()
+FieldSolverGMG::registerOperators()
 {
-  CH_TIME("FieldSolverMultigrid::registerOperators()");
+  CH_TIME("FieldSolverGMG::registerOperators()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::registerOperators()" << endl;
+    pout() << "FieldSolverGMG::registerOperators()" << endl;
   }
 
   CH_assert(!m_amr.isNull());
@@ -429,11 +429,11 @@ FieldSolverMultigrid::registerOperators()
 }
 
 void
-FieldSolverMultigrid::setupSolver()
+FieldSolverGMG::setupSolver()
 {
-  CH_TIME("FieldSolverMultigrid::setupSolver()");
+  CH_TIME("FieldSolverGMG::setupSolver()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::setupSolver()" << endl;
+    pout() << "FieldSolverGMG::setupSolver()" << endl;
   }
 
   this->setupHelmholtzFactory(); // Set up the operator factory
@@ -443,17 +443,17 @@ FieldSolverMultigrid::setupSolver()
 }
 
 void
-FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
-                                              const MFAMRFluxData& a_permittivityFace,
-                                              const MFAMRIVData&   a_permittivityEB)
+FieldSolverGMG::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
+                                        const MFAMRFluxData& a_permittivityFace,
+                                        const MFAMRIVData&   a_permittivityEB)
 {
-  CH_TIME("FieldSolverMultigrid::setSolverPermittivities()");
+  CH_TIME("FieldSolverGMG::setSolverPermittivities()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::setSolverPermittivities()" << endl;
+    pout() << "FieldSolverGMG::setSolverPermittivities()" << endl;
   }
 
   if (!m_isSolverSetup) {
-    MayDay::Error("FieldSolverMultigrid::setSolverPermittivities -- must set up solver first!");
+    MayDay::Error("FieldSolverGMG::setSolverPermittivities -- must set up solver first!");
   }
 
   // Get the AMR operators and update the coefficients.
@@ -490,11 +490,11 @@ FieldSolverMultigrid::setSolverPermittivities(const MFAMRCellData& a_permittivit
 }
 
 void
-FieldSolverMultigrid::setPermittivities()
+FieldSolverGMG::setPermittivities()
 {
-  CH_TIME("FieldSolverMultigrid::setPermittivities()");
+  CH_TIME("FieldSolverGMG::setPermittivities()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::setPermittivities()" << endl;
+    pout() << "FieldSolverGMG::setPermittivities()" << endl;
   }
 
   // Parent method fills permittivities over the "valid" region.
@@ -559,22 +559,22 @@ FieldSolverMultigrid::setPermittivities()
 }
 
 void
-FieldSolverMultigrid::setupHelmholtzFactory()
+FieldSolverGMG::setupHelmholtzFactory()
 {
-  CH_TIME("FieldSolverMultigrid::setupHelmholtzFactory()");
+  CH_TIME("FieldSolverGMG::setupHelmholtzFactory()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::setupHelmholtzFactory()" << endl;
+    pout() << "FieldSolverGMG::setupHelmholtzFactory()" << endl;
   }
 
   // Kill the simulation if the use asked for stencils that are unreachable due to too few ghost cells.
   if (m_multigridBcOrder > m_amr->getNumberOfGhostCells()) {
-    MayDay::Abort("FieldSolverMultigrid.gmg_bc_order is larger than number of ghost cells");
+    MayDay::Abort("FieldSolverGMG.gmg_bc_order is larger than number of ghost cells");
   }
   if (m_multigridJumpOrder > m_amr->getNumberOfGhostCells()) {
-    MayDay::Abort("FieldSolverMultigrid.gmg_jump_order is larger than number of ghost cells");
+    MayDay::Abort("FieldSolverGMG.gmg_jump_order is larger than number of ghost cells");
   }
   if (!(m_multigridRelaxFactor > 0.0 && m_multigridRelaxFactor <= 2.0)) {
-    MayDay::Abort("FieldSolverMultigrid.gmg_relax_factor must be 0 < gmg_relax_factor <= 2 ");
+    MayDay::Abort("FieldSolverGMG.gmg_relax_factor must be 0 < gmg_relax_factor <= 2 ");
   }
 
   // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We
@@ -720,11 +720,11 @@ FieldSolverMultigrid::setupHelmholtzFactory()
 }
 
 void
-FieldSolverMultigrid::setupMultigrid()
+FieldSolverGMG::setupMultigrid()
 {
-  CH_TIME("FieldSolverMultigrid::setupMultigrid()");
+  CH_TIME("FieldSolverGMG::setupMultigrid()");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::setupMultigrid()" << endl;
+    pout() << "FieldSolverGMG::setupMultigrid()" << endl;
   }
 
   // This routine sets up a standard Chombo multigrid solver using the AMRMultiGrid template. Fortunately, MFHelmholtzOp implements
@@ -749,7 +749,7 @@ FieldSolverMultigrid::setupMultigrid()
     break;
   }
   default: {
-    MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in bottom solver");
+    MayDay::Error("FieldSolverGMG::setupMultigrid - logic bust in bottom solver");
 
     break;
   }
@@ -769,7 +769,7 @@ FieldSolverMultigrid::setupMultigrid()
     break;
   }
   default: {
-    MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in multigrid type selection");
+    MayDay::Error("FieldSolverGMG::setupMultigrid - logic bust in multigrid type selection");
 
     break;
   }
@@ -820,11 +820,11 @@ FieldSolverMultigrid::setupMultigrid()
 }
 
 Vector<long long>
-FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
+FieldSolverGMG::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
 {
-  CH_TIME("FieldSolverMultigrid::computeLoads(DisjointBoxLayout, int)");
+  CH_TIME("FieldSolverGMG::computeLoads(DisjointBoxLayout, int)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::computeLoads(DisjointBoxLayout, int)" << endl;
+    pout() << "FieldSolverGMG::computeLoads(DisjointBoxLayout, int)" << endl;
   }
 
   // This routine estimates the computational loads on a grid level. It does that by creating an operator (which we later delete)
@@ -855,11 +855,11 @@ FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_l
 }
 
 void
-FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const MFAMRCellData& a_potential) const
+FieldSolverGMG::computeElectricField(MFAMRCellData& a_electricField, const MFAMRCellData& a_potential) const
 {
-  CH_TIME("FieldSolverMultigrid::computeElectricField(MFAMRCellData, MFAMRCellData)");
+  CH_TIME("FieldSolverGMG::computeElectricField(MFAMRCellData, MFAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
+    pout() << "FieldSolverGMG::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
   }
 
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
@@ -883,11 +883,11 @@ FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const
 }
 
 void
-FieldSolverMultigrid::computeElectricField(MFAMRFluxData& a_electricField, const MFAMRCellData& a_potential) const
+FieldSolverGMG::computeElectricField(MFAMRFluxData& a_electricField, const MFAMRCellData& a_potential) const
 {
-  CH_TIME("FieldSolverMultigrid::computeElectricField(MFAMRFluxData, MFAMRCellData)");
+  CH_TIME("FieldSolverGMG::computeElectricField(MFAMRFluxData, MFAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::computeElectricField(MFAMRFluxData, MFAMRCellData)" << endl;
+    pout() << "FieldSolverGMG::computeElectricField(MFAMRFluxData, MFAMRCellData)" << endl;
   }
 
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
@@ -907,13 +907,13 @@ FieldSolverMultigrid::computeElectricField(MFAMRFluxData& a_electricField, const
 }
 
 void
-FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricField,
-                                           const phase::which_phase a_phase,
-                                           const MFAMRCellData&     a_potential) const
+FieldSolverGMG::computeElectricField(EBAMRCellData&           a_electricField,
+                                     const phase::which_phase a_phase,
+                                     const MFAMRCellData&     a_potential) const
 {
-  CH_TIME("FieldSolverMultigrid::computeElectricField(EBAMRCellData, phase, MFAMRCellData)");
+  CH_TIME("FieldSolverGMG::computeElectricField(EBAMRCellData, phase, MFAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::computeElectricField(EBAMRCellData, phase, MFAMRCellData)" << endl;
+    pout() << "FieldSolverGMG::computeElectricField(EBAMRCellData, phase, MFAMRCellData)" << endl;
   }
 
   CH_assert(a_electricField[0]->nComp() == SpaceDim);
@@ -942,13 +942,13 @@ FieldSolverMultigrid::computeElectricField(EBAMRCellData&           a_electricFi
 }
 
 void
-FieldSolverMultigrid::computeElectricField(EBAMRFluxData&           a_electricField,
-                                           const phase::which_phase a_phase,
-                                           const MFAMRCellData&     a_potential) const
+FieldSolverGMG::computeElectricField(EBAMRFluxData&           a_electricField,
+                                     const phase::which_phase a_phase,
+                                     const MFAMRCellData&     a_potential) const
 {
-  CH_TIME("FieldSolverMultigrid::computeElectricField(EBAMRFluxData, phase, MFAMRCellData)");
+  CH_TIME("FieldSolverGMG::computeElectricField(EBAMRFluxData, phase, MFAMRCellData)");
   if (m_verbosity > 5) {
-    pout() << "FieldSolverMultigrid::computeElectricField(EBAMRFluxData, phase, MFAMRCellData)" << endl;
+    pout() << "FieldSolverGMG::computeElectricField(EBAMRFluxData, phase, MFAMRCellData)" << endl;
   }
 
   CH_assert(a_electricField[0]->nComp() == SpaceDim);

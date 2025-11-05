@@ -21,7 +21,7 @@
 #include <CD_TracerParticleSolver.H>
 #include <CD_TracerParticle.H>
 #include <CD_FieldSolver.H>
-#include <CD_FieldSolverMultigrid.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_CdrSolver.H>
 #include <CD_CdrCTU.H>
 #include <CD_NamespaceHeader.H>
@@ -75,7 +75,7 @@ namespace Physics {
       F is the field solver type. 
       C is the convection-diffusion-reaction solver type. 
     */
-    template <typename P = TracerParticle<2, 3>, typename F = FieldSolverMultigrid, typename C = CdrCTU>
+    template <typename P = TracerParticle<2, 3>, typename F = FieldSolverGMG, typename C = CdrCTU>
     class DischargeInceptionStepper : public TimeStepper
     {
     public:
