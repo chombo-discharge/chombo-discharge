@@ -12,10 +12,6 @@
 #ifndef CD_FieldStepperImplem_H
 #define CD_FieldStepperImplem_H
 
-#warning "Double-check the field calculation near triple points -- it seems to be a bit high? Maybe a gradient bug?"
-#warning "Check if we can improve pathological multigrid cases on coarsened data"
-#warning "Remove all debug and development files"
-
 // Std includes
 #include <math.h>
 

@@ -1758,7 +1758,6 @@ EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>&       a_correction,
                                    dbl[din],
                                    din,
                                    redBlack);
-
       }
     }
   }
