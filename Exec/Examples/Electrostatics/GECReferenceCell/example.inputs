@@ -62,25 +62,25 @@ Driver.refine_dielectrics           = 0                   ## Refine dielectric s
 # ====================================================================================================
 # FieldSolverGMG class options
 # ====================================================================================================
-FieldSolverGMG.verbosity             = -1               ## Class verbosity
-FieldSolverGMG.jump_bc               = natural          ## Jump BC type ('natural' or 'saturation_charge')
-FieldSolverGMG.bc.x.lo               = neumann 0.0      ## Bc type (see docs)
-FieldSolverGMG.bc.x.hi               = neumann 0.0      ## Bc type (see docs)
-FieldSolverGMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverGMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverGMG.bc.z.lo               = neumann 0.0      ## Bc type (see docs)
-FieldSolverGMG.bc.z.hi               = neumann 0.0      ## Bc type (see docs)
-FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
-FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
-FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
-FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
-FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
+FieldSolverGMG.verbosity             = -1             ## Class verbosity
+FieldSolverGMG.jump_bc               = natural        ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverGMG.bc.x.lo               = neumann 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.x.hi               = neumann 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.y.lo               = neumann 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.y.hi               = neumann 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.z.lo               = neumann 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.z.hi               = neumann 0.0    ## Bc type (see docs)
+FieldSolverGMG.plt_vars              = phi rho E      ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
+FieldSolverGMG.use_regrid_slopes     = true           ## Use slopes when regridding or not
+FieldSolverGMG.kappa_source          = true           ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverGMG.filter_rho            = 0              ## Number of filterings of space charge before Poisson solve
+FieldSolverGMG.filter_potential      = 0              ## Number of filterings of potential after Poisson solve
 
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = false        ## Use default multigrid settings or not (see documentation)
 FieldSolverGMG.gmg_pre_smooth               = 24           ## Number of relaxations in downsweep
 FieldSolverGMG.gmg_post_smooth              = 24           ## Number of relaxations in upsweep
-FieldSolverGMG.gmg_bott_smooth              = 24           ## Number of at bottom level (before dropping to bottom solver)
+FieldSolverGMG.gmg_bott_smooth              = 0            ## Number of at bottom level (before dropping to bottom solver)
 FieldSolverGMG.gmg_precond_smooth           = 10           ## Number of smoothing steps in the preconditioner
 FieldSolverGMG.gmg_min_iter                 = 5            ## Minimum number of iterations
 FieldSolverGMG.gmg_max_iter                 = 32           ## Maximum number of iterations
@@ -93,7 +93,7 @@ FieldSolverGMG.gmg_bc_weight                = 1            ## Boundary condition
 FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
 FieldSolverGMG.gmg_jump_weight              = 1            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
-FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverGMG.gmg_bottom_solver            = simple 32    ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now.
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 FieldSolverGMG.gmg_relax_factor             = 1.5          ## Adjustable SOR factor
