@@ -24,10 +24,17 @@ LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int
   Vector<Real> ret(a_displacements.size(), 1.0);
 
   if (a_pow > 0) {
+    // Figure out the min distance, and normalize every weight with this distance. We do not use physical
+    // distances when weighting the equations :)
+    Real normDist = 0.0;
     for (int i = 0; i < a_displacements.size(); i++) {
-      const RealVect& d   = a_displacements[i];
-      const Real      len = d.vectorLength();
-      const Real      w   = std::pow(len, -a_pow);
+      normDist = std::max(normDist, a_displacements[i].vectorLength());
+    }
+
+    // Set weightings = 1/(1 + |displacement|/normDist)^a_pow
+    for (int i = 0; i < a_displacements.size(); i++) {
+      const Real len = a_displacements[i].vectorLength() / normDist;
+      const Real w   = std::pow(1 + len, -a_pow);
 
       ret[i] = w;
     }
