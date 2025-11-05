@@ -62,26 +62,26 @@ Driver.refine_dielectrics           = 0                    ## Refine dielectric 
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-FieldSolverMultigrid.verbosity             = -1               ## Class verbosity
-FieldSolverMultigrid.jump_bc               = saturation_charge          ## Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.bc.x.lo               = neumann 0.0      ## Bc type.
-FieldSolverMultigrid.bc.x.hi               = neumann 0.0      ## Bc type.
-FieldSolverMultigrid.bc.y.lo               = dirichlet 0.0    ## Bc type.
-FieldSolverMultigrid.bc.y.hi               = dirichlet 1.0    ## Bc type.
-FieldSolverMultigrid.bc.z.lo               = neumann 0.0      ## Bc type.
-FieldSolverMultigrid.bc.z.hi               = neumann 1.0      ## Bc type.
+FieldSolverMultigrid.verbosity             = -1                     ## Class verbosity
+FieldSolverMultigrid.jump_bc               = saturation_charge      ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverMultigrid.bc.x.lo               = neumann 0.0            ## Bc type.
+FieldSolverMultigrid.bc.x.hi               = neumann 0.0            ## Bc type.
+FieldSolverMultigrid.bc.y.lo               = dirichlet 0.0          ## Bc type.
+FieldSolverMultigrid.bc.y.hi               = dirichlet 1.0          ## Bc type.
+FieldSolverMultigrid.bc.z.lo               = neumann 0.0            ## Bc type.
+FieldSolverMultigrid.bc.z.hi               = neumann 1.0            ## Bc type.
 FieldSolverMultigrid.plt_vars              = phi rho E res sigma    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
-FieldSolverMultigrid.use_regrid_slopes     = true             ## Use slopes when regridding or not
-FieldSolverMultigrid.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
-FieldSolverMultigrid.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
-FieldSolverMultigrid.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
+FieldSolverMultigrid.use_regrid_slopes     = true                   ## Use slopes when regridding or not
+FieldSolverMultigrid.kappa_source          = true                   ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverMultigrid.filter_rho            = 0                      ## Number of filterings of space charge before Poisson solve
+FieldSolverMultigrid.filter_potential      = 0                      ## Number of filterings of potential after Poisson solve
 
 FieldSolverMultigrid.gmg_verbosity                = 10           ## GMG verbosity
 FieldSolverMultigrid.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
 FieldSolverMultigrid.gmg_pre_smooth               = 10           ## Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth              = 10           ## Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth              = 0            ## NUmber of relaxations before dropping to bottom solver
-FieldSolverMultigrid.gmg_precond_smooth           = 4                       ## Number of smoothing steps in the preconditioner
+FieldSolverMultigrid.gmg_precond_smooth           = 4            ## Number of smoothing steps in the preconditioner
 FieldSolverMultigrid.gmg_min_iter                 = 5            ## Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter                 = 32           ## Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol                 = 1.E-10       ## Residue tolerance
