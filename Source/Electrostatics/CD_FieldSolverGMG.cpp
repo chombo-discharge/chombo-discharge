@@ -187,7 +187,7 @@ FieldSolverGMG::parseMultigridSettings()
     m_multigridBcWeight      = 4;
     m_multigridJumpOrder     = 1;
     m_multigridJumpWeight    = 4;
-    m_multigridRelaxFactor   = 1.0;
+    m_multigridRelaxFactor   = 1.5;
     m_multigridPreSmooth     = 12;
     m_multigridPostSmooth    = 12;
     m_multigridBottomSmooth  = 0;
