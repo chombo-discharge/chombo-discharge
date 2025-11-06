@@ -1802,7 +1802,8 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
       }
     };
 
-    // Irregular red-black kernel.
+    // Irregular red-black kernel -- note that this is on the multi-valued cells. Singly-cut cells
+    // are done in regularKernel.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect& iv = vof.gridIndex();
 
@@ -1966,7 +1967,7 @@ EBHelmholtzOp::computeDiagWeight()
     auto betaKernel = [&](const VolIndex& vof) -> void {
       const IntVect iv = vof.gridIndex();
 
-      VoFStencil& curStencil = m_relaxStencils[din](vof, m_comp);
+      VoFStencil curStencil = m_relaxStencils[din](vof, m_comp);
 
       Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
       for (int dir = 0; dir < SpaceDim; dir++) {
@@ -2041,10 +2042,11 @@ EBHelmholtzOp::computeRelaxationCoefficient()
       // m_alphaDiagWeight holds kappa * A
       const Real alphaWeight = m_alpha * m_alphaDiagWeight[din](vof, m_comp);
 
-      // m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells.
+      // m_betaWeight holds the diagonal part of V^-1 * sum_faces(b*grad(phi)*dA_f) in the cut-cells. This includes
+      // the face fractions and the b-coefficient.
       const Real betaWeight = m_beta * m_betaDiagWeight[din](vof, m_comp);
 
-      m_relCoef[din](vof, m_comp) = m_relaxFactor / (alphaWeight + betaWeight);
+      m_relCoef[din](vof, m_comp) = 1.0 / (alphaWeight + betaWeight);
     };
 
     BoxLoops::loop(m_vofIterStenc[din], irregularKernel);
