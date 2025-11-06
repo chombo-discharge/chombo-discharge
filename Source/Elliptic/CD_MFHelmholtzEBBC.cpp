@@ -175,18 +175,24 @@ MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>&
   const RealVect normal  = ebisbox.normal(a_vof);
 
   const int lsqRadius = a_order;
-  const int lsqOrder  = a_order;
   const int lsqWeight = a_weight;
+  const int lsqOrder  = a_order;
 
-  const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
-                                                                a_neighborhood,
-                                                                m_dataLocation,
-                                                                ebisbox,
-                                                                m_dx,
-                                                                lsqRadius,
-                                                                lsqWeight,
-                                                                lsqOrder,
-                                                                addStartVof);
+  const Real coordDx = 1.0 / lsqRadius;
+
+  // We use normalized coordinates when doing the least squares solve. This also means that
+  // we need to scale back after getting the stencil.
+  VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
+                                                          a_neighborhood,
+                                                          m_dataLocation,
+                                                          ebisbox,
+                                                          coordDx,
+                                                          lsqRadius,
+                                                          lsqWeight,
+                                                          lsqOrder,
+                                                          addStartVof);
+
+  gradStencil *= coordDx / m_dx;
 
   if (gradStencil.size() > 0 && normal != RealVect::Zero) {
 
