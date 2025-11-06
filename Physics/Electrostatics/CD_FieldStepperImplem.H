@@ -24,7 +24,7 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
-#error "With enough smoothings we always converge, it seems. Should check if there are pathologies in the smoothign step where we shouldn't add a correction"
+#warning "With enough smoothings we always converge, it seems. Should check if there are pathologies in the smoothign step where we shouldn't add a correction"
 
 namespace Physics {
   namespace Electrostatics {
