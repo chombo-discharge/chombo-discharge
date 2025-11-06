@@ -84,7 +84,6 @@ MFHelmholtzEBBC::defineMultiPhase()
 
     // Safety hook becase jumpBC might not have defined the data holders if we're not doing multiphase.
     if (m_jumpBC->isMultiPhase()) {
-
       VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, din);
 
       const BaseIVFAB<VoFStencil>& jumpStencils = (m_jumpBC->getGradPhiStencils())[din].getIVFAB(m_phase);
@@ -175,14 +174,18 @@ MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>&
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const RealVect normal  = ebisbox.normal(a_vof);
 
+  const int lsqRadius = a_order;
+  const int lsqOrder  = a_order;
+  const int lsqWeight = a_weight;
+
   const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
                                                                 a_neighborhood,
                                                                 m_dataLocation,
                                                                 ebisbox,
                                                                 m_dx,
-                                                                a_order,
-                                                                a_weight,
-                                                                a_order,
+                                                                lsqRadius,
+                                                                lsqWeight,
+                                                                lsqOrder,
                                                                 addStartVof);
 
   if (gradStencil.size() > 0 && normal != RealVect::Zero) {
