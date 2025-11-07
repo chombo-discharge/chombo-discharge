@@ -12,7 +12,7 @@ var searchData=
   ['itokmcphotoreaction_9',['ItoKMCPhotoReaction',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhotoReaction.html',1,'Physics::ItoKMC']]],
   ['itokmcphysics_10',['ItoKMCPhysics',['../classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html',1,'Physics::ItoKMC']]],
   ['itokmcstepper_11',['ItoKMCStepper',['../classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html',1,'Physics::ItoKMC']]],
-  ['itokmcstepper_3c_20itosolver_2c_20cdrctu_2c_20mcphoto_2c_20fieldsolvermultigrid_20_3e_12',['ItoKMCStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverMultigrid &gt;',['../classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html',1,'Physics::ItoKMC']]],
+  ['itokmcstepper_3c_20itosolver_2c_20cdrctu_2c_20mcphoto_2c_20fieldsolvergmg_20_3e_12',['ItoKMCStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverGMG &gt;',['../classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html',1,'Physics::ItoKMC']]],
   ['itokmcstreamertagger_13',['ItoKMCStreamerTagger',['../classPhysics_1_1ItoKMC_1_1ItoKMCStreamerTagger.html',1,'Physics::ItoKMC']]],
   ['itokmcsurfacereaction_14',['ItoKMCSurfaceReaction',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReaction.html',1,'Physics::ItoKMC']]],
   ['itokmcsurfacereactions_15',['ItoKMCSurfaceReactions',['../classPhysics_1_1ItoKMC_1_1ItoKMCSurfaceReactions.html',1,'Physics::ItoKMC']]],

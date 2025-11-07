@@ -159,8 +159,8 @@
 <area shape="poly" id="edge105_Node000055_Node000057" title=" " alt="" coords="3615,336,3073,393,3073,387,3615,331"/>
 <area shape="rect" id="Node000073" href="$CD__ComputationalGeometry_8H.html" title="Declaration of base class for defining geometries." alt="" coords="3567,460,3788,485"/>
 <area shape="poly" id="edge114_Node000055_Node000073" title=" " alt="" coords="3680,339,3680,446,3675,446,3675,339"/>
-<area shape="rect" id="Node000163" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="3863,460,3998,485"/>
-<area shape="poly" id="edge115_Node000055_Node000163" title=" " alt="" coords="3699,337,3900,451,3898,456,3696,341"/>
+<area shape="rect" id="Node000164" href="$CD__CdrSpecies_8H.html" title="Declaration of a class that passes information into CdrSolver (e.g., initial conditions)." alt="" coords="3863,460,3998,485"/>
+<area shape="poly" id="edge115_Node000055_Node000164" title=" " alt="" coords="3699,337,3900,451,3898,456,3696,341"/>
 <area shape="rect" id="Node000173" href="$CD__CdrDomainBC_8H.html" title="Declaration of domain boundary condition types for CdrSolver." alt="" coords="3338,460,3491,485"/>
 <area shape="poly" id="edge119_Node000055_Node000173" title=" " alt="" coords="3632,341,3573,360,3512,389,3470,420,3436,452,3432,448,3467,416,3509,384,3571,355,3630,336"/>
 <area shape="poly" id="edge112_Node000057_Node000020" title=" " alt="" coords="2935,409,2612,437,2359,463,2184,493,2087,514,2013,536,1992,549,1969,561,1916,574,1846,584,1675,601,1494,612,1337,618,1337,613,1493,606,1675,596,1845,579,1915,568,1967,556,1989,544,2011,531,2086,509,2183,488,2358,457,2611,432,2935,403"/>
@@ -171,9 +171,9 @@
 <area shape="poly" id="edge108_Node000073_Node000011" title=" " alt="" coords="3698,483,3766,524,3763,528,3695,488"/>
 <area shape="poly" id="edge109_Node000073_Node000020" title=" " alt="" coords="3667,488,3621,526,3590,546,3555,561,3517,568,3447,574,3226,584,2572,602,1337,620,1337,614,2572,596,3225,579,3447,568,3517,562,3554,556,3587,541,3618,522,3664,484"/>
 <area shape="poly" id="edge110_Node000073_Node000021" title=" " alt="" coords="3678,487,3665,524,3652,544,3635,561,3600,573,3541,583,3373,600,3180,611,3010,618,3010,612,3179,606,3373,595,3541,578,3599,568,3632,556,3648,541,3660,522,3672,485"/>
-<area shape="poly" id="edge116_Node000163_Node000011" title=" " alt="" coords="3910,488,3831,529,3829,524,3908,483"/>
-<area shape="poly" id="edge117_Node000163_Node000020" title=" " alt="" coords="3927,487,3900,525,3880,545,3856,561,3750,571,3505,581,2756,598,1337,619,1337,614,2756,593,3505,576,3750,566,3854,556,3877,541,3896,522,3922,484"/>
-<area shape="poly" id="edge118_Node000163_Node000021" title=" " alt="" coords="3933,486,3925,524,3915,544,3900,561,3881,570,3851,579,3764,592,3650,603,3518,610,3240,618,3010,621,3010,615,3240,613,3518,605,3650,597,3764,587,3850,573,3879,565,3897,557,3911,541,3920,522,3927,485"/>
+<area shape="poly" id="edge116_Node000164_Node000011" title=" " alt="" coords="3910,488,3831,529,3829,524,3908,483"/>
+<area shape="poly" id="edge117_Node000164_Node000020" title=" " alt="" coords="3927,487,3900,525,3880,545,3856,561,3750,571,3505,581,2756,598,1337,619,1337,614,2756,593,3505,576,3750,566,3854,556,3877,541,3896,522,3922,484"/>
+<area shape="poly" id="edge118_Node000164_Node000021" title=" " alt="" coords="3933,486,3925,524,3915,544,3900,561,3881,570,3851,579,3764,592,3650,603,3518,610,3240,618,3010,621,3010,615,3240,613,3518,605,3650,597,3764,587,3850,573,3879,565,3897,557,3911,541,3920,522,3927,485"/>
 <area shape="poly" id="edge122_Node000173_Node000020" title=" " alt="" coords="3356,488,3138,525,2999,545,2859,561,2640,579,2416,593,1981,611,1604,619,1337,621,1337,616,1604,614,1981,606,2416,588,2640,574,2858,556,2998,540,3137,520,3355,483"/>
 <area shape="poly" id="edge123_Node000173_Node000021" title=" " alt="" coords="3409,487,3379,525,3357,545,3332,561,3273,580,3190,595,3010,614,3009,609,3189,589,3272,575,3330,556,3354,541,3375,521,3405,484"/>
 <area shape="poly" id="edge120_Node000173_Node000029" title=" " alt="" coords="3338,485,2833,543,2832,538,3338,480"/>

@@ -172,10 +172,10 @@ By using lexicographical ordering of the multi-indices, it is straightforward to
 E.g., for <span class="math notranslate nohighlight">\(Q = 1\)</span> in two dimensions:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix}
-1 &amp; (x_1 - x) &amp; (y - y_1) \\
-1 &amp; (x_2 - x) &amp; (y - y_2) \\
+1 &amp; (x_1 - x) &amp; (y_1 - y) \\
+1 &amp; (x_2 - x) &amp; (y_1 - y) \\
 \vdots &amp; \ddots &amp; \vdots \\
-1 &amp; (x_N - x) &amp; (y - y_N) \\
+1 &amp; (x_N - x) &amp; (y_N - y) \\
 \end{pmatrix}
 \begin{pmatrix}
 f            \\
@@ -215,10 +215,10 @@ This path is defined by walking through neighboring grid cells without changing 
 <p>Weights can also be added to each equation, e.g. to ensure that close grid points are more important than remote ones:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix}
-w_1 &amp; w_1(x_1 - x) &amp; w_N(y - y_1) \\
-w_2 &amp; w_2(x_2 - x) &amp; w_N(y - y_2) \\
+w_1 &amp; w_1(x_1 - x) &amp; w_1(y_1 - y) \\
+w_2 &amp; w_2(x_2 - x) &amp; w_2(y_2 - y) \\
 \vdots &amp; \ddots &amp; \vdots \\
-w_N &amp; w_N(x_N - x) &amp; w_N(y - y_N) \\
+w_N &amp; w_N(x_N - x) &amp; w_N(y_N - y) \\
 \end{pmatrix}
 \begin{pmatrix}
 f            \\
@@ -275,10 +275,10 @@ f(\mathbf{x}_N)
 E.g. if <span class="math notranslate nohighlight">\(f\left(\mathbf{x}\right)\)</span> happens to be known, the system of equations can be rewritten as</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix}
-w_1(x_1 - x) &amp; w_N(y - y_1) \\
-w_2(x_2 - x) &amp; w_N(y - y_2) \\
+w_1(x_1 - x) &amp; w_1(y_1 - y) \\
+w_2(x_2 - x) &amp; w_2(y_2 - y) \\
 \vdots &amp; \vdots \\
-w_N(x_N - x) &amp; w_N(y - y_N) \\
+w_N(x_N - x) &amp; w_N(y_N - y) \\
 \end{pmatrix}
 \begin{pmatrix}
 \partial_x f \\

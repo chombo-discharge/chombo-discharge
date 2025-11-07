@@ -95,9 +95,9 @@ Inheritance diagram for FieldSolver:</div>
 <div class="dyncontent">
 <div class="center"><img src="classFieldSolver__inherit__graph.png" border="0" usemap="#aFieldSolver_inherit__map" alt="Inheritance graph"/></div>
 <map name="aFieldSolver_inherit__map" id="aFieldSolver_inherit__map">
-<area shape="rect" title="Base class for electrostatic solvers." alt="" coords="34,5,129,31"/>
-<area shape="rect" href="classFieldSolverMultigrid.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="5,79,157,104"/>
-<area shape="poly" title=" " alt="" coords="84,44,84,79,79,79,79,44"/>
+<area shape="rect" title="Base class for electrostatic solvers." alt="" coords="21,5,116,31"/>
+<area shape="rect" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid." alt="" coords="5,79,132,104"/>
+<area shape="poly" title=" " alt="" coords="71,44,71,79,66,79,66,44"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -739,7 +739,7 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#ab72c353477e21a22e7ee5692c7ed3b73">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a1614a34e51f0d94c6dc98b7eb927d97f">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -793,7 +793,7 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#a6d1b52f36ccb73d28d18756f12085716">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#aa4b70fcdb2f2e5075766a687eafc9277">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -840,7 +840,7 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#a2a064ed1a63c84c8c9a04e2866b3b52e">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a6f75085eb025109e892c01c611e744bf">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -887,7 +887,7 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#a0d2adeaf9d09c4704245900d7ae4f3fc">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a8b34ca0bf9096a34718b58a073b6f87a">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -957,7 +957,7 @@ Static Protected Attributes</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>The return vector should have the same order as the boxes in a_dbl. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">E.g</a>. ret[0] must be the load for <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">a_dbl.boxArray()</a>[0];</dd></dl>
 <p>The default implementation returns the number of cells in the grid patch as a proxy for the load. </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a7ba9896c4c868488216cf9835961479e">FieldSolverMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a9b50d8b8bed89e0c35e2d5f117137540">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1360,7 +1360,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Parse options (for derived class) </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#ad418125293c7f4fe2b6bdc5b22197192">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a84846bcabd7ab2560df9d1d9e2cb72ac">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1389,7 +1389,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Parse runtime options (for derived class) </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#a8307e12432089f128e7f98b3480e4fa8">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a4b8b1e553af21fc7798c4f28470964ab">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1481,7 +1481,7 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <p>This allocates m_cache which gets a copy of m_potential </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a49cbd8a4d52a324ebb87dcf6c02a1b7b">FieldSolverMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a55a6dbca16271c9372bdb287d6a2df6c">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1510,7 +1510,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Register operators for AMR. Derived classes have to implement these. </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#a7e63d9f9dddb049fd27355f4133d9d48">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a416f8cbbf19f2e2cae601ec3b6192a00">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1565,7 +1565,7 @@ Static Protected Attributes</h2></td></tr>
 </dl>
 <p>This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#ad2ff25c7cdf35abd6d7c210d3e98fa05">FieldSolverMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#ae41d752e9d02e7b498d9fcfae8d2d0cd">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -1998,7 +1998,7 @@ Static Protected Attributes</h2></td></tr>
 <p>Set the permittivities. </p>
 <p>This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB. </p>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a7a46c76a189f4d11959ac4715d196e31">FieldSolverMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#a1809fbefa9d47cdb160536ca6d70971a">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -2155,9 +2155,9 @@ Static Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classFieldSolverMultigrid.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverMultigrid</a> to change permittivities/conductivities under the hood of the multigrid solver. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Used by <a class="el" href="classFieldSolverGMG.html" title="Implementation of FieldSolver which uses multigrid.">FieldSolverGMG</a> to change permittivities/conductivities under the hood of the multigrid solver. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classFieldSolverMultigrid.html#a5f236c23030a758bc4ee54520e346c19">FieldSolverMultigrid</a>.</p>
+<p>Reimplemented in <a class="el" href="classFieldSolverGMG.html#add5e2de507c3c032e14a0a97fd31891d">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -2231,7 +2231,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Set up solver routines. </p>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#a2e28a48d4ce140b46dc2ebec38da88af">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a77474e5dd5e6782ae07696be3c7d2924">FieldSolverGMG</a>.</p>
 
 </div>
 </div>
@@ -2391,7 +2391,7 @@ Static Protected Attributes</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>True if we found a solution and false otherwise. </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>a_sigma must be defined on the gas phase. </dd></dl>
 
-<p>Implemented in <a class="el" href="classFieldSolverMultigrid.html#ad7afdd05f87b20fbf69dfe9faaf382df">FieldSolverMultigrid</a>.</p>
+<p>Implemented in <a class="el" href="classFieldSolverGMG.html#a6f4e7e6e94d332979a5ae29796b63836">FieldSolverGMG</a>.</p>
 
 </div>
 </div>

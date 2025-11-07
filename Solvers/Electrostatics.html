@@ -98,7 +98,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#calling-the-solve-function">Calling the solve function</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fieldsolvermultigrid">FieldSolverMultigrid</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#fieldsolvergmg">FieldSolverGMG</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#solver-configuration">Solver configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#setting-boundary-conditions">Setting boundary conditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#algorithmic-adjustments">Algorithmic adjustments</a></li>
@@ -197,7 +197,7 @@ The code for the electrostatics solver is given in <code class="file docutils li
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is an abstract class for electrostatic solves in an EB context and contains most routines required for setting up and solving electrostatic problems.
 <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> can solve over three phases, gas, dielectric, and electrode, and thus it is uses <code class="docutils literal notranslate"><span class="pre">MFAMRCellData</span></code> functionality where data is defined over multiple phases (see <a class="reference internal" href="../Source/MeshData.html#chap-meshdata"><span class="std std-ref">Mesh data</span></a>).</p>
 <p>Note that in order to separate the electrostatic solver interface from the implementation, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> is a pure class without knowledge of numerical discretizations.
-Currently, our only supported subclass is <a class="reference internal" href="#chap-fieldsolvermultigrid"><span class="std std-ref">FieldSolverMultigrid</span></a>, which supplies a finite-volume discretization that is solved with geometric multigrid.</p>
+Currently, our only supported subclass is <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a>, which supplies a finite-volume discretization that is solved with geometric multigrid.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>See the <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classFieldSolver.html">FieldSolver C++ API</a> for the complete interface.</p>
@@ -209,7 +209,7 @@ Currently, our only supported subclass is <a class="reference internal" href="#c
 <p>We point out that this equation can be enforced in various formats.
 The most common case is that <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> are free parameters and <span class="math notranslate nohighlight">\(\sigma\)</span> is a fixed parameter.
 However, we <em>can</em> also fix <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span> on one side of the boundary and let <span class="math notranslate nohighlight">\(\sigma\)</span> be the free parameter.
-When using <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> (see <a class="reference internal" href="#chap-fieldsolvermultigrid"><span class="std std-ref">FieldSolverMultigrid</span></a>), users can choose between these two natural boundary conditions, see <a class="reference internal" href="#chap-poissonebbc"><span class="std std-ref">EB boundary conditions</span></a>.</p>
+When using <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> (see <a class="reference internal" href="#chap-fieldsolvergmg"><span class="std std-ref">FieldSolverGMG</span></a>), users can choose between these two natural boundary conditions, see <a class="reference internal" href="#chap-poissonebbc"><span class="std std-ref">EB boundary conditions</span></a>.</p>
 </section>
 <section id="using-fieldsolver">
 <h2>Using FieldSolver<a class="headerlink" href="#using-fieldsolver" title="Permalink to this heading"></a></h2>
@@ -257,8 +257,8 @@ Note that on multifluid-boundaries the boundary condition is enforced by the con
 Domain boundary condition <em>types</em> are parsed through a member function <code class="docutils literal notranslate"><span class="pre">FieldSolver::parseDomainBc</span></code>.
 This function will read string identifiers from the input script, and these identifiers are either in the format <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span> <span class="pre">&lt;float&gt;</span></code> (simplified format) or in the format <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span></code> (general format).
 For setting general types of Neumann or Dirichlet BCs on the domain sides, one will specify</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.x.low  = dirichlet_custom
-FieldSolverMultigrid.bc.x.high = dirichlet_neumann
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.x.low  = dirichlet_custom
+FieldSolverGMG.bc.x.high = dirichlet_neumann
 </pre></div>
 </div>
 <p>Unfortunately, due to the many degrees of freedom in setting domain boundary conditions, the procedure is a bit convoluted.
@@ -286,8 +286,8 @@ These functions are then directly processed by the numerical discretizations.</p
 <p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> also supports a simplified method of setting the domain boundary conditions, in which case the user will specify Neumann or Dirichlet values (rather than functions) for each domain side.
 These values are usually, but not necessarily, constant values.</p>
 <p>In this case one will use an identifier <code class="docutils literal notranslate"><span class="pre">&lt;string&gt;</span> <span class="pre">&lt;float&gt;</span></code> in the input script, like so:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.x.low  = neumann   0.0
-FieldSolverMultigrid.bc.x.high = dirichlet 1.0
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.x.low  = neumann   0.0
+FieldSolverGMG.bc.x.high = dirichlet 1.0
 </pre></div>
 </div>
 <p>The floating point number has a slightly different interpretation for the two types of BCs.
@@ -311,8 +311,8 @@ For Dirichlet boundary conditions the solver will always multiply the provided i
 That is, the function <code class="docutils literal notranslate"><span class="pre">func(a_pos,</span> <span class="pre">a_time)</span></code> is the space-time function set through <code class="docutils literal notranslate"><span class="pre">setDomainSideBcFunction</span></code>.
 Recall that, by default, this function is set to one so that the default voltage that is parsed into the numerical discretization is simply the specified voltage multiplied by the specified fraction in the input script.
 For example, using</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.bc.y.low  = dirichlet 0.0
-FieldSolverMultigrid.bc.y.high = dirichlet 1.0
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.y.low  = dirichlet 0.0
+FieldSolverGMG.bc.y.high = dirichlet 1.0
 </pre></div>
 </div>
 <p>will the set voltage on the lower y-plane to ground and the voltage on the upper y-plane to the live voltage.
@@ -360,7 +360,7 @@ I.e. the boundary condition function that is passed into the numerical discretiz
 <h3>Electrodes<a class="headerlink" href="#electrodes" title="Permalink to this heading"></a></h3>
 <p>For the current <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> the natural BC at the EB is Dirichlet with a specified voltage, whereas on dielectrics we enforce <a class="reference internal" href="#equation-gaussbc">Eq. 8</a>.
 The voltage on the electrodes are automatically retrieved from the specified voltages on the electrodes in the geometry being used (see <a class="reference internal" href="../Source/ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a>).
-The exception to this is that while <a class="reference internal" href="../Source/ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a> specifies that an electrode will be at some fraction of a specified voltage, <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> uses this fraction <em>and</em> the specified voltage wave form in <code class="docutils literal notranslate"><span class="pre">setVoltage</span></code>.</p>
+The exception to this is that while <a class="reference internal" href="../Source/ComputationalGeometry.html#chap-computationalgeometry"><span class="std std-ref">ComputationalGeometry</span></a> specifies that an electrode will be at some fraction of a specified voltage, <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> uses this fraction <em>and</em> the specified voltage wave form in <code class="docutils literal notranslate"><span class="pre">setVoltage</span></code>.</p>
 <p>To understand how the voltage on the electrode is being set, we first remark that our implementation uses a completely general specification of the voltage on each electrode in both space and time.
 This voltage has the form</p>
 <div class="math notranslate nohighlight">
@@ -432,55 +432,58 @@ This is encapsulated by the pure member function</p>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">a_phi</span></code> is the resulting potential that was computing with the space charge density <code class="docutils literal notranslate"><span class="pre">a_rho</span></code>, and surface charge density <code class="docutils literal notranslate"><span class="pre">a_sigma</span></code>.</p>
 </section>
-<section id="fieldsolvermultigrid">
-<span id="chap-fieldsolvermultigrid"></span><h2>FieldSolverMultigrid<a class="headerlink" href="#fieldsolvermultigrid" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 7</a>, and is currently the only implementation of <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>.</p>
-<p>The discretization used by <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> is described in <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
-The underlying solver type is a Helmholtz solver, but <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> considers only the Laplacian term.
+<section id="fieldsolvergmg">
+<span id="chap-fieldsolvergmg"></span><h2>FieldSolverGMG<a class="headerlink" href="#fieldsolvergmg" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> implements a multigrid routine for solving <a class="reference internal" href="#equation-poisson">Eq. 7</a>, and is currently the only implementation of <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code>.</p>
+<p>The discretization used by <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> is described in <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.
+The underlying solver type is a Helmholtz solver, but <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> considers only the Laplacian term.
 For further details on the spatial discretization, see <a class="reference internal" href="../Source/LinearSolvers.html#chap-linearsolvers"><span class="std std-ref">Linear solvers</span></a>.</p>
 <section id="solver-configuration">
 <h3>Solver configuration<a class="headerlink" href="#solver-configuration" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> has a number of switches for determining how it operates.
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> has a number of switches for determining how it operates.
 Some of these switches are intended for parsing boundary conditions, whereas others are settings for operating multigrid or for I/O.
 The current list of configuration options are indicated below</p>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-number">Listing 26 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="code-block-caption"><span class="caption-number">Listing 26 </span><span class="caption-text">Input options for the <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> class. Runtime adjustable options are highlighted.</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span># ====================================================================================================
-# FieldSolverMultigrid class options
+# FieldSolverGMG class options
 # ====================================================================================================
-<span class="hll">FieldSolverMultigrid.verbosity             = -1               ## Class verbosity
-</span>FieldSolverMultigrid.jump_bc               = natural          ## Jump BC type (&#39;natural&#39; or &#39;saturation_charge&#39;)
-FieldSolverMultigrid.bc.x.lo               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverMultigrid.bc.x.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverMultigrid.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverMultigrid.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverMultigrid.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverMultigrid.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverMultigrid.plt_vars              = phi rho E        ## Plot variables: &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;perm&#39;, &#39;sigma&#39;, &#39;Esol&#39;
-<span class="hll">FieldSolverMultigrid.use_regrid_slopes     = true             ## Use slopes when regridding or not
-</span><span class="hll">FieldSolverMultigrid.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
-</span><span class="hll">FieldSolverMultigrid.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
-</span><span class="hll">FieldSolverMultigrid.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
+<span class="hll">FieldSolverGMG.verbosity             = -1               ## Class verbosity
+</span>FieldSolverGMG.jump_bc               = natural          ## Jump BC type (&#39;natural&#39; or &#39;saturation_charge&#39;)
+FieldSolverGMG.bc.x.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.x.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
+FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;perm&#39;, &#39;sigma&#39;, &#39;Esol&#39;
+<span class="hll">FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
+</span><span class="hll">FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
+</span><span class="hll">FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
+</span><span class="hll">FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
 </span>
-<span class="hll">FieldSolverMultigrid.gmg_verbosity         = -1           ## GMG verbosity
-</span><span class="hll">FieldSolverMultigrid.gmg_pre_smooth        = 16           ## Number of relaxations in downsweep
-</span><span class="hll">FieldSolverMultigrid.gmg_post_smooth       = 16           ## Number of relaxations in upsweep
-</span><span class="hll">FieldSolverMultigrid.gmg_bott_smooth       = 16           ## Number of at bottom level (before dropping to bottom solver)
-</span><span class="hll">FieldSolverMultigrid.gmg_min_iter          = 5            ## Minimum number of iterations
-</span><span class="hll">FieldSolverMultigrid.gmg_max_iter          = 32           ## Maximum number of iterations
-</span><span class="hll">FieldSolverMultigrid.gmg_exit_tol          = 1.E-10       ## Residue tolerance
-</span><span class="hll">FieldSolverMultigrid.gmg_exit_hang         = 0.2          ## Solver hang
-</span><span class="hll">FieldSolverMultigrid.gmg_min_cells         = 8            ## Bottom drop
-</span><span class="hll">FieldSolverMultigrid.gmg_drop_order        = 0            ## Drop stencil order to 1 if domain is coarser than this.
-</span><span class="hll">FieldSolverMultigrid.gmg_bc_order          = 2            ## Boundary condition order for multigrid
-</span><span class="hll">FieldSolverMultigrid.gmg_bc_weight         = 1            ## Boundary condition weights (for least squares)
-</span><span class="hll">FieldSolverMultigrid.gmg_jump_order        = 2            ## Boundary condition order for jump conditions
-</span><span class="hll">FieldSolverMultigrid.gmg_jump_weight       = 1            ## Boundary condition weight for jump conditions (for least squares)
-</span><span class="hll">FieldSolverMultigrid.gmg_reduce_order      = false        ## If true, always use order=1 EB stencils in coarsened cells
-</span><span class="hll">FieldSolverMultigrid.gmg_bottom_solver     = bicgstab     ## Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
-</span><span class="hll">FieldSolverMultigrid.gmg_cycle             = vcycle       ## Cycle type. Only &#39;vcycle&#39; supported for now.
-</span><span class="hll">FieldSolverMultigrid.gmg_smoother          = red_black    ## Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;
-</span></pre></div>
+<span class="hll">FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
+</span><span class="hll">FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
+</span><span class="hll">FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
+</span><span class="hll">FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
+</span><span class="hll">FieldSolverGMG.gmg_bott_smooth              = 0            ## Number of at bottom level (before dropping to bottom solver)
+</span><span class="hll">FieldSolverGMG.gmg_precond_smooth           = 12           ## Number of smoothing steps in the preconditioner
+</span><span class="hll">FieldSolverGMG.gmg_min_iter                 = 5            ## Minimum number of iterations
+</span><span class="hll">FieldSolverGMG.gmg_max_iter                 = 50           ## Maximum number of iterations
+</span><span class="hll">FieldSolverGMG.gmg_exit_tol                 = 1.E-10       ## Residue tolerance
+</span><span class="hll">FieldSolverGMG.gmg_exit_hang                = 0.2          ## Solver hang
+</span><span class="hll">FieldSolverGMG.gmg_min_cells                = 16           ## Bottom drop
+</span><span class="hll">FieldSolverGMG.gmg_drop_order               = 0            ## Drop stencil order to 1 if domain is coarser than this.
+</span><span class="hll">FieldSolverGMG.gmg_bc_order                 = 1            ## Boundary condition order for multigrid
+</span><span class="hll">FieldSolverGMG.gmg_bc_weight                = 4            ## Boundary condition weights (for least squares)
+</span><span class="hll">FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
+</span><span class="hll">FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
+</span><span class="hll">FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
+</span><span class="hll">FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
+</span>FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only &#39;vcycle&#39; supported for now.
+FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;
+FieldSolverGMG.gmg_relax_factor             = 1.5          ## Adjustable SOR factor
+</pre></div>
 </div>
 </div>
 <p>Note that <em>all</em> options pertaining to IO or multigrid are run-time configurable (see <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).</p>
@@ -503,7 +506,7 @@ If you want to use numerical mock-ups of dielectric-dielectric interfaces, you c
 This means that the quantity that is passed into <code class="docutils literal notranslate"><span class="pre">AMRMultiGrid</span></code> should be weighted by the volume fraction to avoid the small-cell problem of EB grids.
 The flag <code class="docutils literal notranslate"><span class="pre">kappa_source</span></code> indicates whether or not we should multiply the right-hand side by the volume fraction before passing it into the solver routine.
 If this flag is set to <code class="docutils literal notranslate"><span class="pre">false</span></code>, it is an indication that the user has taken responsibility to perform this weighting prior to calling <code class="docutils literal notranslate"><span class="pre">FieldSolver::solve(...)</span></code>.
-If this flag is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid</span></code> will perform the multiplication before the multigrid solve.</p>
+If this flag is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code> will perform the multiplication before the multigrid solve.</p>
 </section>
 <section id="tuning-multigrid-performance">
 <span id="chap-multigridtuning"></span><h3>Tuning multigrid performance<a class="headerlink" href="#tuning-multigrid-performance" title="Permalink to this heading"></a></h3>
@@ -512,58 +515,68 @@ There are a number of factors that influence the multigrid performance.
 Often the most critical factors are the radius of the cut-cell stencils and how far multigrid is allowed to coarsen.
 In addition, the multigrid convergence is improved by increasing the number of smoothings per grid level (up to a certain point), as well as the type of smoother and bottom solver being used.
 We explain these options below:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_verbosity</span></code>.
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_verbosity</span></code>.
 Controls the multigrid verbosity.
 Setting it to a number <span class="math notranslate nohighlight">\(&gt; 0\)</span> will print multigrid convergence information.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_pre_smooth</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_use_default_settings</span></code>.
+Use default multigrid settings.
+This tends to make most problems converge.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_pre_smooth</span></code>.
 Controls the number of relaxations on each level during multigrid downsweeps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_post_smooth</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_post_smooth</span></code>.
 Controls the number of relaxations on each level during multigrid upsweeps.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_bott_smooth</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bott_smooth</span></code>.
 Controls the number of relaxations before entering the bottom solve.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_min_iter</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_min_iter</span></code>.
 Sets the minimum number of iterations that multigrid will perform.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_max_iter</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_max_iter</span></code>.
 Sets the maximum number of iterations that multigrid will perform.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_exit_tol</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_exit_tol</span></code>.
 Sets the exit tolerance for multigrid.
 Multigrid will exit the iterations if <span class="math notranslate nohighlight">\(r &lt; \lambda r_0\)</span> where <span class="math notranslate nohighlight">\(\lambda\)</span> is the specified tolerance, <span class="math notranslate nohighlight">\(r = |L\Phi -\rho|\)</span> is the residual and <span class="math notranslate nohighlight">\(r_0\)</span> is the residual for <span class="math notranslate nohighlight">\(\Phi = 0\)</span>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_exit_hang</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_exit_hang</span></code>.
 Sets the minimum permitted reduction in the convergence rate before exiting multigrid.
 Letting <span class="math notranslate nohighlight">\(r^k\)</span> be the residual after <span class="math notranslate nohighlight">\(k\)</span> multigrid cycles, multigrid will abort if the residual between levels is not reduce by at least a factor of <span class="math notranslate nohighlight">\(r^{k+1} &lt; (1-h)r^k\)</span>, where <span class="math notranslate nohighlight">\(h\)</span> is the “hang” factor.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_min_cells</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_min_cells</span></code>.
 Sets the minimum amount of cells along any coordinate direction for coarsened levels.
 Note that this will control how far multigrid will coarsen. Setting a number <code class="docutils literal notranslate"><span class="pre">gmg_min_cells</span> <span class="pre">=</span> <span class="pre">16</span></code> will terminate multigrid coarsening when the domain has 16 cells in any of the coordinate direction.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_bc_order</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bc_order</span></code>.
 Sets the stencil order for Dirichlet boundary conditions (on electrodes).
 Note that this is also the stencil radius.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_bc_weight</span></code>. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bc_weight</span></code>. Sets the least squares stencil weighting factor for least squares gradient reconstruction on EBs.
 See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_jump_order</span></code>. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_jump_order</span></code>. Sets the stencil order when performing least squares gradient reconstruction on dielectric interfaces.
 Note that this is also the stencil radius.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_jump_weight</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_jump_weight</span></code>.
 Sets the least squares stencil weighting factor for least squares gradient reconstruction on dielectric interfaces.
 See <a class="reference internal" href="../Utilities/LeastSquares.html#chap-leastsquares"><span class="std std-ref">Least squares</span></a> for details.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_bottom_solver</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bottom_solver</span></code>.
 Sets the bottom solver type.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_cycle</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_cycle</span></code>.
 Sets the multigrid method.
 Currently, only V-cycles are supported.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_smoother</span></code>.
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_smoother</span></code>.
 Sets the multigrid smoother.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_relax_factor</span></code>.
+Sets the multigrid relaxation factor.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Enabling this setting tends to make most problems converge quite well.</p>
+</div>
+</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>When setting the bottom solver (which by default is a biconjugate gradient stabilized method) to a regular smoother, one must also specify the number of smoothings to perform.
-E.g., <code class="docutils literal notranslate"><span class="pre">FieldSolverMultigrid.gmg_bottom_solver</span> <span class="pre">=</span> <span class="pre">simple</span> <span class="pre">64</span></code>.
+E.g., <code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bottom_solver</span> <span class="pre">=</span> <span class="pre">simple</span> <span class="pre">64</span></code>.
 Setting the bottom solver to <code class="docutils literal notranslate"><span class="pre">simple</span></code> without specifying the number of smoothings that will be performed will issue a run-time error.</p>
 </div>
 </section>
 <section id="adjusting-output">
 <h3>Adjusting output<a class="headerlink" href="#adjusting-output" title="Permalink to this heading"></a></h3>
 <p>The user may plot the potential, the space charge, the electric, and the GMG residue as follows:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.plt_vars  = phi rho E res     # Plot variables. Possible vars are &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;
 </pre></div>
 </div>
 </section>
@@ -571,11 +584,11 @@ Setting the bottom solver to <code class="docutils literal notranslate"><span cl
 <span id="chap-poissondielectricbc"></span><h3>Saturation charge BC<a class="headerlink" href="#saturation-charge-bc" title="Permalink to this heading"></a></h3>
 <p>As mentioned above, on dielectric interfaces the user can choose to specify which “form” of <a class="reference internal" href="#equation-gaussbc">Eq. 8</a> to solve.
 If the user wants the natural form in which the surface charge is the free parameter, he can specify</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump = natural
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.which_jump = natural
 </pre></div>
 </div>
 <p>To use the other format (in which one of the fluxes is specified), use</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverMultigrid.which_jump = saturation_charge
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.which_jump = saturation_charge
 </pre></div>
 </div>
 <div class="admonition note">

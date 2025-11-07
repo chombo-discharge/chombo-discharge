@@ -1,15 +1,15 @@
 <map id="Source/Elliptic/CD_MFHelmholtzOp.H" name="Source/Elliptic/CD_MFHelmholtzOp.H">
-<area shape="rect" id="Node000001" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="445,5,593,45"/>
-<area shape="rect" id="Node000002" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="127,93,289,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="438,52,277,96,275,91,437,46"/>
-<area shape="rect" id="Node000003" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="313,93,506,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="485,56,435,95,432,91,482,52"/>
-<area shape="rect" id="Node000018" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="530,93,729,133"/>
-<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="548,52,599,91,596,95,545,57"/>
-<area shape="rect" id="Node000004" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="199,181,395,221"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="375,144,324,183,321,179,372,140"/>
-<area shape="rect" id="Node000017" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="419,181,626,221"/>
-<area shape="poly" id="edge22_Node000003_Node000017" title=" " alt="" coords="447,140,499,179,496,183,444,144"/>
+<area shape="rect" id="Node000001" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="439,5,587,45"/>
+<area shape="rect" id="Node000002" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="122,93,283,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="433,52,271,96,270,91,431,46"/>
+<area shape="rect" id="Node000003" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="307,93,501,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="480,56,430,95,427,91,477,52"/>
+<area shape="rect" id="Node000018" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="525,93,723,133"/>
+<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="542,52,593,91,590,95,539,57"/>
+<area shape="rect" id="Node000004" href="$CD__FieldSolverGMG_8H.html" title="Declaration of FieldSolverGMG." alt="" coords="212,181,383,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,144,323,183,319,179,368,140"/>
+<area shape="rect" id="Node000017" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="407,181,614,221"/>
+<area shape="poly" id="edge22_Node000003_Node000017" title=" " alt="" coords="440,140,489,179,485,183,437,144"/>
 <area shape="rect" id="Node000005" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,269,271,309"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="254,231,184,272,181,267,252,226"/>
 <area shape="rect" id="Node000007" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="314,277,577,302"/>
@@ -40,5 +40,5 @@
 <area shape="rect" id="Node000016" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="867,460,1115,515"/>
 <area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="985,426,985,460,980,460,979,426"/>
 <area shape="poly" id="edge21_Node000016_Node000015" title=" " alt="" coords="997,447,996,412,1001,412,1002,446"/>
-<area shape="poly" id="edge24_Node000018_Node000001" title=" " alt="" coords="600,86,549,48,552,43,604,82"/>
+<area shape="poly" id="edge24_Node000018_Node000001" title=" " alt="" coords="595,86,544,48,547,43,598,82"/>
 </map>

@@ -1,7 +1,7 @@
 <map id="TimeStepper" name="TimeStepper">
 <area shape="rect" id="Node000001" title="Base class for advancing equations." alt="" coords="5,367,111,393"/>
-<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="728,283,959,338"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,354,106,306,130,283,159,266,238,238,321,224,405,220,489,224,569,234,643,248,764,281,763,286,642,253,568,239,488,229,405,225,322,229,239,244,161,270,133,287,110,310,75,357"/>
+<area shape="rect" id="Node000002" href="$classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="703,283,933,338"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,354,106,306,130,283,159,266,235,240,314,226,395,222,475,225,552,235,623,249,740,281,739,286,622,254,551,241,474,231,395,227,315,231,236,245,161,270,133,287,110,310,75,357"/>
 <area shape="rect" id="Node000003" href="$classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html" title="Implementation of TimeStepper which runs a single advection&#45;diffusion&#45;reaction solver." alt="" coords="210,101,413,141"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="60,353,70,308,88,253,116,198,136,173,158,151,183,137,209,127,211,132,185,141,162,155,140,176,121,201,93,256,75,310,66,354"/>
 <area shape="rect" id="Node000004" href="$classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html" title="Implementation of TimeStepper which advances an ItoSolver." alt="" coords="219,165,404,205"/>
@@ -22,11 +22,11 @@
 <area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="67,405,77,446,96,496,123,546,141,568,162,587,197,606,194,611,158,591,137,572,119,549,91,498,72,448,62,407"/>
 <area shape="rect" id="Node000015" href="$classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html" title="Implementation of TimeStepper for advancing tracer particles in a fixed velocity field." alt="" coords="209,667,414,707"/>
 <area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="63,406,70,459,86,526,99,561,116,595,136,626,162,653,184,667,210,677,208,682,182,672,158,657,132,629,111,597,94,563,81,527,65,459,58,407"/>
-<area shape="rect" id="Node000006" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="739,69,947,109"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="400,60,739,80,739,86,400,65"/>
-<area shape="rect" id="Node000007" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="740,5,947,45"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="400,49,740,29,740,34,400,55"/>
-<area shape="poly" id="edge12_Node000011_Node000002" title=" " alt="" coords="432,482,462,473,553,441,642,404,787,336,789,341,644,409,555,446,463,479,433,487"/>
-<area shape="rect" id="Node000012" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="724,488,963,528"/>
-<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="440,505,724,505,724,511,440,511"/>
+<area shape="rect" id="Node000006" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html" title="Class for evolving plasma equations using a split step Godunov method." alt="" coords="714,69,922,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="401,60,714,80,713,85,400,66"/>
+<area shape="rect" id="Node000007" href="$classPhysics_1_1CdrPlasma_1_1CdrPlasmaImExSdcStepper.html" title="Class for evolving plasma equations using implicit&#45;explicit spectral deferred corrections." alt="" coords="715,5,921,45"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="400,49,714,29,715,34,401,54"/>
+<area shape="poly" id="edge12_Node000011_Node000002" title=" " alt="" coords="434,482,462,473,547,441,631,404,766,336,768,341,633,409,549,446,464,479,435,487"/>
+<area shape="rect" id="Node000012" href="$classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="699,488,937,528"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="441,505,698,505,698,511,441,511"/>
 </map>

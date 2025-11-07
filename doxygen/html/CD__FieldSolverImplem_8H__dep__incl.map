@@ -1,22 +1,22 @@
 <map id="Source/Electrostatics/CD_FieldSolverImplem.H" name="Source/Electrostatics/CD_FieldSolverImplem.H">
-<area shape="rect" id="Node000001" title="Implementation of CD_FieldSolver.H." alt="" coords="1901,5,2089,45"/>
-<area shape="rect" id="Node000002" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="1915,93,2074,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1989,59,1990,93,1984,93,1983,59"/>
-<area shape="poly" id="edge48_Node000002_Node000001" title=" " alt="" coords="2001,80,2000,46,2005,46,2006,80"/>
+<area shape="rect" id="Node000001" title="Implementation of CD_FieldSolver.H." alt="" coords="1889,5,2077,45"/>
+<area shape="rect" id="Node000002" href="$CD__FieldSolver_8H.html" title="Contains declaration of a base electrostatics solver class." alt="" coords="1903,93,2062,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1977,59,1978,93,1972,93,1971,59"/>
+<area shape="poly" id="edge51_Node000002_Node000001" title=" " alt="" coords="1989,80,1988,46,1993,46,1994,80"/>
 <area shape="rect" id="Node000003" href="$CD__CdrPlasmaStepper_8H.html" title="Declaration of a CdrPlasmaStepper, an abstract class for evolving cdr plasma equations in time." alt="" coords="1028,181,1196,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1902,126,1197,195,1196,189,1901,121"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1890,126,1196,194,1196,189,1889,121"/>
 <area shape="rect" id="Node000019" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="1863,277,2103,317"/>
-<area shape="poly" id="edge22_Node000002_Node000019" title=" " alt="" coords="1931,142,1906,160,1888,183,1882,201,1888,220,1899,237,1912,251,1945,274,1942,279,1909,255,1894,240,1883,222,1876,201,1883,180,1903,156,1928,138"/>
+<area shape="poly" id="edge22_Node000002_Node000019" title=" " alt="" coords="1928,143,1905,160,1888,183,1882,201,1888,220,1899,237,1912,251,1945,274,1942,279,1909,255,1894,240,1883,222,1877,201,1883,180,1901,156,1924,138"/>
 <area shape="rect" id="Node000021" href="$CD__FieldStepper_8H.html" title="TimeStepper class for only solving the Poisson equation (with surface charge)" alt="" coords="1659,181,1821,221"/>
-<area shape="poly" id="edge25_Node000002_Node000021" title=" " alt="" coords="1927,140,1797,184,1795,179,1925,135"/>
+<area shape="poly" id="edge25_Node000002_Node000021" title=" " alt="" coords="1918,140,1794,184,1792,179,1916,135"/>
 <area shape="rect" id="Node000024" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="2146,284,2409,309"/>
-<area shape="poly" id="edge29_Node000002_Node000024" title=" " alt="" coords="2088,121,2148,129,2208,142,2258,158,2277,168,2290,180,2301,206,2301,236,2294,263,2286,285,2281,283,2289,262,2296,235,2296,207,2286,183,2274,172,2256,163,2206,147,2147,135,2087,126"/>
-<area shape="rect" id="Node000034" href="$CD__FieldSolver_8cpp.html" title="Implementation of CD_FieldSolver.H." alt="" coords="2117,181,2275,221"/>
-<area shape="poly" id="edge44_Node000002_Node000034" title=" " alt="" coords="2053,136,2153,179,2151,184,2051,141"/>
+<area shape="poly" id="edge29_Node000002_Node000024" title=" " alt="" coords="2076,123,2188,144,2235,160,2266,180,2280,206,2286,235,2282,284,2277,284,2281,235,2275,207,2262,183,2233,165,2187,149,2075,128"/>
+<area shape="rect" id="Node000034" href="$CD__FieldSolver_8cpp.html" title="Implementation of CD_FieldSolver.H." alt="" coords="2093,181,2251,221"/>
+<area shape="poly" id="edge44_Node000002_Node000034" title=" " alt="" coords="2038,137,2132,179,2129,184,2035,141"/>
 <area shape="rect" id="Node000035" href="$CD__FieldSolverFactory_8H.html" title="Declaration of a template factory class for making FieldSolvers." alt="" coords="2459,181,2642,221"/>
-<area shape="poly" id="edge45_Node000002_Node000035" title=" " alt="" coords="2088,126,2460,183,2459,189,2087,132"/>
-<area shape="rect" id="Node000037" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="1897,181,2093,221"/>
-<area shape="poly" id="edge49_Node000002_Node000037" title=" " alt="" coords="1997,147,1997,181,1992,181,1992,147"/>
+<area shape="poly" id="edge45_Node000002_Node000035" title=" " alt="" coords="2076,126,2459,184,2459,189,2075,131"/>
+<area shape="rect" id="Node000037" href="$CD__FieldSolverGMG_8H.html" title="Declaration of FieldSolverGMG." alt="" coords="1897,181,2068,221"/>
+<area shape="poly" id="edge48_Node000002_Node000037" title=" " alt="" coords="1985,147,1985,181,1980,181,1980,147"/>
 <area shape="rect" id="Node000004" href="$CD__CdrPlasmaStepper_8cpp.html" title="Implementation of CD_CdrPlasmaStepper.H." alt="" coords="1255,277,1430,317"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1172,224,1297,274,1295,279,1170,229"/>
 <area shape="rect" id="Node000005" href="$CD__CdrPlasmaTagger_8H.html" title="Declearation of an abstract class for tagging cells in a Physics/CdrPlasma context." alt="" coords="453,277,621,317"/>
@@ -85,6 +85,6 @@
 <area shape="rect" id="Node000036" href="$CD__FieldSolverFactoryImplem_8H.html" title="Implementation of CD_FieldSolverFactory.H." alt="" coords="2433,277,2668,317"/>
 <area shape="poly" id="edge46_Node000035_Node000036" title=" " alt="" coords="2545,235,2546,277,2541,277,2539,235"/>
 <area shape="poly" id="edge47_Node000036_Node000035" title=" " alt="" coords="2557,263,2555,221,2561,221,2562,263"/>
-<area shape="poly" id="edge50_Node000037_Node000019" title=" " alt="" coords="1993,235,1988,277,1982,276,1988,235"/>
-<area shape="poly" id="edge51_Node000037_Node000024" title=" " alt="" coords="2066,223,2243,281,2242,286,2064,228"/>
+<area shape="poly" id="edge49_Node000037_Node000019" title=" " alt="" coords="1985,235,1985,277,1980,277,1980,235"/>
+<area shape="poly" id="edge50_Node000037_Node000024" title=" " alt="" coords="2056,223,2242,281,2240,286,2054,228"/>
 </map>

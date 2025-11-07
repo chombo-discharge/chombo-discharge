@@ -1,9 +1,9 @@
 <map id="Source/Elliptic/CD_MFHelmholtzOpFactory.H" name="Source/Elliptic/CD_MFHelmholtzOpFactory.H">
-<area shape="rect" id="Node000001" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="313,5,506,45"/>
-<area shape="rect" id="Node000002" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="199,93,395,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="375,56,324,95,321,91,372,52"/>
-<area shape="rect" id="Node000015" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="419,93,626,133"/>
-<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="447,52,499,91,496,95,444,56"/>
+<area shape="rect" id="Node000001" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="307,5,501,45"/>
+<area shape="rect" id="Node000002" href="$CD__FieldSolverGMG_8H.html" title="Declaration of FieldSolverGMG." alt="" coords="212,93,383,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="371,56,323,95,319,91,368,52"/>
+<area shape="rect" id="Node000015" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="407,93,614,133"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="440,52,489,91,485,95,437,56"/>
 <area shape="rect" id="Node000003" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="31,181,271,221"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="254,143,184,184,181,179,252,138"/>
 <area shape="rect" id="Node000005" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="314,189,577,214"/>

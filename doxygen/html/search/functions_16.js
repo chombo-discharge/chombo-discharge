@@ -95,7 +95,7 @@ var searchData=
   ['_7eelectrostaticebbc_92',['~ElectrostaticEbBc',['../classElectrostaticEbBc.html#ade854dd3dce5937a39080da898a0fa41',1,'ElectrostaticEbBc']]],
   ['_7efieldsolver_93',['~FieldSolver',['../classFieldSolver.html#ac219769da337c055bd178c4372f5976b',1,'FieldSolver']]],
   ['_7efieldsolverfactory_94',['~FieldSolverFactory',['../classFieldSolverFactory.html#a89307d98dc389060b35a2a542071b08b',1,'FieldSolverFactory']]],
-  ['_7efieldsolvermultigrid_95',['~FieldSolverMultigrid',['../classFieldSolverMultigrid.html#a322a86ba493867937dd6fbcbe6422c99',1,'FieldSolverMultigrid']]],
+  ['_7efieldsolvergmg_95',['~FieldSolverGMG',['../classFieldSolverGMG.html#a1f24617a972e20f519206e94f30d4241',1,'FieldSolverGMG']]],
   ['_7efieldstepper_96',['~FieldStepper',['../classPhysics_1_1Electrostatics_1_1FieldStepper.html#ab42f63a82b6d92fb44301fca75962656',1,'Physics::Electrostatics::FieldStepper']]],
   ['_7efieldstorage_97',['~FieldStorage',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper_1_1FieldStorage.html#ad8e342ae34782ae283f00a98b2e559e7',1,'Physics::CdrPlasma::CdrPlasmaGodunovStepper::FieldStorage']]],
   ['_7egecreferencecell_98',['~GECReferenceCell',['../classGECReferenceCell.html#a2b77c391d974677a6e678005c5539e91',1,'GECReferenceCell']]],

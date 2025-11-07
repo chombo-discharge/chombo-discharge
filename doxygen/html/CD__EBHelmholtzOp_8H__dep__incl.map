@@ -61,11 +61,11 @@
 <area shape="poly" id="edge33_Node000025_Node000027" title=" " alt="" coords="1117,224,888,272,887,267,1116,218"/>
 <area shape="rect" id="Node000030" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="1105,269,1303,309"/>
 <area shape="poly" id="edge38_Node000025_Node000030" title=" " alt="" coords="1198,235,1199,269,1194,269,1193,235"/>
-<area shape="rect" id="Node000028" href="$CD__FieldSolverMultigrid_8H.html" title="Declaration of FieldSolverMultigrid." alt="" coords="769,365,965,405"/>
+<area shape="rect" id="Node000028" href="$CD__FieldSolverGMG_8H.html" title="Declaration of FieldSolverGMG." alt="" coords="781,365,952,405"/>
 <area shape="poly" id="edge34_Node000027_Node000028" title=" " alt="" coords="823,319,855,363,851,366,818,322"/>
-<area shape="rect" id="Node000029" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="989,365,1195,405"/>
-<area shape="poly" id="edge37_Node000027_Node000029" title=" " alt="" coords="872,311,1034,362,1032,367,870,316"/>
-<area shape="poly" id="edge35_Node000028_Node000005" title=" " alt="" coords="952,406,1150,457,1149,463,951,411"/>
+<area shape="rect" id="Node000029" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="977,365,1183,405"/>
+<area shape="poly" id="edge37_Node000027_Node000029" title=" " alt="" coords="869,311,1024,362,1022,367,868,316"/>
+<area shape="poly" id="edge35_Node000028_Node000005" title=" " alt="" coords="950,406,965,409,1149,457,1148,463,963,415,949,411"/>
 <area shape="poly" id="edge36_Node000028_Node000007" title=" " alt="" coords="881,417,899,466,894,468,876,419"/>
 <area shape="poly" id="edge39_Node000030_Node000025" title=" " alt="" coords="1210,256,1209,222,1214,222,1215,256"/>
 </map>

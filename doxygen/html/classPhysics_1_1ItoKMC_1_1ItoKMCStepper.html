@@ -100,10 +100,10 @@ Inheritance diagram for Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;:</div
 <div class="center"><img src="classPhysics_1_1ItoKMC_1_1ItoKMCStepper__inherit__graph.png" border="0" usemap="#aPhysics_1_1ItoKMC_1_1ItoKMCStepper_3_01I_00_01C_00_01R_00_01F_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="aPhysics_1_1ItoKMC_1_1ItoKMCStepper_3_01I_00_01C_00_01R_00_01F_01_4_inherit__map" id="aPhysics_1_1ItoKMC_1_1ItoKMCStepper_3_01I_00_01C_00_01R_00_01F_01_4_inherit__map">
 <area shape="rect" title="Base time stepper class that advances the Ito&#45;KMC&#45;Poisson system of equations. If you want a differen..." alt="" coords="160,41,391,81"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="652,5,891,45"/>
-<area shape="poly" title=" " alt="" coords="404,49,652,31,652,37,405,55"/>
-<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="656,70,887,125"/>
-<area shape="poly" title=" " alt="" coords="397,81,415,83,539,92,656,95,656,100,539,97,414,88,396,86"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCGodunovStepper.html" title="Implementation of ItoKMCStepper that uses a semi&#45;implicit split&#45;step formalism for advancing the Ito&#45;..." alt="" coords="627,5,865,45"/>
+<area shape="poly" title=" " alt="" coords="405,49,626,32,627,37,405,54"/>
+<area shape="rect" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html" title=" " alt="" coords="631,70,861,125"/>
+<area shape="poly" title=" " alt="" coords="397,81,415,83,526,91,631,94,631,100,525,96,414,88,396,86"/>
 <area shape="rect" href="classTimeStepper.html" title="Base class for advancing equations." alt="" coords="5,49,111,74"/>
 <area shape="poly" title=" " alt="" coords="124,59,160,59,160,64,124,64"/>
 </map>
@@ -904,7 +904,7 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a87a085f6781132b4eea40f5ab48889e5 inherit pro_attribs_classTimeStepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> = FieldSolverMultigrid&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a> = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a> = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a> = FieldSolverGMG&gt;<br />
 class Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</div><p>Base time stepper class that advances the Ito-KMC-Poisson system of equations. If you want a different underlying solver, change the template arguments. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a81b11368275f303489fa1aac26b49792" name="a81b11368275f303489fa1aac26b49792"></a>
@@ -950,7 +950,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5785,7 +5785,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5812,7 +5812,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5839,7 +5839,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5866,7 +5866,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5893,7 +5893,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5920,7 +5920,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5947,7 +5947,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -5974,7 +5974,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6001,7 +6001,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6028,7 +6028,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6055,7 +6055,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6082,7 +6082,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6109,7 +6109,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6136,7 +6136,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6163,7 +6163,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6190,7 +6190,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6218,7 +6218,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6245,7 +6245,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6272,7 +6272,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6299,7 +6299,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6326,7 +6326,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6353,7 +6353,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6380,7 +6380,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6407,7 +6407,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6434,7 +6434,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6461,7 +6461,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -6488,7 +6488,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverMultigrid&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">I</a>  = ItoSolver, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU, <a class="el" href="classTracerParticleSolver.html">typename</a> R  = McPhoto, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
