@@ -12,6 +12,9 @@
 #ifndef CD_LoadBalancing_H
 #define CD_LoadBalancing_H
 
+// Std includes
+#include <cstdint>
+
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_BoxSorting.H>
@@ -159,33 +162,31 @@ protected:
   shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
-    @brief Sort boxes using Morton code.
-    @param[inout] a_boxes Grid boxes to be sorted. 
-    @param[inout] a_loads Computational loads to be sorted.
-    @details On output, a_boxes and a_loads are Morton sorted. 
+    @brief Generic SFC sorting function
+    @param[inout] a_boxes Grid boxes to be sorted
+    @param[inout] a_loads Computational loads to be sorted along with the boxes.
+    @param[in]    a_sfcEncoder Function for turning a grid index into an SFC index.
   */
-  template <class T>
+  template <class T, int DIM>
   static void
-  mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
+  sortSFC(Vector<Box>&                                                    a_boxes,
+          Vector<T>&                                                      a_loads,
+          const std::function<uint64_t(const std::array<uint32_t, DIM>)>& a_sfcEncoder) noexcept;
 
   /*!
-    @brief Morton comparator
-    @param[in] a_maxBits Maximum bits
-    @param[in] a_lhs     Left hand side
-    @param[in] a_rhs     Right hand side
-    @return Returns true if a_lhs.first has a lower Morton index than a_rhs.first. 
+    @brief Helper function for computing a Morton code using 21 bits per direction. 
+    @param[in] a_coords 
   */
-  template <class T>
-  static bool
-  mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_lhs, const std::pair<Box, T>& a_rhs);
+  template <int DIM>
+  static uint64_t
+  mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept;
 
   /*!
-    @brief Utility function for Morton sorting which needs the maximum bits
-    @param[in] a_first Iterator 
-    @param[in] a_second Iterator 
+    @brief Helper function for computing a Hilbert index
   */
-  static int
-  maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last);
+  template <int DIM>
+  static uint64_t
+  hilbertIndex(const std::array<uint32_t, DIM>& a_coords);
 };
 
 #include <CD_NamespaceFooter.H>

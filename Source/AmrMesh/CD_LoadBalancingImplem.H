@@ -16,10 +16,14 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
+#include <limits>
+#include <array>
+#include <tuple>
 
 // Chombo includes
 #include <LoadBalance.H>
 #include <BoxLayout.H>
+#include <ParmParse.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -248,7 +252,12 @@ LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a
     break;
   }
   case BoxSorting::Morton: {
-    LoadBalancing::mortonSort(a_boxes, a_loads);
+    LoadBalancing::sortSFC<T, SpaceDim>(a_boxes, a_loads, LoadBalancing::mortonIndex<SpaceDim>);
+
+    break;
+  }
+  case BoxSorting::Hilbert: {
+    LoadBalancing::sortSFC<T, SpaceDim>(a_boxes, a_loads, LoadBalancing::hilbertIndex<SpaceDim>);
 
     break;
   }
@@ -295,57 +304,140 @@ LoadBalancing::shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
   std::shuffle(vec.begin(), vec.end(), e);
 
   // Split boxes and loads
-
   unpackPairs(a_boxes, a_loads, vec);
 }
 
-template <class T>
+template <class T, int DIM>
 void
-LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads)
+LoadBalancing::sortSFC(Vector<Box>&                                                    a_boxes,
+                       Vector<T>&                                                      a_loads,
+                       const std::function<uint64_t(const std::array<uint32_t, DIM>)>& a_sfcEncoder) noexcept
+
 {
-  CH_TIME("LoadBalancing::mortonSort");
+  CH_TIME("LoadBalancing::sortSFC");
 
-  auto vec = packPairs(a_boxes, a_loads);
+  using Bundle = std::tuple<Box, T, uint64_t>;
 
-  // Get max bits
-  std::vector<Box>& b    = a_boxes.stdVector();
-  int               bits = maxBits(b.begin(), b.end());
+  const int n = a_boxes.size();
+  if (n == 0 || n != a_loads.size()) {
+    return;
+  }
 
-  // Morton sort.
-  std::sort(std::begin(vec), std::end(vec), [bits](const std::pair<Box, T>& v1, const std::pair<Box, T>& v2) -> bool {
-    return mortonComparator(bits, v1, v2);
+  // Pack data into a vector of tuples. Tuple contains (box, load, key).
+  std::vector<Bundle> buf;
+  for (std::size_t i = 0; i < n; ++i) {
+    buf.emplace_back(std::move(a_boxes[i]), std::move(a_loads[i]), uint64_t{0});
+  }
+
+  // Compute Hilbert keys
+  for (std::size_t i = 0; i < n; ++i) {
+    const auto& b  = std::get<0>(buf[i]);
+    const auto  iv = b.smallEnd();
+
+    std::array<uint32_t, SpaceDim> c;
+
+    for (int d = 0; d < SpaceDim; ++d) {
+      c[d] = static_cast<uint32_t>(iv[d]);
+    }
+
+    std::get<2>(buf[i]) = a_sfcEncoder(c);
+  }
+
+  // 3) Sort by hilbert key.
+  std::sort(buf.begin(), buf.end(), [](const Bundle& a, const Bundle& b) noexcept {
+    return std::get<2>(a) < std::get<2>(b);
   });
 
-  // Put back in normal form
-  unpackPairs(a_boxes, a_loads, vec);
+  // Unpack into original containers.
+  for (std::size_t i = 0; i < n; ++i) {
+    a_boxes[i] = std::move(std::get<0>(buf[i]));
+    a_loads[i] = std::move(std::get<1>(buf[i]));
+  }
 }
 
-template <class T>
-bool
-LoadBalancing::mortonComparator(const int a_maxBits, const std::pair<Box, T>& a_lhs, const std::pair<Box, T>& a_rhs)
+template <int DIM>
+uint64_t
+LoadBalancing::mortonIndex(const std::array<uint32_t, DIM> a_coords) noexcept
 {
-  const Box& lbox = a_lhs.first;
-  const Box& rbox = a_rhs.first;
+  uint64_t code = 0;
 
-  const IntVect l = lbox.smallEnd();
-  const IntVect r = rbox.smallEnd();
+  // If this fails then we can't compute a Morton code using a 64-bit integer. We must either scale back the boxes
+  // by their blocking factors, or switch to 128/256 bit integers.
+  const int maxDim = std::pow(2, 21);
 
-  for (int i = a_maxBits; i > 0; i--) {
+  for (int dir = 0; dir < SpaceDim; dir++) {
+    if (a_coords[dir] > maxDim) {
+      MayDay::Abort("LoadBalancing::mortonIndex - logic bust");
+    }
+  }
 
-    // March from most significant bit to least.
-    const int N = (1 << i);
+  for (int bit = 20; bit >= 0; --bit) {
+    for (int dir = CH_SPACEDIM - 1; dir >= 0; --dir) {
+      const uint64_t b = (static_cast<uint64_t>(static_cast<uint32_t>(a_coords[dir])) >> bit) & 1ull;
 
-    for (int dir = CH_SPACEDIM - 1; dir >= 0; dir--) {
-      if ((l[dir] / N) < (r[dir] / N)) {
-        return true;
+      code = (code << 1) | b;
+    }
+  }
+
+  return code;
+}
+
+template <int DIM>
+uint64_t
+LoadBalancing::hilbertIndex(const std::array<uint32_t, DIM>& a_coords)
+{
+  CH_TIME("LoadBalancing::hilbertIndex");
+
+  constexpr int nbits = 21;
+
+  uint32_t x[DIM];
+
+  for (int i = 0; i < DIM; ++i) {
+    x[i] = a_coords[i];
+  }
+
+  const uint32_t M = 1u << (nbits - 1);
+
+  for (uint32_t Q = M; Q > 1; Q >>= 1) {
+    const uint32_t P = Q - 1;
+
+    for (int i = 0; i < DIM; ++i) {
+      if (x[i] & Q) {
+        x[0] ^= P;
       }
-      else if ((l[dir] / N) > (r[dir] / N)) {
-        return false;
+      else {
+        const uint32_t t = (x[0] ^ x[i]) & P;
+
+        x[0] ^= t;
+        x[i] ^= t;
       }
     }
   }
 
-  return false;
+  for (int i = 1; i < DIM; ++i) {
+    x[i] ^= x[i - 1];
+  }
+
+  uint32_t t = 0;
+  for (uint32_t Q = M; Q > 1; Q >>= 1) {
+    if (x[DIM - 1] & Q) {
+      t ^= (Q - 1);
+    }
+  }
+
+  for (int i = 0; i < DIM; ++i) {
+    x[i] ^= t;
+  }
+
+  uint64_t idx = 0;
+
+  for (int b = nbits - 1; b >= 0; --b) {
+    for (int i = 0; i < DIM; ++i) {
+      idx = (idx << 1) | ((x[i] >> b) & 1u);
+    }
+  }
+
+  return idx;
 }
 
 #include <CD_NamespaceFooter.H>

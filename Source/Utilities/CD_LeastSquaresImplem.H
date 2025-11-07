@@ -24,10 +24,17 @@ LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacements, const int
   Vector<Real> ret(a_displacements.size(), 1.0);
 
   if (a_pow > 0) {
+    // Figure out the min distance, and normalize every weight with this distance. We do not use physical
+    // distances when weighting the equations :)
+    Real normDist = 0.0;
     for (int i = 0; i < a_displacements.size(); i++) {
-      const RealVect& d   = a_displacements[i];
-      const Real      len = d.vectorLength();
-      const Real      w   = std::pow(len, -a_pow);
+      normDist = std::max(normDist, a_displacements[i].vectorLength());
+    }
+
+    // Set weightings = 1/(1 + |displacement|/normDist)^a_pow
+    for (int i = 0; i < a_displacements.size(); i++) {
+      const Real len = a_displacements[i].vectorLength() / normDist;
+      const Real w   = std::pow(1 + len, -a_pow);
 
       ret[i] = w;
     }
@@ -119,13 +126,13 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
     // ----------------------------------------------------------------------------------------------------------------------
     // If we have an (unweighted) full system then our system A*x = b is
     //
-    //              A                   x             b
-    //             ===                 ===           ===
-    //     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]
-    //     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]
-    //     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]
-    //     [:   :      :         ] [    :    ]     [  :  ]
-    //     [:   :      :         ] [    :    ]     [  :  ]
+    //                A                   x               b
+    //               ===                 ===             ===
+    //     [1 (x-x0) 0.5(x-x0)^2 ...] [f(x)     ]      [f(x0)]
+    //     [1 (x-x1) 0.5(x-x1)^2 ...] [df/dx    ]      [f(x1)]
+    //     [1 (x-x2) 0.5(x-x2)^2 ...] [d^2f/dx^2](x) = [f(x2)]
+    //     [:   :         :         ] [    :    ]      [  :  ]
+    //     [:   :         :         ] [    :    ]      [  :  ]
     //
     // Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we
     // solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose
@@ -163,11 +170,11 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
       // When we have eliminated rows in the linear system we can't use MultiIndex to map directly, this occurs because
       // if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)):
       //
-      //     [(x-x0) (x-x0)^2 ...] [df/dx    ]     [f(x0) - f(x)]
-      //     [(x-x1) (x-x1)^2 ...] [d^2f/dx^2]     [f(x1) - f(x)]
-      //     [(x-x2) (x-x2)^2 ...] [         ]  =  [f(x2) - f(x)]
-      //     [  :      :         ] [    :    ]     [  :         ]
-      //     [  :      :         ] [    :    ]     [  :         ]
+      //     [(x-x0) 0.5(x-x0)^2 ...] [df/dx    ]      [f(x0) - f(x)]
+      //     [(x-x1) 0.5(x-x1)^2 ...] [d^2f/dx^2]      [f(x1) - f(x)]
+      //     [(x-x2) 0.5(x-x2)^2 ...] [         ](x) = [f(x2) - f(x)]
+      //     [  :         :         ] [    :    ]      [  :         ]
+      //     [  :         :         ] [    :    ]      [  :         ]
       //
       // The MultiIndex won't know about this, and will (correctly!), believe that the first row corresponds to
       // multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to

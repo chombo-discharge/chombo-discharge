@@ -48,9 +48,11 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const IntVect&          a_ghostPhi,
                                            const IntVect&          a_ghostRhs,
                                            const Smoother&         a_smoother,
+                                           const Real&             a_relaxFactor,
                                            const ProblemDomain&    a_bottomDomain,
                                            const int&              a_jumpOrder,
                                            const int&              a_jumpWeight,
+                                           const int&              a_preCondSmooth,
                                            const int&              a_blockingFactor,
                                            const AmrLevelGrids&    a_deeperLevelGrids)
 {
@@ -83,10 +85,12 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_ghostRhs = a_ghostRhs;
 
   m_smoother     = a_smoother;
+  m_relaxFactor  = a_relaxFactor;
   m_bottomDomain = a_bottomDomain;
 
-  m_jumpOrder  = a_jumpOrder;
-  m_jumpWeight = a_jumpWeight;
+  m_jumpOrder        = a_jumpOrder;
+  m_jumpWeight       = a_jumpWeight;
+  m_numPreCondSmooth = a_preCondSmooth;
 
   m_mgBlockingFactor = a_blockingFactor;
 
@@ -698,7 +702,9 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
                              m_ghostRhs,
                              m_jumpOrder,
                              m_jumpWeight,
-                             m_smoother);
+                             m_numPreCondSmooth,
+                             m_smoother,
+                             m_relaxFactor);
 
     mgOp->setJump(jump);
   }
@@ -781,7 +787,9 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
                                         m_ghostRhs,
                                         m_jumpOrder,
                                         m_jumpWeight,
-                                        m_smoother);
+                                        m_numPreCondSmooth,
+                                        m_smoother,
+                                        m_relaxFactor);
 
   // Give the operator access by reference to the jump data.
   op->setJump(m_amrJump[amrLevel]);

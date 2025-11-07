@@ -2684,6 +2684,9 @@ AmrMesh::parseGridGeneration()
   else if (str == "morton") {
     m_boxSort = BoxSorting::Morton;
   }
+  else if (str == "hilbert") {
+    m_boxSort = BoxSorting::Hilbert;
+  }
   else {
     MayDay::Abort("AmrMesh::parseGridGeneration - unknown box sorting method requested");
   }

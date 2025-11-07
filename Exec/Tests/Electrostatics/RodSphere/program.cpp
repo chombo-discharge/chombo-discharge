@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "CD_FieldSolverMultigrid.H"
+#include "CD_FieldSolverGMG.H"
 #include <CD_RodDielectric.H>
 #include "CD_FieldStepper.H"
 #include "ParmParse.H"
@@ -25,7 +25,7 @@ main(int argc, char* argv[])
   RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up basic Poisson, potential = 1
-  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid>>(new FieldStepper<FieldSolverMultigrid>());
+  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverGMG>>(new FieldStepper<FieldSolverGMG>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));

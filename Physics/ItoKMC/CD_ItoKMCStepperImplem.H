@@ -288,6 +288,9 @@ ItoKMCStepper<I, C, R, F>::parseLoadBalance() noexcept
   else if (str == "morton") {
     m_boxSort = BoxSorting::Morton;
   }
+  else if (str == "hilbert") {
+    m_boxSort = BoxSorting::Hilbert;
+  }
   else {
     const std::string err = "ItoKMCStepper::parseLoadBalance - 'box_sorting = " + str + "' not recognized";
 

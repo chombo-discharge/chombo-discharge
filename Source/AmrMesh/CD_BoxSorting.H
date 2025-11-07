@@ -22,7 +22,8 @@ enum class BoxSorting
   None,
   Std,
   Shuffle,
-  Morton
+  Morton,
+  Hilbert
 };
 
 #include <CD_NamespaceFooter.H>

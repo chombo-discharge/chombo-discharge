@@ -54,7 +54,7 @@ GECReferenceCell::GECReferenceCell()
   outerElectrodeHi = EBGeometry::Reflect<Real>(outerElectrodeLo, 1);
 
   // Cylindrical vessel -- subtract all the other parts.
-  vessel = std::make_shared<CylinderSDF<Real>>(-0.5 * H * yhat, 0.5 * H * yhat, r4);
+  vessel = std::make_shared<RoundedCylinderSDF<Real>>(0.5 * r4 + 1E-3, 1E-3, H);
   vessel = EBGeometry::Complement<Real>(vessel);
   vessel = EBGeometry::Difference<Real>(vessel, innerElectrodeLo);
   vessel = EBGeometry::Difference<Real>(vessel, outerElectrodeLo);

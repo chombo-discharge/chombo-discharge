@@ -275,31 +275,4 @@ LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads)
 #endif
 }
 
-int
-LoadBalancing::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last)
-{
-  CH_TIME("LoadBalancing::maxBits");
-
-  int maxSize = 0;
-  for (std::vector<Box>::iterator p = a_first; p < a_last; ++p) {
-    IntVect small = p->smallEnd();
-    D_EXPR6(maxSize = Max(maxSize, std::abs(small[0])),
-            maxSize = Max(maxSize, std::abs(small[1])),
-            maxSize = Max(maxSize, std::abs(small[2])),
-            maxSize = Max(maxSize, std::abs(small[3])),
-            maxSize = Max(maxSize, std::abs(small[4])),
-            maxSize = Max(maxSize, std::abs(small[5])));
-  }
-  int bits;
-  for (bits = 8 * sizeof(int) - 2; bits > 0; bits--) {
-    const int N = (1 << bits);
-
-    if (maxSize / N > 0) {
-      break;
-    }
-  }
-  bits++;
-  return bits;
-}
-
 #include <CD_NamespaceFooter.H>
