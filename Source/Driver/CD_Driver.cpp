@@ -282,13 +282,15 @@ Driver::getGeometryTags()
     indexSpaces[0] = ebisGas;
     indexSpaces[1] = ebisSol;
 
+    const int nGhost = std::min(2, m_amr->getNumberOfGhostCells());
+
     for (int is = 0; is < 2; is++) {
       const RefCountedPtr<EBIndexSpace>& ebis = indexSpaces[is];
 
       if (!(ebis.isNull())) {
         DisjointBoxLayout irregGrids = ebis->getIrregGrids(curDomain);
         EBISLayout        ebisl;
-        ebis->fillEBISLayout(ebisl, irregGrids, curDomain, 1);
+        ebis->fillEBISLayout(ebisl, irregGrids, curDomain, nGhost);
 
         const RealVect     probLo = m_amr->getProbLo();
         const DataIterator dit    = irregGrids.dataIterator();
@@ -314,7 +316,7 @@ Driver::getGeometryTags()
             // angle exceeds a specified threshold the cell is refined.
             const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof,
                                                                          ebisbox,
-                                                                         1,
+                                                                         nGhost,
                                                                          VofUtils::Connectivity::MonotonePath,
                                                                          false);
 

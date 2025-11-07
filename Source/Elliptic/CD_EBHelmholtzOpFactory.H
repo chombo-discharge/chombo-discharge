@@ -91,7 +91,8 @@ public:
     @param[in] a_ebbcFactory      Factory class for making BC objects for EB boundary conditions. 
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
     @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
-    @param[in] a_relaxationMethod Relaxation method. 
+    @param[in] a_relaxationMethod Relaxation method.
+    @param[in] a_relaxFactor      Relaxation factor
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
     @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
     @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels. 
@@ -118,6 +119,7 @@ public:
                        const IntVect&          a_ghostPhi,
                        const IntVect&          a_ghostRHS,
                        const Smoother&         a_relaxationMethod,
+                       const Real&             a_relaxFactor,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_mgBlockingFactor,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
@@ -213,6 +215,11 @@ protected:
     @brief Operator beta
   */
   Real m_beta;
+
+  /*!
+    @brief Relaxation factor
+  */
+  Real m_relaxFactor;
 
   /*!
     @brief Lower-left corner of computational domain

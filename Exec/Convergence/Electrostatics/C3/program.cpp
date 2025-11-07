@@ -1,5 +1,5 @@
 #include <CD_Driver.H>
-#include <CD_FieldSolverMultigrid.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_MechanicalShaft.H>
 #include <CD_FieldStepper.H>
 #include <ParmParse.H>
@@ -77,7 +77,7 @@ main(int argc, char* argv[])
   RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up the time stepper.
-  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverMultigrid>>(new FieldStepper<FieldSolverMultigrid>());
+  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverGMG>>(new FieldStepper<FieldSolverGMG>());
 
   // Run simulations at various resolutions.
   for (const auto& cells : nCells) {

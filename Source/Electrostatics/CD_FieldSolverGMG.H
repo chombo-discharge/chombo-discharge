@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_FieldSolverMultigrid.H
-  @brief  Declaration of FieldSolverMultigrid
+  @file   CD_FieldSolverGMG.H
+  @brief  Declaration of FieldSolverGMG
   @author Robert Marskar
 */
 
-#ifndef CD_FieldSolverMultigrid_H
-#define CD_FieldSolverMultigrid_H
+#ifndef CD_FieldSolverGMG_H
+#define CD_FieldSolverGMG_H
 
 // Chombo includes
 #include <AMRMultiGrid.H>
@@ -29,45 +29,45 @@
   alpha*a(x)*phi(x) + beta*div[b(x)*grad(phi)] = rho, we just set alpha to zero and eat the performance penalty. This class runs with electrostatic
   domain and EB boundary conditions that fit in the EBHelmholtzOp/MFHelmholtzOp constructs. 
 */
-class FieldSolverMultigrid : public FieldSolver
+class FieldSolverGMG : public FieldSolver
 {
 public:
   /*!
     @brief Weak constructor. 
     @details This sets default options. 
   */
-  FieldSolverMultigrid();
+  FieldSolverGMG();
 
   /*!
     @brief Disallowed copy constructor. 
     @param[in] a_other Other solver
   */
-  FieldSolverMultigrid(const FieldSolverMultigrid& a_other) = delete;
+  FieldSolverGMG(const FieldSolverGMG& a_other) = delete;
 
   /*!
     @brief Disallowed move constructor.
     @param[in] a_other Other solver
   */
-  FieldSolverMultigrid(const FieldSolverMultigrid&& a_other) = delete;
+  FieldSolverGMG(const FieldSolverGMG&& a_other) = delete;
 
   /*!
     @brief Disallowed copy assignment operator.
     @param[in] a_other Other solver
   */
-  FieldSolverMultigrid&
-  operator=(const FieldSolverMultigrid& a_other) = delete;
+  FieldSolverGMG&
+  operator=(const FieldSolverGMG& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment operator.
     @param[in] a_other Other solver
   */
-  FieldSolverMultigrid&
-  operator=(const FieldSolverMultigrid&& a_other) = delete;
+  FieldSolverGMG&
+  operator=(const FieldSolverGMG&& a_other) = delete;
 
   /*!
     @brief Constructor (does nothing)
   */
-  virtual ~FieldSolverMultigrid();
+  virtual ~FieldSolverGMG();
 
   /*!
     @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
@@ -260,6 +260,11 @@ protected:
   bool m_multigridDropOrder;
 
   /*!
+    @brief Use default multigrid settings
+  */
+  bool m_multigridUseDefaultSettings;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
@@ -330,6 +335,11 @@ protected:
   int m_multigridJumpWeight;
 
   /*!
+    @brief Multigrid smoothing steps for preconditioner
+  */
+  int m_multigridPreCondSmooth;
+
+  /*!
     @brief Exit tolerance for multigrid. 
     @details Multigrid exits if L(phi) < tolerance*L(phi=0)
   */
@@ -340,6 +350,11 @@ protected:
     @details Multigrid exits if residue is not reduce by at least this factor. 
   */
   Real m_multigridExitHang;
+
+  /*!
+    @brief Multigrid relaxation factor
+  */
+  Real m_multigridRelaxFactor;
 
   /*!
     @brief Multigrid operator factory. 

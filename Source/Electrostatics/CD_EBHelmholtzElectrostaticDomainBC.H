@@ -23,7 +23,7 @@
   class will simply instantiate one such BC object for each edge/face in the computational domain, and call the appropriate BC function when EBHelmholtzOp
   asks for it. 
   @note For this class to operate correctly with time-dependent boundary conditions, the user must ensure that
-  the time dependence is captured by reference. FieldSolverMultigrid already does this, by taking the user's boundary condition function
+  the time dependence is captured by reference. FieldSolverGMG already does this, by taking the user's boundary condition function
   and replacing the time-argument by a reference to FieldSolver::m_time. 
 */
 class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC

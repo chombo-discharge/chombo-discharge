@@ -97,6 +97,7 @@ public:
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_smoother      Which smoother to use
+    @param[in] a_relaxFactor   Relaxation factor
   */
   EBHelmholtzOp(const Location::Cell                             a_dataLocation,
                 const EBLevelGrid&                               a_eblgFine,
@@ -124,7 +125,8 @@ public:
                 const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoIrreg,
                 const IntVect&                                   a_ghostCellsPhi,
                 const IntVect&                                   a_ghostCellsRHS,
-                const Smoother&                                  a_smoother);
+                const Smoother&                                  a_smoother,
+                const Real&                                      a_relaxFactor);
 
   /*!
     @brief Dtor
@@ -554,6 +556,14 @@ public:
   scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) override final;
 
   /*!
+    @brief Local scaling function. Multiplies the left-hand side by the right-hand side.
+    @param[out] a_lhs. Equal to a_lhs*a_rhs on output
+    @param[in]  a_rhs. Scaling data
+  */
+  void
+  scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) const noexcept;
+
+  /*!
     @brief Compute norm of data
     @param[in]
     @details a_order is currently ignored as we call a static routine in EBAMRPoissonOp for now. 
@@ -840,6 +850,12 @@ public:
   LevelData<EBFluxFAB>&
   getFlux() const;
 
+  /*!
+    @brief Returns m_relCoef. Used by MFHelmholtzOp
+  */
+  const LevelData<EBCellFAB>&
+  getRelaxationCoeff() const noexcept;
+
 protected:
   /*!
     @brief Number of components that we solve for (always one..)
@@ -907,6 +923,11 @@ protected:
   int m_refToFine;
 
   /*!
+    @brief Number of smoothings in the preconditioner
+  */
+  int m_numSmoothPreCond;
+
+  /*!
     @brief Do coarse-fine interpolation or not. 
     @note Used by MFHelmholtzOp for optimizing how calls in EBHelmholtzOp are made
   */
@@ -948,6 +969,11 @@ protected:
     @brief Grid resolution;
   */
   Real m_dx;
+
+  /*!
+    @brief Successive over-relaxation factor (Must be >= 1).
+  */
+  Real m_relaxFactor;
 
   /*!
     @brief Vector resolution

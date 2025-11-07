@@ -1,6 +1,6 @@
 #include "CD_Driver.H"
 #include <CD_FieldSolverFactory.H>
-#include <CD_FieldSolverMultigrid.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_CdrLayoutImplem.H>
 #include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
@@ -54,7 +54,7 @@ main(int argc, char* argv[])
     new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
-  auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
+  auto poi_fact = new FieldSolverFactory<FieldSolverGMG>();
   auto cdr_fact = new CdrFactory<CdrSolver, CdrGodunov>();
   auto rte_fact = new RtFactory<RtSolver, EddingtonSP1>();
 

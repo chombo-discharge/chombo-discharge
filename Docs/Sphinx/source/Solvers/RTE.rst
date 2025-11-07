@@ -218,7 +218,7 @@ The ``EddingtonSP1`` implementation has a number of configurable options for run
    :emphasize-lines: 4, 6-9, 20-33
    :caption: ``EddingtonSP1`` solver configuration options. Run-time configurable options are highlighted.
 
-The multigrid options are analogous to the multigrid options for :ref:`Chap:FieldSolverMultigrid`, see :ref:`Chap:MultigridTuning`.
+The multigrid options are analogous to the multigrid options for :ref:`Chap:FieldSolverGMG`, see :ref:`Chap:MultigridTuning`.
 
 .. _Chap:MonteCarloRTE:
 

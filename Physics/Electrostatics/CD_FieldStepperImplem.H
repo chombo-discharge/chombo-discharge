@@ -78,6 +78,9 @@ namespace Physics {
       else if (str == "morton") {
         m_boxSort = BoxSorting::Morton;
       }
+      else if (str == "hilbert") {
+        m_boxSort = BoxSorting::Hilbert;
+      }
       else {
         MayDay::Error("FieldStepper::FieldStepper - unknown box sorting method requested for argument 'BoxSorting'");
       }

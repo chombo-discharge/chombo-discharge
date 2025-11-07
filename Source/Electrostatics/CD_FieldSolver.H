@@ -78,7 +78,7 @@ public:
     @param[in] a_permittivityCell Permittivity on cell center
     @param[in] a_permittivityFace Permittivity on faces
     @param[in] a_permittivityEB   Permittivity on EB
-    @note Used by FieldSolverMultigrid to change permittivities/conductivities under the hood of the multigrid solver.
+    @note Used by FieldSolverGMG to change permittivities/conductivities under the hood of the multigrid solver.
   */
   virtual void
   setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
