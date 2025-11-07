@@ -713,10 +713,16 @@ namespace Physics {
       std::vector<std::pair<Real, Real>> m_ionizationVolumeTransient;
 
       /*!
-        @brief CFL-step for negative ions.
-        @brief Relative voltage increase
+        @brief Maximum relative voltage increase
+        @details Only for stationary mode.
       */
-      Real m_voltageIncrease;
+      Real m_relativeDeltaU;
+
+      /*!
+        @brief Maximum targeted increase in K-value.
+        @details Only for stationary mode.
+      */
+      Real m_deltaK;
 
       /*!
         @brief Maximum K-value that is calculated in stationary mode

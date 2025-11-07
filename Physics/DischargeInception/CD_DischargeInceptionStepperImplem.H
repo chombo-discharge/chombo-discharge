@@ -52,7 +52,8 @@ DischargeInceptionStepper<P, F, C>::DischargeInceptionStepper()
   m_debug               = false;
   m_fullIntegration     = false;
   m_evaluateTownsend    = false;
-  m_voltageIncrease     = 1 + 0.05;
+  m_relativeDeltaU      = 1 + 0.05;
+  m_deltaK              = 1.0;
   m_maxKLimit           = 15.0;
 
   this->parseOptions();
@@ -447,12 +448,13 @@ DischargeInceptionStepper<P, F, C>::parseVoltages() noexcept
 
   ParmParse pp("DischargeInceptionStepper");
 
-  pp.get("rel_step_dU", m_voltageIncrease);
+  pp.get("rel_step_dU", m_relativeDeltaU);
+  pp.get("step_dK", m_deltaK);
   pp.get("limit_max_K", m_maxKLimit);
   pp.get("K_inception", m_inceptionK);
   pp.get("eval_townsend", m_evaluateTownsend);
 
-  m_voltageIncrease = 1.0 + m_voltageIncrease;
+  m_relativeDeltaU = 1.0 + m_relativeDeltaU;
 }
 
 template <typename P, typename F, typename C>
@@ -2472,7 +2474,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
     pout() << "DischargeInceptionStepper::computeInceptionIntegralStationary" << endl;
   }
 
-  constexpr int maxIter = 100;
+  constexpr int maxIter = 50;
 
   // Get the maximum field (in the gas phase) with the electrodes at 1V
   Real maxField = 0.0;
@@ -2484,15 +2486,21 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
   DataOps::getMaxMinNorm(maxField, minField, gasField);
 
-  // Compute the critical and the minimum possible inception voltage.
+  // Compute the critical field and the minimum possible inception voltage.
   const Real Ecrit = this->getCriticalField();
 
-  Real curVoltage = Ecrit / maxField;
+  Real curVoltage = (1.0 + m_relativeDeltaU) * Ecrit / maxField;
   Real curMaxK    = 0.0;
   int  curIter    = 0;
 
   m_inceptionIntegralPlus.resize(0);
   m_inceptionIntegralMinu.resize(0);
+
+  // We use K1, K2, U2, U1 to extrapolate to a next voltage.
+  Real K1 = 0.0;
+  Real K2 = 0.0;
+  Real U1 = Ecrit / maxField;
+  Real U2 = curVoltage;
 
   while (curMaxK < m_maxKLimit && curIter < maxIter) {
     EBAMRCellData Kplus;
@@ -2526,10 +2534,19 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
     curMaxK = std::max(maxKPlus, maxKMinu);
 
-    // Step to next voltage.
-    curVoltage = curVoltage * m_voltageIncrease;
+    // Figure out the next voltage.
+    K2 = curMaxK;
+    U2 = curVoltage;
 
-    curIter++;
+    const Real dKdU        = (K2 - K1) / (U2 - U1);
+    const Real nextVoltage = U1 + ((K2 - K1) + m_deltaK) / dKdU;
+
+    K1 = K2;
+    U1 = U2;
+
+    // Step to next voltage.
+    curVoltage = std::min(nextVoltage, curVoltage * m_relativeDeltaU);
+    curIter    = curIter + 1;
 
     if (!m_fullIntegration && (std::abs(curMaxK - m_inceptionK) <= 1E-3)) {
       break;

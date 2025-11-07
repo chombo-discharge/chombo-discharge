@@ -22,6 +22,7 @@ DischargeInceptionStepper.townsend_grid_dx     = 2.0       ## Space step to use 
 
 # Static mode
 DischargeInceptionStepper.rel_step_dU     = 0.05    ## Relative (%) voltage increase for each step
+DischargeInceptionStepper.step_dK         = 1.0     ## Desired increase in K for each voltage step
 DischargeInceptionStepper.limit_max_K     = 15.0    ## Limit the maximum K-value
 
 # Dynamic mode
