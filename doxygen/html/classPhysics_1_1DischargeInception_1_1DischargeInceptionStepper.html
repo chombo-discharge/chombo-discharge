@@ -654,9 +654,12 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a8ef0248e370f679846405f8e838d7dd4" id="r_a8ef0248e370f679846405f8e838d7dd4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">Real</a>, <a class="el" href="classTracerParticleSolver.html">Real</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a8ef0248e370f679846405f8e838d7dd4">m_ionizationVolumeTransient</a></td></tr>
 <tr class="memdesc:a8ef0248e370f679846405f8e838d7dd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ionization volume at various time instances.  <br /></td></tr>
 <tr class="separator:a8ef0248e370f679846405f8e838d7dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a063b72798ea19cff86c1d21d46d5c37a" id="r_a063b72798ea19cff86c1d21d46d5c37a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a063b72798ea19cff86c1d21d46d5c37a">m_voltageIncrease</a></td></tr>
-<tr class="memdesc:a063b72798ea19cff86c1d21d46d5c37a"><td class="mdescLeft">&#160;</td><td class="mdescRight">CFL-step for negative ions.  <br /></td></tr>
-<tr class="separator:a063b72798ea19cff86c1d21d46d5c37a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e1553a4f694e2a1a310068546a80730" id="r_a5e1553a4f694e2a1a310068546a80730"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a5e1553a4f694e2a1a310068546a80730">m_relativeDeltaU</a></td></tr>
+<tr class="memdesc:a5e1553a4f694e2a1a310068546a80730"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum relative voltage increase.  <br /></td></tr>
+<tr class="separator:a5e1553a4f694e2a1a310068546a80730"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c17ca267cda5b8a725f42fb2100a059" id="r_a7c17ca267cda5b8a725f42fb2100a059"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a7c17ca267cda5b8a725f42fb2100a059">m_deltaK</a></td></tr>
+<tr class="memdesc:a7c17ca267cda5b8a725f42fb2100a059"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum targeted increase in K-value.  <br /></td></tr>
+<tr class="separator:a7c17ca267cda5b8a725f42fb2100a059"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2769097ecc4c782085028ed08cdc7ddc" id="r_a2769097ecc4c782085028ed08cdc7ddc"><td class="memItemLeft" align="right" valign="top"><a id="a2769097ecc4c782085028ed08cdc7ddc" name="a2769097ecc4c782085028ed08cdc7ddc"></a>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_maxKLimit</b></td></tr>
 <tr class="memdesc:a2769097ecc4c782085028ed08cdc7ddc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum K-value that is calculated in stationary mode. <br /></td></tr>
@@ -3652,6 +3655,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="a7c17ca267cda5b8a725f42fb2100a059" name="a7c17ca267cda5b8a725f42fb2100a059"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c17ca267cda5b8a725f42fb2100a059">&#9670;&#160;</a></span>m_deltaK</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_deltaK</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum targeted increase in K-value. </p>
+<p>Only for stationary mode. </p>
+
+</div>
+</div>
 <a id="a0510ac0989492a8ecc026bdb2efcea9d" name="a0510ac0989492a8ecc026bdb2efcea9d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0510ac0989492a8ecc026bdb2efcea9d">&#9670;&#160;</a></span>m_detachment</h2>
 
@@ -4194,6 +4224,33 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 
 </div>
 </div>
+<a id="a5e1553a4f694e2a1a310068546a80730" name="a5e1553a4f694e2a1a310068546a80730"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e1553a4f694e2a1a310068546a80730">&#9670;&#160;</a></span>m_relativeDeltaU</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_relativeDeltaU</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Maximum relative voltage increase. </p>
+<p>Only for stationary mode. </p>
+
+</div>
+</div>
 <a id="a85689fc76d2b4f776231c3915cab25d9" name="a85689fc76d2b4f776231c3915cab25d9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a85689fc76d2b4f776231c3915cab25d9">&#9670;&#160;</a></span>m_streamerInceptionVoltageMinu</h2>
 
@@ -4436,33 +4493,6 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a 
 <p>Max T value for every voltage. </p>
 <dl class="section note"><dt>Note</dt><dd>Stationary mode and positive polarity. The tuple contains (|voltage|, K-value, max position) <br  />
  </dd></dl>
-
-</div>
-</div>
-<a id="a063b72798ea19cff86c1d21d46d5c37a" name="a063b72798ea19cff86c1d21d46d5c37a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a063b72798ea19cff86c1d21d46d5c37a">&#9670;&#160;</a></span>m_voltageIncrease</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">P</a>  = TracerParticle&lt;2, 3&gt;, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">F</a>  = FieldSolverGMG, <a class="el" href="classTracerParticleSolver.html">typename</a> <a class="el" href="classTracerParticleSolver.html">C</a>  = CdrCTU&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html">Physics::DischargeInception::DischargeInceptionStepper</a>&lt; <a class="el" href="classTracerParticleSolver.html">P</a>, <a class="el" href="classTracerParticleSolver.html">F</a>, <a class="el" href="classTracerParticleSolver.html">C</a> &gt;::m_voltageIncrease</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>CFL-step for negative ions. </p>
-<p>Relative voltage increase </p>
 
 </div>
 </div>

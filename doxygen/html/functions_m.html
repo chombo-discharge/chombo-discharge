@@ -270,6 +270,7 @@ $(function() {
 <li>m_dblFine&#160;:&#160;<a class="el" href="classCoarseInterpQuadCF.html#a9307ccdb37f4891afd63b8ebc27afbb5">CoarseInterpQuadCF</a></li>
 <li>m_debug&#160;:&#160;<a class="el" href="classEBAMRSurfaceDeposition.html#aa007a7405de181027b3a24f354c33985">EBAMRSurfaceDeposition</a>, <a class="el" href="classParticleContainer.html#a3ef206d4c9c131277aefaed866e80907">ParticleContainer&lt; P &gt;</a>, <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a78074be1cbf25cd07ff6c441ed17556b">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaGodunovStepper.html#a02bb042402387ee9552da182eb494337">Physics::CdrPlasma::CdrPlasmaGodunovStepper</a>, <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#ab481570e53018e92f179ec60625798d6">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCPhysics.html#a2f14d4b1616e44cfcd420752008813aa">Physics::ItoKMC::ItoKMCPhysics</a></li>
 <li>m_deeperLevelGrids&#160;:&#160;<a class="el" href="classEBHelmholtzOpFactory.html#a552c15960da771e9fddb904bde436e99">EBHelmholtzOpFactory</a>, <a class="el" href="classMFHelmholtzOpFactory.html#ad1f7ba6013040f7e50f2054f1f70972f">MFHelmholtzOpFactory</a></li>
+<li>m_deltaK&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a7c17ca267cda5b8a725f42fb2100a059">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_denom&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBC.html#a1a32857bcc75225143e2b7b951a1d75c">MFHelmholtzJumpBC</a></li>
 <li>m_deposition&#160;:&#160;<a class="el" href="classItoSolver.html#a61bc4b0940fd002ab82329890fbd3157">ItoSolver</a>, <a class="el" href="classMcPhoto.html#a612355eb088e1faf64dd93c487dcab12">McPhoto</a>, <a class="el" href="classTracerParticleSolver.html#aa77d8e47a504302aeac78b7f89294302">TracerParticleSolver&lt; P &gt;</a></li>
 <li>m_depositionNC&#160;:&#160;<a class="el" href="classItoSolver.html#a49dc43db44eb8cb98f208c66162d5e7b">ItoSolver</a>, <a class="el" href="classMcPhoto.html#ae9f71af70d0ef3dc565d67874cbb715a">McPhoto</a></li>
@@ -1033,6 +1034,7 @@ $(function() {
 <li>m_regridSuperparticles&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a69d9ee6f988806e516a7577187cc4375">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_regularCoarseFineRegions&#160;:&#160;<a class="el" href="classEBReflux.html#ac18f971f138bdf6af4f19dba39108897">EBReflux</a></li>
 <li>m_regularGhostRegions&#160;:&#160;<a class="el" href="classEBGhostCellInterpolator.html#a1aa877059c00a3070bf2ea228733c22c">EBGhostCellInterpolator</a></li>
+<li>m_relativeDeltaU&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a5e1553a4f694e2a1a310068546a80730">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_relaxationTime&#160;:&#160;<a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a0608866c829b5d65e45d66132fa9e447">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_relaxFactor&#160;:&#160;<a class="el" href="classEBHelmholtzOp.html#aa7a6e09dfa0081bb3d970b3abf7cc10d">EBHelmholtzOp</a>, <a class="el" href="classEBHelmholtzOpFactory.html#aa6bc162b949e63772825159531d4bd73">EBHelmholtzOpFactory</a>, <a class="el" href="classMFHelmholtzOpFactory.html#a9d64423021548afc680432e8458b9505">MFHelmholtzOpFactory</a></li>
 <li>m_relaxStencils&#160;:&#160;<a class="el" href="classEBHelmholtzOp.html#a19dcd06b3d6626ea49878eaec6e404d3">EBHelmholtzOp</a></li>
@@ -1223,7 +1225,6 @@ $(function() {
 <li>m_voltage&#160;:&#160;<a class="el" href="classFieldSolver.html#ad98ede81e227228b8761ed0fa9339200">FieldSolver</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#acc9efff66a85a54e3bd13455c0bf0a8a">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#accc14b3af6e5cb3fe790bdefec37738f">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a></li>
 <li>m_voltageCurve&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a9fbcffce07519495f6d677336d283def">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_voltageFraction&#160;:&#160;<a class="el" href="classElectrode.html#ae7d3a103fc55adc31f3abad5fb7999bf">Electrode</a></li>
-<li>m_voltageIncrease&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a063b72798ea19cff86c1d21d46d5c37a">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_voltageSweeps&#160;:&#160;<a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a553bafe7e5670ffe3dd31b5aac1f932b">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a></li>
 <li>m_volumeScale&#160;:&#160;<a class="el" href="classTracerParticleSolver.html#a6184240f0a0a5c5b6021e18d24e78a19">TracerParticleSolver&lt; P &gt;</a></li>
 <li>m_volumeWeights&#160;:&#160;<a class="el" href="classEBCoarseToFineInterp.html#a40e22787d64b2f92ed1ad2aca76fdce0">EBCoarseToFineInterp</a></li>
@@ -1259,35 +1260,35 @@ $(function() {
 <li>makeSuperparticlesEqualWeightKD()&#160;:&#160;<a class="el" href="classItoSolver.html#a054d02df4353cf514c5a7e84616c8b3b">ItoSolver</a></li>
 <li>mapParticlesToAMRGrid()&#160;:&#160;<a class="el" href="classParticleContainer.html#a9929380521a01b62152b714847f9f08b">ParticleContainer&lt; P &gt;</a></li>
 <li>matchBC()&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBC.html#aa1d0987cc31b2fc1590f2d450000f3a4">MFHelmholtzJumpBC</a>, <a class="el" href="classMFHelmholtzSaturationChargeJumpBC.html#a2cabca8488f4c12c6c0b883a38c936e5">MFHelmholtzSaturationChargeJumpBC</a></li>
-<li>max()&#160;:&#160;<a class="el" href="classDataOps.html#a55267a7e87eb9baa3306b3a5856553cd">DataOps</a></li>
+<li>max()&#160;:&#160;<a class="el" href="classDataOps.html#ac08f7f4e51cda580cfa00a7780b00775">DataOps</a></li>
 <li>McPhoto()&#160;:&#160;<a class="el" href="classMcPhoto.html#a852aed4d457e23aaabed633ec8abcc25">McPhoto</a></li>
 <li>MechanicalShaft()&#160;:&#160;<a class="el" href="classMechanicalShaft.html#a7086ed08c8fcaae296fa7a4e3be5b5b8">MechanicalShaft</a></li>
 <li>mergeParticles()&#160;:&#160;<a class="el" href="classItoSolver.html#a51538761f2825b0989349d640e8c061c">ItoSolver</a></li>
 <li>Mesh&#160;:&#160;<a class="el" href="classSignedDistanceDCEL.html#ac3ba4cb079ccd274977cf3ee9ff80e69">SignedDistanceDCEL&lt; T &gt;</a></li>
 <li>MeshODESolver()&#160;:&#160;<a class="el" href="classMeshODESolver.html#a5a824db056b2ce43bf99e12e5f0c41fb">MeshODESolver&lt; N &gt;</a></li>
-<li>MeshODEStepper()&#160;:&#160;<a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#af27c3d40ffa283e4c07727af3ce84834">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a></li>
+<li>MeshODEStepper()&#160;:&#160;<a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#ac8208c26ceb09a93f3379646cfb03501">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a></li>
 <li>MFBaseIVFAB()&#160;:&#160;<a class="el" href="classMFBaseIVFAB.html#a1ea286eecb86a3eb7986420d9ab71b6c">MFBaseIVFAB</a></li>
 <li>MFBaseIVFABFactory()&#160;:&#160;<a class="el" href="classMFBaseIVFABFactory.html#a5d873c6b90b2f2d915f7b8306c053bca">MFBaseIVFABFactory</a></li>
 <li>MFCoarAve()&#160;:&#160;<a class="el" href="classMFCoarAve.html#a17b88ab11df6403b14ef0a79c2293869">MFCoarAve</a></li>
-<li>MFHelmholtzDirichletDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzDirichletDomainBCFactory.html#a71b8edf842afd156e88a306858426c71">MFHelmholtzDirichletDomainBCFactory</a></li>
+<li>MFHelmholtzDirichletDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzDirichletDomainBCFactory.html#a8f547b4c2800d58b3ab3d042e82393e0">MFHelmholtzDirichletDomainBCFactory</a></li>
 <li>MFHelmholtzDirichletEBBC()&#160;:&#160;<a class="el" href="classMFHelmholtzDirichletEBBC.html#a18b95b3d890712dd1416340fef08f4ab">MFHelmholtzDirichletEBBC</a></li>
-<li>MFHelmholtzDirichletEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#ad20e599282940cc5e208c078ee918126">MFHelmholtzDirichletEBBCFactory</a></li>
+<li>MFHelmholtzDirichletEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzDirichletEBBCFactory.html#a240d4c17ccc61f9229c93036e3baf3f5">MFHelmholtzDirichletEBBCFactory</a></li>
 <li>MFHelmholtzDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzDomainBCFactory.html#abb09d8122443521683cafaa65d01235d">MFHelmholtzDomainBCFactory</a></li>
-<li>MFHelmholtzEBBC()&#160;:&#160;<a class="el" href="classMFHelmholtzEBBC.html#a6480dab6e6e59982d7b50810a5cb2bdc">MFHelmholtzEBBC</a></li>
+<li>MFHelmholtzEBBC()&#160;:&#160;<a class="el" href="classMFHelmholtzEBBC.html#af15c1cc5e32ebec39aac32ed717260f1">MFHelmholtzEBBC</a></li>
 <li>MFHelmholtzEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzEBBCFactory.html#a22cc270285ea051a3052eba13aa5b9b2">MFHelmholtzEBBCFactory</a></li>
-<li>MFHelmholtzElectrostaticDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzElectrostaticDomainBCFactory.html#acf727f2a80c168e02f0ba842e2579da2">MFHelmholtzElectrostaticDomainBCFactory</a></li>
+<li>MFHelmholtzElectrostaticDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzElectrostaticDomainBCFactory.html#a3848d1e7c22ddf017d81cdd55a47f806">MFHelmholtzElectrostaticDomainBCFactory</a></li>
 <li>MFHelmholtzElectrostaticEBBC()&#160;:&#160;<a class="el" href="classMFHelmholtzElectrostaticEBBC.html#a02b2dee4fd4fe20fdb452a8243c191d7">MFHelmholtzElectrostaticEBBC</a></li>
 <li>MFHelmholtzElectrostaticEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzElectrostaticEBBCFactory.html#a9c805a8387909afa4f2d2250b7808993">MFHelmholtzElectrostaticEBBCFactory</a></li>
 <li>MFHelmholtzJumpBC()&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBC.html#a75a1cede969a2feac7f9b70d30510c12">MFHelmholtzJumpBC</a></li>
 <li>MFHelmholtzJumpBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzJumpBCFactory.html#a3c75a6d341adcab52c1cf2523320093c">MFHelmholtzJumpBCFactory</a></li>
 <li>MFHelmholtzNeumannDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzNeumannDomainBCFactory.html#a6acba0f8bc54390802959381a5156916">MFHelmholtzNeumannDomainBCFactory</a></li>
 <li>MFHelmholtzNeumannEBBC()&#160;:&#160;<a class="el" href="classMFHelmholtzNeumannEBBC.html#a919ffe862c85218d77847996c3fe94c7">MFHelmholtzNeumannEBBC</a></li>
-<li>MFHelmholtzNeumannEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#a0ad15ec0624424cf1ff91cf04370c0c4">MFHelmholtzNeumannEBBCFactory</a></li>
-<li>MFHelmholtzOp()&#160;:&#160;<a class="el" href="classMFHelmholtzOp.html#a154770218de08dfb3b4bf7d59c2f8224">MFHelmholtzOp</a></li>
-<li>MFHelmholtzOpFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzOpFactory.html#a3c99674cf3c2592650a464038773f0f9">MFHelmholtzOpFactory</a></li>
+<li>MFHelmholtzNeumannEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzNeumannEBBCFactory.html#a7a9080622a6cb87cd5e831a2576cd28f">MFHelmholtzNeumannEBBCFactory</a></li>
+<li>MFHelmholtzOp()&#160;:&#160;<a class="el" href="classMFHelmholtzOp.html#a36c70cf070ec18faf85d876ca209f21a">MFHelmholtzOp</a></li>
+<li>MFHelmholtzOpFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzOpFactory.html#a59046d0f9a950da0a9107e8bddf6cc16">MFHelmholtzOpFactory</a></li>
 <li>MFHelmholtzRobinDomainBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzRobinDomainBCFactory.html#a35d5fdb7c2c2b87d337496723a800dfb">MFHelmholtzRobinDomainBCFactory</a></li>
 <li>MFHelmholtzRobinEBBC()&#160;:&#160;<a class="el" href="classMFHelmholtzRobinEBBC.html#a2aa5215b91efe24cbf81c805de12d57b">MFHelmholtzRobinEBBC</a></li>
-<li>MFHelmholtzRobinEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a0787f79f703b14776cc05757023799d1">MFHelmholtzRobinEBBCFactory</a></li>
+<li>MFHelmholtzRobinEBBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzRobinEBBCFactory.html#a62c3d63d98e0b75db2f3d8a9074decc5">MFHelmholtzRobinEBBCFactory</a></li>
 <li>MFHelmholtzSaturationChargeJumpBC()&#160;:&#160;<a class="el" href="classMFHelmholtzSaturationChargeJumpBC.html#a9938aa746a9eb550338ea39907ace4e8">MFHelmholtzSaturationChargeJumpBC</a></li>
 <li>MFHelmholtzSaturationChargeJumpBCFactory()&#160;:&#160;<a class="el" href="classMFHelmholtzSaturationChargeJumpBCFactory.html#a2e7f97fb6aee42c916e0abbb00fea79e">MFHelmholtzSaturationChargeJumpBCFactory</a></li>
 <li>MFInterfaceFAB()&#160;:&#160;<a class="el" href="classMFInterfaceFAB.html#a0c1665a8fb77aac838aab83eaf8e379e">MFInterfaceFAB&lt; T &gt;</a></li>
