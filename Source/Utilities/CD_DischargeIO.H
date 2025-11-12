@@ -158,6 +158,29 @@ namespace DischargeIO {
               const RealVect                                  a_shift    = RealVect::Zero,
               const Real                                      a_time     = 0.0) noexcept;
 
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpointed particles to HDF5
+    @param[in, out] a_handle Handle to HDF5 files
+    @param[in] a_particles Particles to checkpoint
+    @param[in] a_dataType String identifier
+    @note This is basically a bootleg of Chombo's HDF5 API, but replacing P::size() by P::H5size()
+  */
+  template <class P>
+  void
+  writeCheckParticlesToHDF(HDF5Handle& a_handle, const ParticleData<P>& a_particles, const std::string& a_dataType);
+
+  /*!
+    @brief Write checkpointed particles to HDF5
+    @param[in, out] a_handle Handle to HDF5 files
+    @param[in] a_particles Particles to checkpoint
+    @param[in] a_dataType String identifier
+    @note This is basically a bootleg of Chombo's HDF5 API, but replacing P::size() by P::H5size()    
+  */
+  template <class P>
+  void
+  readCheckParticlesFromHDF(HDF5Handle& a_handle, ParticleData<P>& a_particles, const std::string& a_dataType);
+#endif
 } // namespace DischargeIO
 
 #include <CD_NamespaceFooter.H>

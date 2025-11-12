@@ -24,6 +24,7 @@
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
 #include <CD_ParticleOps.H>
+#include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
 #include <CD_BoxLoops.H>
 #include <CD_Random.H>
@@ -1086,7 +1087,7 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
 
   const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
-  writeParticlesToHDF(a_handle, particles[a_level], str);
+  DischargeIO::writeCheckParticlesToHDF(a_handle, particles[a_level], str);
 }
 #endif
 
@@ -1212,7 +1213,7 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
 
   const std::string str = m_name + "_particlesP";
 
-  readParticlesFromHDF(a_handle, particles[a_level], str);
+  DischargeIO::readCheckParticlesFromHDF(a_handle, particles[a_level], str);
 }
 #endif
 

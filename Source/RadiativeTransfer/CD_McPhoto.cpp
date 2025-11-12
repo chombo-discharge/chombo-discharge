@@ -27,6 +27,7 @@
 #include <CD_PointParticle.H>
 #include <CD_ParticleOps.H>
 #include <CD_Random.H>
+#include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
 McPhoto::McPhoto()
@@ -778,7 +779,7 @@ McPhoto::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const
 
   // Write particles. Must be implemented.
   std::string str = m_name + "_particles";
-  writeParticlesToHDF(a_handle, m_photons[a_level], str);
+  DischargeIO::writeCheckParticlesToHDF(a_handle, m_photons[a_level], str);
 }
 #endif
 
@@ -796,7 +797,7 @@ McPhoto::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
 
   // Read particles. Should be implemented
   std::string str = m_name + "_particles";
-  readParticlesFromHDF(a_handle, m_photons[a_level], str);
+  DischargeIO::readCheckParticlesFromHDF(a_handle, m_photons[a_level], str);
 }
 #endif
 
