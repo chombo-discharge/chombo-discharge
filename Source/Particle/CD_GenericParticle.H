@@ -18,12 +18,51 @@
 #include <cstdio>
 #include <cmath>
 #include <array>
+#include <cstdint>
 
 // Chombo includes
 #include <RealVect.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
+
+namespace detail {
+  /*!
+    @brief Helper function for linearizing a particle onto a buffer.
+    @detail This copies T into the buffer p and increments the pointer.
+    @param[in,out] p Buffer
+    @param[in] a_x Particle property. Must be a trivial type.
+  */
+  template <class T>
+  inline void
+  pushParticleProperty(uint8_t*& p, const T& a_x)
+  {
+    static_assert(std::is_trivially_copyable<T>::value,
+                  "detail::pushParticleProperty expects trivially-copyable fields");
+
+    std::memcpy(p, &a_x, sizeof(T));
+
+    p += sizeof(T);
+  };
+
+  /*!
+    @brief Helper function for linearizing a buffer onto a particle property.
+    @detail This copies from the buffer p into the particle property T. 
+    @param[in,out] p Buffer. 
+    @param[in] a_x Particle property. Must be a trivial type.
+  */
+  template <class T>
+  inline void
+  pullParticleProperty(const uint8_t*& p, T& a_x)
+  {
+    static_assert(std::is_trivially_copyable<T>::value,
+                  "detail::pushParticleProperty expects trivially-copyable fields");
+
+    std::memcpy(&a_x, p, sizeof(T));
+
+    p += sizeof(T);
+  };
+} // namespace detail
 
 /*!
   @brief A generic particle class, holding the position and a specified number of real and vector values.
@@ -47,6 +86,30 @@ public:
     @brief Destructor (deallocates runtime memory storage)
   */
   inline virtual ~GenericParticle();
+
+  /*!
+    @brief Get the particle ID
+  */
+  inline const int64_t&
+  getParticleID() const noexcept;
+
+  /*!
+    @brief Get the particle ID
+  */
+  inline int64_t&
+  getParticleID() noexcept;
+
+  /*!
+    @brief Get the MPI rank ID
+  */
+  inline const int32_t&
+  getRankID() const noexcept;
+
+  /*!
+    @brief Get the MPI rank ID
+  */
+  inline int32_t&
+  getRankID() noexcept;
 
   /*!
     @brief Get the particle position. 
@@ -164,16 +227,26 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* a_buffer) const;
+  linearOut(void* const a_buffer) const;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
-    @param[in] a_buffer Pointer to memory block
+    @param[in] a_buffer Pointer to memory block.
   */
   inline virtual void
-  linearIn(void* a_buffer);
+  linearIn(const void* const a_buffer);
 
 protected:
+  /*!
+    @brief Particle ID
+  */
+  int64_t m_particleID;
+
+  /*!
+    @brief MPI rank owning this particle
+  */
+  int32_t m_rankID;
+
   /*!
     @brief Particle position
   */

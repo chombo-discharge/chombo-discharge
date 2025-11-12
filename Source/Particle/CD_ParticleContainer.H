@@ -28,6 +28,8 @@
 #include <CD_ParticleMap.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "Must add a function that sets the rank ID and particle ID!"
+
 /*!
   @brief Alias for ParticleData on each AMR level.
 */

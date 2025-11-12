@@ -78,79 +78,85 @@ template <size_t M, size_t N>
 inline int
 TracerParticle<M, N>::size() const
 {
-  return (GenericParticle<M, N>::size() + sizeof(Real) + SpaceDim * sizeof(Real));
+  int size = 0;
+
+  size += GenericParticle<M, N>::size();
+  size += SpaceDim * sizeof(Real);
+  size += sizeof(Real);
+
+  return size;
 }
 
 template <size_t M, size_t N>
 inline void
-TracerParticle<M, N>::linearOut(void* buf) const
+TracerParticle<M, N>::linearOut(void* const a_buffer) const
 {
-  // clang-format off
-  Real* buffer = (Real*) buf;
+  uint8_t* p = static_cast<uint8_t*>(a_buffer);
 
-  // Linearize m_position onto buffer.
-  D_TERM(*buffer++ = this->m_position[0];,
-	 *buffer++ = this->m_position[1];,
-	 *buffer++ = this->m_position[2];);
+  detail::pushParticleProperty(p, this->m_particleID);
+  detail::pushParticleProperty(p, this->m_rankID);
 
-  // Linearize m_scalars onto the buffer
+  detail::pushParticleProperty(p, this->m_position[0]);
+  detail::pushParticleProperty(p, this->m_position[1]);
+#if CH_SPACEDIM == 3
+  detail::pushParticleProperty(p, this->m_position[2]);
+#endif
+
   for (size_t i = 0; i < M; i++) {
-    *buffer++ = this->m_scalars[i];
+    detail::pushParticleProperty(p, this->m_scalars[i]);
   }
 
-  // Linearize vectors onto the buffer
-  for (size_t i = 0; i < N; i++) {
-    const RealVect& v = this->m_vectors[i];
-
-    D_TERM(*buffer++ = v[0];, *buffer++ = v[1];, *buffer++ = v[2];);
+  for (size_t i = 0; i < M; i++) {
+    detail::pushParticleProperty(p, this->m_vectors[i][0]);
+    detail::pushParticleProperty(p, this->m_vectors[i][1]);
+#if CH_SPACEDIM == 3
+    detail::pushParticleProperty(p, this->m_vectors[i][2]);
+#endif
   }
 
-  // Linearize m_velocity onto buffer
-  D_TERM(*buffer++ = m_velocity[0];,
-	 *buffer++ = m_velocity[1];,
-	 *buffer++ = m_velocity[2];);
+  detail::pushParticleProperty(p, m_weight);
 
-  // // Linearize weight onto buffer
-  *buffer = m_weight;
-
-  // clang-format on
+  detail::pushParticleProperty(p, m_velocity[0]);
+  detail::pushParticleProperty(p, m_velocity[1]);
+#if CH_SPACEDIM == 3
+  detail::pushParticleProperty(p, m_velocity[2]);
+#endif
 }
 
 template <size_t M, size_t N>
 inline void
-TracerParticle<M, N>::linearIn(void* buf)
+TracerParticle<M, N>::linearIn(const void* const a_buffer)
 {
-  // clang-format off
-  
-  Real* buffer = (Real*)buf;
-  
-  D_TERM(this->m_position[0] = *buffer++;,
-	 this->m_position[1] = *buffer++;,
-	 this->m_position[2] = *buffer++;);
+  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
 
-  // Linearize buffer onto scalars
+  detail::pullParticleProperty(p, this->m_particleID);
+  detail::pullParticleProperty(p, this->m_rankID);
+
+  detail::pullParticleProperty(p, this->m_position[0]);
+  detail::pullParticleProperty(p, this->m_position[1]);
+#if CH_SPACEDIM == 3
+  detail::pullParticleProperty(p, this->m_position[2]);
+#endif
+
   for (size_t i = 0; i < M; i++) {
-    this->m_scalars[i] = *buffer++;
+    detail::pullParticleProperty(p, this->m_scalars[i]);
   }
 
-  // Linearize buffer onto vectors
-  for (size_t i = 0; i < N; i++) {
-    RealVect& v = this->m_vectors[i];
-
-    D_TERM(v[0] = *buffer++;,
-	   v[1] = *buffer++;,
-	   v[2] = *buffer++;);
+  for (size_t i = 0; i < M; i++) {
+    detail::pullParticleProperty(p, this->m_vectors[i][0]);
+    detail::pullParticleProperty(p, this->m_vectors[i][1]);
+#if CH_SPACEDIM == 3
+    detail::pullParticleProperty(p, this->m_vectors[i][2]);
+#endif
   }
 
-  // Put velocity onto buffer.
-  D_TERM(m_velocity[0] = *buffer++;,
-	 m_velocity[1] = *buffer++;,
-	 m_velocity[2] = *buffer++;);
+  detail::pullParticleProperty(p, m_weight);
 
-  // Put weight onto buffer
-  m_weight = *buffer;
-
-  // clang-format on
+  detail::pullParticleProperty(p, m_velocity[0]);
+  detail::pullParticleProperty(p, m_velocity[1]);
+#if CH_SPACEDIM == 3
+  detail::pullParticleProperty(p, m_velocity[2]);
+#endif
 }
 
 template <size_t M, size_t N>

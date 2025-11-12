@@ -146,7 +146,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   H5Sselect_hyperslab(memSpaceID, H5S_SELECT_SET, memStart, nullptr, memCount, nullptr);
 
   // Create the ID and positional data sets
-  hid_t datasetID = H5Dcreate2(grp, "id", H5T_NATIVE_ULLONG, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t datasetID = H5Dcreate2(grp, "rank id", H5T_NATIVE_ULLONG, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   hid_t datasetX  = H5Dcreate2(grp, "x", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   hid_t datasetY  = H5Dcreate2(grp, "y", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #if CH_SPACEDIM == 3

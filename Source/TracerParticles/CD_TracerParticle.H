@@ -88,14 +88,14 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* a_buffer) const override;
+  linearOut(void* const a_buffer) const override;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearIn(void* a_buffer) override;
+  linearIn(const void* const a_buffer) override;
 
   /*!
     @brief Get one of the scalars. 
