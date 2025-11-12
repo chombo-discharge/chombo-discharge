@@ -149,7 +149,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   H5Sselect_hyperslab(memSpaceID, H5S_SELECT_SET, memStart, nullptr, memCount, nullptr);
 
   // Create the ID and positional data sets
-  hid_t datasetID = H5Dcreate2(grp, "rank id", H5T_NATIVE_ULLONG, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t datasetID = H5Dcreate2(grp, "id", H5T_NATIVE_LLONG, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   hid_t datasetX  = H5Dcreate2(grp, "x", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   hid_t datasetY  = H5Dcreate2(grp, "y", H5T_NATIVE_DOUBLE, fileSpaceID, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #if CH_SPACEDIM == 3
@@ -157,10 +157,10 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 #endif
 
   // Write ID data set
-  std::vector<unsigned long long> id;
-  std::vector<double>             x;
-  std::vector<double>             y;
-  std::vector<double>             z;
+  std::vector<long long> id;
+  std::vector<double>    x;
+  std::vector<double>    y;
+  std::vector<double>    z;
 
   for (int lvl = 0; lvl <= a_particles.getFinestLevel(); lvl++) {
 
@@ -175,7 +175,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
       const List<GenericParticle<M, N>>& particles = a_particles[lvl][din].listItems();
 
       for (ListIterator<GenericParticle<M, N>> lit(particles); lit.ok(); ++lit) {
-        id.push_back(procID());
+        id.push_back(static_cast<long long>(lit().particleID()));
         x.push_back(lit().position()[0] - a_shift[0]);
         y.push_back(lit().position()[1] - a_shift[1]);
 #if CH_SPACEDIM == 3

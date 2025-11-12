@@ -95,25 +95,25 @@ public:
     @brief Get the particle ID
   */
   inline const int32_t&
-  getParticleID() const noexcept;
+  particleID() const noexcept;
 
   /*!
     @brief Get the particle ID
   */
   inline int32_t&
-  getParticleID() noexcept;
+  particleID() noexcept;
 
   /*!
     @brief Get the MPI rank ID
   */
   inline const int32_t&
-  getRankID() const noexcept;
+  rankID() const noexcept;
 
   /*!
     @brief Get the MPI rank ID
   */
   inline int32_t&
-  getRankID() noexcept;
+  rankID() noexcept;
 
   /*!
     @brief Get the particle position. 

@@ -60,28 +60,28 @@ GenericParticle<M, N>::position() const
 
 template <size_t M, size_t N>
 inline const int32_t&
-GenericParticle<M, N>::getParticleID() const noexcept
+GenericParticle<M, N>::particleID() const noexcept
 {
   return m_particleID;
 }
 
 template <size_t M, size_t N>
 inline int32_t&
-GenericParticle<M, N>::getParticleID() noexcept
+GenericParticle<M, N>::particleID() noexcept
 {
   return m_particleID;
 }
 
 template <size_t M, size_t N>
 inline const int32_t&
-GenericParticle<M, N>::getRankID() const noexcept
+GenericParticle<M, N>::rankID() const noexcept
 {
   return m_rankID;
 }
 
 template <size_t M, size_t N>
 inline int32_t&
-GenericParticle<M, N>::getRankID() noexcept
+GenericParticle<M, N>::rankID() noexcept
 {
   return m_rankID;
 }
