@@ -18,7 +18,6 @@
 #include <ParticleIO.H>
 
 // Our includes
-#include <CD_SimpleItoParticle.H>
 #include <CD_NonCommParticle.H>
 #include <CD_ItoSolver.H>
 #include <CD_Random.H>
@@ -1082,44 +1081,12 @@ ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level
     pout() << m_name + "::writeCheckPointLevelParticles" << endl;
   }
 
-  // TLDR: This routine writes particles directly to the HDF5 file -- since the ItoParticle is quite large (112 bytes, ish), we put the most
-  //       important ItoParticle fields into the SimpleItoParticle and checkpoint that particle type instead. This is what happens below.
-
   // I call this _particlesP to distinguish it from the "fluid" checkpointing method.
   const std::string str = m_name + "_particlesP";
 
-  // Set up a particle container with SimpleItoParticle -- this is ItoParticle's low-memory cousin.
-  ParticleContainer<SimpleItoParticle> lowMemoryParticles;
-  m_amr->allocate(lowMemoryParticles, m_realm);
+  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
-  // Handle to the particles that will be checkpointed.
-  const ParticleContainer<ItoParticle>& myParticles = this->getParticles(WhichContainer::Bulk);
-
-  // Make ItoParticle into SimpleItoParticle. This saves a ton of disk space.
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const DataIterator&      dit = dbl.dataIterator();
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    // Handle to list of particles low-memory particles in the current grid patch.
-    List<SimpleItoParticle>& simpleParticles = (lowMemoryParticles[a_level])[din].listItems();
-
-    // Make the ItoParticle into a SimpleItoParticle for checkpointing purposes -- we only need weight, position, and energy.
-    simpleParticles.clear();
-
-    for (ListIterator<ItoParticle> lit(myParticles[a_level][din].listItems()); lit.ok(); ++lit) {
-      const ItoParticle& p = lit();
-
-      simpleParticles.append(SimpleItoParticle(p.weight(), p.position(), p.energy()));
-    }
-  }
-
-  // Finally, write the particles to HDF5.
-  writeParticlesToHDF(a_handle, lowMemoryParticles[a_level], str);
+  writeParticlesToHDF(a_handle, particles[a_level], str);
 }
 #endif
 
@@ -1245,38 +1212,7 @@ ItoSolver::readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level)
 
   const std::string str = m_name + "_particlesP";
 
-  // Allocate storage for holding simple particle data and then read the particles into simpleParticles[a_level]. The other
-  // grid levels are not touched.
-  Vector<RefCountedPtr<ParticleData<SimpleItoParticle>>> simpleParticles;
-  m_amr->allocate(simpleParticles, m_realm);
-
-  readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
-
-  // Go through the particles we read from the file and make them into true ItoParticles.
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const DataIterator&      dit = dbl.dataIterator();
-
-  const int nbox = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-  for (int mybox = 0; mybox < nbox; mybox++) {
-    const DataIndex& din = dit[mybox];
-
-    List<ItoParticle>&             itoParticles       = particles[a_level][din].listItems();
-    const List<SimpleItoParticle>& simpleItoParticles = (*simpleParticles[a_level])[din].listItems();
-
-    for (ListIterator<SimpleItoParticle> lit(simpleItoParticles); lit.ok(); ++lit) {
-      const SimpleItoParticle& simpleParticle = lit();
-      const ItoParticle        itoParticle    = ItoParticle(simpleParticle.weight(),
-                                                  simpleParticle.position(),
-                                                  RealVect::Zero,
-                                                  0.0,
-                                                  0.0,
-                                                  simpleParticle.energy());
-
-      itoParticles.append(itoParticle);
-    }
-  }
+  readParticlesFromHDF(a_handle, particles[a_level], str);
 }
 #endif
 

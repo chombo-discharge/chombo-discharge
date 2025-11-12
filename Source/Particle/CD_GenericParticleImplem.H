@@ -59,14 +59,14 @@ GenericParticle<M, N>::position() const
 }
 
 template <size_t M, size_t N>
-inline const int64_t&
+inline const int32_t&
 GenericParticle<M, N>::getParticleID() const noexcept
 {
   return m_particleID;
 }
 
 template <size_t M, size_t N>
-inline int64_t&
+inline int32_t&
 GenericParticle<M, N>::getParticleID() noexcept
 {
   return m_particleID;
@@ -197,8 +197,8 @@ GenericParticle<M, N>::size() const
   // Size is the sum of the particle ID, rank ID, position, plus M Reals and N RealVects
   int size = 0;
 
-  size += sizeof(int64_t);             // Particle ID
-  size += sizeof(int);                 // Rank ID
+  size += sizeof(int32_t);             // Particle ID
+  size += sizeof(int32_t);             // Rank ID
   size += SpaceDim * sizeof(Real);     // Position
   size += M * sizeof(Real);            // m_scalars
   size += N * SpaceDim * sizeof(Real); // m_vectors
@@ -242,6 +242,69 @@ GenericParticle<M, N>::linearIn(const void* const a_buffer)
 
   detail::pullParticleProperty(p, m_particleID);
   detail::pullParticleProperty(p, m_rankID);
+
+  detail::pullParticleProperty(p, m_position[0]);
+  detail::pullParticleProperty(p, m_position[1]);
+#if CH_SPACEDIM == 3
+  detail::pullParticleProperty(p, m_position[2]);
+#endif
+
+  for (size_t i = 0; i < M; i++) {
+    detail::pullParticleProperty(p, m_scalars[i]);
+  }
+
+  for (size_t i = 0; i < N; i++) {
+    detail::pullParticleProperty(p, m_vectors[i][0]);
+    detail::pullParticleProperty(p, m_vectors[i][1]);
+#if CH_SPACEDIM == 3
+    detail::pullParticleProperty(p, m_vectors[i][2]);
+#endif
+  }
+}
+
+template <size_t M, size_t N>
+inline int
+GenericParticle<M, N>::H5size() const
+{
+  int size = 0;
+
+  size += SpaceDim * sizeof(Real);     // m_position
+  size += M * sizeof(Real);            // m_scalars
+  size += N * SpaceDim * sizeof(Real); // m_vectors
+
+  return size;
+}
+
+template <size_t M, size_t N>
+inline void
+GenericParticle<M, N>::H5linearOut(void* const a_buffer) const
+{
+  uint8_t* p = static_cast<uint8_t*>(a_buffer);
+
+  detail::pushParticleProperty(p, m_position[0]);
+  detail::pushParticleProperty(p, m_position[1]);
+#if CH_SPACEDIM == 3
+  detail::pushParticleProperty(p, m_position[2]);
+#endif
+
+  for (size_t i = 0; i < M; i++) {
+    detail::pushParticleProperty(p, m_scalars[i]);
+  }
+
+  for (size_t i = 0; i < N; i++) {
+    detail::pushParticleProperty(p, m_vectors[i][0]);
+    detail::pushParticleProperty(p, m_vectors[i][1]);
+#if CH_SPACEDIM == 3
+    detail::pushParticleProperty(p, m_vectors[i][2]);
+#endif
+  }
+}
+
+template <size_t M, size_t N>
+inline void
+GenericParticle<M, N>::H5linearIn(const void* const a_buffer)
+{
+  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
 
   detail::pullParticleProperty(p, m_position[0]);
   detail::pullParticleProperty(p, m_position[1]);

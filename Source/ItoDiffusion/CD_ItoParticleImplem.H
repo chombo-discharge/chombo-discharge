@@ -181,6 +181,58 @@ ItoParticle::tmpVect() const
   return this->vect<2>();
 }
 
+inline int
+ItoParticle::H5size() const
+{
+  int size = 0;
+
+  size += sizeof(Real);            // m_weight
+  size += SpaceDim * sizeof(Real); // m_position
+  size += SpaceDim * sizeof(Real); // m_velocity
+
+  return size;
+}
+
+inline void
+ItoParticle::H5linearOut(void* const a_buffer) const
+{
+  uint8_t* p = static_cast<uint8_t*>(a_buffer);
+
+  detail::pushParticleProperty(p, this->weight());
+
+  detail::pushParticleProperty(p, this->m_position[0]);
+  detail::pushParticleProperty(p, this->m_position[1]);
+#if CH_SPACEDIM == 3
+  detail::pushParticleProperty(p, this->m_position[2]);
+#endif
+
+  detail::pushParticleProperty(p, this->velocity()[0]);
+  detail::pushParticleProperty(p, this->velocity()[1]);
+#if CH_SPACEDIM == 3
+  detail::pushParticleProperty(p, this->velocity()[2]);
+#endif
+}
+
+inline void
+ItoParticle::H5linearIn(const void* const a_buffer)
+{
+  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
+
+  detail::pullParticleProperty(p, this->weight());
+
+  detail::pullParticleProperty(p, this->m_position[0]);
+  detail::pullParticleProperty(p, this->m_position[1]);
+#if CH_SPACEDIM == 3
+  detail::pullParticleProperty(p, this->m_position[2]);
+#endif
+
+  detail::pullParticleProperty(p, this->velocity()[0]);
+  detail::pullParticleProperty(p, this->velocity()[1]);
+#if CH_SPACEDIM == 3
+  detail::pullParticleProperty(p, this->velocity()[2]);
+#endif
+}
+
 #include <CD_NamespaceFooter.H>
 
 #include <CD_ItoParticleImplem.H>
