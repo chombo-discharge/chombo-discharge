@@ -1286,8 +1286,8 @@ ParticleContainer<P>::resetParticleIDs() noexcept
       List<P>& particles = (*m_particles[lvl])[din].listItems();
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit, counter++) {
-        lit().getRankID()     = myRank;
-        lit().getParticleID() = counter;
+        lit().rankID()     = myRank;
+        lit().particleID() = counter;
       }
     }
   }
