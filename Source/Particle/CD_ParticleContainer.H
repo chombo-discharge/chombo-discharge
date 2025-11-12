@@ -28,8 +28,6 @@
 #include <CD_ParticleMap.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "Must add a function that sets the rank ID and particle ID!"
-
 /*!
   @brief Alias for ParticleData on each AMR level.
 */
@@ -140,6 +138,12 @@ public:
   */
   void
   preRegrid(const int a_base);
+
+  /*!
+    @brief Compute new particle IDs.
+  */
+  void
+  resetParticleIDs() noexcept;
 
   /*!
     @brief Copy particles to mask particle data holder.
