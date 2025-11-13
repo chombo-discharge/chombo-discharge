@@ -72,7 +72,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ChomboBasics.html"><code class="docutils literal notranslate"><span class="pre">Chombo-3</span></code> basics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MeshData.html">Mesh data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Particles</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#genericparticle">GenericParticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#genericparticle">GenericParticle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#linearization-functions">Linearization functions</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-particles">Custom particles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#particlecontainer">ParticleContainer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#data-structures">Data structures</a><ul>
@@ -209,20 +212,11 @@ Typically, these will are derived from <a class="reference internal" href="#chap
 The particle type is essentially a template</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">GenericParticle</span>
-<span class="p">{</span>
-<span class="k">public</span>
-<span class="w">   </span><span class="n">RealVect</span><span class="o">&amp;</span>
-<span class="w">   </span><span class="nf">position</span><span class="p">();</span>
-<span class="k">protected</span><span class="o">:</span>
-<span class="w">   </span><span class="n">RealVect</span><span class="w"> </span><span class="n">m_position</span><span class="p">;</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">Real</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_scalars</span><span class="p">;</span>
-<span class="w">   </span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="n">RealVcet</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_vectors</span><span class="p">;</span>
-<span class="p">};</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">M</span></code> and <code class="docutils literal notranslate"><span class="pre">N</span></code> are the number of <code class="docutils literal notranslate"><span class="pre">Real</span></code> and <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> variables for the particle.
 The <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> always stores the position of the particle, which is available through <code class="docutils literal notranslate"><span class="pre">GenericParticle&lt;M,N&gt;::position</span></code>.</p>
-<p>To fetch the <code class="docutils literal notranslate"><span class="pre">Real</span></code> and <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> variables, <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> has member functions</p>
+<p>To fetch the <code class="docutils literal notranslate"><span class="pre">Real</span></code> and <code class="docutils literal notranslate"><span class="pre">RealVect</span></code> variables, <a class="reference internal" href="#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> has member functions</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">size_t</span><span class="w"> </span><span class="n">K</span><span class="o">&gt;</span>
 <span class="kr">inline</span><span class="w"> </span><span class="n">Real</span><span class="o">&amp;</span>
 <span class="n">GenericParticle</span><span class="o">&lt;</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="o">&gt;::</span><span class="n">real</span><span class="p">();</span>
@@ -239,10 +233,18 @@ The <code class="docutils literal notranslate"><span class="pre">GenericParticle
 </pre></div>
 </div>
 <p>Note that one must include the template keyword.</p>
+<p><a class="reference internal" href="#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> can also store the local (per MPI rank) particle ID and the MPI rank ID on the particle.
+These are available through member functions <code class="docutils literal notranslate"><span class="pre">particleID()</span></code> and <code class="docutils literal notranslate"><span class="pre">rankID</span></code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">GenericParticle</span></code> C++ API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classGenericParticle.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classGenericParticle.html</a>.</p>
 </div>
+<section id="linearization-functions">
+<h3>Linearization functions<a class="headerlink" href="#linearization-functions" title="Permalink to this heading"></a></h3>
+<p><a class="reference internal" href="#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> has linearization functions communicating particles with MPI, as well as for supplying output to HDF5 checkpoint files.
+By default, <a class="reference internal" href="#chap-genericparticle"><span class="std std-ref">GenericParticle</span></a> will communicate all particle properties (including rank ID and particle ID), and include all <code class="docutils literal notranslate"><span class="pre">Real</span></code> member values in the HDF5 checkpoint files.
+For particles that do not need to checkpoint all particle properties when writing HDF5 checkpoint files, it may be beneficial to reduce the file size by only exporting the necessary particle properties (e.g., the position and particle weight).</p>
+</section>
 </section>
 <section id="custom-particles">
 <h2>Custom particles<a class="headerlink" href="#custom-particles" title="Permalink to this heading"></a></h2>
@@ -485,6 +487,7 @@ The remapping function for <code class="docutils literal notranslate"><span clas
 <span class="cm">  @brief Remap over the entire AMR hierarchy</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
+<span class="nf">remap</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>This is simply used as follows:</p>
@@ -514,6 +517,7 @@ This is relatively simple to achieve, and is done as follows:</p>
 <span class="cm">  @param[in] a_base Coarsest grid level which will not change. </span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
+<span class="nf">preRegrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">a_base</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).</p>
@@ -532,13 +536,14 @@ This is relatively simple to achieve, and is done as follows:</p>
 <span class="cm">  @param[in] a_newFinestLevel New finest grid level</span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
-<span class="n">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w">         </span><span class="n">a_grids</span><span class="p">,</span>
+<span class="nf">regrid</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">DisjointBoxLayout</span><span class="o">&gt;&amp;</span><span class="w">         </span><span class="n">a_grids</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ProblemDomain</span><span class="o">&gt;&amp;</span><span class="w">             </span><span class="n">a_domains</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">Real</span><span class="o">&gt;&amp;</span><span class="w">                      </span><span class="n">a_dx</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w">                       </span><span class="n">a_refRat</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">ValidMask</span><span class="o">&gt;&amp;</span><span class="w">                 </span><span class="n">a_validMask</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelTiles</span><span class="o">&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_levelTiles</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                </span><span class="n">a_base</span><span class="p">,</span>
+<span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w">                                </span><span class="n">a_newFinestLevel</span><span class="p">);</span>
 </pre></div>
 </div>
 </li>
@@ -564,6 +569,7 @@ The function signatures for this is</p>
 <span class="cm">  @note If the mask is nullptr on any of the levels, those levels will be ignored. </span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
+<span class="nf">copyMaskParticles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">LevelData</span><span class="o">&lt;</span><span class="n">BaseFab</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;&gt;&gt;&amp;</span><span class="w"> </span><span class="n">a_mask</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>The argument <code class="docutils literal notranslate"><span class="pre">a_mask</span></code> holds a bool at each cell in the AMR hierarchy.
@@ -573,6 +579,7 @@ Particles that live in cells where <code class="docutils literal notranslate"><s
 <span class="cm">  @return m_maskParticles</span>
 <span class="cm">*/</span>
 <span class="n">AMRParticles</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;&amp;</span>
+<span class="n">getMaskParticles</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>In the above functions the mask particles are <em>copied</em>, and the original particles are left untouched.
@@ -581,6 +588,7 @@ After the user is done with the particles, they should be deleted through the fu
 <span class="cm">  @brief Clear the &quot;mask&quot; particles. </span>
 <span class="cm">*/</span>
 <span class="kt">void</span>
+<span class="nf">clearMaskParticles</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>An example pseudocode for working with masked particles is given below:</p>

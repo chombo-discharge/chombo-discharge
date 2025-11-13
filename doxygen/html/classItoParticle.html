@@ -192,6 +192,15 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>tmpVect</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a98641149f2cd22bdd56d7c2d38ff16e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return scratch RealVect storage. <br /></td></tr>
 <tr class="separator:a98641149f2cd22bdd56d7c2d38ff16e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc1b08cbfc71ac80659c154a1c5babcf" id="r_acc1b08cbfc71ac80659c154a1c5babcf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#acc1b08cbfc71ac80659c154a1c5babcf">H5size</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:acc1b08cbfc71ac80659c154a1c5babcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that is used when writing particles to HDF5.  <br /></td></tr>
+<tr class="separator:acc1b08cbfc71ac80659c154a1c5babcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a335ffca6d7772d612ad9fc7df040762d" id="r_a335ffca6d7772d612ad9fc7df040762d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a335ffca6d7772d612ad9fc7df040762d">H5linearOut</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a335ffca6d7772d612ad9fc7df040762d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize the checkpointed Real components onto a buffer workable by HDF5.  <br /></td></tr>
+<tr class="separator:a335ffca6d7772d612ad9fc7df040762d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55b23e132dd59908bb376bf2c27172d3" id="r_a55b23e132dd59908bb376bf2c27172d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classItoParticle.html#a55b23e132dd59908bb376bf2c27172d3">H5linearIn</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>)</td></tr>
+<tr class="memdesc:a55b23e132dd59908bb376bf2c27172d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delinearize the buffer onto the checkpointed real components in the particle class.  <br /></td></tr>
+<tr class="separator:a55b23e132dd59908bb376bf2c27172d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classGenericParticle"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classGenericParticle')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classGenericParticle.html">GenericParticle&lt; 5, 3 &gt;</a></td></tr>
 <tr class="memitem:ae716639f8f7b35d464f4fc2361ce8db4 inherit pub_methods_classGenericParticle" id="r_ae716639f8f7b35d464f4fc2361ce8db4"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>GenericParticle</b> ()</td></tr>
@@ -204,6 +213,22 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~GenericParticle</b> ()</td></tr>
 <tr class="memdesc:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (deallocates runtime memory storage) <br /></td></tr>
 <tr class="separator:a0823ce71cac17ffec0893d6da3c8af2b inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eed66113fb7cf6afdb66fa45def380f inherit pub_methods_classGenericParticle" id="r_a0eed66113fb7cf6afdb66fa45def380f"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>particleID</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a0eed66113fb7cf6afdb66fa45def380f inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle ID. <br /></td></tr>
+<tr class="separator:a0eed66113fb7cf6afdb66fa45def380f inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a843f43df43bcfafc49a27c1a92ca5cc6 inherit pub_methods_classGenericParticle" id="r_a843f43df43bcfafc49a27c1a92ca5cc6"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>particleID</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a843f43df43bcfafc49a27c1a92ca5cc6 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle ID. <br /></td></tr>
+<tr class="separator:a843f43df43bcfafc49a27c1a92ca5cc6 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b24473be5200c00b859cdcf25c83d7c inherit pub_methods_classGenericParticle" id="r_a8b24473be5200c00b859cdcf25c83d7c"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>rankID</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a8b24473be5200c00b859cdcf25c83d7c inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the MPI rank ID. <br /></td></tr>
+<tr class="separator:a8b24473be5200c00b859cdcf25c83d7c inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9e215468f8da25da3793a5db7351ae2 inherit pub_methods_classGenericParticle" id="r_ad9e215468f8da25da3793a5db7351ae2"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>rankID</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad9e215468f8da25da3793a5db7351ae2 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the MPI rank ID. <br /></td></tr>
+<tr class="separator:ad9e215468f8da25da3793a5db7351ae2 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3665043add6728988d96e98e1b320753 inherit pub_methods_classGenericParticle" id="r_a3665043add6728988d96e98e1b320753"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a3665043add6728988d96e98e1b320753">position</a> ()</td></tr>
 <tr class="memdesc:a3665043add6728988d96e98e1b320753 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle position.  <br /></td></tr>
 <tr class="separator:a3665043add6728988d96e98e1b320753 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -248,12 +273,12 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><b>size</b> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the size, in number of bytes, of a flat representation of the data in this object. <br /></td></tr>
 <tr class="separator:a67caf9ed7ce5bcb0c0a80a1316745a14 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle" id="r_a07141e6091f41df1e5bb406f2bdc126c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a07141e6091f41df1e5bb406f2bdc126c">linearOut</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">a_buffer</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <br /></td></tr>
-<tr class="separator:a07141e6091f41df1e5bb406f2bdc126c inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2aabb13f9632f5ddec1844b799d73b1b inherit pub_methods_classGenericParticle" id="r_a2aabb13f9632f5ddec1844b799d73b1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a2aabb13f9632f5ddec1844b799d73b1b">linearIn</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">a_buffer</a>)</td></tr>
-<tr class="memdesc:a2aabb13f9632f5ddec1844b799d73b1b inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <br /></td></tr>
-<tr class="separator:a2aabb13f9632f5ddec1844b799d73b1b inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ed7dd6619bf1c5be3556904c544b276 inherit pub_methods_classGenericParticle" id="r_a0ed7dd6619bf1c5be3556904c544b276"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a0ed7dd6619bf1c5be3556904c544b276">linearOut</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a0ed7dd6619bf1c5be3556904c544b276 inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <br /></td></tr>
+<tr class="separator:a0ed7dd6619bf1c5be3556904c544b276 inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b3f30b24ef0a55d257d9073e6bf983d inherit pub_methods_classGenericParticle" id="r_a5b3f30b24ef0a55d257d9073e6bf983d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a5b3f30b24ef0a55d257d9073e6bf983d">linearIn</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>)</td></tr>
+<tr class="memdesc:a5b3f30b24ef0a55d257d9073e6bf983d inherit pub_methods_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <br /></td></tr>
+<tr class="separator:a5b3f30b24ef0a55d257d9073e6bf983d inherit pub_methods_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -269,6 +294,14 @@ Static Public Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pro_attribs_classGenericParticle"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_classGenericParticle')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classGenericParticle.html">GenericParticle&lt; 5, 3 &gt;</a></td></tr>
+<tr class="memitem:a8bb2d30b6269cf8121343a2d95ef88f3 inherit pro_attribs_classGenericParticle" id="r_a8bb2d30b6269cf8121343a2d95ef88f3"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">int32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleID</b></td></tr>
+<tr class="memdesc:a8bb2d30b6269cf8121343a2d95ef88f3 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle ID. <br /></td></tr>
+<tr class="separator:a8bb2d30b6269cf8121343a2d95ef88f3 inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c99133b0268fa720b6835530d5a5a99 inherit pro_attribs_classGenericParticle" id="r_a2c99133b0268fa720b6835530d5a5a99"><td class="memItemLeft" align="right" valign="top">
+<a class="el" href="classTracerParticleSolver.html">int32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_rankID</b></td></tr>
+<tr class="memdesc:a2c99133b0268fa720b6835530d5a5a99 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPI rank owning this particle. <br /></td></tr>
+<tr class="separator:a2c99133b0268fa720b6835530d5a5a99 inherit pro_attribs_classGenericParticle"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle" id="r_ae4b8b5e0e0725aeac66a973cbd69ad26"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_position</b></td></tr>
 <tr class="memdesc:ae4b8b5e0e0725aeac66a973cbd69ad26 inherit pro_attribs_classGenericParticle"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle position. <br /></td></tr>
@@ -662,6 +695,108 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Get average particle energy. </p>
 <dl class="section return"><dt>Returns</dt><dd>m_energy </dd></dl>
+
+</div>
+</div>
+<a id="a55b23e132dd59908bb376bf2c27172d3" name="a55b23e132dd59908bb376bf2c27172d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55b23e132dd59908bb376bf2c27172d3">&#9670;&#160;</a></span>H5linearIn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoParticle::H5linearIn </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a>&#160;</td>
+          <td class="paramname"><em>a_buffer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Delinearize the buffer onto the checkpointed real components in the particle class. </p>
+<p>Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Pointer to memory block </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classGenericParticle.html#a9e0d1c8ba4dd5a4682005bcc78045201">GenericParticle&lt; 5, 3 &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a335ffca6d7772d612ad9fc7df040762d" name="a335ffca6d7772d612ad9fc7df040762d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a335ffca6d7772d612ad9fc7df040762d">&#9670;&#160;</a></span>H5linearOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> ItoParticle::H5linearOut </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a>&#160;</td>
+          <td class="paramname"><em>a_buffer</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Linearize the checkpointed Real components onto a buffer workable by HDF5. </p>
+<p>Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Pointer to memory block </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Reimplemented from <a class="el" href="classGenericParticle.html#a8785bc441dadfc187a1631a128a553c4">GenericParticle&lt; 5, 3 &gt;</a>.</p>
+
+</div>
+</div>
+<a id="acc1b08cbfc71ac80659c154a1c5babcf" name="acc1b08cbfc71ac80659c154a1c5babcf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc1b08cbfc71ac80659c154a1c5babcf">&#9670;&#160;</a></span>H5size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> ItoParticle::H5size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function that is used when writing particles to HDF5. </p>
+<p>This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs. </p>
+
+<p>Reimplemented from <a class="el" href="classGenericParticle.html#a119909d3c210ed624e6a3d3dc62ca69d">GenericParticle&lt; 5, 3 &gt;</a>.</p>
 
 </div>
 </div>

@@ -22,24 +22,14 @@ GenericParticle
 ``GenericParticle`` is a default particle usable by the ``Chombo`` particle library.
 The particle type is essentially a template
 
-.. code-block:: c++
-
-   template <size_t M, size_t N>
-   class GenericParticle
-   {
-   public
-      RealVect&
-      position();
-   protected:
-      RealVect m_position;
-      std::array<Real, M> m_scalars;
-      std::array<RealVcet, N> m_vectors;      
-   };
+.. literalinclude:: ../../../../Source/Particle/CD_GenericParticle.H
+   :lines: 74-75
+   :language: c++
 
 where ``M`` and ``N`` are the number of ``Real`` and ``RealVect`` variables for the particle.
 The ``GenericParticle`` always stores the position of the particle, which is available through ``GenericParticle<M,N>::position``.
 
-To fetch the ``Real`` and ``RealVect`` variables, ``GenericParticle`` has member functions
+To fetch the ``Real`` and ``RealVect`` variables, :ref:`Chap:GenericParticle` has member functions
 
 .. code-block:: c++
 
@@ -59,11 +49,21 @@ If using ``GenericParticle`` directly, the correct C++ way of fetching one of th
 
    Real& s = p.template real<0>();
 
-Note that one must include the template keyword.    
+Note that one must include the template keyword.
+
+:ref:`Chap:GenericParticle` can also store the local (per MPI rank) particle ID and the MPI rank ID on the particle.
+These are available through member functions ``particleID()`` and ``rankID``.
 
 .. tip::
 
    The ``GenericParticle`` C++ API is found at `<https://chombo-discharge.github.io/chombo-discharge/doxygen/html/classGenericParticle.html>`_.
+
+Linearization functions
+_______________________
+
+:ref:`Chap:GenericParticle` has linearization functions communicating particles with MPI, as well as for supplying output to HDF5 checkpoint files.
+By default, :ref:`Chap:GenericParticle` will communicate all particle properties (including rank ID and particle ID), and include all ``Real`` member values in the HDF5 checkpoint files.
+For particles that do not need to checkpoint all particle properties when writing HDF5 checkpoint files, it may be beneficial to reduce the file size by only exporting the necessary particle properties (e.g., the position and particle weight). 
 
 Custom particles
 ----------------
@@ -343,7 +343,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 438-442
+   :lines: 445-449
    :language: c++
    :dedent: 2   		
 
@@ -373,20 +373,18 @@ This is relatively simple to achieve, and is done as follows:
 1. *Before* creating the new grids, each MPI rank collects *all* particles on a single ``List<P>`` by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 134-139
+      :lines: 134-140
       :language: c++
       :dedent: 2   		   
       
    This will pull the particles off their current grids and collect them in a single list (on a per-rank basis).
-
-
    
 2. When ``ParticleContainer<P>`` regrids, each rank adds his ``List<P>`` back into the internal particle containers.
 
    This is done by calling the ``ParticleContainer<P>`` regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 113-132
+      :lines: 114-133
       :language: c++
       :dedent: 2
 
@@ -411,7 +409,7 @@ To fill the masked particles, ``ParticleContainer<P>`` has members functions for
 The function signatures for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 141-147
+   :lines: 148-154
    :language: c++
    :dedent: 2
 
@@ -419,7 +417,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal data holder in ``ParticleContainer<P>`` which can be retrieved through a call
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 256-261
+   :lines: 263-268
    :language: c++
    :dedent: 2
 
@@ -428,7 +426,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be deleted through the function
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 191-195
+   :lines: 198-202
    :language: c++
    :dedent: 2
 

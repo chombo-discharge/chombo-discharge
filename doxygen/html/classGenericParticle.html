@@ -93,25 +93,21 @@ Inheritance diagram for GenericParticle&lt; M, N &gt;:</div>
 <div class="dyncontent">
 <div class="center"><img src="classGenericParticle__inherit__graph.png" border="0" usemap="#aGenericParticle_3_01M_00_01N_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="aGenericParticle_3_01M_00_01N_01_4_inherit__map" id="aGenericParticle_3_01M_00_01N_01_4_inherit__map">
-<area shape="rect" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,104,185,129"/>
+<area shape="rect" title="A generic particle class, holding the position and a specified number of real and vector values." alt="" coords="5,80,185,105"/>
 <area shape="rect" href="classTracerParticle.html" title="A tracer particle class. This is templated for holding extra storage (useful for kernels)." alt="" coords="295,5,464,31"/>
-<area shape="poly" title=" " alt="" coords="136,96,208,66,291,39,330,28,332,33,293,45,210,71,138,101"/>
+<area shape="poly" title=" " alt="" coords="149,73,209,55,320,28,321,33,210,61,150,78"/>
 <area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="292,55,467,80"/>
-<area shape="poly" title=" " alt="" coords="182,99,305,77,306,83,183,104"/>
+<area shape="poly" title=" " alt="" coords="199,81,292,72,292,78,199,86"/>
 <area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="292,104,467,129"/>
-<area shape="poly" title=" " alt="" coords="199,114,292,114,292,119,199,119"/>
+<area shape="poly" title=" " alt="" coords="172,105,210,110,292,114,291,120,209,115,171,110"/>
 <area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="292,153,467,179"/>
-<area shape="poly" title=" " alt="" coords="182,129,210,134,305,151,304,156,209,139,181,134"/>
-<area shape="rect" href="classGenericParticle.html" title=" " alt="" coords="292,203,467,228"/>
-<area shape="poly" title=" " alt="" coords="136,133,210,165,327,200,325,205,208,170,134,138"/>
-<area shape="rect" href="classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="539,55,625,80"/>
-<area shape="poly" title=" " alt="" coords="481,65,539,65,539,70,481,70"/>
-<area shape="rect" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer." alt="" coords="549,104,615,129"/>
-<area shape="poly" title=" " alt="" coords="481,114,548,114,548,119,481,119"/>
-<area shape="rect" href="classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="531,153,633,179"/>
-<area shape="poly" title=" " alt="" coords="481,163,530,163,530,169,481,169"/>
-<area shape="rect" href="classSimpleItoParticle.html" title="A particle class for reducing HDF5 I/O file sizes when using ItoSolver." alt="" coords="516,203,648,228"/>
-<area shape="poly" title=" " alt="" coords="481,213,516,213,516,218,481,218"/>
+<area shape="poly" title=" " alt="" coords="138,108,210,134,292,152,291,157,209,139,136,113"/>
+<area shape="rect" href="classItoParticle.html" title="A particle class for use with ItoSolvers, i.e. drifting Brownian walkers." alt="" coords="524,55,611,80"/>
+<area shape="poly" title=" " alt="" coords="480,65,524,65,524,70,480,70"/>
+<area shape="rect" href="classPhoton.html" title="Particle class for usage with Monte Carlo radiative transfer." alt="" coords="534,104,601,129"/>
+<area shape="poly" title=" " alt="" coords="480,114,534,114,534,119,480,119"/>
+<area shape="rect" href="classPointParticle.html" title="A particle class that only has a position and a weight." alt="" coords="516,153,619,179"/>
+<area shape="poly" title=" " alt="" coords="480,163,516,163,516,169,480,169"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -128,6 +124,22 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">virtual</a>&#160;</td><td class="memItemRight" valign="bottom"><b>~GenericParticle</b> ()</td></tr>
 <tr class="memdesc:a0823ce71cac17ffec0893d6da3c8af2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor (deallocates runtime memory storage) <br /></td></tr>
 <tr class="separator:a0823ce71cac17ffec0893d6da3c8af2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eed66113fb7cf6afdb66fa45def380f" id="r_a0eed66113fb7cf6afdb66fa45def380f"><td class="memItemLeft" align="right" valign="top"><a id="a0eed66113fb7cf6afdb66fa45def380f" name="a0eed66113fb7cf6afdb66fa45def380f"></a>
+<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>particleID</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a0eed66113fb7cf6afdb66fa45def380f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle ID. <br /></td></tr>
+<tr class="separator:a0eed66113fb7cf6afdb66fa45def380f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a843f43df43bcfafc49a27c1a92ca5cc6" id="r_a843f43df43bcfafc49a27c1a92ca5cc6"><td class="memItemLeft" align="right" valign="top"><a id="a843f43df43bcfafc49a27c1a92ca5cc6" name="a843f43df43bcfafc49a27c1a92ca5cc6"></a>
+<a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>particleID</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a843f43df43bcfafc49a27c1a92ca5cc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle ID. <br /></td></tr>
+<tr class="separator:a843f43df43bcfafc49a27c1a92ca5cc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b24473be5200c00b859cdcf25c83d7c" id="r_a8b24473be5200c00b859cdcf25c83d7c"><td class="memItemLeft" align="right" valign="top"><a id="a8b24473be5200c00b859cdcf25c83d7c" name="a8b24473be5200c00b859cdcf25c83d7c"></a>
+<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>rankID</b> () <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a8b24473be5200c00b859cdcf25c83d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the MPI rank ID. <br /></td></tr>
+<tr class="separator:a8b24473be5200c00b859cdcf25c83d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9e215468f8da25da3793a5db7351ae2" id="r_ad9e215468f8da25da3793a5db7351ae2"><td class="memItemLeft" align="right" valign="top"><a id="ad9e215468f8da25da3793a5db7351ae2" name="ad9e215468f8da25da3793a5db7351ae2"></a>
+<a class="el" href="classTracerParticleSolver.html">int32_t</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>rankID</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ad9e215468f8da25da3793a5db7351ae2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the MPI rank ID. <br /></td></tr>
+<tr class="separator:ad9e215468f8da25da3793a5db7351ae2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3665043add6728988d96e98e1b320753" id="r_a3665043add6728988d96e98e1b320753"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a3665043add6728988d96e98e1b320753">position</a> ()</td></tr>
 <tr class="memdesc:a3665043add6728988d96e98e1b320753"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the particle position.  <br /></td></tr>
 <tr class="separator:a3665043add6728988d96e98e1b320753"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,15 +187,32 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a67caf9ed7ce5bcb0c0a80a1316745a14" id="r_a67caf9ed7ce5bcb0c0a80a1316745a14"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a67caf9ed7ce5bcb0c0a80a1316745a14">size</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a67caf9ed7ce5bcb0c0a80a1316745a14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the size, in number of bytes, of a flat representation of the data in this object.  <br /></td></tr>
 <tr class="separator:a67caf9ed7ce5bcb0c0a80a1316745a14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07141e6091f41df1e5bb406f2bdc126c" id="r_a07141e6091f41df1e5bb406f2bdc126c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a07141e6091f41df1e5bb406f2bdc126c">linearOut</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">a_buffer</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
-<tr class="memdesc:a07141e6091f41df1e5bb406f2bdc126c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <br /></td></tr>
-<tr class="separator:a07141e6091f41df1e5bb406f2bdc126c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2aabb13f9632f5ddec1844b799d73b1b" id="r_a2aabb13f9632f5ddec1844b799d73b1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a2aabb13f9632f5ddec1844b799d73b1b">linearIn</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">a_buffer</a>)</td></tr>
-<tr class="memdesc:a2aabb13f9632f5ddec1844b799d73b1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <br /></td></tr>
-<tr class="separator:a2aabb13f9632f5ddec1844b799d73b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ed7dd6619bf1c5be3556904c544b276" id="r_a0ed7dd6619bf1c5be3556904c544b276"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a0ed7dd6619bf1c5be3556904c544b276">linearOut</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a0ed7dd6619bf1c5be3556904c544b276"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write a linear binary representation of the internal data. Assumes that sufficient memory for the buffer has already been allocated by the caller.  <br /></td></tr>
+<tr class="separator:a0ed7dd6619bf1c5be3556904c544b276"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b3f30b24ef0a55d257d9073e6bf983d" id="r_a5b3f30b24ef0a55d257d9073e6bf983d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a5b3f30b24ef0a55d257d9073e6bf983d">linearIn</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>)</td></tr>
+<tr class="memdesc:a5b3f30b24ef0a55d257d9073e6bf983d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.  <br /></td></tr>
+<tr class="separator:a5b3f30b24ef0a55d257d9073e6bf983d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a119909d3c210ed624e6a3d3dc62ca69d" id="r_a119909d3c210ed624e6a3d3dc62ca69d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a119909d3c210ed624e6a3d3dc62ca69d">H5size</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a119909d3c210ed624e6a3d3dc62ca69d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that is used when writing particles to HDF5.  <br /></td></tr>
+<tr class="separator:a119909d3c210ed624e6a3d3dc62ca69d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8785bc441dadfc187a1631a128a553c4" id="r_a8785bc441dadfc187a1631a128a553c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a8785bc441dadfc187a1631a128a553c4">H5linearOut</a> (<a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a8785bc441dadfc187a1631a128a553c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearize the Real components onto a buffer workable by HDF5.  <br /></td></tr>
+<tr class="separator:a8785bc441dadfc187a1631a128a553c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e0d1c8ba4dd5a4682005bcc78045201" id="r_a9e0d1c8ba4dd5a4682005bcc78045201"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGenericParticle.html#a9e0d1c8ba4dd5a4682005bcc78045201">H5linearIn</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>)</td></tr>
+<tr class="memdesc:a9e0d1c8ba4dd5a4682005bcc78045201"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delinearize the buffer onto the real components in the particle class.  <br /></td></tr>
+<tr class="separator:a9e0d1c8ba4dd5a4682005bcc78045201"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a8bb2d30b6269cf8121343a2d95ef88f3" id="r_a8bb2d30b6269cf8121343a2d95ef88f3"><td class="memItemLeft" align="right" valign="top"><a id="a8bb2d30b6269cf8121343a2d95ef88f3" name="a8bb2d30b6269cf8121343a2d95ef88f3"></a>
+<a class="el" href="classTracerParticleSolver.html">int32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_particleID</b></td></tr>
+<tr class="memdesc:a8bb2d30b6269cf8121343a2d95ef88f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle ID. <br /></td></tr>
+<tr class="separator:a8bb2d30b6269cf8121343a2d95ef88f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c99133b0268fa720b6835530d5a5a99" id="r_a2c99133b0268fa720b6835530d5a5a99"><td class="memItemLeft" align="right" valign="top"><a id="a2c99133b0268fa720b6835530d5a5a99" name="a2c99133b0268fa720b6835530d5a5a99"></a>
+<a class="el" href="classTracerParticleSolver.html">int32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_rankID</b></td></tr>
+<tr class="memdesc:a2c99133b0268fa720b6835530d5a5a99"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPI rank owning this particle. <br /></td></tr>
+<tr class="separator:a2c99133b0268fa720b6835530d5a5a99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4b8b5e0e0725aeac66a973cbd69ad26" id="r_ae4b8b5e0e0725aeac66a973cbd69ad26"><td class="memItemLeft" align="right" valign="top"><a id="ae4b8b5e0e0725aeac66a973cbd69ad26" name="ae4b8b5e0e0725aeac66a973cbd69ad26"></a>
 <a class="el" href="classTracerParticleSolver.html">RealVect</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_position</b></td></tr>
 <tr class="memdesc:ae4b8b5e0e0725aeac66a973cbd69ad26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle position. <br /></td></tr>
@@ -200,6 +229,7 @@ Protected Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt;<br />
 class GenericParticle&lt; M, N &gt;</div><p>A generic particle class, holding the position and a specified number of real and vector values. </p>
+<p>For the sake of simplicity, I have added separate linearization functions H5size, H5linearOut, H5linearIn that only linearizes the Real components of the particle. This is done for convenience only, so I don't have to rewrite all of Chombo's particle HDF5 checkpointing routines. Instead, we simply run a bootleg version of those codes that call the H5 linearization versions instead of the regular linearization functions. Users can use this functionality for trimming other types of unnecessary properties that don't need to go into the HDF5 files. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a41c58064e000d6b6211e1909a26a60e2" name="a41c58064e000d6b6211e1909a26a60e2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a41c58064e000d6b6211e1909a26a60e2">&#9670;&#160;</a></span>GenericParticle()</h2>
@@ -358,8 +388,120 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a
 
 </div>
 </div>
-<a id="a2aabb13f9632f5ddec1844b799d73b1b" name="a2aabb13f9632f5ddec1844b799d73b1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2aabb13f9632f5ddec1844b799d73b1b">&#9670;&#160;</a></span>linearIn()</h2>
+<a id="a9e0d1c8ba4dd5a4682005bcc78045201" name="a9e0d1c8ba4dd5a4682005bcc78045201"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e0d1c8ba4dd5a4682005bcc78045201">&#9670;&#160;</a></span>H5linearIn()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; <a class="el" href="classTracerParticleSolver.html">M</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::H5linearIn </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a>&#160;</td>
+          <td class="paramname"><em>a_buffer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Delinearize the buffer onto the real components in the particle class. </p>
+<p>Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Pointer to memory block. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Please do not try to output anything other than Real components. Chombo will expect only Reals. <br  />
+ </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classItoParticle.html#a55b23e132dd59908bb376bf2c27172d3">ItoParticle</a>, and <a class="el" href="classTracerParticle.html#aeda9fe1799669cb77c08ba28c5328a08">TracerParticle&lt; M, N &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a8785bc441dadfc187a1631a128a553c4" name="a8785bc441dadfc187a1631a128a553c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8785bc441dadfc187a1631a128a553c4">&#9670;&#160;</a></span>H5linearOut()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; <a class="el" href="classTracerParticleSolver.html">M</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::H5linearOut </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a>&#160;</td>
+          <td class="paramname"><em>a_buffer</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Linearize the Real components onto a buffer workable by HDF5. </p>
+<p>Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Pointer to memory block. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Please do not try to output anything other than Real components. Chombo will expect only Reals. <br  />
+ </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classItoParticle.html#a335ffca6d7772d612ad9fc7df040762d">ItoParticle</a>, and <a class="el" href="classTracerParticle.html#a46eda0dd3512fbdd16f3e8d50e2b2082">TracerParticle&lt; M, N &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a119909d3c210ed624e6a3d3dc62ca69d" name="a119909d3c210ed624e6a3d3dc62ca69d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a119909d3c210ed624e6a3d3dc62ca69d">&#9670;&#160;</a></span>H5size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a class="el" href="classTracerParticleSolver.html">size_t</a> N&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; <a class="el" href="classTracerParticleSolver.html">M</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::H5size </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Function that is used when writing particles to HDF5. </p>
+<p>This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs. </p><dl class="section note"><dt>Note</dt><dd>Please do not try to output anything other than Real components. Chombo will expect only Reals. </dd></dl>
+
+<p>Reimplemented in <a class="el" href="classItoParticle.html#acc1b08cbfc71ac80659c154a1c5babcf">ItoParticle</a>, and <a class="el" href="classTracerParticle.html#a9cc86e157a239cecdec6cfd2c9bb5160">TracerParticle&lt; M, N &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a5b3f30b24ef0a55d257d9073e6bf983d" name="a5b3f30b24ef0a55d257d9073e6bf983d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b3f30b24ef0a55d257d9073e6bf983d">&#9670;&#160;</a></span>linearIn()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -372,7 +514,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; <a class="el" href="classTracerParticleSolver.html">M</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::linearIn </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">void</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a>&#160;</td>
           <td class="paramname"><em>a_buffer</em></td><td>)</td>
           <td></td>
         </tr>
@@ -387,17 +529,17 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a
 <p>Read a linear binary representation of the internal data. Assumes that the buffer has the correct data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Pointer to memory block </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Pointer to memory block. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classTracerParticle.html#ae5a44b5857c8c76c5dbb8b2435cb7f5e">TracerParticle&lt; M, N &gt;</a>.</p>
+<p>Reimplemented in <a class="el" href="classTracerParticle.html#a42835010d965b2b666bfea6564c87ea4">TracerParticle&lt; M, N &gt;</a>.</p>
 
 </div>
 </div>
-<a id="a07141e6091f41df1e5bb406f2bdc126c" name="a07141e6091f41df1e5bb406f2bdc126c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07141e6091f41df1e5bb406f2bdc126c">&#9670;&#160;</a></span>linearOut()</h2>
+<a id="a0ed7dd6619bf1c5be3556904c544b276" name="a0ed7dd6619bf1c5be3556904c544b276"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ed7dd6619bf1c5be3556904c544b276">&#9670;&#160;</a></span>linearOut()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -410,7 +552,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a
         <tr>
           <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> <a class="el" href="classGenericParticle.html">GenericParticle</a>&lt; <a class="el" href="classTracerParticleSolver.html">M</a>, <a class="el" href="classTracerParticleSolver.html">N</a> &gt;::linearOut </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">void</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">void</a> *<a class="el" href="classTracerParticleSolver.html">const</a>&#160;</td>
           <td class="paramname"><em>a_buffer</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -430,7 +572,7 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">size_t</a> M, <a
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classTracerParticle.html#a9377920cbf7963c3ca1c5565514374dc">TracerParticle&lt; M, N &gt;</a>.</p>
+<p>Reimplemented in <a class="el" href="classTracerParticle.html#acc743ba40b06429aa99b7579f2edc9b0">TracerParticle&lt; M, N &gt;</a>.</p>
 
 </div>
 </div>
