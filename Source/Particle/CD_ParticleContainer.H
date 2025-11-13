@@ -140,6 +140,12 @@ public:
   preRegrid(const int a_base);
 
   /*!
+    @brief Compute new particle IDs.
+  */
+  void
+  resetParticleIDs() noexcept;
+
+  /*!
     @brief Copy particles to mask particle data holder.
     @param[in] a_mask Mask
     @note If the mask is nullptr on any of the levels, those levels will be ignored. 

@@ -1815,8 +1815,8 @@ ItoKMCGodunovStepper<I, C, R, F>::writeCheckpointData(HDF5Handle& a_handle, cons
       const ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
       const ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
 
-      writeParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
-      writeParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+      DischargeIO::writeCheckParticlesToHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
+      DischargeIO::writeCheckParticlesToHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
     }
   }
 
@@ -1849,8 +1849,8 @@ ItoKMCGodunovStepper<I, C, R, F>::readCheckpointData(HDF5Handle& a_handle, const
       ParticleContainer<PointParticle>& conductivityParticles = *m_conductivityParticles[i];
       ParticleContainer<PointParticle>& rhoDaggerParticles    = *m_rhoDaggerParticles[i];
 
-      readParticlesFromHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
-      readParticlesFromHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
+      DischargeIO::readCheckParticlesFromHDF(a_handle, conductivityParticles[a_lvl], identifierSigma);
+      DischargeIO::readCheckParticlesFromHDF(a_handle, rhoDaggerParticles[a_lvl], identifierRho);
     }
   }
 

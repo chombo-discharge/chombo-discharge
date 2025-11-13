@@ -599,7 +599,7 @@ TracerParticleSolver<P>::writeCheckpointLevel(HDF5Handle& a_handle, const int a_
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  writeParticlesToHDF(a_handle, m_particles[a_level], m_name + "_particles");
+  DischargeIO::writeCheckParticlesToHDF(a_handle, m_particles[a_level], m_name + "_particles");
 }
 #endif
 
@@ -613,7 +613,7 @@ TracerParticleSolver<P>::readCheckpointLevel(HDF5Handle& a_handle, const int a_l
     pout() << m_name + "::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  readParticlesFromHDF(a_handle, m_particles[a_level], m_name + "_particles");
+  DischargeIO::readCheckParticlesFromHDF(a_handle, m_particles[a_level], m_name + "_particles");
 }
 #endif
 

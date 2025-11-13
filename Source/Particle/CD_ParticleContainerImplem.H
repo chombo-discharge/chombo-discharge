@@ -1257,6 +1257,44 @@ ParticleContainer<P>::preRegrid(const int a_lmin)
 
 template <class P>
 void
+ParticleContainer<P>::resetParticleIDs() noexcept
+{
+  CH_TIME("ParticleContainer::resetParticleIDs");
+  if (m_verbose) {
+    pout() << "ParticleContainer::resetParticleIDs" << endl;
+  }
+
+  CH_assert(m_isDefined);
+  if (m_isOrganizedByCell) {
+    MayDay::Error("ParticleContainer::preRegrid - particles are sorted by cell!");
+  }
+
+  int32_t counter = 0;
+
+  const int32_t myRank = static_cast<uint32_t>(procID());
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
+
+    const int nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      List<P>& particles = (*m_particles[lvl])[din].listItems();
+
+      for (ListIterator<P> lit(particles); lit.ok(); ++lit, counter++) {
+        lit().rankID()     = myRank;
+        lit().particleID() = counter;
+      }
+    }
+  }
+}
+
+template <class P>
+void
 ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>&         a_grids,
                              const Vector<ProblemDomain>&             a_domains,
                              const Vector<Real>&                      a_dx,

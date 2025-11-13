@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <cmath>
 #include <array>
+#include <cstdint>
 
 // Chombo includes
 #include <RealVect.H>
@@ -25,8 +26,50 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
+namespace detail {
+  /*!
+    @brief Helper function for linearizing a particle onto a buffer.
+    @detail This copies T into the buffer p and increments the pointer.
+    @param[in,out] p Buffer
+    @param[in] a_x Particle property. Must be a trivial type.
+  */
+  template <class T>
+  inline void
+  pushParticleProperty(uint8_t*& p, const T& a_x)
+  {
+    static_assert(std::is_trivially_copyable<T>::value,
+                  "detail::pushParticleProperty expects trivially-copyable fields");
+
+    std::memcpy(p, &a_x, sizeof(T));
+
+    p += sizeof(T);
+  };
+
+  /*!
+    @brief Helper function for linearizing a buffer onto a particle property.
+    @detail This copies from the buffer p into the particle property T. 
+    @param[in,out] p Buffer. 
+    @param[in] a_x Particle property. Must be a trivial type.
+  */
+  template <class T>
+  inline void
+  pullParticleProperty(const uint8_t*& p, T& a_x)
+  {
+    static_assert(std::is_trivially_copyable<T>::value,
+                  "detail::pushParticleProperty expects trivially-copyable fields");
+
+    std::memcpy(&a_x, p, sizeof(T));
+
+    p += sizeof(T);
+  };
+} // namespace detail
+
 /*!
   @brief A generic particle class, holding the position and a specified number of real and vector values.
+  @details For the sake of simplicity, I have added separate linearization functions H5size, H5linearOut, H5linearIn that only linearizes
+  the Real components of the particle. This is done for convenience only, so I don't have to rewrite all of Chombo's particle HDF5 checkpointing
+  routines. Instead, we simply run a bootleg version of those codes that call the H5 linearization versions instead of the regular linearization
+  functions. Users can use this functionality for trimming other types of unnecessary properties that don't need to go into the HDF5 files.
 */
 template <size_t M, size_t N>
 class GenericParticle
@@ -47,6 +90,30 @@ public:
     @brief Destructor (deallocates runtime memory storage)
   */
   inline virtual ~GenericParticle();
+
+  /*!
+    @brief Get the particle ID
+  */
+  inline const int32_t&
+  particleID() const noexcept;
+
+  /*!
+    @brief Get the particle ID
+  */
+  inline int32_t&
+  particleID() noexcept;
+
+  /*!
+    @brief Get the MPI rank ID
+  */
+  inline const int32_t&
+  rankID() const noexcept;
+
+  /*!
+    @brief Get the MPI rank ID
+  */
+  inline int32_t&
+  rankID() noexcept;
 
   /*!
     @brief Get the particle position. 
@@ -164,16 +231,52 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* a_buffer) const;
+  linearOut(void* const a_buffer) const;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
-    @param[in] a_buffer Pointer to memory block
+    @param[in] a_buffer Pointer to memory block.
   */
   inline virtual void
-  linearIn(void* a_buffer);
+  linearIn(const void* const a_buffer);
+
+  /*!
+    @brief Function that is used when writing particles to HDF5.
+    @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
+    @note Please do not try to output anything other than Real components. Chombo will expect only Reals. 
+  */
+  inline virtual int
+  H5size() const;
+
+  /*!
+    @brief Linearize the Real components onto a buffer workable by HDF5.
+    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
+    @param[in] a_buffer Pointer to memory block.
+    @note Please do not try to output anything other than Real components. Chombo will expect only Reals.     
+  */
+  inline virtual void
+  H5linearOut(void* const a_buffer) const;
+
+  /*!
+    @brief Delinearize the buffer onto the real components in the particle class.
+    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
+    @param[in] a_buffer Pointer to memory block.
+    @note Please do not try to output anything other than Real components. Chombo will expect only Reals.     
+  */
+  inline virtual void
+  H5linearIn(const void* const a_buffer);
 
 protected:
+  /*!
+    @brief Particle ID
+  */
+  int32_t m_particleID;
+
+  /*!
+    @brief MPI rank owning this particle
+  */
+  int32_t m_rankID;
+
   /*!
     @brief Particle position
   */

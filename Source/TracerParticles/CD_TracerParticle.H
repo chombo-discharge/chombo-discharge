@@ -88,14 +88,37 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* a_buffer) const override;
+  linearOut(void* const a_buffer) const override;
 
   /*!
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearIn(void* a_buffer) override;
+  linearIn(const void* const a_buffer) override;
+
+  /*!
+    @brief Function that is used when writing particles to HDF5.
+    @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
+  */
+  inline virtual int
+  H5size() const;
+
+  /*!
+    @brief Linearize the Real components onto a buffer workable by HDF5.
+    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
+    @param[in] a_buffer Pointer to memory block
+  */
+  inline virtual void
+  H5linearOut(void* const a_buffer) const;
+
+  /*!
+    @brief Delinearize the buffer onto the real components in the particle class.
+    @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
+    @param[in] a_buffer Pointer to memory block
+  */
+  inline virtual void
+  H5linearIn(const void* const a_buffer);
 
   /*!
     @brief Get one of the scalars. 
