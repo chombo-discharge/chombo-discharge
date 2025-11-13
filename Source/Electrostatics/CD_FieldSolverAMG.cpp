@@ -214,7 +214,7 @@ FieldSolverAMG::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
     pout() << "FieldSolverAMG::regrid" << endl;
   }
 
-  FieldSolver::regrid(a_lbase, a_oldFinestLevel, a_newFinestLevel);
+  FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 }
 
 void
