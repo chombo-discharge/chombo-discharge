@@ -54,6 +54,8 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   bool converged = false;
 
+  DataOps::setValue(a_potential, 0.0);
+
   return converged;
 }
 
@@ -64,9 +66,6 @@ FieldSolverAMG::parseOptions()
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::parseOptions" << endl;
   }
-
-  //  this->parseVerbosity();
-  //  this->parsePlotVariables();
 }
 
 void
@@ -79,25 +78,59 @@ FieldSolverAMG::parseRuntimeOptions()
 }
 
 void
-FieldSolverAMG::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const
+FieldSolverAMG::computeElectricField(MFAMRCellData& a_electricField, const MFAMRCellData& a_potential) const
 {
   CH_TIME("FieldSolverAMG::computeElectricField(MFAMRCellData)");
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::computeElectricField(MFAMRCellData)" << endl;
   }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential[0]->nComp() == 1);
+
+  // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
+  // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
+  // than interpGhostPwl or interpGhost here.
+  MFAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_nComp);
+  m_amr->copyData(scratch, a_potential);
+  m_amr->interpGhostMG(scratch, m_realm);
+
+  // Compute the cell-centered gradient everywhere.
+  m_amr->computeGradient(a_electricField, scratch, m_realm);
+  DataOps::scale(a_electricField, -1.0);
+
+  // Coarsen solution and update ghost cells.
+  m_amr->conservativeAverage(a_electricField, m_realm);
+  m_amr->interpGhost(a_electricField, m_realm);
 }
 
 void
-FieldSolverAMG::computeElectricField(MFAMRFluxData& a_E, const MFAMRCellData& a_potential) const
+FieldSolverAMG::computeElectricField(MFAMRFluxData& a_electricField, const MFAMRCellData& a_potential) const
 {
   CH_TIME("FieldSolverAMG::computeElectricField(MFAMRFluxData)");
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::computeElectricField(MFAMRFluxData)" << endl;
   }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential[0]->nComp() == 1);
+
+  // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
+  // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
+  // than interpGhostPwl or interpGhost here.
+  MFAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_nComp);
+  m_amr->copyData(scratch, a_potential);
+  m_amr->interpGhostMG(scratch, m_realm);
+
+  // Compute the cell-centered gradient everywhere.
+  m_amr->computeGradient(a_electricField, scratch, m_realm);
+  DataOps::scale(a_electricField, -1.0);
 }
 
 void
-FieldSolverAMG::computeElectricField(EBAMRCellData&           a_E,
+FieldSolverAMG::computeElectricField(EBAMRCellData&           a_electricField,
                                      const phase::which_phase a_phase,
                                      const MFAMRCellData&     a_potential) const
 {
@@ -105,10 +138,34 @@ FieldSolverAMG::computeElectricField(EBAMRCellData&           a_E,
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::computeElectricField(EBAMRCellData)" << endl;
   }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential[0]->nComp() == 1);
+
+  // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
+  // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
+  // than interpGhostPwl or interpGhost here.
+  EBAMRCellData scratch;
+  EBAMRCellData potentialPhase;
+
+  m_amr->allocatePointer(potentialPhase, m_realm);
+  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
+  m_amr->alias(potentialPhase, a_phase, a_potential);
+
+  m_amr->copyData(scratch, potentialPhase);
+  m_amr->interpGhostMG(scratch, m_realm, a_phase);
+
+  // Use EBGradient for computing the gradient.
+  m_amr->computeGradient(a_electricField, scratch, m_realm, a_phase);
+  DataOps::scale(a_electricField, -1.0);
+
+  // Coarsen solution and update ghost cells.
+  m_amr->conservativeAverage(a_electricField, m_realm, a_phase);
+  m_amr->interpGhost(a_electricField, m_realm, a_phase);
 }
 
 void
-FieldSolverAMG::computeElectricField(EBAMRFluxData&           a_E,
+FieldSolverAMG::computeElectricField(EBAMRFluxData&           a_electricField,
                                      const phase::which_phase a_phase,
                                      const MFAMRCellData&     a_potential) const
 {
@@ -116,6 +173,26 @@ FieldSolverAMG::computeElectricField(EBAMRFluxData&           a_E,
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::computeElectricField(EBAMRFluxData)" << endl;
   }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential[0]->nComp() == 1);
+
+  // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
+  // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
+  // than interpGhostPwl or interpGhost here.
+  EBAMRCellData scratch;
+  EBAMRCellData potentialPhase;
+
+  m_amr->allocatePointer(potentialPhase, m_realm);
+  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
+  m_amr->alias(potentialPhase, a_phase, a_potential);
+
+  m_amr->copyData(scratch, potentialPhase);
+  m_amr->interpGhostMG(scratch, m_realm, a_phase);
+
+  // Use EBGradient for computing the gradient.
+  m_amr->computeGradient(a_electricField, scratch, m_realm, a_phase);
+  DataOps::scale(a_electricField, -1.0);
 }
 
 void
@@ -136,6 +213,8 @@ FieldSolverAMG::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::regrid" << endl;
   }
+
+  FieldSolver::regrid(a_lbase, a_oldFinestLevel, a_newFinestLevel);
 }
 
 void
