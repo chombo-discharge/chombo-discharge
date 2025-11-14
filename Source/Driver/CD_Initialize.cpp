@@ -25,6 +25,9 @@
 #include <CD_Initialize.H>
 #include <CD_NamespaceHeader.H>
 
+std::string dischargeInputFile = "<none>";
+ParmParse*  dischargeParser    = nullptr;
+
 #if defined(CH_USE_PETSC)
 PetscErrorCode
 #else
@@ -32,6 +35,7 @@ void
 #endif
 initialize(int argc, char* argv[])
 {
+
 #if defined(CH_USE_PETSC)
   const PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 #else

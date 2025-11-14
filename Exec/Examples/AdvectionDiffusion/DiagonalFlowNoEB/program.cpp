@@ -11,7 +11,7 @@ int
 main(int argc, char* argv[])
 {
   ChomboDischarge::initialize(argc, argv);
-  
+
   auto compgeom    = RefCountedPtr<ComputationalGeometry>(new RegularGeometry());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
