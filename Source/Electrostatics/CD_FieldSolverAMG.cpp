@@ -69,7 +69,7 @@ FieldSolverAMG::parseOptions()
 
   this->parseVerbosity();
   this->parsePlotVariables();
-  this->parseRegridSlopes();  
+  this->parseRegridSlopes();
 }
 
 void
@@ -82,7 +82,7 @@ FieldSolverAMG::parseRuntimeOptions()
 
   this->parseVerbosity();
   this->parsePlotVariables();
-  this->parseRegridSlopes();    
+  this->parseRegridSlopes();
 }
 
 void

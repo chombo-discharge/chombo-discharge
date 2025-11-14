@@ -168,7 +168,6 @@ public:
                           const MFAMRIVData&   a_permittivityEB) override;
 
 protected:
-
   /*!
     @brief Set the permittivities
     @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills
