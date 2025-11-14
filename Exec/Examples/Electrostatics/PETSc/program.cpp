@@ -7,7 +7,7 @@
 using namespace ChomboDischarge;
 using namespace Physics::Electrostatics;
 
-using FSOLVE = FieldSolverGMG;
+using FSOLVE = FieldSolverAMG;
 
 int
 main(int argc, char* argv[])

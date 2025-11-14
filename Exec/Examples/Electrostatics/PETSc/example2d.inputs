@@ -99,6 +99,17 @@ FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. '
 FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
 
 # ====================================================================================================
+# FIELD_SOLVER_MULTIGRID_AMG CLASS OPTIONS (MULTIFLUID AMG SOLVER SETTINGS)
+# ====================================================================================================
+FieldSolverAMG.verbosity             = -1                      ## Class verbosity
+FieldSolverAMG.plt_vars              = phi rho E Esol sigma    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverAMG.use_regrid_slopes     = true                    ## Use slopes when regridding or not
+FieldSolverAMG.kappa_source          = true                    ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverAMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
+FieldSolverAMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
+
+
+# ====================================================================================================
 # SurfaceODESolver solver settings.
 # ====================================================================================================
 SurfaceODESolver.verbosity     = -1              ## Chattiness

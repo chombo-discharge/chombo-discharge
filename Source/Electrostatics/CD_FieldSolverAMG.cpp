@@ -66,6 +66,10 @@ FieldSolverAMG::parseOptions()
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::parseOptions" << endl;
   }
+
+  this->parseVerbosity();
+  this->parsePlotVariables();
+  this->parseRegridSlopes();  
 }
 
 void
@@ -75,6 +79,10 @@ FieldSolverAMG::parseRuntimeOptions()
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::parseRuntimeOptions" << endl;
   }
+
+  this->parseVerbosity();
+  this->parsePlotVariables();
+  this->parseRegridSlopes();    
 }
 
 void
