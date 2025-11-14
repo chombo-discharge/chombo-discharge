@@ -32,12 +32,7 @@ using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 int
 main(int argc, char* argv[])
 {
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Read input file
-  ParmParse pp(argc - 2, argv + 2, NULL, argv[1]);
+  ChomboDischarge::initialize(argc, argv);
 
   // Seed the RNG
   Random::setRandomSeed();
@@ -65,6 +60,8 @@ main(int argc, char* argv[])
   reactionList.emplace_back(c4R);
 
   // Read input variables
+  ParmParse pp;
+
   Real SSAlim   = 0.1;
   Real eps      = 0.3;
   Real exitTol  = 1.E-6;
@@ -150,7 +147,5 @@ main(int argc, char* argv[])
     curDt += nextDt;
   }
 
-#ifdef CH_MPI
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }

@@ -14,14 +14,8 @@ using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 int
 main(int argc, char* argv[])
 {
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
+  ChomboDischarge::initialize(argc, argv);
 
-  // Read input file.
-  ParmParse pp(argc - 2, argv + 2, NULL, argv[1]);
-
-  // Seed the RNG
   Random::setRandomSeed();
 
   // State that we advance.
@@ -54,6 +48,8 @@ main(int argc, char* argv[])
   int  maxIter  = 10;
 
   std::string alg;
+
+  ParmParse pp;
 
   // Read program input variables
   pp.get("nsteps", numSteps);
@@ -137,7 +133,5 @@ main(int argc, char* argv[])
     curDt += nextDt;
   }
 
-#ifdef CH_MPI
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }
