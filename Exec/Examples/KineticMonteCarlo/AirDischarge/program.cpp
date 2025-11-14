@@ -1,5 +1,4 @@
-#include "ParmParse.H"
-
+#include <CD_Driver.H>
 #include <CD_ItoKMCJSON.H>
 
 using namespace ChomboDischarge;
@@ -8,22 +7,16 @@ using namespace Physics::ItoKMC;
 int
 main(int argc, char* argv[])
 {
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
-
-  std::string basename;
-  {
-    ParmParse pp("ItoKMCJSON");
-    pp.get("algorithm", basename);
-    setPoutBaseName(basename);
-  }
+  ChomboDischarge::initialize(argc, argv);
 
   Random::seed();
+
+  ParmParse pp;
+
+  std::string basename;
+
+  pp.get("ItoKMCJSON.algorithm", basename);
+  setPoutBaseName(basename);
 
   auto      physics          = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
   const int numPlasmaSpecies = physics->getNumPlasmaSpecies();
@@ -35,8 +28,7 @@ main(int argc, char* argv[])
   Vector<RealVect> gradPhi(numPlasmaSpecies, RealVect::Zero);
 
   Real initParticles;
-  Real criticalDt;
-  Real nonCriticalDt;
+  Real physicsDt;
   Real dt;
   Real E;
   Real stopTime;
@@ -62,17 +54,7 @@ main(int argc, char* argv[])
   while (t < stopTime) {
     printToFile();
 
-    physics->advanceKMC(particles,
-                        photons,
-                        criticalDt,
-                        nonCriticalDt,
-                        phi,
-                        gradPhi,
-                        dt,
-                        E * RealVect::Unit,
-                        RealVect::Zero,
-                        1.0,
-                        1.0);
+    physics->advanceKMC(particles, photons, physicsDt, phi, gradPhi, dt, E * RealVect::Unit, RealVect::Zero, 1.0, 1.0);
 
     t += dt;
   }
@@ -80,8 +62,5 @@ main(int argc, char* argv[])
 
   physics->killKMC();
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }

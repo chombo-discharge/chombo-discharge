@@ -29,7 +29,7 @@ main(int argc, char* argv[])
 
   ParmParse pp("ItoKMC");
   pp.get("potential", U0);
-  
+
   timestepper->setVoltage([=](const Real t) -> Real {
     return U0;
   });
