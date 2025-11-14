@@ -15,10 +15,6 @@
 // Chombo includes
 #include <RefCountedPtr.H>
 
-#if defined(_OPENMP) && defined(CH_USE_MEMORY_TRACKING)
-#error "OpenMP and memory tracking are not compatible"
-#endif
-
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_TimeStepper.H>
