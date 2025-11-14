@@ -108,7 +108,6 @@ FieldSolverAMG.kappa_source          = true                    ## Volume weighte
 FieldSolverAMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
 FieldSolverAMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
-
 # ====================================================================================================
 # SurfaceODESolver solver settings.
 # ====================================================================================================

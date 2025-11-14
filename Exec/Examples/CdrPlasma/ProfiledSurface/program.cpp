@@ -10,15 +10,6 @@
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
 #include <CD_DataParser.H>
-#include <ParmParse.H>
-
-// This is the potential curve. It is (approximately) a 1.2/50 lightning impulse starting at some specified time.
-Real peakVoltage = 0.0;
-Real
-potentialCurve(const Real a_time)
-{
-  return peakVoltage;
-}
 
 using namespace ChomboDischarge;
 using namespace Physics::CdrPlasma;
@@ -26,61 +17,45 @@ using namespace Physics::CdrPlasma;
 int
 main(int argc, char* argv[])
 {
+  ChomboDischarge::initialize(argc, argv);
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
+  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new RodPlaneProfile());
+  auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
+  auto physics     = RefCountedPtr<CdrPlasmaPhysics>(new CdrPlasmaJSON());
+  auto timestepper = RefCountedPtr<CdrPlasmaStepper>(new CdrPlasmaGodunovStepper(physics));
+  auto tagger      = RefCountedPtr<CellTagger>(new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
+  auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
-
-  // Get potential from input script
-  {
-    ParmParse pp("ProfiledSurface");
-
-    pp.get("voltage", peakVoltage);
-  }
-
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new RodPlaneProfile());
-  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
-
-  // Set up physics
-  RefCountedPtr<CdrPlasmaPhysics> physics     = RefCountedPtr<CdrPlasmaPhysics>(new CdrPlasmaJSON());
-  RefCountedPtr<CdrPlasmaStepper> timestepper = RefCountedPtr<CdrPlasmaStepper>(new CdrPlasmaGodunovStepper(physics));
-  RefCountedPtr<CellTagger>       tagger      = RefCountedPtr<CellTagger>(
-    new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
-
-  // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverGMG>();
   auto cdr_fact = new CdrFactory<CdrSolver, CdrCTU>();
   auto rte_fact = new RtFactory<RtSolver, EddingtonSP1>();
 
-  // Instantiate solvers
   auto poi = poi_fact->newSolver();
   auto cdr = cdr_fact->newLayout(physics->getCdrSpecies());
   auto rte = rte_fact->newLayout(physics->getRtSpecies());
 
-  // Send solvers to TimeStepper
   timestepper->setFieldSolver(poi);
   timestepper->setCdrSolvers(cdr);
   timestepper->setRadiativeTransferSolvers(rte);
 
-  // Set voltage
-  timestepper->setVoltage(potentialCurve);
+  // Define a voltage curve for our problem.
+  Real U0 = 1.0;
 
-  // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
-  engine->setupAndRun(input_file);
+  ParmParse pp("ProfiledSurface");
+  pp.get("voltage", U0);
+
+  auto voltageCurve = [=](const Real t) -> Real {
+    return U0;
+  };
+
+  timestepper->setVoltage(voltageCurve);
+
+  engine->setupAndRun();
 
   // Clean up memory
   delete poi_fact;
   delete cdr_fact;
   delete rte_fact;
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }
