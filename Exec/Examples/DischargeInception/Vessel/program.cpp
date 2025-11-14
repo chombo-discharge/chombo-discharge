@@ -4,7 +4,6 @@
 #include <CD_DischargeInceptionTagger.H>
 #include <CD_LookupTable.H>
 #include <CD_DataParser.H>
-#include <ParmParse.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::DischargeInception;
@@ -12,20 +11,10 @@ using namespace Physics::DischargeInception;
 int
 main(int argc, char* argv[])
 {
+  ChomboDischarge::initialize(argc, argv);
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Read the input file into the ParmParse table
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
-
-  // Read BOLSIG+ data into alpha and eta coefficients
-  const Real N  = 2.45E25;
-  const Real O2 = 0.2;
-  const Real N2 = 0.8;
-  const Real T  = 300.0;
+  const Real N = 2.45E25;
+  const Real T = 300.0;
 
   LookupTable1D<> ionizationData = DataParser::fractionalFileReadASCII("transport_data.txt",
                                                                        "E/N (Td)	Townsend ioniz. coef. alpha/N (m2)",
@@ -46,7 +35,6 @@ main(int argc, char* argv[])
   ionizationData.prepareTable(0, 500, LookupTable::Spacing::Exponential);
   attachmentData.prepareTable(0, 500, LookupTable::Spacing::Exponential);
 
-  // Read data for the voltage curve.
   Real peak           = 0.0;
   Real t0             = 0.0;
   Real t1             = 0.0;
@@ -55,18 +43,13 @@ main(int argc, char* argv[])
 
   ParmParse li("lightning_impulse");
   ParmParse di("DischargeInception");
+
   li.get("peak", peak);
   li.get("start", t0);
   li.get("tail_time", t1);
   li.get("front_time", t2);
-
   di.get("second_townsend", secondTownsend);
 
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Vessel());
-  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
-
-  // Define transport data
   auto alpha = [&](const Real& E, const RealVect& x) -> Real {
     return ionizationData.interpolate<1>(E);
   };
@@ -96,7 +79,7 @@ main(int argc, char* argv[])
     return peak * (exp(-(t + t0) / t1) - exp(-(t + t0) / t2));
   };
   auto fieldEmission = [&](const Real& E, const RealVect& x) -> Real {
-    const Real beta = 1.0; // Field enhancement factor
+    const Real beta = 1.0;
     const Real phi  = 4.5;
     const Real C1   = 1.54E-6 * std::pow(10, 4.52 / sqrt(phi)) / phi;
     const Real C2   = 2.84E9 * std::pow(phi, 1.5);
@@ -107,12 +90,14 @@ main(int argc, char* argv[])
     return secondTownsend;
   };
 
-  // Set up time stepper
+  // clang-format off
+  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new Vessel());
+  auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto timestepper = RefCountedPtr<DischargeInceptionStepper<>>(new DischargeInceptionStepper<>());
-  auto celltagger  = RefCountedPtr<DischargeInceptionTagger>(
-    new DischargeInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
+  auto celltagger  = RefCountedPtr<DischargeInceptionTagger>(new DischargeInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
+  auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
+  // clang-format on
 
-  // Set transport data
   timestepper->setAlpha(alpha);
   timestepper->setEta(eta);
   timestepper->setBackgroundRate(bgRate);
@@ -124,12 +109,7 @@ main(int argc, char* argv[])
   timestepper->setVoltageCurve(voltageCurve);
   timestepper->setSecondaryEmission(secondaryEmission);
 
-  // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
-  engine->setupAndRun(input_file);
+  engine->setupAndRun();
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }

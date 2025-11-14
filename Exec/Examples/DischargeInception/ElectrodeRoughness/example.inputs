@@ -171,7 +171,7 @@ DischargeInceptionStepper.mode                 = stationary        ## Mode (stat
 DischargeInceptionStepper.eval_townsend        = true              ## Evaluate Townsend criterion or not (only for stationary)
 DischargeInceptionStepper.inception_alg        = trapz             ## Integration algorithm. Either euler or trapz
 DischargeInceptionStepper.output_file          = report.txt        ## Output file
-DischargeInceptionStepper.K_inception          = 15                ## User-specified inception value
+DischargeInceptionStepper.K_inception          = 10                ## User-specified inception value
 DischargeInceptionStepper.plt_vars             = K Uinc poisson    ## Plot variables
 
 # Particle integration controls

@@ -4,7 +4,6 @@
 #include <CD_DischargeInceptionTagger.H>
 #include <CD_LookupTable.H>
 #include <CD_DataParser.H>
-#include <ParmParse.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::DischargeInception;
@@ -12,20 +11,8 @@ using namespace Physics::DischargeInception;
 int
 main(int argc, char* argv[])
 {
+  ChomboDischarge::initialize(argc, argv);
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Read the input file into the ParmParse table
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
-
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new NoisePlane());
-  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
-
-  // Read ionization and attachment coefficients and make them into functions.
   constexpr Real N = 2.45E25;
 
   LookupTable1D<> ionizationData = DataParser::fractionalFileReadASCII("sf6.dat",
@@ -47,7 +34,6 @@ main(int argc, char* argv[])
   ionizationData.prepareTable(0, 500, LookupTable::Spacing::Exponential);
   attachmentData.prepareTable(0, 500, LookupTable::Spacing::Exponential);
 
-  // Define transport data
   auto alpha = [&](const Real& E, const RealVect& x) -> Real {
     return ionizationData.interpolate<1>(E);
   };
@@ -79,12 +65,14 @@ main(int argc, char* argv[])
     return 1.0;
   };
 
-  // Set up time stepper
+  // clang-format off
+  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new NoisePlane());
+  auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto timestepper = RefCountedPtr<DischargeInceptionStepper<>>(new DischargeInceptionStepper<>());
-  auto celltagger  = RefCountedPtr<DischargeInceptionTagger>(
-    new DischargeInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
+  auto celltagger  = RefCountedPtr<DischargeInceptionTagger>(new DischargeInceptionTagger(amr, timestepper->getElectricField(), alphaEff));
+  auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
+  // clang-format on
 
-  // Set transport data
   timestepper->setAlpha(alpha);
   timestepper->setEta(eta);
   timestepper->setBackgroundRate(bgRate);
@@ -95,12 +83,7 @@ main(int argc, char* argv[])
   timestepper->setIonDensity(ionDensity);
   timestepper->setVoltageCurve(voltageCurve);
 
-  // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, celltagger));
-  engine->setupAndRun(input_file);
+  engine->setupAndRun();
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }
