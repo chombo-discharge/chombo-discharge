@@ -1,7 +1,7 @@
 #include <CD_Driver.H>
+#include <CD_FieldSolverGMG.H>
 #include <CD_DiskProfiledPlane.H>
 #include <CD_FieldStepper.H>
-#include <CD_FieldSolverAMG.H>
 #include <ParmParse.H>
 
 using namespace ChomboDischarge;
@@ -25,7 +25,7 @@ main(int argc, char* argv[])
   RefCountedPtr<CellTagger>            tagger   = RefCountedPtr<CellTagger>(NULL);
 
   // Set up basic Poisson, potential = 1
-  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverAMG>>(new FieldStepper<FieldSolverAMG>());
+  auto timestepper = RefCountedPtr<FieldStepper<FieldSolverGMG>>(new FieldStepper<FieldSolverGMG>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
