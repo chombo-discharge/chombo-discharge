@@ -1,23 +1,12 @@
 #include <CD_Driver.H>
-#include <CD_FieldSolverFactory.H>
 #include <CD_FieldSolverGMG.H>
-#include <CD_ItoLayout.H>
 #include <CD_ItoSolver.H>
-#include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include <CD_ItoKMCJSON.H>
+#include <CD_CdrCTU.H>
 #include <CD_WireWire.H>
 #include <CD_ItoKMCGodunovStepper.H>
 #include <CD_ItoKMCStreamerTagger.H>
-#include "ParmParse.H"
-
-// This is the potential curve (constant in this case). Modify it if you want to.
-Real g_potential;
-Real
-potential_curve(const Real a_time)
-{
-  return g_potential;
-}
 
 using namespace ChomboDischarge;
 using namespace Physics::ItoKMC;
@@ -25,42 +14,26 @@ using namespace Physics::ItoKMC;
 int
 main(int argc, char* argv[])
 {
+  ChomboDischarge::initialize(argc, argv);
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
-
-  // Get potential from input script
-  std::string basename;
-  {
-    ParmParse pp("WireWire");
-    pp.get("potential", g_potential);
-    pp.get("basename", basename);
-    setPoutBaseName(basename);
-  }
-
-  // Initialize RNG
   Random::seed();
 
-  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new WireWire());
+  auto geometry    = RefCountedPtr<ComputationalGeometry>(new WireWire());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto physics     = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
   auto timestepper = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCGodunovStepper<>(physics));
   auto tagger      = RefCountedPtr<CellTagger>(new ItoKMCStreamerTagger<ItoKMCStepper<>>(physics, timestepper, amr));
+  auto engine      = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, tagger));
 
-  // Set potential
-  timestepper->setVoltage(potential_curve);
+  Real U0 = 1.0;
 
-  // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
-  engine->setupAndRun(input_file);
+  ParmParse pp("ItoKMC");
+  pp.get("potential", U0);
+  timestepper->setVoltage([=](const Real t) -> Real {
+    return U0;
+  });
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
+  engine->setupAndRun();
+
+  ChomboDischarge::finalize();
 }
