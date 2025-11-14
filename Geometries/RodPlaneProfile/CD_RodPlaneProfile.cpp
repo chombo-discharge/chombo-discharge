@@ -163,4 +163,4 @@ RodPlaneProfile::getBaseIFSquare()
 
   return new RoundedBoxIF(lo, hi, curv, true);
 }
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

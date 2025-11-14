@@ -21,7 +21,7 @@
 #endif
 
 #if defined(CH_USE_PETSC)
-#include "petsc.h"
+#include <petsc.h>
 #endif
 
 // Chombo includes

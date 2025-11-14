@@ -13,7 +13,7 @@
 #define CD_BrownianWalkerStepper_H
 
 // Our includes
-#include "CD_TimeStepper.H"
+#include <CD_TimeStepper.H>
 #include <CD_ItoSolver.H>
 #include <CD_ItoLayout.H>
 #include <CD_NamespaceHeader.H>

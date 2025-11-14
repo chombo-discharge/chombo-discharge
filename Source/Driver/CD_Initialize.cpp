@@ -11,7 +11,7 @@
 
 // Std includes
 #if defined(CH_MPI) || defined(CH_USE_PETSC)
-#include "mpi.h"
+#include <mpi.h>
 #endif
 #include <iostream>
 #include <memory>
