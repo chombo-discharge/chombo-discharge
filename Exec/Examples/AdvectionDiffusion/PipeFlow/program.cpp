@@ -3,7 +3,6 @@
 #include <CD_Cylinder.H>
 #include <CD_AdvectionDiffusionStepper.H>
 #include <CD_AdvectionDiffusionTagger.H>
-#include <ParmParse.H>
 
 using namespace ChomboDischarge;
 using namespace Physics::AdvectionDiffusion;
@@ -11,35 +10,20 @@ using namespace Physics::AdvectionDiffusion;
 int
 main(int argc, char* argv[])
 {
+  ChomboDischarge::initialize(argc, argv);
 
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
-
-  // Set geometry and AMR
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry>(new Cylinder());
-  RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
-
-  // Set up basic AdvectionDiffusion
+  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new Cylinder());
+  auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto solver      = RefCountedPtr<CdrSolver>(new CdrCTU());
   auto timestepper = RefCountedPtr<AdvectionDiffusionStepper>(new AdvectionDiffusionStepper(solver));
   auto tagger      = RefCountedPtr<CellTagger>(new AdvectionDiffusionTagger(solver, amr));
+  auto engine      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
 
-  // Set up velocity along the cylinder
   timestepper->setVelocity([](const RealVect& a_position) {
     return RealVect(D_DECL(1.0, 1.0, 0.0));
   });
 
-  // Set up the Driver and run it
-  RefCountedPtr<Driver> engine = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr, tagger));
-  engine->setupAndRun(input_file);
+  engine->setupAndRun();
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
+  ChomboDischarge::finalize();
 }
