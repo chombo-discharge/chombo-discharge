@@ -989,7 +989,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
 }
 
 void
-Driver::setupAndRun(const std::string a_inputFile)
+Driver::setupAndRun()
 {
   CH_TIME("Driver::setupAndRun(std::string)");
   if (m_verbosity > 0) {
@@ -1002,7 +1002,7 @@ Driver::setupAndRun(const std::string a_inputFile)
   sprintf(iter_str, ".check%07d.%dd.hdf5", m_restartStep, SpaceDim);
   const std::string restartFile = m_outputDirectory + "/chk/" + m_outputFileNames + std::string(iter_str);
 
-  this->setup(a_inputFile, m_initialRegrids, m_restart, restartFile);
+  this->setup(dischargeInputFile, m_initialRegrids, m_restart, restartFile);
 
   // Run the simulation.
   if (!m_geometryOnly) {

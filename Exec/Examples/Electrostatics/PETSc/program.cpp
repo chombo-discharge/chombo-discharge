@@ -19,7 +19,7 @@ main(int argc, char* argv[])
   auto timestepper = RefCountedPtr<FieldStepper<FSOLVE>>(new FieldStepper<FSOLVE>());
   auto driver      = RefCountedPtr<Driver>(new Driver(compgeom, timestepper, amr));
 
-  driver->setupAndRun(std::string(argv[1]));
+  driver->setupAndRun();
 
   ChomboDischarge::finalize();
 }

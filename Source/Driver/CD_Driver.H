@@ -25,6 +25,7 @@
 #include <CD_AmrMesh.H>
 #include <CD_CellTagger.H>
 #include <CD_MultiFluidIndexSpace.H>
+#include <CD_Initialize.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -61,29 +62,7 @@ public:
     @param[in] a_inputFile Input file containing parameters for the simulation. 
   */
   void
-  setupAndRun(const std::string a_inputFile);
-
-  /*!
-    @brief Run a simulation for a specific time, or until a maximum number of steps have been performed.
-    @param[in] a_startTime Starting time of simulation
-    @param[in] a_endTime   Simulation end time
-    @param[in] a_maxSteps  Maximum number of steps.
-  */
-  void
-  run(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
-
-  /*!
-    @brief Setup function
-    @param[in] a_inputFile      Input file containing all tunable simulation parameters.
-    @param[in] a_initialRegrids Number of initial regrids to perform
-    @param[in] a_restart        Do a restart or not
-    @param[in] a_restartFile    Name of restart file (if restarting from a previous time step)
-  */
-  void
-  setup(const std::string a_inputFile,
-        const int         a_initialRegrids,
-        const bool        a_restart,
-        const std::string a_restartFile);
+  setupAndRun();
 
 protected:
   /*!
@@ -367,6 +346,28 @@ protected:
     @brief Plot level sets
   */
   bool m_plotLevelset;
+
+  /*!
+    @brief Run a simulation for a specific time, or until a maximum number of steps have been performed.
+    @param[in] a_startTime Starting time of simulation
+    @param[in] a_endTime   Simulation end time
+    @param[in] a_maxSteps  Maximum number of steps.
+  */
+  void
+  run(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
+
+  /*!
+    @brief Setup function
+    @param[in] a_inputFile      Input file containing all tunable simulation parameters.
+    @param[in] a_initialRegrids Number of initial regrids to perform
+    @param[in] a_restart        Do a restart or not
+    @param[in] a_restartFile    Name of restart file (if restarting from a previous time step)
+  */
+  void
+  setup(const std::string a_inputFile,
+        const int         a_initialRegrids,
+        const bool        a_restart,
+        const std::string a_restartFile);
 
   /*!
     @brief Set amr

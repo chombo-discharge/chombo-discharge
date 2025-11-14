@@ -33,12 +33,12 @@
 /*!
   @brief Global chombo-discharge ParmParse input parameter object. This must have global lifetime.
 */
-ParmParse* dischargeParser = nullptr;
+static ParmParse* dischargeParser = nullptr;
 
 /*!
   @brief Global chombo-discharge input file name
 */
-std::string dischargeInputFile = "<none>";
+static std::string dischargeInputFile = "<none>";
 
 /*!
   @brief chombo-discharge main initialization function.
