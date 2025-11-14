@@ -1,21 +1,15 @@
 #include <CD_Driver.H>
 #include <CD_LookupTable.H>
-#include <ParmParse.H>
 
 using namespace ChomboDischarge;
 
 int
 main(int argc, char* argv[])
 {
-#ifdef CH_MPI
-  MPI_Init(&argc, &argv);
-#endif
+  ChomboDischarge::initialize(argc, argv);
 
-  // Build class options from input script and command line options
-  const std::string input_file = argv[1];
-  ParmParse         pp(argc - 2, argv + 2, NULL, input_file.c_str());
+  ParmParse pp;
 
-  // Get the input file name
   std::string inputFile;
   int         numPoints;
 
@@ -44,10 +38,5 @@ main(int argc, char* argv[])
 
   const auto interpRow = slicedTable.interpolate(std::numeric_limits<Real>::max());
 
-#ifdef CH_MPI
-  CH_TIMER_REPORT();
-  MPI_Finalize();
-#endif
-
-  return 0;
+  ChomboDischarge::finalize();
 }
