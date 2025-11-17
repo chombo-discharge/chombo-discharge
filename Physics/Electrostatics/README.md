@@ -1,6 +1,6 @@
 # Physics/Electrostatics
-This physics module solves the Poisson equation. It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
-See https://chombo-discharge.github.io/ElectrostaticsModel.html for implementation details.
+This physics module runs one of the electrostatic field solvers.
+It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
 
 The source files consist of the following:
 
@@ -10,7 +10,13 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=MyElectrostatics -geometry=CoaxialCable
+python setup.py -base_dir=/home/foo/MyApplications -app_name=MyElectrostatics -geometry=Vessel
+```
+
+To install within chombo-discharge:
+
+```shell
+python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyElectrostatics -geometry=Vessel
 ```
 
 The application will be installed to $DISCHARGE_HOME/MyApplications/MyElectrostatics.
