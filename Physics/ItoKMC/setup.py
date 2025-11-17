@@ -13,9 +13,10 @@ parser = argparse.ArgumentParser();
 parser.add_argument('-discharge_home', type=str,  default=os.environ.get('DISCHARGE_HOME', os.getcwd()), help="Source code base directory (default: %(default)s)")
 parser.add_argument('-base_dir',       type=str,  default="MyApplications",                              help="Base directory of mini-app (default: %(default)s")
 parser.add_argument('-geometry',       type=str,  default="RegularGeometry",                             help="Geometry class (default: %(default)s)")
-parser.add_argument('-field_solver',   type=str,  default="FieldSolverMultigrid",                        help="Poisson solver implementation (default: %(default)s)")
+parser.add_argument('-field_solver',   type=str,  default="FieldSolverGMG",                              help="Poisson solver implementation (default: %(default)s)")
 parser.add_argument('-ito_solver',     type=str,  default="ItoSolver",                                   help="Ito solver implementation (default: %(default)s)")
-parser.add_argument('-cdr_solver',     type=str,  default="CdrCTU",                                      help="Ito solver implementation (default: %(default)s)")
+parser.add_argument('-cdr_solver',     type=str,  default="CdrCTU",                                      help="CDR solver implementation (default: %(default)s)")
+parser.add_argument('-rte_solver',     type=str,  default="McPhoto",                                     help="RTE solver implementation (default: %(default)s)")
 parser.add_argument('-physics',        type=str,  default="ItoKMCJSON",                                  help="Plasma model (default: %(default)s)")
 parser.add_argument('-time_stepper',   type=str,  default="ItoKMCGodunovStepper",                        help="Time stepping method (default: %(default)s)")
 parser.add_argument('-cell_tagger',    type=str,  default="ItoKMCStreamerTagger",                        help="Cell tagging method (default: %(default)s)")
@@ -31,13 +32,13 @@ if not args.discharge_home:
     print("       >export  DISCHARGE_HOME=<directory>")
 else:
     print("DISCHARGE_HOME is " + args.discharge_home)
-    print('Setting up problem in directory ' + args.discharge_home + '/' + args.base_dir + '/' + args.app_name)
+    print('Setting up problem in directory ' + args.base_dir + '/' + args.app_name)
 
     app_main.write_template(args)    # Write main file
     app_options.write_template(args) # Write options file
     app_inc.copy_dependencies(args)  # Copy depencies
 
     # # Copy the makefile
-    os.system('cp ./python/GNUmakefile ' + args.discharge_home + '/' + args.base_dir + "/" + args.app_name + "/GNUmakefile")        
+    os.system('cp ./python/GNUmakefile ' + args.base_dir + "/" + args.app_name + "/GNUmakefile")        
 
     print('Problem setup successful')

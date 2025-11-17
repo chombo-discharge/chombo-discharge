@@ -11,7 +11,6 @@ import app_inc
 parser = argparse.ArgumentParser();
 parser.add_argument('-dim',             type=int,  help='Dimension', default=2)
 parser.add_argument('-procs',           type=int,  help='Processors to use when building executable', default=1)
-parser.add_argument('-use_mpi',         type=bool, help='MPI enabled (default true)', default=True)
 parser.add_argument('-discharge_home',  type=str,  help="Source code base directory", default=os.environ.get('DISCHARGE_HOME', os.getcwd()))
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./MyApplications")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")

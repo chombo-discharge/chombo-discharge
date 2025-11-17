@@ -1,0 +1,64 @@
+{
+    "gas" : {
+	"background species" :
+        [
+	    { "id": "M",
+              "molar fraction" : {
+                  "type" : "constant", 
+		  "value" : 1.0        
+	      }
+	    }
+	],
+        "law": {
+            "id": "ideal_gas",
+            "ideal_gas" : {"type": "ideal", "temperature": 300, "pressure": 1E5}
+        }
+    },
+    "particle placement": { "method": "random"},
+    "alpha": {"type": "constant", "value": 1.0},
+    "eta": {"type": "constant", "value": 1.0},    
+    "plasma species" :
+    [
+	{
+            "id": "e",          
+	    "Z" : -1,           
+	    "solver" : "ito",   
+	    "mobile" : true,    
+	    "diffusive" : true, 
+	    "mobility" : { "type" : "constant", "value": 1.0},
+	    "diffusion" : { "type" : "constant", "value": 1.0},           
+	    "initial particles" :
+            [
+		{
+		    "uniform distribution" : {
+			"low corner" : [ -1, -1, -1 ],
+			"high corner" : [ 1, 1, 1 ],
+			"num particles": 1000,        
+			"weight" : 1                  
+		    } 
+		}
+	    ]
+        },
+	{
+            "id": "M+",            
+	    "Z" : 1,               
+	    "solver" : "ito",      
+	    "mobile" : true,       
+	    "diffusive" : true,    
+	    "mobility": { "type": "constant", "value": 1.0},
+	    "diffusion": { "type": "constant", "value": 1.0}
+	}
+    ],
+    "photon species":
+    [
+	{ "id": "Y", "kappa": {"type": "stochastic B", "chi min": 1.0, "chi max": 10.0, "neutral": "M"}}
+    ],
+    "plasma reactions":
+    [
+	{"reaction": "e + M -> e + e + M+ + Y", "type": "constant","value": 1.0}
+    ],
+    "photoionization":
+    [
+	{"reaction": "Y + (M) -> e + M+"}
+    ]
+}
