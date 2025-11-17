@@ -25,6 +25,7 @@ parser.add_argument('--benchmark', help="Generate benchmark files only.", action
 parser.add_argument('--no_exec',   help="Do not run executables.",        action='store_true')
 parser.add_argument('--compare',   help="Turn off HDF5 comparisons",      action='store_true')
 parser.add_argument('-mpi',        help="Use MPI or not",         type=str, default="FALSE",  required=False)
+parser.add_argument('-petsc',      help="Compile with PETSC",     type=str, default="FALSE",  required=False)
 parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default="FALSE",  required=False)
 parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default="FALSE",  required=False)
 parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=-1,       required=False)
@@ -91,7 +92,7 @@ def pre_check(silent):
 # --------------------------------------------------
 # Function that compiles a test
 # --------------------------------------------------
-def compile_test(silent, build_procs, dim, mpi, omp, hdf, clean, main):
+def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, clean, main):
     """ Set up and run a compilation of the target test. """
 
     makeCommand = "make "
@@ -102,6 +103,7 @@ def compile_test(silent, build_procs, dim, mpi, omp, hdf, clean, main):
     makeCommand += "MPI=" + str(mpi).upper() + " "
     makeCommand += "OPENMPCC=" + str(omp).upper() + " "    
     makeCommand += "USE_HDF=" + str(hdf).upper() + " "
+    makeCommand += "USE_PETSC=" + str(petsc).upper() + " "
     if(str(omp).upper() == "TRUE"):
         makeCommand += "USE_MT=FALSE "
     
@@ -233,6 +235,7 @@ for test in config.sections():
                                         mpi=args.mpi,
                                         omp=args.openmp,
                                         hdf=args.hdf,
+                                        petsc=args.petsc,
                                         clean=args.clean,
                                         main = str(config[str(test)]['exec']))
             if compile_code != 0:
