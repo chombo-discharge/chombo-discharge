@@ -15,7 +15,7 @@ To set up a new problem, use the Python script. For example:
 python setup.py -base_dir=/home/foo/MyApplications -app_name=MyAdvectionDiffusion -geometry=CoaxialCable
 ```
 
-To install within chombo-dischareg:
+To install within chombo-discharge:
 
 ```shell
 python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyAdvectionDiffusion -geometry=CoaxialCable

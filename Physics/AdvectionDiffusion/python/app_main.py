@@ -19,7 +19,6 @@ def write_template(args):
     mainf.write('#include <CD_' + args.stepper + '.H>\n')
     mainf.write('#include <CD_AdvectionDiffusionTagger.H>\n')
     mainf.write("\n")
-
     mainf.write("using namespace ChomboDischarge;\n")
     mainf.write("using namespace Physics::AdvectionDiffusion;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
