@@ -10,6 +10,7 @@ FC             = ifort
 MPI            = TRUE
 MPICXX         = mpiicpc
 CXXSTD         = 14
+USE_PETSC      = FALSE
 USE_EB         = TRUE
 USE_MF         = TRUE
 USE_HDF        = FALSE

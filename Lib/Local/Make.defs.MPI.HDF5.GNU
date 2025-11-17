@@ -12,6 +12,7 @@ MPICXX         = mpic++
 CXXSTD         = 14
 USE_MT         = TRUE
 OPENMPCC       = FALSE
+USE_PETSC      = FALSE
 USE_EB         = TRUE
 USE_MF         = TRUE
 USE_HDF        = TRUE
