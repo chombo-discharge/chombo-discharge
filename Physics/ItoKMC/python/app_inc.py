@@ -7,7 +7,6 @@ def copy_dependencies(args):
     app_dir = args.base_dir + "/" + args.app_name
     kin_home = args.discharge_home + "/Physics/ItoKMC/PlasmaModels" + "/" + args.physics    
     kin_name = args.discharge_home + "/Physics/ItoKMC/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics
-    print(kin_name)
     if os.path.exists(kin_name + ".inc"): # Read file and copy all listed dependencies
         f = open(kin_name + ".inc", 'r')
         incf = f.readline().strip();
