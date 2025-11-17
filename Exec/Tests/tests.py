@@ -24,11 +24,11 @@ parser.add_argument('--clean',     help="Do a clean compile.",            action
 parser.add_argument('--benchmark', help="Generate benchmark files only.", action='store_true')
 parser.add_argument('--no_exec',   help="Do not run executables.",        action='store_true')
 parser.add_argument('--compare',   help="Turn off HDF5 comparisons",      action='store_true')
-parser.add_argument('-mpi',        help="Use MPI or not",         type=str, default="FALSE",  required=False)
-parser.add_argument('-petsc',      help="Compile with PETSC",     type=str, default="FALSE",  required=False)
-parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default="FALSE",  required=False)
-parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default="FALSE",  required=False)
-parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=-1,       required=False)
+parser.add_argument('-mpi',        help="Use MPI or not",         type=str, default=None,  required=False)
+parser.add_argument('-petsc',      help="Compile with PETSC",     type=str, default=None,  required=False)
+parser.add_argument('-hdf',        help="Use HDF5 or not",        type=str, default=None,  required=False)
+parser.add_argument('-openmp',     help="Use OpenMP or not",      type=str, default=None,  required=False)
+parser.add_argument('-dim',        help="Test dimensionality",    type=int, default=None,       required=False)
 parser.add_argument('-cores',      help="Number of cores to use", type=int, default=2,        required=False)
 parser.add_argument('-exec_mpi',   help="MPI run command.",       type=str, default="mpirun", required=False)
 parser.add_argument('-suites',     help="Test suite (e.g. 'geometry' or 'field')", nargs='+', default="all")
@@ -99,17 +99,24 @@ def compile_test(silent, build_procs, dim, mpi, omp, hdf, petsc, clean, main):
     if silent:
         makeCommand += "-s "
     makeCommand += "-j" + str(build_procs) + " "
-    makeCommand += "DIM=" + str(dim) + " "
-    makeCommand += "MPI=" + str(mpi).upper() + " "
-    makeCommand += "OPENMPCC=" + str(omp).upper() + " "    
-    makeCommand += "USE_HDF=" + str(hdf).upper() + " "
-    makeCommand += "USE_PETSC=" + str(petsc).upper() + " "
-    if(str(omp).upper() == "TRUE"):
+
+    # Only add arguments if they were specified on command line
+    if dim is not None:
+        makeCommand += "DIM=" + str(dim) + " "
+    if mpi is not None:
+        makeCommand += "MPI=" + str(mpi).upper() + " "
+    if omp is not None:
+        makeCommand += "OPENMPCC=" + str(omp).upper() + " "
+    if hdf is not None:
+        makeCommand += "USE_HDF=" + str(hdf).upper() + " "
+    if petsc is not None:
+        makeCommand += "USE_PETSC=" + str(petsc).upper() + " "
+    if omp is not None and str(omp).upper() == "TRUE":
         makeCommand += "USE_MT=FALSE "
-    
+
     if clean:
         makeCommand += "clean "
-    makeCommand += str(config[str(test)]['exec'])        
+    makeCommand += str(config[str(test)]['exec'])
 
     print("\t Compiling with   = '" + str(makeCommand) + "'")
 
@@ -170,7 +177,7 @@ for test in config.sections():
         do_test = True
         dim     = int(config[str(test)]['dim'])
 
-        if dim != args.dim and (args.dim==2 or args.dim==3):
+        if args.dim is not None and dim != args.dim and (args.dim==2 or args.dim==3):
             do_test = False
     else:
         do_test = False
@@ -197,11 +204,11 @@ for test in config.sections():
         else:
             output     = str(config[str(test)]['output'])
 
-        
-        if str(args.mpi).upper() == "TRUE":
+
+        if args.mpi is not None and str(args.mpi).upper() == "TRUE":
             executable += "MPI."
-        if str(args.openmp).upper() == "TRUE":
-            executable += "OPENMPCC."            
+        if args.openmp is not None and str(args.openmp).upper() == "TRUE":
+            executable += "OPENMPCC."
         executable += "ex"
 
         start = time.time()        
@@ -253,18 +260,18 @@ for test in config.sections():
                 # --------------------------------------------------
                 # Configure OpenMP
                 # --------------------------------------------------
-                if str(args.openmp).upper() == "TRUE":
+                if args.openmp is not None and str(args.openmp).upper() == "TRUE":
                     os.environ['OMP_NUM_THREADS'] = str(args.cores)
                     os.environ['OMP_PLACES'] = "cores"
                     os.environ['OMP_SCHEDULE'] = "dynamic"
                     os.environ['OMP_PROC_BIND'] = "true"
-                    
+
                 # --------------------------------------------------
                 # Set up the run command
                 # --------------------------------------------------
-                if str(args.mpi).upper() == "TRUE":
-                    if str(args.openmp).upper() == "TRUE":
-                        runCommand = args.exec_mpi + " -np 1" + " ./" + executable + " " + inputFile                        
+                if args.mpi is not None and str(args.mpi).upper() == "TRUE":
+                    if args.openmp is not None and str(args.openmp).upper() == "TRUE":
+                        runCommand = args.exec_mpi + " -np 1" + " ./" + executable + " " + inputFile
                     else:
                         runCommand = args.exec_mpi + " -np " + str(args.cores) + " ./" + executable + " " + inputFile
                 else:
@@ -302,7 +309,7 @@ for test in config.sections():
                     # --------------------------------------------------
                     if args.benchmark:
                         print("\t Regression test '" + str(test) + "' has generated benchmark files.")
-                    elif not args.benchmark and args.compare and str(args.hdf).upper == "TRUE":
+                    elif not args.benchmark and args.compare and args.hdf is not None and str(args.hdf).upper() == "TRUE":
                         # --------------------------------------------------
                         # Loop through all files that were generated and
                         # compare them with h5diff. Print an error message
