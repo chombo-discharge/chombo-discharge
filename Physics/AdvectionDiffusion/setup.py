@@ -26,11 +26,11 @@ if not args.discharge_home:
     print( "       >export  DISCHARGE_HOME=<directory>")
 else:
     print("DISCHARGE_HOME is " + args.discharge_home)
-    print('Setting up problem in directory ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name)
+    print('Setting up problem in directory ' + args.base_dir + "/" + args.app_name)
 
     app_main.write_template(args)    # Write main file
     app_options.write_template(args) # Write options file
 
     # Copy the makefile
-    os.system('cp ./python/GNUmakefile ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name + "/GNUmakefile")
+    os.system('cp ./python/GNUmakefile ' + args.base_dir + "/" + args.app_name + "/GNUmakefile")
     print('Problem setup successful')

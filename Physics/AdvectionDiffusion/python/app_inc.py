@@ -4,7 +4,7 @@ from shutil import copyfile
 
 # Write an options file. This should be a separate routine
 def copy_dependencies(args):
-    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.base_dir + "/" + args.app_name
     
     kin_home = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics
     kin_name = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics + "/" + args.physics

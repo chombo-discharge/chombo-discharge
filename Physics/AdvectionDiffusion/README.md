@@ -12,8 +12,14 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=MyAdvectionDiffusion -geometry=CoaxialCable
+python setup.py -base_dir=/home/foo/MyApplications -app_name=MyAdvectionDiffusion -geometry=CoaxialCable
 ```
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/MyAdvectionDiffusion.
+To install within chombo-dischareg:
+
+```shell
+python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyAdvectionDiffusion -geometry=CoaxialCable
+```
+
+The application then be installed to $DISCHARGE_HOME/MyApplications/MyAdvectionDiffusion.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
