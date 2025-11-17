@@ -3,7 +3,7 @@ import sys
 
 # Write an options file. This should be a separate routine
 def write_template(args):
-    app_dir = args.discharge_home + "/" + args.base_dir + "/" + args.app_name
+    app_dir = args.base_dir + "/" + args.app_name
     options_filename = app_dir + "/template.inputs"
     optf = open(options_filename, 'w')
     
@@ -11,7 +11,7 @@ def write_template(args):
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/CD_Driver.options", \
                      args.discharge_home + "/Source/TracerParticles/CD_TracerParticleSolver.options", \
-                     args.discharge_home + "/Source/Electrostatics/CD_FieldSolverMultigrid.options", \
+                     args.discharge_home + "/Source/Electrostatics/CD_" + args.field_solver + ".options", \
                      args.discharge_home + "/Source/ConvectionDiffusionReaction/CD_CdrCTU.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/DischargeInception/CD_DischargeInceptionStepper.options",\
