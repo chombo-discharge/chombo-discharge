@@ -171,19 +171,12 @@ pre_check(args.silent)
 # --------------------------------------------------
 if args.dim is not None:
     target_dim = args.dim
-    print("Using DIM=" + str(target_dim) + " from command line")
 else:
     target_dim = get_dim_from_make_defs()
-    if target_dim is not None:
-        print("Using DIM=" + str(target_dim) + " from Make.defs.local")
-    else:
+    if target_dim is None:
         print("Warning: DIM not specified on command line and not found in Make.defs.local")
         print("All tests will be run regardless of dimensionality")
         target_dim = None
-
-if target_dim is not None:
-    print("Only running tests with dim=" + str(target_dim))
-
 
 # --------------------------------------------------
 # Run all tests
@@ -305,52 +298,69 @@ for test in config.sections():
             else:
                 # --------------------------------------------------
                 # Find the executable file with .ex extension
+                # Filter by dimensionality to allow multiple .ex files with different dims
                 # --------------------------------------------------
                 exec_files = glob.glob("*.ex")
-                if len(exec_files) == 0:
-                    print("\t Error: No .ex file found in directory " + directory)
+
+                # Filter executables by dimensionality
+                matching_exec = []
+                for exec_file in exec_files:
+                    dim_match = re.search(r'(\d+)d\.', exec_file)
+                    if dim_match:
+                        exec_dim = int(dim_match.group(1))
+                        if exec_dim == dim:
+                            matching_exec.append(exec_file)
+
+                if len(matching_exec) == 0:
+                    print("\t Error: No .ex file found with dim=" + str(dim) + " in directory " + directory)
                     run_suite = False
                     ret_code = 1
-                elif len(exec_files) > 1:
-                    print("\t Error: Multiple .ex files found in directory " + directory + ": " + str(exec_files))
-                    print("\t Please ensure only one executable is present.")
+                elif len(matching_exec) > 1:
+                    print("\t Error: Multiple .ex files with dim=" + str(dim) + " found in directory " + directory + ": " + str(matching_exec))
+                    print("\t Please ensure only one executable per dimensionality is present.")
                     run_suite = False
                     ret_code = 1
                 else:
-                    executable = exec_files[0]
-
-                    # Verify dimensionality in filename matches config
-                    dim_match = re.search(r'(\d+)d\.', executable)
-                    if dim_match:
-                        exec_dim = int(dim_match.group(1))
-                        if exec_dim != dim:
-                            print("\t Warning: Executable '" + executable + "' has dim=" + str(exec_dim) + " but config specifies dim=" + str(dim))
-                    else:
-                        print("\t Warning: Could not extract dimensionality from executable name '" + executable + "'")
+                    executable = matching_exec[0]
 
                     print("\t Executable is    = " + executable)
-                    print("\t Dimensionality   = " + str(dim))
                     print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
                 # --------------------------------------------------
-                # Configure OpenMP
-                # --------------------------------------------------
-                if run_suite and args.openmp is not None and str(args.openmp).upper() == "TRUE":
-                    os.environ['OMP_NUM_THREADS'] = str(args.cores)
-                    os.environ['OMP_PLACES'] = "cores"
-                    os.environ['OMP_SCHEDULE'] = "dynamic"
-                    os.environ['OMP_PROC_BIND'] = "true"
-
-                # --------------------------------------------------
-                # Set up the run command
+                # Configure OpenMP and set up the run command
                 # --------------------------------------------------
                 if run_suite:
+                    # Determine MPI ranks and OpenMP threads
                     if "MPI" in executable:
                         if args.openmp is not None and str(args.openmp).upper() == "TRUE":
-                            runCommand = args.exec_mpi + " -np 1" + " ./" + executable + " " + inputFile
+                            # MPI + OpenMP case
+                            if args.cores == 1:
+                                # Special case: 1 core = 1 MPI rank, 1 OpenMP thread
+                                num_mpi_ranks = 1
+                                num_omp_threads = 1
+                            else:
+                                # General case: cores/2 MPI ranks, 2 OpenMP threads
+                                num_mpi_ranks = args.cores // 2
+                                num_omp_threads = 2
+
+                            os.environ['OMP_NUM_THREADS'] = str(num_omp_threads)
+                            os.environ['OMP_PLACES'] = "cores"
+                            os.environ['OMP_SCHEDULE'] = "dynamic"
+                            os.environ['OMP_PROC_BIND'] = "true"
+
+                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
                         else:
-                            runCommand = args.exec_mpi + " -np " + str(args.cores) + " ./" + executable + " " + inputFile
+                            # MPI only case
+                            num_mpi_ranks = args.cores
+                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
                     else:
+                        # No MPI case
+                        if args.openmp is not None and str(args.openmp).upper() == "TRUE":
+                            os.environ['OMP_NUM_THREADS'] = str(args.cores)
+                            os.environ['OMP_PLACES'] = "cores"
+                            os.environ['OMP_SCHEDULE'] = "dynamic"
+                            os.environ['OMP_PROC_BIND'] = "true"
+
                         runCommand = "./" + executable + " " + inputFile
 
                     runCommand = runCommand + " Driver.output_names="  + str(output)
