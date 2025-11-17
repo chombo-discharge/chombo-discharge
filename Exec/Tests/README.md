@@ -17,7 +17,6 @@ Configurable options are
 
 By default, the compilation is done using the configured options from Make.defs.local.
 
-### Compilation
 ```shell
 python tests.py --compile --clean --silent --no_exec -cores 12
 ```
@@ -25,14 +24,12 @@ python tests.py --compile --clean --silent --no_exec -cores 12
 will compile all the tests using 12 cores, but not run them.
 Benchmark files can then be generated with
 
-### Generating benchmark files
 ```shell
 python tests.py -cores 12 --benchmark
 ```
 
 After adding some new code to chombo-discharge, one can compare against the benchmark files by
 
-### Comparing against benchmark files
 ```shell
 python3 tests.py --compile --silent --compare -cores 12
 ```
