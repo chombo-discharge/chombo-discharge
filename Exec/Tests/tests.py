@@ -5,6 +5,7 @@ import sys
 import configparser
 import subprocess
 import time
+import re
 from subprocess import DEVNULL
 
 # This script requires Python3.5 to work properly
@@ -190,11 +191,10 @@ for test in config.sections():
     if do_test:
         # --------------------------------------------------
         # Get test suite parameters from .ini file and
-        # convert them to the types that they represent. 
+        # convert them to the types that they represent.
         # --------------------------------------------------
         directory  = str(config[str(test)]['directory'])
-        dim        = int(config[str(test)]['dim'])    
-        executable = str(config[str(test)]['exec']) + str(dim) + "d.*"
+        dim        = int(config[str(test)]['dim'])
         inputFile  = str(config[str(test)]['input'])
         nplot      = int(config[str(test)]['plot_interval'])
         nsteps     = int(config[str(test)]['nsteps'])
@@ -204,37 +204,58 @@ for test in config.sections():
         else:
             output     = str(config[str(test)]['output'])
 
+        start = time.time()
 
-        if args.mpi is not None and str(args.mpi).upper() == "TRUE":
-            executable += "MPI."
-        if args.openmp is not None and str(args.openmp).upper() == "TRUE":
-            executable += "OPENMPCC."
-        executable += "ex"
-
-        start = time.time()        
-        
         # --------------------------------------------------
-        # Print some information about the regression test 
-        # being run. 
+        # Print some information about the regression test
+        # being run.
         # --------------------------------------------------
         print("\nRunning regression test '" + str(test) + "'...")
         if args.benchmark:
             print("\t Running benchmark!")
-            
+
         print("\t Directory is     = " + directory)
         print("\t Input file is    = " + inputFile)
-        print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
         # --------------------------------------------------
         # Now change to test directory
         # --------------------------------------------------
-        os.chdir(baseDir + "/" + directory) 
+        os.chdir(baseDir + "/" + directory)
+
+        # --------------------------------------------------
+        # Find the executable file with .ex extension
+        # --------------------------------------------------
+        exec_files = glob.glob("*.ex")
+        if len(exec_files) == 0:
+            print("\t Error: No .ex file found in directory " + directory)
+            run_suite = False
+            ret_code = 1
+        elif len(exec_files) > 1:
+            print("\t Error: Multiple .ex files found in directory " + directory + ": " + str(exec_files))
+            print("\t Please ensure only one executable is present.")
+            run_suite = False
+            ret_code = 1
+        else:
+            executable = exec_files[0]
+
+            # Extract dimensionality from filename (e.g., main2d.MPI.ex -> 2)
+            dim_match = re.search(r'(\d+)d\.', executable)
+            if dim_match:
+                dim = int(dim_match.group(1))
+            else:
+                print("\t Warning: Could not extract dimensionality from executable name '" + executable + "'. Using dim from config.")
+                dim = int(config[str(test)]['dim'])
+
+            print("\t Executable is    = " + executable)
+            print("\t Dimensionality   = " + str(dim))
+            print("\t Output files are = " + str(output) + ".stepXXXXXXX." + str(dim) + "d.hdf5")
 
         # --------------------------------------------------
         # Check if executable exists. Recompile test if
         # user has called for it
         # --------------------------------------------------
-        run_suite = True
+        if 'run_suite' not in locals():
+            run_suite = True
         if args.compile:
             compile_code = compile_test(silent=args.silent,
                                         build_procs=args.cores,
@@ -269,7 +290,7 @@ for test in config.sections():
                 # --------------------------------------------------
                 # Set up the run command
                 # --------------------------------------------------
-                if args.mpi is not None and str(args.mpi).upper() == "TRUE":
+                if "MPI" in executable:
                     if args.openmp is not None and str(args.openmp).upper() == "TRUE":
                         runCommand = args.exec_mpi + " -np 1" + " ./" + executable + " " + inputFile
                     else:
