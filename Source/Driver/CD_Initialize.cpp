@@ -15,6 +15,10 @@
 #endif
 #include <iostream>
 #include <memory>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+#include <unistd.h>
 
 // Chombo includes
 #include <parstream.H>
@@ -35,7 +39,6 @@ void
 #endif
 initialize(int argc, char* argv[])
 {
-
 #if defined(CH_USE_PETSC)
   const PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 #else
@@ -49,11 +52,37 @@ initialize(int argc, char* argv[])
     dischargeParser    = new ParmParse(argc - 2, argv + 2, nullptr, argv[1]);
   }
   else {
-    if (procID() == 0) {
-      std::cout << "ChomboDischarge::initialize(...): No input file provided" << std::endl;
-    }
-
     dischargeParser = new ParmParse();
+  }
+
+  // Print initialization information from master rank
+  bool printInitializationMessage = false;
+
+  char cwd[1024];
+  if (getcwd(cwd, sizeof(cwd)) != nullptr) {
+    pout() << "\n";
+    pout() << "================================================================================\n";
+    pout() << "chombo-discharge initialization\n";
+    pout() << "================================================================================\n";
+    pout() << "  Working directory: " << cwd << "\n";
+    pout() << "  Input file:        " << dischargeInputFile << "\n";
+    pout() << "--------------------------------------------------------------------------------\n";
+    pout() << "  MPI ranks:         " << numProc() << "\n";
+#ifdef _OPENMP
+    pout() << "  OpenMP threads:    " << omp_get_max_threads() << "\n";
+#endif
+#ifdef CH_USE_HDF5
+    pout() << "  HDF5:              TRUE\n";
+#else
+    pout() << "  HDF5:              FALSE\n";
+#endif
+#ifdef CH_USE_PETSC
+    pout() << "  PETSc:             TRUE\n";
+#else
+    pout() << "  PETSc:             FALSE\n";
+#endif
+    pout() << "================================================================================\n";
+    pout() << std::endl;
   }
 
 #if defined(CH_USE_PETSC)

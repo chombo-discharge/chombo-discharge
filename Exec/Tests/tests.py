@@ -330,9 +330,13 @@ for test in config.sections():
                 # Configure OpenMP and set up the run command
                 # --------------------------------------------------
                 if run_suite:
+                    # Detect if executable has OpenMP support by checking filename
+                    has_openmp = "OPENMP" in executable or "OPENMPCC" in executable
+                    has_mpi = "MPI" in executable
+
                     # Determine MPI ranks and OpenMP threads
-                    if "MPI" in executable:
-                        if args.openmp is not None and str(args.openmp).upper() == "TRUE":
+                    if has_mpi:
+                        if has_openmp:
                             # MPI + OpenMP case
                             if args.cores == 1:
                                 # Special case: 1 core = 1 MPI rank, 1 OpenMP thread
@@ -355,7 +359,7 @@ for test in config.sections():
                             runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
                     else:
                         # No MPI case
-                        if args.openmp is not None and str(args.openmp).upper() == "TRUE":
+                        if has_openmp:
                             os.environ['OMP_NUM_THREADS'] = str(args.cores)
                             os.environ['OMP_PLACES'] = "cores"
                             os.environ['OMP_SCHEDULE'] = "dynamic"
