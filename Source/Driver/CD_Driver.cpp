@@ -39,8 +39,6 @@
 #include <CD_OpenMP.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "Everything in Exec should use the new initialization interface. Including the Python tools"
-
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
