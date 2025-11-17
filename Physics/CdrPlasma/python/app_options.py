@@ -3,16 +3,15 @@ import sys
 
 # Write an options file. This should be a separate routine
 def write_template(args):
-    app_dir = args.discharge_home + '/' + args.base_dir + "/" + args.app_name
+    app_dir = args.base_dir + "/" + args.app_name
     options_filename = app_dir + "/template.inputs"
     optf = open(options_filename, 'w')
     
     # Write plasma kinetics options
     optf.write("# ====================================================================================================\n")
-    optf.write('# Voltage curve\n')
+    optf.write('# Applied voltage\n')
     optf.write("# ====================================================================================================\n")
-    optf.write(args.app_name + ".voltage   = 1\n")
-    optf.write(args.app_name + ".basename  = pout\n")
+    optf.write("voltage   = 1\n")
     optf.write('\n')
 
     options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \

@@ -1,0 +1,28 @@
+{
+    "gas":
+    {
+        "law": "ideal",
+        "temperature": 300,
+        "pressure": 1,
+        "neutral species":
+        [
+	    {"name": "M", "molar fraction": 1.0}
+        ]
+    },
+    "plasma species":
+    [
+        {"name":"e",   "Z":  -1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-2} },
+        {"name":"M+",  "Z":   1, "mobile": true, "diffusive": false, "mobility": {"lookup": "constant", "value": 2E-4} }
+    ],
+    "photon species":
+    [
+        {"name": "B", "kappa": "helmholtz", "neutral": "M", "lambda": 1.0}
+    ],    
+    "sigma": {"initial density": 0.0},
+    "alpha": { "lookup": "morrow-lowke" },
+    "eta": { "lookup": "morrow-lowke" }, 
+    "plasma reactions": 
+    [
+        {"reaction": "e + M -> M+ + e + e", "lookup": "constant", "rate": 1.0}
+    ]
+}

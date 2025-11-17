@@ -12,16 +12,16 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-python setup.py -base_dir=/home/foo/MyApplications -app_name=MyBrownianWalker -geometry=CoaxialCable
+python setup.py -base_dir=/home/foo/MyApplications -app_name=MyBrownianWalker -geometry=Vessel
 ```
 
 To install within chombo-discharge:
 
 ```shell
-python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyBrownianWalker -geometry=CoaxialCable
+python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyBrownianWalker -geometry=Vessel
 ```
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/MyBrownianWalker.
+The application will then be installed to $DISCHARGE_HOME/MyApplications/MyBrownianWalker.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 ## Modifying the application
