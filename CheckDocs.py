@@ -12,7 +12,7 @@ def get_changed_files(base_branch="main"):
         check=True
     )
     files = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    exts = (".cpp", ".H", ".options", ".inputs")
+    exts = (".cpp", ".H", ".options", ".inputs", ".md")
     return [str(Path(f).resolve()) for f in files if f.endswith(exts)]
 
 def find_literalincludes(rst_dir, changed_files):
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     changed_files = get_changed_files(base_branch)
     if not changed_files:
-        print(f"No changed .cpp, .H, .options, or .inputs files compared to {base_branch}")
+        print(f"No changed .cpp, .H, .options, .inputs, or .md files compared to {base_branch}")
         exit(0)
 
     includes = find_literalincludes(rst_dir, changed_files)
