@@ -1,5 +1,5 @@
 #include <CD_Driver.H>
-#include <CD_RodPerlinBox.H>
+#include <CD_RodDielectric.H>
 #include <CD_GeometryStepper.H>
 
 using namespace ChomboDischarge;
@@ -10,7 +10,7 @@ main(int argc, char* argv[])
 {
   ChomboDischarge::initialize(argc, argv);
 
-  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new RodPerlinBox());
+  auto compgeom    = RefCountedPtr<ComputationalGeometry>(new RodDielectric());
   auto amr         = RefCountedPtr<AmrMesh>(new AmrMesh());
   auto tagger      = RefCountedPtr<CellTagger>(nullptr);
   auto timestepper = RefCountedPtr<GeometryStepper>(new GeometryStepper());
