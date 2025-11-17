@@ -1,8 +1,6 @@
 # Regression
 This folder can run various regression or unit tests.
 
-
-
 ## Main usage
 Use various flags for controlling how the applications are run and whether or not benchmark files for comparison will be generated.
 Configurable options are
@@ -17,6 +15,7 @@ Configurable options are
 * ```-suites``` Tests suites to run. E.g. ```-suite AdvectionDiffusion Electrostatics```.
 * ```-tests``` Specific tests to run. E.g. ```-tests AdvectionDiffusion/Godunov```.
 
+By default, the compilation is done using the configured options from Make.defs.local.
 
 ### Compilation
 ```shell
