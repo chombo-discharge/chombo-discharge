@@ -39,7 +39,7 @@ public:
   /*!
     @brief Full constructor. 
     @param[in] a_computationalGeometry Computational geometry. 
-    @param[in] a_timeStepper          The time stepper
+    @param[in] a_timeStepper           The time stepper
     @param[in] a_amrMesh               AmrMesh core class. 
     @param[in] a_cellTagger            Cell tagger which flags cell for refinement. 
   */
