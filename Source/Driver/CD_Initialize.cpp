@@ -55,33 +55,41 @@ initialize(int argc, char* argv[])
     dischargeParser = new ParmParse();
   }
 
-  // Print initialization information from master rank
-  bool printInitializationMessage = false;
-
   char cwd[1024];
   if (getcwd(cwd, sizeof(cwd)) != nullptr) {
     pout() << "\n";
-    pout() << "================================================================================\n";
-    pout() << "chombo-discharge initialization\n";
-    pout() << "================================================================================\n";
+    pout() << "==========================================================================================" << endl;
+    pout() << R"(
+      _                     _                     _ _          _                          
+  ___| |__   ___  _ __ ___ | |__   ___         __| (_)___  ___| |__   __ _ _ __ __ _  ___ 
+ / __| '_ \ / _ \| '_ ` _ \| '_ \ / _ \ _____ / _` | / __|/ __| '_ \ / _` | '__/ _` |/ _ \
+| (__| | | | (_) | | | | | | |_) | (_) |_____| (_| | \__ \ (__| | | | (_| | | | (_| |  __/
+ \___|_| |_|\___/|_| |_| |_|_.__/ \___/       \__,_|_|___/\___|_| |_|\__,_|_|  \__, |\___|
+)" << endl;
     pout() << "  Working directory: " << cwd << "\n";
     pout() << "  Input file:        " << dischargeInputFile << "\n";
     pout() << "--------------------------------------------------------------------------------\n";
-    pout() << "  MPI ranks:         " << numProc() << "\n";
+#ifdef CH_MPI
+    pout() << "  MPI:    TRUE (" << numProc() << " ranks)\n";
+#else
+    pout() << "  MPI:    FALSE\n";
+#endif
 #ifdef _OPENMP
-    pout() << "  OpenMP threads:    " << omp_get_max_threads() << "\n";
+    pout() << "  OpenMP: TRUE (" << omp_get_max_threads() << " threads)\n";
+#else
+    pout() << "  OpenMP: FALSE\n";
 #endif
 #ifdef CH_USE_HDF5
-    pout() << "  HDF5:              TRUE\n";
+    pout() << "  HDF5:   TRUE\n";
 #else
-    pout() << "  HDF5:              FALSE\n";
+    pout() << "  HDF5:   FALSE\n";
 #endif
 #ifdef CH_USE_PETSC
-    pout() << "  PETSc:             TRUE\n";
+    pout() << "  PETSc:  TRUE\n";
 #else
-    pout() << "  PETSc:             FALSE\n";
+    pout() << "  PETSc:  FALSE\n";
 #endif
-    pout() << "================================================================================\n";
+    pout() << "==========================================================================================" << endl;
     pout() << std::endl;
   }
 
