@@ -163,7 +163,14 @@ The primary purpose of the <code class="docutils literal notranslate"><span clas
 <li><p>Coordinate HDF5 I/O operations.</p></li>
 </ol>
 <p>The constructor for this class is</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_computationalGeometry</span><span class="p">,</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Full constructor. </span>
+<span class="cm">  @param[in] a_computationalGeometry Computational geometry. </span>
+<span class="cm">  @param[in] a_timeStepper           The time stepper</span>
+<span class="cm">  @param[in] a_amrMesh               AmrMesh core class. </span>
+<span class="cm">  @param[in] a_cellTagger            Cell tagger which flags cell for refinement. </span>
+<span class="cm">*/</span>
+<span class="n">Driver</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">ComputationalGeometry</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">a_computationalGeometry</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">TimeStepper</span><span class="o">&gt;&amp;</span><span class="w">           </span><span class="n">a_timeStepper</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;&amp;</span><span class="w">               </span><span class="n">a_amrMesh</span><span class="p">,</span>
 <span class="w">       </span><span class="k">const</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;&amp;</span><span class="w">            </span><span class="n">a_cellTagger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">CellTagger</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">));</span>
@@ -183,7 +190,7 @@ If users decide to omit a cell tagger as in the above constructor, regridding fu
 <section id="simulation-setup">
 <h2>Simulation setup<a class="headerlink" href="#simulation-setup" title="Permalink to this heading"></a></h2>
 <p>For setting up an running simulations, only a single routine is used:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setupAndRun</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_inputFile</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">setupAndRun</span><span class="p">();</span>
 </pre></div>
 </div>
 <p>This routine will set up and run a simulation.</p>

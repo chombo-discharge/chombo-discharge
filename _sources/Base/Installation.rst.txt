@@ -150,7 +150,9 @@ The main variables that the user needs to set are
 * ``USE_HDF5 = TRUE/FALSE``
   This enables or disables HDF5 output.
 * ``OPENMPCC = TRUE/FALSE``
-  Turn on or off OpenMP threading. 
+  Turn on or off OpenMP threading.
+* ``USE_PETSC = TRUE/FALSE``
+  If set to TRUE, link to PETSC.
   
 
 MPI
@@ -195,6 +197,12 @@ When compiled with OpenMP all loops over grid patches uses threading in the form
 
    Memory tracking is currently not supported together with threading.
    When compiling ``chombo-discharge`` make sure that memory tracking is turned off (see :ref:`Chap:MainSettings`).
+
+PETSC
+_____
+
+It is possible expose PETSC to ``chombo-discharge`` by setting ``USE_PETSC = TRUE`` when compiling.
+The user must first install PETSC, and set ``PETSC_DIR`` and ``PETSC_ARCH``.
 
 
 Compiler flags

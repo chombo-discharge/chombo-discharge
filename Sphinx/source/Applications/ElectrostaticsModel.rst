@@ -92,7 +92,7 @@ To see available setup options, use
 
 .. code-block:: bash
 
-   ./setup.py --help
+   python setup.py --help
 
 Example programs
 ----------------

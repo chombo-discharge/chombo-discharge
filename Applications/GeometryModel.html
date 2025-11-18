@@ -166,7 +166,6 @@ A full description is available in the <code class="docutils literal notranslate
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/Geometry</span>
 This physics module only sets up a geometry -- it does include any solvers whatsoever and so all TimeStepper routines are empty.
 This is typically used when developing/testing a new geometry. 
-See https://chombo-discharge.github.io/Geometry.html for implementation details.
 
 The source files consist of the following:
 
@@ -176,17 +175,23 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>myGeometry<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyGeometry<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/myGeometry.
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyGeometry<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyGeometry.
 
 <span class="gu">## Modifying the application</span>
 Users are free to modify this application.
 </pre></div>
 </div>
 <p>To see available setup options, use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>

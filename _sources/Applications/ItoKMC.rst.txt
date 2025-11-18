@@ -2291,3 +2291,19 @@ Example programs that use the Îto-KMC module are given in
 
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic` for a basic streamer discharge in atmospheric air.
 * :file:`$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD` for a streamer discharge over a dielectric.
+
+Setting up a new problem
+========================
+
+New problems that use the ``ItoKMC`` physics model are best set up by using the Python tools provided with the module.
+A full description is available in the ``README.md`` file contained in the folder:
+
+.. literalinclude:: ../../../../Physics/ItoKMC/README.md
+   :language: markdown
+              
+To see the list of available options type
+
+.. code-block:: bash
+
+   cd $DISCHARGE_HOME/Physics/ItoKMC
+   python setup.py --help  

@@ -177,6 +177,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#example-programs">Example programs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-problem">Setting up a new problem</a></li>
 </ul>
 </li>
 </ul>
@@ -2854,6 +2855,45 @@ It is essential that the user checks that the model converges when these feature
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirBasic</span></code> for a basic streamer discharge in atmospheric air.</p></li>
 <li><p><code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/ItoKMC/AirDBD</span></code> for a streamer discharge over a dielectric.</p></li>
 </ul>
+</section>
+<section id="setting-up-a-new-problem">
+<h2>Setting up a new problem<a class="headerlink" href="#setting-up-a-new-problem" title="Permalink to this heading"></a></h2>
+<p>New problems that use the <code class="docutils literal notranslate"><span class="pre">ItoKMC</span></code> physics model are best set up by using the Python tools provided with the module.
+A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> file contained in the folder:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/ItoKMC</span>
+This physics module solves the Ito-KMC formulation for electric discharges.
+
+The folders contain:
+
+<span class="k">*</span><span class="w"> </span><span class="gs">**PlasmaModels**</span> Implementations of various plasma models. 
+<span class="k">*</span><span class="w"> </span><span class="gs">**TimeSteppers**</span> Implementations of the various time integration algorithms.
+<span class="k">*</span><span class="w"> </span><span class="gs">**CellTaggers**</span> Implementations of various cell taggers.
+
+<span class="gu">## Setting up a new application</span>
+To set up a new problem, use the Python script. For example:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyPlasmaModel<span class="w"> </span>-geometry<span class="o">=</span>Vessel<span class="w"> </span>-physics<span class="o">=</span>ItoKMCJSON
+<span class="sb">```</span>
+
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyPlasmaModel<span class="w"> </span>-geometry<span class="o">=</span>Vessel<span class="w"> </span>-physics<span class="o">=</span>ItoKMCJSON
+<span class="sb">```</span>
+
+The application will then be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaApplication.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
+
+<span class="gu">## Modifying the application</span>
+Users are free to modify this application, e.g. adding new initial conditions and flow fields.
+</pre></div>
+</div>
+<p>To see the list of available options type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>/Physics/ItoKMC
+python<span class="w"> </span>setup.py<span class="w"> </span>--help
+</pre></div>
+</div>
 </section>
 </section>
 

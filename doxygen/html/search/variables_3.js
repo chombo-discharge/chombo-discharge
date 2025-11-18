@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['k_0',['K',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray']]],
-  ['kb_1',['kb',['../namespaceUnits.html#a0237c7c446f131e27ea2c9482b7f2a3b',1,'Units']]]
+  ['eps0_0',['eps0',['../namespaceUnits.html#a1b05588f11c74e3846a8e62e5b29e94d',1,'Units']]],
+  ['ev_1',['eV',['../namespaceUnits.html#ae948cbf0a553931726bbdc75ac7ae433',1,'Units']]]
 ];

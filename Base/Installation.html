@@ -59,6 +59,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#mpi">MPI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hdf5">HDF5</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#openmp">OpenMP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#petsc">PETSC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#compiler-flags">Compiler flags</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pre-defined-configuration-files">Pre-defined configuration files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gnu-configuration-for-workstations">GNU configuration for workstations</a></li>
@@ -305,6 +306,8 @@ Not supported with OpenMP, and enabling memory tracking together with OpenMP wil
 This enables or disables HDF5 output.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">OPENMPCC</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
 Turn on or off OpenMP threading.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">USE_PETSC</span> <span class="pre">=</span> <span class="pre">TRUE/FALSE</span></code>
+If set to TRUE, link to PETSC.</p></li>
 </ul>
 </section>
 <section id="mpi">
@@ -346,6 +349,11 @@ When compiled with OpenMP all loops over grid patches uses threading in the form
 <p>Memory tracking is currently not supported together with threading.
 When compiling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> make sure that memory tracking is turned off (see <a class="reference internal" href="#chap-mainsettings"><span class="std std-ref">Main settings</span></a>).</p>
 </div>
+</section>
+<section id="petsc">
+<h3>PETSC<a class="headerlink" href="#petsc" title="Permalink to this heading"></a></h3>
+<p>It is possible expose PETSC to <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> by setting <code class="docutils literal notranslate"><span class="pre">USE_PETSC</span> <span class="pre">=</span> <span class="pre">TRUE</span></code> when compiling.
+The user must first install PETSC, and set <code class="docutils literal notranslate"><span class="pre">PETSC_DIR</span></code> and <code class="docutils literal notranslate"><span class="pre">PETSC_ARCH</span></code>.</p>
 </section>
 <section id="compiler-flags">
 <h3>Compiler flags<a class="headerlink" href="#compiler-flags" title="Permalink to this heading"></a></h3>

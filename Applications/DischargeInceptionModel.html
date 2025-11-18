@@ -682,14 +682,20 @@ The user must supply transport coefficients, geometry, and electron sources.
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-python3<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyDischargeInception<span class="w"> </span>-geometry<span class="o">=</span>Cylinder
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyDischargeInception<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyDischargeInception<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
 The application will then be installed to $DISCHARGE_HOME/MyApplications/MyDischargeInception.
 </pre></div>
 </div>
 <p>To see available setup options, use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>

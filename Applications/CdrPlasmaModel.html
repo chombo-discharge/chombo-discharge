@@ -1961,15 +1961,20 @@ The folders contains
 <span class="k">*</span><span class="w"> </span><span class="gs">**CellTaggers**</span> Implementations of various cell taggers.
 <span class="k">*</span><span class="w"> </span><span class="gs">**Data**</span> Various data (e.g. transport data). 
 
-
 <span class="gu">## Setting up a new application</span>
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyPlasmaModel<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyPlasmaModel<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaApplication
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyPlasmaModel<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+The application will then be installed to $DISCHARGE_HOME/MyApplications/MyPlasmaApplication
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 <span class="gu">## Modifying the application</span>
@@ -1978,7 +1983,7 @@ Users are free to modify this application, e.g. adding new initial conditions an
 </div>
 <p>To see the list of available options type</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$DISCHARGE_HOME</span>/Physics/CdrPlasma
-./setup.py<span class="w"> </span>--help
+python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>

@@ -205,9 +205,7 @@ TracerParticleStepper.velocity_field        = 0        ## Velocity field to use.
 A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/TracerParticle</span>
 This physics module solves for an tracer particle solver.
-This module contains files for setting up the initial conditions
-and advected species, basic integrators, and a cell tagger for refining grid cells.
-See https://chombo-discharge.github.io/TracerParticleModel.html for implementation details.
+This module contains files for setting up the initial conditions and advected species, basic integrators, and a cell tagger for refining grid cells.
 
 The source files consist of the following:
 
@@ -217,10 +215,16 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>TracerParticle<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyTracerParticle<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/TracerParticle.
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyTracerParticle<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+The application will then be installed to $DISCHARGE_HOME/MyApplications/TracerParticle.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 <span class="gu">## Modifying the application</span>
@@ -229,7 +233,7 @@ Users are free to modify this application, e.g. adding new initial conditions an
 </pre></div>
 </div>
 <p>To see available setup options, use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>

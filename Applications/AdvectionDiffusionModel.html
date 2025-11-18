@@ -367,15 +367,21 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusion<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusion<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/MyAdvectionDiffusion.
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyAdvectionDiffusion<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+The application will then be installed to $DISCHARGE_HOME/MyApplications/MyAdvectionDiffusion.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 </pre></div>
 </div>
 <p>To see available setup options, use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>

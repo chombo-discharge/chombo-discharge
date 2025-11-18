@@ -1916,4 +1916,4 @@ To see the list of available options type
 .. code-block:: bash
 
    cd $DISCHARGE_HOME/Physics/CdrPlasma
-   ./setup.py --help
+   python setup.py --help

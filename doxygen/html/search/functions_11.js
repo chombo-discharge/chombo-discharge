@@ -113,7 +113,7 @@ var searchData=
   ['settimestepper_110',['setTimeStepper',['../classDriver.html#aee0f47db487a555647464402a963e0e9',1,'Driver']]],
   ['settozero_111',['settozero',['../classEBHelmholtzOp.html#ab067e4cd5069c9d6dcc075047c2d86fd',1,'EBHelmholtzOp::setToZero()'],['../classMFHelmholtzOp.html#ab92ac9dfa98fbaad73387ff8990b1a26',1,'MFHelmholtzOp::setToZero()']]],
   ['setup_112',['setup',['../classDriver.html#a80a09dd4343b51d772fceb0af3ed8f65',1,'Driver']]],
-  ['setupandrun_113',['setupAndRun',['../classDriver.html#a8bbed5d5b728da4c667ae1f9ce5a6cf8',1,'Driver']]],
+  ['setupandrun_113',['setupAndRun',['../classDriver.html#ae758bbee13aa1c712423674db8598e54',1,'Driver']]],
   ['setupcdr_114',['setupcdr',['../classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a52c2ec7020d9297f53c4116a96965063',1,'Physics::CdrPlasma::CdrPlasmaStepper::setupCdr()'],['../classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#a067136fb7d58075fdbfa27e748e5cf1a',1,'Physics::ItoKMC::ItoKMCStepper::setupCdr()']]],
   ['setupdiffusionsolver_115',['setupDiffusionSolver',['../classCdrMultigrid.html#ac775f2f88fcbc0375a0447d5f768d919',1,'CdrMultigrid']]],
   ['setupfresh_116',['setupFresh',['../classDriver.html#a3200bfb2c8b2811bba7589afd877ef3a',1,'Driver']]],

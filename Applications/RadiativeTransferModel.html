@@ -198,7 +198,6 @@ RadiativeTransferStepper.blob_center        = 0 0       ## Blob center
 A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/RtPhysics</span>
 This physics module solves for a radiative transfer problem. This module contains files for setting up the initial conditions and integrators. It does not feature adaptive mesh refinement. 
-See https://chombo-discharge.github.io/RtPhysicsModel.html for implementation details.
 
 The source files consist of the following:
 
@@ -209,14 +208,18 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>myApplications<span class="w"> </span>-app_name<span class="o">=</span>myRtPhysics<span class="w"> </span>-dim<span class="o">=</span><span class="m">2</span><span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable<span class="w"> </span>-RtSolver<span class="o">=</span>EddingtonSP1
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyRadiativeTransfer<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
-Note that the user can choose between either using discrete or continuum models with the -RtSolver flag.
-Acceptable options are EddingtonSP1 or McPhoto. 
+To install within chombo-discharge:
 
-The application will be installed to $DISCHARGE_HOME/myApplications/myRtPhysics.
-The user will need to modify the geometry and set the initial conditions through the inputs file. 
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyRadiativeTransfer<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+The application will then be installed to $DISCHARGE_HOME/myApplications/myRtPhysics.
+The user will need to modify the geometry and set the initial conditions through the inputs file.
+Note that the user can choose between either using discrete or continuum models with the -RtSolver flag.
 
 <span class="gu">## Modifying the application</span>
 By default, this application specifies a Gaussian source for the photons. 
@@ -224,7 +227,7 @@ Users are free to modify this application, e.g. adding other initial conditions.
 </pre></div>
 </div>
 <p>To see available setup options, use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 <div class="admonition tip">

@@ -246,8 +246,8 @@ FieldStepper.rho_radius       = 1.0       ## Space charge blob radius
 <p>To set up a new problem, using the Python setup tools in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/Electrostatics</span></code> is the simplest way.
 A full description is available in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> contained in the folder:</p>
 <div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span><span class="gh"># Physics/Electrostatics</span>
-This physics module solves the Poisson equation. It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
-See https://chombo-discharge.github.io/ElectrostaticsModel.html for implementation details.
+This physics module runs one of the electrostatic field solvers.
+It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
 
 The source files consist of the following:
 
@@ -257,7 +257,13 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 <span class="sb">```shell</span>
-./setup.py<span class="w"> </span>-base_dir<span class="o">=</span>MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyElectrostatics<span class="w"> </span>-geometry<span class="o">=</span>CoaxialCable
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span>/home/foo/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyElectrostatics<span class="w"> </span>-geometry<span class="o">=</span>Vessel
+<span class="sb">```</span>
+
+To install within chombo-discharge:
+
+<span class="sb">```shell</span>
+python<span class="w"> </span>setup.py<span class="w"> </span>-base_dir<span class="o">=</span><span class="nv">$DISCHARGE_HOME</span>/MyApplications<span class="w"> </span>-app_name<span class="o">=</span>MyElectrostatics<span class="w"> </span>-geometry<span class="o">=</span>Vessel
 <span class="sb">```</span>
 
 The application will be installed to $DISCHARGE_HOME/MyApplications/MyElectrostatics.
@@ -268,7 +274,7 @@ Users are free to modify this application, e.g. adding support for mesh refineme
 </pre></div>
 </div>
 <p>To see available setup options, use</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./setup.py<span class="w"> </span>--help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>setup.py<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>
