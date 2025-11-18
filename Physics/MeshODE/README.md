@@ -1,5 +1,5 @@
 # Physics/MeshODE
-This physics module solves for an ODE problem of a single scalar quantity. This module contains files for setting up problems.
+This physics module solves for an ODE problem of a single scalar quantity. 
 
 The source files consist of the following:
 
@@ -9,8 +9,14 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=MyProblem -geometry=CoaxialCable
+python setup.py -base_dir=/home/foo/MyApplications -app_name=MyProblem -geometry=Vessel
 ```
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/MyProblem.
+To install within chombo-discharge:
+
+```shell
+python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyProblem -geometry=Vessel
+```
+
+The application will then be installed to $DISCHARGE_HOME/MyApplications/MyProblem.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 

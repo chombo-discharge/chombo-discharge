@@ -11,7 +11,7 @@ import app_inc
 parser = argparse.ArgumentParser();
 parser.add_argument('-discharge_home', type=str,  default=os.environ.get('DISCHARGE_HOME', os.getcwd()), help = "Source code base directory (default: %(default)s)")
 parser.add_argument('-base_dir',       type=str,  default="MyApplications",                              help="Base directory of mini-app (default: %(default)s")
-parser.add_argument('-field_solver',   type=str,  default="FieldSolverMultigrid",                        help="Poisson solver implementation (default: %(default)s)")
+parser.add_argument('-field_solver',   type=str,  default="FieldSolverGMG",                              help="Poisson solver implementation (default: %(default)s)")
 parser.add_argument('-cdr_solver',     type=str,  default="CdrGodunov",                                  help="CDR solver implementation (default: %(default)s)")
 parser.add_argument('-rte_solver',     type=str,  default="EddingtonSP1",                                help="RTE solver implementation (default: %(default)s)")
 parser.add_argument('-physics',        type=str,  default="CdrPlasmaJSON",                               help="Plasma model (default: %(default)s)")
@@ -30,14 +30,14 @@ if not args.discharge_home:
     print("       >export  DISCHARGE_HOME=<directory>")
 else:
     print("DISCHARGE_HOME is " + args.discharge_home)
-    print('Setting up problem in directory ' + args.discharge_home + '/' + args.base_dir + '/' + args.app_name)
+    print('Setting up problem in directory ' + args.base_dir + '/' + args.app_name)
 
     app_main.write_template(args)    # Write main file
     app_options.write_template(args) # Write options file
     app_inc.copy_dependencies(args)  # Copy depencies
 
     # # Copy the makefile
-    os.system('cp ./python/GNUmakefile ' + args.discharge_home + '/' + args.base_dir + "/" + args.app_name + "/GNUmakefile")        
+    os.system('cp ./python/GNUmakefile ' + args.base_dir + "/" + args.app_name + "/GNUmakefile")        
 
     print('Problem setup successful')
         

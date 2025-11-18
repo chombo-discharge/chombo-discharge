@@ -16,7 +16,7 @@
 #include <BaseIF.H>
 
 // Our includes
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Infinite plane with surface noise (Perlin noise). 

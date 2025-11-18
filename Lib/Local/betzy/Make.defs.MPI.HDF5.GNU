@@ -125,6 +125,7 @@ MPICXX         = mpic++
 CXXSTD         = 14
 #USE_64        =
 #USE_COMPLEX   =
+USE_PETSC      = FALSE
 USE_EB         = TRUE
 #USE_CCSE      =
 USE_HDF        = TRUE

@@ -366,7 +366,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   // Hook for filling the electrode potentials directly from the geometry. Useful only for visualization purposes.
   ParmParse pp(m_className.c_str());
 
-  bool fillElectrodePotential = true;
+  bool fillElectrodePotential = false;
 
   pp.query("fill_electrode_potential", fillElectrodePotential);
 

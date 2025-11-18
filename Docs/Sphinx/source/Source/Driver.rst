@@ -13,7 +13,7 @@ The primary purpose of the ``Driver`` class is to
 The constructor for this class is
 
 .. literalinclude:: ../../../../Source/Driver/CD_Driver.H
-   :lines: 49-52
+   :lines: 39-49
    :language: c++
    :dedent: 2
 
@@ -37,7 +37,7 @@ For setting up an running simulations, only a single routine is used:
 
 .. code-block:: c++
 
-   void setupAndRun(const std::string a_inputFile);
+   void setupAndRun();
 
 This routine will set up and run a simulation.
 

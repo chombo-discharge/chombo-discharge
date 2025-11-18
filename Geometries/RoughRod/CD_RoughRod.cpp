@@ -15,7 +15,7 @@
 // Our includes
 #include <CD_RoughRod.H>
 #include <CD_PerlinRodSdf.H>
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 RoughRod::RoughRod()
 {

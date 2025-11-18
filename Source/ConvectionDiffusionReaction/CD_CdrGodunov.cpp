@@ -18,7 +18,7 @@
 #include <CD_CdrGodunov.H>
 #include <CD_DataOps.H>
 #include <CD_ParallelOps.H>
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 CdrGodunov::CdrGodunov() : CdrMultigrid()
 {

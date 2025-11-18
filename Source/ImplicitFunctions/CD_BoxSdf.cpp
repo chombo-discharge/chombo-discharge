@@ -17,7 +17,7 @@
 
 // our includes
 #include <CD_BoxSdf.H>
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 BoxSdf::BoxSdf(const RealVect& a_loCorner, const RealVect& a_hiCorner, const bool& a_fluidInside)
 {

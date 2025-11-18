@@ -18,7 +18,7 @@
 #include <EBISLayout.H>
 
 // Our includes
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for holding fluxes on domain boundaries

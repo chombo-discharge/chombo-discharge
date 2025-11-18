@@ -24,7 +24,7 @@
 #include <CD_Units.H>
 #include <CD_Timer.H>
 #include <CD_CdrGodunov.H>
-#include "CD_LaPackUtils.H"
+#include <CD_LaPackUtils.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;

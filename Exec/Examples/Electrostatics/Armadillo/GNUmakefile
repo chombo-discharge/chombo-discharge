@@ -1,7 +1,7 @@
 include $(DISCHARGE_HOME)/Lib/Definitions.make
 
 # Things for the Chombo makefile system. 
-ebase    = program
+ebase    = main
 include $(CHOMBO_HOME)/mk/Make.example
 
 export DIM=3

@@ -125,6 +125,7 @@ makefiles+=Make.defs.local
 #CXXSTD        = 11
 #USE_64        =
 #USE_COMPLEX   =
+USE_PETSC      = FALSE
 #USE_EB        =
 #USE_CCSE      =
 #USE_HDF       =

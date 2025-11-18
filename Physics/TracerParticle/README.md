@@ -1,8 +1,6 @@
 # Physics/TracerParticle
 This physics module solves for an tracer particle solver.
-This module contains files for setting up the initial conditions
-and advected species, basic integrators, and a cell tagger for refining grid cells.
-See https://chombo-discharge.github.io/TracerParticleModel.html for implementation details.
+This module contains files for setting up the initial conditions and advected species, basic integrators, and a cell tagger for refining grid cells.
 
 The source files consist of the following:
 
@@ -12,10 +10,16 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=TracerParticle -dim=2 -geometry=CoaxialCable
+python setup.py -base_dir=/home/foo/MyApplications -app_name=MyTracerParticle -geometry=Vessel
 ```
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/TracerParticle.
+To install within chombo-discharge:
+
+```shell
+python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyTracerParticle -geometry=Vessel
+```
+
+The application will then be installed to $DISCHARGE_HOME/MyApplications/TracerParticle.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 ## Modifying the application

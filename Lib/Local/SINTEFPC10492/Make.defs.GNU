@@ -10,6 +10,7 @@ FC             = gfortran
 MPI            = FALSE
 #MPICXX         = mpicxx
 CXXSTD         = 14
+USE_PETSC      = FALSE
 USE_EB         = TRUE
 USE_HDF        = FALSE
 #HDFINCFLAGS    = -I/usr/local/hdf5-1.8.14/include

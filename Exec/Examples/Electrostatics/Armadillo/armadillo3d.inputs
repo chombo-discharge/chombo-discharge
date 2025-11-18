@@ -108,7 +108,7 @@ SurfaceODESolver.plt_vars      = phi             ## Plot variables. Valid argume
 # ====================================================================================================
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
-Tesselation.mesh_file       = armadillo.ply    ## Ply file
+Tesselation.mesh_file       = armadillo.stl    ## Ply file
 Tesselation.partitioner     = default          ## Partitioner. Valid options are 'default', 'overlap', 'sah'
 Tesselation.use_bvh         = true             ## Use bounding volume hierarchy for accelerating search
 Tesselation.z_coord         = 0.0              ## z-coordinate for 2D slicing this object

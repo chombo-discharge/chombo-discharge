@@ -1,7 +1,6 @@
 # Physics/Geometry
 This physics module only sets up a geometry -- it does include any solvers whatsoever and so all TimeStepper routines are empty.
 This is typically used when developing/testing a new geometry. 
-See https://chombo-discharge.github.io/Geometry.html for implementation details.
 
 The source files consist of the following:
 
@@ -11,10 +10,16 @@ The source files consist of the following:
 To set up a new problem, use the Python script. For example:
 
 ```shell
-./setup.py -base_dir=MyApplications -app_name=myGeometry -dim=2 -geometry=CoaxialCable
+python setup.py -base_dir=/home/foo/MyApplications -app_name=MyGeometry -geometry=Vessel
 ```
 
-The application will be installed to $DISCHARGE_HOME/MyApplications/myGeometry.
+To install within chombo-discharge:
+
+```shell
+python setup.py -base_dir=$DISCHARGE_HOME/MyApplications -app_name=MyGeometry -geometry=Vessel
+```
+
+The application will be installed to $DISCHARGE_HOME/MyApplications/MyGeometry.
 
 ## Modifying the application
 Users are free to modify this application.
