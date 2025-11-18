@@ -56,6 +56,10 @@ initialize(int argc, char* argv[])
     dischargeParser.define(argc - 2, argv + 2, nullptr, nullptr);
   }
 
+#ifdef _OPENMP
+#pragma omp flush
+#endif
+
   char cwd[1024];
   if (getcwd(cwd, sizeof(cwd)) != nullptr) {
     pout() << "\n";
