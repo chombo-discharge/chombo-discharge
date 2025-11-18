@@ -15,9 +15,6 @@
 #if defined(_OPENMP) && defined(CH_USE_MEMORY_TRACKING)
 #error "OpenMP and memory tracking are not compatible"
 #endif
-#if defined(_OPENMP) && defined(CH_USE_PETSC)
-#error "OpenMP and PETSC are not (yet) compatible"
-#endif
 
 #if defined(CH_USE_PETSC) && !defined(CH_MPI)
 #error "USE_PETSC=TRUE requires USE_MPI=TRUE"
