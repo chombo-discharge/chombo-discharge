@@ -68,6 +68,14 @@ initialize(int argc, char* argv[])
 )" << endl;
     pout() << "  Working directory: " << cwd << "\n";
     pout() << "  Input file:        " << dischargeInputFile << "\n";
+    pout() << "  Run command:       ";
+    for (int i = 0; i < argc; i++) {
+      pout() << argv[i];
+      if (i < argc - 1) {
+        pout() << " ";
+      }
+    }
+    pout() << "\n";
     pout() << "--------------------------------------------------------------------------------\n";
 #ifdef CH_MPI
     pout() << "  MPI:    TRUE (" << numProc() << " ranks)\n";
