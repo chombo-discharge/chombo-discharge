@@ -15,6 +15,7 @@
 #ifdef CH_USE_PETSC
 
 #include "petsc.h"
+#include "petscis.h"
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
@@ -53,7 +54,7 @@ public:
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
-  virtual void
+  virtual PetscErrorCode
   define(const Vector<RefCountedPtr<MFLevelGrid>>&              m_amrGrids,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
          const int                                              a_finestLevel,
@@ -63,19 +64,19 @@ public:
     @brief Clear the object.
     @details This deallocates all PETSc-relevant allocations.
   */
-  virtual void
+  virtual PetscErrorCode
   clear() noexcept;
 
   /*!
     @brief Create a PETSc vector
   */
-  virtual void
+  virtual PetscErrorCode
   create(Vec& x) noexcept;
 
   /*!
     @brief Create a PETSc vector
   */
-  virtual void
+  virtual PetscErrorCode
   destroy(Vec& x) noexcept;
 
   /*!
@@ -83,7 +84,7 @@ public:
     @param[out] a_x PETSc vector
     @param[in] a_y chombo-discharge data holder    
   */
-  virtual void
+  virtual PetscErrorCode
   putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept;
 
   /*!
@@ -91,7 +92,7 @@ public:
     @param[in,out] a_y chombo-discharge data holder
     @param[in] a_x PETSc vector    
   */
-  virtual void
+  virtual PetscErrorCode
   putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept;
 
 protected:
@@ -128,22 +129,27 @@ protected:
   /*!
     @brief Number of local DOFs
   */
-  int m_numLocalDOFs;
+  PetscInt m_numLocalDOFs;
 
   /*!
     @brief Number of global DOFs
   */
-  int m_numGlobalDOFs;
+  PetscInt m_numGlobalDOFs;
 
   /*!
     @brief Global DOF corresponding to the first local DOF.
   */
-  int m_localDOFBegin;
+  PetscInt m_localDOFBegin;
+
+  /*!
+    @brief Local index to global index mapping for PETSc
+  */
+  ISLocalToGlobalMapping m_localToGlobalIS;
 
   /*!
     @brief Number of DOFs per MPI rank. Visible to all ranks. 
   */
-  Vector<int> m_numDOFsPerRank;
+  Vector<PetscInt> m_numDOFsPerRank;
 
   /*!
     @brief Valid grid cells
@@ -161,7 +167,7 @@ protected:
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
 
   /*!
-    @brief Mapping of AMR DOFs to local PETSc DOFs
+p    @brief Mapping of AMR DOFs to local PETSc DOFs
   */
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_localIndices[2];
 
@@ -174,8 +180,8 @@ protected:
   /*!
     @brief Build the local cell index to global cell index mapping
   */
-  virtual void
-  buildPetscMaping() noexcept;
+  virtual PetscErrorCode
+  buildPetscMapping() noexcept;
 };
 
 #endif
