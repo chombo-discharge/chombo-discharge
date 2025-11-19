@@ -151,6 +151,8 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::putChomboInPetsc" << endl;
   }
+
+  MayDay::Abort("PetscGrid::putChomboInPetsc -- not implemented");
 }
 
 void
@@ -160,6 +162,8 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::putPetscInChombo" << endl;
   }
+
+  MayDay::Abort("PetscGrid::putPetscInChombo -- not implemented");
 }
 
 #include <CD_NamespaceFooter.H>
