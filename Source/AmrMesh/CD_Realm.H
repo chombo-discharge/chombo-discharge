@@ -18,6 +18,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
+#include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -432,6 +433,13 @@ protected:
     @brief Mask which is true for all valid cells
   */
   AMRMask m_validCells;
+
+#ifdef CH_USE_PETSC
+  /*!
+    @brief PETSc grid
+  */
+  PetscGrid m_petscGrid;
+#endif
 
   /*!
     @brief Phase realms. 

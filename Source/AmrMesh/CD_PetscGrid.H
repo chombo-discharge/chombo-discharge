@@ -1,0 +1,138 @@
+/* chombo-discharge
+ * Copyright © 2026 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
+/*!
+  @file   CD_PetscGrid.H
+  @brief  File containing declaration of PetscGrid.
+  @author Robert Marskar
+*/
+
+#ifndef CD_PetscGrid_H
+#define CD_PetscGrid_H
+
+#ifdef CH_USE_PETSC
+
+#include "petsc.h"
+
+// Chombo includes
+#include <DisjointBoxLayout.H>
+#include <EBCellFAB.H>
+#include <MFCellFAB.H>
+#include <EBISLayout.H>
+
+// Our includes
+#include <CD_EBAMRData.H>
+#include <CD_MFLevelGrid.H>
+#include <CD_NamespaceHeader.H>
+
+/*!
+  @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
+  @details This class includes functions for putting chombo-discharge in PETSc and vice versa.
+*/
+class PetscGrid
+{
+public:
+  /*!
+    @brief Default constructor. Must subsequently call define
+  */
+  PetscGrid() noexcept;
+
+  /*!
+    @brief Destructor. Does nothing.
+  */
+  virtual ~PetscGrid() noexcept;
+
+  /*!
+    @brief Main define function. Puts object in usable state.
+    @param[in] a_amrGrids chombo-discharge AMR grids
+    @param[in] a_validCells Valid grid cells
+    @param[in] a_finestLevel Finest defined grid level.
+  */
+  virtual void
+  define(const Vector<RefCountedPtr<MFLevelGrid>>&              m_amrGrids,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+         const int                                              a_finestLevel) noexcept;
+
+  /*!
+    @brief Clear the object.
+    @details This deallocates all PETSc-relevant allocations.
+  */
+  virtual void
+  clear() noexcept;
+
+  /*!
+    @brief Push data form a chombo-discharge data holder into PETSc
+    @param[out] a_x PETSc vector
+    @param[in] a_y chombo-discharge data holder    
+  */
+  virtual void
+  putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept;
+
+  /*!
+    @brief Pull data from a PETSc vector into a chombo-discharge data holder
+    @param[in,out] a_y chombo-discharge data holder
+    @param[in] a_x PETSc vector    
+  */
+  virtual void
+  putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept;
+
+protected:
+  /*!
+    @brief Is defined or not
+  */
+  bool m_isDefined;
+
+  /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
+
+  /*!
+    @brief Run-time debug or not
+  */
+  bool m_debug;
+
+  /*!
+    @brief Run-time profile or not
+  */
+  bool m_profile;
+
+  /*!
+    @brief Number of local unknowns
+  */
+  int m_localUnknowns;
+
+  /*!
+    @brief Global unknowns (per rank)
+  */
+  int m_globalUnknowns;
+
+  /*!
+    @brief Finest grid level
+  */
+  int m_finestLevel;
+
+  /*!
+    @brief Valid grid cells
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
+
+  /*!
+    @brief Level grids
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_amrGrids;
+
+  /*!
+    @brief Build the local cell index to global cell index mapping
+  */
+  virtual void
+  buildLocalToGlobalMapping() noexcept;
+};
+
+#endif
+
+#include <CD_NamespaceFooter.H>
+
+#endif

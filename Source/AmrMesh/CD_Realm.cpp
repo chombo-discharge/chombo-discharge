@@ -168,6 +168,13 @@ Realm::regridBase(const int a_lmin)
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
   this->defineLevelTiles();
+
+
+#warning "Debug code in Realm"
+#ifdef CH_USE_PETSC
+   m_petscGrid.clear();
+   m_petscGrid.define(m_mflg, m_validCells, m_finestLevel);
+#endif
 }
 
 void
