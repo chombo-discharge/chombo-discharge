@@ -25,11 +25,13 @@
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_MFLevelGrid.H>
+#include <CD_PetscDOF.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
   @details This class includes functions for putting chombo-discharge in PETSc and vice versa.
+  @note This class assumes that PETSc will only care about a single component per grid cell (two components in a multifluid cell).
 */
 class PetscGrid
 {
@@ -63,6 +65,18 @@ public:
   */
   virtual void
   clear() noexcept;
+
+  /*!
+    @brief Create a PETSc vector
+  */
+  virtual void
+  create(Vec& x) noexcept;
+
+  /*!
+    @brief Create a PETSc vector
+  */
+  virtual void
+  destroy(Vec& x) noexcept;
 
   /*!
     @brief Push data form a chombo-discharge data holder into PETSc
@@ -102,16 +116,6 @@ protected:
   bool m_profile;
 
   /*!
-    @brief Number of local unknowns
-  */
-  int m_numLocalDOFs;
-
-  /*!
-    @brief Global unknowns (per rank)
-  */
-  int m_numGlobalDOFs;
-
-  /*!
     @brief Finest grid level
   */
   int m_finestLevel;
@@ -122,7 +126,22 @@ protected:
   int m_numGhost;
 
   /*!
-    @brief Number of unknowns per MPI rank
+    @brief Number of local DOFs
+  */
+  int m_numLocalDOFs;
+
+  /*!
+    @brief Number of global DOFs
+  */
+  int m_numGlobalDOFs;
+
+  /*!
+    @brief Global DOF corresponding to the first local DOF.
+  */
+  int m_localDOFBegin;
+
+  /*!
+    @brief Number of DOFs per MPI rank. Visible to all ranks. 
   */
   Vector<int> m_numDOFsPerRank;
 
@@ -137,10 +156,21 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid>> m_amrGrids;
 
   /*!
+    @brief Mapping of Chombo cell indices to PETSc cell indices. 
+  */
+  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
+
+  /*!
+    @brief Mapping of PETSc local DOF index back to AMR
+    @details Locally owned. Maps a local DOF index to a level/grid/cell DOF index.
+  */
+  Vector<PetscDOF> m_petscToAMR;
+
+  /*!
     @brief Build the local cell index to global cell index mapping
   */
   virtual void
-  buildLocalToGlobalMapping() noexcept;
+  buildPetscMaping() noexcept;
 };
 
 #endif

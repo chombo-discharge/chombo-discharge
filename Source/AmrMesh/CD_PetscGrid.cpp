@@ -21,6 +21,8 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
+
 PetscGrid::PetscGrid() noexcept
 {
   CH_TIME("PetscGrid::PetscGrid");
@@ -66,7 +68,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGr
   CH_assert(m_numGhost >= 0);
   CH_assert(m_finestLevel >= 0);
 
-  this->buildLocalToGlobalMapping();
+  this->buildPetscMaping();
 
   m_isDefined = true;
 }
@@ -81,23 +83,25 @@ PetscGrid::clear() noexcept
 }
 
 void
-PetscGrid::buildLocalToGlobalMapping() noexcept
+PetscGrid::buildPetscMaping() noexcept
 {
-  CH_TIME("PetscGrid::buildLocalToGlobalMapping");
+  CH_TIME("PetscGrid::buildPetscMaping");
   if (m_verbose) {
-    pout() << "PetscGrid::buildLocalToGlobalMapping" << endl;
+    pout() << "PetscGrid::buildPetscMaping" << endl;
   }
 
   m_numLocalDOFs  = 0;
   m_numGlobalDOFs = 0;
   m_numDOFsPerRank.resize(numProc(), 0);
 
-  const int myRank = procID();
-
+  const int myRank    = procID();
   const int numPhases = m_amrGrids[0]->numPhases();
 
-  // 1. Figure out the number of unknowns per rank.
   for (int iphase = 0; iphase < numPhases; iphase++) {
+    Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
+
+    GIDs.resize(1 + m_finestLevel);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg  = m_amrGrids[lvl]->getEBLevelGrid(iphase);
       const EBISLayout&        ebisl = eblg.getEBISL();
@@ -115,22 +119,24 @@ PetscGrid::buildLocalToGlobalMapping() noexcept
         const EBGraph&       ebgraph    = ebisBox.getEBGraph();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
-          if (validCells(iv) && ebisBox.isRegular(iv)) {
-            m_numLocalDOFs += 1;
+          if (validCells(iv) && !ebisBox.isCovered(iv)) {
+            if (ebisBox.isMultiValued(iv)) {
+              MayDay::Abort("PetscGrid::buildPetscMapping -- multi-valued cells are not permitted");
+            }
+
+            PetscDOF dof;
+
+            dof.gridLevel = lvl;
+            dof.gridIndex = mybox;
+            dof.gridCell  = iv;
+            dof.phase     = iphase;
+
+            m_numLocalDOFs = m_numLocalDOFs + 1;
+            m_petscToAMR.push_back(dof);
           }
         };
-
-        auto irregularKernel = [&](const VolIndex& vof) -> void {
-          const IntVect iv = vof.gridIndex();
-          if (validCells(iv) && ebisBox.isIrregular(iv)) {
-            m_numLocalDOFs += 1;
-          }
-        };
-
-        VoFIterator vofit(ivs, ebgraph);
 
         BoxLoops::loop(cellBox, regularKernel);
-        BoxLoops::loop(vofit, irregularKernel);
       }
     }
   }
@@ -138,10 +144,37 @@ PetscGrid::buildLocalToGlobalMapping() noexcept
   m_numDOFsPerRank = ParallelOps::gather(m_numLocalDOFs);
   m_numGlobalDOFs  = ParallelOps::sum(m_numLocalDOFs);
 
-  if (m_debug) {
-    pout() << "PetscGrid::buildLocalToGlobalMapping - numLocalUnknowns = " << m_numLocalDOFs << endl;
-    pout() << "PetscGrid::buildLocalToGlobalMapping - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
+  m_localDOFBegin = 0;
+  for (int i = 0; i < procID(); i++) {
+    m_localDOFBegin += m_numDOFsPerRank[i];
   }
+
+  if (m_debug) {
+    pout() << "PetscGrid::buildPetscMaping - numLocalUnknowns = " << m_numLocalDOFs << endl;
+    pout() << "PetscGrid::buildPetscMaping - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
+  }
+}
+
+void
+PetscGrid::create(Vec& x) noexcept
+{
+  CH_TIME("PetscGrid::create");
+  if (m_verbose) {
+    pout() << "PetscGrid::create" << endl;
+  }
+
+  CH_assert(m_isDefined);
+}
+
+void
+PetscGrid::destroy(Vec& x) noexcept
+{
+  CH_TIME("PetscGrid::destroy");
+  if (m_verbose) {
+    pout() << "PetscGrid::destroy" << endl;
+  }
+
+  CH_assert(m_isDefined);
 }
 
 void
