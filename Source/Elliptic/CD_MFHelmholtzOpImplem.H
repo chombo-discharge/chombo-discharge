@@ -86,7 +86,7 @@ MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, const int a_num
     loads[intCode] = (long long)duration.count();
   }
 
-  ParallelOps::vectorSum(loads);
+  ParallelOps::sum(loads);
 
   return loads;
 }

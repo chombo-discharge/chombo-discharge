@@ -167,7 +167,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<Real>& a_data) noexcept;
+  sum(Vector<Real>& a_data) noexcept;
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
@@ -176,7 +176,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<int>& a_data) noexcept;
+  sum(Vector<int>& a_data) noexcept;
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
@@ -185,7 +185,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<long int>& a_data) noexcept;
+  sum(Vector<long int>& a_data) noexcept;
 
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
@@ -194,7 +194,7 @@ namespace ParallelOps {
     @param[inout] a_data On 
   */
   inline void
-  vectorSum(Vector<long long int>& a_data) noexcept;
+  sum(Vector<long long int>& a_data) noexcept;
 
   /*!
     @brief Gather local values -- return a vector of local values.
