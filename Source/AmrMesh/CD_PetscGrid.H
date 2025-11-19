@@ -156,9 +156,14 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid>> m_amrGrids;
 
   /*!
-    @brief Mapping of Chombo cell indices to PETSc cell indices. 
+    @brief Mapping of AMR DOFs to global PETSc DOFs
   */
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
+
+  /*!
+    @brief Mapping of AMR DOFs to local PETSc DOFs
+  */
+  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_localIndices[2];
 
   /*!
     @brief Mapping of PETSc local DOF index back to AMR

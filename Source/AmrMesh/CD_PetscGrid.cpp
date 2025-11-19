@@ -99,8 +99,10 @@ PetscGrid::buildPetscMaping() noexcept
 
   for (int iphase = 0; iphase < numPhases; iphase++) {
     Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
+    Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
 
     GIDs.resize(1 + m_finestLevel);
+    LIDs.resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg  = m_amrGrids[lvl]->getEBLevelGrid(iphase);
@@ -108,6 +110,9 @@ PetscGrid::buildPetscMaping() noexcept
       const DisjointBoxLayout& dbl   = eblg.getDBL();
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
+
+      GIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
+      LIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
@@ -117,6 +122,12 @@ PetscGrid::buildPetscMaping() noexcept
         const EBISBox&       ebisBox    = ebisl[din];
         const IntVectSet&    ivs        = ebisBox.getIrregIVS(cellBox);
         const EBGraph&       ebgraph    = ebisBox.getEBGraph();
+
+        BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
+        BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
+
+        gid.setVal(-1);
+        lid.setVal(-1);
 
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv) && !ebisBox.isCovered(iv)) {
@@ -131,8 +142,10 @@ PetscGrid::buildPetscMaping() noexcept
             dof.gridCell  = iv;
             dof.phase     = iphase;
 
-            m_numLocalDOFs = m_numLocalDOFs + 1;
             m_petscToAMR.push_back(dof);
+
+            lid(iv)        = m_numLocalDOFs;
+            m_numLocalDOFs = m_numLocalDOFs + 1;
           }
         };
 
@@ -164,6 +177,8 @@ PetscGrid::create(Vec& x) noexcept
   }
 
   CH_assert(m_isDefined);
+
+  MayDay::Abort("PetscGrid::create - not implemented");
 }
 
 void
@@ -175,6 +190,8 @@ PetscGrid::destroy(Vec& x) noexcept
   }
 
   CH_assert(m_isDefined);
+
+  MayDay::Abort("PetscGrid::destroy - not implemented");
 }
 
 void
