@@ -30,7 +30,7 @@
 #include <CD_NamespaceHeader.H>
 
 std::string dischargeInputFile;
-ParmParse*   dischargeParser;
+ParmParse*  dischargeParser;
 
 #if defined(CH_USE_PETSC)
 PetscErrorCode
@@ -49,7 +49,7 @@ initialize(int argc, char* argv[])
 
   if (argc >= 2) {
     dischargeInputFile = argv[1];
-    dischargeParser = new ParmParse(argc - 2, argv + 2, nullptr, argv[1]);
+    dischargeParser    = new ParmParse(argc - 2, argv + 2, nullptr, argv[1]);
   }
   else {
     dischargeInputFile = "<No file provided>";
@@ -118,7 +118,7 @@ int
 finalize()
 {
   delete dischargeParser;
-  
+
   CH_TIMER_REPORT();
 
 #if defined(CH_USE_PETSC)

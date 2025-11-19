@@ -535,6 +535,38 @@ ParallelOps::standardDeviation(const Real& a_value) noexcept
 #endif
 }
 
+inline Vector<int>
+ParallelOps::gather(const int& a_localValue) noexcept
+{
+  CH_TIME("ParallelOps::gather(int)");
+
+#ifdef CH_MPI
+  Vector<int> ret(numProc());
+
+  MPI_Allgather(&a_localValue, 1, MPI_INT, ret.stdVector().data(), 1, MPI_INT, Chombo_MPI::comm);
+
+  return ret;
+#else
+  return Vector<int>(1, a_localValue);
+#endif
+}
+
+inline Vector<Real>
+ParallelOps::gather(const Real& a_localValue) noexcept
+{
+  CH_TIME("ParallelOps::gather(Real)");
+
+#ifdef CH_MPI
+  Vector<Real> ret(numProc());
+
+  MPI_Allgather(&a_localValue, 1, MPI_CH_REAL, ret.stdVector().data(), 1, MPI_CH_REAL, Chombo_MPI::comm);
+
+  return ret;
+#else
+  return Vector<Real>(1, a_localValue);
+#endif
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

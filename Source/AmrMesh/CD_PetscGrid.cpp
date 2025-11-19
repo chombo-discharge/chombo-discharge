@@ -30,9 +30,10 @@ PetscGrid::PetscGrid() noexcept
   m_debug     = false;
   m_profile   = false;
 
-  m_localUnknowns  = -1;
-  m_globalUnknowns = -1;
-  m_finestLevel    = -1;
+  m_numLocalDOFs  = -1;
+  m_numGlobalDOFs = -1;
+  m_finestLevel   = -1;
+  m_numGhost      = -1;
 }
 
 PetscGrid::~PetscGrid() noexcept
@@ -43,7 +44,8 @@ PetscGrid::~PetscGrid() noexcept
 void
 PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGrids,
                   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
-                  const int                                              a_finestLevel) noexcept
+                  const int                                              a_finestLevel,
+                  const int                                              a_numGhost) noexcept
 {
   CH_TIME("PetscGrid::define");
   if (m_verbose) {
@@ -59,6 +61,10 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGr
   m_amrGrids    = a_amrGrids;
   m_validCells  = a_validCells;
   m_finestLevel = a_finestLevel;
+  m_numGhost    = a_numGhost;
+
+  CH_assert(m_numGhost >= 0);
+  CH_assert(m_finestLevel >= 0);
 
   this->buildLocalToGlobalMapping();
 
@@ -82,10 +88,11 @@ PetscGrid::buildLocalToGlobalMapping() noexcept
     pout() << "PetscGrid::buildLocalToGlobalMapping" << endl;
   }
 
-  m_localUnknowns  = 0;
-  m_globalUnknowns = 0;
+  m_numLocalDOFs  = 0;
+  m_numGlobalDOFs = 0;
+  m_numDOFsPerRank.resize(numProc(), 0);
 
-  std::vector<int> unknownsPerRank(numProc(), 0);
+  const int myRank = procID();
 
   const int numPhases = m_amrGrids[0]->numPhases();
 
@@ -100,28 +107,40 @@ PetscGrid::buildLocalToGlobalMapping() noexcept
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex din = dit[mybox];
-
+        const DataIndex      din        = dit[mybox];
         const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
         const Box&           cellBox    = dbl[din];
         const EBISBox&       ebisBox    = ebisl[din];
+        const IntVectSet&    ivs        = ebisBox.getIrregIVS(cellBox);
+        const EBGraph&       ebgraph    = ebisBox.getEBGraph();
 
         auto regularKernel = [&](const IntVect& iv) -> void {
-          if (validCells(iv)){// && ebisBox.isRegular(iv)) {
-            m_localUnknowns += 1;
+          if (validCells(iv) && ebisBox.isRegular(iv)) {
+            m_numLocalDOFs += 1;
           }
         };
 
+        auto irregularKernel = [&](const VolIndex& vof) -> void {
+          const IntVect iv = vof.gridIndex();
+          if (validCells(iv) && ebisBox.isIrregular(iv)) {
+            m_numLocalDOFs += 1;
+          }
+        };
+
+        VoFIterator vofit(ivs, ebgraph);
+
         BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop(vofit, irregularKernel);
       }
     }
   }
 
-  m_globalUnknowns = ParallelOps::sum(m_localUnknowns);
+  m_numDOFsPerRank = ParallelOps::gather(m_numLocalDOFs);
+  m_numGlobalDOFs  = ParallelOps::sum(m_numLocalDOFs);
 
   if (m_debug) {
-    pout() << "PetscGrid::buildLocalToGlobalMapping - numLocalUnknowns = " << m_localUnknowns << endl;
-    pout() << "PetscGrid::buildLocalToGlobalMapping - numGlobalUnknowns = " << m_globalUnknowns << endl;
+    pout() << "PetscGrid::buildLocalToGlobalMapping - numLocalUnknowns = " << m_numLocalDOFs << endl;
+    pout() << "PetscGrid::buildLocalToGlobalMapping - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
   }
 }
 

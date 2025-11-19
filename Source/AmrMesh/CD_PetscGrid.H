@@ -49,11 +49,13 @@ public:
     @param[in] a_amrGrids chombo-discharge AMR grids
     @param[in] a_validCells Valid grid cells
     @param[in] a_finestLevel Finest defined grid level.
+    @param[in] a_numGhost Number of ghost cells described in the grid.
   */
   virtual void
   define(const Vector<RefCountedPtr<MFLevelGrid>>&              m_amrGrids,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
-         const int                                              a_finestLevel) noexcept;
+         const int                                              a_finestLevel,
+         const int                                              a_numGhost) noexcept;
 
   /*!
     @brief Clear the object.
@@ -102,17 +104,27 @@ protected:
   /*!
     @brief Number of local unknowns
   */
-  int m_localUnknowns;
+  int m_numLocalDOFs;
 
   /*!
     @brief Global unknowns (per rank)
   */
-  int m_globalUnknowns;
+  int m_numGlobalDOFs;
 
   /*!
     @brief Finest grid level
   */
   int m_finestLevel;
+
+  /*!
+    @brief Number of ghost cells
+  */
+  int m_numGhost;
+
+  /*!
+    @brief Number of unknowns per MPI rank
+  */
+  Vector<int> m_numDOFsPerRank;
 
   /*!
     @brief Valid grid cells

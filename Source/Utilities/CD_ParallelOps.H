@@ -168,6 +168,7 @@ namespace ParallelOps {
   */
   inline void
   vectorSum(Vector<Real>& a_data) noexcept;
+
   /*!
     @brief Perform a summation of all the MPI ranks's input data. 
     @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
@@ -194,6 +195,20 @@ namespace ParallelOps {
   */
   inline void
   vectorSum(Vector<long long int>& a_data) noexcept;
+
+  /*!
+    @brief Gather local values -- return a vector of local values.
+    @param[in] a_localValue Local value per MPI rank
+  */
+  inline Vector<int>
+  gather(const int& a_localValue) noexcept;
+
+  /*!
+    @brief Gather local values -- return a vector of local values.
+    @param[in] a_localValue Local value per MPI rank
+  */
+  inline Vector<Real>
+  gather(const Real& a_localValue) noexcept;
 } // namespace ParallelOps
 
 #include <CD_NamespaceFooter.H>
