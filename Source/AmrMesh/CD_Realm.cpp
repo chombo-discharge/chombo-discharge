@@ -169,11 +169,7 @@ Realm::regridBase(const int a_lmin)
   this->defineValidCells();
   this->defineLevelTiles();
 
-#warning "Debug code in Realm"
-#ifdef CH_USE_PETSC
-  m_petscGrid.clear();
-  m_petscGrid.define(m_mflg, m_validCells, m_finestLevel, m_numGhost);
-#endif
+
 }
 
 void
@@ -189,6 +185,7 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
+  this->definePetscGrid();
 }
 
 void
@@ -741,6 +738,24 @@ Realm::defineLevelTiles() noexcept
   }
 }
 
+void Realm::definePetscGrid() noexcept {
+#ifdef CH_USE_PETSC
+  CH_TIME("Realm::definePetscGrid");
+  if (m_verbosity > 5) {
+    pout() << "Realm::definePetscGrid" << endl;
+  }
+  
+  if (!(m_petscGrid.isNull())) {
+    m_petscGrid->clear();
+  }
+  else {
+    m_petscGrid = RefCountedPtr<PetscGrid>(new PetscGrid());
+  }
+
+  m_petscGrid->define(m_mflg, m_validCells, m_finestLevel, m_numGhost);
+#endif
+}
+
 void
 Realm::registerOperator(const std::string a_operator, const phase::which_phase a_phase)
 {
@@ -959,6 +974,12 @@ const Vector<RefCountedPtr<LevelTiles>>&
 Realm::getLevelTiles() const noexcept
 {
   return m_levelTiles;
+}
+
+const RefCountedPtr<PetscGrid>&
+Realm::getPetscGrid() const noexcept
+{
+  return m_petscGrid;
 }
 
 #include <CD_NamespaceFooter.H>

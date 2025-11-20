@@ -54,7 +54,7 @@ public:
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
-  virtual PetscErrorCode
+  virtual void
   define(const Vector<RefCountedPtr<MFLevelGrid>>&              m_amrGrids,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
          const int                                              a_finestLevel,
@@ -64,27 +64,39 @@ public:
     @brief Clear the object.
     @details This deallocates all PETSc-relevant allocations.
   */
-  virtual PetscErrorCode
+  virtual void
   clear() noexcept;
 
   /*!
-    @brief Create a PETSc vector
+    @brief Create a PETSc vector.
+    @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
+    param[in,out] x PETSc vector    
   */
-  virtual PetscErrorCode
+  virtual void
   create(Vec& x) noexcept;
 
   /*!
-    @brief Create a PETSc vector
+    @brief Destroy a PETSc vector.
+    @details This will deallocate the PETSc vector.
+    param[in,out] x PETSc vector
   */
-  virtual PetscErrorCode
+  virtual void
   destroy(Vec& x) noexcept;
+
+  /*!
+    @brief Set values in a PETSc vector.
+    @details a_value Does not need to be the same across all ranks. 
+    @param[in,out] x Global PETSc vector
+  */
+  virtual void
+  setValue(Vec& a_x, const PetscScalar a_value) const noexcept;
 
   /*!
     @brief Push data form a chombo-discharge data holder into PETSc
     @param[out] a_x PETSc vector
     @param[in] a_y chombo-discharge data holder    
   */
-  virtual PetscErrorCode
+  virtual void
   putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept;
 
   /*!
@@ -92,7 +104,7 @@ public:
     @param[in,out] a_y chombo-discharge data holder
     @param[in] a_x PETSc vector    
   */
-  virtual PetscErrorCode
+  virtual void
   putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept;
 
 protected:
@@ -125,6 +137,11 @@ protected:
     @brief Number of ghost cells
   */
   int m_numGhost;
+
+  /*!
+    @brief Number of phases
+  */
+  int m_numPhases;
 
   /*!
     @brief Number of local DOFs
@@ -167,7 +184,7 @@ protected:
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
 
   /*!
-p    @brief Mapping of AMR DOFs to local PETSc DOFs
+    @brief Mapping of AMR DOFs to local PETSc DOFs
   */
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_localIndices[2];
 
@@ -180,7 +197,7 @@ p    @brief Mapping of AMR DOFs to local PETSc DOFs
   /*!
     @brief Build the local cell index to global cell index mapping
   */
-  virtual PetscErrorCode
+  virtual void
   buildPetscMapping() noexcept;
 };
 

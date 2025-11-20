@@ -374,6 +374,21 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
     this->fillCoveredPotential(a_phi);
   }
 
+
+#warning "Development code in FieldSolverGMG where PETSc is used for mapping"
+#if 1
+#ifdef CH_USE_PETSC  
+  auto petscGrid = m_amr->getPetscGrid(m_realm);
+
+  Vec x;
+  DataOps::setValue(a_phi, 1.0);
+  petscGrid->create(x);
+  petscGrid->setValue(x, 1.0 + 1.0*procID());
+  petscGrid->putPetscInChombo(a_phi, x);
+  petscGrid->destroy(x);
+#endif
+#endif
+
   return converged;
 }
 

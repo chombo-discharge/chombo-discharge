@@ -363,6 +363,14 @@ public:
   const Vector<RefCountedPtr<LevelTiles>>&
   getLevelTiles() const noexcept;
 
+#ifdef CH_USE_PETSC
+  /*!
+    @brief Get the PETSc grid object
+  */
+  const RefCountedPtr<PetscGrid>&
+  getPetscGrid() const noexcept;
+#endif
+
 protected:
   /*!
     @brief Realm defined or not
@@ -438,7 +446,7 @@ protected:
   /*!
     @brief PETSc grid
   */
-  PetscGrid m_petscGrid;
+  RefCountedPtr<PetscGrid> m_petscGrid;
 #endif
 
   /*!
@@ -525,6 +533,11 @@ protected:
   */
   void
   defineLevelTiles() noexcept;
+
+  /*!
+    @brief Define the PETSc composite grid
+  */
+  void definePetscGrid() noexcept;
 
   /*!
     @brief Get a particular realm

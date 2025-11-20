@@ -3431,6 +3431,24 @@ AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase
   return m_realms[a_realm]->getRedistributionOp(a_phase);
 }
 
+#ifdef CH_USE_PETSC
+const RefCountedPtr<PetscGrid>&
+AmrMesh::getPetscGrid(const std::string a_realm) const noexcept
+{
+  CH_TIME("AmrMesh::nonConservativeDivergence(AMR)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::nonConservativeDivergence(AMR)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getPetscGrid - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms.at(a_realm)->getPetscGrid();
+}
+#endif
+
 void
 AmrMesh::nonConservativeDivergence(EBAMRIVData&              a_nonConsDivF,
                                    const EBAMRCellData&      a_kappaDivF,

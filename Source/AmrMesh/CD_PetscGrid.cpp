@@ -1,14 +1,14 @@
-/**
- * chombo-discharge
- * Copyright © 2026 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*!
+  chombo-discharge
+  Copyright © 2026 SINTEF Energy Research.
+  Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
 */
 
-/**
- *  @file   CD_PetscGrid.cpp
- *  @brief  Implementation of CD_PetscGrid.H
- *  @author Robert Marskar
- */
+/*!
+  @file   CD_PetscGrid.cpp
+  @brief  Implementation of CD_PetscGrid.H
+  @author Robert Marskar
+*/
 
 #ifdef CH_USE_PETSC
 
@@ -23,6 +23,8 @@
 #include <CD_NamespaceHeader.H>
 
 #warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
+#warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
+#warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
 
 PetscGrid::PetscGrid() noexcept
 {
@@ -44,7 +46,7 @@ PetscGrid::~PetscGrid() noexcept
   CH_TIME("PetscGrid::~PetscGrid");
 }
 
-PetscErrorCode
+void
 PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGrids,
                   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
                   const int                                              a_finestLevel,
@@ -56,8 +58,6 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGr
   }
 
   ParmParse pp("PetscGrid");
-
-  PetscErrorCode ierr;
 
   pp.query("verbose", m_verbose);
   pp.query("debug", m_debug);
@@ -71,15 +71,12 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGr
   CH_assert(m_numGhost >= 0);
   CH_assert(m_finestLevel >= 0);
 
-  ierr = this->buildPetscMapping();
-  CHKERRQ(ierr);
+  this->buildPetscMapping();
 
   m_isDefined = true;
-
-  return ierr;
 }
 
-PetscErrorCode
+void
 PetscGrid::clear() noexcept
 {
   CH_TIME("PetscGrid::clear");
@@ -87,17 +84,12 @@ PetscGrid::clear() noexcept
     pout() << "PetscGrid::clear" << endl;
   }
 
-  PetscErrorCode ierr;
-
   if (m_isDefined) {
-    ierr = ISLocalToGlobalMappingDestroy(&m_localToGlobalIS);
-    CHKERRQ(ierr);
+    PetscCallVoid(ISLocalToGlobalMappingDestroy(&m_localToGlobalIS));
   }
-
-  return ierr;
 }
 
-PetscErrorCode
+void
 PetscGrid::buildPetscMapping() noexcept
 {
   CH_TIME("PetscGrid::buildPetscMapping");
@@ -105,16 +97,15 @@ PetscGrid::buildPetscMapping() noexcept
     pout() << "PetscGrid::buildPetscMapping" << endl;
   }
 
-  PetscErrorCode ierr;
+  CH_assert(!(m_amrGrids[0].isNull()));
 
   m_numLocalDOFs  = 0;
   m_numGlobalDOFs = 0;
+  m_numPhases     = m_amrGrids[0]->numPhases();
+
   m_numDOFsPerRank.resize(numProc(), 0);
 
-  const int myRank    = procID();
-  const int numPhases = m_amrGrids[0]->numPhases();
-
-  for (int iphase = 0; iphase < numPhases; iphase++) {
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
     // Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
     // Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
 
@@ -155,7 +146,7 @@ PetscGrid::buildPetscMapping() noexcept
             PetscDOF dof;
 
             dof.gridLevel = lvl;
-            dof.gridIndex = mybox;
+            dof.gridIndex = din;
             dof.gridCell  = iv;
             dof.phase     = iphase;
 
@@ -179,24 +170,21 @@ PetscGrid::buildPetscMapping() noexcept
   }
 
   PetscInt* gidx;
-  ierr = PetscMalloc1(m_numLocalDOFs, &gidx);
-  CHKERRQ(ierr);
+  PetscCallVoid(PetscMalloc1(m_numLocalDOFs, &gidx));
   for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
     gidx[i] = m_localDOFBegin + i;
   }
 
-  ierr = ISLocalToGlobalMappingCreate(Chombo_MPI::comm, 1, m_numLocalDOFs, gidx, PETSC_OWN_POINTER, &m_localToGlobalIS);
-  CHKERRQ(ierr);
+  PetscCallVoid(
+    ISLocalToGlobalMappingCreate(Chombo_MPI::comm, 1, m_numLocalDOFs, gidx, PETSC_OWN_POINTER, &m_localToGlobalIS));
 
   if (m_debug) {
     pout() << "PetscGrid::buildPetscMapping - numLocalUnknowns = " << m_numLocalDOFs << endl;
     pout() << "PetscGrid::buildPetscMapping - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
   }
-
-  return ierr;
 }
 
-PetscErrorCode
+void
 PetscGrid::create(Vec& x) noexcept
 {
   CH_TIME("PetscGrid::create");
@@ -206,14 +194,29 @@ PetscGrid::create(Vec& x) noexcept
 
   CH_assert(m_isDefined);
 
-  PetscErrorCode ierr;
+  PetscCallVoid(VecCreate(Chombo_MPI::comm, &x));
+  PetscCallVoid(VecSetSizes(x, m_numLocalDOFs, m_numGlobalDOFs));
+  PetscCallVoid(VecSetLocalToGlobalMapping(x, m_localToGlobalIS));
+  PetscCallVoid(VecSetFromOptions(x));
 
-  MayDay::Abort("PetscGrid::create - not implemented");
+#warning "Debug code in PetscGrid::create"
+#if 0
+  PetscInt    indices[m_numLocalDOFs];
+  PetscScalar values[m_numLocalDOFs];
 
-  return ierr;
+  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
+    indices[i] = i;
+    values[i]  = 1.0 * procID();
+  }
+
+  PetscCallVoid(VecSetValuesLocal(x, m_numLocalDOFs, indices, values, INSERT_VALUES));
+  PetscCallVoid(VecAssemblyBegin(x));
+  PetscCallVoid(VecAssemblyEnd(x));
+  PetscCallVoid(VecView(x, PETSC_VIEWER_STDOUT_WORLD));
+#endif
 }
 
-PetscErrorCode
+void
 PetscGrid::destroy(Vec& x) noexcept
 {
   CH_TIME("PetscGrid::destroy");
@@ -221,16 +224,37 @@ PetscGrid::destroy(Vec& x) noexcept
     pout() << "PetscGrid::destroy" << endl;
   }
 
-  CH_assert(m_isDefined);
-
-  PetscErrorCode ierr;
-
-  MayDay::Abort("PetscGrid::destroy - not implemented");
-
-  return ierr;
+  PetscCallVoid(VecDestroy(&x));
 }
 
-PetscErrorCode
+void
+PetscGrid::setValue(Vec& a_x, const PetscScalar a_value) const noexcept
+{
+  CH_TIME("PetscGrid::setValue");
+  if (m_verbose) {
+    pout() << "PetscGrid::setValue" << endl;
+  }
+
+  PetscInt     startIdx = -1;
+  PetscInt     endIdx   = -1;
+  PetscScalar* arr      = nullptr;
+
+  PetscCallVoid(VecGetOwnershipRange(a_x, &startIdx, &endIdx));
+  PetscCallVoid(VecGetArray(a_x, &arr));
+
+  CH_assert(endIdx <= startIdx);
+  CH_assert(endIdx >= 0);
+  CH_assert(startIdx >= 0);
+  CH_assert(endIdx - startIdx == m_numLocalDOFs - 1);
+
+  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
+    arr[i] = a_value;
+  }
+
+  PetscCallVoid(VecRestoreArray(a_x, &arr));
+}
+
+void
 PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
 {
   CH_TIME("PetscGrid::putChomboInPetsc");
@@ -240,14 +264,10 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
 
   CH_assert(m_isDefined);
 
-  PetscErrorCode ierr;
-
-  MayDay::Abort("PetscGrid::putChomboInPetsc -- not implemented");
-
-  return ierr;
+#warning "not implemented (yet)"
 }
 
-PetscErrorCode
+void
 PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 {
   CH_TIME("PetscGrid::putPetscInChombo");
@@ -257,11 +277,33 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 
   CH_assert(m_isDefined);
 
-  PetscErrorCode ierr;
+  // Get the local PETSc vector and do basic error checks.
+  PetscInt     startIdx = -1;
+  PetscInt     endIdx   = -1;
+  PetscScalar* arr      = nullptr;
 
-  MayDay::Abort("PetscGrid::putPetscInChombo -- not implemented");
+  PetscCallVoid(VecGetOwnershipRange(a_x, &startIdx, &endIdx));
+  PetscCallVoid(VecGetArray(a_x, &arr));
 
-  return ierr;
+  CH_assert(endIdx <= startIdx);
+  CH_assert(endIdx >= 0);
+  CH_assert(startIdx >= 0);
+  CH_assert(endIdx - startIdx == m_numLocalDOFs - 1);
+
+  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
+    const PetscDOF dof = m_petscToAMR[i];
+
+    const int       phase     = dof.phase;
+    const int       gridLevel = dof.gridLevel;
+    const DataIndex gridIndex = dof.gridIndex;
+    const IntVect   gridCell  = dof.gridCell;
+
+    FArrayBox& data = (*a_y[gridLevel])[gridIndex].getPhase(phase).getFArrayBox();
+
+    data(gridCell, 0) = arr[i];
+  }
+
+  PetscCallVoid(VecRestoreArray(a_x, &arr));
 }
 
 #include <CD_NamespaceFooter.H>

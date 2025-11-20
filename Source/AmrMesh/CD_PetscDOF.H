@@ -14,16 +14,17 @@
 
 // Chombo includes
 #include <IntVect.H>
+#include <DataIndex.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 struct PetscDOF
 {
-  int     gridLevel = -1;
-  int     gridIndex = -1;
-  int     phase     = -1;
-  IntVect gridCell  = -IntVect::Unit;
+  int       phase;
+  int       gridLevel;
+  DataIndex gridIndex;
+  IntVect   gridCell;
 };
 
 #include <CD_NamespaceFooter.H>
