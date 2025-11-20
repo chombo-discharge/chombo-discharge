@@ -33,7 +33,7 @@
 /*!
   @brief Global chombo-discharge ParmParse input parameter object. This must have global lifetime.
 */
-extern ParmParse dischargeParser;
+extern ParmParse* dischargeParser;
 
 /*!
   @brief Global chombo-discharge input file name
