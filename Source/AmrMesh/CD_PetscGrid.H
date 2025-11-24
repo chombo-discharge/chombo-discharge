@@ -37,17 +37,31 @@
 class PetscGrid
 {
 public:
+
   /*!
-    @brief Enum for separating whether a cell is a genuine cell, a ghost cell, covered by a finer grid, or covered by the
-    geometry.
+    @brief A cell missing an identifier (usually signals a bug).
   */
-  enum class CellType : int
-  {
-    Genuine = 0,
-    Ghost   = 1,
-    Covered = 2,
-    Invalid = 3
-  };
+  static const int InvalidCell;
+
+  /*!
+    @brief Genuine cell (i.e., cell not covered by geometry or a finer grid)
+  */
+  static const int GenuineCell;
+
+  /*!
+    @brief Ghost cell (i.e., a cell outside a fine-grid patch)
+  */
+  static const int GhostCell;
+
+  /*!
+    @brief Covered cell (i.e., a cell covered by a finer grid)
+  */
+  static const int CoveredCell;
+
+  /*!
+    @brief Exterior cell (i.e., a cell covered by the geometry, or outside the problem domain)
+  */
+  static const int ExteriorCell;    
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -190,7 +204,8 @@ protected:
     @details These cells are encoded by whether or not they are a genuine cell, a ghost cell,
     covered by a finer grid, or outside the domain (completely inside EBs or outside the problem domain).
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<CellType>>>> m_cellTypes;
+  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellTypes;
+
   /*!
     @brief Level grids
   */
@@ -213,10 +228,17 @@ protected:
   Vector<PetscDOF> m_petscToAMR;
 
   /*!
-    @brief Build the local cell index to global cell index mapping
+    @brief Build the Chombo <--> Petsc index mapping for the valid cells.
   */
   virtual void
   buildPetscMapping() noexcept;
+
+  /*!
+    @brief Build the map over valid degrees of freedom, done so that each grid has a local view of the
+    surrounding global DOFs. 
+  */
+  virtual void
+  buildDOFMapping() noexcept;
 };
 
 #endif

@@ -27,6 +27,12 @@
 #warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
 #warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
 
+const int PetscGrid::InvalidCell  = -1;
+const int PetscGrid::GenuineCell  = 0;
+const int PetscGrid::GhostCell    = 1;
+const int PetscGrid::CoveredCell  = 2;
+const int PetscGrid::ExteriorCell = 3;
+
 PetscGrid::PetscGrid() noexcept
 {
   CH_TIME("PetscGrid::PetscGrid");
@@ -186,6 +192,35 @@ PetscGrid::buildPetscMapping() noexcept
 }
 
 void
+PetscGrid::buildDOFMapping() noexcept
+{
+  CH_TIME("PetscGrid::buildDOFMapping");
+  if (m_verbose) {
+    pout() << "PetscGrid::buildDOFMapping" << endl;
+  }
+
+  m_cellTypes.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_amrGrids[lvl]->getGrids();
+
+    m_cellTypes[lvl] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, m_numGhost));
+
+    const DataIterator& dit  = dbl.dataIterator();
+    const int           nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseFab<int>& cellTypes = (*m_cellTypes[lvl])[din];
+
+      cellTypes.setVal(PetscGrid::InvalidCell);
+    }
+  }
+}
+
+void
 PetscGrid::create(Vec& x) noexcept
 {
   CH_TIME("PetscGrid::create");
@@ -200,7 +235,7 @@ PetscGrid::create(Vec& x) noexcept
   PetscCallVoid(VecSetLocalToGlobalMapping(x, m_localToGlobalIS));
   PetscCallVoid(VecSetFromOptions(x));
 
-#warning "Debug code in PetscGrid::create -- scheduled for removal"    
+#warning "Debug code in PetscGrid::create -- scheduled for removal"
 #if 0
   PetscInt    indices[m_numLocalDOFs];
   PetscScalar values[m_numLocalDOFs];
