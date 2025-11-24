@@ -186,6 +186,12 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
 
   /*!
+    @brief Encoded grid cells.
+    @details These cells are encoded by whether or not they are a genuine cell, a ghost cell,
+    covered by a finer grid, or outside the domain (completely inside EBs or outside the problem domain).
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<CellType>>>> m_cellTypes;
+  /*!
     @brief Level grids
   */
   Vector<RefCountedPtr<MFLevelGrid>> m_amrGrids;

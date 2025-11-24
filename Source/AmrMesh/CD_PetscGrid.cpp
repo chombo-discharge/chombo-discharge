@@ -25,6 +25,7 @@
 #warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
 #warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
 #warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
+#warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
 
 PetscGrid::PetscGrid() noexcept
 {
