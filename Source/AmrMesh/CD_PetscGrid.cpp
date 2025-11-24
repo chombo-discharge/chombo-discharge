@@ -199,7 +199,7 @@ PetscGrid::create(Vec& x) noexcept
   PetscCallVoid(VecSetLocalToGlobalMapping(x, m_localToGlobalIS));
   PetscCallVoid(VecSetFromOptions(x));
 
-#warning "Debug code in PetscGrid::create"
+#warning "Debug code in PetscGrid::create -- scheduled for removal"    
 #if 0
   PetscInt    indices[m_numLocalDOFs];
   PetscScalar values[m_numLocalDOFs];

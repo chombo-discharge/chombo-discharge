@@ -38,6 +38,18 @@ class PetscGrid
 {
 public:
   /*!
+    @brief Enum for separating whether a cell is a genuine cell, a ghost cell, covered by a finer grid, or covered by the
+    geometry.
+  */
+  enum class CellType : int
+  {
+    Genuine = 0,
+    Ghost   = 1,
+    Covered = 2,
+    Invalid = 3
+  };
+
+  /*!
     @brief Default constructor. Must subsequently call define
   */
   PetscGrid() noexcept;
