@@ -367,6 +367,8 @@ PetscGrid::defineCellFlags() noexcept
       }
     }
   }
+
+#error "Next up: Start defining the cell flags"
 }
 
 void
