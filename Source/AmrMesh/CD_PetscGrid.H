@@ -234,7 +234,7 @@ protected:
     of the domain. Similarly, negative values are assigned to indicate if cells are ghost cells, covered by another grid, covered
     or covered by the geometry.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFs;
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFs[2];
 
   /*!
     @brief Coarse-grid DOFs.
@@ -243,7 +243,7 @@ protected:
     lvl+1. This means that if we are visiting level lvl+1 on m_levelDOFs, we can access the coarse grid by visiting level
     lvl in this data holder.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsCoFi;
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsCoFi[2];
 
   /*!
     @brief FIne-grid DOFs.
@@ -252,7 +252,7 @@ protected:
     of level lvl. This means that if we are visiting level lvl on m_levelDOFs, we can access the fine grids via this data
     holder (i.e., level lvl+1 in this data holder).
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsFiCo;
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsFiCo[2];
 
   /*!
     @brief Mapping of PETSc local DOF index back to AMR

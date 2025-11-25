@@ -248,54 +248,60 @@ PetscGrid::allocateLocalViews() noexcept
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
-  m_levelDOFs.resize(1 + m_finestLevel);
-  m_levelDOFsCoFi.resize(1 + m_finestLevel);
-  m_levelDOFsFiCo.resize(1 + m_finestLevel);
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& levelDOFs     = m_levelDOFs[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& levelDOFsCoFi = m_levelDOFsCoFi[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& levelDOFsFiCo = m_levelDOFsFiCo[iphase];
 
-  // Define all DOF data -- set everything to invalid cell for now.
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const bool hasCoar = (lvl > 0);
-    const bool hasFine = (lvl < m_finestLevel);
+    levelDOFs.resize(1 + m_finestLevel);
+    levelDOFsCoFi.resize(1 + m_finestLevel);
+    levelDOFsFiCo.resize(1 + m_finestLevel);
 
-    {
-      const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+    // Define all DOF data -- set everything to invalid cell for now.
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const bool hasCoar = (lvl > 0);
+      const bool hasFine = (lvl < m_finestLevel);
 
-      m_levelDOFs[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
-        new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
+      {
+        const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
+        const DataIterator&      dit  = dbl.dataIterator();
+        const int                nbox = dit.size();
+
+        levelDOFs[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+          new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        (*m_levelDOFs[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          (*levelDOFs[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        }
       }
-    }
 
-    if (hasFine) {
-      const DisjointBoxLayout& dbl  = m_levelGridsCoFi[lvl]->getGrids();
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      if (hasFine) {
+        const DisjointBoxLayout& dbl  = m_levelGridsCoFi[lvl]->getGrids();
+        const DataIterator&      dit  = dbl.dataIterator();
+        const int                nbox = dit.size();
 
-      m_levelDOFsCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
-        new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
+        levelDOFsCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+          new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        (*m_levelDOFsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          (*levelDOFsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        }
       }
-    }
 
-    if (hasCoar) {
-      const DisjointBoxLayout& dbl  = m_levelGridsFiCo[lvl]->getGrids();
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      if (hasCoar) {
+        const DisjointBoxLayout& dbl  = m_levelGridsFiCo[lvl]->getGrids();
+        const DataIterator&      dit  = dbl.dataIterator();
+        const int                nbox = dit.size();
 
-      m_levelDOFsFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
-        new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
+        levelDOFsFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+          new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
-      for (int mybox = 0; mybox < nbox; mybox++) {
-        (*m_levelDOFsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        for (int mybox = 0; mybox < nbox; mybox++) {
+          (*levelDOFsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        }
       }
     }
   }
@@ -311,6 +317,12 @@ PetscGrid::fillLocalViews() noexcept
 
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
+
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+    const DisjointBoxLayout& dbl      = m_levelGrids[lvl]->getGrids();
+    const DataIterator&      dit      = dbl.dataIterator();
+    const int                numBoxes = dit.size();
+  }
 }
 
 void

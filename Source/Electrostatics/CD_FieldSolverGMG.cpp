@@ -356,7 +356,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   Vec x;
   petscGrid->create(x);
   petscGrid->putChomboInPetsc(x, a_phi);
-  petscGrid->setValue(x, 1.23456789*procID());
+  //  petscGrid->setValue(x, 1.23456789*procID());
   petscGrid->putPetscInChombo(a_phi, x);
   petscGrid->destroy(x);
 #endif
