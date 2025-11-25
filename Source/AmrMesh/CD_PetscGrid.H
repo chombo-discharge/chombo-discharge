@@ -53,9 +53,9 @@ public:
   static const int BoundaryCell;
 
   /*!
-    @brief Ghost cell (i.e., a cell outside a fine-grid patch)
+    @brief Coarse-fine ghost cell (i.e., a cell outside a fine-grid patch). 
   */
-  static const int GhostCell;
+  static const int CFGhostCell;
 
   /*!
     @brief A cell that is covered by a finer grid.
@@ -231,6 +231,11 @@ protected:
     @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid grid cell
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalRows[2];
+
+  /*!
+    @brief Simple map that checks if a grid cell is associated with a PETSc row
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validPetscRow;
 
   /*!
     @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies

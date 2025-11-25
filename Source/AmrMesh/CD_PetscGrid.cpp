@@ -33,7 +33,7 @@
 const int PetscGrid::InvalidCell  = -1;
 const int PetscGrid::InteriorCell = 0;
 const int PetscGrid::BoundaryCell = 1;
-const int PetscGrid::GhostCell    = 2;
+const int PetscGrid::CFGhostCell  = 2;
 const int PetscGrid::CoveredCell  = 3;
 
 PetscGrid::PetscGrid() noexcept
@@ -123,6 +123,27 @@ PetscGrid::definePetscRows() noexcept
   m_numGlobalRows = 0;
 
   m_numRowsPerRank.resize(numProc(), 0);
+  m_validPetscRow.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_levelGrids[lvl]->getGrids();
+
+    m_validPetscRow[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(dbl, 1, IntVect::Zero));
+
+    const DataIterator& dit      = dbl.dataIterator();
+    const int           numBoxes = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      BaseFab<bool>& validPetscRow = (*m_validPetscRow[lvl])[din];
+
+      validPetscRow.setVal(false);
+    }
+  }
+
+#warning "I need to throw in a cross-phase BaseFab that checks if the cell contains something that should go into PETSc"
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& LIDs = m_localRows[iphase];
@@ -150,8 +171,9 @@ PetscGrid::definePetscRows() noexcept
         const IntVectSet&    ivs        = ebisBox.getIrregIVS(cellBox);
         const EBGraph&       ebgraph    = ebisBox.getEBGraph();
 
-        BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
-        BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
+        BaseFab<PetscInt>& lid      = (*LIDs[lvl])[din];
+        BaseFab<PetscInt>& gid      = (*GIDs[lvl])[din];
+        BaseFab<bool>&     validRow = (*m_validPetscRow[lvl])[din];
 
         lid.setVal(-1);
         gid.setVal(-1);
@@ -171,8 +193,9 @@ PetscGrid::definePetscRows() noexcept
 
             m_petscToAMR.push_back(dof);
 
-            lid(iv) = m_numLocalRows;
-            gid(iv) = m_numLocalRows;
+            lid(iv)      = m_numLocalRows;
+            gid(iv)      = m_numLocalRows;
+            validRow(iv) = true;
 
             m_numLocalRows = m_numLocalRows + 1;
           }
@@ -368,7 +391,25 @@ PetscGrid::defineCellFlags() noexcept
     }
   }
 
-#error "Next up: Start defining the cell flags"
+  // Fill cell flags
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+    const DisjointBoxLayout& dbl      = m_levelGrids[lvl]->getGrids();
+    const DataIterator&      dit      = dbl.dataIterator();
+    const int                numBoxes = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < numBoxes; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+
+      BaseFab<int>&        cellFlags  = (*m_cellFlags[lvl])[din];
+      const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+
+      };
+    }
+  }
 }
 
 void
