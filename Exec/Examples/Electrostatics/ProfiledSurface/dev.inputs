@@ -12,8 +12,8 @@ AmrMesh.buffer_size          = 4              ## Number of cells between grid le
 AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton         ## 'none', 'standardSort', 'shuffle', or 'morton'
 AmrMesh.blocking_factor      = 8              ## Default blocking factor (16 in 3D)
-AmrMesh.max_box_size         = 8             ## Maximum allowed box size
-AmrMesh.max_ebis_box         = 8             ## Maximum allowed box size
+AmrMesh.max_box_size         = 8              ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 8              ## Maximum allowed box size
 AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios
 AmrMesh.num_ghost            = 2              ## Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost            = 0              ## Number of ghost cells when writing level-set to grid
@@ -64,10 +64,10 @@ Driver.refine_dielectrics           = 0                    ## Refine dielectric 
 # ====================================================================================================
 FieldSolverGMG.verbosity             = -1                      ## Class verbosity
 FieldSolverGMG.jump_bc               = natural                 ## Jump BC type ('natural' or 'saturation_charge')
-FieldSolverGMG.bc.x.lo               = neumann 0.0           ## Bc type.
-FieldSolverGMG.bc.x.hi               = neumann 0.0           ## Bc type.
+FieldSolverGMG.bc.x.lo               = neumann 0.0             ## Bc type.
+FieldSolverGMG.bc.x.hi               = neumann 0.0             ## Bc type.
 FieldSolverGMG.bc.y.lo               = dirichlet 0.0           ## Bc type.
-FieldSolverGMG.bc.y.hi               = dirichlet 1.0             ## Bc type.
+FieldSolverGMG.bc.y.hi               = dirichlet 1.0           ## Bc type.
 FieldSolverGMG.bc.z.lo               = neumann 0.0             ## Bc type.
 FieldSolverGMG.bc.z.hi               = neumann 0.0             ## Bc type.
 FieldSolverGMG.plt_vars              = phi rho E Esol sigma    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
@@ -120,9 +120,9 @@ DiskProfiledPlane.wheel_smooth              = 1E-3
 DiskProfiledPlane.wheel_extra_thickness     = 0.0           ## Extra wheel thickness
 
 DiskProfiledPlane.box_dimensions       = 40.2000123E-2 0.020012 1    ## Box dimensions
-DiskProfiledPlane.box_translate        = 0 5.0123E-3 0              ## Box translation
-DiskProfiledPlane.box_permittivity     = 3.0                        ## Dielectric box permittivity
-DiskProfiledPlane.box_curvature        = 50E-6                      ## Corner curvatures
+DiskProfiledPlane.box_translate        = 0 5.0123E-3 0               ## Box translation
+DiskProfiledPlane.box_permittivity     = 3.0                         ## Dielectric box permittivity
+DiskProfiledPlane.box_curvature        = 50E-6                       ## Corner curvatures
 
 DiskProfiledPlane.profile_type              = square        ## Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
 DiskProfiledPlane.profile_translate         = 0 0 0         ## Profile translation

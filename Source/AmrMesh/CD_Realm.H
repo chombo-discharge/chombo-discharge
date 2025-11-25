@@ -232,7 +232,7 @@ public:
     level is undefined because there was no coarser grid from which we can refine.
   */
   Vector<RefCountedPtr<MFLevelGrid>>&
-  getMFLevelGridFiCo();    
+  getMFLevelGridFiCo();
 
   /*!
     @brief Get EBIndexSpace for particular phase
@@ -451,7 +451,7 @@ protected:
   /*!
     @brief Refined grids. Entry lvl+1 contains the refined version of grids on level lvl
   */
-  Vector<RefCountedPtr<MFLevelGrid>> m_mflgFiCo;   
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgFiCo;
 
   /*!
     @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.
@@ -563,7 +563,8 @@ protected:
   /*!
     @brief Define the PETSc composite grid
   */
-  void definePetscGrid() noexcept;
+  void
+  definePetscGrid() noexcept;
 
   /*!
     @brief Get a particular realm

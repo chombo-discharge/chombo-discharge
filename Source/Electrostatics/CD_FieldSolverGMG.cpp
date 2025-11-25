@@ -350,7 +350,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
 
 #warning "Development code in FieldSolverGMG where PETSc is used for mapping"
 #if 1
-#ifdef CH_USE_PETSC  
+#ifdef CH_USE_PETSC
   auto petscGrid = m_amr->getPetscGrid(m_realm);
 
   Vec x;
@@ -360,7 +360,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   petscGrid->putPetscInChombo(a_phi, x);
   petscGrid->destroy(x);
 #endif
-#endif  
+#endif
 
   // Coarsen/update ghosts before computing the field.
   m_amr->conservativeAverage(a_phi, m_realm);
