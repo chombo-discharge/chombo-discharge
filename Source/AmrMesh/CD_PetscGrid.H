@@ -37,7 +37,6 @@
 class PetscGrid
 {
 public:
-
   /*!
     @brief A cell missing an identifier (usually signals a bug).
   */
@@ -61,7 +60,7 @@ public:
   /*!
     @brief Exterior cell (i.e., a cell covered by the geometry, or outside the problem domain)
   */
-  static const int ExteriorCell;    
+  static const int ExteriorCell;
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -85,7 +84,7 @@ public:
   virtual void
   define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
          const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
-         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,         
+         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
          const int                                              a_finestLevel,
          const int                                              a_numGhost) noexcept;
@@ -223,19 +222,19 @@ protected:
   /*!
     @brief Refined grids
   */
-  Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;    
+  Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;
 
   /*!
     @brief Mapping of AMR DOFs to local PETSc DOFs
     @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid DOF.
   */
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_localIndices[2];
-  
+
   /*!
     @brief Mapping of AMR DOFs to local PETSc DOFs
     @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid DOF.
   */
-  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];  
+  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
 
   /*!
     @brief Mapping of PETSc local DOF index back to AMR
@@ -249,17 +248,15 @@ protected:
     of degrees of freedom on each MPI rank. After this is called, it will be possible to index local grid cells into a PETSc
     vector row.
   */
-  virtual void 
-  definePetscDOFs() noexcept;  
+  virtual void
+  definePetscDOFs() noexcept;
 
   /*!
     @brief Build the map over valid degrees of freedom, done so that each grid has a local view of the
     surrounding global DOFs. 
   */
   virtual void
-  defineLocalCompositeView() noexcept;
-
-
+  defineLocalViews() noexcept;
 };
 
 #endif

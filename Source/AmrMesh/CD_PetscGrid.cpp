@@ -87,7 +87,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   CH_assert(m_finestLevel >= 0);
 
   this->definePetscDOFs();
-  this->defineLocalCompositeView();
+  this->defineLocalViews();
 
   m_isDefined = true;
 }
@@ -235,11 +235,11 @@ PetscGrid::definePetscDOFs() noexcept
 }
 
 void
-PetscGrid::defineLocalCompositeView() noexcept
+PetscGrid::defineLocalViews() noexcept
 {
-  CH_TIME("PetscGrid::defineLocalCompositeView");
+  CH_TIME("PetscGrid::defineLocalViews");
   if (m_verbose) {
-    pout() << "PetscGrid::defineLocalCompositeView" << endl;
+    pout() << "PetscGrid::defineLocalViews" << endl;
   }
 
   m_cellTypes.resize(1 + m_finestLevel);
