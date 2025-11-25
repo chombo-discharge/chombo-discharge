@@ -75,13 +75,17 @@ public:
 
   /*!
     @brief Main define function. Puts object in usable state.
-    @param[in] a_amrGrids chombo-discharge AMR grids
+    @param[in] a_levelGrids chombo-discharge AMR grids
+    @param[in] a_levelGridsCoFi Refined grids
+    @param[in] a_levelGridsFiCo Coarsened grids
     @param[in] a_validCells Valid grid cells
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
   virtual void
-  define(const Vector<RefCountedPtr<MFLevelGrid>>&              m_amrGrids,
+  define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
+         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
+         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,         
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
          const int                                              a_finestLevel,
          const int                                              a_numGhost) noexcept;
@@ -207,19 +211,31 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellTypes;
 
   /*!
-    @brief Level grids
+    @brief Grids on each level
   */
-  Vector<RefCountedPtr<MFLevelGrid>> m_amrGrids;
+  Vector<RefCountedPtr<MFLevelGrid>> m_levelGrids;
 
   /*!
-    @brief Mapping of AMR DOFs to global PETSc DOFs
+    @brief Coarsened grids
   */
-  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
+  Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsCoFi;
+
+  /*!
+    @brief Refined grids
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;    
 
   /*!
     @brief Mapping of AMR DOFs to local PETSc DOFs
+    @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid DOF.
   */
   Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_localIndices[2];
+  
+  /*!
+    @brief Mapping of AMR DOFs to local PETSc DOFs
+    @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid DOF.
+  */
+  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];  
 
   /*!
     @brief Mapping of PETSc local DOF index back to AMR
@@ -229,16 +245,21 @@ protected:
 
   /*!
     @brief Build the Chombo <--> Petsc index mapping for the valid cells.
+    @details This defines m_localIndices and m_globalIndices, m_numDOFsPerRank, m_localToGlobalIS, and figures out the number
+    of degrees of freedom on each MPI rank. After this is called, it will be possible to index local grid cells into a PETSc
+    vector row.
   */
-  virtual void
-  buildPetscMapping() noexcept;
+  virtual void 
+  definePetscDOFs() noexcept;  
 
   /*!
     @brief Build the map over valid degrees of freedom, done so that each grid has a local view of the
     surrounding global DOFs. 
   */
   virtual void
-  buildDOFMapping() noexcept;
+  defineLocalCompositeView() noexcept;
+
+
 };
 
 #endif

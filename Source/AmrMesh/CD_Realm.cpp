@@ -168,8 +168,6 @@ Realm::regridBase(const int a_lmin)
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
   this->defineLevelTiles();
-
-
 }
 
 void
@@ -211,6 +209,8 @@ Realm::defineMFLevelGrid(const int a_lmin)
   }
 
   m_mflg.resize(1 + m_finestLevel);
+  m_mflgCoFi.resize(1 + m_finestLevel);
+  m_mflgFiCo.resize(1 + m_finestLevel);
 
   PhaseRealm& gas = this->getRealm(phase::gas);
   PhaseRealm& sol = this->getRealm(phase::solid);
@@ -220,13 +220,55 @@ Realm::defineMFLevelGrid(const int a_lmin)
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     Vector<EBLevelGrid> eblgs;
+    Vector<EBLevelGrid> eblgsCoFi;
+    Vector<EBLevelGrid> eblgsFiCo;
 
-    if (!ebis_gas.isNull())
+    // Define the basic grids.
+    //
+    // The returned PhaseRealm::getEBLevelGridCoFi contains fine grids coarsened to the vector entry index. I.e.,
+    // getEBLevelGridCoFi[0] contains the coarsening of grids on level 1.
+    //
+    // Similarly, PhaseRaelm::getEBLevelGridFiCo contains the refined grids. I.e., getEBLevelGrid[1] contains
+    // the refinement of the grids on level 0. We dereference the pointers when we pass into MFLevelGrid,
+    // so have to put some safeguards in place before we define.
+    if (!ebis_gas.isNull()) {
       eblgs.push_back(*(gas.getEBLevelGrid()[lvl]));
-    if (!ebis_sol.isNull())
-      eblgs.push_back(*(sol.getEBLevelGrid()[lvl]));
 
+      if (lvl < m_finestLevel) {
+        eblgsCoFi.push_back(*(gas.getEBLevelGridCoFi()[lvl]));
+      }
+      if (lvl > 0) {
+        eblgsFiCo.push_back(*(gas.getEBLevelGridFiCo()[lvl]));
+      }
+    }
+    if (!ebis_sol.isNull()) {
+      eblgs.push_back(*(sol.getEBLevelGrid()[lvl]));
+      if (lvl < m_finestLevel) {
+        eblgsCoFi.push_back(*(sol.getEBLevelGridCoFi()[lvl]));
+      }
+      if (lvl > 0) {
+        eblgsFiCo.push_back(*(sol.getEBLevelGridFiCo()[lvl]));
+      }
+    }
+
+    // Actual grids
     m_mflg[lvl] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgs));
+
+    // Coarsened grids -- there nothing on the finest level since there's no finer grid.
+    if (lvl < m_finestLevel) {
+      m_mflgCoFi[lvl] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsCoFi));
+    }
+    else {
+      m_mflgCoFi[lvl] = RefCountedPtr<MFLevelGrid>(nullptr);
+    }
+
+    // Refined grids -- there's nothing on level 0 because there was nothing to refined from.
+    if (lvl > 0) {
+      m_mflgFiCo[lvl] = RefCountedPtr<MFLevelGrid>(new MFLevelGrid(m_multifluidIndexSpace, eblgsFiCo));
+    }
+    else {
+      m_mflgFiCo[lvl] = RefCountedPtr<MFLevelGrid>(nullptr);
+    }
   }
 }
 
@@ -738,13 +780,15 @@ Realm::defineLevelTiles() noexcept
   }
 }
 
-void Realm::definePetscGrid() noexcept {
+void
+Realm::definePetscGrid() noexcept
+{
 #ifdef CH_USE_PETSC
   CH_TIME("Realm::definePetscGrid");
   if (m_verbosity > 5) {
     pout() << "Realm::definePetscGrid" << endl;
   }
-  
+
   if (!(m_petscGrid.isNull())) {
     m_petscGrid->clear();
   }
@@ -752,7 +796,7 @@ void Realm::definePetscGrid() noexcept {
     m_petscGrid = RefCountedPtr<PetscGrid>(new PetscGrid());
   }
 
-  m_petscGrid->define(m_mflg, m_validCells, m_finestLevel, m_numGhost);
+  m_petscGrid->define(m_mflg, m_mflgCoFi, m_mflgFiCo, m_validCells, m_finestLevel, m_numGhost);
 #endif
 }
 
@@ -843,6 +887,18 @@ Vector<RefCountedPtr<MFLevelGrid>>&
 Realm::getMFLevelGrid()
 {
   return m_mflg;
+}
+
+Vector<RefCountedPtr<MFLevelGrid>>&
+Realm::getMFLevelGridCoFi()
+{
+  return m_mflgCoFi;
+}
+
+Vector<RefCountedPtr<MFLevelGrid>>&
+Realm::getMFLevelGridFiCo()
+{
+  return m_mflgFiCo;
 }
 
 const RefCountedPtr<EBIndexSpace>&

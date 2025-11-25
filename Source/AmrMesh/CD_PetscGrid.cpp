@@ -25,6 +25,9 @@
 #warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
 #warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
 #warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
+#warning "PetscGrid should take the coarsened and refined MFLevelGrid as input"
+#warning "I really want the MFBaseFab<PetscInt>, no?"
+#warning "How much PETSc math should we add to this class?"
 #warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
 
 const int PetscGrid::InvalidCell  = -1;
@@ -54,7 +57,9 @@ PetscGrid::~PetscGrid() noexcept
 }
 
 void
-PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGrids,
+PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
+                  const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
+                  const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,
                   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
                   const int                                              a_finestLevel,
                   const int                                              a_numGhost) noexcept
@@ -70,15 +75,19 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_amrGr
   pp.query("debug", m_debug);
   pp.query("profile", m_profile);
 
-  m_amrGrids    = a_amrGrids;
-  m_validCells  = a_validCells;
-  m_finestLevel = a_finestLevel;
-  m_numGhost    = a_numGhost;
+  m_levelGrids     = a_levelGrids;
+  m_levelGridsCoFi = a_levelGridsCoFi;
+  m_levelGridsFiCo = a_levelGridsFiCo;
+  m_validCells     = a_validCells;
+  m_finestLevel    = a_finestLevel;
+  m_numGhost       = a_numGhost;
+  m_numPhases      = m_levelGrids[0]->numPhases();
 
   CH_assert(m_numGhost >= 0);
   CH_assert(m_finestLevel >= 0);
 
-  this->buildPetscMapping();
+  this->definePetscDOFs();
+  this->defineLocalCompositeView();
 
   m_isDefined = true;
 }
@@ -97,37 +106,36 @@ PetscGrid::clear() noexcept
 }
 
 void
-PetscGrid::buildPetscMapping() noexcept
+PetscGrid::definePetscDOFs() noexcept
 {
-  CH_TIME("PetscGrid::buildPetscMapping");
+  CH_TIME("PetscGrid::definePetscDOFs");
   if (m_verbose) {
-    pout() << "PetscGrid::buildPetscMapping" << endl;
+    pout() << "PetscGrid::definePetscDOFs" << endl;
   }
 
-  CH_assert(!(m_amrGrids[0].isNull()));
+  CH_assert(!(m_levelGrids[0].isNull()));
 
   m_numLocalDOFs  = 0;
   m_numGlobalDOFs = 0;
-  m_numPhases     = m_amrGrids[0]->numPhases();
 
   m_numDOFsPerRank.resize(numProc(), 0);
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    // Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
-    // Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
+    Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
+    Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
 
-    // GIDs.resize(1 + m_finestLevel);
-    // LIDs.resize(1 + m_finestLevel);
+    LIDs.resize(1 + m_finestLevel);
+    GIDs.resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      const EBLevelGrid&       eblg  = m_amrGrids[lvl]->getEBLevelGrid(iphase);
+      const EBLevelGrid&       eblg  = m_levelGrids[lvl]->getEBLevelGrid(iphase);
       const EBISLayout&        ebisl = eblg.getEBISL();
       const DisjointBoxLayout& dbl   = eblg.getDBL();
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
 
-      // GIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
-      // LIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
+      LIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
+      GIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
@@ -138,16 +146,19 @@ PetscGrid::buildPetscMapping() noexcept
         const IntVectSet&    ivs        = ebisBox.getIrregIVS(cellBox);
         const EBGraph&       ebgraph    = ebisBox.getEBGraph();
 
-        // BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
-        // BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
+        BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
+        BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
 
-        // gid.setVal(-1);
-        // lid.setVal(-1);
+        lid.define(cellBox, 1);
+        lid.setVal(-1);
+
+        gid.define(cellBox, 1);
+        gid.setVal(-1);
 
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
-              MayDay::Abort("PetscGrid::buildPetscMapping -- multi-valued cells are not permitted");
+              MayDay::Abort("PetscGrid::definePetscDOFs -- multi-valued cells are not permitted");
             }
 
             PetscDOF dof;
@@ -159,6 +170,9 @@ PetscGrid::buildPetscMapping() noexcept
 
             m_petscToAMR.push_back(dof);
 
+            lid(iv) = m_numLocalDOFs;
+            gid(iv) = m_numLocalDOFs;
+
             m_numLocalDOFs = m_numLocalDOFs + 1;
           }
         };
@@ -168,14 +182,43 @@ PetscGrid::buildPetscMapping() noexcept
     }
   }
 
+  // Gather the number of DOFs per MPI rank. And figure out the total number of DOFs.
   m_numDOFsPerRank = ParallelOps::gather(m_numLocalDOFs);
   m_numGlobalDOFs  = ParallelOps::sum(m_numLocalDOFs);
 
+  // Compute the global row offset for this rank.
   m_localDOFBegin = 0;
   for (PetscInt i = 0; i < procID(); i++) {
     m_localDOFBegin += m_numDOFsPerRank[i];
   }
 
+  // Above, LIDs = GIDs, but we now know the PETSc row where we begin indexing for this rank, so we now
+  // increment GIDs by m_localDOFBegin.
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex din     = dit[mybox];
+        const Box       cellBox = dbl[din];
+
+        BaseFab<PetscInt>& gid = (*m_globalIndices[iphase][lvl])[din];
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          if (gid(iv) >= 0) {
+            gid(iv) += m_localDOFBegin;
+          }
+        };
+
+        BoxLoops::loop(cellBox, regularKernel);
+      }
+    }
+  }
+
+  // Build local to global mapping for PETSc, so that we can extract local subvectors.
   PetscInt* gidx;
   PetscCallVoid(PetscMalloc1(m_numLocalDOFs, &gidx));
   for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
@@ -186,23 +229,23 @@ PetscGrid::buildPetscMapping() noexcept
     ISLocalToGlobalMappingCreate(Chombo_MPI::comm, 1, m_numLocalDOFs, gidx, PETSC_OWN_POINTER, &m_localToGlobalIS));
 
   if (m_debug) {
-    pout() << "PetscGrid::buildPetscMapping - numLocalUnknowns = " << m_numLocalDOFs << endl;
-    pout() << "PetscGrid::buildPetscMapping - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
+    pout() << "PetscGrid::definePetscDOFs - numLocalUnknowns = " << m_numLocalDOFs << endl;
+    pout() << "PetscGrid::definePetscDOFs - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
   }
 }
 
 void
-PetscGrid::buildDOFMapping() noexcept
+PetscGrid::defineLocalCompositeView() noexcept
 {
-  CH_TIME("PetscGrid::buildDOFMapping");
+  CH_TIME("PetscGrid::defineLocalCompositeView");
   if (m_verbose) {
-    pout() << "PetscGrid::buildDOFMapping" << endl;
+    pout() << "PetscGrid::defineLocalCompositeView" << endl;
   }
 
   m_cellTypes.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_amrGrids[lvl]->getGrids();
+    const DisjointBoxLayout& dbl = m_levelGrids[lvl]->getGrids();
 
     m_cellTypes[lvl] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, m_numGhost));
 
@@ -300,7 +343,48 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
 
   CH_assert(m_isDefined);
 
-#warning "not implemented (yet)"
+  // Get the local PETSc vector and do basic error checks.
+  PetscInt     startIdx = -1;
+  PetscInt     endIdx   = -1;
+  PetscScalar* arr      = nullptr;
+
+  PetscCallVoid(VecGetOwnershipRange(a_x, &startIdx, &endIdx));
+  PetscCallVoid(VecGetArray(a_x, &arr));
+
+  CH_assert(endIdx <= startIdx);
+  CH_assert(endIdx >= 0);
+  CH_assert(startIdx >= 0);
+  CH_assert(endIdx - startIdx == m_numLocalDOFs - 1);
+
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const EBLevelGrid&       eblg  = m_levelGrids[lvl]->getEBLevelGrid(iphase);
+      const EBISLayout&        ebisl = eblg.getEBISL();
+      const DisjointBoxLayout& dbl   = eblg.getDBL();
+      const DataIterator&      dit   = dbl.dataIterator();
+      const int                nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex din     = dit[mybox];
+        const Box&      cellBox = dbl[din];
+
+        const FArrayBox&         data       = (*a_y[lvl])[din].getPhase(iphase).getFArrayBox();
+        const BaseFab<PetscInt>& localIndex = (*m_localIndices[iphase][lvl])[din];
+
+        auto kernel = [&](const IntVect iv) -> void {
+          const PetscInt& k = localIndex(iv);
+          if (k >= 0) {
+            arr[k] = data(iv, 0);
+          }
+        };
+
+        BoxLoops::loop(cellBox, kernel);
+      }
+    }
+  }
+
+  PetscCallVoid(VecRestoreArray(a_x, &arr));
 }
 
 void

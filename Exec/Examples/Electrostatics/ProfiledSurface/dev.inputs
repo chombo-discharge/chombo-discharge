@@ -4,7 +4,7 @@
 AmrMesh.lo_corner            = -0.04  0.
 AmrMesh.hi_corner            = 0.04  0.04
 AmrMesh.verbosity            = -1             ## Controls verbosity.
-AmrMesh.coarsest_domain      = 32 16          ## Number of cells on coarsest domain
+AmrMesh.coarsest_domain      = 64 32          ## Number of cells on coarsest domain
 AmrMesh.max_amr_depth        = 4              ## Maximum amr depth
 AmrMesh.max_sim_depth        = -1             ## Maximum simulation depth
 AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
@@ -124,7 +124,7 @@ DiskProfiledPlane.box_translate        = 0 5.0123E-3 0              ## Box trans
 DiskProfiledPlane.box_permittivity     = 3.0                        ## Dielectric box permittivity
 DiskProfiledPlane.box_curvature        = 50E-6                      ## Corner curvatures
 
-DiskProfiledPlane.profile_type              = none          ## Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
+DiskProfiledPlane.profile_type              = square        ## Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'
 DiskProfiledPlane.profile_translate         = 0 0 0         ## Profile translation
 DiskProfiledPlane.profile_repetition_lo     = 100 0 0       ## Repetition pattern in low coordinate direction
 DiskProfiledPlane.profile_repetition_hi     = 100 0 0       ## Repetition pattern in high coordinate direction

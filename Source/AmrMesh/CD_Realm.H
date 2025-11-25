@@ -219,6 +219,22 @@ public:
   getMFLevelGrid();
 
   /*!
+    @brief Get the coarsened grids
+    @details The returned vector contains the coarsened grids. Entry on level lvl=0 contains the coarsening of level lvl=1 and so on. The top
+    level is undefined because there was no finer grid from which we can coarsen.
+  */
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridCoFi();
+
+  /*!
+    @brief Get the refined grids
+    @details The returned vector contains the refined grids. Entry on level lvl=1 contains the refinement of level lvl=0 and so on. The bottom
+    level is undefined because there was no coarser grid from which we can refine.
+  */
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridFiCo();    
+
+  /*!
     @brief Get EBIndexSpace for particular phase
     @param[in] a_phase Phase
   */
@@ -426,6 +442,16 @@ protected:
     @brief MFLevelGrids
   */
   Vector<RefCountedPtr<MFLevelGrid>> m_mflg;
+
+  /*!
+    @brief Coarsened grids. Entry lvl contains the coarsened version of grids on level lvl+1
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgCoFi;
+
+  /*!
+    @brief Refined grids. Entry lvl+1 contains the refined version of grids on level lvl
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgFiCo;   
 
   /*!
     @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.

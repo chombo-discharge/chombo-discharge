@@ -232,17 +232,21 @@ public:
 
   /*!
     @brief Get EBLevelGrids
-    @return Immutable m_eblg
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGrid() const;
 
   /*!
     @brief Get coarsened fine grids
-    @return Immutable m_eblg
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi() const;
+
+  /*!
+    @brief Get refined grids
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridFiCo() const;
 
   /*!
     @brief Return vof iterator for iterating over irregular cells in each grid patch
