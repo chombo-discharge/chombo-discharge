@@ -22,21 +22,19 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "At the end -- let's see if we can trim some memory from this class"
 #warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
 #warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
 #warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
-#warning "PetscGrid should take the coarsened and refined MFLevelGrid as input"
-#warning "I really want the MFBaseFab<PetscInt>, no?"
-#warning "How much PETSc math should we add to this class?"
 #warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
+#warning "Priority 1: Build maps over which cells are which. Must be viewable from each patch".
+#warning "Priority 2: Map global row numbers to cells on each phase. Must be viewable from each patch".
 
-// These are all negative because we fill the unknowns on each level by their global
-// row #, which is always positive. Cells that require special handling are assigned
-// a negative value so we can flag them correctly later on.
-const int PetscGrid::InvalidCell  = -4;
-const int PetscGrid::CoveredCell  = -3;
-const int PetscGrid::GhostCell    = -2;
-const int PetscGrid::BoundaryCell = -1;
+const int PetscGrid::InvalidCell  = -1;
+const int PetscGrid::InteriorCell = 0;
+const int PetscGrid::BoundaryCell = 1;
+const int PetscGrid::GhostCell    = 2;
+const int PetscGrid::CoveredCell  = 3;
 
 PetscGrid::PetscGrid() noexcept
 {
@@ -92,7 +90,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   CH_assert(m_finestLevel >= 0);
 
   this->definePetscRows();
-  this->allocateRowViews();
+  this->defineCellFlags();
   this->defineRowViews();
 
   m_isDefined = true;
@@ -238,16 +236,17 @@ PetscGrid::definePetscRows() noexcept
 }
 
 void
-PetscGrid::allocateRowViews() noexcept
+PetscGrid::defineRowViews() noexcept
 {
-  CH_TIME("PetscGrid::allocateRowViews");
+  CH_TIME("PetscGrid::defineRowViews");
   if (m_verbose) {
-    pout() << "PetscGrid::allocateRowViews" << endl;
+    pout() << "PetscGrid::defineRowViews" << endl;
   }
 
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
+  // Allocate, but do not assign anything yet.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& rows     = m_rows[iphase];
     Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& rowsCoFi = m_rowsCoFi[iphase];
@@ -257,7 +256,7 @@ PetscGrid::allocateRowViews() noexcept
     rowsCoFi.resize(1 + m_finestLevel);
     rowsFiCo.resize(1 + m_finestLevel);
 
-    // Define all DOF data -- set everything to invalid cell for now.
+    // Define all row data -- set everything to an invalid row for now.
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const bool hasCoar = (lvl > 0);
       const bool hasFine = (lvl < m_finestLevel);
@@ -272,7 +271,7 @@ PetscGrid::allocateRowViews() noexcept
 
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
-          (*rows[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+          (*rows[lvl])[dit[mybox]].setVal(-1);
         }
       }
 
@@ -286,7 +285,7 @@ PetscGrid::allocateRowViews() noexcept
 
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
-          (*rowsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+          (*rowsCoFi[lvl])[dit[mybox]].setVal(-1);
         }
       }
 
@@ -300,7 +299,7 @@ PetscGrid::allocateRowViews() noexcept
 
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
-          (*rowsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+          (*rowsFiCo[lvl])[dit[mybox]].setVal(-1);
         }
       }
     }
@@ -308,21 +307,64 @@ PetscGrid::allocateRowViews() noexcept
 }
 
 void
-PetscGrid::defineRowViews() noexcept
+PetscGrid::defineCellFlags() noexcept
 {
-  CH_TIME("PetscGrid::defineRowViews");
+  CH_TIME("PetscGrid::defineCellFlags");
   if (m_verbose) {
-    pout() << "PetscGrid::defineRowViews" << endl;
+    pout() << "PetscGrid::defineCellFlags" << endl;
   }
 
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
-  for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-      const DisjointBoxLayout& dbl      = m_levelGrids[lvl]->getGrids();
-      const DataIterator&      dit      = dbl.dataIterator();
-      const int                numBoxes = dit.size();
+  m_cellFlags.resize(1 + m_finestLevel);
+  m_cellFlagsCoFi.resize(1 + m_finestLevel);
+  m_cellFlagsFiCo.resize(1 + m_finestLevel);
+
+  // Allocate storages -- set everything to an invalid cell.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const bool hasCoar = (lvl > 0);
+    const bool hasFine = (lvl < m_finestLevel);
+
+    {
+      const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      m_cellFlags[lvl] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, numComps, ghostVec));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        (*m_cellFlags[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+      }
+    }
+
+    if (hasFine) {
+      const DisjointBoxLayout& dbl  = m_levelGridsCoFi[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      m_cellFlagsCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<int>>>(
+        new LevelData<BaseFab<int>>(dbl, numComps, ghostVec));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        (*m_cellFlagsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+      }
+    }
+
+    if (hasCoar) {
+      const DisjointBoxLayout& dbl  = m_levelGridsFiCo[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      m_cellFlagsFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<int>>>(
+        new LevelData<BaseFab<int>>(dbl, numComps, ghostVec));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        (*m_cellFlagsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+      }
     }
   }
 }

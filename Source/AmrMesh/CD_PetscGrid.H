@@ -38,24 +38,29 @@ class PetscGrid
 {
 public:
   /*!
-    @brief A cell missing an identifier (usually signals a bug).
+    @brief A cell missing an identifier (reaching into these is a bug).
   */
-  static const PetscInt InvalidCell;
+  static const int InvalidCell;
+
+  /*!
+    @brief Interior, valid cell.
+  */
+  static const int InteriorCell;
+
+  /*!
+    @brief Interior cell which is also a boundary cell (i.e., a cell that abuts the domain boundary).
+  */
+  static const int BoundaryCell;
 
   /*!
     @brief Ghost cell (i.e., a cell outside a fine-grid patch)
   */
-  static const PetscInt GhostCell;
+  static const int GhostCell;
 
   /*!
-    @brief Covered cell (i.e., a cell covered by a finer grid). 
+    @brief A cell that is covered by a finer grid.
   */
-  static const PetscInt CoveredCell;
-
-  /*!
-    @brief Boundary cell (i.e., a cell that abuts the domain boundary)
-  */
-  static const PetscInt BoundaryCell;
+  static const int CoveredCell;
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -258,6 +263,26 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rowsFiCo[2];
 
   /*!
+    @brief Map over which cells belong to ghosts, covered, invalid, boundary, etc.
+    @details This is defined over m_levelGrids, which is the fundamental grid structure on which solvers will operatore. 
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellFlags;
+
+  /*!
+    @brief Map over which cells belong to ghosts, covered, invalid, boundary, etc.
+    @details This is defined over coarsened versions m_levelGrids. I.e., the entry on level lvl is on a grid that is a coarsening
+    from lvl+1
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellFlagsCoFi;
+
+  /*!
+    @brief Map over which cells belong to ghosts, covered, invalid, boundary, etc.
+    @details This is defined over refine4d versions m_levelGrids. I.e., the entry on level lvl+1 is on a grid that is a refinement
+    from lvl    
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellFlagsFiCo;
+
+  /*!
     @brief Mapping of PETSc local row index back to AMR
     @details Locally owned. Maps a local row index to a level/grid/cell.
   */
@@ -273,14 +298,13 @@ protected:
   definePetscRows() noexcept;
 
   /*!
-    @brief Allocate the local views of the PETSc grid, done so that each grid has a loacl view of the surrounding PETSc rows.
-    @details This does not actually fill the views -- it simply allocatse the data holders
+    @brief Build the cell flag mappings
   */
   virtual void
-  allocateRowViews() noexcept;
+  defineCellFlags() noexcept;
 
   /*!
-    @brief Fill the local views of the PETSc grid.
+    @brief Build the view of the global PETSc rows around each grid patch.
   */
   virtual void
   defineRowViews() noexcept;
