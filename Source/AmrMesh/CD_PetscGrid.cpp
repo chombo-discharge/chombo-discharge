@@ -30,7 +30,7 @@
 #warning "How much PETSc math should we add to this class?"
 #warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
 
-// These are all negative because we fill the DOFs on each level by their global
+// These are all negative because we fill the unknowns on each level by their global
 // row #, which is always positive. Cells that require special handling are assigned
 // a negative value so we can flag them correctly later on.
 const int PetscGrid::InvalidCell  = -4;
@@ -51,9 +51,9 @@ PetscGrid::PetscGrid() noexcept
   m_numGhost    = -1;
   m_numPhases   = -1;
 
-  m_numLocalDOFs  = -1;
-  m_numGlobalDOFs = -1;
-  m_localDOFBegin = -1;
+  m_numLocalRows  = -1;
+  m_numGlobalRows = -1;
+  m_localRowBegin = -1;
 }
 
 PetscGrid::~PetscGrid() noexcept
@@ -91,9 +91,9 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   CH_assert(m_numGhost >= 0);
   CH_assert(m_finestLevel >= 0);
 
-  this->definePetscDOFs();
-  this->allocateLocalViews();
-  this->fillLocalViews();
+  this->definePetscRows();
+  this->allocateRowViews();
+  this->defineRowViews();
 
   m_isDefined = true;
 }
@@ -112,23 +112,23 @@ PetscGrid::clear() noexcept
 }
 
 void
-PetscGrid::definePetscDOFs() noexcept
+PetscGrid::definePetscRows() noexcept
 {
-  CH_TIME("PetscGrid::definePetscDOFs");
+  CH_TIME("PetscGrid::definePetscRows");
   if (m_verbose) {
-    pout() << "PetscGrid::definePetscDOFs" << endl;
+    pout() << "PetscGrid::definePetscRows" << endl;
   }
 
   CH_assert(!(m_levelGrids[0].isNull()));
 
-  m_numLocalDOFs  = 0;
-  m_numGlobalDOFs = 0;
+  m_numLocalRows  = 0;
+  m_numGlobalRows = 0;
 
-  m_numDOFsPerRank.resize(numProc(), 0);
+  m_numRowsPerRank.resize(numProc(), 0);
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
-    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& LIDs = m_localRows[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& GIDs = m_globalRows[iphase];
 
     LIDs.resize(1 + m_finestLevel);
     GIDs.resize(1 + m_finestLevel);
@@ -161,7 +161,7 @@ PetscGrid::definePetscDOFs() noexcept
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (validCells(iv) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
-              MayDay::Abort("PetscGrid::definePetscDOFs -- multi-valued cells are not permitted");
+              MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted");
             }
 
             PetscDOF dof;
@@ -173,10 +173,10 @@ PetscGrid::definePetscDOFs() noexcept
 
             m_petscToAMR.push_back(dof);
 
-            lid(iv) = m_numLocalDOFs;
-            gid(iv) = m_numLocalDOFs;
+            lid(iv) = m_numLocalRows;
+            gid(iv) = m_numLocalRows;
 
-            m_numLocalDOFs = m_numLocalDOFs + 1;
+            m_numLocalRows = m_numLocalRows + 1;
           }
         };
 
@@ -185,18 +185,18 @@ PetscGrid::definePetscDOFs() noexcept
     }
   }
 
-  // Gather the number of DOFs per MPI rank. And figure out the total number of DOFs.
-  m_numDOFsPerRank = ParallelOps::gather(m_numLocalDOFs);
-  m_numGlobalDOFs  = ParallelOps::sum(m_numLocalDOFs);
+  // Gather the number of rows per MPI rank. And figure out the total number of rows.
+  m_numRowsPerRank = ParallelOps::gather(m_numLocalRows);
+  m_numGlobalRows  = ParallelOps::sum(m_numLocalRows);
 
   // Compute the global row offset for this rank.
-  m_localDOFBegin = 0;
+  m_localRowBegin = 0;
   for (PetscInt i = 0; i < procID(); i++) {
-    m_localDOFBegin += m_numDOFsPerRank[i];
+    m_localRowBegin += m_numRowsPerRank[i];
   }
 
   // Above, LIDs = GIDs, but we now know the PETSc row where we begin indexing for this rank, so we now
-  // increment GIDs by m_localDOFBegin.
+  // increment GIDs by m_localRowBegin.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
@@ -208,11 +208,11 @@ PetscGrid::definePetscDOFs() noexcept
         const DataIndex din     = dit[mybox];
         const Box       cellBox = dbl[din];
 
-        BaseFab<PetscInt>& gid = (*m_globalIndices[iphase][lvl])[din];
+        BaseFab<PetscInt>& gid = (*m_globalRows[iphase][lvl])[din];
 
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (gid(iv) >= 0) {
-            gid(iv) += m_localDOFBegin;
+            gid(iv) += m_localRowBegin;
           }
         };
 
@@ -223,39 +223,39 @@ PetscGrid::definePetscDOFs() noexcept
 
   // Build local to global mapping for PETSc, so that we can extract local subvectors.
   PetscInt* gidx;
-  PetscCallVoid(PetscMalloc1(m_numLocalDOFs, &gidx));
-  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
-    gidx[i] = m_localDOFBegin + i;
+  PetscCallVoid(PetscMalloc1(m_numLocalRows, &gidx));
+  for (PetscInt i = 0; i < m_numLocalRows; i++) {
+    gidx[i] = m_localRowBegin + i;
   }
 
   PetscCallVoid(
-    ISLocalToGlobalMappingCreate(Chombo_MPI::comm, 1, m_numLocalDOFs, gidx, PETSC_OWN_POINTER, &m_localToGlobalIS));
+    ISLocalToGlobalMappingCreate(Chombo_MPI::comm, 1, m_numLocalRows, gidx, PETSC_OWN_POINTER, &m_localToGlobalIS));
 
   if (m_debug) {
-    pout() << "PetscGrid::definePetscDOFs - numLocalUnknowns = " << m_numLocalDOFs << endl;
-    pout() << "PetscGrid::definePetscDOFs - numGlobalUnknowns = " << m_numGlobalDOFs << endl;
+    pout() << "PetscGrid::definePetscRows - numLocalUnknowns = " << m_numLocalRows << endl;
+    pout() << "PetscGrid::definePetscRows - numGlobalUnknowns = " << m_numGlobalRows << endl;
   }
 }
 
 void
-PetscGrid::allocateLocalViews() noexcept
+PetscGrid::allocateRowViews() noexcept
 {
-  CH_TIME("PetscGrid::allocateLocalViews");
+  CH_TIME("PetscGrid::allocateRowViews");
   if (m_verbose) {
-    pout() << "PetscGrid::allocateLocalViews" << endl;
+    pout() << "PetscGrid::allocateRowViews" << endl;
   }
 
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& levelDOFs     = m_levelDOFs[iphase];
-    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& levelDOFsCoFi = m_levelDOFsCoFi[iphase];
-    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& levelDOFsFiCo = m_levelDOFsFiCo[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& rows     = m_rows[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& rowsCoFi = m_rowsCoFi[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& rowsFiCo = m_rowsFiCo[iphase];
 
-    levelDOFs.resize(1 + m_finestLevel);
-    levelDOFsCoFi.resize(1 + m_finestLevel);
-    levelDOFsFiCo.resize(1 + m_finestLevel);
+    rows.resize(1 + m_finestLevel);
+    rowsCoFi.resize(1 + m_finestLevel);
+    rowsFiCo.resize(1 + m_finestLevel);
 
     // Define all DOF data -- set everything to invalid cell for now.
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -267,12 +267,12 @@ PetscGrid::allocateLocalViews() noexcept
         const DataIterator&      dit  = dbl.dataIterator();
         const int                nbox = dit.size();
 
-        levelDOFs[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+        rows[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
           new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
-          (*levelDOFs[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+          (*rows[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
         }
       }
 
@@ -281,12 +281,12 @@ PetscGrid::allocateLocalViews() noexcept
         const DataIterator&      dit  = dbl.dataIterator();
         const int                nbox = dit.size();
 
-        levelDOFsCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+        rowsCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
           new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
-          (*levelDOFsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+          (*rowsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
         }
       }
 
@@ -295,12 +295,12 @@ PetscGrid::allocateLocalViews() noexcept
         const DataIterator&      dit  = dbl.dataIterator();
         const int                nbox = dit.size();
 
-        levelDOFsFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+        rowsFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
           new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
         for (int mybox = 0; mybox < nbox; mybox++) {
-          (*levelDOFsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+          (*rowsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
         }
       }
     }
@@ -308,20 +308,22 @@ PetscGrid::allocateLocalViews() noexcept
 }
 
 void
-PetscGrid::fillLocalViews() noexcept
+PetscGrid::defineRowViews() noexcept
 {
-  CH_TIME("PetscGrid::fillLocalViews");
+  CH_TIME("PetscGrid::defineRowViews");
   if (m_verbose) {
-    pout() << "PetscGrid::fillLocalViews" << endl;
+    pout() << "PetscGrid::defineRowViews" << endl;
   }
 
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
-  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
-    const DisjointBoxLayout& dbl      = m_levelGrids[lvl]->getGrids();
-    const DataIterator&      dit      = dbl.dataIterator();
-    const int                numBoxes = dit.size();
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+      const DisjointBoxLayout& dbl      = m_levelGrids[lvl]->getGrids();
+      const DataIterator&      dit      = dbl.dataIterator();
+      const int                numBoxes = dit.size();
+    }
   }
 }
 
@@ -336,21 +338,21 @@ PetscGrid::create(Vec& x) noexcept
   CH_assert(m_isDefined);
 
   PetscCallVoid(VecCreate(Chombo_MPI::comm, &x));
-  PetscCallVoid(VecSetSizes(x, m_numLocalDOFs, m_numGlobalDOFs));
+  PetscCallVoid(VecSetSizes(x, m_numLocalRows, m_numGlobalRows));
   PetscCallVoid(VecSetLocalToGlobalMapping(x, m_localToGlobalIS));
   PetscCallVoid(VecSetFromOptions(x));
 
 #warning "Debug code in PetscGrid::create -- scheduled for removal"
 #if 0
-  PetscInt    indices[m_numLocalDOFs];
-  PetscScalar values[m_numLocalDOFs];
+  PetscInt    indices[m_numLocalRows];
+  PetscScalar values[m_numLocalRows];
 
-  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
+  for (PetscInt i = 0; i < m_numLocalRows; i++) {
     indices[i] = i;
     values[i]  = 1.0 * procID();
   }
 
-  PetscCallVoid(VecSetValuesLocal(x, m_numLocalDOFs, indices, values, INSERT_VALUES));
+  PetscCallVoid(VecSetValuesLocal(x, m_numLocalRows, indices, values, INSERT_VALUES));
   PetscCallVoid(VecAssemblyBegin(x));
   PetscCallVoid(VecAssemblyEnd(x));
   PetscCallVoid(VecView(x, PETSC_VIEWER_STDOUT_WORLD));
@@ -386,9 +388,9 @@ PetscGrid::setValue(Vec& a_x, const PetscScalar a_value) const noexcept
   CH_assert(endIdx <= startIdx);
   CH_assert(endIdx >= 0);
   CH_assert(startIdx >= 0);
-  CH_assert(endIdx - startIdx == m_numLocalDOFs - 1);
+  CH_assert(endIdx - startIdx == m_numLocalRows - 1);
 
-  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
+  for (PetscInt i = 0; i < m_numLocalRows; i++) {
     arr[i] = a_value;
   }
 
@@ -416,7 +418,7 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
   CH_assert(endIdx <= startIdx);
   CH_assert(endIdx >= 0);
   CH_assert(startIdx >= 0);
-  CH_assert(endIdx - startIdx == m_numLocalDOFs - 1);
+  CH_assert(endIdx - startIdx == m_numLocalRows - 1);
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -432,7 +434,7 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
         const Box&      cellBox = dbl[din];
 
         const FArrayBox&         data       = (*a_y[lvl])[din].getPhase(iphase).getFArrayBox();
-        const BaseFab<PetscInt>& localIndex = (*m_localIndices[iphase][lvl])[din];
+        const BaseFab<PetscInt>& localIndex = (*m_localRows[iphase][lvl])[din];
 
         auto kernel = [&](const IntVect iv) -> void {
           const PetscInt& k = localIndex(iv);
@@ -470,9 +472,9 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   CH_assert(endIdx <= startIdx);
   CH_assert(endIdx >= 0);
   CH_assert(startIdx >= 0);
-  CH_assert(endIdx - startIdx == m_numLocalDOFs - 1);
+  CH_assert(endIdx - startIdx == m_numLocalRows - 1);
 
-  for (PetscInt i = 0; i < m_numLocalDOFs; i++) {
+  for (PetscInt i = 0; i < m_numLocalRows; i++) {
     const PetscDOF dof = m_petscToAMR[i];
 
     const int       phase     = dof.phase;

@@ -171,19 +171,19 @@ protected:
   int m_numPhases;
 
   /*!
-    @brief Number of local DOFs
+    @brief Number of rows owned locally
   */
-  PetscInt m_numLocalDOFs;
+  PetscInt m_numLocalRows;
 
   /*!
-    @brief Number of global DOFs
+    @brief Number of global rows
   */
-  PetscInt m_numGlobalDOFs;
+  PetscInt m_numGlobalRows;
 
   /*!
-    @brief Global DOF corresponding to the first local DOF.
+    @brief Global row corresponding to the first local row
   */
-  PetscInt m_localDOFBegin;
+  PetscInt m_localRowBegin;
 
   /*!
     @brief Local index to global index mapping for PETSc
@@ -191,9 +191,9 @@ protected:
   ISLocalToGlobalMapping m_localToGlobalIS;
 
   /*!
-    @brief Number of DOFs per MPI rank. Visible to all ranks. 
+    @brief Number of rows per MPI rank. Visible to all ranks. 
   */
-  Vector<PetscInt> m_numDOFsPerRank;
+  Vector<PetscInt> m_numRowsPerRank;
 
   /*!
     @brief Valid grid cells
@@ -216,72 +216,74 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;
 
   /*!
-    @brief Mapping of AMR DOFs to local PETSc DOFs
-    @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid DOF.
+    @brief Mapping of AMR cells to local PETSc rows
+    @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid grid cell
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_localIndices[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_localRows[2];
 
   /*!
-    @brief Mapping of AMR DOFs to local PETSc DOFs
-    @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid DOF.
+    @brief Mapping of AMR cells to global PETSc rows
+    @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid grid cell
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalIndices[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalRows[2];
 
   /*!
-    @brief Encoded grid cells on each level. 
-    @details This contains the global row # in the PETsc vector corresponding to a grid cell (similar to m_globalIndices). The
+    @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies
+    that the cell is either a ghost, invalid, covered by a finer grid, etc. 
+    @details This contains the global row # in the PETsc vector corresponding to a grid cell (similar to m_globalRows). The
     only difference is that this contain also has ghost cells so it can access the global row number for cells that lie outside
     of the domain. Similarly, negative values are assigned to indicate if cells are ghost cells, covered by another grid, covered
     or covered by the geometry.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFs[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rows[2];
 
   /*!
-    @brief Coarse-grid DOFs.
-    @details This data holder is filled with DOFs, including ghost cells around each patch. The grids on which
+    @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies
+    that the cell is either a ghost, invalid, covered by a finer grid, etc.     
+    @details This data holder is filled with row indices, including ghost cells around each patch. The grids on which
     the objects are defined are coarsenings from finer levels. I.e., entry on level lvl corresponds to a coarsening of level
-    lvl+1. This means that if we are visiting level lvl+1 on m_levelDOFs, we can access the coarse grid by visiting level
+    lvl+1. This means that if we are visiting level lvl+1 on m_rows, we can access the coarse grid by visiting level
     lvl in this data holder.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsCoFi[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rowsCoFi[2];
 
   /*!
-    @brief FIne-grid DOFs.
-    @details This data holder is filled with fine-grid DOFs, including ghost cells around each patch. The grids on which
+    @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies
+    that the cell is either a ghost, invalid, covered by a finer grid, etc.         
+    @details This data holder is filled with row indices, including ghost cells around each patch. The grids on which
     the objects are defined are refinements of coarser levels. I.e., the entry on level lvl+1 corresponds to a refinement
-    of level lvl. This means that if we are visiting level lvl on m_levelDOFs, we can access the fine grids via this data
+    of level lvl. This means that if we are visiting level lvl on m_rows, we can access the fine grids via this data
     holder (i.e., level lvl+1 in this data holder).
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsFiCo[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rowsFiCo[2];
 
   /*!
-    @brief Mapping of PETSc local DOF index back to AMR
-    @details Locally owned. Maps a local DOF index to a level/grid/cell DOF index.
+    @brief Mapping of PETSc local row index back to AMR
+    @details Locally owned. Maps a local row index to a level/grid/cell.
   */
   Vector<PetscDOF> m_petscToAMR;
 
   /*!
     @brief Build the Chombo <--> Petsc index mapping for the valid cells.
-    @details This defines m_localIndices and m_globalIndices, m_numDOFsPerRank, m_localToGlobalIS, and figures out the number
+    @details This defines m_localRows and m_globalRows, m_numRowsPerRank, m_localToGlobalIS, and figures out the number
     of degrees of freedom on each MPI rank. After this is called, it will be possible to index local grid cells into a PETSc
     vector row.
   */
   virtual void
-  definePetscDOFs() noexcept;
+  definePetscRows() noexcept;
 
   /*!
-    @brief Allocate the local views of the PETSc grid, done so that each grid has a loacl view of the surrounding global DOFs.
-    surrounding global DOFs.
+    @brief Allocate the local views of the PETSc grid, done so that each grid has a loacl view of the surrounding PETSc rows.
     @details This does not actually fill the views -- it simply allocatse the data holders
   */
   virtual void
-  allocateLocalViews() noexcept;
+  allocateRowViews() noexcept;
 
   /*!
     @brief Fill the local views of the PETSc grid.
   */
   virtual void
-  fillLocalViews() noexcept;
+  defineRowViews() noexcept;
 };
 
 #endif
