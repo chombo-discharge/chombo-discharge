@@ -30,11 +30,13 @@
 #warning "How much PETSc math should we add to this class?"
 #warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
 
-const int PetscGrid::InvalidCell  = -1;
-const int PetscGrid::GenuineCell  = 0;
-const int PetscGrid::GhostCell    = 1;
-const int PetscGrid::CoveredCell  = 2;
-const int PetscGrid::ExteriorCell = 3;
+// These are all negative because we fill the DOFs on each level by their global
+// row #, which is always positive. Cells that require special handling are assigned
+// a negative value so we can flag them correctly later on.
+const int PetscGrid::InvalidCell  = -4;
+const int PetscGrid::CoveredCell  = -3;
+const int PetscGrid::GhostCell    = -2;
+const int PetscGrid::BoundaryCell = -1;
 
 PetscGrid::PetscGrid() noexcept
 {
@@ -45,10 +47,13 @@ PetscGrid::PetscGrid() noexcept
   m_debug     = false;
   m_profile   = false;
 
+  m_finestLevel = -1;
+  m_numGhost    = -1;
+  m_numPhases   = -1;
+
   m_numLocalDOFs  = -1;
   m_numGlobalDOFs = -1;
-  m_finestLevel   = -1;
-  m_numGhost      = -1;
+  m_localDOFBegin = -1;
 }
 
 PetscGrid::~PetscGrid() noexcept
@@ -87,7 +92,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   CH_assert(m_finestLevel >= 0);
 
   this->definePetscDOFs();
-  this->defineLocalViews();
+  this->allocateLocalViews();
+  this->fillLocalViews();
 
   m_isDefined = true;
 }
@@ -121,8 +127,8 @@ PetscGrid::definePetscDOFs() noexcept
   m_numDOFsPerRank.resize(numProc(), 0);
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
-    Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& LIDs = m_localIndices[iphase];
+    Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& GIDs = m_globalIndices[iphase];
 
     LIDs.resize(1 + m_finestLevel);
     GIDs.resize(1 + m_finestLevel);
@@ -134,8 +140,8 @@ PetscGrid::definePetscDOFs() noexcept
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
 
-      LIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
-      GIDs[lvl] = RefCountedPtr<LayoutData<BaseFab<PetscInt>>>(new LayoutData<BaseFab<PetscInt>>(dbl));
+      LIDs[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(new LevelData<BaseFab<PetscInt>>(dbl, 1, IntVect::Zero));
+      GIDs[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(new LevelData<BaseFab<PetscInt>>(dbl, 1, IntVect::Zero));
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
@@ -149,10 +155,7 @@ PetscGrid::definePetscDOFs() noexcept
         BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
         BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
 
-        lid.define(cellBox, 1);
         lid.setVal(-1);
-
-        gid.define(cellBox, 1);
         gid.setVal(-1);
 
         auto regularKernel = [&](const IntVect& iv) -> void {
@@ -235,32 +238,79 @@ PetscGrid::definePetscDOFs() noexcept
 }
 
 void
-PetscGrid::defineLocalViews() noexcept
+PetscGrid::allocateLocalViews() noexcept
 {
-  CH_TIME("PetscGrid::defineLocalViews");
+  CH_TIME("PetscGrid::allocateLocalViews");
   if (m_verbose) {
-    pout() << "PetscGrid::defineLocalViews" << endl;
+    pout() << "PetscGrid::allocateLocalViews" << endl;
   }
 
-  m_cellTypes.resize(1 + m_finestLevel);
+  const int     numComps = 1;
+  const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
+  m_levelDOFs.resize(1 + m_finestLevel);
+  m_levelDOFsCoFi.resize(1 + m_finestLevel);
+  m_levelDOFsFiCo.resize(1 + m_finestLevel);
+
+  // Define all DOF data -- set everything to invalid cell for now.
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_levelGrids[lvl]->getGrids();
+    const bool hasCoar = (lvl > 0);
+    const bool hasFine = (lvl < m_finestLevel);
 
-    m_cellTypes[lvl] = RefCountedPtr<LevelData<BaseFab<int>>>(new LevelData<BaseFab<int>>(dbl, m_numGhost));
+    {
+      const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
 
-    const DataIterator& dit  = dbl.dataIterator();
-    const int           nbox = dit.size();
+      m_levelDOFs[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+        new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
 
 #pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din = dit[mybox];
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        (*m_levelDOFs[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+      }
+    }
 
-      BaseFab<int>& cellTypes = (*m_cellTypes[lvl])[din];
+    if (hasFine) {
+      const DisjointBoxLayout& dbl  = m_levelGridsCoFi[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
 
-      cellTypes.setVal(PetscGrid::InvalidCell);
+      m_levelDOFsCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+        new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        (*m_levelDOFsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+      }
+    }
+
+    if (hasCoar) {
+      const DisjointBoxLayout& dbl  = m_levelGridsFiCo[lvl]->getGrids();
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      m_levelDOFsFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<PetscInt>>>(
+        new LevelData<BaseFab<PetscInt>>(dbl, numComps, ghostVec));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        (*m_levelDOFsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+      }
     }
   }
+}
+
+void
+PetscGrid::fillLocalViews() noexcept
+{
+  CH_TIME("PetscGrid::fillLocalViews");
+  if (m_verbose) {
+    pout() << "PetscGrid::fillLocalViews" << endl;
+  }
+
+  const int     numComps = 1;
+  const IntVect ghostVec = m_numGhost * IntVect::Unit;
 }
 
 void

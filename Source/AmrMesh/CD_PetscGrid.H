@@ -40,27 +40,22 @@ public:
   /*!
     @brief A cell missing an identifier (usually signals a bug).
   */
-  static const int InvalidCell;
-
-  /*!
-    @brief Genuine cell (i.e., cell not covered by geometry or a finer grid)
-  */
-  static const int GenuineCell;
+  static const PetscInt InvalidCell;
 
   /*!
     @brief Ghost cell (i.e., a cell outside a fine-grid patch)
   */
-  static const int GhostCell;
+  static const PetscInt GhostCell;
 
   /*!
-    @brief Covered cell (i.e., a cell covered by a finer grid)
+    @brief Covered cell (i.e., a cell covered by a finer grid). 
   */
-  static const int CoveredCell;
+  static const PetscInt CoveredCell;
 
   /*!
-    @brief Exterior cell (i.e., a cell covered by the geometry, or outside the problem domain)
+    @brief Boundary cell (i.e., a cell that abuts the domain boundary)
   */
-  static const int ExteriorCell;
+  static const PetscInt BoundaryCell;
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -74,9 +69,12 @@ public:
 
   /*!
     @brief Main define function. Puts object in usable state.
+    @details Note that a_levelGridsCoFi must be coarsened from finer grids. That is, entry lvl
+    in levelGridsCoFi must be a coarsened version of a_levelGrids[lvl+1]. Similarly, a_levelGridsFiCo
+    must be a refinement, i.e., a_levelGridsFiCo[lvl] must be a refinemetn of a_levelGrids[lvl].
     @param[in] a_levelGrids chombo-discharge AMR grids
-    @param[in] a_levelGridsCoFi Refined grids
-    @param[in] a_levelGridsFiCo Coarsened grids
+    @param[in] a_levelGridsCoFi Coarsened grids.
+    @param[in] a_levelGridsFiCo Refined grids.
     @param[in] a_validCells Valid grid cells
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
@@ -203,13 +201,6 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
 
   /*!
-    @brief Encoded grid cells.
-    @details These cells are encoded by whether or not they are a genuine cell, a ghost cell,
-    covered by a finer grid, or outside the domain (completely inside EBs or outside the problem domain).
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellTypes;
-
-  /*!
     @brief Grids on each level
   */
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGrids;
@@ -228,13 +219,40 @@ protected:
     @brief Mapping of AMR DOFs to local PETSc DOFs
     @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid DOF.
   */
-  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_localIndices[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_localIndices[2];
 
   /*!
     @brief Mapping of AMR DOFs to local PETSc DOFs
     @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid DOF.
   */
-  Vector<RefCountedPtr<LayoutData<BaseFab<PetscInt>>>> m_globalIndices[2];
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalIndices[2];
+
+  /*!
+    @brief Encoded grid cells on each level. 
+    @details This contains the global row # in the PETsc vector corresponding to a grid cell (similar to m_globalIndices). The
+    only difference is that this contain also has ghost cells so it can access the global row number for cells that lie outside
+    of the domain. Similarly, negative values are assigned to indicate if cells are ghost cells, covered by another grid, covered
+    or covered by the geometry.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFs;
+
+  /*!
+    @brief Coarse-grid DOFs.
+    @details This data holder is filled with DOFs, including ghost cells around each patch. The grids on which
+    the objects are defined are coarsenings from finer levels. I.e., entry on level lvl corresponds to a coarsening of level
+    lvl+1. This means that if we are visiting level lvl+1 on m_levelDOFs, we can access the coarse grid by visiting level
+    lvl in this data holder.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsCoFi;
+
+  /*!
+    @brief FIne-grid DOFs.
+    @details This data holder is filled with fine-grid DOFs, including ghost cells around each patch. The grids on which
+    the objects are defined are refinements of coarser levels. I.e., the entry on level lvl+1 corresponds to a refinement
+    of level lvl. This means that if we are visiting level lvl on m_levelDOFs, we can access the fine grids via this data
+    holder (i.e., level lvl+1 in this data holder).
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_levelDOFsFiCo;
 
   /*!
     @brief Mapping of PETSc local DOF index back to AMR
@@ -252,11 +270,18 @@ protected:
   definePetscDOFs() noexcept;
 
   /*!
-    @brief Build the map over valid degrees of freedom, done so that each grid has a local view of the
-    surrounding global DOFs. 
+    @brief Allocate the local views of the PETSc grid, done so that each grid has a loacl view of the surrounding global DOFs.
+    surrounding global DOFs.
+    @details This does not actually fill the views -- it simply allocatse the data holders
   */
   virtual void
-  defineLocalViews() noexcept;
+  allocateLocalViews() noexcept;
+
+  /*!
+    @brief Fill the local views of the PETSc grid.
+  */
+  virtual void
+  fillLocalViews() noexcept;
 };
 
 #endif
