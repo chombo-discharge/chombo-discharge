@@ -56,17 +56,17 @@ public:
     @param[in] a_levelGrids chombo-discharge AMR grids
     @param[in] a_levelGridsCoFi Coarsened grids.
     @param[in] a_levelGridsFiCo Refined grids.
-    @param[in] a_validCells Valid grid cells
+    @param[in] a_amrCells Grid cell types
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
   virtual void
-  define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
-         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
-         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,
-         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
-         const int                                              a_finestLevel,
-         const int                                              a_numGhost) noexcept;
+  define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGrids,
+         const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsCoFi,
+         const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsFiCo,
+         const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>& a_amrCells,
+         const int                                                 a_finestLevel,
+         const int                                                 a_numGhost) noexcept;
 
   /*!
     @brief Clear the object.
@@ -179,7 +179,7 @@ protected:
   /*!
     @brief Valid grid cells
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
+  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
 
   /*!
     @brief Grids on each level
@@ -207,17 +207,6 @@ protected:
     @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid grid cell
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalRows[2];
-
-  /*!
-    @brief Map over which cells are of which types (e.g., a valid cell, ghost, boundary, etc).
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
-
-  /*!
-    @brief Simple map that checks if a grid cell is associated with a PETSc row
-  */
-#warning "This can probably be removed"
-  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validPetscRow;
 
   /*!
     @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies

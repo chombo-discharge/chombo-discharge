@@ -22,6 +22,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
+#if 0
 #warning "At the end -- let's see if we can trim some memory from this class"
 #warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
 #warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
@@ -29,6 +30,7 @@
 #warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
 #warning "Priority 1: Build maps over which cells are which. Must be viewable from each patch".
 #warning "Priority 2: Map global row numbers to cells on each phase. Must be viewable from each patch".
+#endif
 
 PetscGrid::PetscGrid() noexcept
 {
@@ -54,12 +56,12 @@ PetscGrid::~PetscGrid() noexcept
 }
 
 void
-PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
-                  const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
-                  const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,
-                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
-                  const int                                              a_finestLevel,
-                  const int                                              a_numGhost) noexcept
+PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGrids,
+                  const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsCoFi,
+                  const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsFiCo,
+                  const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>& a_amrCells,
+                  const int                                                 a_finestLevel,
+                  const int                                                 a_numGhost) noexcept
 {
   CH_TIME("PetscGrid::define");
   if (m_verbose) {
@@ -75,7 +77,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   m_levelGrids     = a_levelGrids;
   m_levelGridsCoFi = a_levelGridsCoFi;
   m_levelGridsFiCo = a_levelGridsFiCo;
-  m_validCells     = a_validCells;
+  m_amrCells       = a_amrCells;
   m_finestLevel    = a_finestLevel;
   m_numGhost       = a_numGhost;
   m_numPhases      = m_levelGrids[0]->numPhases();
@@ -117,27 +119,6 @@ PetscGrid::definePetscRows() noexcept
   m_numGlobalRows = 0;
 
   m_numRowsPerRank.resize(numProc(), 0);
-  m_validPetscRow.resize(1 + m_finestLevel);
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl = m_levelGrids[lvl]->getGrids();
-
-    m_validPetscRow[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(new LevelData<BaseFab<bool>>(dbl, 1, IntVect::Zero));
-
-    const DataIterator& dit      = dbl.dataIterator();
-    const int           numBoxes = dit.size();
-
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < numBoxes; mybox++) {
-      const DataIndex& din = dit[mybox];
-
-      BaseFab<bool>& validPetscRow = (*m_validPetscRow[lvl])[din];
-
-      validPetscRow.setVal(false);
-    }
-  }
-
-#warning "I need to throw in a cross-phase BaseFab that checks if the cell contains something that should go into PETSc"
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>>& LIDs = m_localRows[iphase];
@@ -158,22 +139,21 @@ PetscGrid::definePetscRows() noexcept
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex      din        = dit[mybox];
-        const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
-        const Box&           cellBox    = dbl[din];
-        const EBISBox&       ebisBox    = ebisl[din];
-        const IntVectSet&    ivs        = ebisBox.getIrregIVS(cellBox);
-        const EBGraph&       ebgraph    = ebisBox.getEBGraph();
+        const DataIndex         din      = dit[mybox];
+        const BaseFab<AMRCell>& amrCells = (*m_amrCells[lvl])[din];
+        const Box&              cellBox  = dbl[din];
+        const EBISBox&          ebisBox  = ebisl[din];
+        const IntVectSet&       ivs      = ebisBox.getIrregIVS(cellBox);
+        const EBGraph&          ebgraph  = ebisBox.getEBGraph();
 
-        BaseFab<PetscInt>& lid      = (*LIDs[lvl])[din];
-        BaseFab<PetscInt>& gid      = (*GIDs[lvl])[din];
-        BaseFab<bool>&     validRow = (*m_validPetscRow[lvl])[din];
+        BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
+        BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
 
         lid.setVal(-1);
         gid.setVal(-1);
 
         auto regularKernel = [&](const IntVect& iv) -> void {
-          if (validCells(iv) && !ebisBox.isCovered(iv)) {
+          if (!(amrCells(iv).isCoveredByFinerGrid()) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
               MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted");
             }
@@ -187,9 +167,8 @@ PetscGrid::definePetscRows() noexcept
 
             m_petscToAMR.push_back(dof);
 
-            lid(iv)      = m_numLocalRows;
-            gid(iv)      = m_numLocalRows;
-            validRow(iv) = true;
+            lid(iv) = m_numLocalRows;
+            gid(iv) = m_numLocalRows;
 
             m_numLocalRows = m_numLocalRows + 1;
           }
@@ -259,7 +238,7 @@ PetscGrid::defineRowViews() noexcept
   if (m_verbose) {
     pout() << "PetscGrid::defineRowViews" << endl;
   }
-
+#if 0
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
@@ -321,6 +300,7 @@ PetscGrid::defineRowViews() noexcept
       }
     }
   }
+#endif
 }
 
 void
@@ -330,7 +310,7 @@ PetscGrid::defineCellFlags() noexcept
   if (m_verbose) {
     pout() << "PetscGrid::defineCellFlags" << endl;
   }
-
+#if 0
   const int     numComps = 1;
   const IntVect ghostVec = m_numGhost * IntVect::Unit;
 
@@ -397,13 +377,14 @@ PetscGrid::defineCellFlags() noexcept
       const Box        cellBox = dbl[din];
 
       BaseFab<int>&        cellFlags  = (*m_cellFlags[lvl])[din];
-      const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
+      const BaseFab<bool>& amrCells = (*m_amrCells[lvl])[din];
 
       auto regularKernel = [&](const IntVect& iv) -> void {
 
       };
     }
   }
+#endif
 }
 
 void
@@ -435,6 +416,7 @@ PetscGrid::create(Vec& x) noexcept
   PetscCallVoid(VecAssemblyBegin(x));
   PetscCallVoid(VecAssemblyEnd(x));
   PetscCallVoid(VecView(x, PETSC_VIEWER_STDOUT_WORLD));
+#endif
 #endif
 }
 
@@ -570,5 +552,3 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 }
 
 #include <CD_NamespaceFooter.H>
-
-#endif

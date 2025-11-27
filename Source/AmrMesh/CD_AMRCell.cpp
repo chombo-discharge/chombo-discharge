@@ -60,6 +60,30 @@ AMRCell::setDomainCell(const bool a_isDomainCell) noexcept
   m_isDomainCell = a_isDomainCell;
 }
 
+unsigned int
+AMRCell::getNumPhases() const noexcept
+{
+  return static_cast<unsigned int>(m_numPhases);
+}
+
+bool
+AMRCell::isCoveredByFinerGrid() const noexcept
+{
+  return m_isCoveredByFinerGrid;
+}
+
+bool
+AMRCell::isGhostCF() const noexcept
+{
+  return m_isGhostCF;
+}
+
+bool
+AMRCell::isDomainCell() const noexcept
+{
+  return m_isDomainCell;
+}
+
 int
 linearSize(const AMRCell& a_amrCell)
 {

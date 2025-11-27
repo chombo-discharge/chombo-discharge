@@ -167,6 +167,7 @@ Realm::regridBase(const int a_lmin)
 
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
+  this->defineAMRCells();  
   this->defineLevelTiles();
 }
 
@@ -766,6 +767,47 @@ Realm::defineValidCells()
 }
 
 void
+Realm::defineAMRCells()
+{
+  CH_TIME("Realm::defineAMRCells");
+  if (m_verbosity > 5) {
+    pout() << "Realm::defineAMRCells" << endl;
+  }
+
+  const int curComp = 0;
+  const int numComp = 1;
+
+  m_amrCells.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl  = m_grids[lvl];
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+
+    m_amrCells[lvl] = RefCountedPtr<LevelData<BaseFab<AMRCell>>>(
+      new LevelData<BaseFab<AMRCell>>(dbl, numComp, m_numGhost * IntVect::Unit));
+
+#if 1 // While I develop, only set the covered flag from the valid cell stuff
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din     = dit[mybox];
+      const Box        cellBox = dbl[din];
+
+      BaseFab<AMRCell>&    amrCells   = (*m_amrCells[lvl])[din];
+      const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
+
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        amrCells(iv).setCoveredByFinerGrid(!(validCells(iv)));
+      };
+
+      BoxLoops::loop(cellBox, regularKernel);
+    }
+#endif
+  }
+}
+
+void
 Realm::defineLevelTiles() noexcept
 {
   CH_TIME("Realm::defineLevelTiles");
@@ -796,7 +838,7 @@ Realm::definePetscGrid() noexcept
     m_petscGrid = RefCountedPtr<PetscGrid>(new PetscGrid());
   }
 
-  m_petscGrid->define(m_mflg, m_mflgCoFi, m_mflgFiCo, m_validCells, m_finestLevel, m_numGhost);
+  m_petscGrid->define(m_mflg, m_mflgCoFi, m_mflgFiCo, m_amrCells, m_finestLevel, m_numGhost);
 #endif
 }
 
@@ -1024,6 +1066,12 @@ const AMRMask&
 Realm::getValidCells() const
 {
   return m_validCells;
+}
+
+const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>&
+Realm::getAMRCells() const
+{
+  return m_amrCells;
 }
 
 const Vector<RefCountedPtr<LevelTiles>>&

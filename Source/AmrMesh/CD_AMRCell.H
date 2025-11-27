@@ -126,7 +126,7 @@ public:
   unsigned char m_numPhases;
 
   /*!
-    @brief If > 0, the cell is covered by a finer grid.
+    @brief If true, the cell is covered by a finer grid
   */
   bool m_isCoveredByFinerGrid;
 

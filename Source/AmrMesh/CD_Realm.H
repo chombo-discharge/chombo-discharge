@@ -18,6 +18,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
+#include <CD_AMRCell.H>
 #include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
@@ -374,6 +375,12 @@ public:
   getValidCells() const;
 
   /*!
+    @brief Get cell maps describing which cells are which
+  */
+  const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>&
+  getAMRCells() const;  
+
+  /*!
     @brief Get the tiled space
   */
   const Vector<RefCountedPtr<LevelTiles>>&
@@ -468,6 +475,11 @@ protected:
   */
   AMRMask m_validCells;
 
+  /*!
+    @brief Map over which cells contain valid cells, if they are ghosts, etc.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
+
 #ifdef CH_USE_PETSC
   /*!
     @brief PETSc grid
@@ -549,10 +561,15 @@ protected:
 
   /*!
     @brief Define the valid cell region mask. 
-    @param[in] a_lmin Coarsest level that changed during regrid. 
   */
   void
   defineValidCells();
+
+  /*!
+    @brief Define the AMRCell data holder region mask. 
+  */
+  void
+  defineAMRCells();  
 
   /*!
     @brief Define the tiled space
