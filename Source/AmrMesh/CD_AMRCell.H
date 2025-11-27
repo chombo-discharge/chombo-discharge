@@ -131,12 +131,12 @@ public:
   bool m_isCoveredByFinerGrid;
 
   /*!
-    @brief If > 0, the cell lies outside the grid level.
+    @brief If true, the cell lies outside the grid level.
   */
   bool m_isGhostCF;
 
   /*!
-    @brief If > 0, the cell is a domain boundary cell
+    @brief If true, the cell is a domain boundary cell
    */
   bool m_isDomainCell;
 };
