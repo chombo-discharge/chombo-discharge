@@ -27,6 +27,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_PetscDOF.H>
+#include <CD_AMRCell.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -37,31 +38,6 @@
 class PetscGrid
 {
 public:
-  /*!
-    @brief A cell missing an identifier (reaching into these is a bug).
-  */
-  static const int InvalidCell;
-
-  /*!
-    @brief Interior, valid cell.
-  */
-  static const int InteriorCell;
-
-  /*!
-    @brief Interior cell which is also a boundary cell (i.e., a cell that abuts the domain boundary).
-  */
-  static const int BoundaryCell;
-
-  /*!
-    @brief Coarse-fine ghost cell (i.e., a cell outside a fine-grid patch). 
-  */
-  static const int CFGhostCell;
-
-  /*!
-    @brief A cell that is covered by a finer grid.
-  */
-  static const int CoveredCell;
-
   /*!
     @brief Default constructor. Must subsequently call define
   */
@@ -233,8 +209,14 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalRows[2];
 
   /*!
+    @brief Map over which cells are of which types (e.g., a valid cell, ghost, boundary, etc).
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
+
+  /*!
     @brief Simple map that checks if a grid cell is associated with a PETSc row
   */
+#warning "This can probably be removed"
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validPetscRow;
 
   /*!

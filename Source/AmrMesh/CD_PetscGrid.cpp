@@ -30,12 +30,6 @@
 #warning "Priority 1: Build maps over which cells are which. Must be viewable from each patch".
 #warning "Priority 2: Map global row numbers to cells on each phase. Must be viewable from each patch".
 
-const int PetscGrid::InvalidCell  = -1;
-const int PetscGrid::InteriorCell = 0;
-const int PetscGrid::BoundaryCell = 1;
-const int PetscGrid::CFGhostCell  = 2;
-const int PetscGrid::CoveredCell  = 3;
-
 PetscGrid::PetscGrid() noexcept
 {
   CH_TIME("PetscGrid::PetscGrid");
@@ -358,7 +352,7 @@ PetscGrid::defineCellFlags() noexcept
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        (*m_cellFlags[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        //        (*m_cellFlags[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
       }
     }
 
@@ -372,7 +366,7 @@ PetscGrid::defineCellFlags() noexcept
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        (*m_cellFlagsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        //        (*m_cellFlagsCoFi[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
       }
     }
 
@@ -386,7 +380,7 @@ PetscGrid::defineCellFlags() noexcept
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        (*m_cellFlagsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
+        //        (*m_cellFlagsFiCo[lvl])[dit[mybox]].setVal(PetscGrid::InvalidCell);
       }
     }
   }
