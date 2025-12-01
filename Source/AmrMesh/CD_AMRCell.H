@@ -58,13 +58,13 @@ public:
     @param[in] a_numPhases Number of phases where this cell is a valid cell.
     @param[in] a_isCoveredByFinerGrid Covered by finer grid or not.
     @param[in] a_isGhostCF Cell lies outside the grid level.
-    @param[in] a_isDomainCell Cell abuts the domain boundary.
+    @param[in] a_isDomainBoundaryCell Cell abuts the domain boundary.
   */
   void
   define(const unsigned int a_numPhases,
          const bool         a_isCoveredByFinerGrid,
          const bool         a_isGhostCF,
-         const bool         a_isDomainCell) noexcept;
+         const bool         a_isDomainBoundaryCell) noexcept;
 
   /*!
     @brief Set number of phases
@@ -89,10 +89,10 @@ public:
 
   /*!
     @brief Set domain boundary flag
-    @param[in] a_isDomainCell If true, the cell abuts the domain boundary.
+    @param[in] a_isDomainBoundaryCell If true, the cell abuts the domain boundary.
   */
   void
-  setDomainCell(const bool a_isDomainCell) noexcept;
+  setDomainBoundaryCell(const bool a_isDomainBoundaryCell) noexcept;
 
   /*!
     @brief Get number of phases.
@@ -116,7 +116,7 @@ public:
     @brief Check if the cell is a domain cell
   */
   bool
-  isDomainCell() const noexcept;
+  isDomainBoundaryCell() const noexcept;
 
   /*!
     @brief If > 0, indicates the number of phases where this cell is a valid cell.
@@ -138,7 +138,7 @@ public:
   /*!
     @brief If true, the cell is a domain boundary cell
    */
-  bool m_isDomainCell;
+  bool m_isDomainBoundaryCell;
 };
 
 /*!

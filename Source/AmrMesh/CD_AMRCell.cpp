@@ -18,7 +18,7 @@ AMRCell::AMRCell() noexcept
   m_numPhases            = 0;
   m_isCoveredByFinerGrid = false;
   m_isGhostCF            = false;
-  m_isDomainCell         = false;
+  m_isDomainBoundaryCell = false;
 }
 
 AMRCell::~AMRCell() noexcept
@@ -28,12 +28,12 @@ void
 AMRCell::define(const unsigned int a_numPhases,
                 const bool         a_isCoveredByFinerGrid,
                 const bool         a_isGhostCF,
-                const bool         a_isDomainCell) noexcept
+                const bool         a_isDomainBoundaryCell) noexcept
 {
   m_numPhases            = a_numPhases;
   m_isCoveredByFinerGrid = a_isCoveredByFinerGrid;
   m_isGhostCF            = a_isGhostCF;
-  m_isDomainCell         = a_isDomainCell;
+  m_isDomainBoundaryCell = a_isDomainBoundaryCell;
 }
 
 void
@@ -55,9 +55,9 @@ AMRCell::setGhostCF(const bool a_isGhostCF) noexcept
 }
 
 void
-AMRCell::setDomainCell(const bool a_isDomainCell) noexcept
+AMRCell::setDomainBoundaryCell(const bool a_isDomainBoundaryCell) noexcept
 {
-  m_isDomainCell = a_isDomainCell;
+  m_isDomainBoundaryCell = a_isDomainBoundaryCell;
 }
 
 unsigned int
@@ -79,9 +79,9 @@ AMRCell::isGhostCF() const noexcept
 }
 
 bool
-AMRCell::isDomainCell() const noexcept
+AMRCell::isDomainBoundaryCell() const noexcept
 {
-  return m_isDomainCell;
+  return m_isDomainBoundaryCell;
 }
 
 int
@@ -92,7 +92,7 @@ linearSize(const AMRCell& a_amrCell)
   size += sizeof(AMRCell::m_numPhases);
   size += sizeof(AMRCell::m_isCoveredByFinerGrid);
   size += sizeof(AMRCell::m_isGhostCF);
-  size += sizeof(AMRCell::m_isDomainCell);
+  size += sizeof(AMRCell::m_isDomainBoundaryCell);
 
   return size;
 }
@@ -111,7 +111,7 @@ linearIn(AMRCell& a_amrCell, const void* const a_buffer)
   a_amrCell.m_isGhostCF = *buffer;
   buffer++;
 
-  a_amrCell.m_isDomainCell = *buffer;
+  a_amrCell.m_isDomainBoundaryCell = *buffer;
   buffer++;
 }
 
@@ -129,7 +129,7 @@ linearOut(void* const a_buffer, const AMRCell& a_amrCell)
   *buffer = static_cast<unsigned char>(a_amrCell.m_isGhostCF);
   buffer++;
 
-  *buffer = static_cast<unsigned char>(a_amrCell.m_isDomainCell);
+  *buffer = static_cast<unsigned char>(a_amrCell.m_isDomainBoundaryCell);
   buffer++;
 }
 

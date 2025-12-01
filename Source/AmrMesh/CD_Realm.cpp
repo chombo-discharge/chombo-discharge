@@ -167,7 +167,6 @@ Realm::regridBase(const int a_lmin)
 
   this->defineMFLevelGrid(a_lmin);
   this->defineValidCells();
-  this->defineAMRCells();  
   this->defineLevelTiles();
 }
 
@@ -184,6 +183,7 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
+  this->defineAMRCells();
   this->definePetscGrid();
 }
 
@@ -779,31 +779,94 @@ Realm::defineAMRCells()
 
   m_amrCells.resize(1 + m_finestLevel);
 
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-    const DisjointBoxLayout& dbl  = m_grids[lvl];
-    const DataIterator&      dit  = dbl.dataIterator();
-    const int                nbox = dit.size();
+  const AMRMask& haloMask = this->getMask(s_outer_particle_halo, 1);
+
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+    const ProblemDomain&     domain = m_domains[lvl];
+    const DisjointBoxLayout& dbl    = m_grids[lvl];
+    const DataIterator&      dit    = dbl.dataIterator();
+    const int                nbox   = dit.size();
 
     m_amrCells[lvl] = RefCountedPtr<LevelData<BaseFab<AMRCell>>>(
       new LevelData<BaseFab<AMRCell>>(dbl, numComp, m_numGhost * IntVect::Unit));
 
-#if 1 // While I develop, only set the covered flag from the valid cell stuff
-
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din     = dit[mybox];
-      const Box        cellBox = dbl[din];
+      const DataIndex& din            = dit[mybox];
+      const Box        cellBox        = dbl[din];
+      const Box        ghostedCellBox = grow(cellBox, m_numGhost);
 
       BaseFab<AMRCell>&    amrCells   = (*m_amrCells[lvl])[din];
       const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
 
+#if 0
+      // While I develop, only set the covered flag from the valid cell stuff
       auto regularKernel = [&](const IntVect& iv) -> void {
         amrCells(iv).setCoveredByFinerGrid(!(validCells(iv)));
       };
+#else
 
-      BoxLoops::loop(cellBox, regularKernel);
-    }
+      auto setGhostCF = [&](const IntVect& iv) -> void {
+        if (ghostedCellBox.contains(iv)) {
+          amrCells(iv).setGhostCF(true);
+        }
+        if (cellBox.contains(iv)) {
+          amrCells(iv).setGhostCF(false);
+        }
+      };
+
+      auto setCoveredByFiner = [&](const IntVect& iv) -> void {
+        if (validCells(iv)) {
+          amrCells(iv).setCoveredByFinerGrid(false);
+        }
+        else {
+          amrCells(iv).setCoveredByFinerGrid(true);
+        }
+      };
+
+      auto resetDomainBoundaryFlags = [&](const IntVect& iv) -> void {
+        amrCells(iv).setDomainBoundaryCell(false);
+      };
+
+      BoxLoops::loop(ghostedCellBox, setGhostCF);
+      BoxLoops::loop(cellBox, setCoveredByFiner);
+      BoxLoops::loop(cellBox, resetDomainBoundaryFlags);
+
+      // Fix CF region flags
+      if (lvl < m_finestLevel) {
+        const BaseFab<bool>& haloCells = (*haloMask[lvl])[din];
+
+        auto setOuterCFRegion = [&](const IntVect& iv) -> void {
+          if (haloCells(iv)) {
+            amrCells(iv).setNumPhases(1);
+          }
+          else {
+            amrCells(iv).setNumPhases(0);
+          }
+        };
+
+        BoxLoops::loop(cellBox, setOuterCFRegion);
+      }
+
+      // Fix up domain side falgs
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Box domainBoxLo = adjCellLo(domain.domainBox(), dir, -1);
+        const Box domainBoxHi = adjCellHi(domain.domainBox(), dir, -1);
+
+        auto setDomainFlag = [&](const IntVect& iv) -> void {
+          if (domainBoxLo.contains(iv) || domainBoxHi.contains(iv)) {
+            amrCells(iv).setDomainBoundaryCell(true);
+          }
+        };
+
+        BoxLoops::loop(cellBox, setDomainFlag);
+      }
+
+#warning "Maybe we should put all of this in the PetscGrid class instead"
 #endif
+    }
+
+    m_amrCells[lvl]->exchange();
   }
 }
 
