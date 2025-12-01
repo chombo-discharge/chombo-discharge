@@ -56,14 +56,14 @@ PetscGrid::~PetscGrid() noexcept
 }
 
 void
-PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGrids,
-                  const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsCoFi,
-                  const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsFiCo,
-                  const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>& a_amrCells,
-                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_coarHaloCF,
-                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_fineHaloCF,
-                  const int                                                 a_finestLevel,
-                  const int                                                 a_numGhost) noexcept
+PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
+                  const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
+                  const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,
+                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarHaloCF,
+                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_fineHaloCF,
+                  const int                                              a_finestLevel,
+                  const int                                              a_numGhost) noexcept
 {
   CH_TIME("PetscGrid::define");
   if (m_verbose) {
@@ -79,16 +79,18 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_le
   m_levelGrids     = a_levelGrids;
   m_levelGridsCoFi = a_levelGridsCoFi;
   m_levelGridsFiCo = a_levelGridsFiCo;
+  m_validCells     = a_validCells;
   m_coarHaloCF     = a_coarHaloCF;
   m_fineHaloCF     = a_fineHaloCF;
-  m_amrCells       = a_amrCells;
-  m_finestLevel    = a_finestLevel;
-  m_numGhost       = a_numGhost;
-  m_numPhases      = m_levelGrids[0]->numPhases();
+
+  m_finestLevel = a_finestLevel;
+  m_numGhost    = a_numGhost;
+  m_numPhases   = m_levelGrids[0]->numPhases();
 
   CH_assert(m_numGhost >= 0);
   CH_assert(m_finestLevel >= 0);
 
+  this->definePetscAMRCells();
   this->definePetscRows();
   this->defineCellFlags();
   this->defineRowViews();
@@ -107,6 +109,106 @@ PetscGrid::clear() noexcept
   if (m_isDefined) {
     PetscCallVoid(ISLocalToGlobalMappingDestroy(&m_localToGlobalIS));
   }
+}
+
+void
+PetscGrid::definePetscAMRCells() noexcept
+{
+  CH_TIME("PetscGrid::definePetscAMRCells");
+  if (m_verbose) {
+    pout() << "PetscGrid::definePetscAMRCells" << endl;
+  }
+
+  const int curComp = 0;
+  const int numComp = 1;
+
+  m_amrCells.resize(1 + m_finestLevel);
+
+  for (int lvl = m_finestLevel; lvl >= 0; lvl--) {
+    const ProblemDomain&     domain = m_levelGrids[lvl]->getDomain();
+    const DisjointBoxLayout& dbl    = m_levelGrids[lvl]->getGrids();
+    const DataIterator&      dit    = dbl.dataIterator();
+    const int                nbox   = dit.size();
+
+    m_amrCells[lvl] = RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>(
+      new LevelData<BaseFab<PetscAMRCell>>(dbl, numComp, m_numGhost * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din            = dit[mybox];
+      const Box        cellBox        = dbl[din];
+      const Box        ghostedCellBox = grow(cellBox, m_numGhost);
+
+      BaseFab<PetscAMRCell>&    amrCells   = (*m_amrCells[lvl])[din];
+      const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
+
+#if 0
+      // While I develop, only set the covered flag from the valid cell stuff
+      auto regularKernel = [&](const IntVect& iv) -> void {
+        amrCells(iv).setCoveredByFinerGrid(!(validCells(iv)));
+      };
+#else
+
+      auto setGhostCF = [&](const IntVect& iv) -> void {
+        if (ghostedCellBox.contains(iv)) {
+          amrCells(iv).setGhostCF(true);
+        }
+        if (cellBox.contains(iv)) {
+          amrCells(iv).setGhostCF(false);
+        }
+      };
+
+      auto setCoveredByFiner = [&](const IntVect& iv) -> void {
+        if (validCells(iv)) {
+          amrCells(iv).setCoveredByFinerGrid(false);
+        }
+        else {
+          amrCells(iv).setCoveredByFinerGrid(true);
+        }
+      };
+
+      auto resetDomainBoundaryFlags = [&](const IntVect& iv) -> void {
+        amrCells(iv).setDomainBoundaryCell(false);
+      };
+
+      BoxLoops::loop(ghostedCellBox, setGhostCF);
+      BoxLoops::loop(cellBox, setCoveredByFiner);
+      BoxLoops::loop(cellBox, resetDomainBoundaryFlags);
+
+      // Fix CF region flags
+      if (lvl < m_finestLevel) {
+        const BaseFab<bool>& haloCells = (*m_coarHaloCF[lvl])[din];
+
+#warning "This is incorrect -- remember to add the coarse/fine CF flags to PetscAMRCell"
+        auto setOuterCFRegion = [&](const IntVect& iv) -> void {
+          if (haloCells(iv)) {
+            amrCells(iv).setNumPhases(1);
+          }
+          else {
+            amrCells(iv).setNumPhases(0);
+          }
+        };
+
+        BoxLoops::loop(cellBox, setOuterCFRegion);
+      }
+
+      // Fix up domain side flags
+      for (int dir = 0; dir < SpaceDim; dir++) {
+        const Box domainBoxLo = adjCellLo(domain.domainBox(), dir, -1);
+        const Box domainBoxHi = adjCellHi(domain.domainBox(), dir, -1);
+
+        auto setDomainFlag = [&](const IntVect& iv) -> void {
+          if (domainBoxLo.contains(iv) || domainBoxHi.contains(iv)) {
+            amrCells(iv).setDomainBoundaryCell(true);
+          }
+        };
+
+        BoxLoops::loop(cellBox, setDomainFlag);
+      }
+    }
+
+    m_amrCells[lvl]->exchange();
+  }  
 }
 
 void
@@ -143,9 +245,9 @@ PetscGrid::definePetscRows() noexcept
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex         din      = dit[mybox];
-        const BaseFab<AMRCell>& amrCells = (*m_amrCells[lvl])[din];
-        const Box&              cellBox  = dbl[din];
+        const DataIndex              din      = dit[mybox];
+        const BaseFab<PetscAMRCell>& amrCells = (*m_amrCells[lvl])[din];
+        const Box&                   cellBox  = dbl[din];
         const EBISBox&          ebisBox  = ebisl[din];
         const IntVectSet&       ivs      = ebisBox.getIrregIVS(cellBox);
         const EBGraph&          ebgraph  = ebisBox.getEBGraph();
@@ -553,7 +655,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 
 #warning "Debug code enabled"
 #if 1
-    const AMRCell& amrCell = (*m_amrCells[gridLevel])[gridIndex](gridCell);
+    const PetscAMRCell& amrCell = (*m_amrCells[gridLevel])[gridIndex](gridCell);
 
     data(gridCell, 0) = 0.0;
 
@@ -573,7 +675,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
     bx &= m_levelGrids[gridLevel]->getDomain();
 
     for (BoxIterator bit(bx); bit.ok(); ++bit) {
-      const AMRCell& cell2 = (*m_amrCells[gridLevel])[gridIndex](bit());
+      const PetscAMRCell& cell2 = (*m_amrCells[gridLevel])[gridIndex](bit());
 
       if (cell2.isGhostCF()) {
         data(gridCell, 0) = 1.0;
@@ -593,3 +695,5 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 }
 
 #include <CD_NamespaceFooter.H>
+
+#endif

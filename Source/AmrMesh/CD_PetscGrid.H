@@ -27,7 +27,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_PetscDOF.H>
-#include <CD_AMRCell.H>
+#include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -56,21 +56,21 @@ public:
     @param[in] a_levelGrids chombo-discharge AMR grids
     @param[in] a_levelGridsCoFi Coarsened grids.
     @param[in] a_levelGridsFiCo Refined grids.
-    @param[in] a_amrCells Grid cell types
+    @param[in] a_validCells Data holder which is true for cells not covered by a finer grid and false otherwise.
     @param[in] a_coarHaloCF Data holder which is true on cells that lie on the coarse side of a CF interface
     @param[in] a_fineHaloCF Data holder which is true on cells that lie on the fine side of a CF interface    
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
   virtual void
-  define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGrids,
-         const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsCoFi,
-         const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsFiCo,
-         const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>& a_amrCells,
-         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_coarHaloCF,
-         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_fineHaloCF,
-         const int                                                 a_finestLevel,
-         const int                                                 a_numGhost) noexcept;
+  define(const Vector<RefCountedPtr<MFLevelGrid>>&                      a_levelGrids,
+         const Vector<RefCountedPtr<MFLevelGrid>>&                      a_levelGridsCoFi,
+         const Vector<RefCountedPtr<MFLevelGrid>>&                      a_levelGridsFiCo,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&         a_coarHaloCF,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&         a_fineHaloCF,
+         const int                                                      a_finestLevel,
+         const int                                                      a_numGhost) noexcept;
 
   /*!
     @brief Clear the object.
@@ -181,11 +181,6 @@ protected:
   Vector<PetscInt> m_numRowsPerRank;
 
   /*!
-    @brief Valid grid cells
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
-
-  /*!
     @brief Grids on each level
   */
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGrids;
@@ -201,6 +196,11 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;
 
   /*!
+    @brief Data holder which is true for cells not covered by a finer grid.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_validCells;
+
+  /*!
     @brief Coarse-side cells on refinement interface
   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_coarHaloCF;
@@ -213,7 +213,7 @@ protected:
   /*!
     @brief Cell information for stencils.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrCells;
 
   /*!
     @brief Mapping of AMR cells to local PETSc rows
@@ -282,6 +282,14 @@ protected:
     @details Locally owned. Maps a local row index to a level/grid/cell.
   */
   Vector<PetscDOF> m_petscToAMR;
+
+  /*!
+    @brief Define basic cell information for PetscGrid.
+    @details This defines basic cell properties, indicating whether or not a cell is covered by a finer grid, if it abuts
+    the coarse-fine interface, etc.
+  */
+  virtual void
+  definePetscAMRCells() noexcept;
 
   /*!
     @brief Build the Chombo <--> Petsc index mapping for the valid cells.

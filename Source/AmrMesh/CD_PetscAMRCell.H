@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file CD_AMRCell.H
-  @brief Declaration of a cell type for indicating if a cell is covered, ghost, etc. 
+  @file CD_PetscAMRCell.H
+  @brief Declaration of a cell type for indicating if a cell is covered, ghost, etc.
   @author Robert Marskar
 */
 
-#ifndef CD_AMRCell_H
-#define CD_AMRCell_H
+#ifndef CD_PetscAMRCell_H
+#define CD_PetscAMRCell_H
 
 // Chombo includes
 #include <SPMD.H>
@@ -18,51 +18,55 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-class AMRCell
+class PetscAMRCell
 {
 public:
   /*!
     @brief Constructor - does nothing
   */
-  AMRCell() noexcept;
+  PetscAMRCell() noexcept;
 
   /*!
     @brief Destructor - does nothing
   */
-  ~AMRCell() noexcept;
+  ~PetscAMRCell() noexcept;
 
   /*!
     @brief Copy constructor -- can use default
   */
-  AMRCell(const AMRCell&) = default;
+  PetscAMRCell(const PetscAMRCell&) = default;
 
   /*!
     @brief Move constructor -- can use default
   */
-  AMRCell(AMRCell&&) = default;
+  PetscAMRCell(PetscAMRCell&&) = default;
 
   /*!
     @brief Copy assignment, can use default
   */
-  AMRCell&
-  operator=(const AMRCell&) = default;
+  PetscAMRCell&
+  operator=(const PetscAMRCell&) = default;
 
   /*!
     @brief Move assignment, can use default
   */
-  AMRCell&
-  operator=(AMRCell&&) = default;
+  PetscAMRCell&
+  operator=(PetscAMRCell&&) = default;
 
   /*!
     @brief Define operator. Sets all parameters.
     @param[in] a_numPhases Number of phases where this cell is a valid cell.
     @param[in] a_isCoveredByFinerGrid Covered by finer grid or not.
+    @param[in] a_isCoarCF If true, the cell lies on the coarse side of the refinement boundary
+    @param[in] a_isFineCF If true, the cell lies on the fine side of the refinement boundary    
     @param[in] a_isGhostCF Cell lies outside the grid level.
     @param[in] a_isDomainBoundaryCell Cell abuts the domain boundary.
   */
   void
   define(const unsigned int a_numPhases,
          const bool         a_isCoveredByFinerGrid,
+         const bool         a_isCoarCF,
+         const bool         a_isFineCF,
          const bool         a_isGhostCF,
          const bool         a_isDomainBoundaryCell) noexcept;
 
@@ -79,6 +83,20 @@ public:
   */
   void
   setCoveredByFinerGrid(const bool a_coveredByFinerGrid) noexcept;
+
+  /*!
+    @brief Set coarse-side CF flag
+    @param[in] a_isCoarCF If true, cell abuts the refinement boundary from the coarse side
+  */
+  void
+  setCoarCF(const bool a_isCoarCF) noexcept;
+
+  /*!
+    @brief Set fine-side CF flag
+    @param[in] a_isFineCF If true, cell abuts the refinement boundary from the fine side
+  */
+  void
+  setFineCF(const bool a_isFineCF) noexcept;
 
   /*!
     @brief Set ghosted coarse-fined flag
@@ -105,6 +123,18 @@ public:
   */
   bool
   isCoveredByFinerGrid() const noexcept;
+
+  /*!
+    @brief Check if the cell lies on the coarse-side of the refinement interface
+  */
+  bool
+  isCoarCF() const noexcept;
+
+  /*!
+    @brief Check if the cell lies on the fine-side of the refinement interface
+  */
+  bool
+  isFineCF() const noexcept;
 
   /*!
     @brief Check if the cell is a ghost cell outside this grid level
@@ -136,33 +166,43 @@ public:
   bool m_isGhostCF;
 
   /*!
+    @brief If true, the cell lies on the coarse side of the coarse-fine boundary
+  */
+  bool m_isCoarCF;
+
+  /*!
+    @brief If true, the cell lies on the fine side of the coarse-fine boundary
+  */
+  bool m_isFineCF;
+
+  /*!
     @brief If true, the cell is a domain boundary cell
    */
   bool m_isDomainBoundaryCell;
 };
 
 /*!
-  @brief AMRCell specialization of the linearization size function used by LevelData
+  @brief PetscAMRCell specialization of the linearization size function used by LevelData
 */
 int
-linearSize(const AMRCell& a_amrCell);
+linearSize(const PetscAMRCell& a_amrCell);
 
 /*!
-  @brief AMRCell specialization of the linearization function used by LevelData
+  @brief PetscAMRCell specialization of the linearization function used by LevelData
   @param[out] a_amrCell Input object
   @param[in] a_buffer Buffer
 */
 void
-linearIn(AMRCell& a_amrCell, const void* const a_buffer);
+linearIn(PetscAMRCell& a_amrCell, const void* const a_buffer);
 
 /*!
-  @brief AMRCell specialization of the linearization function used by LevelData
+  @brief PetscAMRCell specialization of the linearization function used by LevelData
   @param[out] a_buffer Buffer to which we write the data
   @param[in] a_amrCell Object to linearize
 
 */
 void
-linearOut(void* const a_buffer, const AMRCell& a_amrCell);
+linearOut(void* const a_buffer, const PetscAMRCell& a_amrCell);
 
 #include <CD_NamespaceFooter.H>
 
