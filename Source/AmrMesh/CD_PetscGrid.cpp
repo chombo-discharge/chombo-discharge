@@ -24,12 +24,9 @@
 
 #if 1
 #warning "At the end -- let's see if we can trim some memory from this class"
-#warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
 #warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
 #warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
-#warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
-#warning "Priority 1: Build maps over which cells are which. Must be viewable from each patch".
-#warning "Priority 2: Map global row numbers to cells on each phase. Must be viewable from each patch".
+#warning "I really want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
 #endif
 
 PetscGrid::PetscGrid() noexcept
@@ -119,6 +116,11 @@ PetscGrid::definePetscAMRCells() noexcept
     pout() << "PetscGrid::definePetscAMRCells" << endl;
   }
 
+#warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
+#warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
+#warning "Priority 1: Build maps over which cells are which. Must be viewable from each patch".
+#warning "Priority 2: Map global row numbers to cells on each phase. Must be viewable from each patch".
+
   const int curComp = 0;
   const int numComp = 1;
 
@@ -139,15 +141,8 @@ PetscGrid::definePetscAMRCells() noexcept
       const Box        cellBox        = dbl[din];
       const Box        ghostedCellBox = grow(cellBox, m_numGhost);
 
-      BaseFab<PetscAMRCell>&    amrCells   = (*m_amrCells[lvl])[din];
-      const BaseFab<bool>& validCells = (*m_validCells[lvl])[din];
-
-#if 0
-      // While I develop, only set the covered flag from the valid cell stuff
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        amrCells(iv).setCoveredByFinerGrid(!(validCells(iv)));
-      };
-#else
+      BaseFab<PetscAMRCell>& amrCells   = (*m_amrCells[lvl])[din];
+      const BaseFab<bool>&   validCells = (*m_validCells[lvl])[din];
 
       auto setGhostCF = [&](const IntVect& iv) -> void {
         if (ghostedCellBox.contains(iv)) {
@@ -171,15 +166,16 @@ PetscGrid::definePetscAMRCells() noexcept
         amrCells(iv).setDomainBoundaryCell(false);
       };
 
+#warning "Merge these kernels"
       BoxLoops::loop(ghostedCellBox, setGhostCF);
       BoxLoops::loop(cellBox, setCoveredByFiner);
       BoxLoops::loop(cellBox, resetDomainBoundaryFlags);
 
       // Fix CF region flags
+#warning "This is incorrect -- remember to add the coarse/fine CF flags to PetscAMRCell"
       if (lvl < m_finestLevel) {
         const BaseFab<bool>& haloCells = (*m_coarHaloCF[lvl])[din];
 
-#warning "This is incorrect -- remember to add the coarse/fine CF flags to PetscAMRCell"
         auto setOuterCFRegion = [&](const IntVect& iv) -> void {
           if (haloCells(iv)) {
             amrCells(iv).setNumPhases(1);
@@ -208,7 +204,7 @@ PetscGrid::definePetscAMRCells() noexcept
     }
 
     m_amrCells[lvl]->exchange();
-  }  
+  }
 }
 
 void

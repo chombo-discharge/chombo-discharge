@@ -13,15 +13,12 @@
 #include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
 
-#warning \
-  "I want new flags for cells that are on the fine side of the CF, and on the coarse side of the CF (in addition to the ghostCF flag)"
-
 PetscAMRCell::PetscAMRCell() noexcept
 {
   m_numPhases            = 0;
   m_isCoveredByFinerGrid = false;
   m_isCoarCF             = false;
-  m_isFine               = false;
+  m_isFineCF             = false;
   m_isGhostCF            = false;
   m_isDomainBoundaryCell = false;
 }

@@ -183,7 +183,6 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
-
   this->definePetscGrid();
 }
 
