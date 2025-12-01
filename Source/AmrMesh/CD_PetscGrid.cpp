@@ -519,7 +519,6 @@ PetscGrid::create(Vec& x) noexcept
   PetscCallVoid(VecAssemblyEnd(x));
   PetscCallVoid(VecView(x, PETSC_VIEWER_STDOUT_WORLD));
 #endif
-#endif
 }
 
 void
