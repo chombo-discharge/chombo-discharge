@@ -183,7 +183,7 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
-  this->defineAMRCells();
+  this->defineAMRCells(); // Must come after masks because it uses the coarse-fine halo mask.
   this->definePetscGrid();
 }
 
@@ -194,6 +194,11 @@ Realm::defineMasks(const int a_lmin)
   if (m_verbosity > 5) {
     pout() << "Realm::defineMasks" << endl;
   }
+
+#ifdef CH_USE_PETSC
+  // This mask is used when defining the PETSc rows, and is therefore required.
+  this->registerMask(s_outer_particle_halo, 1);
+#endif
 
   // Regrid all masks
   this->defineOuterHaloMask(a_lmin);

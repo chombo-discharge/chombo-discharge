@@ -13,6 +13,9 @@
 #include <CD_AMRCell.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "I want new flags for cells that are on the fine side of the CF, and on the coarse side of the CF (in addition to the ghostCF flag)"
+
+
 AMRCell::AMRCell() noexcept
 {
   m_numPhases            = 0;
