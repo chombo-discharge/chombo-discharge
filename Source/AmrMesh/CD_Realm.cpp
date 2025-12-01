@@ -198,6 +198,7 @@ Realm::defineMasks(const int a_lmin)
 #ifdef CH_USE_PETSC
   // This mask is used when defining the PETSc rows, and is therefore required.
   this->registerMask(s_outer_particle_halo, 1);
+  this->registerMask(s_inner_particle_halo, 1);
 #endif
 
   // Regrid all masks
@@ -867,7 +868,8 @@ Realm::defineAMRCells()
         BoxLoops::loop(cellBox, setDomainFlag);
       }
 
-#warning "Maybe we should put all of this in the PetscGrid class instead"
+#warning \
+  "Maybe we should put all of this in the PetscGrid class instead. It must then accept the coarse/fine halo region masks"
 #endif
     }
 
@@ -906,7 +908,14 @@ Realm::definePetscGrid() noexcept
     m_petscGrid = RefCountedPtr<PetscGrid>(new PetscGrid());
   }
 
-  m_petscGrid->define(m_mflg, m_mflgCoFi, m_mflgFiCo, m_amrCells, m_finestLevel, m_numGhost);
+  m_petscGrid->define(m_mflg,
+                      m_mflgCoFi,
+                      m_mflgFiCo,
+                      m_amrCells,
+                      this->getMask(s_outer_particle_halo, 1),
+                      this->getMask(s_inner_particle_halo, 1),
+                      m_finestLevel,
+                      m_numGhost);
 #endif
 }
 

@@ -60,6 +60,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_le
                   const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsCoFi,
                   const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsFiCo,
                   const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>& a_amrCells,
+                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_coarHaloCF,
+                  const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_fineHaloCF,
                   const int                                                 a_finestLevel,
                   const int                                                 a_numGhost) noexcept
 {
@@ -77,6 +79,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&                 a_le
   m_levelGrids     = a_levelGrids;
   m_levelGridsCoFi = a_levelGridsCoFi;
   m_levelGridsFiCo = a_levelGridsFiCo;
+  m_coarHaloCF     = a_coarHaloCF;
+  m_fineHaloCF     = a_fineHaloCF;
   m_amrCells       = a_amrCells;
   m_finestLevel    = a_finestLevel;
   m_numGhost       = a_numGhost;
@@ -577,11 +581,11 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
     }
 
     // Fill boundary cells with values += 2
-    if(amrCell.isDomainBoundaryCell()){
-      data(gridCell,0) += 2.0;
+    if (amrCell.isDomainBoundaryCell()) {
+      data(gridCell, 0) += 2.0;
     }
 
-    data(gridCell,0) = (*m_amrCells[gridLevel])[gridIndex](gridCell).getNumPhases();
+    data(gridCell, 0) = (*m_amrCells[gridLevel])[gridIndex](gridCell).getNumPhases();
 #endif
   }
 

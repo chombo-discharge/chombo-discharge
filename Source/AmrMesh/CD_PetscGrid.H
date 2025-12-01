@@ -57,6 +57,8 @@ public:
     @param[in] a_levelGridsCoFi Coarsened grids.
     @param[in] a_levelGridsFiCo Refined grids.
     @param[in] a_amrCells Grid cell types
+    @param[in] a_coarHaloCF Data holder which is true on cells that lie on the coarse side of a CF interface
+    @param[in] a_fineHaloCF Data holder which is true on cells that lie on the fine side of a CF interface    
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
@@ -65,6 +67,8 @@ public:
          const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsCoFi,
          const Vector<RefCountedPtr<MFLevelGrid>>&                 a_levelGridsFiCo,
          const Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>>& a_amrCells,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_coarHaloCF,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&    a_fineHaloCF,
          const int                                                 a_finestLevel,
          const int                                                 a_numGhost) noexcept;
 
@@ -195,6 +199,16 @@ protected:
     @brief Refined grids
   */
   Vector<RefCountedPtr<MFLevelGrid>> m_levelGridsFiCo;
+
+  /*!
+    @brief Coarse-side cells on refinement interface
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_coarHaloCF;
+
+  /*!
+    @brief Fine-side cells on refinement interface
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fineHaloCF;
 
   /*!
     @brief Mapping of AMR cells to local PETSc rows
