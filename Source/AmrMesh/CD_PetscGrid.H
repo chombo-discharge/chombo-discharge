@@ -211,6 +211,11 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fineHaloCF;
 
   /*!
+    @brief Cell information for stencils.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<AMRCell>>>> m_amrCells;
+
+  /*!
     @brief Mapping of AMR cells to local PETSc rows
     @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid grid cell
   */

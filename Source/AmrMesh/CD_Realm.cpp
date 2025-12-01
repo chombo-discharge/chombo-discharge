@@ -183,7 +183,7 @@ Realm::regridOperators(const int a_lmin)
   }
 
   this->defineMasks(a_lmin);
-  this->defineAMRCells(); // Must come after masks because it uses the coarse-fine halo mask.
+
   this->definePetscGrid();
 }
 
@@ -900,6 +900,8 @@ Realm::definePetscGrid() noexcept
   if (m_verbosity > 5) {
     pout() << "Realm::definePetscGrid" << endl;
   }
+
+  this->defineAMRCells(); // Must come after masks because it uses the coarse-fine halo mask.
 
   if (!(m_petscGrid.isNull())) {
     m_petscGrid->clear();
