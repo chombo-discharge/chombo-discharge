@@ -222,7 +222,21 @@ protected:
     @brief Mapping structure for moving between AMR cells and PETSc rows.
     @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc. 
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;  
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;
+
+  /*!
+    @brief Mapping structure for moving between AMR cells and PETSc rows.
+    @details This is like m_amrToPetsc, except that it is defined on the coarsened grids. Index i thus contains the coarsening of
+    level i+1.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscCoFi;
+
+  /*!
+    @brief Mapping structure for moving between AMR cells and PETSc rows.
+    @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the refinement of
+    level i.
+  */
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;      
 
   /*!
     @brief Mapping of PETSc local row index back to AMR
@@ -246,6 +260,12 @@ protected:
   */
   virtual void
   definePetscRows() noexcept;
+
+  /*!
+    @brief Define the coarsened/refined views of m_amrToPetsc.
+  */
+  virtual void
+  defineCoFiBuffers() noexcept;
 };
 
 #endif

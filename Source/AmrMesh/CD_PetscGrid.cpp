@@ -292,6 +292,15 @@ PetscGrid::definePetscRows() noexcept
 }
 
 void
+PetscGrid::defineCoFiBuffers() noexcept
+{
+  CH_TIME("PetscGrid::defineCoFiBuffers");
+  if (m_verbose) {
+    pout() << "PetscGrid::defineCoFiBuffers" << endl;
+  }
+}
+
+void
 PetscGrid::create(Vec& x) noexcept
 {
   CH_TIME("PetscGrid::create");
