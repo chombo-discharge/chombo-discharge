@@ -518,7 +518,7 @@ protected:
     @param[in] a_lmin Coarsest level that changed during regrid
   */
   void
-  defineOuterCFMask(const int a_lmin);
+  defineOuterHaloMask(const int a_lmin);
 
   /*!
     @brief Define the outer particle halo masks. This is the level-version. 
@@ -531,6 +531,41 @@ protected:
     @param[in]  a_refRat     Refinement ratio between the two levels
   */
   void
+  defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
+                      const ProblemDomain&      a_domainCoar,
+                      const ProblemDomain&      a_domainFine,
+                      const DisjointBoxLayout&  a_gridsCoar,
+                      const DisjointBoxLayout&  a_gridsFine,
+                      const int                 a_buffer,
+                      const int                 a_refRat);
+
+  /*!
+    @brief Define inner particle halo mask.
+    @details This is a mask which is true on the INSIDE of a refinement boundary. The buffer size is always
+    the number of COARSE grid cells. I.e., if one uses a refinement factor of 2, the first two strips of fine-grid
+    cells are set to true and the others to false. 
+    @param[in] a_lmin Coarsest level that changed during regrid
+  */
+  void
+  defineInnerHaloMask(const int a_lmin);
+
+  /*!
+    @brief Define a mask which is true on the outside (i.e., coarse side) of the refinement boundary
+  */
+  void
+  defineOuterCFMask(const int a_lmin);
+
+  /*!
+    @brief Define the outer cf region mask. This is the level-version. 
+    @param[out] a_coarMask   Mask
+    @param[in]  a_domainCoar Coarse domain
+    @param[in]  a_domainFine Fine domain
+    @param[in]  a_gridsCoar  Coarse grids
+    @param[in]  a_gridsFine  Fine grids
+    @param[in]  a_buffer     Buffer
+    @param[in]  a_refRat     Refinement ratio between the two levels
+  */
+  void
   defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
                     const ProblemDomain&      a_domainCoar,
                     const ProblemDomain&      a_domainFine,
@@ -540,9 +575,7 @@ protected:
                     const int                 a_refRat);
 
   /*!
-    @brief Define inner particle halo mask.
-    @details This is a mask which is true on the INSIDE of a refinement boundary.
-    @param[in] a_lmin Coarsest level that changed during regrid
+    @brief Define a mask which is true on the inside (i.e., fine side) of the refinement boundary
   */
   void
   defineInnerCFMask(const int a_lmin);

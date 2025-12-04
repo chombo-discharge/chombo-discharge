@@ -39,20 +39,22 @@
 #include <CD_NamespaceHeader.H>
 
 // These are operators that can be defined.
-static const std::string s_outer_cf_region = "outer_cf_region"; // Outside coarse-fine region
-static const std::string s_inner_cf_region = "inner_cf_region"; // Inside coarse-fine region
-static const std::string s_cfivs           = "cfivs";           // Coarse-fine interface
-static const std::string s_eb_gradient     = "eb_gradient";     // For computing gradients
-static const std::string s_eb_irreg_interp = "eb_irreg_interp"; // For data recentering
-static const std::string s_eb_coar_ave     = "eb_coar_ave";     // For coarsening
-static const std::string s_eb_fill_patch   = "eb_fill_patch";   // For regridding data
-static const std::string s_eb_fine_interp  = "eb_fine_interp";  // For linearly filling ghost cells
-static const std::string s_eb_flux_reg     = "eb_flux_reg";     // For flux registeration
-static const std::string s_eb_redist       = "eb_redist";       // For redistribution
-static const std::string s_noncons_div     = "eb_non_cons_div"; // For computing non-conservative divergences
-static const std::string s_eb_multigrid    = "eb_multigrid";    // For multigrid interpolation
-static const std::string s_levelset        = "levelset";        // For putting level-set on mesh
-static const std::string s_particle_mesh   = "particle_mesh";   // For doing particle-mesh operations.
+static const std::string s_outer_cf_region     = "outer_cf_region";     // Outside coarse-fine region
+static const std::string s_inner_cf_region     = "inner_cf_region";     // Inside coarse-fine region
+static const std::string s_outer_particle_halo = "outer_particle_halo"; // Outside particle halo region
+static const std::string s_inner_particle_halo = "inner_particle_halo"; // Inside particle halo region
+static const std::string s_cfivs               = "cfivs";               // Coarse-fine interface
+static const std::string s_eb_gradient         = "eb_gradient";         // For computing gradients
+static const std::string s_eb_irreg_interp     = "eb_irreg_interp";     // For data recentering
+static const std::string s_eb_coar_ave         = "eb_coar_ave";         // For coarsening
+static const std::string s_eb_fill_patch       = "eb_fill_patch";       // For regridding data
+static const std::string s_eb_fine_interp      = "eb_fine_interp";      // For linearly filling ghost cells
+static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registeration
+static const std::string s_eb_redist           = "eb_redist";           // For redistribution
+static const std::string s_noncons_div         = "eb_non_cons_div";     // For computing non-conservative divergences
+static const std::string s_eb_multigrid        = "eb_multigrid";        // For multigrid interpolation
+static const std::string s_levelset            = "levelset";            // For putting level-set on mesh
+static const std::string s_particle_mesh       = "particle_mesh";       // For doing particle-mesh operations.
 
 /*!
   @brief Class that holds important things for doing AMR over a specific phase and processor distribution. 
