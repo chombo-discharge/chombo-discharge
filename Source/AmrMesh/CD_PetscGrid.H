@@ -219,21 +219,10 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fineHaloCF;
 
   /*!
-    @brief Mapping of AMR cells to local PETSc rows
-    @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid grid cell
+    @brief Mapping structure for moving between AMR cells and PETSc rows.
+    @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc. 
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_localRows[2];
-
-  /*!
-    @brief Mapping of AMR cells to global PETSc rows
-    @details This contains, on each grid, the row number in the global PETSc vector corresponding to each valid grid cell
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalRows[2];
-
-  /*!
-    @brief Cell information for stencils.
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrCells;  
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;  
 
   /*!
     @brief Mapping of PETSc local row index back to AMR
