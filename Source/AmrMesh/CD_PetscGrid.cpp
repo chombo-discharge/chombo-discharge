@@ -88,6 +88,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
 
   this->defineAMRCells();
   this->definePetscRows();
+  this->defineCoFiBuffers();
 
 #warning "Must form the coarsened/refined version of PetscAMRCell"
 
@@ -298,6 +299,8 @@ PetscGrid::defineCoFiBuffers() noexcept
   if (m_verbose) {
     pout() << "PetscGrid::defineCoFiBuffers" << endl;
   }
+
+#warning "Need to begin here next time"
 }
 
 void
@@ -314,22 +317,6 @@ PetscGrid::create(Vec& x) noexcept
   PetscCallVoid(VecSetSizes(x, m_numLocalRows, m_numGlobalRows));
   PetscCallVoid(VecSetLocalToGlobalMapping(x, m_localToGlobalIS));
   PetscCallVoid(VecSetFromOptions(x));
-
-#warning "Debug code in PetscGrid::create -- scheduled for removal"
-#if 0
-  PetscInt    indices[m_numLocalRows];
-  PetscScalar values[m_numLocalRows];
-
-  for (PetscInt i = 0; i < m_numLocalRows; i++) {
-    indices[i] = i;
-    values[i]  = 1.0 * procID();
-  }
-
-  PetscCallVoid(VecSetValuesLocal(x, m_numLocalRows, indices, values, INSERT_VALUES));
-  PetscCallVoid(VecAssemblyBegin(x));
-  PetscCallVoid(VecAssemblyEnd(x));
-  PetscCallVoid(VecView(x, PETSC_VIEWER_STDOUT_WORLD));
-#endif
 }
 
 void
