@@ -156,6 +156,16 @@ public:
   unsigned char m_numPhases;
 
   /*!
+    @brief If >= 0, this contains the PETSc row corresponding to the grid cell on phase 0
+  */
+  int m_rowPhase0;
+
+  /*!
+    @brief If >= 0, this contains the PETSc row corresponding to the grid cell on phase 1
+  */
+  int m_rowPhase1;
+
+  /*!
     @brief If true, the cell is covered by a finer grid
   */
   bool m_isCoveredByFinerGrid;

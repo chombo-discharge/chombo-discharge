@@ -219,11 +219,6 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fineHaloCF;
 
   /*!
-    @brief Cell information for stencils.
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrCells;
-
-  /*!
     @brief Mapping of AMR cells to local PETSc rows
     @details This contains, on each grid, the row number in the local PETSC vector corresponding to each valid grid cell
   */
@@ -236,54 +231,9 @@ protected:
   Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_globalRows[2];
 
   /*!
-    @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies
-    that the cell is either a ghost, invalid, covered by a finer grid, etc. 
-    @details This contains the global row # in the PETsc vector corresponding to a grid cell (similar to m_globalRows). The
-    only difference is that this contain also has ghost cells so it can access the global row number for cells that lie outside
-    of the domain. Similarly, negative values are assigned to indicate if cells are ghost cells, covered by another grid, covered
-    or covered by the geometry.
+    @brief Cell information for stencils.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rows[2];
-
-  /*!
-    @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies
-    that the cell is either a ghost, invalid, covered by a finer grid, etc.     
-    @details This data holder is filled with row indices, including ghost cells around each patch. The grids on which
-    the objects are defined are coarsenings from finer levels. I.e., entry on level lvl corresponds to a coarsening of level
-    lvl+1. This means that if we are visiting level lvl+1 on m_rows, we can access the coarse grid by visiting level
-    lvl in this data holder.
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rowsCoFi[2];
-
-  /*!
-    @brief Rows in the PETSc vector corresponding to a particular grid cell or face. If the value is negative it implies
-    that the cell is either a ghost, invalid, covered by a finer grid, etc.         
-    @details This data holder is filled with row indices, including ghost cells around each patch. The grids on which
-    the objects are defined are refinements of coarser levels. I.e., the entry on level lvl+1 corresponds to a refinement
-    of level lvl. This means that if we are visiting level lvl on m_rows, we can access the fine grids via this data
-    holder (i.e., level lvl+1 in this data holder).
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscInt>>>> m_rowsFiCo[2];
-
-  /*!
-    @brief Map over which cells belong to ghosts, covered, invalid, boundary, etc.
-    @details This is defined over m_levelGrids, which is the fundamental grid structure on which solvers will operatore. 
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellFlags;
-
-  /*!
-    @brief Map over which cells belong to ghosts, covered, invalid, boundary, etc.
-    @details This is defined over coarsened versions m_levelGrids. I.e., the entry on level lvl is on a grid that is a coarsening
-    from lvl+1
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellFlagsCoFi;
-
-  /*!
-    @brief Map over which cells belong to ghosts, covered, invalid, boundary, etc.
-    @details This is defined over refine4d versions m_levelGrids. I.e., the entry on level lvl+1 is on a grid that is a refinement
-    from lvl    
-  */
-  Vector<RefCountedPtr<LevelData<BaseFab<int>>>> m_cellFlagsFiCo;
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrCells;  
 
   /*!
     @brief Mapping of PETSc local row index back to AMR
@@ -307,18 +257,6 @@ protected:
   */
   virtual void
   definePetscRows() noexcept;
-
-  /*!
-    @brief Build the cell flag mappings
-  */
-  virtual void
-  defineCellFlags() noexcept;
-
-  /*!
-    @brief Build the view of the global PETSc rows around each grid patch.
-  */
-  virtual void
-  defineRowViews() noexcept;
 };
 
 #endif
