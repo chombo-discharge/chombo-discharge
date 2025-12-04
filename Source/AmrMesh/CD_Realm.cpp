@@ -294,8 +294,8 @@ Realm::defineOuterCFMask(const int a_lmin)
     const int         buffer     = m.first.second;
 
     if (which_mask == s_outer_cf_region) {
-      if (buffer < 0)
-        MayDay::Abort("Realm::defineOuterCFMask -- cannot have buffer < 0!");
+      if (buffer <= 0)
+        MayDay::Abort("Realm::defineOuterCFMask -- cannot have buffer <= 0!");
 
       AMRMask& mask = m.second;
 
@@ -480,8 +480,8 @@ Realm::defineInnerCFMask(const int a_lmin)
     const int         buffer     = m.first.second;
 
     if (which_mask == s_inner_cf_region) {
-      if (buffer < 0) {
-        MayDay::Abort("Realm::defineInnerCFMask -- cannot have buffer < 0!");
+      if (buffer <= 0) {
+        MayDay::Abort("Realm::defineInnerCFMask -- cannot have buffer <= 0!");
       }
 
       AMRMask& amrMask = m.second;
