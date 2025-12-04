@@ -14,6 +14,7 @@
 
 #ifdef CH_USE_PETSC
 
+// Petsc includes
 #include "petsc.h"
 #include "petscis.h"
 
@@ -24,6 +25,7 @@
 #include <EBISLayout.H>
 
 // Our includes
+#include <CD_DischargeIO.H>
 #include <CD_EBAMRData.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_PetscDOF.H>
@@ -63,14 +65,14 @@ public:
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
   virtual void
-  define(const Vector<RefCountedPtr<MFLevelGrid>>&                      a_levelGrids,
-         const Vector<RefCountedPtr<MFLevelGrid>>&                      a_levelGridsCoFi,
-         const Vector<RefCountedPtr<MFLevelGrid>>&                      a_levelGridsFiCo,
+  define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGrids,
+         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsCoFi,
+         const Vector<RefCountedPtr<MFLevelGrid>>&              a_levelGridsFiCo,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
-         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&         a_coarHaloCF,
-         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>&         a_fineHaloCF,
-         const int                                                      a_finestLevel,
-         const int                                                      a_numGhost) noexcept;
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarHaloCF,
+         const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_fineHaloCF,
+         const int                                              a_finestLevel,
+         const int                                              a_numGhost) noexcept;
 
   /*!
     @brief Clear the object.
@@ -118,6 +120,12 @@ public:
   */
   virtual void
   putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept;
+
+  /*!
+    @brief Write the PETSc grid to an output HDF5 file
+  */
+  virtual void
+  dumpPetscGrid(const std::string a_filename) const noexcept;
 
 protected:
   /*!
@@ -289,7 +297,7 @@ protected:
     the coarse-fine interface, etc.
   */
   virtual void
-  definePetscAMRCells() noexcept;
+  defineAMRCells() noexcept;
 
   /*!
     @brief Build the Chombo <--> Petsc index mapping for the valid cells.

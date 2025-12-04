@@ -87,10 +87,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   CH_assert(m_numGhost >= 0);
   CH_assert(m_finestLevel >= 0);
 
-  this->definePetscAMRCells();
+  this->defineAMRCells();
   this->definePetscRows();
-  this->defineCellFlags();
-  this->defineRowViews();
 
   m_isDefined = true;
 }
@@ -109,11 +107,11 @@ PetscGrid::clear() noexcept
 }
 
 void
-PetscGrid::definePetscAMRCells() noexcept
+PetscGrid::defineAMRCells() noexcept
 {
-  CH_TIME("PetscGrid::definePetscAMRCells");
+  CH_TIME("PetscGrid::defineAMRCells");
   if (m_verbose) {
-    pout() << "PetscGrid::definePetscAMRCells" << endl;
+    pout() << "PetscGrid::defineAMRCells" << endl;
   }
 
 #warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
@@ -144,32 +142,23 @@ PetscGrid::definePetscAMRCells() noexcept
       BaseFab<PetscAMRCell>& amrCells   = (*m_amrCells[lvl])[din];
       const BaseFab<bool>&   validCells = (*m_validCells[lvl])[din];
 
-      auto setGhostCF = [&](const IntVect& iv) -> void {
-        if (ghostedCellBox.contains(iv)) {
-          amrCells(iv).setGhostCF(true);
-        }
+      auto kernel1 = [&](const IntVect& iv) -> void {
+        amrCells(iv).setDomainBoundaryCell(false);
+        amrCells(iv).setGhostCF(true);
+
         if (cellBox.contains(iv)) {
           amrCells(iv).setGhostCF(false);
+
+          if (validCells(iv)) {
+            amrCells(iv).setCoveredByFinerGrid(false);
+          }
+          else {
+            amrCells(iv).setCoveredByFinerGrid(true);
+          }
         }
       };
 
-      auto setCoveredByFiner = [&](const IntVect& iv) -> void {
-        if (validCells(iv)) {
-          amrCells(iv).setCoveredByFinerGrid(false);
-        }
-        else {
-          amrCells(iv).setCoveredByFinerGrid(true);
-        }
-      };
-
-      auto resetDomainBoundaryFlags = [&](const IntVect& iv) -> void {
-        amrCells(iv).setDomainBoundaryCell(false);
-      };
-
-#warning "Merge these kernels"
-      BoxLoops::loop(ghostedCellBox, setGhostCF);
-      BoxLoops::loop(cellBox, setCoveredByFiner);
-      BoxLoops::loop(cellBox, resetDomainBoundaryFlags);
+      BoxLoops::loop(ghostedCellBox, kernel1);
 
       // Fix CF region flags
 #warning "This is incorrect -- remember to add the coarse/fine CF flags to PetscAMRCell"
@@ -177,6 +166,18 @@ PetscGrid::definePetscAMRCells() noexcept
         const BaseFab<bool>& haloCells = (*m_coarHaloCF[lvl])[din];
 
         auto setOuterCFRegion = [&](const IntVect& iv) -> void {
+          amrCells(iv).setCoarCF(haloCells(iv));
+        };
+
+        BoxLoops::loop(cellBox, setOuterCFRegion);
+      }
+
+      if (lvl > 0) {
+        const BaseFab<bool>& haloCells = (*m_fineHaloCF[lvl])[din];
+
+        auto setInnerCFRegion = [&](const IntVect& iv) -> void {
+          amrCells(iv).setFineCF(haloCells(iv));
+
           if (haloCells(iv)) {
             amrCells(iv).setNumPhases(1);
           }
@@ -185,7 +186,7 @@ PetscGrid::definePetscAMRCells() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, setOuterCFRegion);
+        BoxLoops::loop(cellBox, setInnerCFRegion);
       }
 
       // Fix up domain side flags
@@ -203,7 +204,9 @@ PetscGrid::definePetscAMRCells() noexcept
       }
     }
 
-    m_amrCells[lvl]->exchange();
+#warning "Need to fix number of phases!"
+
+    //    m_amrCells[lvl]->exchange();
   }
 }
 
@@ -244,9 +247,9 @@ PetscGrid::definePetscRows() noexcept
         const DataIndex              din      = dit[mybox];
         const BaseFab<PetscAMRCell>& amrCells = (*m_amrCells[lvl])[din];
         const Box&                   cellBox  = dbl[din];
-        const EBISBox&          ebisBox  = ebisl[din];
-        const IntVectSet&       ivs      = ebisBox.getIrregIVS(cellBox);
-        const EBGraph&          ebgraph  = ebisBox.getEBGraph();
+        const EBISBox&               ebisBox  = ebisl[din];
+        const IntVectSet&            ivs      = ebisBox.getIrregIVS(cellBox);
+        const EBGraph&               ebgraph  = ebisBox.getEBGraph();
 
         BaseFab<PetscInt>& lid = (*LIDs[lvl])[din];
         BaseFab<PetscInt>& gid = (*GIDs[lvl])[din];
@@ -687,6 +690,19 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   }
 
   PetscCallVoid(VecRestoreArray(a_x, &arr));
+}
+
+void
+PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
+{
+  CH_TIME("PetscGrid::dumpPetscGrid");
+  if (m_verbose) {
+    pout() << "PetscGrid::dumpPetscGrid" << endl;
+  }
+
+#ifdef CH_USE_HDF5
+
+#endif
 }
 
 #include <CD_NamespaceFooter.H>

@@ -23,6 +23,9 @@
 const std::string Realm::Primal = "primal";
 const std::string Realm::primal = "primal";
 
+#warning "We should rename s_inner_particle_halo to s_inner_cf_region"
+#warning "We should rename s_outer_particle_halo to s_outer_cf_region"
+
 Realm::Realm()
 {
   m_isDefined = false;
