@@ -12,12 +12,26 @@
 #ifndef CD_PetscAMRCell_H
 #define CD_PetscAMRCell_H
 
+#ifdef CH_USE_PETSC
+
+// Petsc includes
+#include "petsc.h"
+
 // Chombo includes
 #include <SPMD.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief Class for storing grid information and corresponding PETSc rows. Used for mapping
+  between Chombo and PETSC
+
+  @details This class is not very sophisticated. It is meant to be plugged into a BaseFab<PetscAMRCell>, and it will store the cell information
+  of the corresponding cell (in an AMR context). Various cell flags are available, such as whether or not the cell is a ghost cell, if it is covered
+  by another refined cell. It also stores the corresponding PETSc rows in the cell. Note that we permit two PETSc rows per cell since we're also
+  dealing with jump conditions where we need to store the cell-centered potential on two phases. 
+*/
 class PetscAMRCell
 {
 public:
@@ -55,7 +69,8 @@ public:
 
   /*!
     @brief Define operator. Sets all parameters.
-    @param[in] a_numPhases Number of phases where this cell is a valid cell.
+    @param[in] a_petscRowPhase0 PETSc row corresponding to this grid cell on phase 0 (gas phase)
+    @param[in] a_petscRowPhase1 PETSc row corresponding to this grid cell on phase 1 (solid phase)
     @param[in] a_isCoveredByFinerGrid Covered by finer grid or not.
     @param[in] a_isCoarCF If true, the cell lies on the coarse side of the refinement boundary
     @param[in] a_isFineCF If true, the cell lies on the fine side of the refinement boundary    
@@ -63,19 +78,21 @@ public:
     @param[in] a_isDomainBoundaryCell Cell abuts the domain boundary.
   */
   void
-  define(const unsigned int a_numPhases,
-         const bool         a_isCoveredByFinerGrid,
-         const bool         a_isCoarCF,
-         const bool         a_isFineCF,
-         const bool         a_isGhostCF,
-         const bool         a_isDomainBoundaryCell) noexcept;
+  define(const PetscInt a_petscRowPhase0,
+         const PetscInt a_petscRowPhase1,
+         const bool     a_isCoveredByFinerGrid,
+         const bool     a_isCoarCF,
+         const bool     a_isFineCF,
+         const bool     a_isGhostCF,
+         const bool     a_isDomainBoundaryCell) noexcept;
 
   /*!
-    @brief Set number of phases
-    @param[in] a_numPhases
+    @brief Set corresponding row in PETSc for specific phase.
+    @param[in] a_phase Phase
+    @param[in] a_row PETSc row
   */
   void
-  setNumPhases(const unsigned int a_numPhases) noexcept;
+  setPetscRow(const int a_phase, const PetscInt a_row) noexcept;
 
   /*!
     @brief Set covered by finer grid flag
@@ -113,10 +130,10 @@ public:
   setDomainBoundaryCell(const bool a_isDomainBoundaryCell) noexcept;
 
   /*!
-    @brief Get number of phases.
+    @brief Get the PETSc row corresponding to this cell and phase
   */
-  unsigned int
-  getNumPhases() const noexcept;
+  PetscInt
+  getPetscRow(const int a_iphase) const noexcept;
 
   /*!
     @brief Check if the cell is covered by a finer grid
@@ -149,21 +166,9 @@ public:
   isDomainBoundaryCell() const noexcept;
 
   /*!
-    @brief If > 0, indicates the number of phases where this cell is a valid cell.
-    @details If zero, it indicates the cell is an invalid cell (either entirely covered by both phases, or
-    outside the domain.
-  */
-  unsigned char m_numPhases;
-
-  /*!
     @brief If >= 0, this contains the PETSc row corresponding to the grid cell on phase 0
   */
-  int m_rowPhase0;
-
-  /*!
-    @brief If >= 0, this contains the PETSc row corresponding to the grid cell on phase 1
-  */
-  int m_rowPhase1;
+  PetscInt m_petscRows[2];
 
   /*!
     @brief If true, the cell is covered by a finer grid
@@ -215,5 +220,7 @@ void
 linearOut(void* const a_buffer, const PetscAMRCell& a_amrCell);
 
 #include <CD_NamespaceFooter.H>
+
+#endif
 
 #endif

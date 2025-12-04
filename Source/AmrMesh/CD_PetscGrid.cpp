@@ -23,7 +23,7 @@
 #include <CD_NamespaceHeader.H>
 
 #if 1
-#warning "At the end -- let's see if we can trim some memory from this class"
+#warning "Can we trim some memory from this class? Maybe localRows and globalRows can be taken out of the design?"
 #warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
 #warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
 #warning "I really want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
@@ -144,8 +144,9 @@ PetscGrid::defineAMRCells() noexcept
       BaseFab<PetscAMRCell>& amrCells   = (*m_amrCells[lvl])[din];
       const BaseFab<bool>&   validCells = (*m_validCells[lvl])[din];
 
-      auto kernel1 = [&](const IntVect& iv) -> void {
-        amrCells(iv).setNumPhases(-1);
+      auto setValidCells = [&](const IntVect& iv) -> void {
+        amrCells(iv).setPetscRow(0, -1);
+        amrCells(iv).setPetscRow(1, -1);
         amrCells(iv).setDomainBoundaryCell(false);
         amrCells(iv).setGhostCF(true);
 
@@ -161,7 +162,7 @@ PetscGrid::defineAMRCells() noexcept
         }
       };
 
-      BoxLoops::loop(ghostedCellBox, kernel1);
+      BoxLoops::loop(ghostedCellBox, setValidCells);
 
       // Fix CF region flags
       if (lvl < m_finestLevel) {
@@ -270,6 +271,8 @@ PetscGrid::definePetscRows() noexcept
 
             lid(iv) = m_numLocalRows;
             gid(iv) = m_numLocalRows;
+
+            amrCells(iv).setPetscRow(iphase, m_numLocalRows);
 
             m_numLocalRows = m_numLocalRows + 1;
           }
@@ -438,11 +441,13 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
         const DataIndex din     = dit[mybox];
         const Box&      cellBox = dbl[din];
 
-        const FArrayBox&         data       = (*a_y[lvl])[din].getPhase(iphase).getFArrayBox();
-        const BaseFab<PetscInt>& localIndex = (*m_localRows[iphase][lvl])[din];
+        const FArrayBox&             data       = (*a_y[lvl])[din].getPhase(iphase).getFArrayBox();
+        const BaseFab<PetscInt>&     localIndex = (*m_localRows[iphase][lvl])[din];
+        const BaseFab<PetscAMRCell>& amrCells   = (*m_amrCells[lvl])[din];
 
         auto kernel = [&](const IntVect iv) -> void {
           const PetscInt& k = localIndex(iv);
+
           if (k >= 0) {
             arr[k] = data(iv, 0);
           }
@@ -525,7 +530,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
       data(gridCell, 0) += 2.0;
     }
 
-    data(gridCell, 0) = (*m_amrCells[gridLevel])[gridIndex](gridCell).getNumPhases();
+    data(gridCell, 0) = m_localRowBegin + (*m_amrCells[gridLevel])[gridIndex](gridCell).getPetscRow(phase);
 #endif
   }
 

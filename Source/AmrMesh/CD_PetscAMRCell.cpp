@@ -9,13 +9,16 @@
   @author Robert Marskar
 */
 
+#ifdef CH_USE_PETSC
+
 // Our includes
 #include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
 
 PetscAMRCell::PetscAMRCell() noexcept
 {
-  m_numPhases            = 0;
+  m_petscRows[0]         = -1;
+  m_petscRows[1]         = -1;
   m_isCoveredByFinerGrid = false;
   m_isCoarCF             = false;
   m_isFineCF             = false;
@@ -27,14 +30,16 @@ PetscAMRCell::~PetscAMRCell() noexcept
 {}
 
 void
-PetscAMRCell::define(const unsigned int a_numPhases,
-                     const bool         a_isCoveredByFinerGrid,
-                     const bool         a_isCoarCF,
-                     const bool         a_isFineCF,
-                     const bool         a_isGhostCF,
-                     const bool         a_isDomainBoundaryCell) noexcept
+PetscAMRCell::define(const PetscInt a_petscRowPhase0,
+                     const PetscInt a_petscRowPhase1,
+                     const bool     a_isCoveredByFinerGrid,
+                     const bool     a_isCoarCF,
+                     const bool     a_isFineCF,
+                     const bool     a_isGhostCF,
+                     const bool     a_isDomainBoundaryCell) noexcept
 {
-  m_numPhases            = a_numPhases;
+  m_petscRows[0]         = a_petscRowPhase0;
+  m_petscRows[1]         = a_petscRowPhase1;
   m_isCoveredByFinerGrid = a_isCoveredByFinerGrid;
   m_isCoarCF             = a_isCoarCF;
   m_isFineCF             = a_isFineCF;
@@ -43,9 +48,9 @@ PetscAMRCell::define(const unsigned int a_numPhases,
 }
 
 void
-PetscAMRCell::setNumPhases(const unsigned int a_numPhases) noexcept
+PetscAMRCell::setPetscRow(const int a_phase, const PetscInt a_row) noexcept
 {
-  m_numPhases = a_numPhases;
+  m_petscRows[a_phase] = a_row;
 }
 
 void
@@ -78,10 +83,10 @@ PetscAMRCell::setDomainBoundaryCell(const bool a_isDomainBoundaryCell) noexcept
   m_isDomainBoundaryCell = a_isDomainBoundaryCell;
 }
 
-unsigned int
-PetscAMRCell::getNumPhases() const noexcept
+PetscInt
+PetscAMRCell::getPetscRow(const int a_iphase) const noexcept
 {
-  return static_cast<unsigned int>(m_numPhases);
+  return m_petscRows[a_iphase];
 }
 
 bool
@@ -119,7 +124,7 @@ linearSize(const PetscAMRCell& a_amrCell)
 {
   int size = 0;
 
-  size += sizeof(PetscAMRCell::m_numPhases);
+  size += sizeof(PetscAMRCell::m_petscRows);
   size += sizeof(PetscAMRCell::m_isCoveredByFinerGrid);
   size += sizeof(PetscAMRCell::m_isCoarCF);
   size += sizeof(PetscAMRCell::m_isFineCF);
@@ -132,49 +137,61 @@ linearSize(const PetscAMRCell& a_amrCell)
 void
 linearIn(PetscAMRCell& a_amrCell, const void* const a_buffer)
 {
-  const unsigned char* buffer = static_cast<const unsigned char*>(a_buffer);
+  const PetscInt* bufferInt = static_cast<const PetscInt*>(a_buffer);
 
-  a_amrCell.m_numPhases = *buffer;
-  buffer++;
+  a_amrCell.m_petscRows[0] = *bufferInt;
+  bufferInt++;
 
-  a_amrCell.m_isCoveredByFinerGrid = *buffer;
-  buffer++;
+  a_amrCell.m_petscRows[1] = *bufferInt;
+  bufferInt++;
 
-  a_amrCell.m_isGhostCF = *buffer;
-  buffer++;
+  const unsigned char* bufferChar = static_cast<const unsigned char*>((void*)bufferInt);
 
-  a_amrCell.m_isCoarCF = *buffer;
-  buffer++;
+  a_amrCell.m_isCoveredByFinerGrid = *bufferChar;
+  bufferChar++;
 
-  a_amrCell.m_isFineCF = *buffer;
-  buffer++;
+  a_amrCell.m_isGhostCF = *bufferChar;
+  bufferChar++;
 
-  a_amrCell.m_isDomainBoundaryCell = *buffer;
-  buffer++;
+  a_amrCell.m_isCoarCF = *bufferChar;
+  bufferChar++;
+
+  a_amrCell.m_isFineCF = *bufferChar;
+  bufferChar++;
+
+  a_amrCell.m_isDomainBoundaryCell = *bufferChar;
+  bufferChar++;
 }
 
 void
 linearOut(void* const a_buffer, const PetscAMRCell& a_amrCell)
 {
-  unsigned char* buffer = static_cast<unsigned char*>(a_buffer);
+  PetscInt* bufferInt = static_cast<PetscInt*>(a_buffer);
 
-  *buffer = a_amrCell.m_numPhases;
-  buffer++;
+  *bufferInt = a_amrCell.m_petscRows[0];
+  bufferInt++;
 
-  *buffer = static_cast<unsigned char>(a_amrCell.m_isCoveredByFinerGrid);
-  buffer++;
+  *bufferInt = a_amrCell.m_petscRows[1];
+  bufferInt++;
 
-  *buffer = static_cast<unsigned char>(a_amrCell.m_isCoarCF);
-  buffer++;
+  unsigned char* bufferChar = static_cast<unsigned char*>((void*)bufferInt);
 
-  *buffer = static_cast<unsigned char>(a_amrCell.m_isFineCF);
-  buffer++;
+  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isCoveredByFinerGrid);
+  bufferChar++;
 
-  *buffer = static_cast<unsigned char>(a_amrCell.m_isGhostCF);
-  buffer++;
+  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isGhostCF);
+  bufferChar++;
 
-  *buffer = static_cast<unsigned char>(a_amrCell.m_isDomainBoundaryCell);
-  buffer++;
+  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isCoarCF);
+  bufferChar++;
+
+  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isFineCF);
+  bufferChar++;
+
+  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isDomainBoundaryCell);
+  bufferChar++;
 }
 
 #include <CD_NamespaceFooter.H>
+
+#endif
