@@ -378,7 +378,7 @@ public:
     @brief Get cell maps describing which cells are which
   */
   const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
-  getAMRCells() const;  
+  getAMRCells() const;
 
   /*!
     @brief Get the tiled space
@@ -518,7 +518,7 @@ protected:
     @param[in] a_lmin Coarsest level that changed during regrid
   */
   void
-  defineOuterHaloMask(const int a_lmin);
+  defineOuterCFMask(const int a_lmin);
 
   /*!
     @brief Define the outer particle halo masks. This is the level-version. 
@@ -531,13 +531,13 @@ protected:
     @param[in]  a_refRat     Refinement ratio between the two levels
   */
   void
-  defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                      const ProblemDomain&      a_domainCoar,
-                      const ProblemDomain&      a_domainFine,
-                      const DisjointBoxLayout&  a_gridsCoar,
-                      const DisjointBoxLayout&  a_gridsFine,
-                      const int                 a_buffer,
-                      const int                 a_refRat);
+  defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
+                    const ProblemDomain&      a_domainCoar,
+                    const ProblemDomain&      a_domainFine,
+                    const DisjointBoxLayout&  a_gridsCoar,
+                    const DisjointBoxLayout&  a_gridsFine,
+                    const int                 a_buffer,
+                    const int                 a_refRat);
 
   /*!
     @brief Define inner particle halo mask.
@@ -545,7 +545,7 @@ protected:
     @param[in] a_lmin Coarsest level that changed during regrid
   */
   void
-  defineInnerHaloMask(const int a_lmin);
+  defineInnerCFMask(const int a_lmin);
 
   /*!
     @brief Define the coarse-fine interface. 

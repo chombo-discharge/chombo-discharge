@@ -23,9 +23,6 @@
 const std::string Realm::Primal = "primal";
 const std::string Realm::primal = "primal";
 
-#warning "We should rename s_inner_particle_halo to s_inner_cf_region"
-#warning "We should rename s_outer_particle_halo to s_outer_cf_region"
-
 Realm::Realm()
 {
   m_isDefined = false;
@@ -199,13 +196,13 @@ Realm::defineMasks(const int a_lmin)
 
 #ifdef CH_USE_PETSC
   // This mask is used when defining the PETSc rows, and is therefore required.
-  this->registerMask(s_outer_particle_halo, 1);
-  this->registerMask(s_inner_particle_halo, 1);
+  this->registerMask(s_outer_cf_region, 1);
+  this->registerMask(s_inner_cf_region, 1);
 #endif
 
   // Regrid all masks
-  this->defineOuterHaloMask(a_lmin);
-  this->defineInnerHaloMask(a_lmin);
+  this->defineOuterCFMask(a_lmin);
+  this->defineInnerCFMask(a_lmin);
   this->defineCFIVS(a_lmin);
 }
 
@@ -282,11 +279,11 @@ Realm::defineMFLevelGrid(const int a_lmin)
 }
 
 void
-Realm::defineOuterHaloMask(const int a_lmin)
+Realm::defineOuterCFMask(const int a_lmin)
 {
-  CH_TIME("Realm::defineOuterHaloMask");
+  CH_TIME("Realm::defineOuterCFMask");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineOuterHaloMask" << endl;
+    pout() << "Realm::defineOuterCFMask" << endl;
   }
 
   // Loop through all masks and do something about the halo masks only.
@@ -296,9 +293,9 @@ Realm::defineOuterHaloMask(const int a_lmin)
     const std::string which_mask = m.first.first;
     const int         buffer     = m.first.second;
 
-    if (which_mask == s_outer_particle_halo) {
+    if (which_mask == s_outer_cf_region) {
       if (buffer < 0)
-        MayDay::Abort("Realm::defineOuterHaloMask -- cannot have buffer < 0!");
+        MayDay::Abort("Realm::defineOuterCFMask -- cannot have buffer < 0!");
 
       AMRMask& mask = m.second;
 
@@ -316,13 +313,13 @@ Realm::defineOuterHaloMask(const int a_lmin)
         mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool>>>(
           new LevelData<BaseFab<bool>>(gridsCoar, ncomp, IntVect::Zero));
 
-        this->defineOuterHaloMask(*mask[lvl],
-                                  domainCoar,
-                                  domainFine,
-                                  gridsCoar,
-                                  gridsFine,
-                                  buffer,
-                                  m_refinementRatios[lvl]);
+        this->defineOuterCFMask(*mask[lvl],
+                                domainCoar,
+                                domainFine,
+                                gridsCoar,
+                                gridsFine,
+                                buffer,
+                                m_refinementRatios[lvl]);
       }
 
       // Must explicitly set this because we want to the finest level mask to be nullptr, but we could be removing a grid level and in that case
@@ -333,17 +330,17 @@ Realm::defineOuterHaloMask(const int a_lmin)
 }
 
 void
-Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
-                           const ProblemDomain&      a_domainCoar,
-                           const ProblemDomain&      a_domainFine,
-                           const DisjointBoxLayout&  a_gridsCoar,
-                           const DisjointBoxLayout&  a_gridsFine,
-                           const int                 a_buffer,
-                           const int                 a_refRat)
+Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
+                         const ProblemDomain&      a_domainCoar,
+                         const ProblemDomain&      a_domainFine,
+                         const DisjointBoxLayout&  a_gridsCoar,
+                         const DisjointBoxLayout&  a_gridsFine,
+                         const int                 a_buffer,
+                         const int                 a_refRat)
 {
-  CH_TIME("Realm::defineOuterHaloMask");
+  CH_TIME("Realm::defineOuterCFMask");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineOuterHaloMask" << endl;
+    pout() << "Realm::defineOuterCFMask" << endl;
   }
 
   // TLDR: This routine defines a "mask" of valid coarse-grid cells (i.e., not covered by a finer level) around a fine grid. The mask is a_buffer wide. It is
@@ -468,11 +465,11 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
 }
 
 void
-Realm::defineInnerHaloMask(const int a_lmin)
+Realm::defineInnerCFMask(const int a_lmin)
 {
-  CH_TIME("Realm::defineInnerHaloMask");
+  CH_TIME("Realm::defineInnerCFMask");
   if (m_verbosity > 5) {
-    pout() << "Realm::defineInnerHaloMask" << endl;
+    pout() << "Realm::defineInnerCFMask" << endl;
   }
 
   // Loop through all masks and do something about the halo masks only.
@@ -482,9 +479,9 @@ Realm::defineInnerHaloMask(const int a_lmin)
     const std::string which_mask = m.first.first;
     const int         buffer     = m.first.second;
 
-    if (which_mask == s_inner_particle_halo) {
+    if (which_mask == s_inner_cf_region) {
       if (buffer < 0) {
-        MayDay::Abort("Realm::defineInnerHaloMask -- cannot have buffer < 0!");
+        MayDay::Abort("Realm::defineInnerCFMask -- cannot have buffer < 0!");
       }
 
       AMRMask& amrMask = m.second;
@@ -809,8 +806,8 @@ Realm::definePetscGrid() noexcept
                       m_mflgCoFi,
                       m_mflgFiCo,
                       m_validCells,
-                      this->getMask(s_outer_particle_halo, 1),
-                      this->getMask(s_inner_particle_halo, 1),
+                      this->getMask(s_outer_cf_region, 1),
+                      this->getMask(s_inner_cf_region, 1),
                       m_finestLevel,
                       m_numGhost);
 #endif
