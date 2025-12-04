@@ -88,9 +88,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
 
   this->defineAMRCells();
   this->definePetscRows();
-  this->defineCoFiBuffers();
-
-#warning "Must form the coarsened/refined version of PetscAMRCell"
+  //  this->defineCoFiBuffers();
 
   m_isDefined = true;
 }
@@ -115,11 +113,6 @@ PetscGrid::defineAMRCells() noexcept
   if (m_verbose) {
     pout() << "PetscGrid::defineAMRCells" << endl;
   }
-
-#warning "I must probably build the Chombo->Petsc maps including ghost cells (stencils will reach out of patches)"
-#warning "I need to figure out which cells are ghost cells, covered by the geometry, or covered by a finer grid."
-#warning "Priority 1: Build maps over which cells are which. Must be viewable from each patch".
-#warning "Priority 2: Map global row numbers to cells on each phase. Must be viewable from each patch".
 
   const int curComp = 0;
   const int numComp = 1;
@@ -244,8 +237,6 @@ PetscGrid::definePetscRows() noexcept
               MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted");
             }
 
-#warning "Somewhere around here I'd want to include the PETSc DOFs in PetscAMRCells"
-
             PetscDOF dof;
 
             dof.gridLevel = lvl;
@@ -301,6 +292,59 @@ PetscGrid::defineCoFiBuffers() noexcept
   }
 
 #warning "Need to begin here next time"
+
+  const int numComp = 1;
+  const int comp    = 0;
+
+  m_amrToPetscCoFi.resize(1 + m_finestLevel);
+  m_amrToPetscFiCo.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < m_finestLevel;
+
+    if (hasFine) {
+      const DisjointBoxLayout& dbl  = m_levelGridsCoFi[lvl]->getGrids();
+      const DataIterator       dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      m_amrToPetscCoFi[lvl] = RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>(
+        new LevelData<BaseFab<PetscAMRCell>>(dbl, numComp, m_numGhost * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetscCoFi[lvl])[din];
+
+        amrToPetsc.setVal(PetscAMRCell());
+      }
+
+      m_amrToPetsc[lvl]->copyTo(*m_amrToPetscCoFi[lvl]);
+      m_amrToPetscCoFi[lvl]->exchange();
+    }
+
+    if (hasCoar) {
+      const DisjointBoxLayout& dbl  = m_levelGridsFiCo[lvl]->getGrids();
+      const DataIterator       dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+      m_amrToPetscFiCo[lvl] = RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>(
+        new LevelData<BaseFab<PetscAMRCell>>(dbl, numComp, m_numGhost * IntVect::Unit));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+
+        BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetscFiCo[lvl])[din];
+
+        amrToPetsc.setVal(PetscAMRCell());
+      }
+
+      m_amrToPetsc[lvl]->copyTo(*m_amrToPetscFiCo[lvl]);
+      m_amrToPetscFiCo[lvl]->exchange();
+    }
+  }
 }
 
 void
