@@ -23,8 +23,7 @@
 #include <CD_NamespaceHeader.H>
 
 #if 1
-#warning "Not sure how I want to handle memory management within PetscGrid. Maybe pass this off to the outside world??"
-#warning "We should REALLY time how fast transfers between Chombo and PETSc really are"
+#warning "I want to reorganize m_petscToAMR and organize it by level, grid, and then the DOFs. E.g., a LayoutData?"
 #warning "I really want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
 #endif
 
@@ -491,7 +490,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 
     data(gridCell, 0) = arr[i];
 
-#warning "Debug code here"
+#warning "Debug code here -- scheduled for removal"
 #if 0
     const PetscAMRCell& amrCell = (*m_amrToPetsc[gridLevel])[gridIndex](gridCell);
 

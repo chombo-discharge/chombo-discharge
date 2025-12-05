@@ -245,6 +245,12 @@ protected:
   Vector<PetscDOF> m_petscToAMR;
 
   /*!
+    @brief Mapping of PETSc local row index back to AMR
+    @details Locally owned. Maps a local row index to a level/grid/cell.
+  */  
+  Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR2;
+
+  /*!
     @brief Define basic cell information for PetscGrid.
     @details This defines basic cell properties, indicating whether or not a cell is covered by a finer grid, if it abuts
     the coarse-fine interface, etc.
