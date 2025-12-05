@@ -22,11 +22,6 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-#if 1
-#warning "I want to reorganize m_petscToAMR and organize it by level, grid, and then the DOFs. E.g., a LayoutData?"
-#warning "I really want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
-#endif
-
 PetscGrid::PetscGrid() noexcept
 {
   CH_TIME("PetscGrid::PetscGrid");
@@ -212,12 +207,16 @@ PetscGrid::definePetscRows() noexcept
   m_numRowsPerRank.resize(numProc(), 0);
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    m_petscToAMR[iphase].resize(1 + m_finestLevel);
+
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg  = m_levelGrids[lvl]->getEBLevelGrid(iphase);
       const EBISLayout&        ebisl = eblg.getEBISL();
       const DisjointBoxLayout& dbl   = eblg.getDBL();
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
+
+      m_petscToAMR[iphase][lvl] = RefCountedPtr<LayoutData<Vector<PetscDOF>>>(new LayoutData<Vector<PetscDOF>>(dbl));
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
@@ -229,22 +228,22 @@ PetscGrid::definePetscRows() noexcept
         const EBGraph&    ebgraph = ebisBox.getEBGraph();
 
         BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
+        Vector<PetscDOF>&      petscToAMR = (*m_petscToAMR[iphase][lvl])[din];
+
+        petscToAMR.resize(0);
 
         auto regularKernel = [&](const IntVect& iv) -> void {
           if (!(amrToPetsc(iv).isCoveredByFinerGrid()) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
-              MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted");
+              MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted!");
             }
 
             PetscDOF dof;
 
-            dof.gridLevel = lvl;
-            dof.gridIndex = din;
-            dof.gridCell  = iv;
-            dof.phase     = iphase;
+            dof.gridCell = iv;
+            dof.localRow = m_numLocalRows;
 
-            m_petscToAMR.push_back(dof);
-
+            petscToAMR.push_back(dof);
             amrToPetsc(iv).setPetscRow(iphase, m_numLocalRows);
 
             m_numLocalRows = m_numLocalRows + 1;
@@ -478,6 +477,7 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   CH_assert(startIdx >= 0);
   CH_assert(endIdx - startIdx == m_numLocalRows - 1);
 
+#if 0
   for (PetscInt i = 0; i < m_numLocalRows; i++) {
     const PetscDOF dof = m_petscToAMR[i];
 
@@ -528,6 +528,29 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
 #endif
   }
 
+#else
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      for (int iphase = 0; iphase < m_numPhases; iphase++) {
+        const Vector<PetscDOF>& petscToAMR = (*m_petscToAMR[iphase][lvl])[din];
+
+        FArrayBox& data = (*a_y[lvl])[din].getPhase(iphase).getFArrayBox();
+
+        for (int i = 0; i < petscToAMR.size(); i++) {
+          data(petscToAMR[i].gridCell, 0) = arr[petscToAMR[i].localRow];
+        }
+      }
+    }
+  }
+#endif
+
   PetscCallVoid(VecRestoreArray(a_x, &arr));
 }
 
@@ -540,7 +563,7 @@ PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
   }
 
 #ifdef CH_USE_HDF5
-#warning "Not implemented (yet)"
+#warning "Not implemented, but I want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
 #endif
 }
 

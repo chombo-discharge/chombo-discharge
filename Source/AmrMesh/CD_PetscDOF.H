@@ -21,9 +21,7 @@
 
 struct PetscDOF
 {
-  int       phase;
-  int       gridLevel;
-  DataIndex gridIndex;
+  PetscInt  localRow;
   IntVect   gridCell;
 };
 
