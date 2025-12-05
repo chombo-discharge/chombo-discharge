@@ -223,7 +223,7 @@ PetscGrid::definePetscRows() noexcept
 
       m_petscToAMR[iphase][lvl] = RefCountedPtr<LayoutData<Vector<PetscDOF>>>(new LayoutData<Vector<PetscDOF>>(dbl));
 
-#pragma omp parallel for schedule(runtime)
+      // PS: This loop is not thread safe!
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex din = dit[mybox];
 
@@ -295,7 +295,6 @@ PetscGrid::defineCoFiBuffers() noexcept
   }
 
   const int numComp = 1;
-  const int comp    = 0;
 
   m_amrToPetscCoFi.resize(1 + m_finestLevel);
   m_amrToPetscFiCo.resize(1 + m_finestLevel);
@@ -394,10 +393,10 @@ PetscGrid::setValue(Vec& a_x, const PetscScalar a_value) const noexcept
   PetscCallVoid(VecGetOwnershipRange(a_x, &startIdx, &endIdx));
   PetscCallVoid(VecGetArray(a_x, &arr));
 
-  CH_assert(endIdx <= startIdx);
+  CH_assert(endIdx >= startIdx);
   CH_assert(endIdx >= 0);
   CH_assert(startIdx >= 0);
-  CH_assert(endIdx - startIdx == m_numLocalRows - 1);
+  CH_assert(endIdx - startIdx == m_numLocalRows);
 
   for (PetscInt i = 0; i < m_numLocalRows; i++) {
     arr[i] = a_value;
@@ -424,10 +423,10 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
   PetscCallVoid(VecGetOwnershipRange(a_x, &startIdx, &endIdx));
   PetscCallVoid(VecGetArray(a_x, &arr));
 
-  CH_assert(endIdx <= startIdx);
+  CH_assert(endIdx >= startIdx);
   CH_assert(endIdx >= 0);
   CH_assert(startIdx >= 0);
-  CH_assert(endIdx - startIdx == m_numLocalRows - 1);
+  CH_assert(endIdx - startIdx == m_numLocalRows);
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
@@ -479,10 +478,10 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   PetscCallVoid(VecGetOwnershipRange(a_x, &startIdx, &endIdx));
   PetscCallVoid(VecGetArray(a_x, &arr));
 
-  CH_assert(endIdx <= startIdx);
+  CH_assert(endIdx >= startIdx);
   CH_assert(endIdx >= 0);
   CH_assert(startIdx >= 0);
-  CH_assert(endIdx - startIdx == m_numLocalRows - 1);
+  CH_assert(endIdx - startIdx == m_numLocalRows);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();

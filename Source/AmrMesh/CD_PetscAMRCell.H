@@ -199,7 +199,7 @@ public:
 /*!
   @brief PetscAMRCell specialization of the linearization size function used by LevelData
 */
-int
+constexpr int
 linearSize(const PetscAMRCell& a_amrCell);
 
 /*!

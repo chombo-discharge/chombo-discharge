@@ -13,6 +13,7 @@
 
 // Our includes
 #include <CD_PetscAMRCell.H>
+#include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
 PetscAMRCell::PetscAMRCell() noexcept
@@ -50,6 +51,8 @@ PetscAMRCell::define(const PetscInt a_petscRowPhase0,
 void
 PetscAMRCell::setPetscRow(const int a_phase, const PetscInt a_row) noexcept
 {
+  CH_assert(a_phase == 0 || a_phase == 1);
+
   m_petscRows[a_phase] = a_row;
 }
 
@@ -119,7 +122,7 @@ PetscAMRCell::isDomainBoundaryCell() const noexcept
   return m_isDomainBoundaryCell;
 }
 
-int
+constexpr int
 linearSize(const PetscAMRCell& a_amrCell)
 {
   int size = 0;
@@ -137,59 +140,29 @@ linearSize(const PetscAMRCell& a_amrCell)
 void
 linearIn(PetscAMRCell& a_amrCell, const void* const a_buffer)
 {
-  const PetscInt* bufferInt = static_cast<const PetscInt*>(a_buffer);
+  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
 
-  a_amrCell.m_petscRows[0] = *bufferInt;
-  bufferInt++;
-
-  a_amrCell.m_petscRows[1] = *bufferInt;
-  bufferInt++;
-
-  const unsigned char* bufferChar = static_cast<const unsigned char*>((void*)bufferInt);
-
-  a_amrCell.m_isCoveredByFinerGrid = *bufferChar;
-  bufferChar++;
-
-  a_amrCell.m_isGhostCF = *bufferChar;
-  bufferChar++;
-
-  a_amrCell.m_isCoarCF = *bufferChar;
-  bufferChar++;
-
-  a_amrCell.m_isFineCF = *bufferChar;
-  bufferChar++;
-
-  a_amrCell.m_isDomainBoundaryCell = *bufferChar;
-  bufferChar++;
+  detail::pullParticleProperty(p, a_amrCell.m_petscRows[0]);
+  detail::pullParticleProperty(p, a_amrCell.m_petscRows[1]);
+  detail::pullParticleProperty(p, a_amrCell.m_isCoveredByFinerGrid);
+  detail::pullParticleProperty(p, a_amrCell.m_isGhostCF);
+  detail::pullParticleProperty(p, a_amrCell.m_isCoarCF);
+  detail::pullParticleProperty(p, a_amrCell.m_isFineCF);
+  detail::pullParticleProperty(p, a_amrCell.m_isDomainBoundaryCell);
 }
 
 void
 linearOut(void* const a_buffer, const PetscAMRCell& a_amrCell)
 {
-  PetscInt* bufferInt = static_cast<PetscInt*>(a_buffer);
+  uint8_t* p = static_cast<uint8_t*>(a_buffer);
 
-  *bufferInt = a_amrCell.m_petscRows[0];
-  bufferInt++;
-
-  *bufferInt = a_amrCell.m_petscRows[1];
-  bufferInt++;
-
-  unsigned char* bufferChar = static_cast<unsigned char*>((void*)bufferInt);
-
-  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isCoveredByFinerGrid);
-  bufferChar++;
-
-  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isGhostCF);
-  bufferChar++;
-
-  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isCoarCF);
-  bufferChar++;
-
-  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isFineCF);
-  bufferChar++;
-
-  *bufferChar = static_cast<unsigned char>(a_amrCell.m_isDomainBoundaryCell);
-  bufferChar++;
+  detail::pushParticleProperty(p, a_amrCell.m_petscRows[0]);
+  detail::pushParticleProperty(p, a_amrCell.m_petscRows[1]);
+  detail::pushParticleProperty(p, a_amrCell.m_isCoveredByFinerGrid);
+  detail::pushParticleProperty(p, a_amrCell.m_isGhostCF);
+  detail::pushParticleProperty(p, a_amrCell.m_isCoarCF);
+  detail::pushParticleProperty(p, a_amrCell.m_isFineCF);
+  detail::pushParticleProperty(p, a_amrCell.m_isDomainBoundaryCell);
 }
 
 #include <CD_NamespaceFooter.H>
