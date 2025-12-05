@@ -282,8 +282,8 @@ protected:
   defineCoFiBuffers() noexcept;
 };
 
-#endif
-
 #include <CD_NamespaceFooter.H>
+
+#endif
 
 #endif

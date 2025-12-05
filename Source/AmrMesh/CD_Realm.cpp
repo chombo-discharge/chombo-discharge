@@ -1317,10 +1317,12 @@ Realm::getLevelTiles() const noexcept
   return m_levelTiles;
 }
 
+#ifdef CH_USE_PETSC
 const RefCountedPtr<PetscGrid>&
 Realm::getPetscGrid() const noexcept
 {
   return m_petscGrid;
 }
+#endif
 
 #include <CD_NamespaceFooter.H>
