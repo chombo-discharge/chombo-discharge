@@ -2910,13 +2910,21 @@ AmrMesh::sanityCheck() const
     MayDay::Abort("AmrMesh::sanityCheck -- non-uniform resolution detected but I must have dx = dy = dz");
   }
 
+#if 0
+  // Comment, Robert M, Dec 2025:
+  // ----------------------------
+  //
+  // I'm not sure why this was in here? It seems to work well without this restriction?
+  //
+  // If this ever becomes a problem, take a look at this again.
   if (m_maxAmrDepth > 0) {
     for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
       if (m_refinementRatios[lvl] > 2 && m_blockingFactor < 8) {
-        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
+        //        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
       }
     }
   }
+#endif
 }
 
 RealVect

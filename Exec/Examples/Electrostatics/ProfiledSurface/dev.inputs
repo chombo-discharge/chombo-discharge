@@ -11,16 +11,16 @@ AmrMesh.fill_ratio           = 1.0            ## Fill ratio for grid generation
 AmrMesh.buffer_size          = 4              ## Number of cells between grid levels
 AmrMesh.grid_algorithm       = br             ## Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting          = morton         ## 'none', 'standardSort', 'shuffle', or 'morton'
-AmrMesh.blocking_factor      = 8              ## Default blocking factor (16 in 3D)
-AmrMesh.max_box_size         = 8              ## Maximum allowed box size
-AmrMesh.max_ebis_box         = 8              ## Maximum allowed box size
-AmrMesh.ref_rat              = 2 2 2 2 2 2    ## Refinement ratios
+AmrMesh.blocking_factor      = 4              ## Default blocking factor (16 in 3D)
+AmrMesh.max_box_size         = 32             ## Maximum allowed box size
+AmrMesh.max_ebis_box         = 32             ## Maximum allowed box size
+AmrMesh.ref_rat              = 4 2 4 2 4 2    ## Refinement ratios
 AmrMesh.num_ghost            = 2              ## Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost            = 0              ## Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost             = 2              ## Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order      = 2              ## Multigrid interpolation order
 AmrMesh.mg_interp_radius     = 2              ## Multigrid interpolation radius
-AmrMesh.mg_interp_weight     = 2              ## Multigrid interpolation weight (for least squares)
+AmrMesh.mg_interp_weight     = 4              ## Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_interp      = minmod         ## Centroid interp stencils. linear, lsq, minmod, etc
 AmrMesh.eb_interp            = minmod         ## EB interp stencils. linear, taylor, minmod, etc
 AmrMesh.redist_radius        = 1              ## Redistribution radius for hyperbolic conservation laws
@@ -77,22 +77,22 @@ FieldSolverGMG.filter_rho            = 0                       ## Number of filt
 FieldSolverGMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
-FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
-FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
-FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
-FieldSolverGMG.gmg_bott_smooth              = 12           ## NUmber of relaxations before dropping to bottom solver
+FieldSolverGMG.gmg_use_default_settings     = false         ## Use default multigrid settings or not (see documentation)
+FieldSolverGMG.gmg_pre_smooth               = 20           ## Number of relaxations in downsweep
+FieldSolverGMG.gmg_post_smooth              = 20           ## Number of relaxations in upsweep
+FieldSolverGMG.gmg_bott_smooth              = 20           ## NUmber of relaxations before dropping to bottom solver
 FieldSolverGMG.gmg_precond_smooth           = 10           ## Number of smoothing steps in the preconditioner
 FieldSolverGMG.gmg_min_iter                 = 5            ## Minimum number of iterations
 FieldSolverGMG.gmg_max_iter                 = 32           ## Maximum number of iterations
 FieldSolverGMG.gmg_exit_tol                 = 1.E-10       ## Residue tolerance
 FieldSolverGMG.gmg_exit_hang                = 0.2          ## Solver hang
-FieldSolverGMG.gmg_min_cells                = 8            ## Bottom drop
+FieldSolverGMG.gmg_min_cells                = 16            ## Bottom drop
 FieldSolverGMG.gmg_drop_order               = 0            ## Drop stencil order to 1 if domain is coarser than this.
-FieldSolverGMG.gmg_bc_order                 = 1            ## Boundary condition order for multigrid
+FieldSolverGMG.gmg_bc_order                 = 2            ## Boundary condition order for multigrid
 FieldSolverGMG.gmg_bc_weight                = 1            ## Boundary condition weights (for least squares)
-FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition order for jump conditions
+FieldSolverGMG.gmg_jump_order               = 2            ## Boundary condition order for jump conditions
 FieldSolverGMG.gmg_jump_weight              = 1            ## Boundary condition weight for jump conditions (for least squares)
-FieldSolverGMG.gmg_reduce_order             = false        ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverGMG.gmg_reduce_order             = true        ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
@@ -113,7 +113,7 @@ DiskProfiledPlane.use_dielectric     = true    ## Turn on/off dielectric
 
 DiskProfiledPlane.wheel_live                = true          ## Live electrode or not
 DiskProfiledPlane.wheel_radius              = 3E-2          ## Wheel radius
-DiskProfiledPlane.wheel_center              = 0 3.5E-2 0    ## Wheel center
+DiskProfiledPlane.wheel_center              = 0 3.7E-2 0    ## Wheel center
 DiskProfiledPlane.wheel_curvature           = 500E-6        ## Wheel curvature (thickness)
 DiskProfiledPlane.wheel_stem_radius         = -1
 DiskProfiledPlane.wheel_smooth              = 1E-3
@@ -121,7 +121,7 @@ DiskProfiledPlane.wheel_extra_thickness     = 0.0           ## Extra wheel thick
 
 DiskProfiledPlane.box_dimensions       = 40.2000123E-2 0.020012 1    ## Box dimensions
 DiskProfiledPlane.box_translate        = 0 5.0123E-3 0               ## Box translation
-DiskProfiledPlane.box_permittivity     = 3.0                         ## Dielectric box permittivity
+DiskProfiledPlane.box_permittivity     = 1.0                         ## Dielectric box permittivity
 DiskProfiledPlane.box_curvature        = 50E-6                       ## Corner curvatures
 
 DiskProfiledPlane.profile_type              = square        ## Profile type. 'square', 'sphere', 'cylinder_d' with d = 'x/y/z'

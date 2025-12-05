@@ -514,7 +514,7 @@ PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
   CH_assert(m_isDefined);
 
 #ifdef CH_USE_HDF5
-#warning "Not implemented, but I want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
+#warning "Not implemented yet, but I want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
 #endif
 }
 
