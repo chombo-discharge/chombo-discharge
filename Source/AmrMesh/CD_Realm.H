@@ -18,7 +18,6 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
-#include <CD_PetscAMRCell.H>
 #include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
@@ -373,12 +372,6 @@ public:
   */
   const AMRMask&
   getValidCells() const;
-
-  /*!
-    @brief Get cell maps describing which cells are which
-  */
-  const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
-  getAMRCells() const;
 
   /*!
     @brief Get the tiled space
