@@ -1791,6 +1791,15 @@ public:
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
 
+#ifdef CH_USE_PETSC
+  /*!
+    @brief Get a PETSc grid object
+    @param[in] a_realm Realm name.
+  */
+  const RefCountedPtr<PetscGrid>&
+  getPetscGrid(const std::string a_realm) const noexcept;
+#endif
+
   /*!
     @brief Get the name of all Realms
     @return Names of all Realms

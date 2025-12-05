@@ -2037,7 +2037,7 @@ Driver::writeComputationalLoads()
       }
     }
 
-    ParallelOps::vectorSum(sumLoads);
+    ParallelOps::sum(sumLoads);
 
     realmLoads.emplace(r, sumLoads);
   }
@@ -2905,7 +2905,7 @@ Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
     a_loads[ibox] = lround(fab.max());
   }
 
-  ParallelOps::vectorSum(a_loads);
+  ParallelOps::sum(a_loads);
 #else
   // Read into an FArrayBox.
   FArrayBox fab;

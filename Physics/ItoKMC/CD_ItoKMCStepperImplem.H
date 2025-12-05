@@ -5696,7 +5696,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
       BoxLoops::loop(cellBox, regularKernel);
     }
 
-    ParallelOps::vectorSum(levelLoads);
+    ParallelOps::sum(levelLoads);
 
     // Add the "constant" load from the other PPC stuff
     for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit) {

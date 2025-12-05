@@ -39,8 +39,10 @@
 #include <CD_NamespaceHeader.H>
 
 // These are operators that can be defined.
-static const std::string s_outer_particle_halo = "outer_particle_halo"; // Outside particle halo
-static const std::string s_inner_particle_halo = "inner_particle_halo"; // Inner particle halo
+static const std::string s_outer_cf_region     = "outer_cf_region";     // Outside coarse-fine region
+static const std::string s_inner_cf_region     = "inner_cf_region";     // Inside coarse-fine region
+static const std::string s_outer_particle_halo = "outer_particle_halo"; // Outside particle halo region
+static const std::string s_inner_particle_halo = "inner_particle_halo"; // Inside particle halo region
 static const std::string s_cfivs               = "cfivs";               // Coarse-fine interface
 static const std::string s_eb_gradient         = "eb_gradient";         // For computing gradients
 static const std::string s_eb_irreg_interp     = "eb_irreg_interp";     // For data recentering
@@ -232,17 +234,21 @@ public:
 
   /*!
     @brief Get EBLevelGrids
-    @return Immutable m_eblg
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGrid() const;
 
   /*!
     @brief Get coarsened fine grids
-    @return Immutable m_eblg
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi() const;
+
+  /*!
+    @brief Get refined grids
+  */
+  const Vector<RefCountedPtr<EBLevelGrid>>&
+  getEBLevelGridFiCo() const;
 
   /*!
     @brief Return vof iterator for iterating over irregular cells in each grid patch

@@ -884,6 +884,12 @@ PhaseRealm::getEBLevelGridCoFi() const
   return m_eblgCoFi;
 }
 
+const Vector<RefCountedPtr<EBLevelGrid>>&
+PhaseRealm::getEBLevelGridFiCo() const
+{
+  return m_eblgFiCo;
+}
+
 Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
 PhaseRealm::getVofIterator() const
 {

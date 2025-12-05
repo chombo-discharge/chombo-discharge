@@ -18,6 +18,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_LevelTiles.H>
+#include <CD_PetscGrid.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -218,6 +219,22 @@ public:
   getMFLevelGrid();
 
   /*!
+    @brief Get the coarsened grids
+    @details The returned vector contains the coarsened grids. Entry on level lvl=0 contains the coarsening of level lvl=1 and so on. The top
+    level is undefined because there was no finer grid from which we can coarsen.
+  */
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridCoFi();
+
+  /*!
+    @brief Get the refined grids
+    @details The returned vector contains the refined grids. Entry on level lvl=1 contains the refinement of level lvl=0 and so on. The bottom
+    level is undefined because there was no coarser grid from which we can refine.
+  */
+  Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridFiCo();
+
+  /*!
     @brief Get EBIndexSpace for particular phase
     @param[in] a_phase Phase
   */
@@ -362,6 +379,14 @@ public:
   const Vector<RefCountedPtr<LevelTiles>>&
   getLevelTiles() const noexcept;
 
+#ifdef CH_USE_PETSC
+  /*!
+    @brief Get the PETSc grid object
+  */
+  const RefCountedPtr<PetscGrid>&
+  getPetscGrid() const noexcept;
+#endif
+
 protected:
   /*!
     @brief Realm defined or not
@@ -419,6 +444,16 @@ protected:
   Vector<RefCountedPtr<MFLevelGrid>> m_mflg;
 
   /*!
+    @brief Coarsened grids. Entry lvl contains the coarsened version of grids on level lvl+1
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgCoFi;
+
+  /*!
+    @brief Refined grids. Entry lvl+1 contains the refined version of grids on level lvl
+  */
+  Vector<RefCountedPtr<MFLevelGrid>> m_mflgFiCo;
+
+  /*!
     @brief Level "tiles" -- i.e. the grids viewed as constant-size boxes.
   */
   Vector<RefCountedPtr<LevelTiles>> m_levelTiles;
@@ -432,6 +467,13 @@ protected:
     @brief Mask which is true for all valid cells
   */
   AMRMask m_validCells;
+
+#ifdef CH_USE_PETSC
+  /*!
+    @brief PETSc grid
+  */
+  RefCountedPtr<PetscGrid> m_petscGrid;
+#endif
 
   /*!
     @brief Phase realms. 
@@ -492,11 +534,44 @@ protected:
 
   /*!
     @brief Define inner particle halo mask.
-    @details This is a mask which is true on the INSIDE of a refinement boundary.
+    @details This is a mask which is true on the INSIDE of a refinement boundary. The buffer size is always
+    the number of COARSE grid cells. I.e., if one uses a refinement factor of 2, the first two strips of fine-grid
+    cells are set to true and the others to false. 
     @param[in] a_lmin Coarsest level that changed during regrid
   */
   void
   defineInnerHaloMask(const int a_lmin);
+
+  /*!
+    @brief Define a mask which is true on the outside (i.e., coarse side) of the refinement boundary
+  */
+  void
+  defineOuterCFMask(const int a_lmin);
+
+  /*!
+    @brief Define the outer cf region mask. This is the level-version. 
+    @param[out] a_coarMask   Mask
+    @param[in]  a_domainCoar Coarse domain
+    @param[in]  a_domainFine Fine domain
+    @param[in]  a_gridsCoar  Coarse grids
+    @param[in]  a_gridsFine  Fine grids
+    @param[in]  a_buffer     Buffer
+    @param[in]  a_refRat     Refinement ratio between the two levels
+  */
+  void
+  defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
+                    const ProblemDomain&      a_domainCoar,
+                    const ProblemDomain&      a_domainFine,
+                    const DisjointBoxLayout&  a_gridsCoar,
+                    const DisjointBoxLayout&  a_gridsFine,
+                    const int                 a_buffer,
+                    const int                 a_refRat);
+
+  /*!
+    @brief Define a mask which is true on the inside (i.e., fine side) of the refinement boundary
+  */
+  void
+  defineInnerCFMask(const int a_lmin);
 
   /*!
     @brief Define the coarse-fine interface. 
@@ -507,7 +582,6 @@ protected:
 
   /*!
     @brief Define the valid cell region mask. 
-    @param[in] a_lmin Coarsest level that changed during regrid. 
   */
   void
   defineValidCells();
@@ -517,6 +591,12 @@ protected:
   */
   void
   defineLevelTiles() noexcept;
+
+  /*!
+    @brief Define the PETSc composite grid
+  */
+  void
+  definePetscGrid() noexcept;
 
   /*!
     @brief Get a particular realm

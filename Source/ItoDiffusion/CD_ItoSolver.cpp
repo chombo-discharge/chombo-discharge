@@ -710,7 +710,7 @@ ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_db
     a_loads[din.intCode()] = particles[a_level][din].numItems();
   }
 
-  ParallelOps::vectorSum(a_loads);
+  ParallelOps::sum(a_loads);
 }
 
 void

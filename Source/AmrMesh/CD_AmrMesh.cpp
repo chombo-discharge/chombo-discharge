@@ -2910,13 +2910,21 @@ AmrMesh::sanityCheck() const
     MayDay::Abort("AmrMesh::sanityCheck -- non-uniform resolution detected but I must have dx = dy = dz");
   }
 
+#if 0
+  // Comment, Robert M, Dec 2025:
+  // ----------------------------
+  //
+  // I'm not sure why this was in here? It seems to work well without this restriction?
+  //
+  // If this ever becomes a problem, take a look at this again.
   if (m_maxAmrDepth > 0) {
     for (int lvl = 0; lvl < m_maxAmrDepth; lvl++) {
       if (m_refinementRatios[lvl] > 2 && m_blockingFactor < 8) {
-        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
+        //        MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
       }
     }
   }
+#endif
 }
 
 RealVect
@@ -3430,6 +3438,24 @@ AmrMesh::getRedistributionOp(const std::string a_realm, const phase::which_phase
 
   return m_realms[a_realm]->getRedistributionOp(a_phase);
 }
+
+#ifdef CH_USE_PETSC
+const RefCountedPtr<PetscGrid>&
+AmrMesh::getPetscGrid(const std::string a_realm) const noexcept
+{
+  CH_TIME("AmrMesh::nonConservativeDivergence(AMR)");
+  if (m_verbosity > 1) {
+    pout() << "AmrMesh::nonConservativeDivergence(AMR)" << endl;
+  }
+
+  if (!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getPetscGrid - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms.at(a_realm)->getPetscGrid();
+}
+#endif
 
 void
 AmrMesh::nonConservativeDivergence(EBAMRIVData&              a_nonConsDivF,

@@ -1649,7 +1649,7 @@ FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
     loads[intCode] = a_dbl[din].numPts();
   }
 
-  ParallelOps::vectorSum(loads);
+  ParallelOps::sum(loads);
 
   return loads;
 }
