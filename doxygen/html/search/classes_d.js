@@ -9,10 +9,11 @@ var searchData=
   ['perlinsdf_6',['PerlinSdf',['../classPerlinSdf.html',1,'']]],
   ['perlinslabsdf_7',['PerlinSlabSdf',['../classPerlinSlabSdf.html',1,'']]],
   ['perlinspheresdf_8',['PerlinSphereSdf',['../classPerlinSphereSdf.html',1,'']]],
-  ['phaserealm_9',['PhaseRealm',['../classPhaseRealm.html',1,'']]],
-  ['photon_10',['Photon',['../classPhoton.html',1,'']]],
-  ['pointparticle_11',['PointParticle',['../classPointParticle.html',1,'']]],
-  ['polygonrodif_12',['PolygonRodIF',['../classPolygonRodIF.html',1,'']]],
-  ['profilecylinderif_13',['ProfileCylinderIF',['../classProfileCylinderIF.html',1,'']]],
-  ['profileplaneif_14',['ProfilePlaneIF',['../classProfilePlaneIF.html',1,'']]]
+  ['petscdof_9',['PetscDOF',['../structPetscDOF.html',1,'']]],
+  ['phaserealm_10',['PhaseRealm',['../classPhaseRealm.html',1,'']]],
+  ['photon_11',['Photon',['../classPhoton.html',1,'']]],
+  ['pointparticle_12',['PointParticle',['../classPointParticle.html',1,'']]],
+  ['polygonrodif_13',['PolygonRodIF',['../classPolygonRodIF.html',1,'']]],
+  ['profilecylinderif_14',['ProfileCylinderIF',['../classProfileCylinderIF.html',1,'']]],
+  ['profileplaneif_15',['ProfilePlaneIF',['../classProfilePlaneIF.html',1,'']]]
 ];

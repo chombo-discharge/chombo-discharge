@@ -158,6 +158,12 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getMFLevelGrid</b> ()</td></tr>
 <tr class="memdesc:aa2e03f8a5ae496c254442ee837db69a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get MFLevelGrids. <br /></td></tr>
 <tr class="separator:aa2e03f8a5ae496c254442ee837db69a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76e4909b8ec880f0ab860bf3254e57ae" id="r_a76e4909b8ec880f0ab860bf3254e57ae"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a76e4909b8ec880f0ab860bf3254e57ae">getMFLevelGridCoFi</a> ()</td></tr>
+<tr class="memdesc:a76e4909b8ec880f0ab860bf3254e57ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the coarsened grids.  <br /></td></tr>
+<tr class="separator:a76e4909b8ec880f0ab860bf3254e57ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a38dafff2e85fe16a024df3f822056" id="r_a66a38dafff2e85fe16a024df3f822056"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a66a38dafff2e85fe16a024df3f822056">getMFLevelGridFiCo</a> ()</td></tr>
+<tr class="memdesc:a66a38dafff2e85fe16a024df3f822056"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the refined grids.  <br /></td></tr>
+<tr class="separator:a66a38dafff2e85fe16a024df3f822056"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade4c74e57693209e8090f776beaaa0f8" id="r_ade4c74e57693209e8090f776beaaa0f8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBIndexSpace</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ade4c74e57693209e8090f776beaaa0f8">getEBIndexSpace</a> (<a class="el" href="classTracerParticleSolver.html">const</a> phase::which_phase <a class="el" href="classTracerParticleSolver.html">a_phase</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:ade4c74e57693209e8090f776beaaa0f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get EBIndexSpace for particular phase.  <br /></td></tr>
 <tr class="separator:ade4c74e57693209e8090f776beaaa0f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,16 +258,32 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ae64fe4e42a16ccc500947dd2d2b3f644" id="r_ae64fe4e42a16ccc500947dd2d2b3f644"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ae64fe4e42a16ccc500947dd2d2b3f644">defineInnerHaloMask</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>)</td></tr>
 <tr class="memdesc:ae64fe4e42a16ccc500947dd2d2b3f644"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define inner particle halo mask.  <br /></td></tr>
 <tr class="separator:ae64fe4e42a16ccc500947dd2d2b3f644"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9e4e04c1bd56d5b0668db0d6da44e34" id="r_af9e4e04c1bd56d5b0668db0d6da44e34"><td class="memItemLeft" align="right" valign="top"><a id="af9e4e04c1bd56d5b0668db0d6da44e34" name="af9e4e04c1bd56d5b0668db0d6da44e34"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineOuterCFMask</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>)</td></tr>
+<tr class="memdesc:af9e4e04c1bd56d5b0668db0d6da44e34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a mask which is true on the outside (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>., coarse side) of the refinement boundary. <br /></td></tr>
+<tr class="separator:af9e4e04c1bd56d5b0668db0d6da44e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5cfb35e6445499019baa2c99a7fa8e5" id="r_aa5cfb35e6445499019baa2c99a7fa8e5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#aa5cfb35e6445499019baa2c99a7fa8e5">defineOuterCFMask</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_coarMask</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_domainFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_gridsCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_gridsFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_buffer</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_refRat</a>)</td></tr>
+<tr class="memdesc:aa5cfb35e6445499019baa2c99a7fa8e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the outer cf region mask. This is the level-version.  <br /></td></tr>
+<tr class="separator:aa5cfb35e6445499019baa2c99a7fa8e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f3a61dca9a5151182b90d86cc1a92ba" id="r_a7f3a61dca9a5151182b90d86cc1a92ba"><td class="memItemLeft" align="right" valign="top"><a id="a7f3a61dca9a5151182b90d86cc1a92ba" name="a7f3a61dca9a5151182b90d86cc1a92ba"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineInnerCFMask</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>)</td></tr>
+<tr class="memdesc:a7f3a61dca9a5151182b90d86cc1a92ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a mask which is true on the inside (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>., fine side) of the refinement boundary. <br /></td></tr>
+<tr class="separator:a7f3a61dca9a5151182b90d86cc1a92ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf0a3c54b5efbe18e25fe1831c131c6c" id="r_adf0a3c54b5efbe18e25fe1831c131c6c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#adf0a3c54b5efbe18e25fe1831c131c6c">defineCFIVS</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_lmin</a>)</td></tr>
 <tr class="memdesc:adf0a3c54b5efbe18e25fe1831c131c6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the coarse-fine interface.  <br /></td></tr>
 <tr class="separator:adf0a3c54b5efbe18e25fe1831c131c6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f2289a6d36fe1f903b4a05dde660e04" id="r_a5f2289a6d36fe1f903b4a05dde660e04"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#a5f2289a6d36fe1f903b4a05dde660e04">defineValidCells</a> ()</td></tr>
-<tr class="memdesc:a5f2289a6d36fe1f903b4a05dde660e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the valid cell region mask.  <br /></td></tr>
+<tr class="memitem:a5f2289a6d36fe1f903b4a05dde660e04" id="r_a5f2289a6d36fe1f903b4a05dde660e04"><td class="memItemLeft" align="right" valign="top"><a id="a5f2289a6d36fe1f903b4a05dde660e04" name="a5f2289a6d36fe1f903b4a05dde660e04"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineValidCells</b> ()</td></tr>
+<tr class="memdesc:a5f2289a6d36fe1f903b4a05dde660e04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the valid cell region mask. <br /></td></tr>
 <tr class="separator:a5f2289a6d36fe1f903b4a05dde660e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa61cd4d4a88072855181c04e81bd7f2d" id="r_aa61cd4d4a88072855181c04e81bd7f2d"><td class="memItemLeft" align="right" valign="top"><a id="aa61cd4d4a88072855181c04e81bd7f2d" name="aa61cd4d4a88072855181c04e81bd7f2d"></a>
 <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>defineLevelTiles</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:aa61cd4d4a88072855181c04e81bd7f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the tiled space. <br /></td></tr>
 <tr class="separator:aa61cd4d4a88072855181c04e81bd7f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac72726c1191850cdd60d0a4865df39e4" id="r_ac72726c1191850cdd60d0a4865df39e4"><td class="memItemLeft" align="right" valign="top"><a id="ac72726c1191850cdd60d0a4865df39e4" name="ac72726c1191850cdd60d0a4865df39e4"></a>
+<a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><b>definePetscGrid</b> () <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:ac72726c1191850cdd60d0a4865df39e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the PETSc composite grid. <br /></td></tr>
+<tr class="separator:ac72726c1191850cdd60d0a4865df39e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2dd1d3c2178a15daa58356f9fdfe7d5" id="r_ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPhaseRealm.html">PhaseRealm</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRealm.html#ad2dd1d3c2178a15daa58356f9fdfe7d5">getRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> phase::which_phase <a class="el" href="classTracerParticleSolver.html">a_phase</a>)</td></tr>
 <tr class="memdesc:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a particular realm.  <br /></td></tr>
 <tr class="separator:ad2dd1d3c2178a15daa58356f9fdfe7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -312,6 +334,14 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mflg</b></td></tr>
 <tr class="memdesc:a8038def76028fd7f950b26ae9eb34175"><td class="mdescLeft">&#160;</td><td class="mdescRight">MFLevelGrids. <br /></td></tr>
 <tr class="separator:a8038def76028fd7f950b26ae9eb34175"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e3d69341d531212124974676f11750e" id="r_a5e3d69341d531212124974676f11750e"><td class="memItemLeft" align="right" valign="top"><a id="a5e3d69341d531212124974676f11750e" name="a5e3d69341d531212124974676f11750e"></a>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mflgCoFi</b></td></tr>
+<tr class="memdesc:a5e3d69341d531212124974676f11750e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coarsened grids. Entry lvl contains the coarsened version of grids on level lvl+1. <br /></td></tr>
+<tr class="separator:a5e3d69341d531212124974676f11750e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfb96b0e740a2e457fd564b8b5bdb787" id="r_abfb96b0e740a2e457fd564b8b5bdb787"><td class="memItemLeft" align="right" valign="top"><a id="abfb96b0e740a2e457fd564b8b5bdb787" name="abfb96b0e740a2e457fd564b8b5bdb787"></a>
+<a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_mflgFiCo</b></td></tr>
+<tr class="memdesc:abfb96b0e740a2e457fd564b8b5bdb787"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refined grids. Entry lvl+1 contains the refined version of grids on level lvl. <br /></td></tr>
+<tr class="separator:abfb96b0e740a2e457fd564b8b5bdb787"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd2a204518222c34f1cf2b2cd44ed5f2" id="r_abd2a204518222c34f1cf2b2cd44ed5f2"><td class="memItemLeft" align="right" valign="top"><a id="abd2a204518222c34f1cf2b2cd44ed5f2" name="abd2a204518222c34f1cf2b2cd44ed5f2"></a>
 <a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classLevelTiles.html">LevelTiles</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_levelTiles</b></td></tr>
 <tr class="memdesc:abd2a204518222c34f1cf2b2cd44ed5f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Level "tiles" &ndash; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. the grids viewed as constant-size boxes. <br /></td></tr>
@@ -611,7 +641,7 @@ Protected Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Define inner particle halo mask. </p>
-<p>This is a mask which is true on the INSIDE of a refinement boundary. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This is a mask which is true on the INSIDE of a refinement boundary. The buffer size is always the number of COARSE grid cells. <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">I.e</a>., if one uses a refinement factor of 2, the first two strips of fine-grid cells are set to true and the others to false. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed during regrid </td></tr>
   </table>
@@ -682,6 +712,86 @@ Protected Attributes</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed during regrid </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa5cfb35e6445499019baa2c99a7fa8e5" name="aa5cfb35e6445499019baa2c99a7fa8e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5cfb35e6445499019baa2c99a7fa8e5">&#9670;&#160;</a></span>defineOuterCFMask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Realm::defineOuterCFMask </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">BaseFab</a>&lt; <a class="el" href="classTracerParticleSolver.html">bool</a> &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a_coarMask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_domainCoar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">ProblemDomain</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_domainFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_gridsCoar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DisjointBoxLayout</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_gridsFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_buffer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_refRat</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the outer cf region mask. This is the level-version. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">a_coarMask</td><td>Mask </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainCoar</td><td>Coarse domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_domainFine</td><td>Fine domain </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gridsCoar</td><td>Coarse grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_gridsFine</td><td>Fine grids </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Buffer </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two levels </td></tr>
   </table>
   </dd>
 </dl>
@@ -796,39 +906,6 @@ Protected Attributes</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_gridsFine</td><td>Fine grids </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_buffer</td><td>Buffer (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>. width of "halo") </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">a_refRat</td><td>Refinement ratio between the two levels </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5f2289a6d36fe1f903b4a05dde660e04" name="a5f2289a6d36fe1f903b4a05dde660e04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f2289a6d36fe1f903b4a05dde660e04">&#9670;&#160;</a></span>defineValidCells()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">void</a> Realm::defineValidCells </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Define the valid cell region mask. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_lmin</td><td>Coarsest level that changed during regrid. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1220,6 +1297,46 @@ Protected Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a76e4909b8ec880f0ab860bf3254e57ae" name="a76e4909b8ec880f0ab860bf3254e57ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76e4909b8ec880f0ab860bf3254e57ae">&#9670;&#160;</a></span>getMFLevelGridCoFi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp; Realm::getMFLevelGridCoFi </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the coarsened grids. </p>
+<p>The returned vector contains the coarsened grids. Entry on level lvl=0 contains the coarsening of level lvl=1 and so on. The top level is undefined because there was no finer grid from which we can coarsen. </p>
+
+</div>
+</div>
+<a id="a66a38dafff2e85fe16a024df3f822056" name="a66a38dafff2e85fe16a024df3f822056"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66a38dafff2e85fe16a024df3f822056">&#9670;&#160;</a></span>getMFLevelGridFiCo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classMFLevelGrid.html">MFLevelGrid</a> &gt; &gt; &amp; Realm::getMFLevelGridFiCo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the refined grids. </p>
+<p>The returned vector contains the refined grids. Entry on level lvl=1 contains the refinement of level lvl=0 and so on. The bottom level is undefined because there was no coarser grid from which we can refine. </p>
 
 </div>
 </div>

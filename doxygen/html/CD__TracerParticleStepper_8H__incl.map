@@ -6,12 +6,12 @@
 <area shape="poly" id="edge130_Node000001_Node000019" title=" " alt="" coords="4216,30,3497,36,2435,48,1445,68,1106,81,999,88,942,96,899,107,867,119,838,137,809,168,785,203,767,239,757,275,755,311,760,345,775,376,798,402,832,424,912,433,1101,441,1684,458,2819,482,2819,487,1684,464,1101,447,912,438,830,429,795,406,770,379,755,346,749,311,752,274,762,237,780,200,805,165,835,133,864,114,898,102,941,91,999,83,1106,76,1444,63,2435,43,3497,30,4216,25"/>
 <area shape="rect" id="Node000020" href="$CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="3785,475,3964,500"/>
 <area shape="poly" id="edge131_Node000001_Node000020" title=" " alt="" coords="4419,24,4767,29,4987,37,5212,50,5421,69,5595,95,5663,112,5714,130,5748,152,5757,165,5760,178,5760,335,5754,370,5739,394,5714,408,5684,416,5610,421,5570,423,5530,429,5433,441,5271,451,4824,468,3978,487,3978,482,4824,463,5271,446,5433,435,5529,424,5570,418,5610,415,5683,410,5712,403,5735,390,5749,368,5755,334,5755,178,5752,167,5744,156,5712,135,5661,117,5594,100,5420,74,5211,55,4987,42,4767,35,4419,29"/>
-<area shape="rect" id="Node000155" href="$CD__TracerParticlePhysics_8H.html" title="Documentation of Physics/TracerParticle namespace." alt="" coords="2987,401,3186,427"/>
-<area shape="poly" id="edge120_Node000001_Node000155" title=" " alt="" coords="4216,29,3851,32,3618,39,3380,51,3158,70,3059,82,2973,97,2901,113,2847,133,2813,155,2804,166,2801,178,2801,254,2806,284,2818,309,2837,331,2862,350,2890,366,2921,378,2985,396,2983,401,2919,383,2888,370,2859,355,2834,335,2814,312,2801,285,2796,254,2796,178,2799,164,2809,151,2844,128,2900,108,2972,91,3059,77,3157,64,3380,46,3618,34,3851,27,4216,23"/>
-<area shape="rect" id="Node000156" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="4245,93,4389,119"/>
-<area shape="poly" id="edge123_Node000001_Node000156" title=" " alt="" coords="4320,46,4320,79,4315,79,4315,46"/>
-<area shape="rect" id="Node000158" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="4293,313,4478,353"/>
-<area shape="poly" id="edge132_Node000001_Node000158" title=" " alt="" coords="4341,43,4367,64,4391,92,4402,111,4408,127,4413,166,4414,203,4410,239,4393,301,4388,299,4404,238,4409,202,4408,167,4403,129,4398,113,4387,95,4364,68,4338,48"/>
+<area shape="rect" id="Node000156" href="$CD__TracerParticlePhysics_8H.html" title="Documentation of Physics/TracerParticle namespace." alt="" coords="2987,401,3186,427"/>
+<area shape="poly" id="edge120_Node000001_Node000156" title=" " alt="" coords="4216,29,3851,32,3618,39,3380,51,3158,70,3059,82,2973,97,2901,113,2847,133,2813,155,2804,166,2801,178,2801,254,2806,284,2818,309,2837,331,2862,350,2890,366,2921,378,2985,396,2983,401,2919,383,2888,370,2859,355,2834,335,2814,312,2801,285,2796,254,2796,178,2799,164,2809,151,2844,128,2900,108,2972,91,3059,77,3157,64,3380,46,3618,34,3851,27,4216,23"/>
+<area shape="rect" id="Node000157" href="$CD__TimeStepper_8H.html" title="Declaration of main (abstract) time stepper class." alt="" coords="4245,93,4389,119"/>
+<area shape="poly" id="edge123_Node000001_Node000157" title=" " alt="" coords="4320,46,4320,79,4315,79,4315,46"/>
+<area shape="rect" id="Node000159" href="$CD__TracerParticleStepperImplem_8H.html" title="Implementation of CD_TracerParticleStepper.H." alt="" coords="4293,313,4478,353"/>
+<area shape="poly" id="edge132_Node000001_Node000159" title=" " alt="" coords="4341,43,4367,64,4391,92,4402,111,4408,127,4413,166,4414,203,4410,239,4393,301,4388,299,4404,238,4409,202,4408,167,4403,129,4398,113,4387,95,4364,68,4338,48"/>
 <area shape="rect" id="Node000003" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="3090,167,3214,192"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1143,108,3076,173,3076,178,1143,113"/>
 <area shape="poly" id="edge114_Node000002_Node000019" title=" " alt="" coords="964,121,905,137,850,163,826,180,808,200,796,224,792,252,792,334,796,361,806,380,822,393,843,401,896,412,956,424,1046,433,1229,442,1773,459,2819,482,2819,487,1772,465,1229,448,1045,439,956,429,895,417,841,407,819,397,802,383,791,363,787,335,787,251,791,222,804,197,823,176,847,158,904,132,963,116"/>
@@ -20,10 +20,10 @@
 <area shape="poly" id="edge93_Node000002_Node000033" title=" " alt="" coords="1143,105,1783,110,2736,121,3655,139,3993,151,4192,164,4247,175,4301,189,4516,229,4730,265,5071,316,5070,321,4729,270,4515,234,4299,195,4246,181,4192,169,3992,156,3654,144,2736,127,1783,116,1143,111"/>
 <area shape="rect" id="Node000067" href="$CD__ParticleContainer_8H.html" title="Declaration of a class for holding particles on an AMR hierarchy." alt="" coords="1502,321,1674,346"/>
 <area shape="poly" id="edge113_Node000002_Node000067" title=" " alt="" coords="1027,121,983,147,936,184,919,204,908,224,907,244,918,263,945,277,997,289,1150,308,1329,320,1488,327,1488,332,1329,325,1149,313,996,295,943,282,914,267,902,245,903,223,914,201,933,180,980,143,1024,116"/>
-<area shape="rect" id="Node000143" href="$CD__TracerParticle_8H.html" title="Declaration of a tracer particle class." alt="" coords="341,321,491,346"/>
-<area shape="poly" id="edge94_Node000002_Node000143" title=" " alt="" coords="973,121,876,141,771,169,678,205,587,246,449,316,447,312,585,241,676,200,770,164,875,135,972,116"/>
-<area shape="rect" id="Node000151" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="928,240,1168,265"/>
-<area shape="poly" id="edge116_Node000002_Node000151" title=" " alt="" coords="1045,119,1042,170,1044,226,1038,226,1036,170,1040,119"/>
+<area shape="rect" id="Node000144" href="$CD__TracerParticle_8H.html" title="Declaration of a tracer particle class." alt="" coords="341,321,491,346"/>
+<area shape="poly" id="edge94_Node000002_Node000144" title=" " alt="" coords="973,121,876,141,771,169,678,205,587,246,449,316,447,312,585,241,676,200,770,164,875,135,972,116"/>
+<area shape="rect" id="Node000152" href="$CD__TracerParticleSolverImplem_8H.html" title="Implementation of CD_TracerParticleSolver.H." alt="" coords="928,240,1168,265"/>
+<area shape="poly" id="edge116_Node000002_Node000152" title=" " alt="" coords="1045,119,1042,170,1044,226,1038,226,1036,170,1040,119"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="813,475,968,500"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="3090,184,2638,188,1958,198,1300,216,1058,228,916,243,846,254,782,261,725,267,673,276,624,290,579,314,536,350,493,403,488,414,493,425,512,440,541,452,621,470,712,479,800,483,799,488,712,484,620,475,540,457,509,444,489,428,483,414,488,400,532,346,576,309,622,285,671,270,724,262,782,256,845,249,916,237,1058,223,1300,210,1958,193,2638,183,3090,178"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="1972,475,2113,500"/>
@@ -50,10 +50,10 @@
 <area shape="poly" id="edge60_Node000003_Node000067" title=" " alt="" coords="3090,187,2770,208,2343,243,1978,283,1684,321,1684,316,1978,278,2342,237,2770,202,3090,182"/>
 <area shape="rect" id="Node000108" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="3805,240,3909,265"/>
 <area shape="poly" id="edge78_Node000003_Node000108" title=" " alt="" coords="3215,184,3792,242,3792,247,3214,190"/>
-<area shape="rect" id="Node000141" href="$CD__CopyStrategy_8H.html" title="Simple enum for distinguishing copying strategies." alt="" coords="3210,401,3358,427"/>
-<area shape="poly" id="edge84_Node000003_Node000141" title=" " alt="" coords="3127,194,3097,213,3083,226,3073,241,3059,272,3053,299,3057,324,3073,352,3091,365,3121,378,3197,397,3195,402,3119,383,3088,370,3069,355,3052,326,3048,298,3054,270,3068,239,3079,223,3093,209,3124,190"/>
-<area shape="rect" id="Node000142" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="3127,240,3302,265"/>
-<area shape="poly" id="edge89_Node000003_Node000142" title=" " alt="" coords="3157,191,3190,229,3186,232,3153,194"/>
+<area shape="rect" id="Node000142" href="$CD__CopyStrategy_8H.html" title="Simple enum for distinguishing copying strategies." alt="" coords="3210,401,3358,427"/>
+<area shape="poly" id="edge84_Node000003_Node000142" title=" " alt="" coords="3127,194,3097,213,3083,226,3073,241,3059,272,3053,299,3057,324,3073,352,3091,365,3121,378,3197,397,3195,402,3119,383,3088,370,3069,355,3052,326,3048,298,3054,270,3068,239,3079,223,3093,209,3124,190"/>
+<area shape="rect" id="Node000143" href="$CD__AmrMeshImplem_8H.html" title="Implementation of CD_AmrMesh.H." alt="" coords="3127,240,3302,265"/>
+<area shape="poly" id="edge89_Node000003_Node000143" title=" " alt="" coords="3157,191,3190,229,3186,232,3153,194"/>
 <area shape="rect" id="Node000016" title=" " alt="" coords="2131,401,2218,427"/>
 <area shape="poly" id="edge6_Node000006_Node000016" title=" " alt="" coords="2472,349,2232,403,2231,397,2470,343"/>
 <area shape="poly" id="edge7_Node000006_Node000017" title=" " alt="" coords="2495,348,2372,399,2370,394,2493,344"/>
@@ -137,59 +137,59 @@
 <area shape="poly" id="edge79_Node000108_Node000041" title=" " alt="" coords="3910,253,4041,258,4210,269,4374,286,4441,297,4492,311,4509,320,4521,331,4533,342,4549,351,4597,365,4663,377,4813,398,4812,403,4662,382,4595,370,4547,356,4529,346,4518,335,4506,325,4490,316,4440,302,4373,291,4209,274,4041,263,3909,258"/>
 <area shape="poly" id="edge80_Node000108_Node000062" title=" " alt="" coords="3886,263,4005,313,4003,318,3883,268"/>
 <area shape="poly" id="edge81_Node000108_Node000075" title=" " alt="" coords="3805,258,2900,282,2398,299,2227,308,2143,316,2094,332,2047,353,1971,396,1968,392,2044,348,2092,327,2142,311,2226,302,2398,294,2900,276,3805,253"/>
-<area shape="poly" id="edge85_Node000141_Node000019" title=" " alt="" coords="3227,429,2997,475,2996,469,3226,424"/>
-<area shape="poly" id="edge86_Node000141_Node000020" title=" " alt="" coords="3359,422,3371,424,3772,472,3771,477,3370,429,3358,428"/>
-<area shape="poly" id="edge90_Node000142_Node000003" title=" " alt="" coords="3209,242,3177,203,3181,200,3213,238"/>
-<area shape="poly" id="edge91_Node000142_Node000019" title=" " alt="" coords="3162,268,3106,285,3043,312,2982,351,2956,375,2934,403,2924,431,2924,461,2919,461,2919,431,2930,400,2952,372,2979,347,3040,308,3104,280,3160,263"/>
-<area shape="poly" id="edge92_Node000142_Node000020" title=" " alt="" coords="3291,263,3421,285,3576,317,3720,355,3777,377,3819,399,3847,428,3866,460,3862,463,3843,432,3816,403,3775,382,3718,360,3575,322,3420,290,3290,268"/>
-<area shape="poly" id="edge107_Node000143_Node000019" title=" " alt="" coords="424,345,449,386,468,408,492,424,587,434,812,443,1501,460,2819,482,2819,487,1501,466,812,448,587,439,490,429,465,412,445,389,419,348"/>
-<area shape="poly" id="edge108_Node000143_Node000020" title=" " alt="" coords="489,343,786,385,976,407,1169,424,1622,440,2395,457,3771,482,3771,487,2395,462,1621,445,1169,429,976,412,785,390,489,349"/>
-<area shape="rect" id="Node000144" title=" " alt="" coords="5,475,64,500"/>
-<area shape="poly" id="edge95_Node000143_Node000144" title=" " alt="" coords="341,344,238,364,182,381,129,404,88,433,55,466,51,462,84,429,127,399,180,376,236,359,340,339"/>
-<area shape="rect" id="Node000145" title=" " alt="" coords="97,475,173,500"/>
-<area shape="poly" id="edge96_Node000143_Node000145" title=" " alt="" coords="342,346,227,368,178,384,160,393,147,403,139,416,135,431,134,461,128,461,130,430,134,414,143,400,157,389,176,379,226,363,341,341"/>
-<area shape="rect" id="Node000146" title=" " alt="" coords="201,475,263,500"/>
-<area shape="poly" id="edge97_Node000143_Node000146" title=" " alt="" coords="341,346,232,368,186,384,169,393,158,403,154,411,153,419,161,436,177,452,198,465,195,470,174,456,157,439,148,420,149,410,154,400,166,389,184,379,230,363,340,341"/>
-<area shape="rect" id="Node000147" title=" " alt="" coords="311,475,374,500"/>
-<area shape="poly" id="edge98_Node000143_Node000147" title=" " alt="" coords="413,347,356,464,352,461,408,345"/>
-<area shape="rect" id="Node000148" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="168,401,328,427"/>
-<area shape="poly" id="edge99_Node000143_Node000148" title=" " alt="" coords="393,348,286,398,283,393,390,344"/>
-<area shape="rect" id="Node000150" href="$CD__TracerParticleImplem_8H.html" title="Implementation of CD_TracerParticle.H." alt="" coords="503,401,702,427"/>
-<area shape="poly" id="edge109_Node000143_Node000150" title=" " alt="" coords="438,344,557,394,555,399,436,348"/>
-<area shape="poly" id="edge105_Node000148_Node000019" title=" " alt="" coords="328,418,448,424,1158,448,1849,465,2819,482,2819,487,1849,471,1157,453,448,429,328,423"/>
-<area shape="poly" id="edge106_Node000148_Node000020" title=" " alt="" coords="328,417,491,424,1214,441,2195,458,3772,482,3771,487,2194,464,1213,446,491,429,328,422"/>
-<area shape="poly" id="edge104_Node000148_Node000037" title=" " alt="" coords="328,417,491,424,1471,448,2233,457,2996,462,3976,472,4689,482,4689,488,3976,477,2996,467,2233,463,1471,453,491,429,328,422"/>
-<area shape="poly" id="edge100_Node000148_Node000144" title=" " alt="" coords="215,429,78,475,76,469,213,424"/>
-<area shape="poly" id="edge101_Node000148_Node000145" title=" " alt="" coords="231,429,166,470,163,465,228,424"/>
-<area shape="poly" id="edge102_Node000148_Node000146" title=" " alt="" coords="248,428,240,462,235,461,243,426"/>
-<area shape="poly" id="edge103_Node000148_Node000147" title=" " alt="" coords="265,425,318,464,315,468,262,429"/>
-<area shape="poly" id="edge111_Node000150_Node000019" title=" " alt="" coords="703,423,720,424,1170,443,1782,460,2819,481,2819,487,1782,465,1169,448,720,429,702,428"/>
-<area shape="poly" id="edge112_Node000150_Node000020" title=" " alt="" coords="702,415,1075,424,3772,481,3771,487,1075,429,702,420"/>
-<area shape="poly" id="edge110_Node000150_Node000143" title=" " alt="" coords="581,404,462,353,464,349,583,399"/>
-<area shape="poly" id="edge117_Node000151_Node000002" title=" " alt="" coords="1051,240,1054,189,1052,133,1058,133,1060,189,1056,240"/>
-<area shape="poly" id="edge118_Node000151_Node000019" title=" " alt="" coords="1037,267,1008,299,977,341,966,363,961,386,964,406,975,425,995,430,1046,436,1219,446,1757,464,2364,476,2818,482,2818,487,2364,481,1757,469,1218,452,1045,441,994,435,972,429,959,408,956,385,961,362,972,338,1003,295,1033,264"/>
-<area shape="poly" id="edge119_Node000151_Node000020" title=" " alt="" coords="1168,253,1750,266,2565,292,2973,311,3333,335,3485,349,3612,364,3710,381,3774,399,3799,412,3822,428,3858,462,3854,466,3818,432,3796,416,3772,404,3709,386,3611,370,3485,355,3333,341,2972,317,2565,297,1750,271,1168,259"/>
-<area shape="poly" id="edge121_Node000155_Node000019" title=" " alt="" coords="3062,429,2965,471,2963,467,3060,424"/>
-<area shape="poly" id="edge122_Node000155_Node000020" title=" " alt="" coords="3186,423,3199,424,3772,475,3771,480,3198,429,3186,428"/>
-<area shape="poly" id="edge127_Node000156_Node000003" title=" " alt="" coords="4245,114,3228,176,3227,171,4245,109"/>
-<area shape="poly" id="edge128_Node000156_Node000019" title=" " alt="" coords="4245,110,3972,111,3607,118,3427,126,3269,136,3148,151,3107,159,3080,169,3043,192,3014,214,2990,238,2972,263,2944,323,2919,402,2915,432,2920,460,2915,461,2910,432,2913,401,2939,321,2968,260,2986,234,3010,210,3040,187,3078,164,3105,154,3147,145,3269,131,3427,120,3607,113,3972,106,4245,104"/>
-<area shape="poly" id="edge129_Node000156_Node000020" title=" " alt="" coords="4316,120,4225,428,4207,440,4183,450,4121,465,4049,476,3978,483,3978,478,4048,471,4120,460,4181,445,4204,435,4221,425,4311,118"/>
-<area shape="poly" id="edge125_Node000156_Node000033" title=" " alt="" coords="4361,116,5111,315,5110,320,4360,121"/>
-<area shape="poly" id="edge126_Node000156_Node000041" title=" " alt="" coords="4341,116,4894,393,4891,397,4339,121"/>
-<area shape="rect" id="Node000157" title=" " alt="" coords="4312,167,4411,192"/>
-<area shape="poly" id="edge124_Node000156_Node000157" title=" " alt="" coords="4327,118,4349,154,4345,156,4322,120"/>
-<area shape="poly" id="edge142_Node000158_Node000001" title=" " alt="" coords="4399,312,4413,284,4425,248,4433,208,4432,167,4427,129,4422,113,4411,95,4392,73,4370,55,4373,51,4396,69,4416,92,4426,111,4432,127,4437,166,4438,208,4430,249,4418,286,4404,314"/>
-<area shape="poly" id="edge143_Node000158_Node000019" title=" " alt="" coords="4293,354,4058,392,3774,429,3568,449,3364,465,3032,484,3032,479,3363,459,3568,444,3773,424,4057,386,4292,348"/>
-<area shape="poly" id="edge144_Node000158_Node000020" title=" " alt="" coords="4479,350,4582,375,4622,388,4643,400,4649,414,4643,428,4630,438,4609,445,4547,458,4465,468,4368,476,4159,485,3978,488,3978,483,4159,480,4367,471,4464,463,4547,453,4608,440,4628,433,4639,425,4644,414,4639,403,4620,393,4581,380,4477,356"/>
+<area shape="poly" id="edge85_Node000142_Node000019" title=" " alt="" coords="3227,429,2997,475,2996,469,3226,424"/>
+<area shape="poly" id="edge86_Node000142_Node000020" title=" " alt="" coords="3359,422,3371,424,3772,472,3771,477,3370,429,3358,428"/>
+<area shape="poly" id="edge90_Node000143_Node000003" title=" " alt="" coords="3209,242,3177,203,3181,200,3213,238"/>
+<area shape="poly" id="edge91_Node000143_Node000019" title=" " alt="" coords="3162,268,3106,285,3043,312,2982,351,2956,375,2934,403,2924,431,2924,461,2919,461,2919,431,2930,400,2952,372,2979,347,3040,308,3104,280,3160,263"/>
+<area shape="poly" id="edge92_Node000143_Node000020" title=" " alt="" coords="3291,263,3421,285,3576,317,3720,355,3777,377,3819,399,3847,428,3866,460,3862,463,3843,432,3816,403,3775,382,3718,360,3575,322,3420,290,3290,268"/>
+<area shape="poly" id="edge107_Node000144_Node000019" title=" " alt="" coords="424,345,449,386,468,408,492,424,587,434,812,443,1501,460,2819,482,2819,487,1501,466,812,448,587,439,490,429,465,412,445,389,419,348"/>
+<area shape="poly" id="edge108_Node000144_Node000020" title=" " alt="" coords="489,343,786,385,976,407,1169,424,1622,440,2395,457,3771,482,3771,487,2395,462,1621,445,1169,429,976,412,785,390,489,349"/>
+<area shape="rect" id="Node000145" title=" " alt="" coords="5,475,64,500"/>
+<area shape="poly" id="edge95_Node000144_Node000145" title=" " alt="" coords="341,344,238,364,182,381,129,404,88,433,55,466,51,462,84,429,127,399,180,376,236,359,340,339"/>
+<area shape="rect" id="Node000146" title=" " alt="" coords="97,475,173,500"/>
+<area shape="poly" id="edge96_Node000144_Node000146" title=" " alt="" coords="342,346,227,368,178,384,160,393,147,403,139,416,135,431,134,461,128,461,130,430,134,414,143,400,157,389,176,379,226,363,341,341"/>
+<area shape="rect" id="Node000147" title=" " alt="" coords="201,475,263,500"/>
+<area shape="poly" id="edge97_Node000144_Node000147" title=" " alt="" coords="341,346,232,368,186,384,169,393,158,403,154,411,153,419,161,436,177,452,198,465,195,470,174,456,157,439,148,420,149,410,154,400,166,389,184,379,230,363,340,341"/>
+<area shape="rect" id="Node000148" title=" " alt="" coords="311,475,374,500"/>
+<area shape="poly" id="edge98_Node000144_Node000148" title=" " alt="" coords="413,347,356,464,352,461,408,345"/>
+<area shape="rect" id="Node000149" href="$CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="168,401,328,427"/>
+<area shape="poly" id="edge99_Node000144_Node000149" title=" " alt="" coords="393,348,286,398,283,393,390,344"/>
+<area shape="rect" id="Node000151" href="$CD__TracerParticleImplem_8H.html" title="Implementation of CD_TracerParticle.H." alt="" coords="503,401,702,427"/>
+<area shape="poly" id="edge109_Node000144_Node000151" title=" " alt="" coords="438,344,557,394,555,399,436,348"/>
+<area shape="poly" id="edge105_Node000149_Node000019" title=" " alt="" coords="328,418,448,424,1158,448,1849,465,2819,482,2819,487,1849,471,1157,453,448,429,328,423"/>
+<area shape="poly" id="edge106_Node000149_Node000020" title=" " alt="" coords="328,417,491,424,1214,441,2195,458,3772,482,3771,487,2194,464,1213,446,491,429,328,422"/>
+<area shape="poly" id="edge104_Node000149_Node000037" title=" " alt="" coords="328,417,491,424,1471,448,2233,457,2996,462,3976,472,4689,482,4689,488,3976,477,2996,467,2233,463,1471,453,491,429,328,422"/>
+<area shape="poly" id="edge100_Node000149_Node000145" title=" " alt="" coords="215,429,78,475,76,469,213,424"/>
+<area shape="poly" id="edge101_Node000149_Node000146" title=" " alt="" coords="231,429,166,470,163,465,228,424"/>
+<area shape="poly" id="edge102_Node000149_Node000147" title=" " alt="" coords="248,428,240,462,235,461,243,426"/>
+<area shape="poly" id="edge103_Node000149_Node000148" title=" " alt="" coords="265,425,318,464,315,468,262,429"/>
+<area shape="poly" id="edge111_Node000151_Node000019" title=" " alt="" coords="703,423,720,424,1170,443,1782,460,2819,481,2819,487,1782,465,1169,448,720,429,702,428"/>
+<area shape="poly" id="edge112_Node000151_Node000020" title=" " alt="" coords="702,415,1075,424,3772,481,3771,487,1075,429,702,420"/>
+<area shape="poly" id="edge110_Node000151_Node000144" title=" " alt="" coords="581,404,462,353,464,349,583,399"/>
+<area shape="poly" id="edge117_Node000152_Node000002" title=" " alt="" coords="1051,240,1054,189,1052,133,1058,133,1060,189,1056,240"/>
+<area shape="poly" id="edge118_Node000152_Node000019" title=" " alt="" coords="1037,267,1008,299,977,341,966,363,961,386,964,406,975,425,995,430,1046,436,1219,446,1757,464,2364,476,2818,482,2818,487,2364,481,1757,469,1218,452,1045,441,994,435,972,429,959,408,956,385,961,362,972,338,1003,295,1033,264"/>
+<area shape="poly" id="edge119_Node000152_Node000020" title=" " alt="" coords="1168,253,1750,266,2565,292,2973,311,3333,335,3485,349,3612,364,3710,381,3774,399,3799,412,3822,428,3858,462,3854,466,3818,432,3796,416,3772,404,3709,386,3611,370,3485,355,3333,341,2972,317,2565,297,1750,271,1168,259"/>
+<area shape="poly" id="edge121_Node000156_Node000019" title=" " alt="" coords="3062,429,2965,471,2963,467,3060,424"/>
+<area shape="poly" id="edge122_Node000156_Node000020" title=" " alt="" coords="3186,423,3199,424,3772,475,3771,480,3198,429,3186,428"/>
+<area shape="poly" id="edge127_Node000157_Node000003" title=" " alt="" coords="4245,114,3228,176,3227,171,4245,109"/>
+<area shape="poly" id="edge128_Node000157_Node000019" title=" " alt="" coords="4245,110,3972,111,3607,118,3427,126,3269,136,3148,151,3107,159,3080,169,3043,192,3014,214,2990,238,2972,263,2944,323,2919,402,2915,432,2920,460,2915,461,2910,432,2913,401,2939,321,2968,260,2986,234,3010,210,3040,187,3078,164,3105,154,3147,145,3269,131,3427,120,3607,113,3972,106,4245,104"/>
+<area shape="poly" id="edge129_Node000157_Node000020" title=" " alt="" coords="4316,120,4225,428,4207,440,4183,450,4121,465,4049,476,3978,483,3978,478,4048,471,4120,460,4181,445,4204,435,4221,425,4311,118"/>
+<area shape="poly" id="edge125_Node000157_Node000033" title=" " alt="" coords="4361,116,5111,315,5110,320,4360,121"/>
+<area shape="poly" id="edge126_Node000157_Node000041" title=" " alt="" coords="4341,116,4894,393,4891,397,4339,121"/>
+<area shape="rect" id="Node000158" title=" " alt="" coords="4312,167,4411,192"/>
+<area shape="poly" id="edge124_Node000157_Node000158" title=" " alt="" coords="4327,118,4349,154,4345,156,4322,120"/>
+<area shape="poly" id="edge142_Node000159_Node000001" title=" " alt="" coords="4399,312,4413,284,4425,248,4433,208,4432,167,4427,129,4422,113,4411,95,4392,73,4370,55,4373,51,4396,69,4416,92,4426,111,4432,127,4437,166,4438,208,4430,249,4418,286,4404,314"/>
+<area shape="poly" id="edge143_Node000159_Node000019" title=" " alt="" coords="4293,354,4058,392,3774,429,3568,449,3364,465,3032,484,3032,479,3363,459,3568,444,3773,424,4057,386,4292,348"/>
+<area shape="poly" id="edge144_Node000159_Node000020" title=" " alt="" coords="4479,350,4582,375,4622,388,4643,400,4649,414,4643,428,4630,438,4609,445,4547,458,4465,468,4368,476,4159,485,3978,488,3978,483,4159,480,4367,471,4464,463,4547,453,4608,440,4628,433,4639,425,4644,414,4639,403,4620,393,4581,380,4477,356"/>
 <area shape="rect" id="Node000026" title=" " alt="" coords="4704,401,4803,427"/>
-<area shape="poly" id="edge133_Node000158_Node000026" title=" " alt="" coords="4474,351,4691,397,4690,402,4473,356"/>
-<area shape="rect" id="Node000159" href="$CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="4293,401,4489,427"/>
-<area shape="poly" id="edge134_Node000158_Node000159" title=" " alt="" coords="4389,353,4392,387,4386,388,4384,354"/>
+<area shape="poly" id="edge133_Node000159_Node000026" title=" " alt="" coords="4474,351,4691,397,4690,402,4473,356"/>
+<area shape="rect" id="Node000160" href="$CD__ParticleManagement_8H.html" title="Namespace containing various particle management utilities." alt="" coords="4293,401,4489,427"/>
+<area shape="poly" id="edge134_Node000159_Node000160" title=" " alt="" coords="4389,353,4392,387,4386,388,4384,354"/>
 <area shape="rect" id="Node000091" href="$CD__Random_8H.html" title="File containing some useful static methods related to random number generation." alt="" coords="4513,401,4629,427"/>
-<area shape="poly" id="edge138_Node000158_Node000091" title=" " alt="" coords="4431,351,4532,393,4530,398,4429,356"/>
-<area shape="poly" id="edge136_Node000159_Node000019" title=" " alt="" coords="4292,423,3032,484,3031,478,4292,417"/>
-<area shape="poly" id="edge137_Node000159_Node000020" title=" " alt="" coords="4308,429,3971,475,3971,470,4307,424"/>
-<area shape="poly" id="edge135_Node000159_Node000037" title=" " alt="" coords="4449,424,4689,471,4688,477,4448,429"/>
+<area shape="poly" id="edge138_Node000159_Node000091" title=" " alt="" coords="4431,351,4532,393,4530,398,4429,356"/>
+<area shape="poly" id="edge136_Node000160_Node000019" title=" " alt="" coords="4292,423,3032,484,3031,478,4292,417"/>
+<area shape="poly" id="edge137_Node000160_Node000020" title=" " alt="" coords="4308,429,3971,475,3971,470,4307,424"/>
+<area shape="poly" id="edge135_Node000160_Node000037" title=" " alt="" coords="4449,424,4689,471,4688,477,4448,429"/>
 <area shape="poly" id="edge140_Node000091_Node000019" title=" " alt="" coords="4513,428,4502,429,4291,448,4075,462,3656,480,3292,488,3032,489,3032,484,3292,482,3656,475,4075,457,4290,442,4501,424,4512,423"/>
 <area shape="poly" id="edge141_Node000091_Node000020" title=" " alt="" coords="4513,428,4502,429,4217,460,3978,481,3977,476,4217,455,4501,424,4512,423"/>
 <area shape="poly" id="edge139_Node000091_Node000037" title=" " alt="" coords="4600,424,4709,467,4707,472,4598,429"/>
