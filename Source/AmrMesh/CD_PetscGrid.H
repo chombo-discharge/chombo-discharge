@@ -60,7 +60,9 @@ public:
     @param[in] a_levelGridsFiCo Refined grids.
     @param[in] a_validCells Data holder which is true for cells not covered by a finer grid and false otherwise.
     @param[in] a_coarHaloCF Data holder which is true on cells that lie on the coarse side of a CF interface
-    @param[in] a_fineHaloCF Data holder which is true on cells that lie on the fine side of a CF interface    
+    @param[in] a_fineHaloCF Data holder which is true on cells that lie on the fine side of a CF interface
+    @param[in] a_refinementRatios Refinement ratios between grid level.
+    @param[in] a_dx Grid resolutions on each level.
     @param[in] a_finestLevel Finest defined grid level.
     @param[in] a_numGhost Number of ghost cells described in the grid.
   */
@@ -71,6 +73,8 @@ public:
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarHaloCF,
          const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_fineHaloCF,
+         const Vector<int>&                                     a_refinementRatios,
+         const Vector<Real>&                                    a_dx,
          const int                                              a_finestLevel,
          const int                                              a_numGhost) noexcept;
 
@@ -217,6 +221,16 @@ protected:
     @brief Fine-side cells on refinement interface
   */
   Vector<RefCountedPtr<LevelData<BaseFab<bool>>>> m_fineHaloCF;
+
+  /*!
+    @brief Refinement ratios between levels.
+  */
+  Vector<int> m_refRat;
+
+  /*!
+    @brief Grid resolutions
+  */
+  Vector<Real> m_dx;
 
   /*!
     @brief Mapping structure for moving between AMR cells and PETSc rows.

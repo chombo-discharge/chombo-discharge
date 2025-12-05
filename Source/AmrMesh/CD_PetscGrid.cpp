@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <AMRIO.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -52,6 +53,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
                   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_validCells,
                   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_coarHaloCF,
                   const Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>& a_fineHaloCF,
+                  const Vector<int>&                                     a_refinementRatios,
+                  const Vector<Real>&                                    a_dx,
                   const int                                              a_finestLevel,
                   const int                                              a_numGhost) noexcept
 {
@@ -72,6 +75,8 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
   m_validCells     = a_validCells;
   m_coarHaloCF     = a_coarHaloCF;
   m_fineHaloCF     = a_fineHaloCF;
+  m_refRat         = a_refinementRatios;
+  m_dx             = a_dx;
 
   m_finestLevel = a_finestLevel;
   m_numGhost    = a_numGhost;
@@ -82,7 +87,7 @@ PetscGrid::define(const Vector<RefCountedPtr<MFLevelGrid>>&              a_level
 
   this->defineAMRCells();
   this->definePetscRows();
-  //  this->defineCoFiBuffers();
+  this->defineCoFiBuffers();
 
   m_isDefined = true;
 }
@@ -513,9 +518,80 @@ PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
 
   CH_assert(m_isDefined);
 
+  const int numComp = 8;
+
+  Vector<LevelData<FArrayBox>*> amrData(1 + m_finestLevel);
+  Vector<DisjointBoxLayout>     amrGrids(1 + m_finestLevel);
+  Vector<std::string>           varNames(numComp);
+
+  varNames[0] = "valid_cell";
+  varNames[1] = "coar_cf";
+  varNames[2] = "fine_cf";
+  varNames[3] = "ghost_cf";
+  varNames[4] = "domain_cell";
+  varNames[5] = "num_rows";
+  varNames[6] = "petsc_row_phase0";
+  varNames[7] = "petsc_row_phase1";
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
+    const DataIterator&      dit  = dbl.dataIterator();
+    const int                nbox = dit.size();
+
+    amrData[lvl]  = new LevelData<FArrayBox>(dbl, numComp, m_numGhost * IntVect::Unit);
+    amrGrids[lvl] = dbl;
+
+#pragma omp parallel for schedule(runtime)
+    for (int mybox = 0; mybox < nbox; mybox++) {
+      const DataIndex& din = dit[mybox];
+
+      FArrayBox& data = (*amrData[lvl])[din];
+
+      data.setVal(-1.0);
+
+      const BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
+
+      auto kernel = [&](const IntVect& iv) -> void {
+        const PetscAMRCell& amrCell = amrToPetsc(iv, 0);
+
+        data(iv, 0) = amrCell.isCoveredByFinerGrid() ? 0.0 : 1.0;
+        data(iv, 1) = amrCell.isCoarCF() ? 1.0 : 0.0;
+        data(iv, 2) = amrCell.isFineCF() ? 1.0 : 0.0;
+        data(iv, 3) = amrCell.isGhostCF() ? 1.0 : 0.0;
+        data(iv, 4) = amrCell.isDomainBoundaryCell() ? 1.0 : 0.0;
+
+        data(iv, 5) = 0.0;
+        if (amrCell.getPetscRow(0) >= 0) {
+          data(iv, 5) += 1.0;
+          data(iv, 6) = amrCell.getPetscRow(0);
+        }
+        if (amrCell.getPetscRow(1) >= 0) {
+          data(iv, 5) += 1.0;
+          data(iv, 7) = amrCell.getPetscRow(1);
+        }
+      };
+
+      BoxLoops::loop(data.box(), kernel);
+    }
+  }
+
 #ifdef CH_USE_HDF5
-#warning "Not implemented yet, but I want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
+  WriteAMRHierarchyHDF5(a_filename,
+                        amrGrids,
+                        amrData,
+                        varNames,
+                        m_levelGrids[0]->getDomain().domainBox(),
+                        m_dx[0],
+                        0.0,
+                        0.0,
+                        m_refRat,
+                        1 + m_finestLevel);
 #endif
+
+  // Free memory
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    delete amrData[lvl];
+  }
 }
 
 #include <CD_NamespaceFooter.H>

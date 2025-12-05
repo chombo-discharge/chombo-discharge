@@ -214,7 +214,6 @@ linearIn(PetscAMRCell& a_amrCell, const void* const a_buffer);
   @brief PetscAMRCell specialization of the linearization function used by LevelData
   @param[out] a_buffer Buffer to which we write the data
   @param[in] a_amrCell Object to linearize
-
 */
 void
 linearOut(void* const a_buffer, const PetscAMRCell& a_amrCell);

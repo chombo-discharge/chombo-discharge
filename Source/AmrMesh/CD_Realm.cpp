@@ -1078,6 +1078,8 @@ Realm::definePetscGrid() noexcept
                       m_validCells,
                       this->getMask(s_outer_cf_region, 1),
                       this->getMask(s_inner_cf_region, 1),
+                      m_refinementRatios,
+                      m_dx,
                       m_finestLevel,
                       m_numGhost);
 #endif
