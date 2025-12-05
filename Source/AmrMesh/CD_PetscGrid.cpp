@@ -289,8 +289,6 @@ PetscGrid::defineCoFiBuffers() noexcept
     pout() << "PetscGrid::defineCoFiBuffers" << endl;
   }
 
-#warning "Need to begin here next time"
-
   const int numComp = 1;
   const int comp    = 0;
 
@@ -369,6 +367,8 @@ PetscGrid::destroy(Vec& x) noexcept
     pout() << "PetscGrid::destroy" << endl;
   }
 
+  CH_assert(m_isDefined);
+
   PetscCallVoid(VecDestroy(&x));
 }
 
@@ -379,6 +379,8 @@ PetscGrid::setValue(Vec& a_x, const PetscScalar a_value) const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::setValue" << endl;
   }
+
+  CH_assert(m_isDefined);
 
   PetscInt     startIdx = -1;
   PetscInt     endIdx   = -1;
@@ -477,58 +479,6 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
   CH_assert(startIdx >= 0);
   CH_assert(endIdx - startIdx == m_numLocalRows - 1);
 
-#if 0
-  for (PetscInt i = 0; i < m_numLocalRows; i++) {
-    const PetscDOF dof = m_petscToAMR[i];
-
-    const int       phase     = dof.phase;
-    const int       gridLevel = dof.gridLevel;
-    const DataIndex gridIndex = dof.gridIndex;
-    const IntVect   gridCell  = dof.gridCell;
-
-    FArrayBox& data = (*a_y[gridLevel])[gridIndex].getPhase(phase).getFArrayBox();
-
-    data(gridCell, 0) = arr[i];
-
-#warning "Debug code here -- scheduled for removal"
-#if 0
-    const PetscAMRCell& amrCell = (*m_amrToPetsc[gridLevel])[gridIndex](gridCell);
-
-    data(gridCell, 0) = 0.0;
-
-    // Ensure that this cell is NOT covered by a finer grid.
-    if (amrCell.isCoveredByFinerGrid()) {
-      MayDay::Abort("logic bust -- cannot be covered by another cell");
-    }
-
-    // Ensure that this cell does not lie across the CF boundary
-    if (amrCell.isGhostCF()) {
-      MayDay::Abort("logic bust -- cannot be a ghost cell");
-    }
-
-    // Fill with values = 1 if the cell lies on the FINE side of the CF boundary.
-    Box bx = Box(gridCell, gridCell);
-    bx.grow(1);
-    bx &= m_levelGrids[gridLevel]->getDomain();
-
-    for (BoxIterator bit(bx); bit.ok(); ++bit) {
-      const PetscAMRCell& cell2 = (*m_amrToPetsc[gridLevel])[gridIndex](bit());
-
-      if (cell2.isGhostCF()) {
-        data(gridCell, 0) = 1.0;
-      }
-    }
-
-    // Fill boundary cells with values += 2
-    if (amrCell.isDomainBoundaryCell()) {
-      data(gridCell, 0) += 2.0;
-    }
-
-    data(gridCell, 0) = m_localRowBegin + (*m_amrToPetsc[gridLevel])[gridIndex](gridCell).getPetscRow(phase);
-#endif
-  }
-
-#else
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl  = m_levelGrids[lvl]->getGrids();
     const DataIterator&      dit  = dbl.dataIterator();
@@ -549,7 +499,6 @@ PetscGrid::putPetscInChombo(MFAMRCellData& a_y, const Vec& a_x) const noexcept
       }
     }
   }
-#endif
 
   PetscCallVoid(VecRestoreArray(a_x, &arr));
 }
@@ -561,6 +510,8 @@ PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
   if (m_verbose) {
     pout() << "PetscGrid::dumpPetscGrid" << endl;
   }
+
+  CH_assert(m_isDefined);
 
 #ifdef CH_USE_HDF5
 #warning "Not implemented, but I want a debug function for writing the PETSc grid to a file, showing all DOFs, etc."
