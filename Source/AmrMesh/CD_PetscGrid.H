@@ -236,12 +236,12 @@ protected:
     @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the refinement of
     level i.
   */
-  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;      
+  Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;
 
   /*!
     @brief Mapping of PETSc local row index back to AMR
     @details Locally owned. Maps a local row index to a level/grid/cell.
-  */  
+  */
   Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR[2];
 
   /*!

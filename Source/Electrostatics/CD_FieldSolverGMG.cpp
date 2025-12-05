@@ -388,7 +388,7 @@ FieldSolverGMG::solve(MFAMRCellData&       a_phi,
   petscGrid->destroy(x);
 
   m_amr->conservativeAverage(a_phi, m_realm);
-  m_amr->interpGhostPwl(a_phi, m_realm);  
+  m_amr->interpGhostPwl(a_phi, m_realm);
 #endif
 #endif
 

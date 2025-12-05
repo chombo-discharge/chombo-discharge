@@ -21,8 +21,8 @@
 
 struct PetscDOF
 {
-  PetscInt  localRow;
-  IntVect   gridCell;
+  PetscInt localRow;
+  IntVect  gridCell;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -77,7 +77,7 @@ FieldSolverGMG.filter_rho            = 0                       ## Number of filt
 FieldSolverGMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
 FieldSolverGMG.gmg_verbosity                = 10           ## GMG verbosity
-FieldSolverGMG.gmg_use_default_settings     = false         ## Use default multigrid settings or not (see documentation)
+FieldSolverGMG.gmg_use_default_settings     = false        ## Use default multigrid settings or not (see documentation)
 FieldSolverGMG.gmg_pre_smooth               = 20           ## Number of relaxations in downsweep
 FieldSolverGMG.gmg_post_smooth              = 20           ## Number of relaxations in upsweep
 FieldSolverGMG.gmg_bott_smooth              = 20           ## NUmber of relaxations before dropping to bottom solver
@@ -86,13 +86,13 @@ FieldSolverGMG.gmg_min_iter                 = 5            ## Minimum number of 
 FieldSolverGMG.gmg_max_iter                 = 32           ## Maximum number of iterations
 FieldSolverGMG.gmg_exit_tol                 = 1.E-10       ## Residue tolerance
 FieldSolverGMG.gmg_exit_hang                = 0.2          ## Solver hang
-FieldSolverGMG.gmg_min_cells                = 16            ## Bottom drop
+FieldSolverGMG.gmg_min_cells                = 16           ## Bottom drop
 FieldSolverGMG.gmg_drop_order               = 0            ## Drop stencil order to 1 if domain is coarser than this.
 FieldSolverGMG.gmg_bc_order                 = 2            ## Boundary condition order for multigrid
 FieldSolverGMG.gmg_bc_weight                = 1            ## Boundary condition weights (for least squares)
 FieldSolverGMG.gmg_jump_order               = 2            ## Boundary condition order for jump conditions
 FieldSolverGMG.gmg_jump_weight              = 1            ## Boundary condition weight for jump conditions (for least squares)
-FieldSolverGMG.gmg_reduce_order             = true        ## If true, always use order=1 EB stencils in coarsened cells
+FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now
 FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
