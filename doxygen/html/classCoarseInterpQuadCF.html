@@ -113,6 +113,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1e672d5407e97aefbe057e6b22955d92" id="r_a1e672d5407e97aefbe057e6b22955d92"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a1e672d5407e97aefbe057e6b22955d92">computeMixedDeriv</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">FArrayBox</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_coarPhi</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_coarVar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
 <tr class="memdesc:a1e672d5407e97aefbe057e6b22955d92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute mixed-derivative Taylor term in directions orthogonal m_ignoreDir.  <br /></td></tr>
 <tr class="separator:a1e672d5407e97aefbe057e6b22955d92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3f0391701de779a497f6846f9d5c851" id="r_aa3f0391701de779a497f6846f9d5c851"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#aa3f0391701de779a497f6846f9d5c851">getFirstDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:aa3f0391701de779a497f6846f9d5c851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first derivative stencil for the input coarse vof.  <br /></td></tr>
+<tr class="separator:aa3f0391701de779a497f6846f9d5c851"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64f21a10d9fa1ea5984cd42f5dff46a5" id="r_a64f21a10d9fa1ea5984cd42f5dff46a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a64f21a10d9fa1ea5984cd42f5dff46a5">getSecondDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a64f21a10d9fa1ea5984cd42f5dff46a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the second derivative stencil for the input coarse vof.  <br /></td></tr>
+<tr class="separator:a64f21a10d9fa1ea5984cd42f5dff46a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43c6635f3ee8873a0d2873b6477c12f1" id="r_a43c6635f3ee8873a0d2873b6477c12f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCoarseInterpQuadCF.html#a43c6635f3ee8873a0d2873b6477c12f1">getMixedDerivStencil</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_ivCoar</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a></td></tr>
+<tr class="memdesc:a43c6635f3ee8873a0d2873b6477c12f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the second derivative stencil for the input coarse vof.  <br /></td></tr>
+<tr class="separator:a43c6635f3ee8873a0d2873b6477c12f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -204,7 +213,7 @@ Protected Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This is used in conjuction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. </p>
-<p>This should be defined over the fine grid. It will store stencils for computing the various required terms in the Taylor series, and the user can call various functions for getting those terms. </p>
+<p>This should be defined over the fine grid. It will store stencils for computing the various required terms in the Taylor series, and the user can call various functions for getting those terms. For the record, all stencils in this object assumes that dx = 1, so the user have to normalize against his/her grid resolutions later. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a1c239449c45456fe117623f9b675e9e9" name="a1c239449c45456fe117623f9b675e9e9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1c239449c45456fe117623f9b675e9e9">&#9670;&#160;</a></span>computeFirstDeriv()</h2>
@@ -502,6 +511,133 @@ Protected Attributes</h2></td></tr>
 
 <p>Compute all first-derivative stencils in the coarse grid cells. </p>
 <dl class="section note"><dt>Note</dt><dd>Must be accurate to O(h^2). </dd></dl>
+
+</div>
+</div>
+<a id="aa3f0391701de779a497f6846f9d5c851" name="aa3f0391701de779a497f6846f9d5c851"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3f0391701de779a497f6846f9d5c851">&#9670;&#160;</a></span>getFirstDerivStencil()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">DerivStencil</a> CoarseInterpQuadCF::getFirstDerivStencil </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_ivCoar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_dir</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the first derivative stencil for the input coarse vof. </p>
+<p>This will construct the stencil for representing the derivative on the coarse cell center and return it. Useful when explicit stencil storage is required. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ivCoar</td><td>Coarse-grid cell index (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>., the one underneath the fine-grid ghost) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Direction of derivative. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a43c6635f3ee8873a0d2873b6477c12f1" name="a43c6635f3ee8873a0d2873b6477c12f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43c6635f3ee8873a0d2873b6477c12f1">&#9670;&#160;</a></span>getMixedDerivStencil()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">DerivStencil</a> CoarseInterpQuadCF::getMixedDerivStencil </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_ivCoar</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the second derivative stencil for the input coarse vof. </p>
+<p>This will construct the stencil for representing the derivative on the coarse cell center and return it. Useful when explicit stencil storage is required. <br  />
+ </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ivCoar</td><td>Coarse-grid cell index (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>., the one underneath the fine-grid ghost) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a64f21a10d9fa1ea5984cd42f5dff46a5" name="a64f21a10d9fa1ea5984cd42f5dff46a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64f21a10d9fa1ea5984cd42f5dff46a5">&#9670;&#160;</a></span>getSecondDerivStencil()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">DerivStencil</a> CoarseInterpQuadCF::getSecondDerivStencil </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_ivCoar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_dir</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the second derivative stencil for the input coarse vof. </p>
+<p>This will construct the stencil for representing the derivative on the coarse cell center and return it. Useful when explicit stencil storage is required. <br  />
+ </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_ivCoar</td><td>Coarse-grid cell index (<a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d" title="Default constructor.">i.e</a>., the one underneath the fine-grid ghost) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Direction of derivative. <br  />
+ </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

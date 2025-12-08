@@ -254,7 +254,7 @@ var searchData=
   ['m_5fdxfine_251',['m_dxFine',['../classEBGradient.html#a36fdf2ff21959bff2cb6f738bdcd2eea',1,'EBGradient']]],
   ['m_5fe_252',['m_E',['../classPhysics_1_1ItoKMC_1_1ItoKMCFieldTagger.html#a774000168c9f8d5419126cd2454e723c',1,'Physics::ItoKMC::ItoKMCFieldTagger']]],
   ['m_5febarithmeticstencils_253',['m_ebArithmeticStencils',['../classEBCoarAve.html#adae93b97baddd930659d651291d2257a',1,'EBCoarAve']]],
-  ['m_5febbc_254',['m_ebbc',['../classFieldSolver.html#aaecc3c15e9bd7c1c555972921162c8a8',1,'FieldSolver::m_ebBc'],['../classEddingtonSP1.html#a7997a5f041f34f4d841a545a4e534e4b',1,'EddingtonSP1::m_ebbc'],['../classEBHelmholtzOp.html#a38c069793638000e71eb9ff8c4d8189d',1,'EBHelmholtzOp::m_ebBc']]],
+  ['m_5febbc_254',['m_ebbc',['../classEddingtonSP1.html#a7997a5f041f34f4d841a545a4e534e4b',1,'EddingtonSP1::m_ebbc'],['../classEBHelmholtzOp.html#a38c069793638000e71eb9ff8c4d8189d',1,'EBHelmholtzOp::m_ebBc'],['../classFieldSolver.html#aaecc3c15e9bd7c1c555972921162c8a8',1,'FieldSolver::m_ebBc']]],
   ['m_5febbcfactory_255',['m_ebbcfactory',['../classEBHelmholtzOpFactory.html#a2f3eb84e501e497c37de58b387f47f98',1,'EBHelmholtzOpFactory::m_ebBcFactory'],['../classMFHelmholtzOpFactory.html#a156bb63e700966bc0470cf30e98d49b8',1,'MFHelmholtzOpFactory::m_ebBcFactory']]],
   ['m_5febcentereddiffusioncoefficient_256',['m_ebCenteredDiffusionCoefficient',['../classCdrSolver.html#a671be5eecf5ae4e148104905d1a2d984',1,'CdrSolver']]],
   ['m_5febcentroidinterpolation_257',['m_ebCentroidInterpolation',['../classPhaseRealm.html#a8b9d4e340cec65c94be1443fcb42dd2a',1,'PhaseRealm']]],

@@ -456,11 +456,9 @@ FieldSolverGMG.bc.y.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.y.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.z.lo               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
-FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;perm&#39;, &#39;sigma&#39;, &#39;Esol&#39;
-<span class="hll">FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
+<span class="hll">FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: &#39;phi&#39;, &#39;rho&#39;, &#39;E&#39;, &#39;res&#39;, &#39;perm&#39;, &#39;sigma&#39;, &#39;Esol&#39;
+</span><span class="hll">FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 </span><span class="hll">FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
-</span><span class="hll">FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
-</span><span class="hll">FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
 </span>
 <span class="hll">FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
 </span><span class="hll">FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
@@ -480,10 +478,10 @@ FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: &#39;
 </span><span class="hll">FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
 </span><span class="hll">FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
 </span><span class="hll">FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. &#39;simple&#39;, &#39;bicgstab&#39;, or &#39;gmres&#39;
-</span>FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only &#39;vcycle&#39; supported for now.
-FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;
-FieldSolverGMG.gmg_relax_factor             = 1.5          ## Adjustable SOR factor
-</pre></div>
+</span><span class="hll">FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only &#39;vcycle&#39; supported for now.
+</span><span class="hll">FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. &#39;jacobi&#39;, &#39;multi_color&#39;, or &#39;red_black&#39;
+</span><span class="hll">FieldSolverGMG.gmg_relax_factor             = 1.5          ## Adjustable SOR factor
+</span></pre></div>
 </div>
 </div>
 <p>Note that <em>all</em> options pertaining to IO or multigrid are run-time configurable (see <a class="reference internal" href="../Base/Control.html#chap-runtimeconfig"><span class="std std-ref">Run-time configurations</span></a>).</p>

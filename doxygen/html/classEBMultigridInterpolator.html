@@ -150,7 +150,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a05cf57cf79a8dffce0555b357e4fcfe8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0988d56a76230f14e0569e573a57dc48" id="r_a0988d56a76230f14e0569e573a57dc48"><td class="memItemLeft" align="right" valign="top"><a id="a0988d56a76230f14e0569e573a57dc48" name="a0988d56a76230f14e0569e573a57dc48"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBMultigridInterpolator</b> ()</td></tr>
-<tr class="memdesc:a0988d56a76230f14e0569e573a57dc48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disallowed constructor. <br /></td></tr>
+<tr class="memdesc:a0988d56a76230f14e0569e573a57dc48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Basic constructor. <br /></td></tr>
 <tr class="separator:a0988d56a76230f14e0569e573a57dc48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6470ba24d5059a34a702b3ed02c8e583" id="r_a6470ba24d5059a34a702b3ed02c8e583"><td class="memItemLeft" align="right" valign="top"><a id="a6470ba24d5059a34a702b3ed02c8e583" name="a6470ba24d5059a34a702b3ed02c8e583"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>EBMultigridInterpolator</b> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classEBMultigridInterpolator.html">EBMultigridInterpolator</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_other</a>)=<a class="el" href="classTracerParticleSolver.html">delete</a></td></tr>
@@ -163,15 +163,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a82dbe484ab2d13dddf72d2ed2cf4b69c" id="r_a82dbe484ab2d13dddf72d2ed2cf4b69c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a82dbe484ab2d13dddf72d2ed2cf4b69c">getGhostCF</a> () <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
 <tr class="memdesc:a82dbe484ab2d13dddf72d2ed2cf4b69c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return number of ghost cells across CF interface.  <br /></td></tr>
 <tr class="separator:a82dbe484ab2d13dddf72d2ed2cf4b69c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87eae9c3716119526beceeb47f720270" id="r_a87eae9c3716119526beceeb47f720270"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFStencil</a>, <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a87eae9c3716119526beceeb47f720270">getInterpolationStencilEB</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineGhost</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
+<tr class="memdesc:a87eae9c3716119526beceeb47f720270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an explicit stencil for a ghost cell near the EB.  <br /></td></tr>
+<tr class="separator:a87eae9c3716119526beceeb47f720270"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a190b956c57a65c0b4a7a324f7adb542b" id="r_a190b956c57a65c0b4a7a324f7adb542b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>, <a class="el" href="classTracerParticleSolver.html">DerivStencil</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a190b956c57a65c0b4a7a324f7adb542b">getInterpolationStencilRegular</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_fineGhost</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_dir</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a> <a class="el" href="classTracerParticleSolver.html">a_side</a>) <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">noexcept</a>=0</td></tr>
+<tr class="memdesc:a190b956c57a65c0b4a7a324f7adb542b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the interpolation stencil near the refinement boundary.  <br /></td></tr>
+<tr class="separator:a190b956c57a65c0b4a7a324f7adb542b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4e679ca5a00f5f7a53010145a62e767" id="r_af4e679ca5a00f5f7a53010145a62e767"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#af4e679ca5a00f5f7a53010145a62e767">coarseFineInterp</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiCoar</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> <a class="el" href="classTracerParticleSolver.html">a_variables</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
 <tr class="memdesc:af4e679ca5a00f5f7a53010145a62e767"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do inhomogeneous interpolation.  <br /></td></tr>
 <tr class="separator:af4e679ca5a00f5f7a53010145a62e767"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4cf5999231432e8b48bbcb04df99ff1" id="r_ac4cf5999231432e8b48bbcb04df99ff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#ac4cf5999231432e8b48bbcb04df99ff1">coarseFineInterpH</a> (<a class="el" href="classTracerParticleSolver.html">LevelData</a>&lt; <a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &gt; &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> <a class="el" href="classTracerParticleSolver.html">a_variables</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
 <tr class="memdesc:ac4cf5999231432e8b48bbcb04df99ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do homogeneous interpolation.  <br /></td></tr>
 <tr class="separator:ac4cf5999231432e8b48bbcb04df99ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82bef505a394da5e759b0c3f0aaa33cf" id="r_a82bef505a394da5e759b0c3f0aaa33cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a82bef505a394da5e759b0c3f0aaa33cf">coarseFineInterpH</a> (<a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> <a class="el" href="classTracerParticleSolver.html">a_variables</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_dit</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
-<tr class="memdesc:a82bef505a394da5e759b0c3f0aaa33cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do homogeneous coarse-fine interpolation on a grid patch.  <br /></td></tr>
-<tr class="separator:a82bef505a394da5e759b0c3f0aaa33cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2885319c94a6ac1b089bf3cba40f01f5" id="r_a2885319c94a6ac1b089bf3cba40f01f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEBMultigridInterpolator.html#a2885319c94a6ac1b089bf3cba40f01f5">coarseFineInterpH</a> (<a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_phiFine</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a> <a class="el" href="classTracerParticleSolver.html">a_variables</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;<a class="el" href="classTracerParticleSolver.html">a_din</a>) <a class="el" href="classTracerParticleSolver.html">const</a> =0</td></tr>
+<tr class="memdesc:a2885319c94a6ac1b089bf3cba40f01f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do homogeneous coarse-fine interpolation on a grid patch.  <br /></td></tr>
+<tr class="separator:a2885319c94a6ac1b089bf3cba40f01f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -476,8 +482,63 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a2885319c94a6ac1b089bf3cba40f01f5" name="a2885319c94a6ac1b089bf3cba40f01f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2885319c94a6ac1b089bf3cba40f01f5">&#9670;&#160;</a></span>coarseFineInterpH() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a> EBMultigridInterpolator::coarseFineInterpH </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_phiFine</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a>&#160;</td>
+          <td class="paramname"><em>a_variables</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_din</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Do homogeneous coarse-fine interpolation on a grid patch. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_phiFine</td><td>Fine-level data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to be interpolated </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Data index </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not contain enough ghost cells. </dd></dl>
+
+<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a09fa12ff6870f30d38bce6cf899c5ec7">EBLeastSquaresMultigridInterpolator</a>.</p>
+
+</div>
+</div>
 <a id="a30bbfa81436139cf3f7a6791761031f2" name="a30bbfa81436139cf3f7a6791761031f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a30bbfa81436139cf3f7a6791761031f2">&#9670;&#160;</a></span>coarseFineInterpH() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a30bbfa81436139cf3f7a6791761031f2">&#9670;&#160;</a></span>coarseFineInterpH() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -518,61 +579,6 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not contain enough ghost cells. </dd></dl>
-
-</div>
-</div>
-<a id="a82bef505a394da5e759b0c3f0aaa33cf" name="a82bef505a394da5e759b0c3f0aaa33cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82bef505a394da5e759b0c3f0aaa33cf">&#9670;&#160;</a></span>coarseFineInterpH() <span class="overload">[2/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">void</a> EBMultigridInterpolator::coarseFineInterpH </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">EBCellFAB</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_phiFine</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">Interval</a>&#160;</td>
-          <td class="paramname"><em>a_variables</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;&#160;</td>
-          <td class="paramname"><em>a_dit</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Do homogeneous coarse-fine interpolation on a grid patch. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_phiFine</td><td>Fine-level data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_variables</td><td>Variables to be interpolated </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">a_dit</td><td>Data index </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section note"><dt>Note</dt><dd>This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not contain enough ghost cells. </dd></dl>
-
-<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a4c6de168cce65b051870b731c5e22f6b">EBLeastSquaresMultigridInterpolator</a>.</p>
 
 </div>
 </div>
@@ -731,6 +737,115 @@ Static Protected Attributes</h2></td></tr>
 <p>Return number of ghost cells across CF interface. </p>
 
 <p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a2112527c53b85c8e2deeba6568d16397">EBLeastSquaresMultigridInterpolator</a>.</p>
+
+</div>
+</div>
+<a id="a87eae9c3716119526beceeb47f720270" name="a87eae9c3716119526beceeb47f720270"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87eae9c3716119526beceeb47f720270">&#9670;&#160;</a></span>getInterpolationStencilEB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">VoFStencil</a>, <a class="el" href="classTracerParticleSolver.html">VoFStencil</a> &gt; EBMultigridInterpolator::getInterpolationStencilEB </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">VolIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fineGhost</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_din</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get an explicit stencil for a ghost cell near the EB. </p>
+<p>This should return the fine + coarse stencils required for interpolating to the fine ghost cell. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineGhost</td><td>Ghost cell on the fine side of the refinement boundary. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>This first/second entry in the returned pair should be the fine/coarse stencil. </dd></dl>
+
+<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#abe95062d17c3d269f34ab6593b366f61">EBLeastSquaresMultigridInterpolator</a>.</p>
+
+</div>
+</div>
+<a id="a190b956c57a65c0b4a7a324f7adb542b" name="a190b956c57a65c0b4a7a324f7adb542b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a190b956c57a65c0b4a7a324f7adb542b">&#9670;&#160;</a></span>getInterpolationStencilRegular()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::pair</a>&lt; <a class="el" href="classTracerParticleSolver.html">DerivStencil</a>, <a class="el" href="classTracerParticleSolver.html">DerivStencil</a> &gt; EBMultigridInterpolator::getInterpolationStencilRegular </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">IntVect</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_fineGhost</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">DataIndex</a> &amp;&#160;</td>
+          <td class="paramname"><em>a_din</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">int</a>&#160;</td>
+          <td class="paramname"><em>a_dir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">Side::LoHiSide</a>&#160;</td>
+          <td class="paramname"><em>a_side</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the interpolation stencil near the refinement boundary. </p>
+<p>This version can assume that all cells are regular, and that returned stencils may later be replaced by getInterpolationStencilEB. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_fineGhost</td><td>Ghost cell index on the fine grid </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_din</td><td>Grid index </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_dir</td><td>Coordinate direction </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_side</td><td>Low or high side of the grid patch </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classEBLeastSquaresMultigridInterpolator.html#a7e8dbf3a874b49884596efe0ac2ca098">EBLeastSquaresMultigridInterpolator</a>.</p>
 
 </div>
 </div>
