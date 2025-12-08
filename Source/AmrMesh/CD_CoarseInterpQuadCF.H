@@ -98,6 +98,8 @@ public:
 
   /*!
     @brief Get the first derivative stencil for the input coarse vof.
+    @details This will construct the stencil for representing the derivative on the coarse cell center
+    and return it. Useful when explicit stencil storage is required. 
     @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
     @param[in] a_dir Direction of derivative. 
   */
@@ -106,6 +108,8 @@ public:
 
   /*!
     @brief Get the second derivative stencil for the input coarse vof.
+    @details This will construct the stencil for representing the derivative on the coarse cell center
+    and return it. Useful when explicit stencil storage is required.     
     @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
     @param[in] a_dir Direction of derivative.     
   */
@@ -114,11 +118,12 @@ public:
 
   /*!
     @brief Get the second derivative stencil for the input coarse vof.
+    @details This will construct the stencil for representing the derivative on the coarse cell center
+    and return it. Useful when explicit stencil storage is required.     
     @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
-    @param[in] a_dir Direction of derivative. 
   */
   virtual DerivStencil
-  getMixedDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;    
+  getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept;
 
 protected:
   /*!

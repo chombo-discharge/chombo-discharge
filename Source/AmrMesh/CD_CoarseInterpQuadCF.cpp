@@ -454,7 +454,7 @@ CoarseInterpQuadCF::getSecondDerivStencil(const IntVect& a_ivCoar, const int a_d
 }
 
 DerivStencil
-CoarseInterpQuadCF::getMixedDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept
+CoarseInterpQuadCF::getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept
 {
   CH_TIME("CoarseInterpQuadCF::getMixedDerivStencil");
 
