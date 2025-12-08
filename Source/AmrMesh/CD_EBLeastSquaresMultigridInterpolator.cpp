@@ -83,15 +83,26 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   CH_STOP(t2);
 }
 
+EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator() noexcept
+{
+  CH_TIME("EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator");
+}
+
 int
 EBLeastSquaresMultigridInterpolator::getGhostCF() const noexcept
 {
   return m_ghostCF;
 }
 
-EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator() noexcept
+std::pair<VoFStencil, VoFStencil>
+EBLeastSquaresMultigridInterpolator::getStencil(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator");
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getStencil");
+
+  VoFStencil fineStencil;
+  VoFStencil coarStencil;
+
+  return std::make_pair(fineStencil, coarStencil);
 }
 
 void

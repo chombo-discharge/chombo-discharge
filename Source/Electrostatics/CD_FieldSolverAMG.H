@@ -5,9 +5,11 @@
 
 /*!
   @file   CD_FieldSolverAMG.H
-  @brief  Declaration of FieldSolverAMG
+  @brief  Declaration of the FieldSolverAMG class
   @author Robert Marskar
 */
+
+#if CH_USE_PETSC
 
 #ifndef CD_FieldSolverAMG_H
 #define CD_FieldSolverAMG_H
@@ -179,5 +181,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#endif
 
 #endif

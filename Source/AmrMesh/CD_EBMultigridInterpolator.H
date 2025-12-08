@@ -47,6 +47,16 @@ public:
   getGhostCF() const = 0;
 
   /*!
+    @brief Get an explicit stencil for a ghost cell near the refinement boundary.
+    @details This should return the fine + coarse stencils required for interpolating to the fine ghost cell.
+    @param[in] a_fineGhost Ghost cell on the fine side of the refinement boundary.
+    @param[in] a_dit Grid index.
+    @return This first/second entry in the returned pair should be the fine/coarse stencil.
+  */
+  virtual std::pair<VoFStencil, VoFStencil>
+  getStencil(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept = 0;
+
+  /*!
     @brief Do inhomogeneous interpolation
     @param[inout] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
