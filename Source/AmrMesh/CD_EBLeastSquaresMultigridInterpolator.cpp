@@ -31,6 +31,9 @@ constexpr int EBLeastSquaresMultigridInterpolator::m_stenComp;
 constexpr int EBLeastSquaresMultigridInterpolator::m_numStenComp;
 constexpr int EBLeastSquaresMultigridInterpolator::m_comp;
 
+#warning \
+  "In here I really want to fetch the explicit stencils and make sure they are correct!. We can merge the new functionality later, separate from the AMG solve itself"
+
 EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
                                                                          const EBLevelGrid& a_eblgCoFi,
                                                                          const EBLevelGrid& a_eblgCoar,
@@ -95,10 +98,23 @@ EBLeastSquaresMultigridInterpolator::getGhostCF() const noexcept
 }
 
 std::pair<VoFStencil, VoFStencil>
-EBLeastSquaresMultigridInterpolator::getInterpolationStencil(const VolIndex&  a_fineGhost,
-                                                             const DataIndex& a_dit) const noexcept
+EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular(const VolIndex&  a_fineGhost,
+                                                                    const DataIndex& a_dit,
+                                                                    const int        a_dir) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencil");
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular");
+
+  VoFStencil fineStencil;
+  VoFStencil coarStencil;
+
+  return std::make_pair(fineStencil, coarStencil);
+}
+
+std::pair<VoFStencil, VoFStencil>
+EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  a_fineGhost,
+                                                               const DataIndex& a_dit) const noexcept
+{
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB");
 
   VoFStencil fineStencil;
   VoFStencil coarStencil;
@@ -108,7 +124,7 @@ EBLeastSquaresMultigridInterpolator::getInterpolationStencil(const VolIndex&  a_
     coarStencil = m_coarStencils[a_dit](a_fineGhost, m_comp);
   }
   else {
-#warning "Must fill the regular stencils"
+    MayDay::Abort("EBLeastSquaresMultigridInterpolation::getInterpolationStencilEB - logic bust!");
   }
 
   return std::make_pair(fineStencil, coarStencil);
@@ -756,9 +772,6 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
   const ProblemDomain&     domainCoar = m_eblgCoFi.getDomain();
   const DataIterator&      ditFine    = dblFine.dataIterator();
   const int                nboxFine   = ditFine.size();
-
-#warning \
-  "In here I really want to fetch the explicit stencils and make sure they are correct!. We can merge the new functionality later, separate from the AMG solve itself"
 
   // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
   // coarse grid, and then cubic interpolation on the fine grid.

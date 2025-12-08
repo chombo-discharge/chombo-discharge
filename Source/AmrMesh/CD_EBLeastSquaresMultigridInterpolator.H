@@ -98,14 +98,30 @@ public:
   getGhostCF() const noexcept override;
 
   /*!
+    @brief Get the interpolation stencil near the refinement boundary.
+    @details This version can assume that all cells are regular, and that returned stencils may later be replaced
+    by getInterpolationStencilEB. This function is not used in the interpolation calls, but is useful if the user
+    wants to extract the stencils for filling matrices directly (e.g., if using PETSc). 
+    @param[in] a_fineGhost Ghost cell VoF
+    @param[in] a_dit Grid index
+    @param[in] a_dir Lo/hi side
+  */
+  virtual std::pair<VoFStencil, VoFStencil>
+  getInterpolationStencilRegular(const VolIndex&  a_fineGhost,
+                                 const DataIndex& a_dit,
+                                 const int        a_dir) const noexcept override;
+
+  /*!
     @brief Get an explicit stencil for a ghost cell near the refinement boundary.
-    @details This should return the fine + coarse stencils required for interpolating to the fine ghost cell.
+    @details This should return the fine + coarse stencils required for interpolating to the fine ghost cell. This
+    function is not used in the interpolation calls, but is useful if the user wants to extract the stencils for
+    filling matrices directly (e.g., if using PETSc). 
     @param[in] a_fineGhost Ghost cell on the fine side of the refinement boundary.
     @param[in] a_dit Grid index.
     @return This first/second entry in the returned pair should be the fine/coarse stencil.    
   */
   virtual std::pair<VoFStencil, VoFStencil>
-  getInterpolationStencil(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept override;
+  getInterpolationStencilEB(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept override;
 
   /*!
     @brief Do inhomogeneous interpolation
