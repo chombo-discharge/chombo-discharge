@@ -27,7 +27,8 @@
   is used in conjuction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. 
 
   @details This should be defined over the fine grid. It will store stencils for computing the various required terms in the 
-  Taylor series, and the user can call various functions for getting those terms. 
+  Taylor series, and the user can call various functions for getting those terms. For the record, all stencils in this object
+  assumes that dx = 1, so the user have to normalize against his/her grid resolutions later. 
 */
 class CoarseInterpQuadCF
 {
@@ -94,6 +95,35 @@ public:
   */
   virtual Real
   computeMixedDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, const int a_coarVar) const noexcept;
+
+  /*!
+    @brief Get the first derivative stencil for the input coarse vof.
+    @details This will construct the stencil for representing the derivative on the coarse cell center
+    and return it. Useful when explicit stencil storage is required. 
+    @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
+    @param[in] a_dir Direction of derivative. 
+  */
+  virtual DerivStencil
+  getFirstDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
+
+  /*!
+    @brief Get the second derivative stencil for the input coarse vof.
+    @details This will construct the stencil for representing the derivative on the coarse cell center
+    and return it. Useful when explicit stencil storage is required.     
+    @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
+    @param[in] a_dir Direction of derivative.     
+  */
+  virtual DerivStencil
+  getSecondDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
+
+  /*!
+    @brief Get the second derivative stencil for the input coarse vof.
+    @details This will construct the stencil for representing the derivative on the coarse cell center
+    and return it. Useful when explicit stencil storage is required.     
+    @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
+  */
+  virtual DerivStencil
+  getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept;
 
 protected:
   /*!

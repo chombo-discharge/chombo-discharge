@@ -15,6 +15,7 @@
 // Chombo includes
 #include <EBLevelGrid.H>
 #include <EBCellFAB.H>
+#include <DerivStencil.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -26,7 +27,7 @@ class EBMultigridInterpolator
 {
 public:
   /*!
-    @brief Disallowed constructor. 
+    @brief Basic constructor. 
   */
   EBMultigridInterpolator();
 
@@ -45,6 +46,31 @@ public:
   */
   virtual int
   getGhostCF() const = 0;
+
+  /*!
+    @brief Get an explicit stencil for a ghost cell near the EB.
+    @details This should return the fine + coarse stencils required for interpolating to the fine ghost cell.
+    @param[in] a_fineGhost Ghost cell on the fine side of the refinement boundary.
+    @param[in] a_din Grid index.
+    @return This first/second entry in the returned pair should be the fine/coarse stencil.
+  */
+  virtual std::pair<VoFStencil, VoFStencil>
+  getInterpolationStencilEB(const VolIndex& a_fineGhost, const DataIndex& a_din) const noexcept = 0;
+
+  /*!
+    @brief Get the interpolation stencil near the refinement boundary.
+    @details This version can assume that all cells are regular, and that returned stencils may later be replaced
+    by getInterpolationStencilEB.
+    @param[in] a_fineGhost Ghost cell index on the fine grid
+    @param[in] a_din Grid index
+    @param[in] a_dir Coordinate direction
+    @param[in] a_side Low or high side of the grid patch
+  */
+  virtual std::pair<DerivStencil, DerivStencil>
+  getInterpolationStencilRegular(const IntVect&       a_fineGhost,
+                                 const DataIndex&     a_din,
+                                 const int            a_dir,
+                                 const Side::LoHiSide a_side) const noexcept = 0;
 
   /*!
     @brief Do inhomogeneous interpolation
@@ -69,13 +95,13 @@ public:
     @brief Do homogeneous coarse-fine interpolation on a grid patch
     @param[in] a_phiFine   Fine-level data
     @param[in] a_variables Variables to be interpolated
-    @param[in] a_dit       Data index
+    @param[in] a_din       Data index
     @note This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is
     the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
     contain enough ghost cells. 
   */
   virtual void
-  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const = 0;
+  coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_din) const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

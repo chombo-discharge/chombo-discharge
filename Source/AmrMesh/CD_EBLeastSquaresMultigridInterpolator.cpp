@@ -83,15 +83,105 @@ EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const E
   CH_STOP(t2);
 }
 
+EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator() noexcept
+{
+  CH_TIME("EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator");
+}
+
 int
 EBLeastSquaresMultigridInterpolator::getGhostCF() const noexcept
 {
   return m_ghostCF;
 }
 
-EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator() noexcept
+std::pair<DerivStencil, DerivStencil>
+EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular(const IntVect&       a_fineGhost,
+                                                                    const DataIndex&     a_din,
+                                                                    const int            a_dir,
+                                                                    const Side::LoHiSide a_side) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator");
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular");
+
+  // TLDR: This version does the same type of interpolation as in regularCoarseFineInterp. I.e., it
+  // constructs a Lagrange polynomial for fine-ghost interpolation, using the same centering where the
+  // ghost cell is at the origin of a coordinate system.
+  const IntVect fineIV = a_fineGhost;
+  const IntVect coarIV = coarsen(a_fineGhost, m_refRat);
+
+  const Real x0 = -0.5 * (m_refRat - 1);
+  const Real xi = 0.0;
+  const Real x1 = 1.0;
+  const Real x2 = 2.0;
+
+  const Real L0 = (xi - x1) * (xi - x2) / ((x0 - x1) * (x0 - x2));
+  const Real L1 = (xi - x0) * (xi - x2) / ((x1 - x0) * (x1 - x2));
+  const Real L2 = (xi - x0) * (xi - x1) / ((x2 - x0) * (x2 - x1));
+
+  const int iHiLo = sign(a_side);
+
+  DerivStencil fineStencil;
+  DerivStencil coarStencil;
+
+  const CoarseInterpQuadCF& coarseStencils = (a_side == Side::Lo) ? m_loCoarseInterpCF[a_dir][a_din]
+                                                                  : m_hiCoarseInterpCF[a_dir][a_din];
+
+  // Interpolation of the coarse-grid data to the line connecting the fine-grid data with the ghost cell. delta is the
+  // displacement vector from coarse-grid cell to fine-grid ghost cell. Note that this is normalized by the coarse grid
+  // cell size
+  const RealVect delta = (RealVect(fineIV) - m_refRat * RealVect(coarIV) + 0.5 * (1.0 - m_refRat)) / m_refRat;
+
+  coarStencil.accumulate(coarIV, 1.0);
+  for (int d = 0; d < SpaceDim; d++) {
+    if (d != a_dir) {
+      const DerivStencil firstDeriv  = coarseStencils.getFirstDerivStencil(coarIV, d);
+      const DerivStencil secondDeriv = coarseStencils.getSecondDerivStencil(coarIV, d);
+
+      for (int i = 0; i < firstDeriv.size(); i++) {
+        coarStencil.accumulate(firstDeriv.getIndex(i), firstDeriv.getWeight(i) * delta[d]);
+      }
+      for (int i = 0; i < secondDeriv.size(); i++) {
+        coarStencil.accumulate(secondDeriv.getIndex(i), secondDeriv.getWeight(i) * 0.5 * delta[d] * delta[d]);
+      }
+    }
+  }
+
+#if CH_SPACEDIM == 3
+  const DerivStencil mixedDeriv = coarseStencils.getMixedDerivStencil(coarIV);
+  for (int d = 0; d < SpaceDim; d++) {
+    if (d != a_dir) {
+      for (int i = 0; i < mixedDeriv.size(); i++) {
+        coarStencil.accumulate(mixedDeriv.getIndex(i), mixedDeriv.getWeight(i) * delta[d]);
+      }
+    }
+  }
+#endif
+
+  // Final interpolant uses the coarse-side value and two fine-grid values inside the grid patch.
+  coarStencil *= L0;
+  fineStencil.accumulate(fineIV - iHiLo * BASISV(a_dir), L1);
+  fineStencil.accumulate(fineIV - 2 * iHiLo * BASISV(a_dir), L2);
+
+  return std::make_pair(fineStencil, coarStencil);
+}
+
+std::pair<VoFStencil, VoFStencil>
+EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  a_fineGhost,
+                                                               const DataIndex& a_din) const noexcept
+{
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB");
+
+  VoFStencil fineStencil;
+  VoFStencil coarStencil;
+
+  if (m_ghostCells[a_din].contains(a_fineGhost.gridIndex())) {
+    fineStencil = m_fineStencils[a_din](a_fineGhost, m_comp);
+    coarStencil = m_coarStencils[a_din](a_fineGhost, m_comp);
+  }
+  else {
+    MayDay::Abort("EBLeastSquaresMultigridInterpolation::getInterpolationStencilEB - logic bust!");
+  }
+
+  return std::make_pair(fineStencil, coarStencil);
 }
 
 void
@@ -179,7 +269,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_p
 void
 EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
                                                        const Interval   a_variables,
-                                                       const DataIndex& a_dit) const noexcept
+                                                       const DataIndex& a_din) const noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>)");
   CH_TIMER("EBLeastSquaresMultigridInterpolator::regular_interp", t1);
@@ -204,7 +294,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
         const IntVect shift = sign(sit()) * BASISV(dir);
 
         // Regular homogeneous interpolation on side sit() in direction dir
-        const Box ghostBox = m_cfivs[a_dit].at(std::make_pair(dir, sit()));
+        const Box ghostBox = m_cfivs[a_din].at(std::make_pair(dir, sit()));
 
         if (!ghostBox.isEmpty()) {
           BaseFab<Real>& phiReg = a_phi.getSingleValuedFAB();
@@ -227,7 +317,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
     // are, in fact, not writing to data that is used by the other stencils
     CH_START(t2);
     constexpr int numComp = 1;
-    m_aggFineStencils[a_dit]->apply(a_phi, a_phi, ivar, ivar, numComp, false);
+    m_aggFineStencils[a_din]->apply(a_phi, a_phi, ivar, ivar, numComp, false);
     CH_STOP(t2);
   }
 }

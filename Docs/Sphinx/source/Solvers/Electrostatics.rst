@@ -327,7 +327,7 @@ The current list of configuration options are indicated below
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolverGMG.options
    :language: text
-   :emphasize-lines: 4,13-16,18-35
+   :emphasize-lines: 4,12-14,16-36
    :caption: Input options for the ``FieldSolverGMG`` class. Runtime adjustable options are highlighted.	      
 
 Note that *all* options pertaining to IO or multigrid are run-time configurable (see :ref:`Chap:RuntimeConfig`).

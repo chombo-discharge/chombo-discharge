@@ -12,8 +12,6 @@ FieldSolverGMG.bc.z.hi               = dirichlet 0.0    ## Bc type (see docs)
 FieldSolverGMG.plt_vars              = phi rho E        ## Plot variables: 'phi', 'rho', 'E', 'res', 'perm', 'sigma', 'Esol'
 FieldSolverGMG.use_regrid_slopes     = true             ## Use slopes when regridding or not
 FieldSolverGMG.kappa_source          = true             ## Volume weighted space charge density or not (depends on algorithm)
-FieldSolverGMG.filter_rho            = 0                ## Number of filterings of space charge before Poisson solve
-FieldSolverGMG.filter_potential      = 0                ## Number of filterings of potential after Poisson solve
 
 FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
