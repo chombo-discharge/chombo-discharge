@@ -54,7 +54,7 @@ public:
     @return This first/second entry in the returned pair should be the fine/coarse stencil.
   */
   virtual std::pair<VoFStencil, VoFStencil>
-  getStencil(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept = 0;
+  getInterpolationStencil(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept = 0;
 
   /*!
     @brief Do inhomogeneous interpolation

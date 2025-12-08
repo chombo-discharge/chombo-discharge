@@ -95,12 +95,21 @@ EBLeastSquaresMultigridInterpolator::getGhostCF() const noexcept
 }
 
 std::pair<VoFStencil, VoFStencil>
-EBLeastSquaresMultigridInterpolator::getStencil(const VolIndex& a_fineGhost, const DataIndex& a_dit) const noexcept
+EBLeastSquaresMultigridInterpolator::getInterpolationStencil(const VolIndex&  a_fineGhost,
+                                                             const DataIndex& a_dit) const noexcept
 {
-  CH_TIME("EBLeastSquaresMultigridInterpolator::getStencil");
+  CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencil");
 
   VoFStencil fineStencil;
   VoFStencil coarStencil;
+
+  if (m_ghostCells[a_dit].contains(a_fineGhost.gridIndex())) {
+    fineStencil = m_fineStencils[a_dit](a_fineGhost, m_comp);
+    coarStencil = m_coarStencils[a_dit](a_fineGhost, m_comp);
+  }
+  else {
+#warning "Must fill the regular stencils"
+  }
 
   return std::make_pair(fineStencil, coarStencil);
 }
