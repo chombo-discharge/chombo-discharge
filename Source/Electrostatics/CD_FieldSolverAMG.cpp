@@ -57,12 +57,12 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   DataOps::setValue(a_potential, 0.0);
 
-#if 1 // Check that PETSc works. 
+#if 1 // Check that PETSc works.
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
   Vec x;
   petscGrid->create(x);
-  petscGrid->setValue(x,1.0*procID());
+  petscGrid->setValue(x, 1.0 * procID());
   petscGrid->putPetscInChombo(a_potential, x);
   petscGrid->destroy(x);
 #endif
@@ -265,9 +265,6 @@ FieldSolverAMG::setupSolver()
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::setupSolver" << endl;
   }
-
-
-
 }
 
 void
