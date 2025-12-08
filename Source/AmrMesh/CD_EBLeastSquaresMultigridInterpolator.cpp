@@ -31,9 +31,6 @@ constexpr int EBLeastSquaresMultigridInterpolator::m_stenComp;
 constexpr int EBLeastSquaresMultigridInterpolator::m_numStenComp;
 constexpr int EBLeastSquaresMultigridInterpolator::m_comp;
 
-#warning \
-  "In here I really want to fetch the explicit stencils and make sure they are correct!. We can merge the new functionality later, separate from the AMG solve itself"
-
 EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
                                                                          const EBLevelGrid& a_eblgCoFi,
                                                                          const EBLevelGrid& a_eblgCoar,
