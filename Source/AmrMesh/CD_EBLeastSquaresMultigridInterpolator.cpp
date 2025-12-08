@@ -757,6 +757,9 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
   const DataIterator&      ditFine    = dblFine.dataIterator();
   const int                nboxFine   = ditFine.size();
 
+#warning \
+  "In here I really want to fetch the explicit stencils and make sure they are correct!. We can merge the new functionality later, separate from the AMG solve itself"
+
   // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
   // coarse grid, and then cubic interpolation on the fine grid.
 #pragma omp parallel for schedule(runtime)

@@ -349,10 +349,147 @@ CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& a_coarPhi,
     break;
   }
   }
-
 #endif
 
   return mixedDeriv;
+}
+
+DerivStencil
+CoarseInterpQuadCF::getFirstDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept
+{
+  CH_TIME("CoarseInterpQuadCF::getFirstDerivStencil");
+
+  CH_assert(a_dir != m_ignoreDir);
+  CH_assert(m_stencilBox.contains(a_ivCoar));
+
+  DerivStencil stencil;
+
+  const IntVect unitDir = BASISV(a_dir);
+
+  switch (m_firstDerivStencils[a_dir](a_ivCoar, 0)) {
+  case FirstDerivStencil::Centered2: {
+    stencil.accumulate(a_ivCoar + unitDir, 0.5);
+    stencil.accumulate(a_ivCoar - unitDir, -0.5);
+
+    break;
+  }
+  case FirstDerivStencil::Backward2: {
+    stencil.accumulate(a_ivCoar, 1.5);
+    stencil.accumulate(a_ivCoar - unitDir, -2.0);
+    stencil.accumulate(a_ivCoar - 2 * unitDir, 0.5);
+
+    break;
+  }
+  case FirstDerivStencil::Forward2: {
+    stencil.accumulate(a_ivCoar, -1.5);
+    stencil.accumulate(a_ivCoar + unitDir, 2.0);
+    stencil.accumulate(a_ivCoar + 2 * unitDir, -0.5);
+
+    break;
+  }
+  case FirstDerivStencil::Backward1: {
+    stencil.accumulate(a_ivCoar, 1.0);
+    stencil.accumulate(a_ivCoar - unitDir, -1.0);
+
+    break;
+  }
+  case FirstDerivStencil::Forward1: {
+    stencil.accumulate(a_ivCoar + unitDir, 1.0);
+    stencil.accumulate(a_ivCoar, -1.0);
+
+    break;
+  }
+  default: {
+    stencil.clear();
+
+    break;
+  }
+  }
+
+  return stencil;
+}
+
+DerivStencil
+CoarseInterpQuadCF::getSecondDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept
+{
+  CH_TIME("CoarseInterpQuadCF::getSecondDerivStencil");
+
+  CH_assert(a_dir != m_ignoreDir);
+  CH_assert(m_stencilBox.contains(a_ivCoar));
+
+  DerivStencil stencil;
+
+  const IntVect unitDir = BASISV(a_dir);
+
+  switch (m_secondDerivStencils[a_dir](a_ivCoar, 0)) {
+  case SecondDerivStencil::Centered2: {
+    stencil.accumulate(a_ivCoar - unitDir, 1.0);
+    stencil.accumulate(a_ivCoar, -2.0);
+    stencil.accumulate(a_ivCoar + unitDir, 1.0);
+
+    break;
+  }
+  case SecondDerivStencil::Backward1: {
+    stencil.accumulate(a_ivCoar - 2 * unitDir, 1.0);
+    stencil.accumulate(a_ivCoar - unitDir, -2.0);
+    stencil.accumulate(a_ivCoar, 1.0);
+
+    break;
+  }
+  case SecondDerivStencil::Forward1: {
+    stencil.accumulate(a_ivCoar, 1.0);
+    stencil.accumulate(a_ivCoar + unitDir, -2.0);
+    stencil.accumulate(a_ivCoar + 2 * unitDir, 1.0);
+
+    break;
+  }
+  default: {
+    stencil.clear();
+
+    break;
+  }
+  }
+
+  return stencil;
+}
+
+DerivStencil
+CoarseInterpQuadCF::getMixedDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept
+{
+  CH_TIME("CoarseInterpQuadCF::getMixedDerivStencil");
+
+  CH_assert(m_stencilBox.contains(a_ivCoar));
+
+  DerivStencil stencil;
+
+#if CH_SPACEDIM == 3
+  switch (m_mixedDerivStencils(a_ivCoar, 0)) {
+  case MixedDerivStencil::Standard: {
+
+    const IntVect tanDir1 = BASISV(m_tanDir1);
+    const IntVect tanDir2 = BASISV(m_tanDir2);
+
+    stencil.accumulate(a_ivCoar + tanDir1 + tanDir2, 0.25);
+    stencil.accumulate(a_ivCoar - tanDir1 - tanDir2, 0.25);
+    stencil.accumulate(a_ivCoar + tanDir1 - tanDir2, -0.25);
+    stencil.accumulate(a_ivCoar - tanDir1 + tanDir2, -0.25);
+
+    break;
+  }
+  case MixedDerivStencil::Explicit: {
+    stencil = m_explicitMixedDerivStencils(a_ivCoar, 0);
+
+    break;
+  }
+  default: {
+    stencil.clear();
+
+    break;
+  }
+  }
+#endif
+
+  return stencil;
 }
 
 #include <CD_NamespaceFooter.H>
