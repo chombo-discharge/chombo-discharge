@@ -21,6 +21,8 @@
 #include <CD_MFHelmholtzPetsc.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "Work item #1: Compute face flux stencils (interior)"
+
 MFHelmholtzPetsc::MFHelmholtzPetsc() noexcept
 {
   CH_TIME("MFHelmholtzPetsc::MFHelmholtzPetsc");
@@ -169,6 +171,7 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
     }
   }
 
+  m_numPhases = m_petscGrid->getNumPhases();
   m_isDefined = true;
 }
 
@@ -244,6 +247,96 @@ MFHelmholtzPetsc::setJumpWeight(const int a_weight) noexcept
   m_jumpWeight = a_weight;
 
   CH_assert(m_jumpWeight >= 0);
+}
+
+void
+MFHelmholtzPetsc::computeEBFluxStencils() noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeEBFluxStencils");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeEBFluxStencils" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    m_ebGradStencils[iphase].resize(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const DisjointBoxLayout& dbl  = m_petscGrid->getGrids()[lvl];
+      const DataIterator&      dit  = dbl.dataIterator();
+      const int                nbox = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din = dit[mybox];
+      }
+    }
+  }
+};
+
+PetscStencil
+MFHelmholtzPetsc::computeFaceFluxStencil(const VolIndex&      a_vof,
+                                         const int&           a_phase,
+                                         const int&           a_level,
+                                         const int            a_dir,
+                                         const Side::LoHiSide a_side,
+                                         const DataIndex&     a_dit) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeFaceFluxStencil(EB)");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeFaceFluxStencil(EB)" << endl;
+  }
+}
+
+PetscStencil
+MFHelmholtzPetsc::computeFaceFluxStencil(const IntVect&       a_cell,
+                                         const int            a_phase,
+                                         const int            a_level,
+                                         const int            a_dir,
+                                         const Side::LoHiSide a_side,
+                                         const DataIndex&     a_dit) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeFaceFluxStencil(Regular)");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeFaceFluxStencil(Regular)" << endl;
+  }
+}
+
+MFHelmholtzPetsc::PetscColumn
+MFHelmholtzPetsc::computeEBFluxStencil(const VolIndex&  a_vof,
+                                       const int&       a_phase,
+                                       const int&       a_level,
+                                       const DataIndex& a_dit) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeEBFluxStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeEBFluxStencil" << endl;
+  }
+}
+
+std::pair<MFHelmholtzPetsc::PetscColumn, MFHelmholtzPetsc::PetscColumn>
+MFHelmholtzPetsc::computeJumpFluxStencils(const IntVect&   a_cell,
+                                          const int&       a_phase,
+                                          const int&       a_level,
+                                          const DataIndex& a_dit) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeJumpFluxStencils");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeJumpFluxStencils" << endl;
+  }
+}
+
+MFHelmholtzPetsc::PetscColumn
+MFHelmholtzPetsc::computeStencil(const VolIndex&  a_vof,
+                                 const int&       a_phase,
+                                 const int&       a_level,
+                                 const DataIndex& a_dit) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeStencil" << endl;
+  }
 }
 
 #include <CD_NamespaceFooter.H>

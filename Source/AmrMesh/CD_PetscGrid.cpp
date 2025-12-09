@@ -105,6 +105,36 @@ PetscGrid::clear() noexcept
   }
 }
 
+Vector<DisjointBoxLayout>
+PetscGrid::getGrids() const noexcept {
+  CH_TIME("PetscGrid::getGrids");
+  if (m_verbose) {
+    pout() << "PetscGrid::getGrids" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  Vector<DisjointBoxLayout> grids;
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    grids.push_back(m_levelGrids[lvl]->getGrids());
+  }
+
+  return grids;
+}
+
+int
+PetscGrid::getNumPhases() const noexcept {
+  CH_TIME("PetscGrid::getNumPhases");
+  if (m_verbose) {
+    pout() << "PetscGrid::getNumPhases" << endl;
+  }
+  
+  CH_assert(m_isDefined);
+
+  return m_numPhases;
+}
+
 void
 PetscGrid::defineAMRCells() noexcept
 {

@@ -157,19 +157,19 @@ public:
     reconstructions near the embedded boundary.
   */
   virtual void
-  computeAndStoreGradEBStencils() noexcept;
+  computeEBFluxStencils() noexcept;
 
   /*!
     @brief Get a face flux stencil.
     @note This is the EB version. 
   */
   virtual PetscStencil
-  getFaceFluxStencil(const VolIndex&      a_vof,
-                     const int&           a_phase,
-                     const int&           a_level,
-                     const int            a_dir,
-                     const Side::LoHiSide a_side,
-                     const DataIndex&     a_dit) const noexcept;
+  computeFaceFluxStencil(const VolIndex&      a_vof,
+                         const int&           a_phase,
+                         const int&           a_level,
+                         const int            a_dir,
+                         const Side::LoHiSide a_side,
+                         const DataIndex&     a_dit) const noexcept;
 
   /*!
     @brief Get a face flux stencil.
@@ -177,32 +177,32 @@ public:
     using the sum of the fine-grid fluxes. 
   */
   virtual PetscStencil
-  getFaceFluxStencil(const IntVect&       a_cell,
-                     const int            a_phase,
-                     const int            a_level,
-                     const int            a_dir,
-                     const Side::LoHiSide a_side,
-                     const DataIndex&     a_dit) const noexcept;
+  computeFaceFluxStencil(const IntVect&       a_cell,
+                         const int            a_phase,
+                         const int            a_level,
+                         const int            a_dir,
+                         const Side::LoHiSide a_side,
+                         const DataIndex&     a_dit) const noexcept;
 
   /*!
     @brief Get the flux through an embedded boundary face.
     @note This should not be called on jump faces.
   */
   virtual std::pair<PetscStencil, PetscScalar>
-  getEBFluxStencil(const VolIndex&  a_vof,
-                   const int&       a_phase,
-                   const int&       a_level,
-                   const DataIndex& a_dit) const noexcept;
+  computeEBFluxStencil(const VolIndex&  a_vof,
+                       const int&       a_phase,
+                       const int&       a_level,
+                       const DataIndex& a_dit) const noexcept;
 
   /*!
     @brief Get the fluxes through either side of a jump-condition cell. 
     @note This should not be called on single-phase EB faces.
   */
   virtual std::pair<PetscColumn, PetscColumn>
-  getJumpFluxStencils(const IntVect&   a_cell,
-                      const int&       a_phase,
-                      const int&       a_level,
-                      const DataIndex& a_dit) const noexcept;
+  computeJumpFluxStencils(const IntVect&   a_cell,
+                          const int&       a_phase,
+                          const int&       a_level,
+                          const DataIndex& a_dit) const noexcept;
 
   /*!
     @brief Get a PETSc stencil for the given input grid point and phase.
@@ -212,7 +212,7 @@ public:
     into the right-hand side.
   */
   virtual PetscColumn
-  getStencil(const VolIndex& a_vof, const int& a_phase, const int& a_level, const DataIndex& a_dit) const noexcept;
+  computeStencil(const VolIndex& a_vof, const int& a_phase, const int& a_level, const DataIndex& a_dit) const noexcept;
 
 protected:
   /*!
@@ -291,6 +291,11 @@ protected:
   int m_jumpWeight;
 
   /*!
+    @brief Number of valid phases
+  */
+  int m_numPhases;
+
+  /*!
     @brief Reference to the PETSc interface object
   */
   RefCountedPtr<PetscGrid> m_petscGrid;
@@ -329,6 +334,11 @@ protected:
     @brief Storage for stencils holding approximations to grad(phi) on the embedded boundaries. 
   */
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<PetscStencil>>>> m_ebGradStencils[2];
+
+  /*!
+    @brief Storage for stencils holding approximations to grad(phi) on jump condition cells.
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<PetscScalar>>>> m_jumpGradStencils[2];
 };
 
 #include <CD_NamespaceFooter.H>

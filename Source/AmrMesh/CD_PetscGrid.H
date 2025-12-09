@@ -88,6 +88,18 @@ public:
   clear() noexcept;
 
   /*!
+    @brief Get the grids
+  */
+  virtual Vector<DisjointBoxLayout>
+  getGrids() const noexcept;
+
+  /*!
+    @brief Get the number of valid phases
+  */
+  virtual int
+  getNumPhases() const noexcept;
+
+  /*!
     @brief Create a PETSc vector.
     @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
     param[in,out] x PETSc vector    
