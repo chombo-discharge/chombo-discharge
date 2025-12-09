@@ -16,6 +16,7 @@
 
 // Our includes
 #include <CD_FieldSolver.H>
+#include <CD_MFHelmholtzPetsc.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
