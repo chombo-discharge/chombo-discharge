@@ -49,18 +49,26 @@ public:
   /*!
     @brief Full constructor. Calls the define method.
   */
-  MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
-                   const RealVect&                                       a_probLo,
-                   const Real&                                           a_alpha,
-                   const Real&                                           a_beta,
-                   const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&    a_aCoef,
-                   const Vector<RefCountedPtr<LevelData<MFFluxFAB>>>&    a_bCoef,
-                   const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&  a_bCoefIrreg,
-                   const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_coarseFineInterpolators,
-                   const Vector<int>&                                    a_refinementRatios,
-                   const Vector<Real>&                                   a_dx,
-                   const int&                                            a_finestLevel,
-                   const Location::Cell&                                 a_dataLocation) noexcept;
+  MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&                          a_petscGrid,
+                   const RealVect&                                          a_probLo,
+                   const Real&                                              a_alpha,
+                   const Real&                                              a_beta,
+                   const bool&                                              a_multRhoByVolFrac,
+                   const bool&                                              a_multSigmaByAreaFrac,
+                   const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_aCoef,
+                   const Vector<RefCountedPtr<LevelData<MFFluxFAB>>>&       a_bCoef,
+                   const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&     a_bCoefIrreg,
+                   const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_rho,
+                   const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>& a_sigma,
+                   const Vector<RefCountedPtr<EBMultigridInterpolator>>&    a_coarseFineInterpolators,
+                   const Vector<int>&                                       a_refinementRatios,
+                   const Vector<Real>&                                      a_dx,
+                   const int&                                               a_finestLevel,
+                   const int&                                               a_ebbcOrder,
+                   const int&                                               a_ebbcWeight,
+                   const int&                                               a_jumpOrder,
+                   const int&                                               a_jumpWeight,
+                   const Location::Cell&                                    a_dataLocation) noexcept;
 
   /*!
     @brief Destructor
@@ -71,24 +79,87 @@ public:
     @brief Define method. Puts object in usable state.
   */
   virtual void
-  define(const RefCountedPtr<PetscGrid>&                       a_petscGrid,
-         const RealVect&                                       a_probLo,
-         const Real&                                           a_alpha,
-         const Real&                                           a_beta,
-         const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&    a_aCoef,
-         const Vector<RefCountedPtr<LevelData<MFFluxFAB>>>&    a_bCoef,
-         const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&  a_bCoefIrreg,
-         const Vector<RefCountedPtr<EBMultigridInterpolator>>& a_coarseFineInterpolators,
-         const Vector<int>&                                    a_refinementRatios,
-         const Vector<Real>&                                   a_dx,
-         const int&                                            a_finestLevel,
-         const Location::Cell&                                 a_dataLocation) noexcept;
+  define(const RefCountedPtr<PetscGrid>&                          a_petscGrid,
+         const RealVect&                                          a_probLo,
+         const Real&                                              a_alpha,
+         const Real&                                              a_beta,
+         const bool&                                              a_multRhoByVolFrac,
+         const bool&                                              a_multSigmaByAreaFrac,
+         const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_aCoef,
+         const Vector<RefCountedPtr<LevelData<MFFluxFAB>>>&       a_bCoef,
+         const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&     a_bCoefIrreg,
+         const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_rho,
+         const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>& a_sigma,
+         const Vector<RefCountedPtr<EBMultigridInterpolator>>&    a_coarseFineInterpolators,
+         const Vector<int>&                                       a_refinementRatios,
+         const Vector<Real>&                                      a_dx,
+         const int&                                               a_finestLevel,
+         const int&                                               a_ebbcOrder,
+         const int&                                               a_ebbcWeight,
+         const int&                                               a_jumpOrder,
+         const int&                                               a_jumpWeight,
+         const Location::Cell&                                    a_dataLocation) noexcept;
 
   /*!
-    @brief Get a PETSc stencil for the given input grid point
+    @brief Turn on/off multiplication of rho by the volume fraction.
+    @param[in] a_multRhoByVolFrac.
+  */
+  virtual void
+  setMultRhoByVolFrac(const bool a_multRhoByVolFrac) noexcept;
+
+  /*!
+    @brief Turn on/off multiplication of sigma by the area fraction.
+    @param[in] a_multSigmaByAreaFrac.    
+  */
+  virtual void
+  setMultSigmaByAreaFrac(const bool a_multSigmaByAreaFrac) noexcept;
+
+  /*!
+    @brief Reset the EBBC order.
+    @param[i] a_order Boundary condition order. Must be > 0.
+  */
+  virtual void
+  setEBBCOrder(const int a_order) noexcept;
+
+  /*!
+    @brief Set the EBBC weighting. Weighting factor = 0 uses unweighted least squares. 
+    @param[i] a_weight Weighting factor. Must be >= 0.
+  */
+  virtual void
+  setEBBCWeight(const int a_weight) noexcept;
+
+  /*!
+    @brief Reset the jump order.
+    @param[i] a_order Boundary condition order. Must be > 0.
+  */
+  virtual void
+  setJumpOrder(const int a_order) noexcept;
+
+  /*!
+    @brief Reset the jump weighting. Weighting factor = 0 uses unweighted least squares. 
+    @param[i] a_weight Weighting factor. Must be >= 0.
+  */
+  virtual void
+  setJumpWeight(const int a_weight) noexcept;
+
+  /*!
+    @brief Get a PETSc stencil for the given input grid point and phase.
+    @details This is the main routine for getting an stencil out of the Helmholtz discretization. Note that this will call
+    the other versions and compute the EB and face flux stencils.
+    @return This returns a stencil for the given input VoF, and the corresponding constant term which can be put
+    into the right-hand side.
+  */
+  virtual std::pair<PetscStencil, PetscScalar>
+  getStencil(const VolIndex& a_vof, const int& a_phase, const int& a_level, const DataIndex& a_dit) const noexcept;
+
+  /*!
+    @brief Get a face flux stencil.
   */
   virtual PetscStencil
-  getStencil(const VolIndex& a_vof, const int& a_level, const DataIndex& a_dit) const noexcept;
+  getFaceFluxStencil(const FaceIndex& a_face,
+                     const int&       a_phase,
+                     const int&       a_level,
+                     const DataIndex& a_dit) const noexcept;
 
 protected:
   /*!
@@ -117,6 +188,16 @@ protected:
   bool m_debug;
 
   /*!
+    @brief Multiply or don't multiply rho by kappa when computing stencils.
+  */
+  bool m_multRhoByVolFrac;
+
+  /*!
+    @brief Multiply or don't multiply sigma by the area fraction when computing stencils.
+  */
+  bool m_multSigmaByAreaFrac;
+
+  /*!
     @brief Lower-left corner of problem domain
   */
   RealVect m_probLo;
@@ -135,6 +216,26 @@ protected:
     @brief Finest grid level
   */
   int m_finestLevel;
+
+  /*!
+    @brief EB boundary condition order. Relevant for Dirichlet and Robin BCs.
+  */
+  int m_ebbcOrder;
+
+  /*!
+    @brief EB boundary condition weighting factor. Relevant for Dirichlet and Robin BCs.
+  */
+  int m_ebbcWeight;
+
+  /*!
+    @brief EB jump condition order.
+  */
+  int m_jumpOrder;
+
+  /*!
+    @brief EB jump condition weighting factor.
+  */
+  int m_jumpWeight;
 
   /*!
     @brief Reference to the PETSc interface object

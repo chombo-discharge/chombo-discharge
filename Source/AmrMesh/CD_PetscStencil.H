@@ -79,8 +79,9 @@ public:
   operator+=(const PetscStencil& a_otherStencil) noexcept;
 
   /*!
-    @brief Scale this stencil
+    @brief Scale this stencil. 
     @param[in] a_scalingFactor Scaling factor
+    @note This does not scale the constant term.
   */
   PetscStencil&
   operator*=(const Real& a_scalingFactor) noexcept;
