@@ -324,6 +324,11 @@ protected:
     @brief Grid resolutions
   */
   Vector<Real> m_dx;
+
+  /*!
+    @brief Storage for stencils holding approximations to grad(phi) on the embedded boundaries. 
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<PetscStencil>>>> m_ebGradStencils[2];
 };
 
 #include <CD_NamespaceFooter.H>
