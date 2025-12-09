@@ -32,6 +32,8 @@
 #include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "This class must be extended so that we can fill matrices/vectors using global indices"
+
 /*!
   @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
   @details This class includes functions for putting chombo-discharge in PETSc and vice versa.

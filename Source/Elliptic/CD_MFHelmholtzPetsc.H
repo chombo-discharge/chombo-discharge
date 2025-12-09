@@ -24,6 +24,7 @@
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "Must design boundary conditions (should be more sophisticated than FieldSolverGMG)"
 #warning "Later, this class should store EB flux stencils to reduce costs when changing the b-coefficients"
 
 /*!
@@ -32,7 +33,7 @@
   stencil generation across coarse-fine interfaces, including:
   1) Fluxes on embedded boundary.
   2) Jump conditions.
-  3) Consistent coarse-fine flux.
+  3) Consistent coarse-fine fluxes.
   4) Domain fluxes.
 
   All the fluxes are expressed in terms of cells that are also PETSc rows, so that PETSc matrices can be
@@ -41,6 +42,11 @@
 class MFHelmholtzPetsc
 {
 public:
+  /*!
+    @brief Short-hand notation for the required contents on a PETSc row. 
+  */
+  using PetscColumn = std::pair<PetscStencil, PetscScalar>;
+
   /*!
     @brief Default constructor. Must subsequently call the define method
   */
@@ -143,23 +149,70 @@ public:
   setJumpWeight(const int a_weight) noexcept;
 
   /*!
+    @brief Convenience function for computing and storing all embedded boundary gradient stencils.
+    @details This function computes the approximation to grad(phi) on all embedded boundary faces. It
+    includes the stencils for the jump conditions. The resulting data is not weighted by either the
+    beta or beta-coefficient. Users can later fetch the raw stencil and scale the matrix with the 
+    corresponding coefficients, and thus avoid recalculation of the relatively expensive least squares
+    reconstructions near the embedded boundary.
+  */
+  virtual void
+  computeAndStoreGradEBStencils() noexcept;
+
+  /*!
+    @brief Get a face flux stencil.
+    @note This is the EB version. 
+  */
+  virtual PetscStencil
+  getFaceFluxStencil(const VolIndex&      a_vof,
+                     const int&           a_phase,
+                     const int&           a_level,
+                     const int            a_dir,
+                     const Side::LoHiSide a_side,
+                     const DataIndex&     a_dit) const noexcept;
+
+  /*!
+    @brief Get a face flux stencil.
+    @note Regular version. If the indicated face is the coarse-face of a coarse-fine boundary, the flux is constructed
+    using the sum of the fine-grid fluxes. 
+  */
+  virtual PetscStencil
+  getFaceFluxStencil(const IntVect&       a_cell,
+                     const int            a_phase,
+                     const int            a_level,
+                     const int            a_dir,
+                     const Side::LoHiSide a_side,
+                     const DataIndex&     a_dit) const noexcept;
+
+  /*!
+    @brief Get the flux through an embedded boundary face.
+    @note This should not be called on jump faces.
+  */
+  virtual std::pair<PetscStencil, PetscScalar>
+  getEBFluxStencil(const VolIndex&  a_vof,
+                   const int&       a_phase,
+                   const int&       a_level,
+                   const DataIndex& a_dit) const noexcept;
+
+  /*!
+    @brief Get the fluxes through either side of a jump-condition cell. 
+    @note This should not be called on single-phase EB faces.
+  */
+  virtual std::pair<PetscColumn, PetscColumn>
+  getJumpFluxStencils(const IntVect&   a_cell,
+                      const int&       a_phase,
+                      const int&       a_level,
+                      const DataIndex& a_dit) const noexcept;
+
+  /*!
     @brief Get a PETSc stencil for the given input grid point and phase.
     @details This is the main routine for getting an stencil out of the Helmholtz discretization. Note that this will call
     the other versions and compute the EB and face flux stencils.
     @return This returns a stencil for the given input VoF, and the corresponding constant term which can be put
     into the right-hand side.
   */
-  virtual std::pair<PetscStencil, PetscScalar>
+  virtual PetscColumn
   getStencil(const VolIndex& a_vof, const int& a_phase, const int& a_level, const DataIndex& a_dit) const noexcept;
-
-  /*!
-    @brief Get a face flux stencil.
-  */
-  virtual PetscStencil
-  getFaceFluxStencil(const FaceIndex& a_face,
-                     const int&       a_phase,
-                     const int&       a_level,
-                     const DataIndex& a_dit) const noexcept;
 
 protected:
   /*!

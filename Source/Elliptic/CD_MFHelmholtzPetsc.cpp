@@ -138,12 +138,36 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
   m_jumpWeight          = a_jumpWeight;
   m_dataLocation        = a_dataLocation;
 
+  const int numLevels = 1 + m_finestLevel;
+
   CH_assert(a_petscGrid->isDefined());
   CH_assert(m_finestLevel >= 0);
   CH_assert(m_ebbcOrder > 0);
   CH_assert(m_ebbcWeight >= 0);
   CH_assert(m_jumpOrder > 0);
   CH_assert(m_jumpWeight >= 0);
+  CH_assert(m_aCoef.size() == numLevels);
+  CH_assert(m_bCoef.size() == numLevels);
+  CH_assert(m_bCoefIrreg.size() == numLevels);
+  CH_assert(m_rho.size() == numLevels);
+  CH_assert(m_sigma.size() == numLevels);
+  CH_assert(m_interpolators.size() == numLevels);
+  CH_assert(m_dx.size() == numLevels);
+  CH_assert(m_refinementRatios.size() == numLevels);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    CH_assert(m_aCoef[lvl]->isDefined());
+    CH_assert(m_bCoef[lvl]->isDefined());
+    CH_assert(m_bCoefIrreg[lvl]->isDefined());
+    CH_assert(m_rho[lvl]->isDefined());
+    CH_assert(m_sigma[lvl]->isDefined());
+    CH_assert(m_refinementRatios[lvl] >= 2);
+    CH_assert(m_refinementRatios[lvl] % 2 == 0);
+
+    if (lvl > 0) {
+      CH_assert(m_interpolators[lvl]->isDefined());
+    }
+  }
 
   m_isDefined = true;
 }
