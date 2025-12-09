@@ -250,11 +250,11 @@ MFHelmholtzPetsc::setJumpWeight(const int a_weight) noexcept
 }
 
 void
-MFHelmholtzPetsc::computeEBFluxStencils() noexcept
+MFHelmholtzPetsc::computeEBGradStencils() noexcept
 {
-  CH_TIME("MFHelmholtzPetsc::computeEBFluxStencils");
+  CH_TIME("MFHelmholtzPetsc::computeEBGradStencils");
   if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::computeEBFluxStencils" << endl;
+    pout() << "MFHelmholtzPetsc::computeEBGradStencils" << endl;
   }
 
   CH_assert(m_isDefined);
@@ -276,42 +276,73 @@ MFHelmholtzPetsc::computeEBFluxStencils() noexcept
 };
 
 PetscStencil
-MFHelmholtzPetsc::computeFaceFluxStencil(const VolIndex&      a_vof,
-                                         const int&           a_phase,
-                                         const int&           a_level,
-                                         const int            a_dir,
-                                         const Side::LoHiSide a_side,
-                                         const DataIndex&     a_dit) const noexcept
+MFHelmholtzPetsc::computeInteriorFaceFluxStencil(const VolIndex&      a_vof,
+                                                 const int&           a_phase,
+                                                 const int&           a_level,
+                                                 const int            a_dir,
+                                                 const Side::LoHiSide a_side,
+                                                 const DataIndex&     a_din) const noexcept
 {
-  CH_TIME("MFHelmholtzPetsc::computeFaceFluxStencil(EB)");
+  CH_TIME("MFHelmholtzPetsc::computeInteriorFaceFluxStencil(EB)");
   if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::computeFaceFluxStencil(EB)" << endl;
+    pout() << "MFHelmholtzPetsc::computeInteriorFaceFluxStencil(EB)" << endl;
   }
 }
 
 PetscStencil
-MFHelmholtzPetsc::computeFaceFluxStencil(const IntVect&       a_cell,
-                                         const int            a_phase,
-                                         const int            a_level,
-                                         const int            a_dir,
-                                         const Side::LoHiSide a_side,
-                                         const DataIndex&     a_dit) const noexcept
+MFHelmholtzPetsc::computeInteriorFaceFluxStencil(const IntVect&       a_cell,
+                                                 const int            a_phase,
+                                                 const int            a_level,
+                                                 const int            a_dir,
+                                                 const Side::LoHiSide a_side,
+                                                 const DataIndex&     a_din) const noexcept
 {
-  CH_TIME("MFHelmholtzPetsc::computeFaceFluxStencil(Regular)");
+  CH_TIME("MFHelmholtzPetsc::computeInteriorFaceFluxStencil(Regular)");
   if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::computeFaceFluxStencil(Regular)" << endl;
+    pout() << "MFHelmholtzPetsc::computeInteriorFaceFluxStencil(Regular)" << endl;
   }
 }
 
-MFHelmholtzPetsc::PetscColumn
-MFHelmholtzPetsc::computeEBFluxStencil(const VolIndex&  a_vof,
-                                       const int&       a_phase,
-                                       const int&       a_level,
-                                       const DataIndex& a_dit) const noexcept
+std::pair<PetscScalar, PetscStencil>
+MFHelmholtzPetsc::computeDirichletEBGradStencil(const VolIndex&  a_vof,
+                                                const int&       a_phase,
+                                                const int&       a_level,
+                                                const DataIndex& a_din) const noexcept
 {
-  CH_TIME("MFHelmholtzPetsc::computeEBFluxStencil");
+  CH_TIME("MFHelmholtzPetsc::computeDirichletEBGradStencil");
   if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::computeEBFluxStencil" << endl;
+    pout() << "MFHelmholtzPetsc::computeDirichletEBGradStencil" << endl;
+  }
+
+#warning "I need to expose the various coarse/fine stuff, too"
+  const Vector<RefCountedPtr<MFLevelGrid>>& grids     = m_petscGrid->getMFLevelGrids();
+  const Vector<RefCountedPtr<MFLevelGrid>>& gridsFiCo = m_petscGrid->getMFLevelGridsFiCo();
+  const Vector<RefCountedPtr<MFLevelGrid>>& gridsCoFi = m_petscGrid->getMFLevelGridsCoFi();
+
+  CH_assert(grids[a_level]->isDefined());
+}
+
+PetscStencil
+MFHelmholtzPetsc::computeRobinEBGradStencil(const VolIndex&  a_vof,
+                                            const int&       a_phase,
+                                            const int&       a_level,
+                                            const DataIndex& a_din) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeRobinEBGradStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeRobinEBGradStencil" << endl;
+  }
+}
+
+PetscScalar
+MFHelmholtzPetsc::computeNeumannEBGradStencil(const VolIndex&  a_vof,
+                                              const int&       a_phase,
+                                              const int&       a_level,
+                                              const DataIndex& a_din) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeNeumannEBGradStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeNeumannEBGradStencil" << endl;
   }
 }
 
@@ -319,7 +350,7 @@ std::pair<MFHelmholtzPetsc::PetscColumn, MFHelmholtzPetsc::PetscColumn>
 MFHelmholtzPetsc::computeJumpFluxStencils(const IntVect&   a_cell,
                                           const int&       a_phase,
                                           const int&       a_level,
-                                          const DataIndex& a_dit) const noexcept
+                                          const DataIndex& a_din) const noexcept
 {
   CH_TIME("MFHelmholtzPetsc::computeJumpFluxStencils");
   if (m_verbose) {
@@ -331,7 +362,7 @@ MFHelmholtzPetsc::PetscColumn
 MFHelmholtzPetsc::computeStencil(const VolIndex&  a_vof,
                                  const int&       a_phase,
                                  const int&       a_level,
-                                 const DataIndex& a_dit) const noexcept
+                                 const DataIndex& a_din) const noexcept
 {
   CH_TIME("MFHelmholtzPetsc::computeStencil");
   if (m_verbose) {

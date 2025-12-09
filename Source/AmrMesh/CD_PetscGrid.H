@@ -94,6 +94,24 @@ public:
   getGrids() const noexcept;
 
   /*!
+    @brief Get the grids on each level.
+  */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGrids() const noexcept;
+
+  /*!
+    @brief Get the refined coarse grids on each level.
+  */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridsFiCo() const noexcept;
+
+  /*!
+    @brief Get the coarsened fine coarse grids on each level.
+  */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridsCoFi() const noexcept;      
+
+  /*!
     @brief Get the number of valid phases
   */
   virtual int

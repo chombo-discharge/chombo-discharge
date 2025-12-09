@@ -123,6 +123,39 @@ PetscGrid::getGrids() const noexcept {
   return grids;
 }
 
+const Vector<RefCountedPtr<MFLevelGrid>>&
+PetscGrid::getMFLevelGrids() const noexcept
+{
+  CH_TIME("PetscGrid::getMFLevelGrids");
+  if (m_verbose) {
+    pout() << "PetscGrid::getMFLevelGrids" << endl;
+  }
+
+  return m_levelGrids;
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+PetscGrid::getMFLevelGridsFiCo() const noexcept
+{
+  CH_TIME("PetscGrid::getMFLevelGridsFiCo");
+  if (m_verbose) {
+    pout() << "PetscGrid::getMFLevelGridsFiCo" << endl;
+  }
+
+  return m_levelGridsFiCo;
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+PetscGrid::getMFLevelGridsCoFi() const noexcept
+{
+  CH_TIME("PetscGrid::getMFLevelGridsCoFi");
+  if (m_verbose) {
+    pout() << "PetscGrid::getMFLevelGridsCoFi" << endl;
+  }
+
+  return m_levelGridsCoFi;
+}
+
 int
 PetscGrid::getNumPhases() const noexcept {
   CH_TIME("PetscGrid::getNumPhases");

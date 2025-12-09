@@ -157,19 +157,19 @@ public:
     reconstructions near the embedded boundary.
   */
   virtual void
-  computeEBFluxStencils() noexcept;
+  computeEBGradStencils() noexcept;
 
   /*!
     @brief Get a face flux stencil.
     @note This is the EB version. 
   */
   virtual PetscStencil
-  computeFaceFluxStencil(const VolIndex&      a_vof,
-                         const int&           a_phase,
-                         const int&           a_level,
-                         const int            a_dir,
-                         const Side::LoHiSide a_side,
-                         const DataIndex&     a_dit) const noexcept;
+  computeInteriorFaceFluxStencil(const VolIndex&      a_vof,
+                                 const int&           a_phase,
+                                 const int&           a_level,
+                                 const int            a_dir,
+                                 const Side::LoHiSide a_side,
+                                 const DataIndex&     a_din) const noexcept;
 
   /*!
     @brief Get a face flux stencil.
@@ -177,22 +177,62 @@ public:
     using the sum of the fine-grid fluxes. 
   */
   virtual PetscStencil
-  computeFaceFluxStencil(const IntVect&       a_cell,
-                         const int            a_phase,
-                         const int            a_level,
-                         const int            a_dir,
-                         const Side::LoHiSide a_side,
-                         const DataIndex&     a_dit) const noexcept;
+  computeInteriorFaceFluxStencil(const IntVect&       a_cell,
+                                 const int            a_phase,
+                                 const int            a_level,
+                                 const int            a_dir,
+                                 const Side::LoHiSide a_side,
+                                 const DataIndex&     a_din) const noexcept;
 
   /*!
-    @brief Get the flux through an embedded boundary face.
+    @brief Get a Dirichlet stencil on an embedded boundary face.
+    @details This will solve the least squares approximation for dphi/dn, assuming that phi is known
+    on the EB face. This is representable as a stencil dphi/dn \approx w_b*phi_b + sum_i w_i phi_i,
+    where phi_b is the provided value on the embedded boundary. This function returns the weight w_b and
+    the corresponding stencil containing the interior points. It is up to the user to later impose w_b*phi_b
+    in the assembled matrix/rhs.
+
+    Internally, this function will only use cells that are not covered by a finer grid. Note that it might reach
+    into the other phase IF we could not obtain enough cells on the input phase. This operator will first attempt
+    to lower the least squares reconstruction order before that happens, however, all the way down to first order.
+    If a stencil still can't be found, it will try to reach into the other phase to obtain a direct approximation
+    to grad(phi), ignoring the jump condition, and then impose the flux as grad(phi)*n, where n is the normal vector.
+
+    @param[in] a_vof Grid cell
+    @param[in] a_phase Phase
+    @param[in] a_level Grid level
+    @param[in] a_din Grid index.
+    @note Calling this function on a grid cell that is not a PETSC-row inside the input grid level and index
+    will cause a runtime error. 
+  */
+  virtual std::pair<PetscScalar, PetscStencil>
+  computeDirichletEBGradStencil(const VolIndex&  a_vof,
+                                const int&       a_phase,
+                                const int&       a_level,
+                                const DataIndex& a_din) const noexcept;
+
+  /*!
+    @brief Get a Robin flux stencil on an embedded boundary face.
+    @details The Robin BC is assumed to be in the form c1*phi + c2*dphi/dn = c3, so the
+    flux is then dphi/dn = c3/c2 - c3/c1 * phi. This routine will turn the right-hand side
+    of this expression into the above form    
     @note This should not be called on jump faces.
   */
-  virtual std::pair<PetscStencil, PetscScalar>
-  computeEBFluxStencil(const VolIndex&  a_vof,
-                       const int&       a_phase,
-                       const int&       a_level,
-                       const DataIndex& a_dit) const noexcept;
+  virtual PetscStencil
+  computeRobinEBGradStencil(const VolIndex&  a_vof,
+                            const int&       a_phase,
+                            const int&       a_level,
+                            const DataIndex& a_din) const noexcept;
+
+  /*!
+    @brief Get a Neumann flux stencil on an embedded boundary face.
+    @note This should not be called on jump faces.
+  */
+  virtual PetscScalar
+  computeNeumannEBGradStencil(const VolIndex&  a_vof,
+                              const int&       a_phase,
+                              const int&       a_level,
+                              const DataIndex& a_din) const noexcept;
 
   /*!
     @brief Get the fluxes through either side of a jump-condition cell. 
@@ -202,7 +242,40 @@ public:
   computeJumpFluxStencils(const IntVect&   a_cell,
                           const int&       a_phase,
                           const int&       a_level,
-                          const DataIndex& a_dit) const noexcept;
+                          const DataIndex& a_din) const noexcept;
+
+  /*!
+    @brief Compute a stencil for imposing a Dirichlet domain flux on a domain side.
+  */
+  virtual std::pair<PetscStencil, PetscScalar>
+  computeDirichletDomainGradStencil(const VolIndex&      a_vof,
+                                    const int&           a_phase,
+                                    const int&           a_level,
+                                    const int&           a_dir,
+                                    const Side::LoHiSide a_side,
+                                    const DataIndex&     a_din) const noexcept;
+
+  /*!
+    @brief Compute a stencil for imposing a Robin BC domain flux on a domain side.
+  */
+  virtual std::pair<PetscStencil, PetscScalar>
+  computeRobinDomainGradStencil(const VolIndex&      a_vof,
+                                const int&           a_phase,
+                                const int&           a_level,
+                                const int&           a_dir,
+                                const Side::LoHiSide a_side,
+                                const DataIndex&     a_din) const noexcept;
+
+  /*!
+    @brief Compute a stencil for imposing a Robin BC domain flux on a domain side.
+  */
+  virtual PetscScalar
+  computeNeumannDomainGradStencil(const VolIndex&      a_vof,
+                                  const int&           a_phase,
+                                  const int&           a_level,
+                                  const int&           a_dir,
+                                  const Side::LoHiSide a_side,
+                                  const DataIndex&     a_din) const noexcept;
 
   /*!
     @brief Get a PETSc stencil for the given input grid point and phase.
@@ -212,7 +285,7 @@ public:
     into the right-hand side.
   */
   virtual PetscColumn
-  computeStencil(const VolIndex& a_vof, const int& a_phase, const int& a_level, const DataIndex& a_dit) const noexcept;
+  computeStencil(const VolIndex& a_vof, const int& a_phase, const int& a_level, const DataIndex& a_din) const noexcept;
 
 protected:
   /*!
