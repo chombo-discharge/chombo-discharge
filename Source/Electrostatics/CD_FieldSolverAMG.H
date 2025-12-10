@@ -172,6 +172,12 @@ public:
                           const MFAMRIVData&   a_permittivityEB) override;
 
 protected:
+
+  /*!
+    @brief PETSc-compatible Helmholtz discretization object
+  */
+  RefCountedPtr<MFHelmholtzPetsc> m_helmholtzPetsc;
+  
   /*!
     @brief Set the permittivities
     @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB and fills
@@ -179,6 +185,12 @@ protected:
   */
   virtual void
   setPermittivities() override;
+
+  /*!
+    @brief Define the Helmholtz operator.
+  */
+  virtual void
+  setupHelmoholtzOp();
 };
 
 #include <CD_NamespaceFooter.H>

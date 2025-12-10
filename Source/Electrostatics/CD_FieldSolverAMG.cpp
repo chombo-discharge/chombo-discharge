@@ -265,6 +265,10 @@ FieldSolverAMG::setupSolver()
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::setupSolver" << endl;
   }
+
+  if(!m_helmholtzPetsc->isDefined()){
+
+  }
 }
 
 void

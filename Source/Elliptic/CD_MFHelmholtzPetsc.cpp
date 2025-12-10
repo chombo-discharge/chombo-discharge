@@ -82,6 +82,17 @@ MFHelmholtzPetsc::~MFHelmholtzPetsc() noexcept
   CH_TIME("MFHelmholtzPetsc::~MFHelmholtzPetsc");
 }
 
+bool
+MFHelmholtzPetsc::isDefined() const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::isDefined");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::isDefined" << endl;
+  }
+
+  return m_isDefined;
+}
+
 void
 MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                          a_petscGrid,
                          const RealVect&                                          a_probLo,
@@ -130,6 +141,8 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
   m_aCoef               = a_aCoef;
   m_bCoef               = a_bCoef;
   m_bCoefIrreg          = a_bCoefIrreg;
+  m_rho                 = a_rho;
+  m_sigma               = a_sigma;
   m_interpolators       = a_coarseFineInterpolators;
   m_refinementRatios    = a_refinementRatios;
   m_dx                  = a_dx;
@@ -173,6 +186,21 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
 
   m_numPhases = m_petscGrid->getNumPhases();
   m_isDefined = true;
+}
+
+void
+MFHelmholtzPetsc::clear() noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::clear");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::clear" << endl;
+  }
+
+  m_petscGrid = RefCountedPtr<PetscGrid>(nullptr);
+  m_aCoef.resize(0);
+  m_bCoef.resize(0);
+  m_bCoefIrreg.resize(0);
+  m_isDefined = false;
 }
 
 void
@@ -319,6 +347,7 @@ MFHelmholtzPetsc::computeDirichletEBGradStencil(const VolIndex&  a_vof,
   const Vector<RefCountedPtr<MFLevelGrid>>& gridsFiCo = m_petscGrid->getMFLevelGridsFiCo();
   const Vector<RefCountedPtr<MFLevelGrid>>& gridsCoFi = m_petscGrid->getMFLevelGridsCoFi();
 
+  
   CH_assert(grids[a_level]->isDefined());
 }
 

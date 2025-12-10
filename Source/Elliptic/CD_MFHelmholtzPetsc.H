@@ -82,6 +82,12 @@ public:
   virtual ~MFHelmholtzPetsc() noexcept;
 
   /*!
+    @brief Check if object is defined or not
+  */
+  virtual bool
+  isDefined() const noexcept;
+
+  /*!
     @brief Define method. Puts object in usable state.
   */
   virtual void
@@ -105,6 +111,12 @@ public:
          const int&                                               a_jumpOrder,
          const int&                                               a_jumpWeight,
          const Location::Cell&                                    a_dataLocation) noexcept;
+
+  /*!
+    @brief Clear this object
+  */
+  virtual void
+  clear() noexcept;
 
   /*!
     @brief Turn on/off multiplication of rho by the volume fraction.
@@ -387,6 +399,16 @@ protected:
     @brief Helmholtz B-coefficient on cut-cell faces.
   */
   Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>> m_bCoefIrreg;
+
+  /*!
+    @brief Right-hand side of Helmholtz equation
+  */
+  Vector<RefCountedPtr<LevelData<MFCellFAB>>> m_rho;
+
+  /*!
+    @brief Jump factor on jump condition cells
+  */
+  Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>> m_sigma;
 
   /*!
     @brief Coarse-fine interpolator objects.
