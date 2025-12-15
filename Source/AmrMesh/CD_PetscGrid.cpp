@@ -168,6 +168,39 @@ PetscGrid::getMFLevelGridsCoFi() const noexcept
   return m_levelGridsCoFi;
 }
 
+const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+PetscGrid::getAMRToPetsc() const noexcept
+{
+  CH_TIME("PetscGrid::getAMRToPetsc");
+  if (m_verbose) {
+    pout() << "PetscGrid::getAMRToPetsc" << endl;
+  }
+
+  return m_amrToPetsc;
+}
+
+const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+PetscGrid::getAMRToPetscCoFi() const noexcept
+{
+  CH_TIME("PetscGrid::getAMRToPetscCoFi");
+  if (m_verbose) {
+    pout() << "PetscGrid::getAMRToPetscCoFi" << endl;
+  }
+
+  return m_amrToPetscCoFi;
+}
+
+const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+PetscGrid::getAMRToPetscFiCo() const noexcept
+{
+  CH_TIME("PetscGrid::getAMRToPetscFiCo");
+  if (m_verbose) {
+    pout() << "PetscGrid::getAMRToPetscFiCo" << endl;
+  }
+
+  return m_amrToPetscFiCo;
+}
+
 int
 PetscGrid::getNumPhases() const noexcept
 {

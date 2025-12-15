@@ -118,6 +118,28 @@ public:
   getMFLevelGridsCoFi() const noexcept;
 
   /*!
+    @brief Get the mapping between the AMR cells and PETSc rows
+  */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetsc() const noexcept;
+
+  /*!
+    @brief Get the mapping between the AMR cells and PETSc rows.
+    @details This returns the mapping on every level l, where the levels are defined
+    by coarsening of the finer level. 
+  */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetscCoFi() const noexcept;
+
+  /*!
+    @brief Get the mapping between the AMR cells and PETSc rows.
+    @details This returns the mapping on every level l, where the levels are defined
+    by refinement of a coarser level.
+  */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetscFiCo() const noexcept;    
+
+  /*!
     @brief Get the number of valid phases
   */
   virtual int
