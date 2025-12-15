@@ -21,7 +21,7 @@
 // Our includes
 #include <CD_PetscGrid.H>
 #include <CD_PetscStencil.H>
-#include <CD_EBMultigridInterpolator.H>
+#include <CD_MFMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 #warning "Must design boundary conditions (should be more sophisticated than FieldSolverGMG)"
@@ -67,7 +67,7 @@ public:
                    const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&     a_bCoefIrreg,
                    const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_rho,
                    const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>& a_sigma,
-                   const Vector<RefCountedPtr<EBMultigridInterpolator>>&    a_coarseFineInterpolators,
+                   const Vector<MFMultigridInterpolator>&                   a_coarseFineInterpolators,
                    const Vector<int>&                                       a_refinementRatios,
                    const Vector<Real>&                                      a_dx,
                    const int&                                               a_finestLevel,
@@ -105,7 +105,7 @@ public:
          const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&     a_bCoefIrreg,
          const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_rho,
          const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>& a_sigma,
-         const Vector<RefCountedPtr<EBMultigridInterpolator>>&    a_coarseFineInterpolators,
+         const Vector<RefCountedPtr<MFMultigridInterpolator>>&    a_coarseFineInterpolators,
          const Vector<int>&                                       a_refinementRatios,
          const Vector<Real>&                                      a_dx,
          const int&                                               a_finestLevel,
@@ -163,7 +163,7 @@ public:
     @param[i] a_weight Weighting factor. Must be >= 0.
   */
   virtual void
-  setRobinEBBCWeight(const int a_weight) noexcept;  
+  setRobinEBBCWeight(const int a_weight) noexcept;
 
   /*!
     @brief Reset the jump order.
@@ -392,7 +392,7 @@ protected:
   /*!
     @brief Robin EB boundary condition weighting factor. 
   */
-  int m_robinEBBCWeight;  
+  int m_robinEBBCWeight;
 
   /*!
     @brief EB jump condition order.
@@ -442,7 +442,7 @@ protected:
   /*!
     @brief Coarse-fine interpolator objects.
   */
-  Vector<RefCountedPtr<EBMultigridInterpolator>> m_interpolators;
+  Vector<MFMultigridInterpolator> m_interpolators;
 
   /*!
     @brief Refinement ratios

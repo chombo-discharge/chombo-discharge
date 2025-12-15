@@ -267,6 +267,13 @@ FieldSolverAMG::setupSolver()
   }
 
   if (!m_helmholtzPetsc->isDefined()) {
+    Vector<MFMultigridInterpolator> coarseFineInterpolators;
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      //      Vector<RefCountedPtr<
+    }
+    
+
     m_helmholtzPetsc = RefCountedPtr<MFHelmholtzPetsc>(
       new MFHelmholtzPetsc(m_amr->getPetscGrid(m_realm),
                            m_amr->getProbLo(),
@@ -279,7 +286,7 @@ FieldSolverAMG::setupSolver()
                            m_permittivityEB.getData(),
                            m_rho.getData(),
                            m_sigma.getData(),
-                           m_amr->getMultigridInterpolator(m_realm, phase::gas),
+			   coarseFineInterpolators,
                            m_amr->getRefinementRatios(),
                            m_amr->getDx(),
                            m_amr->getFinestLevel(),
