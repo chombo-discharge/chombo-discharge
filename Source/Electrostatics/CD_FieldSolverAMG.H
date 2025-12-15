@@ -189,8 +189,8 @@ protected:
   /*!
     @brief Define the Helmholtz operator.
   */
-  virtual void
-  setupHelmoholtzOp();
+  //  virtual void
+  //  setupHelmoholtzOp();
 };
 
 #include <CD_NamespaceFooter.H>

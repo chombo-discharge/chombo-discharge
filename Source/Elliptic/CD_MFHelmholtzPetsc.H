@@ -55,7 +55,6 @@ public:
   /*!
     @brief Full constructor. Calls the define method.
   */
-#warning "The multigrid interpolators should be multiphase..."
   MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&                          a_petscGrid,
                    const RealVect&                                          a_probLo,
                    const Real&                                              a_alpha,

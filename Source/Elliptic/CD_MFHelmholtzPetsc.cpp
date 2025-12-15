@@ -430,6 +430,48 @@ MFHelmholtzPetsc::computeJumpFluxStencils(const IntVect&   a_cell,
   }
 }
 
+std::pair<PetscStencil, PetscScalar>
+MFHelmholtzPetsc::computeDirichletDomainGradStencil(const VolIndex&      a_vof,
+                                                    const int&           a_phase,
+                                                    const int&           a_level,
+                                                    const int&           a_dir,
+                                                    const Side::LoHiSide a_side,
+                                                    const DataIndex&     a_din) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeDirichletDomainGradStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeDirichletDomainGradStencil" << endl;
+  }
+}
+
+std::pair<PetscStencil, PetscScalar>
+MFHelmholtzPetsc::computeRobinDomainGradStencil(const VolIndex&      a_vof,
+                                                const int&           a_phase,
+                                                const int&           a_level,
+                                                const int&           a_dir,
+                                                const Side::LoHiSide a_side,
+                                                const DataIndex&     a_din) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeRobinDomainGradStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeRobinDomainGradStencil" << endl;
+  }
+}
+
+PetscScalar
+MFHelmholtzPetsc::computeNeumannDomainGradStencil(const VolIndex&      a_vof,
+                                                  const int&           a_phase,
+                                                  const int&           a_level,
+                                                  const int&           a_dir,
+                                                  const Side::LoHiSide a_side,
+                                                  const DataIndex&     a_din) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeNeumannDomainGradStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeNeumannDomainGradStencil" << endl;
+  }
+}
+
 MFHelmholtzPetsc::PetscColumn
 MFHelmholtzPetsc::computeStencil(const VolIndex&  a_vof,
                                  const int&       a_phase,
