@@ -58,6 +58,8 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
   DataOps::setValue(a_potential, 0.0);
 
 #if 1 // Check that PETSc works.
+  this->setupSolver();
+  
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
   Vec x;
@@ -264,6 +266,10 @@ FieldSolverAMG::setupSolver()
   CH_TIME("FieldSolverAMG::setupSolver");
   if (m_verbosity > 5) {
     pout() << "FieldSolverAMG::setupSolver" << endl;
+  }
+
+  if(m_helmholtzPetsc.isNull()) {
+    m_helmholtzPetsc = RefCountedPtr<MFHelmholtzPetsc>(new MFHelmholtzPetsc());
   }
 
   if (!m_helmholtzPetsc->isDefined()) {

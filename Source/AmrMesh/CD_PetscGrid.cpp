@@ -105,8 +105,20 @@ PetscGrid::clear() noexcept
   }
 }
 
+bool
+PetscGrid::isDefined() const noexcept
+{
+  CH_TIME("PetscGrid::isDefined");
+  if (m_verbose) {
+    pout() << "PetscGrid::isDefined" << endl;
+  }
+  
+  return m_isDefined;
+}
+
 Vector<DisjointBoxLayout>
-PetscGrid::getGrids() const noexcept {
+PetscGrid::getGrids() const noexcept
+{
   CH_TIME("PetscGrid::getGrids");
   if (m_verbose) {
     pout() << "PetscGrid::getGrids" << endl;
@@ -157,12 +169,13 @@ PetscGrid::getMFLevelGridsCoFi() const noexcept
 }
 
 int
-PetscGrid::getNumPhases() const noexcept {
+PetscGrid::getNumPhases() const noexcept
+{
   CH_TIME("PetscGrid::getNumPhases");
   if (m_verbose) {
     pout() << "PetscGrid::getNumPhases" << endl;
   }
-  
+
   CH_assert(m_isDefined);
 
   return m_numPhases;

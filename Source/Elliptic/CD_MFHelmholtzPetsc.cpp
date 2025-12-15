@@ -188,10 +188,6 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
     CH_assert(m_sigma[lvl]->isDefined());
     CH_assert(m_refinementRatios[lvl] >= 2);
     CH_assert(m_refinementRatios[lvl] % 2 == 0);
-
-    if (lvl > 0) {
-      CH_assert(m_interpolators[lvl]->isDefined());
-    }
   }
 
   m_numPhases = m_petscGrid->getNumPhases();
@@ -334,13 +330,28 @@ MFHelmholtzPetsc::computeEBGradStencils() noexcept
     m_ebGradStencils[iphase].resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
-      const DisjointBoxLayout& dbl  = m_petscGrid->getGrids()[lvl];
-      const DataIterator&      dit  = dbl.dataIterator();
-      const int                nbox = dit.size();
+      const MFLevelGrid&       mflg  = *(m_petscGrid->getMFLevelGrids()[lvl]);
+      const EBLevelGrid&       eblg  = mflg.getEBLevelGrid(iphase);
+      const EBISLayout&        ebisl = eblg.getEBISL();
+      const DisjointBoxLayout& dbl   = eblg.getDBL();
+      const DataIterator&      dit   = dbl.dataIterator();
+      const int                nbox  = dit.size();
 
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex& din = dit[mybox];
+        const DataIndex&  din     = dit[mybox];
+        const Box&        cellBox = dbl[din];
+        const EBISBox&    ebisBox = ebisl[din];
+        const EBGraph&    ebgraph = ebisBox.getEBGraph();
+        const IntVectSet& ivs     = ebisBox.getIrregIVS(cellBox);
+
+        VoFIterator vofit(ivs, ebgraph);
+
+        auto kernel = [&](const VolIndex& vof) -> void {
+
+        };
+
+        BoxLoops::loop(vofit, kernel);
       }
     }
   }
@@ -389,9 +400,6 @@ MFHelmholtzPetsc::computeDirichletEBGradStencil(const VolIndex&  a_vof,
   const Vector<RefCountedPtr<MFLevelGrid>>& grids     = m_petscGrid->getMFLevelGrids();
   const Vector<RefCountedPtr<MFLevelGrid>>& gridsFiCo = m_petscGrid->getMFLevelGridsFiCo();
   const Vector<RefCountedPtr<MFLevelGrid>>& gridsCoFi = m_petscGrid->getMFLevelGridsCoFi();
-
-  
-  CH_assert(grids[a_level]->isDefined());
 }
 
 PetscStencil

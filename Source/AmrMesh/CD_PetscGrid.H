@@ -88,6 +88,12 @@ public:
   clear() noexcept;
 
   /*!
+    @brief Is defined or not
+  */
+  virtual bool
+  isDefined() const noexcept;
+
+  /*!
     @brief Get the grids
   */
   virtual Vector<DisjointBoxLayout>
@@ -109,7 +115,7 @@ public:
     @brief Get the coarsened fine coarse grids on each level.
   */
   virtual const Vector<RefCountedPtr<MFLevelGrid>>&
-  getMFLevelGridsCoFi() const noexcept;      
+  getMFLevelGridsCoFi() const noexcept;
 
   /*!
     @brief Get the number of valid phases
