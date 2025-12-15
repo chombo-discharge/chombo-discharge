@@ -267,10 +267,25 @@ FieldSolverAMG::setupSolver()
   }
 
   if (!m_helmholtzPetsc->isDefined()) {
-    Vector<MFMultigridInterpolator> coarseFineInterpolators;
+    const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+    const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  
+    const int finestLevel = m_amr->getFinestLevel();
+    const int numPhases = m_multifluidIndexSpace->numPhases();
+    
+    Vector<MFMultigridInterpolator> coarseFineInterpolators(1 + finestLevel);;
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      //      Vector<RefCountedPtr<
+      Vector<RefCountedPtr<EBMultigridInterpolator>> interp(numPhases);
+
+      if(!(ebisGas.isNull())){
+	interp[phase::gas] = m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl];
+      }
+      if(!(ebisSol.isNull())){
+	interp[phase::solid] = m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl];
+      }
+      
+      coarseFineInterpolators[lvl].define(interp);
     }
     
 

@@ -105,7 +105,7 @@ public:
          const Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>&     a_bCoefIrreg,
          const Vector<RefCountedPtr<LevelData<MFCellFAB>>>&       a_rho,
          const Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>& a_sigma,
-         const Vector<RefCountedPtr<MFMultigridInterpolator>>&    a_coarseFineInterpolators,
+         const Vector<MFMultigridInterpolator>&                   a_coarseFineInterpolators,
          const Vector<int>&                                       a_refinementRatios,
          const Vector<Real>&                                      a_dx,
          const int&                                               a_finestLevel,
