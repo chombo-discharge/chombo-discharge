@@ -55,6 +55,7 @@ public:
   /*!
     @brief Full constructor. Calls the define method.
   */
+#warning "The multigrid interpolators should be multiphase..."
   MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&                          a_petscGrid,
                    const RealVect&                                          a_probLo,
                    const Real&                                              a_alpha,
@@ -70,8 +71,10 @@ public:
                    const Vector<int>&                                       a_refinementRatios,
                    const Vector<Real>&                                      a_dx,
                    const int&                                               a_finestLevel,
-                   const int&                                               a_ebbcOrder,
-                   const int&                                               a_ebbcWeight,
+                   const int&                                               a_dirichletEBBCOrder,
+                   const int&                                               a_dirichletEBBCWeight,
+                   const int&                                               a_robinEBBCOrder,
+                   const int&                                               a_robinEBBCWeight,
                    const int&                                               a_jumpOrder,
                    const int&                                               a_jumpWeight,
                    const Location::Cell&                                    a_dataLocation) noexcept;
@@ -106,8 +109,10 @@ public:
          const Vector<int>&                                       a_refinementRatios,
          const Vector<Real>&                                      a_dx,
          const int&                                               a_finestLevel,
-         const int&                                               a_ebbcOrder,
-         const int&                                               a_ebbcWeight,
+         const int&                                               a_dirichletEBBCOrder,
+         const int&                                               a_dirichletEBBCWeight,
+         const int&                                               a_robinEBBCOrder,
+         const int&                                               a_robinEBBCWeight,
          const int&                                               a_jumpOrder,
          const int&                                               a_jumpWeight,
          const Location::Cell&                                    a_dataLocation) noexcept;
@@ -133,18 +138,32 @@ public:
   setMultSigmaByAreaFrac(const bool a_multSigmaByAreaFrac) noexcept;
 
   /*!
-    @brief Reset the EBBC order.
+    @brief Reset the Dirichlet EBBC order.
     @param[i] a_order Boundary condition order. Must be > 0.
   */
   virtual void
-  setEBBCOrder(const int a_order) noexcept;
+  setDirichletEBBCOrder(const int a_order) noexcept;
 
   /*!
-    @brief Set the EBBC weighting. Weighting factor = 0 uses unweighted least squares. 
+    @brief Set the Dirichlet EBBC weighting. Weighting factor = 0 uses unweighted least squares. 
     @param[i] a_weight Weighting factor. Must be >= 0.
   */
   virtual void
-  setEBBCWeight(const int a_weight) noexcept;
+  setDirichletEBBCWeight(const int a_weight) noexcept;
+
+  /*!
+    @brief Reset the Robin EBBC order.
+    @param[i] a_order Boundary condition order. Must be > 0.
+  */
+  virtual void
+  setRobinEBBCOrder(const int a_order) noexcept;
+
+  /*!
+    @brief Set the Robin EBBC weighting. Weighting factor = 0 uses unweighted least squares. 
+    @param[i] a_weight Weighting factor. Must be >= 0.
+  */
+  virtual void
+  setRobinEBBCWeight(const int a_weight) noexcept;  
 
   /*!
     @brief Reset the jump order.
@@ -356,14 +375,24 @@ protected:
   int m_finestLevel;
 
   /*!
-    @brief EB boundary condition order. Relevant for Dirichlet and Robin BCs.
+    @brief Dirichlet EB boundary condition order. 
   */
-  int m_ebbcOrder;
+  int m_dirichletEBBCOrder;
 
   /*!
-    @brief EB boundary condition weighting factor. Relevant for Dirichlet and Robin BCs.
+    @brief Dirichlet EB boundary condition weighting factor. 
   */
-  int m_ebbcWeight;
+  int m_dirichletEBBCWeight;
+
+  /*!
+    @brief Robin EB boundary condition order. 
+  */
+  int m_robinEBBCOrder;
+
+  /*!
+    @brief Robin EB boundary condition weighting factor. 
+  */
+  int m_robinEBBCWeight;  
 
   /*!
     @brief EB jump condition order.

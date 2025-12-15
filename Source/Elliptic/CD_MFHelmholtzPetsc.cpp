@@ -47,8 +47,10 @@ MFHelmholtzPetsc::MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&              
                                    const Vector<int>&                                       a_refinementRatios,
                                    const Vector<Real>&                                      a_dx,
                                    const int&                                               a_finestLevel,
-                                   const int&                                               a_ebbcOrder,
-                                   const int&                                               a_ebbcWeight,
+                                   const int&                                               a_dirichletEBBCOrder,
+                                   const int&                                               a_dirichletEBBCWeight,
+                                   const int&                                               a_robinEBBCOrder,
+                                   const int&                                               a_robinEBBCWeight,
                                    const int&                                               a_jumpOrder,
                                    const int&                                               a_jumpWeight,
                                    const Location::Cell&                                    a_dataLocation) noexcept
@@ -70,8 +72,10 @@ MFHelmholtzPetsc::MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&              
                a_refinementRatios,
                a_dx,
                a_finestLevel,
-               a_ebbcOrder,
-               a_ebbcWeight,
+               a_dirichletEBBCOrder,
+               a_dirichletEBBCWeight,
+               a_robinEBBCOrder,
+               a_robinEBBCWeight,	       	       
                a_jumpOrder,
                a_jumpWeight,
                a_dataLocation);
@@ -109,8 +113,10 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
                          const Vector<int>&                                       a_refinementRatios,
                          const Vector<Real>&                                      a_dx,
                          const int&                                               a_finestLevel,
-                         const int&                                               a_ebbcOrder,
-                         const int&                                               a_ebbcWeight,
+                         const int&                                               a_dirichletEBBCOrder,
+                         const int&                                               a_dirichletEBBCWeight,
+                         const int&                                               a_robinEBBCOrder,
+                         const int&                                               a_robinEBBCWeight,
                          const int&                                               a_jumpOrder,
                          const int&                                               a_jumpWeight,
                          const Location::Cell&                                    a_dataLocation) noexcept
@@ -147,8 +153,10 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
   m_refinementRatios    = a_refinementRatios;
   m_dx                  = a_dx;
   m_finestLevel         = a_finestLevel;
-  m_ebbcOrder           = a_ebbcOrder;
-  m_ebbcWeight          = a_ebbcWeight;
+  m_dirichletEBBCOrder  = a_dirichletEBBCOrder;
+  m_dirichletEBBCWeight = a_dirichletEBBCWeight;
+  m_robinEBBCOrder      = a_robinEBBCOrder;
+  m_robinEBBCWeight     = a_robinEBBCWeight;
   m_jumpOrder           = a_jumpOrder;
   m_jumpWeight          = a_jumpWeight;
   m_dataLocation        = a_dataLocation;
@@ -157,8 +165,10 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
 
   CH_assert(a_petscGrid->isDefined());
   CH_assert(m_finestLevel >= 0);
-  CH_assert(m_ebbcOrder > 0);
-  CH_assert(m_ebbcWeight >= 0);
+  CH_assert(m_dirichletEBBCOrder > 0);
+  CH_assert(m_dirichletEBBCWeight >= 0);
+  CH_assert(m_robinEBBCOrder > 0);
+  CH_assert(m_robinEBBCWeight >= 0);
   CH_assert(m_jumpOrder > 0);
   CH_assert(m_jumpWeight >= 0);
   CH_assert(m_aCoef.size() == numLevels);
@@ -186,6 +196,11 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
 
   m_numPhases = m_petscGrid->getNumPhases();
   m_isDefined = true;
+
+#warning "debug code enabled -- users should be responsible for this one"
+#if 1
+  this->computeEBGradStencils();
+#endif
 }
 
 void
@@ -226,29 +241,55 @@ MFHelmholtzPetsc::setMultSigmaByAreaFrac(const bool a_multSigmaByAreaFrac) noexc
 }
 
 void
-MFHelmholtzPetsc::setEBBCOrder(const int a_order) noexcept
+MFHelmholtzPetsc::setDirichletEBBCOrder(const int a_order) noexcept
 {
-  CH_TIME("MFHelmholtzPetsc::setEBBCOrder");
+  CH_TIME("MFHelmholtzPetsc::setDirichletEBBCOrder");
   if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::setEBBCOrder" << endl;
+    pout() << "MFHelmholtzPetsc::setDirichletEBBCOrder" << endl;
   }
 
-  m_ebbcOrder = a_order;
+  m_dirichletEBBCOrder = a_order;
 
-  CH_assert(m_ebbcOrder > 0);
+  CH_assert(m_dirichletEBBCOrder > 0);
 }
 
 void
-MFHelmholtzPetsc::setEBBCWeight(const int a_weight) noexcept
+MFHelmholtzPetsc::setDirichletEBBCWeight(const int a_weight) noexcept
 {
-  CH_TIME("MFHelmholtzPetsc::setEBBCWeight");
+  CH_TIME("MFHelmholtzPetsc::setDirichletEBBCWeight");
   if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::setEBBCWeight" << endl;
+    pout() << "MFHelmholtzPetsc::setDirichletEBBCWeight" << endl;
   }
 
-  m_ebbcWeight = a_weight;
+  m_dirichletEBBCWeight = a_weight;
 
-  CH_assert(m_ebbcWeight >= 0);
+  CH_assert(m_dirichletEBBCWeight >= 0);
+}
+
+void
+MFHelmholtzPetsc::setRobinEBBCOrder(const int a_order) noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::setRobinEBBCOrder");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::setRobinEBBCOrder" << endl;
+  }
+
+  m_robinEBBCOrder = a_order;
+
+  CH_assert(m_robinEBBCOrder > 0);
+}
+
+void
+MFHelmholtzPetsc::setRobinEBBCWeight(const int a_weight) noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::setRobinEBBCWeight");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::setRobinEBBCWeight" << endl;
+  }
+
+  m_robinEBBCWeight = a_weight;
+
+  CH_assert(m_robinEBBCWeight >= 0);
 }
 
 void
@@ -286,6 +327,8 @@ MFHelmholtzPetsc::computeEBGradStencils() noexcept
   }
 
   CH_assert(m_isDefined);
+
+#warning "Continue development here"
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     m_ebGradStencils[iphase].resize(1 + m_finestLevel);

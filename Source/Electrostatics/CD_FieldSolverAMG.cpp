@@ -266,8 +266,30 @@ FieldSolverAMG::setupSolver()
     pout() << "FieldSolverAMG::setupSolver" << endl;
   }
 
-  if(!m_helmholtzPetsc->isDefined()){
-
+  if (!m_helmholtzPetsc->isDefined()) {
+    m_helmholtzPetsc = RefCountedPtr<MFHelmholtzPetsc>(
+      new MFHelmholtzPetsc(m_amr->getPetscGrid(m_realm),
+                           m_amr->getProbLo(),
+                           0.0,
+                           -1.0,
+                           true,
+                           true,
+                           m_permittivityCell.getData(),
+                           m_permittivityFace.getData(),
+                           m_permittivityEB.getData(),
+                           m_rho.getData(),
+                           m_sigma.getData(),
+                           m_amr->getMultigridInterpolator(m_realm, phase::gas),
+                           m_amr->getRefinementRatios(),
+                           m_amr->getDx(),
+                           m_amr->getFinestLevel(),
+                           1,
+                           1,
+                           1,
+                           1,
+                           1,
+                           1,
+                           Location::Cell::Center));
   }
 }
 
