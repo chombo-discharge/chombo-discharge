@@ -190,6 +190,15 @@ public:
   computeEBGradStencils() noexcept;
 
   /*!
+    @brief Convenience function for computing and storing all embedded boundary extrapolation stencils. 
+    @details This function computes the extrapolation of phi to the embedded boundary. The stencils are
+    not multiplied by either beta or the b-coefficient. Useful when the user wants to pre-compute all
+    required stencils for Robin boundary conditions.
+  */
+  virtual void
+  computeEBExtrapStencils() noexcept;
+
+  /*!
     @brief Get a face flux stencil.
     @note This is the EB version. 
   */
@@ -452,6 +461,11 @@ protected:
     @brief Grid resolutions
   */
   Vector<Real> m_dx;
+
+  /*!
+    @brief Storage for stencils holding approximations to the extrapolation of phi on cut-cell centroids
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<PetscStencil>>>> m_ebExtrapStencils[2];
 
   /*!
     @brief Storage for stencils holding approximations to grad(phi) on the embedded boundaries. 

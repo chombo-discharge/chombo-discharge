@@ -62,19 +62,19 @@ Driver.refine_dielectrics           = 0                    ## Refine dielectric 
 # ====================================================================================================
 # FieldSolverAMG class options
 # ====================================================================================================
-FieldSolverGMG.verbosity             = -1                      ## Class verbosity
-FieldSolverGMG.jump_bc               = natural                 ## Jump BC type ('natural' or 'saturation_charge')
-FieldSolverGMG.bc.x.lo               = dirichlet 0.0           ## Bc type.
-FieldSolverGMG.bc.x.hi               = dirichlet 0.0           ## Bc type.
-FieldSolverGMG.bc.y.lo               = dirichlet 0.0           ## Bc type.
-FieldSolverGMG.bc.y.hi               = neumann 0.0             ## Bc type.
-FieldSolverGMG.bc.z.lo               = neumann 0.0             ## Bc type.
-FieldSolverGMG.bc.z.hi               = neumann 0.0             ## Bc type.
-FieldSolverGMG.plt_vars              = phi rho E Esol sigma    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
-FieldSolverGMG.use_regrid_slopes     = true                    ## Use slopes when regridding or not
-FieldSolverGMG.kappa_source          = true                    ## Volume weighted space charge density or not (depends on algorithm)
-FieldSolverGMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
-FieldSolverGMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
+FieldSolverAMG.verbosity             = -1                      ## Class verbosity
+FieldSolverAMG.jump_bc               = natural                 ## Jump BC type ('natural' or 'saturation_charge')
+FieldSolverAMG.bc.x.lo               = dirichlet 0.0           ## Bc type.
+FieldSolverAMG.bc.x.hi               = dirichlet 0.0           ## Bc type.
+FieldSolverAMG.bc.y.lo               = dirichlet 0.0           ## Bc type.
+FieldSolverAMG.bc.y.hi               = neumann 0.0             ## Bc type.
+FieldSolverAMG.bc.z.lo               = neumann 0.0             ## Bc type.
+FieldSolverAMG.bc.z.hi               = neumann 0.0             ## Bc type.
+FieldSolverAMG.plt_vars              = phi rho E Esol sigma    ## Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverAMG.use_regrid_slopes     = true                    ## Use slopes when regridding or not
+FieldSolverAMG.kappa_source          = true                    ## Volume weighted space charge density or not (depends on algorithm)
+FieldSolverAMG.filter_rho            = 0                       ## Number of filterings of space charge before Poisson solve
+FieldSolverAMG.filter_potential      = 0                       ## Number of filterings of potential after Poisson solve
 
 # ====================================================================================================
 # SurfaceODESolver solver settings.
@@ -123,3 +123,7 @@ FieldStepper.init_rho         = 0.E-5     ## Space charge density
 FieldStepper.init_sigma       = 0.0       ## Surface charge density
 FieldStepper.rho_center       = 0 5E-3    ## Space charge blob center
 FieldStepper.rho_radius       = 1.E-3     ## Space charge blob radius
+
+PetscGrid.verbosity     = 10
+PetscGrid.debug         = true
+PetscGrid.profile       = true

@@ -137,7 +137,7 @@ public:
     by refinement of a coarser level.
   */
   virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
-  getAMRToPetscFiCo() const noexcept;    
+  getAMRToPetscFiCo() const noexcept;
 
   /*!
     @brief Get the number of valid phases
@@ -294,7 +294,8 @@ protected:
 
   /*!
     @brief Mapping structure for moving between AMR cells and PETSc rows.
-    @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc. 
+    @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc.
+    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row.     
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;
 
@@ -302,6 +303,7 @@ protected:
     @brief Mapping structure for moving between AMR cells and PETSc rows.
     @details This is like m_amrToPetsc, except that it is defined on the coarsened grids. Index i thus contains the coarsening of
     level i+1.
+    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row. 
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscCoFi;
 
@@ -309,6 +311,7 @@ protected:
     @brief Mapping structure for moving between AMR cells and PETSc rows.
     @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the refinement of
     level i.
+    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row.         
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;
 

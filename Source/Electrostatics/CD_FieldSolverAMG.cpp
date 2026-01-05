@@ -55,18 +55,23 @@ FieldSolverAMG::solve(MFAMRCellData&       a_potential,
 
   bool converged = false;
 
-  DataOps::setValue(a_potential, 0.0);
+  if (a_zeroPhi) {
+    DataOps::setValue(a_potential, 0.0);
+  }
+
+  this->setupSolver();
 
 #if 1 // Check that PETSc works.
-  this->setupSolver();
-  
   const RefCountedPtr<PetscGrid>& petscGrid = m_amr->getPetscGrid(m_realm);
 
   Vec x;
   petscGrid->create(x);
   petscGrid->setValue(x, 1.0 * procID());
   petscGrid->putPetscInChombo(a_potential, x);
+  petscGrid->putChomboInPetsc(x, a_potential);
   petscGrid->destroy(x);
+
+  petscGrid->dumpPetscGrid("petsc.hdf5");
 #endif
 
   return converged;
@@ -268,56 +273,55 @@ FieldSolverAMG::setupSolver()
     pout() << "FieldSolverAMG::setupSolver" << endl;
   }
 
-  if(m_helmholtzPetsc.isNull()) {
+  if (m_helmholtzPetsc.isNull()) {
     m_helmholtzPetsc = RefCountedPtr<MFHelmholtzPetsc>(new MFHelmholtzPetsc());
   }
 
   if (!m_helmholtzPetsc->isDefined()) {
     const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
     const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
-  
+
     const int finestLevel = m_amr->getFinestLevel();
-    const int numPhases = m_multifluidIndexSpace->numPhases();
-    
-    Vector<MFMultigridInterpolator> coarseFineInterpolators(1 + finestLevel);;
+    const int numPhases   = m_multifluidIndexSpace->numPhases();
+
+    Vector<MFMultigridInterpolator> coarseFineInterpolators(1 + finestLevel);
+    ;
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       Vector<RefCountedPtr<EBMultigridInterpolator>> interp(numPhases);
 
-      if(!(ebisGas.isNull())){
-	interp[phase::gas] = m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl];
+      if (!(ebisGas.isNull())) {
+        interp[phase::gas] = m_amr->getMultigridInterpolator(m_realm, phase::gas)[lvl];
       }
-      if(!(ebisSol.isNull())){
-	interp[phase::solid] = m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl];
+      if (!(ebisSol.isNull())) {
+        interp[phase::solid] = m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl];
       }
-      
+
       coarseFineInterpolators[lvl].define(interp);
     }
-    
 
-    m_helmholtzPetsc = RefCountedPtr<MFHelmholtzPetsc>(
-      new MFHelmholtzPetsc(m_amr->getPetscGrid(m_realm),
-                           m_amr->getProbLo(),
-                           0.0,
-                           -1.0,
-                           true,
-                           true,
-                           m_permittivityCell.getData(),
-                           m_permittivityFace.getData(),
-                           m_permittivityEB.getData(),
-                           m_rho.getData(),
-                           m_sigma.getData(),
-			   coarseFineInterpolators,
-                           m_amr->getRefinementRatios(),
-                           m_amr->getDx(),
-                           m_amr->getFinestLevel(),
-                           1,
-                           1,
-                           1,
-                           1,
-                           1,
-                           1,
-                           Location::Cell::Center));
+    m_helmholtzPetsc = RefCountedPtr<MFHelmholtzPetsc>(new MFHelmholtzPetsc(m_amr->getPetscGrid(m_realm),
+                                                                            m_amr->getProbLo(),
+                                                                            0.0,
+                                                                            -1.0,
+                                                                            true,
+                                                                            true,
+                                                                            m_permittivityCell.getData(),
+                                                                            m_permittivityFace.getData(),
+                                                                            m_permittivityEB.getData(),
+                                                                            m_rho.getData(),
+                                                                            m_sigma.getData(),
+                                                                            coarseFineInterpolators,
+                                                                            m_amr->getRefinementRatios(),
+                                                                            m_amr->getDx(),
+                                                                            m_amr->getFinestLevel(),
+                                                                            1,
+                                                                            1,
+                                                                            1,
+                                                                            1,
+                                                                            1,
+                                                                            1,
+                                                                            Location::Cell::Center));
   }
 }
 

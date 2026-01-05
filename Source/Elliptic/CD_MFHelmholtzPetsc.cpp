@@ -21,6 +21,8 @@
 #include <CD_MFHelmholtzPetsc.H>
 #include <CD_NamespaceHeader.H>
 
+#warning \
+  "Before moving on with this class, fix the indexing logic in PetscGrid. Each rank must be able to reach into global rows, not just local ones"
 #warning "Work item #1: Compute face flux stencils (interior)"
 
 MFHelmholtzPetsc::MFHelmholtzPetsc() noexcept
@@ -356,6 +358,15 @@ MFHelmholtzPetsc::computeEBGradStencils() noexcept
     }
   }
 };
+
+void
+MFHelmholtzPetsc::computeEBExtrapStencils() noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeEBExtrapStencils");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeEBExtrapStencils" << endl;
+  }
+}
 
 PetscStencil
 MFHelmholtzPetsc::computeInteriorFaceFluxStencil(const VolIndex&      a_vof,
