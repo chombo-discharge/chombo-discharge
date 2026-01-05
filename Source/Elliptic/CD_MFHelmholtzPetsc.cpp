@@ -21,9 +21,10 @@
 #include <CD_MFHelmholtzPetsc.H>
 #include <CD_NamespaceHeader.H>
 
-#warning \
-  "Before moving on with this class, fix the indexing logic in PetscGrid. Each rank must be able to reach into global rows, not just local ones"
+#warning "Reconsider the usage of separate order for Dirichlet and jump stencils (don't want to compute twice)"
 #warning "Work item #1: Compute face flux stencils (interior)"
+#warning "Work item #2: Compute EB gradient stencils"
+#warning "Work item #3: Compute domain flux stencils?"
 
 MFHelmholtzPetsc::MFHelmholtzPetsc() noexcept
 {

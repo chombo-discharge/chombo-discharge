@@ -170,7 +170,10 @@ public:
   setValue(Vec& a_x, const PetscScalar a_value) const noexcept;
 
   /*!
-    @brief Push data form a chombo-discharge data holder into PETSc
+    @brief Push data form a chombo-discharge data holder into PETSc.
+    @details The current implementation iterates through the AMR cells on each rank and extracts the subvector
+    on each rank. Fillling is done using the local row number obtained via amrToPetsc (we simply subtract each
+    rank's starting row index).
     @param[out] a_x PETSc vector
     @param[in] a_y chombo-discharge data holder    
   */
@@ -178,7 +181,9 @@ public:
   putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept;
 
   /*!
-    @brief Pull data from a PETSc vector into a chombo-discharge data holder
+    @brief Pull data from a PETSc vector into a chombo-discharge data holder.
+    @details The current implementation iterates through the local subvector (via m_petscToAMR), and assigns
+    values to each AMR cell using the local PETSc row. 
     @param[in,out] a_y chombo-discharge data holder
     @param[in] a_x PETSc vector    
   */
