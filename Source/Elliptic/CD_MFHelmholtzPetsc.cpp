@@ -22,9 +22,11 @@
 #include <CD_NamespaceHeader.H>
 
 #warning "Reconsider the usage of separate order for Dirichlet and jump stencils (don't want to compute twice)"
-#warning "Work item #1: Compute face flux stencils (interior)"
-#warning "Work item #2: Compute EB gradient stencils"
-#warning "Work item #3: Compute domain flux stencils?"
+#warning "Work item #1: Compute Dirichlet EB stencils"
+#warning "Work item #2: Compute face flux stencils (interior)"
+#warning "Work item #3: Compute EB gradient stencils"
+#warning "Work item #4: Compute domain flux stencils?"
+#warning "Rename computeDiricihletDomain to computeDomainDirichlet"
 
 MFHelmholtzPetsc::MFHelmholtzPetsc() noexcept
 {
@@ -390,10 +392,36 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
     pout() << "MFHelmholtzPetsc::computeEBDirichletStencil" << endl;
   }
 
-#warning "I need to expose the various coarse/fine stuff, too"
-  const Vector<RefCountedPtr<MFLevelGrid>>& grids     = m_petscGrid->getMFLevelGrids();
-  const Vector<RefCountedPtr<MFLevelGrid>>& gridsFiCo = m_petscGrid->getMFLevelGridsFiCo();
-  const Vector<RefCountedPtr<MFLevelGrid>>& gridsCoFi = m_petscGrid->getMFLevelGridsCoFi();
+  CH_assert(a_phase < m_numPhases);
+
+  const bool hasFine = a_level < m_finestLevel;
+
+  const Real dx     = m_dx[a_level];
+  const Real dxFine = hasFine ? m_dx[a_level + 1] : -1.0;
+
+  MFLevelGrid mflg;
+  MFLevelGrid mflgFine;
+
+  EBLevelGrid eblg;
+  EBLevelGrid eblgFine;
+
+  EBISLayout ebisl;
+  EBISLayout ebislFine;
+
+  EBISBox ebisBox;
+  EBISBox ebisBoxFine;
+
+  mflg    = *m_petscGrid->getMFLevelGrids()[a_level];
+  eblg    = mflg.getEBLevelGrid(a_phase);
+  ebisl   = eblg.getEBISL();
+  ebisBox = ebisl[a_din];
+
+  if (hasFine) {
+    mflgFine    = *m_petscGrid->getMFLevelGridsFiCo()[a_level + 1];
+    eblgFine    = mflg.getEBLevelGrid(a_phase);
+    ebislFine   = eblgFine.getEBISL();
+    ebisBoxFine = ebislFine[a_din];
+  }
 
   return std::make_pair(0, PetscStencil());
 }
