@@ -179,6 +179,19 @@ public:
   setJumpWeight(const int a_weight) noexcept;
 
   /*!
+    @brief Convenience function for computing stencils for Dirichlet boundary conditions.
+    @details This function computes approximations to the gradient through an embedded boundary centroid
+    where the value of phi is known at the cut-cell boundary centroid. The stencils take the form
+
+       dphi/dn = w_b * phi_b + sum(w_i * phi_i)
+
+    where phi_b is the value at the boundary point and phi_i are internal degrees of freedom. The stencil
+    is calculated using least squares approximations.
+  */
+  virtual void
+  computeEBDirichletStencils() noexcept;
+
+  /*!
     @brief Convenience function for computing and storing all embedded boundary gradient stencils.
     @details This function computes the approximation to grad(phi) on all embedded boundary faces. It
     includes the stencils for the jump conditions. The resulting data is not weighted by either the
@@ -245,10 +258,10 @@ public:
     will cause a runtime error. 
   */
   virtual std::pair<PetscScalar, PetscStencil>
-  computeDirichletEBGradStencil(const VolIndex&  a_vof,
-                                const int&       a_phase,
-                                const int&       a_level,
-                                const DataIndex& a_din) const noexcept;
+  computeEBDirichletStencil(const VolIndex&  a_vof,
+                            const int&       a_phase,
+                            const int&       a_level,
+                            const DataIndex& a_din) const noexcept;
 
   /*!
     @brief Get a Robin flux stencil on an embedded boundary face.
@@ -461,6 +474,11 @@ protected:
     @brief Grid resolutions
   */
   Vector<Real> m_dx;
+
+  /*!
+    @brief Storage for stencils holding least squares approximations to a Dirichlet boundary condition on cut cells
+  */
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<std::pair<PetscScalar, PetscStencil>>>>> m_ebDirichletStencils[2];
 
   /*!
     @brief Storage for stencils holding approximations to the extrapolation of phi on cut-cell centroids

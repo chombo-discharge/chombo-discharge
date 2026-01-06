@@ -198,6 +198,7 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
 
 #warning "debug code enabled -- users should be responsible for this one"
 #if 1
+  this->computeEBDirichletStencils();
   this->computeEBGradStencils();
 #endif
 }
@@ -318,6 +319,86 @@ MFHelmholtzPetsc::setJumpWeight(const int a_weight) noexcept
 }
 
 void
+MFHelmholtzPetsc::computeEBDirichletStencils() noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeEBDirichletStencils");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeEBDirichletStencils" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  constexpr int comp    = 0;
+  constexpr int numComp = 1;
+
+  for (int iphase = 0; iphase < m_numPhases; iphase++) {
+    m_ebDirichletStencils[iphase].resize(1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+      const MFLevelGrid&       mflg  = *(m_petscGrid->getMFLevelGrids()[lvl]);
+      const EBLevelGrid&       eblg  = mflg.getEBLevelGrid(iphase);
+      const EBISLayout&        ebisl = eblg.getEBISL();
+      const DisjointBoxLayout& dbl   = eblg.getDBL();
+      const DataIterator&      dit   = dbl.dataIterator();
+      const int                nbox  = dit.size();
+
+      m_ebDirichletStencils[iphase][lvl] = RefCountedPtr<LayoutData<BaseIVFAB<std::pair<PetscScalar, PetscStencil>>>>(
+        new LayoutData<BaseIVFAB<std::pair<PetscScalar, PetscStencil>>>(dbl));
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex&             din        = dit[mybox];
+        const Box&                   cellBox    = dbl[din];
+        const EBISBox&               ebisBox    = ebisl[din];
+        const EBGraph&               ebgraph    = ebisBox.getEBGraph();
+        const BaseFab<PetscAMRCell>& petscToAMR = (*(m_petscGrid->getAMRToPetsc()[lvl]))[din];
+        const IntVectSet&            irregIVS   = (*m_petscGrid->getIrregIVS(iphase)[lvl])[din];
+
+        VoFIterator&                                     vofit    = (*m_petscGrid->getVoFIterator(iphase)[lvl])[din];
+        BaseIVFAB<std::pair<PetscScalar, PetscStencil>>& stencils = (*m_ebDirichletStencils[iphase][lvl])[din];
+
+        stencils.define(irregIVS, ebgraph, numComp);
+
+        auto kernel = [&](const VolIndex& vof) -> void {
+          const PetscAMRCell petscCell = petscToAMR(vof.gridIndex(), comp);
+          const PetscInt     petscRow  = petscCell.getPetscRow(iphase);
+
+          stencils(vof, comp) = this->computeEBDirichletStencil(vof, iphase, lvl, din);
+
+#warning "Remove debug code later"
+#if 1 // Debug code
+          if (petscRow < 0) {
+            MayDay::Abort("Logic bust");
+          }
+#endif
+        };
+
+        BoxLoops::loop(vofit, kernel);
+      }
+    }
+  }
+}
+
+std::pair<PetscScalar, PetscStencil>
+MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
+                                            const int&       a_phase,
+                                            const int&       a_level,
+                                            const DataIndex& a_din) const noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::computeEBDirichletStencil");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::computeEBDirichletStencil" << endl;
+  }
+
+#warning "I need to expose the various coarse/fine stuff, too"
+  const Vector<RefCountedPtr<MFLevelGrid>>& grids     = m_petscGrid->getMFLevelGrids();
+  const Vector<RefCountedPtr<MFLevelGrid>>& gridsFiCo = m_petscGrid->getMFLevelGridsFiCo();
+  const Vector<RefCountedPtr<MFLevelGrid>>& gridsCoFi = m_petscGrid->getMFLevelGridsCoFi();
+
+  return std::make_pair(0, PetscStencil());
+}
+
+void
 MFHelmholtzPetsc::computeEBGradStencils() noexcept
 {
   CH_TIME("MFHelmholtzPetsc::computeEBGradStencils");
@@ -395,23 +476,6 @@ MFHelmholtzPetsc::computeInteriorFaceFluxStencil(const IntVect&       a_cell,
   if (m_verbose) {
     pout() << "MFHelmholtzPetsc::computeInteriorFaceFluxStencil(Regular)" << endl;
   }
-}
-
-std::pair<PetscScalar, PetscStencil>
-MFHelmholtzPetsc::computeDirichletEBGradStencil(const VolIndex&  a_vof,
-                                                const int&       a_phase,
-                                                const int&       a_level,
-                                                const DataIndex& a_din) const noexcept
-{
-  CH_TIME("MFHelmholtzPetsc::computeDirichletEBGradStencil");
-  if (m_verbose) {
-    pout() << "MFHelmholtzPetsc::computeDirichletEBGradStencil" << endl;
-  }
-
-#warning "I need to expose the various coarse/fine stuff, too"
-  const Vector<RefCountedPtr<MFLevelGrid>>& grids     = m_petscGrid->getMFLevelGrids();
-  const Vector<RefCountedPtr<MFLevelGrid>>& gridsFiCo = m_petscGrid->getMFLevelGridsFiCo();
-  const Vector<RefCountedPtr<MFLevelGrid>>& gridsCoFi = m_petscGrid->getMFLevelGridsCoFi();
 }
 
 PetscStencil

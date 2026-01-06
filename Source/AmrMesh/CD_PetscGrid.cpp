@@ -168,6 +168,32 @@ PetscGrid::getMFLevelGridsCoFi() const noexcept
   return m_levelGridsCoFi;
 }
 
+Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+PetscGrid::getVoFIterator(const int a_iphase) const noexcept
+{
+  CH_TIME("PetscGrid::getVoFIterator");
+  if (m_verbose) {
+    pout() << "PetscGrid::getVoFIterator" << endl;
+  }
+
+  CH_assert(a_iphase < m_numPhases);
+
+  return m_vofIterators[a_iphase];
+}
+
+const Vector<RefCountedPtr<LayoutData<IntVectSet>>>&
+PetscGrid::getIrregIVS(const int a_iphase) const noexcept
+{
+  CH_TIME("PetscGrid::getIrregIVS");
+  if (m_verbose) {
+    pout() << "PetscGrid::getIrregIVS" << endl;
+  }
+
+  CH_assert(a_iphase < m_numPhases);
+
+  return m_irregIVS[a_iphase];
+}
+
 const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
 PetscGrid::getAMRToPetsc() const noexcept
 {
@@ -320,6 +346,8 @@ PetscGrid::definePetscRows() noexcept
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     m_petscToAMR[iphase].resize(1 + m_finestLevel);
+    m_vofIterators[iphase].resize(1 + m_finestLevel);
+    m_irregIVS[iphase].resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg  = m_levelGrids[lvl]->getEBLevelGrid(iphase);
@@ -328,18 +356,21 @@ PetscGrid::definePetscRows() noexcept
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
 
-      m_petscToAMR[iphase][lvl] = RefCountedPtr<LayoutData<Vector<PetscDOF>>>(new LayoutData<Vector<PetscDOF>>(dbl));
+      m_petscToAMR[iphase][lvl]   = RefCountedPtr<LayoutData<Vector<PetscDOF>>>(new LayoutData<Vector<PetscDOF>>(dbl));
+      m_vofIterators[iphase][lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+      m_irregIVS[iphase][lvl]     = RefCountedPtr<LayoutData<IntVectSet>>(new LayoutData<IntVectSet>(dbl));
 
       // PS: This loop is not thread safe!
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex   din     = dit[mybox];
-        const Box&        cellBox = dbl[din];
-        const EBISBox&    ebisBox = ebisl[din];
-        const IntVectSet& ivs     = ebisBox.getIrregIVS(cellBox);
-        const EBGraph&    ebgraph = ebisBox.getEBGraph();
+        const DataIndex din     = dit[mybox];
+        const Box&      cellBox = dbl[din];
+        const EBISBox&  ebisBox = ebisl[din];
+        const EBGraph&  ebgraph = ebisBox.getEBGraph();
 
         BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
         Vector<PetscDOF>&      petscToAMR = (*m_petscToAMR[iphase][lvl])[din];
+        VoFIterator&           vofit      = (*m_vofIterators[iphase][lvl])[din];
+        IntVectSet&            irregIVS   = (*m_irregIVS[iphase][lvl])[din];
 
         petscToAMR.resize(0);
 
@@ -347,6 +378,9 @@ PetscGrid::definePetscRows() noexcept
           if (!(amrToPetsc(iv).isCoveredByFinerGrid()) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
               MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted!");
+            }
+            if (ebisBox.isIrregular(iv)) {
+              irregIVS |= iv;
             }
 
             PetscDOF dof;
@@ -362,6 +396,8 @@ PetscGrid::definePetscRows() noexcept
         };
 
         BoxLoops::loop(cellBox, regularKernel);
+
+        vofit.define(irregIVS, ebgraph);
       }
     }
   }

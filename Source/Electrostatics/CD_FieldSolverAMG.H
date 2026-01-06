@@ -184,12 +184,6 @@ protected:
   */
   virtual void
   setPermittivities() override;
-
-  /*!
-    @brief Define the Helmholtz operator.
-  */
-  //  virtual void
-  //  setupHelmoholtzOp();
 };
 
 #include <CD_NamespaceFooter.H>

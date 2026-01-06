@@ -32,7 +32,7 @@
 #include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "This class must be extended so that we can fill matrices/vectors using global indices"
+#warning "This class should have vof iterators that iterate over only the valid cells on each phase/level/grid index"
 
 /*!
   @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
@@ -116,6 +116,20 @@ public:
   */
   virtual const Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGridsCoFi() const noexcept;
+
+  /*!
+    @brief Get the VoF iterator defined on the specified phase
+    @return m_vofIteratork[iphase].
+  */
+  virtual Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getVoFIterator(const int a_iphase) const noexcept;
+
+  /*!
+    @brief Get the cut-cells that are also PETSc rows on the specified phase.
+    @return m_vofIteratork[iphase].
+  */
+  virtual const Vector<RefCountedPtr<LayoutData<IntVectSet>>>&
+  getIrregIVS(const int a_iphase) const noexcept;  
 
   /*!
     @brief Get the mapping between the AMR cells and PETSc rows
@@ -325,6 +339,18 @@ protected:
     @details Locally owned. Maps a local row index to a level/grid/cell.
   */
   Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR[2];
+
+  /*!
+    @brief Iterator for iterating through the cut-cells on each phase
+    @note This is defined only on the valid cut-cells that are also PETSc rows
+  */
+  mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIterators[2];
+
+  /*!
+    @brief Cut-cells that are also PETSc rows. 
+    @note This is defined only on the valid cut-cells that are also PETSc rows
+  */
+  Vector<RefCountedPtr<LayoutData<IntVectSet>>> m_irregIVS[2];  
 
   /*!
     @brief Define basic cell information for PetscGrid.
