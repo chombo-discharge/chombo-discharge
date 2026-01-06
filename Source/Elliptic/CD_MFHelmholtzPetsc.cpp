@@ -414,14 +414,11 @@ MFHelmholtzPetsc::computeEBDirichletStencils() noexcept
           const PetscAMRCell petscCell = petscToAMR(vof.gridIndex(), comp);
           const PetscInt     petscRow  = petscCell.getPetscRow(iphase);
 
-          stencils(vof, comp) = this->computeEBDirichletStencil(vof, iphase, lvl, din);
-
-#warning "Remove debug code later"
-#if 1 // Debug code
           if (petscRow < 0) {
-            MayDay::Abort("Logic bust");
+            MayDay::Abort("MFHelmholtzPetsc::computeEBDirichletStencils -- logic bust 'petscRow < 0'");
           }
-#endif
+
+          stencils(vof, comp) = this->computeEBDirichletStencil(vof, iphase, lvl, din);
         };
 
         BoxLoops::loop(vofit, kernel);
