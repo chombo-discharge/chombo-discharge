@@ -21,6 +21,7 @@
 // Our includes
 #include <CD_PetscGrid.H>
 #include <CD_PetscStencil.H>
+#include <CD_VofUtils.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
@@ -177,6 +178,27 @@ public:
   */
   virtual void
   setJumpWeight(const int a_weight) noexcept;
+
+  /*!
+    @brief Externally set the neighborhood search algorithm when computing Dirichlet boundary conditions
+    @param[in] a_neigborhoods Neighborhood algorithms. Must have size > 0. 
+  */
+  virtual void
+  setEBDirichletNeighborhoods(const std::vector<VofUtils::Neighborhood>& a_neighborhoods) noexcept;
+
+  /*!
+    @brief Externally set the neighborhood search algorithm when computing Robin boundary conditions.
+    @param[in] a_neigborhoods Neighborhood algorithms. Must have size > 0. 
+  */
+  virtual void
+  setEBRobinNeighborhoods(const std::vector<VofUtils::Neighborhood>& a_neighborhoods) noexcept;
+
+  /*!
+    @brief Externally set the neighborhood search algorithm when computing jump boundary conditions.
+    @param[in] a_neigborhoods Neighborhood algorithms. Must have size > 0. 
+  */
+  virtual void
+  setEBJumpNeighborhoods(const std::vector<VofUtils::Neighborhood>& a_neighborhoods) noexcept;
 
   /*!
     @brief Convenience function for computing stencils for Dirichlet boundary conditions.
@@ -429,6 +451,27 @@ protected:
     @brief Number of valid phases
   */
   int m_numPhases;
+
+  /*!
+    @brief List of Dirichlet EB stencil neighborhood priorities
+    @details This is a priority list over which types of cells are used when calculating Dirichlet boundary conditions on EBs. This can
+    be set externally through the public interface. 
+  */
+  std::vector<VofUtils::Neighborhood> m_ebDirichletNeighborhoods;
+
+  /*!
+    @brief List of Robin EB stencil neighborhood priorities
+    @details This is a priority list over which types of cells are used when calculating Robin boundary conditions on EBs. This can be
+    set externally through the public interface. 
+  */
+  std::vector<VofUtils::Neighborhood> m_ebRobinNeighborhoods;
+
+  /*!
+    @brief List of jump EB stencil neighborhood priorities
+    @details This is a priority list over which types of cells are used when calculating jump conditions on EBs. This can be
+    set externally through the public interface. 
+  */
+  std::vector<VofUtils::Neighborhood> m_ebJumpNeighborhoods;
 
   /*!
     @brief Reference to the PETSc interface object

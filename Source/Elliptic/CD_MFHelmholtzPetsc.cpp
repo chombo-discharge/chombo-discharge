@@ -16,7 +16,6 @@
 
 // Our includes
 #include <CD_LeastSquares.H>
-#include <CD_VofUtils.H>
 #include <CD_Timer.H>
 #include <CD_MFHelmholtzPetsc.H>
 #include <CD_NamespaceHeader.H>
@@ -59,8 +58,19 @@ MFHelmholtzPetsc::MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&              
                                    const int&                                               a_jumpOrder,
                                    const int&                                               a_jumpWeight,
                                    const Location::Cell&                                    a_dataLocation) noexcept
+  : MFHelmholtzPetsc()
 {
   CH_TIME("MFHelmholtzPetsc::MFHelmholtzPetsc(full)");
+
+  m_ebDirichletNeighborhoods = {VofUtils::Neighborhood::SemiCircle,
+                                VofUtils::Neighborhood::Quadrant,
+                                VofUtils::Neighborhood::Radius};
+  m_ebRobinNeighborhoods     = {VofUtils::Neighborhood::SemiCircle,
+                                VofUtils::Neighborhood::Quadrant,
+                                VofUtils::Neighborhood::Radius};
+  m_ebJumpNeighborhoods      = {VofUtils::Neighborhood::SemiCircle,
+                                VofUtils::Neighborhood::Quadrant,
+                                VofUtils::Neighborhood::Radius};
 
   this->define(a_petscGrid,
                a_probLo,
@@ -318,6 +328,45 @@ MFHelmholtzPetsc::setJumpWeight(const int a_weight) noexcept
   m_jumpWeight = a_weight;
 
   CH_assert(m_jumpWeight >= 0);
+}
+
+void
+MFHelmholtzPetsc::setEBDirichletNeighborhoods(const std::vector<VofUtils::Neighborhood>& a_neighborhoods) noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::setEBDirichletNeighborhoods");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::setEBDirichletNeighborhoods" << endl;
+  }
+
+  CH_assert(a_neighborhoods.size() > 0);
+
+  m_ebDirichletNeighborhoods = a_neighborhoods;
+}
+
+void
+MFHelmholtzPetsc::setEBRobinNeighborhoods(const std::vector<VofUtils::Neighborhood>& a_neighborhoods) noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::setEBRobinNeighborhoods");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::setEBRobinNeighborhoods" << endl;
+  }
+
+  CH_assert(a_neighborhoods.size() > 0);
+
+  m_ebRobinNeighborhoods = a_neighborhoods;
+}
+
+void
+MFHelmholtzPetsc::setEBJumpNeighborhoods(const std::vector<VofUtils::Neighborhood>& a_neighborhoods) noexcept
+{
+  CH_TIME("MFHelmholtzPetsc::setEBJumpNeighborhoods");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::setEBJumpNeighborhoods" << endl;
+  }
+
+  CH_assert(a_neighborhoods.size() > 0);
+
+  m_ebJumpNeighborhoods = a_neighborhoods;
 }
 
 void
