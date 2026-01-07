@@ -34,6 +34,12 @@ MFHelmholtzPetsc::MFHelmholtzPetsc() noexcept
   m_isDefined = false;
   m_profile   = false;
   m_debug     = false;
+
+  ParmParse pp("MFHelmholtzPetsc");
+
+  pp.query("debug", m_debug);
+  pp.query("profile", m_profile);
+  pp.query("verbose", m_verbose);
 }
 
 MFHelmholtzPetsc::MFHelmholtzPetsc(const RefCountedPtr<PetscGrid>&                          a_petscGrid,
@@ -137,6 +143,9 @@ MFHelmholtzPetsc::define(const RefCountedPtr<PetscGrid>&                        
                          const Location::Cell&                                    a_dataLocation) noexcept
 {
   CH_TIME("MFHelmholtzPetsc::define");
+  if (m_verbose) {
+    pout() << "MFHelmholtzPetsc::define" << endl;
+  }
 
   ParmParse pp("MFHelmholtzPetsc");
 
@@ -466,6 +475,9 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
   ebisBox = ebisl[a_din];
   dx      = m_dx[a_level];
 
+  vofs.resize(0);
+  vofsFine.resize(0);
+
   if (hasFine) {
     mflgFine    = *m_petscGrid->getMFLevelGridsFiCo()[a_level + 1];
     eblgFine    = mflg.getEBLevelGrid(a_phase);
@@ -473,7 +485,18 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
     ebisBoxFine = ebislFine[a_din];
     dxFine      = m_dx[a_level + 1];
 
-    //    vofsFine = ...
+    // First, we fetch all the vofs on the current level as usual.
+    const Vector<VolIndex> allVoFs = VofUtils::getVofsInRadius(a_vof,
+                                                               ebisBox,
+                                                               m_dirichletEBBCOrder,
+                                                               VofUtils::Connectivity::MonotonePath,
+                                                               false);
+
+    // Iterate through the vofs on this level. If they are covered by a finer grid we discard them, and instead
+    // use the vofs defined by refinement of the current vof.
+    for (int i = 0; i < allVoFs.size(); i++) {
+      const Vector<VolIndex>& refinedVoFs = ebisBox.refine(vofs[i]);
+    }
   }
   else {
     vofs = VofUtils::getVofsInRadius(a_vof, ebisBox, m_dirichletEBBCOrder, VofUtils::Connectivity::MonotonePath, false);
