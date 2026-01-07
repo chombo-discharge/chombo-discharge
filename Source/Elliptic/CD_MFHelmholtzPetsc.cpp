@@ -442,8 +442,8 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
 
   const bool hasFine = a_level < m_finestLevel;
 
-  const Real dx     = m_dx[a_level];
-  const Real dxFine = hasFine ? m_dx[a_level + 1] : -1.0;
+  Real dx;
+  Real dxFine;
 
   MFLevelGrid mflg;
   MFLevelGrid mflgFine;
@@ -457,16 +457,26 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
   EBISBox ebisBox;
   EBISBox ebisBoxFine;
 
+  Vector<VolIndex> vofs;
+  Vector<VolIndex> vofsFine;
+
   mflg    = *m_petscGrid->getMFLevelGrids()[a_level];
   eblg    = mflg.getEBLevelGrid(a_phase);
   ebisl   = eblg.getEBISL();
   ebisBox = ebisl[a_din];
+  dx      = m_dx[a_level];
 
   if (hasFine) {
     mflgFine    = *m_petscGrid->getMFLevelGridsFiCo()[a_level + 1];
     eblgFine    = mflg.getEBLevelGrid(a_phase);
     ebislFine   = eblgFine.getEBISL();
     ebisBoxFine = ebislFine[a_din];
+    dxFine      = m_dx[a_level + 1];
+
+    //    vofsFine = ...
+  }
+  else {
+    vofs = VofUtils::getVofsInRadius(a_vof, ebisBox, m_dirichletEBBCOrder, VofUtils::Connectivity::MonotonePath, false);
   }
 
   return std::make_pair(0, PetscStencil());
