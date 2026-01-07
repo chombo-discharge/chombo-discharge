@@ -449,22 +449,27 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
 
   CH_assert(a_phase < m_numPhases);
 
-  const bool hasFine = a_level < m_finestLevel;
+  const bool                   hasFine    = a_level < m_finestLevel;
+  const BaseFab<PetscAMRCell>& amrToPetsc = (*m_petscGrid->getAMRToPetsc()[a_level])[a_din];
 
   Real dx;
   Real dxFine;
 
   MFLevelGrid mflg;
   MFLevelGrid mflgFine;
+  MFLevelGrid mflgCoFi;
 
   EBLevelGrid eblg;
   EBLevelGrid eblgFine;
+  EBLevelGrid eblgCoFi;
 
   EBISLayout ebisl;
   EBISLayout ebislFine;
+  EBISLayout ebislCoFi;
 
   EBISBox ebisBox;
   EBISBox ebisBoxFine;
+  EBISBox ebisBoxCoFi;
 
   Vector<VolIndex> vofs;
   Vector<VolIndex> vofsFine;
@@ -478,6 +483,7 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
   vofs.resize(0);
   vofsFine.resize(0);
 
+  // Figure out the set of VoFs that are available to us.
   if (hasFine) {
     mflgFine    = *m_petscGrid->getMFLevelGridsFiCo()[a_level + 1];
     eblgFine    = mflg.getEBLevelGrid(a_phase);
@@ -495,12 +501,27 @@ MFHelmholtzPetsc::computeEBDirichletStencil(const VolIndex&  a_vof,
     // Iterate through the vofs on this level. If they are covered by a finer grid we discard them, and instead
     // use the vofs defined by refinement of the current vof.
     for (int i = 0; i < allVoFs.size(); i++) {
-      const Vector<VolIndex>& refinedVoFs = ebisBox.refine(vofs[i]);
+      const VolIndex&     curVoF    = allVoFs[i];
+      const IntVect&      curCell   = curVoF.gridIndex();
+      const PetscAMRCell& amrCell   = amrToPetsc(curCell);
+      const bool          isCovered = amrCell.isCoveredByFinerGrid();
+
+      if (isCovered) {
+        const Vector<VolIndex>& refinedVoFs = ebisl.refine(curVoF, m_refinementRatios[a_level], a_din);
+
+        vofsFine.append(refinedVoFs);
+      }
+      else {
+        vofs.push_back(curVoF);
+      }
     }
   }
   else {
     vofs = VofUtils::getVofsInRadius(a_vof, ebisBox, m_dirichletEBBCOrder, VofUtils::Connectivity::MonotonePath, false);
   }
+
+  // This is the coordinate of the embedded boundary centroid on this level.
+  const RealVect x0 = Location::position(Location::Cell::Boundary, a_vof, ebisBox, dx);
 
   return std::make_pair(0, PetscStencil());
 }
