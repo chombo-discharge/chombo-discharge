@@ -4,6 +4,42 @@ Controlling ``chombo-discharge``
 ================================
 
 In this chapter we give a brief overview of how to run a ``chombo-discharge`` simulation and control its behavior through input scripts or command line options.
+``chombo-discharge`` is always initialized and finalized with the following calls:
+
+.. code-block:: c++
+
+   int
+   main(int argc, char* argv[]) {
+      ChomboDischarge::initialize(argc, argv);
+
+      ChomboDischarge::finalize();
+   }
+
+If the user compiled with MPI, OpenMP, or PETSc, the initialization function will instantiate the proper communicators and threads.
+Rank and thread placement is not handled automatically and must be specified by the user.
+When ``chombo-discharge`` is run (see below), it will print a message containing the run command and simulation information to either the terminal or the parallel process output files.
+An example output is given below.
+
+.. code-block:: text
+
+   ==========================================================================================
+
+         _                     _                     _ _          _                          
+     ___| |__   ___  _ __ ___ | |__   ___         __| (_)___  ___| |__   __ _ _ __ __ _  ___ 
+    / __| '_ \ / _ \| '_ ` _ \| '_ \ / _ \ _____ / _` | / __|/ __| '_ \ / _` | '__/ _` |/ _ \
+   | (__| | | | (_) | | | | | | |_) | (_) |_____| (_| | \__ \ (__| | | | (_| | | | (_| |  __/
+    \___|_| |_|\___/|_| |_| |_|_.__/ \___/       \__,_|_|___/\___|_| |_|\__,_|_|  \__, |\___|
+
+     Working directory: /home/robertm/Projects/chombo-discharge/Exec/Examples/Electrostatics/ProfiledSurface
+     Input file:        example2d.inputs
+     Run command:       main2d.Linux.64.mpic++.mpif90.OPTHIGH.MPI.PETSC.ex example2d.inputs
+   --------------------------------------------------------------------------------
+     MPI:    TRUE (12 ranks)
+     OpenMP: FALSE
+     HDF5:   TRUE
+     PETSc:  TRUE
+   ==========================================================================================                      
+
 
 Running ``chombo-discharge``
 ----------------------------
