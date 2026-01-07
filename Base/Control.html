@@ -163,7 +163,39 @@
              
   <section id="controlling-chombo-discharge">
 <span id="chap-control"></span><h1>Controlling <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#controlling-chombo-discharge" title="Permalink to this heading"></a></h1>
-<p>In this chapter we give a brief overview of how to run a <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulation and control its behavior through input scripts or command line options.</p>
+<p>In this chapter we give a brief overview of how to run a <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> simulation and control its behavior through input scripts or command line options.
+<code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is always initialized and finalized with the following calls:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span>
+<span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="n">ChomboDischarge</span><span class="o">::</span><span class="n">initialize</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+
+<span class="w">   </span><span class="n">ChomboDischarge</span><span class="o">::</span><span class="n">finalize</span><span class="p">();</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If the user compiled with MPI, OpenMP, or PETSc, the initialization function will instantiate the proper communicators and threads.
+Rank and thread placement is not handled automatically and must be specified by the user.
+When <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> is run (see below), it will print a message containing the run command and simulation information to either the terminal or the parallel process output files.
+An example output is given below.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>==========================================================================================
+
+      _                     _                     _ _          _
+  ___| |__   ___  _ __ ___ | |__   ___         __| (_)___  ___| |__   __ _ _ __ __ _  ___
+ / __| &#39;_ \ / _ \| &#39;_ ` _ \| &#39;_ \ / _ \ _____ / _` | / __|/ __| &#39;_ \ / _` | &#39;__/ _` |/ _ \
+| (__| | | | (_) | | | | | | |_) | (_) |_____| (_| | \__ \ (__| | | | (_| | | | (_| |  __/
+ \___|_| |_|\___/|_| |_| |_|_.__/ \___/       \__,_|_|___/\___|_| |_|\__,_|_|  \__, |\___|
+
+  Working directory: /home/robertm/Projects/chombo-discharge/Exec/Examples/Electrostatics/ProfiledSurface
+  Input file:        example2d.inputs
+  Run command:       main2d.Linux.64.mpic++.mpif90.OPTHIGH.MPI.PETSC.ex example2d.inputs
+--------------------------------------------------------------------------------
+  MPI:    TRUE (12 ranks)
+  OpenMP: FALSE
+  HDF5:   TRUE
+  PETSc:  TRUE
+==========================================================================================
+</pre></div>
+</div>
 <section id="running-chombo-discharge">
 <h2>Running <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code><a class="headerlink" href="#running-chombo-discharge" title="Permalink to this heading"></a></h2>
 <p>How one runs <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> depends on the type of parallelism.

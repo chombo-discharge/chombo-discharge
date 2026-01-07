@@ -6,11 +6,11 @@ Examples
 In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module.
 These are normally set up through Python interfaces accompanying each module. 
 Several example applications are given in :file:`$DISCHARGE_HOME/Exec/Examples`, which are organized by example type (e.g., plasma simulation, electrostatics, radiative transfer, etc).
-If ``chombo-discharge`` built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (:file:`program.cpp`) and compiling it:
+If ``chombo-discharge`` built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (:file:`main.cpp`) and compiling it:
 
 .. code-block:: text
 
-   make -s -j4 program
+   make -s -j4 main
 
 To see how these programs are run, see :ref:`Chap:Control`.   
 
@@ -26,11 +26,11 @@ First, compile the application by
 .. code-block:: text
 
    cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
-   make -s -j4 DIM=2 program
+   make -s -j4 DIM=2 main
 
-This will provide an executable named ``program2d.<bunch_of_options>.ex``.
+This will provide an executable named ``main2d.<bunch_of_options>.ex``.
 If one compiles for 3D, use ``DIM=3`` either on the command-line or in the configuration file.
-The executable will be named ``program3d.<bunch_of_options>.ex``.
+The executable will be named ``main3d.<bunch_of_options>.ex``.
 
 To run the application do:
 
@@ -38,13 +38,13 @@ To run the application do:
 
 .. code-block:: text
 
-   ./program2d.<bunch_of_options>.ex positive2d.inputs
+   ./main2d.<bunch_of_options>.ex positive2d.inputs
 
 **Parallel build**
   
 .. code-block:: text
 
-   mpirun -np 8 program2d.<bunch_of_options>.ex positive2d.inputs   
+   mpirun -np 8 main2d.<bunch_of_options>.ex positive2d.inputs   
 
 If the user also compiled with HDF5, plot files will appear in the subfolder ``plt``.
 

@@ -151,8 +151,8 @@
 <p>In <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code>, applications are set up so that they use the <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> source code and one <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> physics module.
 These are normally set up through Python interfaces accompanying each module.
 Several example applications are given in <code class="file docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples</span></code>, which are organized by example type (e.g., plasma simulation, electrostatics, radiative transfer, etc).
-If <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (<code class="file docutils literal notranslate"><span class="pre">program.cpp</span></code>) and compiling it:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>make -s -j4 program
+If <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> built successfully, it will usually be sufficient to compile the example by navigating to the folder containing the program file (<code class="file docutils literal notranslate"><span class="pre">main.cpp</span></code>) and compiling it:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>make -s -j4 main
 </pre></div>
 </div>
 <p>To see how these programs are run, see <a class="reference internal" href="Control.html#chap-control"><span class="std std-ref">Controlling chombo-discharge</span></a>.</p>
@@ -162,19 +162,19 @@ If <code class="docutils literal notranslate"><span class="pre">chombo-discharge
 <p>The application code is located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir</span></code> and it uses the convection-diffusion-reaction plasma module (located in <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME/Physics/CdrPlasma</span></code>).</p>
 <p>First, compile the application by</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>cd $DISCHARGE_HOME/Exec/Examples/CdrPlasma/DeterministicAir
-make -s -j4 DIM=2 program
+make -s -j4 DIM=2 main
 </pre></div>
 </div>
-<p>This will provide an executable named <code class="docutils literal notranslate"><span class="pre">program2d.&lt;bunch_of_options&gt;.ex</span></code>.
+<p>This will provide an executable named <code class="docutils literal notranslate"><span class="pre">main2d.&lt;bunch_of_options&gt;.ex</span></code>.
 If one compiles for 3D, use <code class="docutils literal notranslate"><span class="pre">DIM=3</span></code> either on the command-line or in the configuration file.
-The executable will be named <code class="docutils literal notranslate"><span class="pre">program3d.&lt;bunch_of_options&gt;.ex</span></code>.</p>
+The executable will be named <code class="docutils literal notranslate"><span class="pre">main3d.&lt;bunch_of_options&gt;.ex</span></code>.</p>
 <p>To run the application do:</p>
 <p><strong>Serial build</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>./program2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>./main2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
 </pre></div>
 </div>
 <p><strong>Parallel build</strong></p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 program2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 main2d.&lt;bunch_of_options&gt;.ex positive2d.inputs
 </pre></div>
 </div>
 <p>If the user also compiled with HDF5, plot files will appear in the subfolder <code class="docutils literal notranslate"><span class="pre">plt</span></code>.</p>
