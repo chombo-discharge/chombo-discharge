@@ -53,26 +53,38 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 
   Vector<VolIndex> vofs;
 
-  // Can only do this if actually have a normal vecto r
   if (a_normal != RealVect::Zero) {
+    vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, false);
+    vofs = VofUtils::restrictVofsToQuadrant(vofs, a_startVof, a_ebisbox, a_normal, a_radius);
 
-    // Fetch vofs using radius.
-    vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, a_addStartVof);
-
-    // Find the quadrant or "half-plane" where the quadrant vofs live, and restrict to that quadrant
-    Box quadBox;
-    if (VofUtils::isQuadrantWellDefined(a_normal)) {
-      // Box is the quadrant box
-      quadBox = VofUtils::getQuadrant(a_normal, a_startVof, a_ebisbox, a_radius);
+    if (a_addStartVof) {
+      vofs.push_back(a_startVof);
     }
-    else {
-      // Box consists of two quadrants.
-      const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(a_normal);
-      quadBox = VofUtils::getSymmetricQuadrant(cardinal, a_startVof, a_ebisbox, a_radius);
-    }
-
-    VofUtils::includeCells(vofs, quadBox);
   }
+
+  return vofs;
+}
+
+Vector<VolIndex>
+VofUtils::restrictVofsToQuadrant(const Vector<VolIndex>& a_vofs,
+                                 const VolIndex&         a_startVof,
+                                 const EBISBox&          a_ebisbox,
+                                 const RealVect&         a_normal,
+                                 const int               a_radius)
+{
+  Vector<VolIndex> vofs;
+
+  // Find the quadrant or "half-plane" where the quadrant vofs live, and restrict to that quadrant
+  Box quadBox;
+  if (VofUtils::isQuadrantWellDefined(a_normal)) {
+    quadBox = VofUtils::getQuadrant(a_normal, a_startVof, a_ebisbox, a_radius);
+  }
+  else {
+    const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(a_normal);
+    quadBox = VofUtils::getSymmetricQuadrant(cardinal, a_startVof, a_ebisbox, a_radius);
+  }
+
+  VofUtils::includeCells(vofs, quadBox);
 
   return vofs;
 }
@@ -91,26 +103,43 @@ VofUtils::getVofsInSemiCircle(const VolIndex&      a_startVof,
   Vector<VolIndex> vofs;
 
   if (a_normal != RealVect::Zero) {
+    vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, false);
+    vofs = VofUtils::restrictVofsToSemiCircle(vofs,
+                                              a_startVof,
+                                              a_ebisbox,
+                                              a_normal,
+                                              a_deltaThresh,
+                                              a_vofLocation,
+                                              a_cellLocation);
+    if (a_addStartVof) {
+      vofs.push_back(a_startVof);
+    }
+  }
+
+  return vofs;
+}
+
+Vector<VolIndex>
+VofUtils::restrictVofsToSemiCircle(const Vector<VolIndex>& a_vofs,
+                                   const VolIndex&         a_startVof,
+                                   const EBISBox&          a_ebisbox,
+                                   const RealVect&         a_normal,
+                                   const Real              a_deltaThresh,
+                                   const Location::Cell    a_vofLocation,
+                                   const Location::Cell    a_cellLocation)
+{
+  Vector<VolIndex> vofs;
+
+  if (a_normal != RealVect::Zero) {
     const RealVect x0 = Location::position(a_vofLocation, a_startVof, a_ebisbox, 1.0);
 
-    const Vector<VolIndex> vofsInRadius = VofUtils::getVofsInRadius(a_startVof,
-                                                                    a_ebisbox,
-                                                                    a_radius,
-                                                                    a_connectivity,
-                                                                    false);
-
-    for (int i = 0; i < vofsInRadius.size(); i++) {
-      const VolIndex& curVoF = vofsInRadius[i];
-
-      const RealVect delta = Location::position(a_cellLocation, curVoF, a_ebisbox, 1.0) - x0;
+    for (int i = 0; i < a_vofs.size(); i++) {
+      const VolIndex& curVoF = a_vofs[i];
+      const RealVect  delta  = Location::position(a_cellLocation, curVoF, a_ebisbox, 1.0) - x0;
 
       if (delta.dotProduct(a_normal) > a_deltaThresh) {
         vofs.push_back(curVoF);
       }
-    }
-
-    if (a_addStartVof) {
-      vofs.push_back(a_startVof);
     }
   }
 

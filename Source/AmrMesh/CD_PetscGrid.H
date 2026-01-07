@@ -129,7 +129,7 @@ public:
     @return m_vofIteratork[iphase].
   */
   virtual const Vector<RefCountedPtr<LayoutData<IntVectSet>>>&
-  getIrregIVS(const int a_iphase) const noexcept;  
+  getIrregIVS(const int a_iphase) const noexcept;
 
   /*!
     @brief Get the mapping between the AMR cells and PETSc rows
@@ -350,7 +350,7 @@ protected:
     @brief Cut-cells that are also PETSc rows. 
     @note This is defined only on the valid cut-cells that are also PETSc rows
   */
-  Vector<RefCountedPtr<LayoutData<IntVectSet>>> m_irregIVS[2];  
+  Vector<RefCountedPtr<LayoutData<IntVectSet>>> m_irregIVS[2];
 
   /*!
     @brief Define basic cell information for PetscGrid.
