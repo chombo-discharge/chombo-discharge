@@ -398,7 +398,7 @@ for test in config.sections():
                         # --------------------------------------------------
                         if args.benchmark:
                             print("\t Regression test '" + str(test) + "' has generated benchmark files.")
-                        elif not args.benchmark and args.compare and args.hdf is not None and str(args.hdf).upper() == "TRUE":
+                        elif not args.benchmark and args.compare:
                             # --------------------------------------------------
                             # Loop through all files that were generated and
                             # compare them with h5diff. Print an error message

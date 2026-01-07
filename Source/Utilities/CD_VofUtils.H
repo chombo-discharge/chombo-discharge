@@ -114,6 +114,22 @@ public:
                     const bool         a_addStartVof);
 
   /*!
+    @brief Extract the subset of vofs that lie within the quadrant/octant defined by the normal vector
+    @param[in] a_vofs Trial Vofs.
+    @param[in] a_startVof Starting vof.
+    @param[in] a_ebisbox EBISBox holding the geometric information.
+    @param[in] a_normal Normal vector.
+    @param[in] a_radius Radius of Vof neighborhood.
+    @return Returns the subset of vofs that lie within the quadrant/octant.
+  */
+  static Vector<VolIndex>
+  restrictVofsToQuadrant(const Vector<VolIndex>& a_vofs,
+                         const VolIndex&         a_startVof,
+                         const EBISBox&          a_ebisbox,
+                         const RealVect&         a_normal,
+                         const int               a_radius);
+
+  /*!
     @brief Get all vofs lying in a semi-circle (sphere in 3D) from the indicated position in the starting vof
     @param[in] a_startVof     Starting Vof. 
     @param[in] a_ebisbox      EBISBox.
@@ -137,6 +153,28 @@ public:
                       const Location::Cell a_vofLocation,
                       const Location::Cell a_cellLocation,
                       const bool           a_addStartVof);
+
+  /*!
+    @brief Extract the subset of VoFs that lie in a semi-circle ahead of the input vof (a_startVof)
+    @note This routine will discard vofs that fall on the ''wrong'' side of the semi-circle (sphere in 3D). Here, the
+    wrong side is defined as all points (x-x0)*n < a_deltaThresh    
+    @param[in] a_vofs         Trial Vofs.
+    @param[in] a_startVof     Starting Vof. 
+    @param[in] a_ebisbox      EBISBox.
+    @param[in] a_normal       Normal vector
+    @param[in] a_deltaThresh  Threshold for the normal distance betw
+    @param[in] a_vofLocation  Point inside the current vof
+    @param[in] a_cellLocation Other cell locations to test with.
+    @return Returns the subset of vofs that lie within the semi-circle/sphere ahead of the starting vof.
+  */
+  static Vector<VolIndex>
+  restrictVofsToSemiCircle(const Vector<VolIndex>& a_vofs,
+                           const VolIndex&         a_startVof,
+                           const EBISBox&          a_ebisbox,
+                           const RealVect&         a_normal,
+                           const Real              a_deltaThresh,
+                           const Location::Cell    a_vofLocation,
+                           const Location::Cell    a_cellLocation);
 
   /*!
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
