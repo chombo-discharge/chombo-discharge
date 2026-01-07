@@ -43,7 +43,17 @@ initialize(int argc, char* argv[])
   const PetscErrorCode ierr = PetscInitialize(&argc, &argv, PETSC_NULLPTR, PETSC_NULLPTR);
 #else
 #if defined(CH_MPI)
+#ifdef _OPENMP
+  // MPI+OpenMP: Initialize with thread support
+  int provided;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+  if (provided < MPI_THREAD_FUNNELED) {
+    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << std::endl;
+  }
+#else
+  // MPI only
   MPI_Init(&argc, &argv);
+#endif
 #endif
 #endif
 
@@ -82,7 +92,30 @@ initialize(int argc, char* argv[])
     pout() << "\n";
     pout() << "--------------------------------------------------------------------------------\n";
 #ifdef CH_MPI
-    pout() << "  MPI:    TRUE (" << numProc() << " ranks)\n";
+    pout() << "  MPI:    TRUE (" << numProc() << " ranks";
+#ifdef _OPENMP
+    int thread_support;
+    MPI_Query_thread(&thread_support);
+    pout() << ", thread support: ";
+    switch (thread_support) {
+    case MPI_THREAD_SINGLE:
+      pout() << "SINGLE";
+      break;
+    case MPI_THREAD_FUNNELED:
+      pout() << "FUNNELED";
+      break;
+    case MPI_THREAD_SERIALIZED:
+      pout() << "SERIALIZED";
+      break;
+    case MPI_THREAD_MULTIPLE:
+      pout() << "MULTIPLE";
+      break;
+    default:
+      pout() << "UNKNOWN";
+      break;
+    }
+#endif
+    pout() << ")\n";
 #else
     pout() << "  MPI:    FALSE\n";
 #endif
