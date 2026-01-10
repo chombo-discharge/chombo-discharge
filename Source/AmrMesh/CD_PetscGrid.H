@@ -9,10 +9,10 @@
   @author Robert Marskar
 */
 
+#ifdef CH_USE_PETSC
+
 #ifndef CD_PetscGrid_H
 #define CD_PetscGrid_H
-
-#ifdef CH_USE_PETSC
 
 // Petsc includes
 #include "petsc.h"
