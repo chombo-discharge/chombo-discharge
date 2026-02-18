@@ -14,7 +14,7 @@
 <area shape="poly" id="edge159_Node000001_Node000062" title=" " alt="" coords="4556,28,4657,47,4765,76,4900,129,5028,189,5137,246,5214,289,5212,294,5135,251,5026,194,4897,133,4763,81,4656,52,4555,33"/>
 <area shape="rect" id="Node000114" href="$CD__EBAMRParticleMesh_8H.html" title="Declaration of a class for handling particle&#45;mesh operations with AMR." alt="" coords="3557,152,3749,177"/>
 <area shape="poly" id="edge156_Node000001_Node000114" title=" " alt="" coords="4408,33,3732,152,3731,147,4407,28"/>
-<area shape="rect" id="Node000139" href="$CD__PetscGrid_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="5981,79,6105,104"/>
+<area shape="rect" id="Node000139" href="$CD__PetscGrid_8H.html" title="File containing declaration of PetscGrid." alt="" coords="5981,79,6105,104"/>
 <area shape="poly" id="edge160_Node000001_Node000139" title=" " alt="" coords="4582,17,4829,21,5171,30,5563,48,5962,76,5968,77,5967,82,5961,81,5563,53,5171,36,4829,26,4582,23"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="5440,372,5595,397"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2613,90,2956,92,3501,101,4156,118,4497,132,4831,149,4904,151,4975,148,5111,132,5238,112,5356,97,5411,95,5463,99,5513,108,5560,126,5604,152,5645,189,5682,237,5717,298,5722,312,5717,326,5698,340,5670,353,5599,372,5597,367,5668,347,5696,336,5713,322,5716,312,5712,300,5678,240,5641,192,5600,157,5557,131,5511,114,5462,104,5411,101,5356,103,5239,117,5112,137,4976,153,4904,156,4831,155,4496,137,4156,124,3501,106,2956,98,2613,95"/>
