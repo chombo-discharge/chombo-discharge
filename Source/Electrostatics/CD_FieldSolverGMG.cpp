@@ -750,7 +750,7 @@ FieldSolverGMG::setupMultigrid()
   case BottomSolverType::GMRES: {
     bottomSolver = &m_gmres;
 
-    m_gmres.m_verbosity = m_multigridBottomSolverVerbosity;    
+    m_gmres.m_verbosity = m_multigridBottomSolverVerbosity;
 
     break;
   }
