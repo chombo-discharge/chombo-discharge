@@ -105,6 +105,141 @@ PetscGrid::clear() noexcept
   }
 }
 
+bool
+PetscGrid::isDefined() const noexcept
+{
+  CH_TIME("PetscGrid::isDefined");
+  if (m_verbose) {
+    pout() << "PetscGrid::isDefined" << endl;
+  }
+
+  return m_isDefined;
+}
+
+Vector<DisjointBoxLayout>
+PetscGrid::getGrids() const noexcept
+{
+  CH_TIME("PetscGrid::getGrids");
+  if (m_verbose) {
+    pout() << "PetscGrid::getGrids" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  Vector<DisjointBoxLayout> grids;
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    grids.push_back(m_levelGrids[lvl]->getGrids());
+  }
+
+  return grids;
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+PetscGrid::getMFLevelGrids() const noexcept
+{
+  CH_TIME("PetscGrid::getMFLevelGrids");
+  if (m_verbose) {
+    pout() << "PetscGrid::getMFLevelGrids" << endl;
+  }
+
+  return m_levelGrids;
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+PetscGrid::getMFLevelGridsFiCo() const noexcept
+{
+  CH_TIME("PetscGrid::getMFLevelGridsFiCo");
+  if (m_verbose) {
+    pout() << "PetscGrid::getMFLevelGridsFiCo" << endl;
+  }
+
+  return m_levelGridsFiCo;
+}
+
+const Vector<RefCountedPtr<MFLevelGrid>>&
+PetscGrid::getMFLevelGridsCoFi() const noexcept
+{
+  CH_TIME("PetscGrid::getMFLevelGridsCoFi");
+  if (m_verbose) {
+    pout() << "PetscGrid::getMFLevelGridsCoFi" << endl;
+  }
+
+  return m_levelGridsCoFi;
+}
+
+Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+PetscGrid::getVoFIterator(const int a_iphase) const noexcept
+{
+  CH_TIME("PetscGrid::getVoFIterator");
+  if (m_verbose) {
+    pout() << "PetscGrid::getVoFIterator" << endl;
+  }
+
+  CH_assert(a_iphase < m_numPhases);
+
+  return m_vofIterators[a_iphase];
+}
+
+const Vector<RefCountedPtr<LayoutData<IntVectSet>>>&
+PetscGrid::getIrregIVS(const int a_iphase) const noexcept
+{
+  CH_TIME("PetscGrid::getIrregIVS");
+  if (m_verbose) {
+    pout() << "PetscGrid::getIrregIVS" << endl;
+  }
+
+  CH_assert(a_iphase < m_numPhases);
+
+  return m_irregIVS[a_iphase];
+}
+
+const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+PetscGrid::getAMRToPetsc() const noexcept
+{
+  CH_TIME("PetscGrid::getAMRToPetsc");
+  if (m_verbose) {
+    pout() << "PetscGrid::getAMRToPetsc" << endl;
+  }
+
+  return m_amrToPetsc;
+}
+
+const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+PetscGrid::getAMRToPetscCoFi() const noexcept
+{
+  CH_TIME("PetscGrid::getAMRToPetscCoFi");
+  if (m_verbose) {
+    pout() << "PetscGrid::getAMRToPetscCoFi" << endl;
+  }
+
+  return m_amrToPetscCoFi;
+}
+
+const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+PetscGrid::getAMRToPetscFiCo() const noexcept
+{
+  CH_TIME("PetscGrid::getAMRToPetscFiCo");
+  if (m_verbose) {
+    pout() << "PetscGrid::getAMRToPetscFiCo" << endl;
+  }
+
+  return m_amrToPetscFiCo;
+}
+
+int
+PetscGrid::getNumPhases() const noexcept
+{
+  CH_TIME("PetscGrid::getNumPhases");
+  if (m_verbose) {
+    pout() << "PetscGrid::getNumPhases" << endl;
+  }
+
+  CH_assert(m_isDefined);
+
+  return m_numPhases;
+}
+
 void
 PetscGrid::defineAMRCells() noexcept
 {
@@ -191,8 +326,6 @@ PetscGrid::defineAMRCells() noexcept
         BoxLoops::loop(cellBox, setDomainFlag);
       }
     }
-
-    m_amrToPetsc[lvl]->exchange();
   }
 }
 
@@ -213,6 +346,8 @@ PetscGrid::definePetscRows() noexcept
 
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
     m_petscToAMR[iphase].resize(1 + m_finestLevel);
+    m_vofIterators[iphase].resize(1 + m_finestLevel);
+    m_irregIVS[iphase].resize(1 + m_finestLevel);
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
       const EBLevelGrid&       eblg  = m_levelGrids[lvl]->getEBLevelGrid(iphase);
@@ -221,19 +356,21 @@ PetscGrid::definePetscRows() noexcept
       const DataIterator&      dit   = dbl.dataIterator();
       const int                nbox  = dit.size();
 
-      m_petscToAMR[iphase][lvl] = RefCountedPtr<LayoutData<Vector<PetscDOF>>>(new LayoutData<Vector<PetscDOF>>(dbl));
+      m_petscToAMR[iphase][lvl]   = RefCountedPtr<LayoutData<Vector<PetscDOF>>>(new LayoutData<Vector<PetscDOF>>(dbl));
+      m_vofIterators[iphase][lvl] = RefCountedPtr<LayoutData<VoFIterator>>(new LayoutData<VoFIterator>(dbl));
+      m_irregIVS[iphase][lvl]     = RefCountedPtr<LayoutData<IntVectSet>>(new LayoutData<IntVectSet>(dbl));
 
       // PS: This loop is not thread safe!
       for (int mybox = 0; mybox < nbox; mybox++) {
-        const DataIndex din = dit[mybox];
-
-        const Box&        cellBox = dbl[din];
-        const EBISBox&    ebisBox = ebisl[din];
-        const IntVectSet& ivs     = ebisBox.getIrregIVS(cellBox);
-        const EBGraph&    ebgraph = ebisBox.getEBGraph();
+        const DataIndex din     = dit[mybox];
+        const Box&      cellBox = dbl[din];
+        const EBISBox&  ebisBox = ebisl[din];
+        const EBGraph&  ebgraph = ebisBox.getEBGraph();
 
         BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
         Vector<PetscDOF>&      petscToAMR = (*m_petscToAMR[iphase][lvl])[din];
+        VoFIterator&           vofit      = (*m_vofIterators[iphase][lvl])[din];
+        IntVectSet&            irregIVS   = (*m_irregIVS[iphase][lvl])[din];
 
         petscToAMR.resize(0);
 
@@ -241,6 +378,9 @@ PetscGrid::definePetscRows() noexcept
           if (!(amrToPetsc(iv).isCoveredByFinerGrid()) && !ebisBox.isCovered(iv)) {
             if (ebisBox.isMultiValued(iv)) {
               MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted!");
+            }
+            if (ebisBox.isIrregular(iv)) {
+              irregIVS |= iv;
             }
 
             PetscDOF dof;
@@ -256,6 +396,8 @@ PetscGrid::definePetscRows() noexcept
         };
 
         BoxLoops::loop(cellBox, regularKernel);
+
+        vofit.define(irregIVS, ebgraph);
       }
     }
   }
@@ -268,6 +410,47 @@ PetscGrid::definePetscRows() noexcept
   m_localRowBegin = 0;
   for (PetscInt i = 0; i < procID(); i++) {
     m_localRowBegin += m_numRowsPerRank[i];
+  }
+
+  // In the above, we installed the local PETSc row in each amr cell, but we really want this to be the global
+  // row number. This was computed above, and the local offset calculated into m_localRowBegin, so we only need to
+  // offset by that value.
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+    for (int iphase = 0; iphase < m_numPhases; iphase++) {
+      const EBLevelGrid&       eblg  = m_levelGrids[lvl]->getEBLevelGrid(iphase);
+      const EBISLayout&        ebisl = eblg.getEBISL();
+      const DisjointBoxLayout& dbl   = eblg.getDBL();
+      const DataIterator&      dit   = dbl.dataIterator();
+      const int                nbox  = dit.size();
+
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const Box&       cellBox = dbl[din];
+        const EBISBox&   ebisBox = ebisl[din];
+
+        BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          if (!(amrToPetsc(iv).isCoveredByFinerGrid()) && !ebisBox.isCovered(iv)) {
+            if (ebisBox.isMultiValued(iv)) {
+              MayDay::Abort("PetscGrid::definePetscRows -- multi-valued cells are not permitted!");
+            }
+
+            const PetscInt localRow = amrToPetsc(iv).getPetscRow(iphase);
+
+            if (localRow < 0) {
+              MayDay::Abort("PetscGrid::definePetscRows -- logic bust in row offset");
+            }
+
+            amrToPetsc(iv).setPetscRow(iphase, m_localRowBegin + localRow);
+          }
+        };
+
+        BoxLoops::loop(cellBox, regularKernel);
+      }
+    }
+    m_amrToPetsc[lvl]->exchange();
   }
 
   // Build local to global mapping for PETSc, so that we can extract local subvectors.
@@ -300,6 +483,7 @@ PetscGrid::defineCoFiBuffers() noexcept
   m_amrToPetscFiCo.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
+
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < m_finestLevel;
 
@@ -445,7 +629,7 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
         const BaseFab<PetscAMRCell>& amrToPetsc = (*m_amrToPetsc[lvl])[din];
 
         auto kernel = [&](const IntVect iv) -> void {
-          const PetscInt& k = amrToPetsc(iv).getPetscRow(iphase);
+          const PetscInt& k = amrToPetsc(iv).getPetscRow(iphase) - m_localRowBegin;
 
           if (k >= 0) {
             arr[k] = data(iv, 0);
