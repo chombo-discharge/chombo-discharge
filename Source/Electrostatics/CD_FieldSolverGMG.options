@@ -34,3 +34,4 @@ FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition
 FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
+FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity.
