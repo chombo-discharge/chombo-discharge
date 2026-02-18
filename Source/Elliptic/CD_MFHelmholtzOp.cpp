@@ -467,14 +467,11 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       const bool isRegular   = ebisbox.isAllRegular();
       const bool isIrregular = !isCovered && !isRegular;
 
-      if (isIrregular) {
+      if (!isCovered) {
         VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 
         BoxLoops::loop(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
-      }
-      else if (isCovered) {
-        BoxLoops::loop(cellBox, regularKernel);
       }
     }
   }
@@ -544,18 +541,18 @@ MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>&
 {
   CH_TIME("MFHelmholtzOp::preCond");
 
+  for (auto& op : m_helmOps) {
+    LevelData<EBCellFAB> corr;
+    LevelData<EBCellFAB> resi;
+
+    MultifluidAlias::aliasMF(corr, op.first, a_corr);
+    MultifluidAlias::aliasMF(resi, op.first, a_residual);
+
+    op.second->assignLocal(corr, resi);
+    op.second->scaleLocal(corr, op.second->getRelaxationCoeff());
+  }
+
   if (m_numSmoothPreCond > 0) {
-    for (auto& op : m_helmOps) {
-      LevelData<EBCellFAB> corr;
-      LevelData<EBCellFAB> resi;
-
-      MultifluidAlias::aliasMF(corr, op.first, a_corr);
-      MultifluidAlias::aliasMF(resi, op.first, a_residual);
-
-      op.second->assignLocal(corr, resi);
-      op.second->scaleLocal(corr, op.second->getRelaxationCoeff());
-    }
-
     this->relax(a_corr, a_residual, m_numSmoothPreCond);
   }
 }

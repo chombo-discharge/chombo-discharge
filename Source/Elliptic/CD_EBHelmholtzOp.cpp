@@ -1711,7 +1711,6 @@ EBHelmholtzOp::pointJacobiKernel(EBCellFAB&             a_Lcorr,
 
     a_Lcorr -= a_residual;
     a_Lcorr *= m_relCoef[a_dit];
-    a_Lcorr *= 0.5;
     a_correction -= a_Lcorr;
   }
 }

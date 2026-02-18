@@ -270,6 +270,11 @@ protected:
   int m_multigridVerbosity;
 
   /*!
+    @brief Verbosity for bottom solver in GMG cycle
+  */
+  int m_multigridBottomSolverVerbosity;
+
+  /*!
     @brief Number of smoothing for multigrid
   */
   int m_multigridSmooth;

@@ -116,6 +116,7 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
+  pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -187,17 +188,16 @@ FieldSolverGMG::parseMultigridSettings()
     m_multigridBcWeight      = 4;
     m_multigridJumpOrder     = 1;
     m_multigridJumpWeight    = 4;
-    m_multigridRelaxFactor   = 1.5;
+    m_multigridRelaxFactor   = 1.0;
     m_multigridPreSmooth     = 12;
     m_multigridPostSmooth    = 12;
     m_multigridBottomSmooth  = 0;
-    m_multigridPreCondSmooth = 12;
+    m_multigridPreCondSmooth = 40;
     m_minCellsBottom         = std::max(8, m_minCellsBottom);
     m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     m_multigridType          = MultigridType::VCycle;
-    m_bottomSolverType       = BottomSolverType::BiCGStab;
     m_bottomSolverType       = BottomSolverType::Simple;
-    m_mfsolver.setNumSmooths(16);
+    m_mfsolver.setNumSmooths(40);
   }
 
   // Things won't run unless this is fulfilled.
@@ -743,10 +743,14 @@ FieldSolverGMG::setupMultigrid()
   case BottomSolverType::BiCGStab: {
     bottomSolver = &m_bicgstab;
 
+    m_bicgstab.m_verbosity = m_multigridBottomSolverVerbosity;
+
     break;
   }
   case BottomSolverType::GMRES: {
     bottomSolver = &m_gmres;
+
+    m_gmres.m_verbosity = m_multigridBottomSolverVerbosity;
 
     break;
   }
