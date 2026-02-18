@@ -187,17 +187,16 @@ FieldSolverGMG::parseMultigridSettings()
     m_multigridBcWeight      = 4;
     m_multigridJumpOrder     = 1;
     m_multigridJumpWeight    = 4;
-    m_multigridRelaxFactor   = 1.5;
+    m_multigridRelaxFactor   = 1.0;
     m_multigridPreSmooth     = 12;
     m_multigridPostSmooth    = 12;
     m_multigridBottomSmooth  = 0;
-    m_multigridPreCondSmooth = 12;
+    m_multigridPreCondSmooth = 40;
     m_minCellsBottom         = std::max(8, m_minCellsBottom);
     m_multigridRelaxMethod   = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     m_multigridType          = MultigridType::VCycle;
-    m_bottomSolverType       = BottomSolverType::BiCGStab;
     m_bottomSolverType       = BottomSolverType::Simple;
-    m_mfsolver.setNumSmooths(16);
+    m_mfsolver.setNumSmooths(40);
   }
 
   // Things won't run unless this is fulfilled.
