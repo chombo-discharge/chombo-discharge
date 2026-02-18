@@ -116,6 +116,7 @@ FieldSolverGMG::parseMultigridSettings()
   pp.get("gmg_jump_weight", m_multigridJumpWeight);
   pp.get("gmg_reduce_order", m_multigridDropOrder);
   pp.get("gmg_relax_factor", m_multigridRelaxFactor);
+  pp.get("gmg_bottom_verbosity", m_multigridBottomSolverVerbosity);
 
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverGMG.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver.
@@ -742,10 +743,14 @@ FieldSolverGMG::setupMultigrid()
   case BottomSolverType::BiCGStab: {
     bottomSolver = &m_bicgstab;
 
+    m_bicgstab.m_verbosity = m_multigridBottomSolverVerbosity;
+
     break;
   }
   case BottomSolverType::GMRES: {
     bottomSolver = &m_gmres;
+
+    m_gmres.m_verbosity = m_multigridBottomSolverVerbosity;    
 
     break;
   }

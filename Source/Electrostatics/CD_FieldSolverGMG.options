@@ -15,6 +15,9 @@ FieldSolverGMG.kappa_source          = true             ## Volume weighted space
 
 FieldSolverGMG.gmg_verbosity                = -1           ## GMG verbosity
 FieldSolverGMG.gmg_use_default_settings     = true         ## Use default multigrid settings or not (see documentation)
+FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now.
+FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
 FieldSolverGMG.gmg_pre_smooth               = 12           ## Number of relaxations in downsweep
 FieldSolverGMG.gmg_post_smooth              = 12           ## Number of relaxations in upsweep
 FieldSolverGMG.gmg_bott_smooth              = 0            ## Number of at bottom level (before dropping to bottom solver)
@@ -31,6 +34,4 @@ FieldSolverGMG.gmg_jump_order               = 1            ## Boundary condition
 FieldSolverGMG.gmg_jump_weight              = 4            ## Boundary condition weight for jump conditions (for least squares)
 FieldSolverGMG.gmg_reduce_order             = true         ## If true, always use order=1 EB stencils in coarsened cells
 FieldSolverGMG.gmg_bottom_solver            = bicgstab     ## Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-FieldSolverGMG.gmg_cycle                    = vcycle       ## Cycle type. Only 'vcycle' supported for now.
-FieldSolverGMG.gmg_smoother                 = red_black    ## Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-FieldSolverGMG.gmg_relax_factor             = 1.0          ## Adjustable SOR factor
+FieldSolverGMG.gmg_bottom_verbosity         = -1           ## Bottom solver verbosity. 
