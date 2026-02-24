@@ -29,5 +29,6 @@ main(int argc, char* argv[])
 #endif
   const auto triSDF = EBGeometry::Parser::readIntoTriangleBVH<T, Meta, BV, K>("x_low.vtk");
 
+  Triangle tri;
   ChomboDischarge::finalize();
 }

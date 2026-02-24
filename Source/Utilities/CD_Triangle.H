@@ -46,6 +46,18 @@ public:
   virtual ~Triangle() noexcept;
 
   /*!
+    @brief Compute the area of the triangle
+  */
+  void
+  computeArea() noexcept;
+
+  /*!
+    @brief Compute the triangle normal
+  */
+  void
+  computeNormal() noexcept;
+
+  /*!
     @brief Set meta-data on the vertices
     @param[in] a_vertexData Data on the vertices. Must be in the same order as the vertex positions.
   */
