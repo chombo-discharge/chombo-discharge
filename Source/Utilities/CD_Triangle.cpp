@@ -42,24 +42,14 @@ Triangle::computeArea() noexcept
   const Vec3 x = m_vertexPositions[1] - m_vertexPositions[0];
   const Vec3 y = m_vertexPositions[2] - m_vertexPositions[0];
 
-  m_area = 0.5 * (x.cross(y)).length();
-}
-
-void
-Triangle::computeNormal() noexcept
-{
-  const Vec3 x = m_vertexPositions[1] - m_vertexPositions[0];
-  const Vec3 y = m_vertexPositions[2] - m_vertexPositions[0];
-
-  m_normal = x.cross(y);
-  m_normal = m_normal / m_normal.length();
+  this->m_area = 0.5 * (x.cross(y)).length();
 }
 
 bool
 Triangle::isInside(const Vec3& a_point) const noexcept
 {
   auto sgn = [](const Real x) -> int {
-    return (x > 0.0) ? 1 : -1;
+    return (x >= 0.0) ? 1 : -1;
   };
 
   const Vec3 v21 = m_vertexPositions[1] - m_vertexPositions[0];
