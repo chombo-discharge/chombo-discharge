@@ -46,6 +46,11 @@ Triangle::computeArea() noexcept
   m_area = computeTriangleArea(m_vertexPositions[0], m_vertexPositions[1], m_vertexPositions[2]);
 }
 
+EBGeometry::Vec3T<Real>
+Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept {
+  return a_point - dot(a_point, m_triangleNormal) * m_triangleNormal;
+}
+
 bool
 Triangle::isInside(const Vec3& a_point) const noexcept
 {

@@ -74,10 +74,12 @@ public:
   define(std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept;
 
   /*!
-    @brief Hierarchical search function that fetches the closest triangles
+    @brief Hierarchical search function that fetches the closest triangles.
     @param[in] a_input Point
+    @return Returns a list of candidate triangles that are believed to be the closest triangles. The returned vector
+    is sorted according to the shortest distance between the input point and triangle. 
   */
-  virtual std::vector<std::shared_ptr<const Triangle>>
+  virtual std::vector<std::pair<std::shared_ptr<const Triangle>, Real>>
   getClosestTriangles(const Vec3& a_point) const noexcept;
 
 protected:

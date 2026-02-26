@@ -80,6 +80,14 @@ public:
   setVertexData(const std::array<Real, 3>& a_vertexData) noexcept;
 
   /*!
+    @brief Project the input point to the triangle plane
+    @param[in] a_point Input point.
+    @return Returns a_point - dot(a_point, m_triangleNormal) * m_triangleNormal
+  */
+  Vec3
+  projectToTrianglePlane(const Vec3& a_point) const noexcept;
+
+  /*!
     @brief Check if a point lies inside the triangle.
     @details Tests whether the projection of a_point onto the triangle plane falls within the
     triangle boundary. The test is based on the sign of the triple products of each edge direction
