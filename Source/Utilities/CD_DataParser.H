@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_PointParticle.H>
 #include <CD_LookupTable.H>
+#include <CD_Triangle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -82,6 +83,25 @@ namespace DataParser {
                           const unsigned int      a_zColumn     = 2,
                           const unsigned int      a_wColumn     = 3,
                           const std::vector<char> a_ignoreChars = {'#', '/'});
+
+  /*!
+    @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.
+    @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier
+    matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK
+    point-data scalar), that data is stored as the vertex metadata on each Triangle via
+    setVertexData(). If the identifier is not found, a warning is issued and all vertex data
+    values are set to zero.
+
+    Non-triangular facets are skipped with a warning. The file type is inferred from the
+    extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.
+
+    @param[in] a_filename             Path to the input mesh file.
+    @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as
+                                      Triangle vertex metadata.
+    @return Vector of fully initialised Triangle objects, sorted in file order.
+  */
+  std::vector<std::shared_ptr<Triangle>>
+  readTriangles(const std::string a_filename, const std::string a_vertexDataIdentifier);
 
 } // namespace DataParser
 

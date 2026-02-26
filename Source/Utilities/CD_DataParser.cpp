@@ -12,6 +12,7 @@
 // Std includes
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -20,6 +21,10 @@
 // Our includes
 #include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
+
+#warning "The EBGeometry parser doesn't appear to populate the VTK members. This is an EBGeometry bug."
+#warning "Some EBGeometry memeber functions are erronously marked noexcept. Fix this"
+#warning "We should also have try/catch statements on the errors. "
 
 LookupTable1D<Real, 1>
 DataParser::simpleFileReadASCII(const std::string       a_fileName,
@@ -213,6 +218,77 @@ DataParser::readPointParticlesASCII(const std::string       a_fileName,
   }
 
   return particles;
+}
+
+std::vector<std::shared_ptr<Triangle>>
+DataParser::readTriangles(const std::string a_filename, const std::string a_vertexDataIdentifier)
+{
+  CH_TIME("DataParser::readTriangles");
+
+  using Vec3 = Triangle::Vec3;
+
+  // Detect file type from the extension.
+  const auto fileType = EBGeometry::Parser::getFileType(a_filename);
+
+  if (fileType == EBGeometry::Parser::FileType::Unsupported) {
+    MayDay::Error(("DataParser::readTriangles - unsupported file type for '" + a_filename +
+                   "'. File must have a .ply or .vtk extension.")
+                    .c_str());
+  }
+
+  std::vector<Vec3>                vertices;
+  std::vector<std::vector<size_t>> facets;
+  std::vector<Real>                vertexData;
+  bool                             hasVertexData = true;
+
+  // Read the file and attempt to fetch the named per-vertex scalar property.
+  if (fileType == EBGeometry::Parser::FileType::PLY) {
+    auto ply = EBGeometry::Parser::readPLY<Real>(a_filename);
+
+    vertices      = ply.getVertexCoordinates();
+    facets        = ply.getFacets();
+    vertexData    = ply.getVertexProperties(a_vertexDataIdentifier);
+    hasVertexData = false;
+  }
+  else if (fileType == EBGeometry::Parser::FileType::VTK) {
+    auto vtk = EBGeometry::Parser::readVTK<Real>(a_filename);
+
+    vertices      = vtk.getVertexCoordinates();
+    facets        = vtk.getFacets();
+    vertexData    = vtk.getPointDataScalars(a_vertexDataIdentifier);
+    hasVertexData = false;
+  }
+
+  // Build Triangle objects from the facet connectivity.
+  std::vector<std::shared_ptr<Triangle>> triangles;
+
+  for (const auto& facet : facets) {
+    if (facet.size() != 3) {
+      const std::string err = "DataParser::readTriangles - non-triangular facet encountered for '" + a_filename + "'. Skipping this.";
+      
+      MayDay::Warning(err.c_str());
+      
+      continue;
+    }
+
+    const size_t i0 = facet[0];
+    const size_t i1 = facet[1];
+    const size_t i2 = facet[2];
+
+    auto tri = std::make_shared<Triangle>(std::array<Vec3, 3>{vertices[i0], vertices[i1], vertices[i2]});
+
+    if (hasVertexData) {
+      tri->setVertexData({vertexData[i0], vertexData[i1], vertexData[i2]});
+    }
+
+    triangles.emplace_back(std::move(tri));
+  }
+
+  if (triangles.empty()) {
+    MayDay::Warning(("DataParser::readTriangles - no triangles were read from file '" + a_filename + "'.").c_str());
+  }
+
+  return triangles;
 }
 
 #include <CD_NamespaceFooter.H>

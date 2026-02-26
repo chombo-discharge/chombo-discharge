@@ -15,9 +15,11 @@
 // Std includes
 #include <vector>
 #include <memory>
+#include <string>
 
 // Our includes
 #include <CD_Triangle.H>
+#include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -58,7 +60,20 @@ public:
   TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept;
 
   /*!
-    @brief Destructor (does nothing). 
+    @brief File-reading constructor. Reads a PLY or VTK mesh file and builds the BVH.
+    @details Calls DataParser::readTriangles() to parse the file and populate Triangle vertex
+    positions and metadata, then calls define() to build the BVH. Equivalent to constructing
+    with the default constructor and then calling define(DataParser::readTriangles(a_filename,
+    a_vertexDataIdentifier)). Issues a fatal error for unsupported file types and a warning if
+    the vertex data identifier is not found in the file (vertex data defaults to zero in that case).
+    @param[in] a_filename             Path to the input mesh file (.ply or .vtk).
+    @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as
+                                      Triangle vertex metadata.
+  */
+  TriangleCollection(const std::string& a_filename, const std::string& a_vertexDataIdentifier);
+
+  /*!
+    @brief Destructor (does nothing).
   */
   virtual ~TriangleCollection() noexcept;
 

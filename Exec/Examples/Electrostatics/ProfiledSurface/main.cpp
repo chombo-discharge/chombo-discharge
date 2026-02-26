@@ -27,8 +27,9 @@ main(int argc, char* argv[])
 
   engine->setupAndRun();
 #endif
-  const auto triSDF = EBGeometry::Parser::readIntoTriangleBVH<T, Meta, BV, K>("x_low.vtk");
+  //  const auto triSDF = EBGeometry::Parser::readIntoTriangleBVH<T, Meta, BV, K>("x_low.vtk");
 
-  Triangle tri;
+  const auto triangles = DataParser::readTriangles("test.vtk", "potential");
+
   ChomboDischarge::finalize();
 }

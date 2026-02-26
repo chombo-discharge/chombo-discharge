@@ -13,6 +13,7 @@
 #include <CH_Timer.H>
 
 // Our includes
+#include <CD_DataParser.H>
 #include <CD_TriangleCollection.H>
 #include <CD_NamespaceHeader.H>
 
@@ -24,6 +25,12 @@ TriangleCollection::TriangleCollection() noexcept
 TriangleCollection::TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
   this->define(a_triangles);
+}
+
+TriangleCollection::TriangleCollection(const std::string& a_filename,
+                                       const std::string& a_vertexDataIdentifier)
+{
+  this->define(DataParser::readTriangles(a_filename, a_vertexDataIdentifier));
 }
 
 TriangleCollection::~TriangleCollection() noexcept
