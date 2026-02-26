@@ -1,7 +1,7 @@
 #include <CD_Driver.H>
 #include <CD_FieldSolverGMG.H>
 #include <CD_DiskProfiledPlane.H>
-#include <CD_TriangleLookup.H>
+#include <CD_TriangleCollection.H>
 #include <CD_Triangle.H>
 #include <CD_FieldStepper.H>
 
