@@ -22,7 +22,7 @@ Triangle::Triangle(const std::array<Vec3, 3>& a_vertexPositions) noexcept
 {
   this->setVertexPositions(a_vertexPositions);
   this->setVertexData({0.0, 0.0, 0.0});
-  this->computeArea();  
+  this->computeArea();
 }
 
 Triangle::~Triangle() noexcept
@@ -47,7 +47,8 @@ Triangle::computeArea() noexcept
 }
 
 EBGeometry::Vec3T<Real>
-Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept {
+Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept
+{
   return a_point - dot(a_point, m_triangleNormal) * m_triangleNormal;
 }
 

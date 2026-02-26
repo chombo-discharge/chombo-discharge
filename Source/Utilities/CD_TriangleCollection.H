@@ -28,7 +28,7 @@ class TriangleCollection
 {
 public:
   /*!
-    @brief Vector alias. Inherited from Triangle class
+    @brief 3D vector type, re-exported from Triangle for convenience.
   */
   using Vec3 = Triangle::Vec3;
 
@@ -43,23 +43,19 @@ public:
   using BV = EBGeometry::BoundingVolumes::AABBT<Real>;
 
   /*!
-    @brief Default constructor
+    @brief Default constructor.
+    @details Leaves the object in an undefined state (m_isDefined = false). define() must be called
+    before getClosestTriangles() can be used.
   */
   TriangleCollection() noexcept;
 
   /*!
     @brief Full constructor. Takes the input triangles and stores them in a BVH-tree.
-    @param[in] a_triangles Input triangles. These must already have their meta-data filled.
+    @details Calls define(). The object is ready for use immediately after construction.
+    @param[in] a_triangles Input triangles. Must be non-empty and must already have their vertex
+    positions and meta-data set.
   */
-  TriangleCollection(std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept;
-
-  /*!
-    @brief Full constructor. Read the input file and stores the triangle in a BVH-tree.
-    @note The input file must either be a VTK file or a PLY file. 
-    @param[in] a_file File name
-    @param[in] a_vertexData Identifier for the vertex data (must be a single property/float per vertex9
-  */
-  TriangleCollection(const std::string a_filename, const std::string a_vertexData);
+  TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept;
 
   /*!
     @brief Destructor (does nothing). 
@@ -67,17 +63,29 @@ public:
   virtual ~TriangleCollection() noexcept;
 
   /*!
-    @brief Full define function. Takes the input triangles and stores them in a BVH-tree.
-    @param[in] a_triangles Input triangles. These must already have their meta-data filled.
+    @brief Build the BVH tree from a set of triangles.
+    @details Packs each triangle into an axis-aligned bounding box, constructs a K-ary BVH using
+    top-down partitioning, and flattens it into a linear layout for cache-friendly traversal. Sets
+    m_isDefined to true on success. This is the same operation performed by the full constructor;
+    use it to (re-)initialize an object that was default-constructed or needs to be rebuilt.
+    @param[in] a_triangles Input triangles. Must be non-empty and must already have their vertex
+    positions and meta-data set.
   */
   virtual void
-  define(std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept;
+  define(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept;
 
   /*!
-    @brief Hierarchical search function that fetches the closest triangles.
-    @param[in] a_input Point
-    @return Returns a list of candidate triangles that are believed to be the closest triangles. The returned vector
-    is sorted according to the shortest distance between the input point and triangle. 
+    @brief Hierarchical BVH search that returns candidate closest triangles to a query point.
+    @details Traverses the BVH closest-node-first, pruning any node whose bounding volume distance
+    exceeds the shortest triangle distance found so far. At each leaf the pruning threshold is
+    tightened as each closer triangle is encountered, so the returned list contains every triangle
+    that was the shortest-distance-so-far at the moment it was evaluated. As a result the list may
+    include triangles that are not among the globally closest once the full traversal is complete;
+    callers should use the first entry (index 0) as the definitive closest triangle.
+    Requires define() to have been called first.
+    @param[in] a_point Query point in 3D space.
+    @return Candidate triangles paired with their unsigned distance to a_point, sorted ascending by
+    distance. The first entry is the closest triangle found.
   */
   virtual std::vector<std::pair<std::shared_ptr<const Triangle>, Real>>
   getClosestTriangles(const Vec3& a_point) const noexcept;
@@ -86,7 +94,7 @@ protected:
   /*!
     @brief Is defined or not
   */
-  bool m_isDefined;
+  bool m_isDefined = false;
 
   /*!
     @brief Triangle collection -- stored in a BVH-tree for faster lookup

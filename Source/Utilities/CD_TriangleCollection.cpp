@@ -21,7 +21,7 @@ TriangleCollection::TriangleCollection() noexcept
   m_isDefined = false;
 }
 
-TriangleCollection::TriangleCollection(std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
+TriangleCollection::TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
   this->define(a_triangles);
 }
@@ -30,9 +30,12 @@ TriangleCollection::~TriangleCollection() noexcept
 {}
 
 void
-TriangleCollection::define(std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
+TriangleCollection::define(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
   CH_assert(a_triangles.size() > 0);
+  if (a_triangles.empty()) {
+    return;
+  }
 
   // Pack triangles and their bounding volumes into a list.
   using TriAndBVList = std::vector<std::pair<std::shared_ptr<const Triangle>, BV>>;
@@ -109,7 +112,6 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
 
       if (distToTri <= shortestDistanceSoFar) {
         candidates.emplace_back(f, distToTri);
-
         shortestDistanceSoFar = distToTri;
       }
     }
