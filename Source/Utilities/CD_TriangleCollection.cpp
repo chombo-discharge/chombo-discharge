@@ -27,8 +27,7 @@ TriangleCollection::TriangleCollection(const std::vector<std::shared_ptr<Triangl
   this->define(a_triangles);
 }
 
-TriangleCollection::TriangleCollection(const std::string& a_filename,
-                                       const std::string& a_vertexDataIdentifier)
+TriangleCollection::TriangleCollection(const std::string& a_filename, const std::string& a_vertexDataIdentifier)
 {
   this->define(DataParser::readTriangles(a_filename, a_vertexDataIdentifier));
 }

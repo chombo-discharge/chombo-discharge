@@ -23,7 +23,8 @@
 #include <CD_ElectrostaticEbBc.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "This class should have support for triangle BCs in 3D and line BCs in 2D. Line BCs should be read into a lookuptable1d"
+#warning \
+  "This class should have support for triangle BCs in 3D and line BCs in 2D. Line BCs should be read into a lookuptable1d"
 
 /*!
   @brief Base class for electrostatic solvers. 

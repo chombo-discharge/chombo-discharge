@@ -248,7 +248,7 @@ DataParser::readTriangles(const std::string a_filename, const std::string a_vert
     vertices      = ply.getVertexCoordinates();
     facets        = ply.getFacets();
     vertexData    = ply.getVertexProperties(a_vertexDataIdentifier);
-    hasVertexData = false;
+    hasVertexData = !vertexData.empty();
   }
   else if (fileType == EBGeometry::Parser::FileType::VTK) {
     auto vtk = EBGeometry::Parser::readVTK<Real>(a_filename);
@@ -256,7 +256,7 @@ DataParser::readTriangles(const std::string a_filename, const std::string a_vert
     vertices      = vtk.getVertexCoordinates();
     facets        = vtk.getFacets();
     vertexData    = vtk.getPointDataScalars(a_vertexDataIdentifier);
-    hasVertexData = false;
+    hasVertexData = !vertexData.empty();
   }
 
   // Build Triangle objects from the facet connectivity.
@@ -264,10 +264,11 @@ DataParser::readTriangles(const std::string a_filename, const std::string a_vert
 
   for (const auto& facet : facets) {
     if (facet.size() != 3) {
-      const std::string err = "DataParser::readTriangles - non-triangular facet encountered for '" + a_filename + "'. Skipping this.";
-      
+      const std::string err = "DataParser::readTriangles - non-triangular facet encountered for '" + a_filename +
+                              "'. Skipping this.";
+
       MayDay::Warning(err.c_str());
-      
+
       continue;
     }
 
