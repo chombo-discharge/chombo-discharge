@@ -49,7 +49,10 @@ Triangle::computeArea() noexcept
 EBGeometry::Vec3T<Real>
 Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept
 {
-  return a_point - dot(a_point, m_triangleNormal) * m_triangleNormal;
+#warning "Remove later"
+  std::cout << "meta = " << m_metaData[0] << "\t" << m_metaData[1] << "\t" << m_metaData[2] << "\n";
+
+  return a_point - dot(a_point - m_vertexPositions[0], m_triangleNormal) * m_triangleNormal;
 }
 
 bool
@@ -59,19 +62,15 @@ Triangle::isInside(const Vec3& a_point) const noexcept
     return (x >= 0.0) ? 1 : -1;
   };
 
-  const Vec3 v21 = m_vertexPositions[1] - m_vertexPositions[0];
-  const Vec3 v32 = m_vertexPositions[2] - m_vertexPositions[1];
-  const Vec3 v13 = m_vertexPositions[0] - m_vertexPositions[2];
+  const Vec3 A = m_vertexPositions[0] - a_point;
+  const Vec3 B = m_vertexPositions[1] - a_point;
+  const Vec3 C = m_vertexPositions[2] - a_point;
 
-  const Vec3 p1 = a_point - m_vertexPositions[0];
-  const Vec3 p2 = a_point - m_vertexPositions[1];
-  const Vec3 p3 = a_point - m_vertexPositions[2];
+  const Vec3 u = B.cross(C);
+  const Vec3 v = C.cross(A);
+  const Vec3 w = A.cross(B);
 
-  const Real s0 = sgn(dot(v21.cross(m_triangleNormal), p1));
-  const Real s1 = sgn(dot(v32.cross(m_triangleNormal), p2));
-  const Real s2 = sgn(dot(v13.cross(m_triangleNormal), p3));
-
-  return (s0 + s1 + s2 >= 2.0);
+  return !((dot(u, v) < 0.0) || (dot(u, w) < 0.0));
 }
 
 Real

@@ -96,6 +96,7 @@ public:
     @param[in] a_point Query point in 3D space.
     @return True if the projection of a_point onto the triangle plane is inside the triangle,
     false otherwise.
+    @note The user must first project the point to the triangle plane by using projectToTrianglePlane
   */
   bool
   isInside(const Vec3& a_point) const noexcept;

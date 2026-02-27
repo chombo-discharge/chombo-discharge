@@ -8,11 +8,6 @@
 using namespace ChomboDischarge;
 using namespace Physics::Electrostatics;
 
-using T         = Real;
-using Meta      = std::array<Real, 3>;
-using BV        = EBGeometry::BoundingVolumes::AABBT<T>;
-constexpr int K = 4;
-
 int
 main(int argc, char* argv[])
 {
@@ -27,9 +22,30 @@ main(int argc, char* argv[])
 
   engine->setupAndRun();
 #endif
-  //  const auto triSDF = EBGeometry::Parser::readIntoTriangleBVH<T, Meta, BV, K>("x_low.vtk");
+  const auto x                  = EBGeometry::Vec3T<Real>::zero();
+  const auto triangles          = DataParser::readTriangles("test.vtk", "potential");
+  const auto triangleCollection = std::make_shared<TriangleCollection>(triangles);
+  const auto closestTriangles   = triangleCollection->getClosestTriangles(x);
 
-  const auto triangles = DataParser::readTriangles("test.vtk", "potential");
+  if (procID() == 0) {
+    const auto& tri = *(closestTriangles.front().first);
+    const auto  y   = tri.projectToTrianglePlane(x);
+    const auto  z   = tri.interpolate(y);
+
+    std::cout << "v0 = " << tri.getVertexPositions()[0] << "\n";
+    std::cout << "v1 = " << tri.getVertexPositions()[1] << "\n";
+    std::cout << "v2 = " << tri.getVertexPositions()[2] << "\n";
+    
+    std::cout << "num triangles = " << triangles.size() << "\n";
+    std::cout << "closest triangles size = " << closestTriangles.size() << "\n";
+    std::cout << "x = " << x << "\n";
+    std::cout << "y = " << y << "\n";    
+    std::cout << "inside(x) = " << tri.isInside(x) << "\n";
+    std::cout << "inside(y) = " << tri.isInside(y) << "\n";
+    std::cout << "dist(x) = " << tri.signedDistance(x) << "\n";
+    std::cout << "dist(y) = " << tri.signedDistance(y) << "\n";
+    std::cout << "interp = " << z << "\n";
+  }
 
   ChomboDischarge::finalize();
 }
