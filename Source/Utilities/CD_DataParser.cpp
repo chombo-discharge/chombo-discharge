@@ -241,18 +241,34 @@ DataParser::readTriangles(const std::string a_filename, const std::string a_vert
   if (fileType == EBGeometry::Parser::FileType::PLY) {
     auto ply = EBGeometry::Parser::readPLY<Real>(a_filename);
 
-    vertices      = ply.getVertexCoordinates();
-    facets        = ply.getFacets();
-    vertexData    = ply.getVertexProperties(a_vertexDataIdentifier);
-    hasVertexData = !vertexData.empty();
+    vertices = ply.getVertexCoordinates();
+    facets   = ply.getFacets();
+
+    try {
+      vertexData    = ply.getVertexProperties(a_vertexDataIdentifier);
+      hasVertexData = !vertexData.empty();
+    } catch (const std::out_of_range& e) {
+      MayDay::Warning(("DataParser::readTriangles - vertex property '" + a_vertexDataIdentifier +
+                       "' not found in PLY file '" + a_filename + "'. Ignoring vertex data.")
+                        .c_str());
+      hasVertexData = false;
+    }
   }
   else if (fileType == EBGeometry::Parser::FileType::VTK) {
     auto vtk = EBGeometry::Parser::readVTK<Real>(a_filename);
 
-    vertices      = vtk.getVertexCoordinates();
-    facets        = vtk.getFacets();
-    vertexData    = vtk.getPointDataScalars(a_vertexDataIdentifier);
-    hasVertexData = !vertexData.empty();
+    vertices = vtk.getVertexCoordinates();
+    facets   = vtk.getFacets();
+
+    try {
+      vertexData    = vtk.getPointDataScalars(a_vertexDataIdentifier);
+      hasVertexData = !vertexData.empty();
+    } catch (const std::out_of_range& e) {
+      MayDay::Warning(("DataParser::readTriangles - point data scalar '" + a_vertexDataIdentifier +
+                       "' not found in VTK file '" + a_filename + "'. Ignoring vertex data.")
+                        .c_str());
+      hasVertexData = false;
+    }
   }
 
   // Build Triangle objects from the facet connectivity.
