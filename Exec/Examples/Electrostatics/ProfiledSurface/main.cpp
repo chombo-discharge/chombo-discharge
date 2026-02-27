@@ -22,7 +22,7 @@ main(int argc, char* argv[])
 
   engine->setupAndRun();
 #endif
-  const auto x                  = EBGeometry::Vec3T<Real>::zero();
+  const auto x                  = EBGeometry::Vec3T<Real>(0.0, 0.0, 0.1);
   const auto triangles          = DataParser::readTriangles("test.vtk", "potential");
   const auto triangleCollection = std::make_shared<TriangleCollection>(triangles);
   const auto closestTriangles   = triangleCollection->getClosestTriangles(x);
