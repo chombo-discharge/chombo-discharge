@@ -23,6 +23,8 @@
 #include <CD_ElectrostaticEbBc.H>
 #include <CD_NamespaceHeader.H>
 
+#warning "This class should have support for triangle BCs in 3D and line BCs in 2D. Line BCs should be read into a lookuptable1d"
+
 /*!
   @brief Base class for electrostatic solvers. 
   @details This class contains an interface to a solve routine, data holders, and interface to boundary conditions. Solver routines are
