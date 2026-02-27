@@ -49,9 +49,6 @@ Triangle::computeArea() noexcept
 EBGeometry::Vec3T<Real>
 Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept
 {
-#warning "Remove later"
-  std::cout << "meta = " << m_metaData[0] << "\t" << m_metaData[1] << "\t" << m_metaData[2] << "\n";
-
   return a_point - dot(a_point - m_vertexPositions[0], m_triangleNormal) * m_triangleNormal;
 }
 

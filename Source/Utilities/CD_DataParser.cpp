@@ -22,10 +22,6 @@
 #include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
-#warning "The EBGeometry parser doesn't appear to populate the VTK members. This is an EBGeometry bug."
-#warning "Some EBGeometry memeber functions are erronously marked noexcept. Fix this"
-#warning "We should also have try/catch statements on the errors. "
-
 LookupTable1D<Real, 1>
 DataParser::simpleFileReadASCII(const std::string       a_fileName,
                                 const int               a_xColumn,
