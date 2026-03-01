@@ -9,10 +9,10 @@
   @author Robert Marskar
 */
 
+#ifdef CH_USE_PETSC
+
 #ifndef CD_PetscGrid_H
 #define CD_PetscGrid_H
-
-#ifdef CH_USE_PETSC
 
 // Petsc includes
 #include "petsc.h"
@@ -31,6 +31,8 @@
 #include <CD_PetscDOF.H>
 #include <CD_PetscAMRCell.H>
 #include <CD_NamespaceHeader.H>
+
+#warning "This class should have vof iterators that iterate over only the valid cells on each phase/level/grid index"
 
 /*!
   @brief Class which maps a multifluid cut-cell AMR hierarchy to PETSc.
@@ -86,6 +88,78 @@ public:
   clear() noexcept;
 
   /*!
+    @brief Is defined or not
+  */
+  virtual bool
+  isDefined() const noexcept;
+
+  /*!
+    @brief Get the grids
+  */
+  virtual Vector<DisjointBoxLayout>
+  getGrids() const noexcept;
+
+  /*!
+    @brief Get the grids on each level.
+  */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGrids() const noexcept;
+
+  /*!
+    @brief Get the refined coarse grids on each level.
+  */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridsFiCo() const noexcept;
+
+  /*!
+    @brief Get the coarsened fine coarse grids on each level.
+  */
+  virtual const Vector<RefCountedPtr<MFLevelGrid>>&
+  getMFLevelGridsCoFi() const noexcept;
+
+  /*!
+    @brief Get the VoF iterator defined on the specified phase
+    @return m_vofIteratork[iphase].
+  */
+  virtual Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
+  getVoFIterator(const int a_iphase) const noexcept;
+
+  /*!
+    @brief Get the cut-cells that are also PETSc rows on the specified phase.
+    @return m_vofIteratork[iphase].
+  */
+  virtual const Vector<RefCountedPtr<LayoutData<IntVectSet>>>&
+  getIrregIVS(const int a_iphase) const noexcept;
+
+  /*!
+    @brief Get the mapping between the AMR cells and PETSc rows
+  */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetsc() const noexcept;
+
+  /*!
+    @brief Get the mapping between the AMR cells and PETSc rows.
+    @details This returns the mapping on every level l, where the levels are defined
+    by coarsening of the finer level. 
+  */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetscCoFi() const noexcept;
+
+  /*!
+    @brief Get the mapping between the AMR cells and PETSc rows.
+    @details This returns the mapping on every level l, where the levels are defined
+    by refinement of a coarser level.
+  */
+  virtual const Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>>&
+  getAMRToPetscFiCo() const noexcept;
+
+  /*!
+    @brief Get the number of valid phases
+  */
+  virtual int
+  getNumPhases() const noexcept;
+
+  /*!
     @brief Create a PETSc vector.
     @details This will allocate the PETSc vector. It is up to the user to destroy it when it is no longer needed.
     param[in,out] x PETSc vector    
@@ -110,7 +184,10 @@ public:
   setValue(Vec& a_x, const PetscScalar a_value) const noexcept;
 
   /*!
-    @brief Push data form a chombo-discharge data holder into PETSc
+    @brief Push data form a chombo-discharge data holder into PETSc.
+    @details The current implementation iterates through the AMR cells on each rank and extracts the subvector
+    on each rank. Fillling is done using the local row number obtained via amrToPetsc (we simply subtract each
+    rank's starting row index).
     @param[out] a_x PETSc vector
     @param[in] a_y chombo-discharge data holder    
   */
@@ -118,7 +195,9 @@ public:
   putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept;
 
   /*!
-    @brief Pull data from a PETSc vector into a chombo-discharge data holder
+    @brief Pull data from a PETSc vector into a chombo-discharge data holder.
+    @details The current implementation iterates through the local subvector (via m_petscToAMR), and assigns
+    values to each AMR cell using the local PETSc row. 
     @param[in,out] a_y chombo-discharge data holder
     @param[in] a_x PETSc vector    
   */
@@ -234,7 +313,8 @@ protected:
 
   /*!
     @brief Mapping structure for moving between AMR cells and PETSc rows.
-    @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc. 
+    @details PetscAMRCell contains extra information, such as whether or not a cell is a ghost cell, covered by another cell, etc.
+    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row.     
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetsc;
 
@@ -242,6 +322,7 @@ protected:
     @brief Mapping structure for moving between AMR cells and PETSc rows.
     @details This is like m_amrToPetsc, except that it is defined on the coarsened grids. Index i thus contains the coarsening of
     level i+1.
+    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row. 
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscCoFi;
 
@@ -249,6 +330,7 @@ protected:
     @brief Mapping structure for moving between AMR cells and PETSc rows.
     @details This is like m_amrToPetsc, except that it is defined on the refined. Index i+1 thus contains the refinement of
     level i.
+    @note This object stores the global PETSc row, not the local one. Subtract by m_localRowBegin if you need the local row.         
   */
   Vector<RefCountedPtr<LevelData<BaseFab<PetscAMRCell>>>> m_amrToPetscFiCo;
 
@@ -257,6 +339,18 @@ protected:
     @details Locally owned. Maps a local row index to a level/grid/cell.
   */
   Vector<RefCountedPtr<LayoutData<Vector<PetscDOF>>>> m_petscToAMR[2];
+
+  /*!
+    @brief Iterator for iterating through the cut-cells on each phase
+    @note This is defined only on the valid cut-cells that are also PETSc rows
+  */
+  mutable Vector<RefCountedPtr<LayoutData<VoFIterator>>> m_vofIterators[2];
+
+  /*!
+    @brief Cut-cells that are also PETSc rows. 
+    @note This is defined only on the valid cut-cells that are also PETSc rows
+  */
+  Vector<RefCountedPtr<LayoutData<IntVectSet>>> m_irregIVS[2];
 
   /*!
     @brief Define basic cell information for PetscGrid.
