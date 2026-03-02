@@ -912,6 +912,7 @@ FieldSolver::parseDomainBc()
             const auto                     closest   = triColl->getClosestTriangles(queryPt);
             const auto&                    tri       = closest.front().first;
             const auto                     projected = tri->projectToTrianglePlane(queryPt);
+
             return tri->interpolate(projected) * voltage(time) * val;
           };
 
@@ -923,6 +924,7 @@ FieldSolver::parseDomainBc()
             const auto                     closest   = triColl->getClosestTriangles(queryPt);
             const auto&                    tri       = closest.front().first;
             const auto                     projected = tri->projectToTrianglePlane(queryPt);
+
             return tri->interpolate(projected) * val;
           };
 
@@ -940,9 +942,11 @@ FieldSolver::parseDomainBc()
         if (num != 1) {
           MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann_custom takes exactly 1 argument");
         }
+
         curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
           return bcFunc(a_pos, time);
         };
+
         bcType = (str == "dirichlet_custom") ? ElectrostaticDomainBc::BcType::Dirichlet
                                              : ElectrostaticDomainBc::BcType::Neumann;
       }
