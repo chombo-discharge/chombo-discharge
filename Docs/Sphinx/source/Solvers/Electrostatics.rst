@@ -466,10 +466,18 @@ We explain these options below:
 
 * ``FieldSolverGMG.gmg_verbosity``.
   Controls the multigrid verbosity.
-  Setting it to a number :math:`> 0` will print multigrid convergence information.  
+  Setting it to a number :math:`> 0` will print multigrid convergence information.
+* ``FieldSolverGMG.gmg_bottom_verbosity``.
+  Controls the multigrid bottom solver verbosity.
+  Setting it to a number :math:`> 0` will print some bottom solver convergence information.
+  The information printed depends on the bottom solver that is used.
 * ``FieldSolverGMG.gmg_use_default_settings``.
   Use default multigrid settings.
-  This tends to make most problems converge.
+  
+  .. tip::
+     
+     Enabling this setting tends to make most problems converge, but potentially at suboptimal convergence rates.
+
 * ``FieldSolverGMG.gmg_pre_smooth``.
   Controls the number of relaxations on each level during multigrid downsweeps.
 * ``FieldSolverGMG.gmg_post_smooth``.
@@ -510,9 +518,7 @@ We explain these options below:
   Sets the multigrid relaxation factor.
 
 
-  .. tip::
-     
-     Enabling this setting tends to make most problems converge quite well.
+
 
 
 .. warning::
