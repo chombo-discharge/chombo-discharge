@@ -18,6 +18,9 @@
 #include <type_traits>
 #include <iostream>
 
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 namespace LookupTable {
   /*!
   @brief Strategy for obtaining data when requesting data that is out of range. 
@@ -41,6 +44,8 @@ namespace LookupTable {
   };
 
 } // namespace LookupTable
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_LookupTable1D.H>
 

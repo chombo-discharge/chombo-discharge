@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_LookupTable.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for interpolation of f = f(x) data in one independent variable x.
@@ -247,6 +248,8 @@ protected:
   inline size_t
   getIndexLo(const T& a_x) const;
 };
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_LookupTable1DImplem.H>
 

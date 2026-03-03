@@ -67,7 +67,7 @@ The function signature for setting the voltage on various parts is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 381-387
+   :lines: 385-391
    :dedent: 2
 
 This allows setting a time-dependent voltage on electrodes and domain boundaries.
@@ -222,7 +222,105 @@ I.e. the boundary condition function that is passed into the numerical discretiz
       return func(a_pos, a_time) * neumannFraction;
    };
 
-Note that since ``func`` is initialized to one, the floating point number in the input option directly specifies the value of :math:`\partial_n\Phi`. 
+Note that since ``func`` is initialized to one, the floating point number in the input option directly specifies the value of :math:`\partial_n\Phi`.
+
+File-based boundary conditions
+______________________________
+
+``FieldSolver`` also supports loading spatially-varying domain boundary conditions from a
+data file, using the ``file`` keyword in the input script.
+The general format is
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.x.low = file <dirichlet|neumann> <path> <arg4> <multiplier>
+
+where ``<path>`` is the path to the data file, ``<multiplier>`` is a real-valued scale
+factor applied to the interpolated result, and ``<arg4>`` depends on the spatial dimension:
+
+* **2D**: ``<arg4>`` is an integer specifying the number of uniformly-spaced interpolation
+  points used to prepare the lookup table.
+  The file must be an ASCII column file readable by :func:`DataParser::simpleFileReadASCII`.
+  The boundary condition value is interpolated along the single tangential direction of the
+  domain side.
+
+  Example:
+
+  .. code-block:: text
+
+     FieldSolverGMG.bc.y.low = file dirichlet /path/to/data.txt 100 1.0
+
+* **3D**: ``<arg4>`` is a string naming the per-vertex scalar property in a PLY or VTK
+  triangle mesh file (see :ref:`Chap:DataParser`).
+  The mesh is loaded into a ``TriangleCollection``; for each boundary point the closest
+  triangle is found, the point is projected onto the triangle plane, and the vertex metadata
+  is interpolated using barycentric coordinates.
+
+  Example:
+
+  .. code-block:: text
+
+     FieldSolverGMG.bc.y.low = file dirichlet /path/to/mesh.ply scalarprop 1.0
+
+The resulting boundary condition value applied in both cases follows the same convention as
+the simplified format:
+
+* **Dirichlet**: ``interpolated_value × voltage(t) × multiplier``
+* **Neumann**: ``interpolated_value × multiplier``
+
+.. note::
+
+   The PLY/VTK mesh used for 3D file-based BCs does not need to coincide with the domain
+   boundary face — it only needs to cover the spatial extent of the boundary, since the
+   closest-triangle lookup is used.
+   If a named per-vertex scalar is not found in the mesh file, a warning is issued and all
+   vertex data defaults to zero.
+
+Radial file-based boundary conditions
+______________________________________
+
+For problems with axisymmetric boundary data, ``FieldSolver`` supports a
+``file_radial`` keyword.
+In this case, the boundary condition value is tabulated as a function of the
+in-plane radial distance from the axis normal to the face:
+
+* z-face: :math:`r = \sqrt{x^2 + y^2}`
+* y-face: :math:`r = \sqrt{x^2 + z^2}`
+* x-face: :math:`r = \sqrt{y^2 + z^2}`
+
+The format is:
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.z.hi = file_radial <dirichlet|neumann> <path> <numPoints> <multiplier>
+
+where
+
+* ``<path>`` is the path to a two-column ASCII file where the first column is
+  the radial distance :math:`r` and the second column is the BC value.
+  The file is read with :func:`DataParser::simpleFileReadASCII`.
+* ``<numPoints>`` is an integer specifying the number of uniformly-spaced
+  interpolation points for the prepared lookup table.
+* ``<multiplier>`` is a real-valued scale factor.
+
+The resulting BC value follows the same convention as the simplified format:
+
+* **Dirichlet**: ``interpolated_value × voltage(t) × multiplier``
+* **Neumann**: ``interpolated_value × multiplier``
+
+Example — Gaussian potential profile on the upper z-face:
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.z.hi = file_radial dirichlet /path/to/radial_profile.txt 200 1.0
+
+where ``radial_profile.txt`` contains two columns: ``r`` and ``value(r)``.
+
+.. note::
+
+   In 2D, ``file_radial`` uses :math:`r = |p_{\perp}|` where :math:`p_\perp`
+   is the single tangential coordinate, making it equivalent to looking up by
+   the absolute tangential distance.
 
 .. _Chap:PoissonEBBC:
    
@@ -249,7 +347,7 @@ The member function that does this is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 401-407
+   :lines: 405-411
    :dedent: 2
 
 Here, the type ``ElectrostaticEbBc::BcFunction`` is just an alias of ``std::function<Real(const RealVect a_position, const Real a_time)>``.
@@ -302,7 +400,7 @@ This is encapsulated by the pure member function
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 107-117
+   :lines: 111-121
    :dedent: 2
 
 where ``a_phi`` is the resulting potential that was computing with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
@@ -368,10 +466,18 @@ We explain these options below:
 
 * ``FieldSolverGMG.gmg_verbosity``.
   Controls the multigrid verbosity.
-  Setting it to a number :math:`> 0` will print multigrid convergence information.  
+  Setting it to a number :math:`> 0` will print multigrid convergence information.
+* ``FieldSolverGMG.gmg_bottom_verbosity``.
+  Controls the multigrid bottom solver verbosity.
+  Setting it to a number :math:`> 0` will print some bottom solver convergence information.
+  The information printed depends on the bottom solver that is used.
 * ``FieldSolverGMG.gmg_use_default_settings``.
   Use default multigrid settings.
-  This tends to make most problems converge.
+  
+  .. tip::
+     
+     Enabling this setting tends to make most problems converge, but potentially at suboptimal convergence rates.
+
 * ``FieldSolverGMG.gmg_pre_smooth``.
   Controls the number of relaxations on each level during multigrid downsweeps.
 * ``FieldSolverGMG.gmg_post_smooth``.
@@ -412,9 +518,7 @@ We explain these options below:
   Sets the multigrid relaxation factor.
 
 
-  .. tip::
-     
-     Enabling this setting tends to make most problems converge quite well.
+
 
 
 .. warning::

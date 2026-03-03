@@ -842,62 +842,206 @@ FieldSolver::parseDomainBc()
       const int                               num        = pp.countval(bcString.c_str());
 
       std::string str;
+      pp.get(bcString.c_str(), str, 0);
 
       ElectrostaticDomainBc::BcType      bcType;
       ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(domainSide); // = F(x,t) in the comments below
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
-      if (
-        num ==
-        1) { // If we only had one argument the user has asked for "custom" boundary conditions, and we then pass in F(x,t) directly (evaluated at m_time)
-        pp.get(bcString.c_str(), str, 0);
+      if (str == "file") {
+        // Format: file <dirichlet|neumann> <path> <numPts_or_id> <multiplier>
+        if (num != 5) {
+          MayDay::Error("FieldSolver::parseDomainBc -- 'file' BC requires 5 arguments: "
+                        "file <dirichlet|neumann> <path> <numPts_or_id> <multiplier>");
+        }
+
+        std::string bcTypeStr;
+        std::string filename;
+
+        Real val;
+
+        pp.get(bcString.c_str(), bcTypeStr, 1);
+        pp.get(bcString.c_str(), filename, 2);
+        pp.get(bcString.c_str(), val, 4);
+
+        bcType = this->parseBcString(bcTypeStr);
+
+#if CH_SPACEDIM == 2
+        int numPoints;
+        pp.get(bcString.c_str(), numPoints, 3);
+
+        auto table = std::make_shared<LookupTable1D<Real, 1>>(DataParser::simpleFileReadASCII(filename));
+        table->prepareTable(0, static_cast<size_t>(numPoints), LookupTable::Spacing::Uniform);
+
+        const int tangDir = 1 - dir; // sole tangential direction in 2D
+
+        switch (bcType) {
+        case ElectrostaticDomainBc::BcType::Dirichlet: {
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, tangDir](const RealVect a_pos,
+                                                                                            const Real     a_time) {
+            return table->interpolate<0>(a_pos[tangDir]) * voltage(time) * val;
+          };
+
+          break;
+        }
+        case ElectrostaticDomainBc::BcType::Neumann: {
+          curFunc = [table, val, tangDir](const RealVect a_pos, const Real a_time) {
+            return table->interpolate<0>(a_pos[tangDir]) * val;
+          };
+
+          break;
+        }
+        default: {
+          MayDay::Error("FieldSolver::parseDomainBc -- unsupported BC type for file-based BC!");
+          break;
+        }
+        }
+
+#elif CH_SPACEDIM == 3
+        std::string identifier;
+        pp.get(bcString.c_str(), identifier, 3);
+
+        auto triColl = std::make_shared<TriangleCollection>(filename, identifier);
+
+        switch (bcType) {
+        case ElectrostaticDomainBc::BcType::Dirichlet: {
+          curFunc = [triColl, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect a_pos,
+                                                                                     const Real     a_time) {
+            const TriangleCollection::Vec3 queryPt{a_pos[0], a_pos[1], a_pos[2]};
+            const auto                     closest   = triColl->getClosestTriangles(queryPt);
+            const auto&                    tri       = closest.front().first;
+            const auto                     projected = tri->projectToTrianglePlane(queryPt);
+
+            return tri->interpolate(projected) * voltage(time) * val;
+          };
+
+          break;
+        }
+        case ElectrostaticDomainBc::BcType::Neumann: {
+          curFunc = [triColl, val](const RealVect a_pos, const Real a_time) {
+            const TriangleCollection::Vec3 queryPt{a_pos[0], a_pos[1], a_pos[2]};
+            const auto                     closest   = triColl->getClosestTriangles(queryPt);
+            const auto&                    tri       = closest.front().first;
+            const auto                     projected = tri->projectToTrianglePlane(queryPt);
+
+            return tri->interpolate(projected) * val;
+          };
+
+          break;
+        }
+        default: {
+          MayDay::Error("FieldSolver::parseDomainBc -- unsupported BC type for file-based BC!");
+
+          break;
+        }
+        }
+#endif
+      }
+      else if (str == "file_radial") {
+        // Format: file_radial <dirichlet|neumann> <path> <numPts> <multiplier>
+        if (num != 5) {
+          MayDay::Error("FieldSolver::parseDomainBc -- 'file_radial' BC requires 5 arguments: "
+                        "file_radial <dirichlet|neumann> <path> <numPts> <multiplier>");
+        }
+
+        std::string bcTypeStr;
+        std::string filename;
+        int         numPoints;
+        Real        val;
+
+        pp.get(bcString.c_str(), bcTypeStr, 1);
+        pp.get(bcString.c_str(), filename, 2);
+        pp.get(bcString.c_str(), numPoints, 3);
+        pp.get(bcString.c_str(), val, 4);
+
+        bcType = this->parseBcString(bcTypeStr);
+
+        auto table = std::make_shared<LookupTable1D<Real, 1>>(DataParser::simpleFileReadASCII(filename));
+        table->prepareTable(0, static_cast<size_t>(numPoints), LookupTable::Spacing::Uniform);
+
+        switch (bcType) {
+        case ElectrostaticDomainBc::BcType::Dirichlet: {
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect a_pos,
+                                                                                        const Real     a_time) {
+            Real r2 = 0.0;
+            for (int d = 0; d < SpaceDim; d++) {
+              if (d != dir)
+                r2 += a_pos[d] * a_pos[d];
+            }
+            return table->interpolate<1>(std::sqrt(r2)) * voltage(time) * val;
+          };
+
+          break;
+        }
+        case ElectrostaticDomainBc::BcType::Neumann: {
+          curFunc = [table, val, dir](const RealVect a_pos, const Real a_time) {
+            Real r2 = 0.0;
+            for (int d = 0; d < SpaceDim; d++) {
+              if (d != dir)
+                r2 += a_pos[d] * a_pos[d];
+            }
+            return table->interpolate<1>(std::sqrt(r2)) * val;
+          };
+
+          break;
+        }
+        default: {
+          MayDay::Error("FieldSolver::parseDomainBc -- unsupported BC type for file_radial BC!");
+
+          break;
+        }
+        }
+      }
+      else if (str == "dirichlet_custom" || str == "neumann_custom") {
+        if (num != 1) {
+          MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann_custom takes exactly 1 argument");
+        }
 
         curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
           return bcFunc(a_pos, time);
         };
 
-        if (str == "dirichlet_custom") {
-          bcType = ElectrostaticDomainBc::BcType::Dirichlet;
-        }
-        else if (str == "neumann_custom") {
-          bcType = ElectrostaticDomainBc::BcType::Neumann;
-        }
-        else {
-          MayDay::Error(
-            "FieldSolver::parseDomainBc -- got only one argument but this argument was not dirichlet/neumann_custom. Maybe you have the wrong BC specification?");
-        }
+        bcType = (str == "dirichlet_custom") ? ElectrostaticDomainBc::BcType::Dirichlet
+                                             : ElectrostaticDomainBc::BcType::Neumann;
       }
-      else if (
-        num ==
-        2) { // If we had two arguments the user has asked to run with less verbose specifications. E.g. "dirichlet 0.5" => V(x,t) = V(t) * 0.5 * F(x,t)
+      else if (str == "dirichlet" || str == "neumann") {
+        if (num != 2) {
+          MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann takes exactly 2 arguments");
+        }
+
         Real val;
 
-        pp.get(bcString.c_str(), str, 0);
         pp.get(bcString.c_str(), val, 1);
 
         bcType = this->parseBcString(str);
 
-        // Build a function computing the value at the boundary.
         switch (bcType) {
-        case ElectrostaticDomainBc::BcType::Dirichlet:
+        case ElectrostaticDomainBc::BcType::Dirichlet: {
           curFunc = [&bcFunc, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect a_pos,
                                                                                      const Real     a_time) {
             return bcFunc(a_pos, time) * voltage(time) * val;
           };
+
           break;
-        case ElectrostaticDomainBc::BcType::Neumann:
+        }
+        case ElectrostaticDomainBc::BcType::Neumann: {
           curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real a_time) {
             return bcFunc(a_pos, time) * val;
           };
+
           break;
-        default:
+        }
+        default: {
           MayDay::Error("FieldSolver::parseDomainBc -- unsupported boundary condition requested!");
+
           break;
+        }
         }
       }
       else {
-        const std::string errorString = "FieldSolver::parseDomainBc -- bad or no input parameter for " + bcString;
+        const std::string errorString = "FieldSolver::parseDomainBc -- unknown BC keyword '" + str + "' for " +
+                                        bcString;
         MayDay::Error(errorString.c_str());
       }
 

@@ -115,12 +115,16 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
   // Write the header to file.
   HDF5HeaderData header;
 
+  bool      useProbLo = false;
+  ParmParse pp("DischargeIO");
+  pp.query("use_prob_lo", useProbLo);
+
   header.m_string["filetype"]    = "VanillaAMRFileType";
   header.m_int["num_levels"]     = a_numLevels;
   header.m_int["num_components"] = numCompTotal;
-#if 0 // Uncommenting this because VisIt doesn't know what to do with it.
-  header.m_realvect["prob_lo"]   = a_probLo;
-#endif
+  if (useProbLo) {
+    header.m_realvect["prob_lo"] = a_probLo;
+  }
 
   for (int comp = 0; comp < numCompTotal; comp++) {
     char labelString[100];

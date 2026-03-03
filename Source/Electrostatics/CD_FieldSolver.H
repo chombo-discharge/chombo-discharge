@@ -21,6 +21,10 @@
 #include <CD_AmrMesh.H>
 #include <CD_ElectrostaticDomainBc.H>
 #include <CD_ElectrostaticEbBc.H>
+#include <CD_DataParser.H>
+#include <CD_LookupTable1D.H>
+#include <CD_LookupTable.H>
+#include <CD_TriangleCollection.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

@@ -21,6 +21,7 @@
 
 // Our includes
 #include <CD_LookupTable1D.H>
+#include <CD_NamespaceHeader.H>
 
 template <typename T, size_t N, typename I>
 LookupTable1D<T, N, I>::LookupTable1D() noexcept
@@ -471,5 +472,7 @@ LookupTable1D<T, N, I>::slice(const Ts&... a_columns) const noexcept
 
   return ret;
 }
+
+#include <CD_NamespaceFooter.H>
 
 #endif
