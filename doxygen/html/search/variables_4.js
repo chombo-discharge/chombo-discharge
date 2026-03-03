@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['k_0',['K',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray']]],
+  ['k_0',['k',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray::K'],['../classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011',1,'TriangleCollection::K']]],
   ['kb_1',['kb',['../namespaceUnits.html#a0237c7c446f131e27ea2c9482b7f2a3b',1,'Units']]]
 ];

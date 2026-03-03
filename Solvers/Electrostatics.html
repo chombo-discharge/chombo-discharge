@@ -90,6 +90,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#neumann">Neumann</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#file-based-boundary-conditions">File-based boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#radial-file-based-boundary-conditions">Radial file-based boundary conditions</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#eb-boundary-conditions">EB boundary conditions</a><ul>
@@ -353,6 +355,94 @@ I.e. the boundary condition function that is passed into the numerical discretiz
 <p>Note that since <code class="docutils literal notranslate"><span class="pre">func</span></code> is initialized to one, the floating point number in the input option directly specifies the value of <span class="math notranslate nohighlight">\(\partial_n\Phi\)</span>.</p>
 </section>
 </section>
+<section id="file-based-boundary-conditions">
+<h3>File-based boundary conditions<a class="headerlink" href="#file-based-boundary-conditions" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> also supports loading spatially-varying domain boundary conditions from a
+data file, using the <code class="docutils literal notranslate"><span class="pre">file</span></code> keyword in the input script.
+The general format is</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.x.low = file &lt;dirichlet|neumann&gt; &lt;path&gt; &lt;arg4&gt; &lt;multiplier&gt;
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;path&gt;</span></code> is the path to the data file, <code class="docutils literal notranslate"><span class="pre">&lt;multiplier&gt;</span></code> is a real-valued scale
+factor applied to the interpolated result, and <code class="docutils literal notranslate"><span class="pre">&lt;arg4&gt;</span></code> depends on the spatial dimension:</p>
+<ul>
+<li><p><strong>2D</strong>: <code class="docutils literal notranslate"><span class="pre">&lt;arg4&gt;</span></code> is an integer specifying the number of uniformly-spaced interpolation
+points used to prepare the lookup table.
+The file must be an ASCII column file readable by <code class="xref py py-func docutils literal notranslate"><span class="pre">DataParser::simpleFileReadASCII()</span></code>.
+The boundary condition value is interpolated along the single tangential direction of the
+domain side.</p>
+<p>Example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.y.low = file dirichlet /path/to/data.txt 100 1.0
+</pre></div>
+</div>
+</li>
+<li><p><strong>3D</strong>: <code class="docutils literal notranslate"><span class="pre">&lt;arg4&gt;</span></code> is a string naming the per-vertex scalar property in a PLY or VTK
+triangle mesh file (see <a class="reference internal" href="../Utilities/DataParser.html#chap-dataparser"><span class="std std-ref">Data parsing</span></a>).
+The mesh is loaded into a <code class="docutils literal notranslate"><span class="pre">TriangleCollection</span></code>; for each boundary point the closest
+triangle is found, the point is projected onto the triangle plane, and the vertex metadata
+is interpolated using barycentric coordinates.</p>
+<p>Example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.y.low = file dirichlet /path/to/mesh.ply scalarprop 1.0
+</pre></div>
+</div>
+</li>
+</ul>
+<p>The resulting boundary condition value applied in both cases follows the same convention as
+the simplified format:</p>
+<ul class="simple">
+<li><p><strong>Dirichlet</strong>: <code class="docutils literal notranslate"><span class="pre">interpolated_value</span> <span class="pre">×</span> <span class="pre">voltage(t)</span> <span class="pre">×</span> <span class="pre">multiplier</span></code></p></li>
+<li><p><strong>Neumann</strong>: <code class="docutils literal notranslate"><span class="pre">interpolated_value</span> <span class="pre">×</span> <span class="pre">multiplier</span></code></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The PLY/VTK mesh used for 3D file-based BCs does not need to coincide with the domain
+boundary face — it only needs to cover the spatial extent of the boundary, since the
+closest-triangle lookup is used.
+If a named per-vertex scalar is not found in the mesh file, a warning is issued and all
+vertex data defaults to zero.</p>
+</div>
+</section>
+<section id="radial-file-based-boundary-conditions">
+<h3>Radial file-based boundary conditions<a class="headerlink" href="#radial-file-based-boundary-conditions" title="Permalink to this heading"></a></h3>
+<p>For problems with axisymmetric boundary data, <code class="docutils literal notranslate"><span class="pre">FieldSolver</span></code> supports a
+<code class="docutils literal notranslate"><span class="pre">file_radial</span></code> keyword.
+In this case, the boundary condition value is tabulated as a function of the
+in-plane radial distance from the axis normal to the face:</p>
+<ul class="simple">
+<li><p>z-face: <span class="math notranslate nohighlight">\(r = \sqrt{x^2 + y^2}\)</span></p></li>
+<li><p>y-face: <span class="math notranslate nohighlight">\(r = \sqrt{x^2 + z^2}\)</span></p></li>
+<li><p>x-face: <span class="math notranslate nohighlight">\(r = \sqrt{y^2 + z^2}\)</span></p></li>
+</ul>
+<p>The format is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.z.hi = file_radial &lt;dirichlet|neumann&gt; &lt;path&gt; &lt;numPoints&gt; &lt;multiplier&gt;
+</pre></div>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;path&gt;</span></code> is the path to a two-column ASCII file where the first column is
+the radial distance <span class="math notranslate nohighlight">\(r\)</span> and the second column is the BC value.
+The file is read with <code class="xref py py-func docutils literal notranslate"><span class="pre">DataParser::simpleFileReadASCII()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;numPoints&gt;</span></code> is an integer specifying the number of uniformly-spaced
+interpolation points for the prepared lookup table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;multiplier&gt;</span></code> is a real-valued scale factor.</p></li>
+</ul>
+<p>The resulting BC value follows the same convention as the simplified format:</p>
+<ul class="simple">
+<li><p><strong>Dirichlet</strong>: <code class="docutils literal notranslate"><span class="pre">interpolated_value</span> <span class="pre">×</span> <span class="pre">voltage(t)</span> <span class="pre">×</span> <span class="pre">multiplier</span></code></p></li>
+<li><p><strong>Neumann</strong>: <code class="docutils literal notranslate"><span class="pre">interpolated_value</span> <span class="pre">×</span> <span class="pre">multiplier</span></code></p></li>
+</ul>
+<p>Example — Gaussian potential profile on the upper z-face:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>FieldSolverGMG.bc.z.hi = file_radial dirichlet /path/to/radial_profile.txt 200 1.0
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">radial_profile.txt</span></code> contains two columns: <code class="docutils literal notranslate"><span class="pre">r</span></code> and <code class="docutils literal notranslate"><span class="pre">value(r)</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In 2D, <code class="docutils literal notranslate"><span class="pre">file_radial</span></code> uses <span class="math notranslate nohighlight">\(r = |p_{\perp}|\)</span> where <span class="math notranslate nohighlight">\(p_\perp\)</span>
+is the single tangential coordinate, making it equivalent to looking up by
+the absolute tangential distance.</p>
+</div>
+</section>
 </section>
 <section id="eb-boundary-conditions">
 <span id="chap-poissonebbc"></span><h2>EB boundary conditions<a class="headerlink" href="#eb-boundary-conditions" title="Permalink to this heading"></a></h2>
@@ -518,9 +608,17 @@ We explain these options below:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_verbosity</span></code>.
 Controls the multigrid verbosity.
 Setting it to a number <span class="math notranslate nohighlight">\(&gt; 0\)</span> will print multigrid convergence information.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_bottom_verbosity</span></code>.
+Controls the multigrid bottom solver verbosity.
+Setting it to a number <span class="math notranslate nohighlight">\(&gt; 0\)</span> will print some bottom solver convergence information.
+The information printed depends on the bottom solver that is used.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_use_default_settings</span></code>.
-Use default multigrid settings.
-This tends to make most problems converge.</p></li>
+Use default multigrid settings.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Enabling this setting tends to make most problems converge, but potentially at suboptimal convergence rates.</p>
+</div>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_pre_smooth</span></code>.
 Controls the number of relaxations on each level during multigrid downsweeps.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_post_smooth</span></code>.
@@ -558,12 +656,7 @@ Currently, only V-cycles are supported.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_smoother</span></code>.
 Sets the multigrid smoother.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG.gmg_relax_factor</span></code>.
-Sets the multigrid relaxation factor.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Enabling this setting tends to make most problems converge quite well.</p>
-</div>
-</li>
+Sets the multigrid relaxation factor.</p></li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

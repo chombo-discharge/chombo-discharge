@@ -370,7 +370,8 @@ It takes an “operator factory” as an argument, and the factory can generate 
 <li><p>A generalized minimal residual method (GMRES).</p></li>
 </ol>
 <p>The user can select between these for the various solvers that use multigrid.
-Typically, smoothers tend to work sufficiently well but improved convergence rates can occasionally be achieved by using a conjugate gradient solver.</p>
+Typically, smoothers tend to work sufficiently well if one can coarsen sufficiently far, although improved convergence rates can occasionally be achieved by using a conjugate gradient solver.
+In each case, a simple smoother with a specified number of relaxations is applied as a preconditioner for the bottom solver.</p>
 </section>
 </section>
 </section>

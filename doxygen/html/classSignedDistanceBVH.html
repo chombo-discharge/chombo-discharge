@@ -121,7 +121,7 @@ Public Types</h2></td></tr>
 <tr class="memdesc:aa89e4a554d128a7b03e5c62acfd0b7db"><td class="mdescLeft">&#160;</td><td class="mdescRight">DCEL polygon face, which is the primitive type enclosed in the bounding volume hierarchy. <br /></td></tr>
 <tr class="separator:aa89e4a554d128a7b03e5c62acfd0b7db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8acfa25dfc21c7d4b367f2d2c935728a" id="r_a8acfa25dfc21c7d4b367f2d2c935728a"><td class="memItemLeft" align="right" valign="top"><a id="a8acfa25dfc21c7d4b367f2d2c935728a" name="a8acfa25dfc21c7d4b367f2d2c935728a"></a>
-<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> = EBGeometry::BVH::LinearBVH&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classSignedDistanceBVH.html#aa89e4a554d128a7b03e5c62acfd0b7db">Face</a>, <a class="el" href="classTracerParticleSolver.html">BV</a>, K &gt;</td></tr>
+<a class="el" href="classTracerParticleSolver.html">using</a>&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> = EBGeometry::BVH::LinearBVH&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classSignedDistanceBVH.html#aa89e4a554d128a7b03e5c62acfd0b7db">Face</a>, BV, K &gt;</td></tr>
 <tr class="memdesc:a8acfa25dfc21c7d4b367f2d2c935728a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for BVH node with precision T, enclosing DCEL face with a bounding volume type V. <br /></td></tr>
 <tr class="separator:a8acfa25dfc21c7d4b367f2d2c935728a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -174,7 +174,7 @@ std::chrono::duration&lt; <a class="el" href="classTracerParticleSolver.html">do
 <tr class="separator:a97396806f49a9cd91e6743ea8298049b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">BV</a>, <a class="el" href="classTracerParticleSolver.html">int</a> K&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html">class</a> BV, <a class="el" href="classTracerParticleSolver.html">int</a> K&gt;<br />
 class SignedDistanceBVH&lt; T, BV, K &gt;</div><p>Signed distance function for a DCEL mesh. </p>
 <p>This class uses the EBGeometry submodule for creating signed distance functions from compelx geometries. The template parameters are the precision and the bounding volume type. To use this class, the user must first create the DCEL mesh and then create the BVH. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -184,10 +184,10 @@ class SignedDistanceBVH&lt; T, BV, K &gt;</div><p>Signed distance function for a
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">BV</a> , <a class="el" href="classTracerParticleSolver.html">int</a> K&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">class</a> BV , <a class="el" href="classTracerParticleSolver.html">int</a> K&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html">BV</a>, K &gt;<a class="el" href="classSignedDistanceBVH.html">::SignedDistanceBVH</a> </td>
+          <td class="memname"><a class="el" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, BV, K &gt;<a class="el" href="classSignedDistanceBVH.html">::SignedDistanceBVH</a> </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classSignedDistanceBVH.html#a8acfa25dfc21c7d4b367f2d2c935728a">Node</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>a_root</em>, </td>
@@ -231,13 +231,13 @@ template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a cla
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">BV</a> , <a class="el" href="classTracerParticleSolver.html">int</a> K&gt; </div>
+template&lt;<a class="el" href="classTracerParticleSolver.html">class</a> <a class="el" href="classTracerParticleSolver.html">T</a> , <a class="el" href="classTracerParticleSolver.html">class</a> BV , <a class="el" href="classTracerParticleSolver.html">int</a> K&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, <a class="el" href="classTracerParticleSolver.html">BV</a>, K &gt;::value </td>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">Real</a> <a class="el" href="classSignedDistanceBVH.html">SignedDistanceBVH</a>&lt; <a class="el" href="classTracerParticleSolver.html">T</a>, BV, K &gt;::value </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">RealVect</a> &amp;&#160;</td>
           <td class="paramname"><em>a_point</em></td><td>)</td>

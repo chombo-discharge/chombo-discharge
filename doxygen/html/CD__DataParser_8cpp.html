@@ -88,6 +88,7 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;fstream&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
+<code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;CH_Timer.H&gt;</code><br />
 <code>#include &lt;REAL.H&gt;</code><br />
 <code>#include &lt;<a class="el" href="CD__DataParser_8H_source.html">CD_DataParser.H</a>&gt;</code><br />
@@ -98,90 +99,106 @@ Include dependency graph for CD_DataParser.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CD__DataParser_8cpp__incl.png" border="0" usemap="#aSource_2Utilities_2CD__DataParser_8cpp" alt=""/></div>
 <map name="aSource_2Utilities_2CD__DataParser_8cpp" id="aSource_2Utilities_2CD__DataParser_8cpp">
-<area shape="rect" title="Implementation of CD_DataParser.H." alt="" coords="1214,5,1358,45"/>
+<area shape="rect" title="Implementation of CD_DataParser.H." alt="" coords="1419,5,1563,45"/>
 <area shape="rect" title=" " alt="" coords="5,387,79,412"/>
-<area shape="poly" title=" " alt="" coords="1214,30,913,39,717,48,514,62,325,81,166,107,105,122,58,139,29,158,22,168,19,178,19,254,26,319,38,373,32,374,20,320,14,254,14,178,17,166,25,154,56,134,103,117,165,101,324,76,514,56,717,43,913,33,1214,25"/>
-<area shape="rect" title=" " alt="" coords="1030,93,1105,119"/>
-<area shape="poly" title=" " alt="" coords="1235,48,1113,91,1112,86,1233,43"/>
-<area shape="rect" title=" " alt="" coords="1129,93,1227,119"/>
-<area shape="poly" title=" " alt="" coords="1261,48,1207,87,1204,83,1258,43"/>
-<area shape="rect" title=" " alt="" coords="1251,93,1321,119"/>
-<area shape="poly" title=" " alt="" coords="1289,46,1289,79,1283,79,1283,46"/>
-<area shape="rect" href="CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="1345,93,1477,119"/>
-<area shape="poly" title=" " alt="" coords="1318,43,1383,84,1380,88,1315,48"/>
-<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="1676,387,1861,412"/>
-<area shape="poly" title=" " alt="" coords="1359,25,1523,34,1620,44,1717,58,1806,77,1879,102,1908,118,1930,136,1944,156,1949,178,1949,254,1945,278,1936,300,1921,320,1903,337,1862,365,1819,384,1817,379,1859,360,1900,333,1917,316,1931,298,1940,277,1943,254,1943,178,1939,158,1926,139,1905,122,1877,107,1805,82,1716,63,1619,49,1522,40,1358,31"/>
-<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1154,387,1333,412"/>
-<area shape="poly" title=" " alt="" coords="1358,27,1511,38,1600,49,1688,63,1769,82,1835,107,1861,122,1881,139,1894,157,1898,178,1898,254,1894,275,1881,294,1862,310,1837,325,1771,349,1690,367,1601,381,1510,390,1347,399,1346,394,1510,385,1601,375,1689,362,1769,344,1834,320,1859,306,1877,290,1889,273,1893,254,1893,178,1889,159,1877,142,1858,127,1833,112,1767,88,1687,68,1599,54,1510,43,1358,32"/>
-<area shape="rect" title=" " alt="" coords="1319,167,1378,192"/>
-<area shape="poly" title=" " alt="" coords="1403,121,1370,158,1366,154,1399,117"/>
-<area shape="rect" href="CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="1403,167,1545,192"/>
-<area shape="poly" title=" " alt="" coords="1424,117,1457,154,1453,158,1420,121"/>
-<area shape="poly" title=" " alt="" coords="1478,108,1553,118,1639,140,1682,157,1724,179,1762,206,1795,238,1811,263,1816,286,1814,310,1807,340,1789,377,1784,374,1802,338,1809,310,1811,286,1806,265,1791,242,1758,210,1721,184,1680,162,1637,146,1552,124,1477,113"/>
-<area shape="poly" title=" " alt="" coords="1345,121,1010,182,845,216,786,231,752,242,726,257,706,271,691,288,678,314,674,327,677,337,699,348,739,358,861,374,1006,385,1140,392,1140,397,1006,391,860,380,738,363,697,353,673,340,668,327,673,312,687,285,703,267,723,252,750,238,785,225,844,211,1009,176,1344,116"/>
-<area shape="rect" href="CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="320,167,463,192"/>
-<area shape="poly" title=" " alt="" coords="1346,120,1333,121,954,147,477,176,476,170,954,142,1332,116,1345,115"/>
-<area shape="rect" title=" " alt="" coords="1495,313,1554,339"/>
-<area shape="poly" title=" " alt="" coords="1481,192,1519,300,1514,301,1476,193"/>
-<area shape="rect" title=" " alt="" coords="1579,313,1655,339"/>
-<area shape="poly" title=" " alt="" coords="1486,191,1553,263,1595,302,1591,306,1549,267,1482,194"/>
-<area shape="rect" title=" " alt="" coords="778,313,839,339"/>
-<area shape="poly" title=" " alt="" coords="1403,193,1232,218,1088,243,960,277,853,312,852,307,958,272,1087,237,1231,212,1402,188"/>
-<area shape="rect" title=" " alt="" coords="864,313,927,339"/>
-<area shape="poly" title=" " alt="" coords="1410,195,1303,215,1181,243,1050,279,940,313,939,308,1048,274,1180,237,1301,210,1409,189"/>
-<area shape="rect" href="CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="1193,240,1353,265"/>
-<area shape="poly" title=" " alt="" coords="1443,195,1319,238,1317,233,1441,190"/>
-<area shape="poly" title=" " alt="" coords="1546,182,1610,189,1676,200,1734,216,1756,226,1771,238,1781,254,1787,271,1791,308,1787,344,1780,374,1775,373,1782,343,1786,308,1782,273,1776,256,1767,242,1753,230,1732,221,1675,205,1609,194,1545,188"/>
-<area shape="poly" title=" " alt="" coords="1403,193,1390,195,1228,205,1016,216,911,228,816,247,775,260,739,275,710,294,688,315,682,327,684,337,693,346,709,355,758,370,826,380,987,392,1140,396,1140,401,986,398,825,386,757,375,707,360,690,350,679,339,677,326,684,312,707,290,737,271,773,255,815,242,910,223,1016,211,1227,199,1390,189,1402,188"/>
-<area shape="rect" href="CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="1563,240,1756,265"/>
-<area shape="poly" title=" " alt="" coords="1498,190,1610,233,1608,238,1496,195"/>
-<area shape="poly" title=" " alt="" coords="1314,263,1483,310,1482,315,1312,268"/>
-<area shape="poly" title=" " alt="" coords="1331,263,1566,311,1565,316,1330,268"/>
-<area shape="poly" title=" " alt="" coords="1193,265,1035,286,853,316,853,316,852,311,852,311,1034,280,1192,260"/>
-<area shape="poly" title=" " alt="" coords="1200,268,1082,288,941,316,940,311,1081,283,1199,263"/>
-<area shape="rect" title=" " alt="" coords="698,313,754,339"/>
-<area shape="poly" title=" " alt="" coords="1193,262,1003,280,887,296,768,316,767,311,886,290,1002,275,1192,257"/>
-<area shape="rect" title=" " alt="" coords="1069,313,1135,339"/>
-<area shape="poly" title=" " alt="" coords="1246,268,1143,310,1141,306,1244,263"/>
-<area shape="rect" title=" " alt="" coords="951,313,1045,339"/>
-<area shape="poly" title=" " alt="" coords="1229,268,1056,312,1055,307,1228,263"/>
-<area shape="poly" title=" " alt="" coords="1308,263,1434,311,1459,324,1484,336,1581,363,1673,382,1672,387,1579,369,1482,341,1457,329,1432,316,1306,268"/>
-<area shape="poly" title=" " alt="" coords="1250,268,1223,287,1210,300,1200,314,1197,330,1201,346,1222,376,1218,379,1197,348,1192,330,1196,312,1206,296,1219,283,1247,263"/>
-<area shape="rect" href="CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="1210,313,1421,339"/>
-<area shape="poly" title=" " alt="" coords="1275,264,1296,301,1291,304,1270,267"/>
-<area shape="poly" title=" " alt="" coords="1313,315,1292,278,1297,275,1318,312"/>
-<area shape="poly" title=" " alt="" coords="1389,336,1683,382,1682,387,1388,341"/>
-<area shape="poly" title=" " alt="" coords="1305,341,1267,379,1263,375,1302,337"/>
-<area shape="poly" title=" " alt="" coords="1635,242,1522,199,1524,194,1637,237"/>
-<area shape="poly" title=" " alt="" coords="1672,264,1713,312,1756,373,1752,376,1709,315,1668,267"/>
-<area shape="poly" title=" " alt="" coords="1668,265,1679,301,1678,322,1669,340,1648,357,1617,370,1534,388,1438,398,1346,401,1346,396,1438,392,1533,383,1615,365,1645,352,1665,337,1673,320,1673,301,1663,266"/>
-<area shape="rect" title=" " alt="" coords="210,240,287,265"/>
-<area shape="poly" title=" " alt="" coords="370,194,285,236,283,231,367,190"/>
-<area shape="rect" title=" " alt="" coords="159,313,221,339"/>
-<area shape="poly" title=" " alt="" coords="320,186,288,192,255,203,225,219,200,242,193,255,189,269,188,300,183,299,183,269,188,253,196,238,222,215,253,198,286,187,319,181"/>
-<area shape="rect" title=" " alt="" coords="480,313,572,339"/>
-<area shape="poly" title=" " alt="" coords="418,190,452,210,485,238,506,269,520,299,515,301,501,271,481,242,449,214,415,194"/>
-<area shape="rect" title=" " alt="" coords="54,313,134,339"/>
-<area shape="poly" title=" " alt="" coords="320,195,252,213,217,226,183,242,144,272,114,304,110,300,141,268,181,238,214,221,250,208,319,189"/>
-<area shape="rect" href="CD__LookupTable1D_8H.html" title="Declaration of a lookup table in one independent variable." alt="" coords="311,240,471,265"/>
-<area shape="poly" title=" " alt="" coords="387,192,385,227,380,226,382,192"/>
-<area shape="poly" title=" " alt="" coords="446,263,685,313,684,319,445,268"/>
-<area shape="poly" title=" " alt="" coords="396,240,397,206,403,206,401,240"/>
-<area shape="poly" title=" " alt="" coords="360,268,235,312,233,307,358,263"/>
-<area shape="poly" title=" " alt="" coords="414,263,493,304,491,309,412,268"/>
-<area shape="poly" title=" " alt="" coords="344,268,148,315,147,309,343,263"/>
-<area shape="rect" href="CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="245,313,455,339"/>
-<area shape="poly" title=" " alt="" coords="380,267,358,302,353,300,375,264"/>
-<area shape="poly" title=" " alt="" coords="301,341,92,389,91,384,300,336"/>
-<area shape="poly" title=" " alt="" coords="361,312,384,277,388,279,366,315"/>
-<area shape="rect" title=" " alt="" coords="449,387,534,412"/>
-<area shape="poly" title=" " alt="" coords="374,336,457,378,455,383,372,341"/>
-<area shape="rect" title=" " alt="" coords="175,387,243,412"/>
-<area shape="poly" title=" " alt="" coords="328,341,245,383,243,378,326,336"/>
-<area shape="rect" title=" " alt="" coords="267,387,342,412"/>
-<area shape="poly" title=" " alt="" coords="345,340,322,377,317,374,340,338"/>
-<area shape="rect" title=" " alt="" coords="366,387,425,412"/>
-<area shape="poly" title=" " alt="" coords="360,338,383,374,378,377,355,340"/>
+<area shape="poly" title=" " alt="" coords="1419,29,1085,34,863,41,633,54,417,72,236,99,166,116,112,134,78,156,70,167,67,178,67,254,62,319,51,374,46,373,56,318,62,254,62,178,65,164,75,152,110,130,164,110,235,94,416,67,633,48,863,36,1085,29,1419,24"/>
+<area shape="rect" title=" " alt="" coords="1491,93,1566,119"/>
+<area shape="poly" title=" " alt="" coords="1503,44,1520,80,1515,82,1498,47"/>
+<area shape="rect" title=" " alt="" coords="1591,93,1677,119"/>
+<area shape="poly" title=" " alt="" coords="1527,43,1602,84,1600,89,1524,48"/>
+<area shape="rect" title=" " alt="" coords="1702,93,1801,119"/>
+<area shape="poly" title=" " alt="" coords="1554,43,1701,87,1700,92,1553,48"/>
+<area shape="rect" title=" " alt="" coords="1825,93,1894,119"/>
+<area shape="poly" title=" " alt="" coords="1564,38,1812,90,1811,96,1563,44"/>
+<area shape="rect" href="CD__DataParser_8H.html" title="Declaration of various routines for simple parsing of input data." alt="" coords="1252,93,1384,119"/>
+<area shape="poly" title=" " alt="" coords="1451,48,1357,90,1355,85,1449,43"/>
+<area shape="rect" href="CD__NamespaceHeader_8H_source.html" title=" " alt="" coords="781,387,967,412"/>
+<area shape="poly" title=" " alt="" coords="1419,33,1190,51,1043,67,888,89,738,116,601,151,542,170,491,192,449,216,417,242,395,266,381,290,377,313,381,325,389,337,406,346,439,355,536,370,767,390,767,395,535,376,437,360,404,351,386,341,376,327,372,314,376,288,391,263,413,238,446,212,489,188,540,165,600,145,736,111,888,83,1042,62,1190,46,1419,28"/>
+<area shape="rect" href="CD__NamespaceFooter_8H_source.html" title=" " alt="" coords="1759,387,1938,412"/>
+<area shape="poly" title=" " alt="" coords="1486,46,1467,105,1460,141,1457,178,1457,254,1458,301,1465,319,1481,337,1499,348,1525,358,1592,374,1669,384,1746,391,1745,396,1669,390,1591,379,1523,363,1497,353,1478,341,1461,321,1453,302,1451,254,1451,178,1454,140,1462,103,1481,45"/>
+<area shape="rect" title=" " alt="" coords="1222,167,1281,192"/>
+<area shape="poly" title=" " alt="" coords="1309,121,1273,158,1270,155,1305,117"/>
+<area shape="rect" href="CD__PointParticle_8H.html" title="Declaration of a computational point particle." alt="" coords="2015,167,2157,192"/>
+<area shape="poly" title=" " alt="" coords="1384,111,2001,167,2000,173,1384,116"/>
+<area shape="poly" title=" " alt="" coords="1286,121,1218,148,1127,190,1028,247,980,279,936,315,909,345,889,376,885,373,905,342,932,311,977,275,1025,242,1124,186,1216,143,1285,116"/>
+<area shape="poly" title=" " alt="" coords="1385,109,1479,116,1674,126,1826,129,1977,139,2170,164,2216,169,2257,170,2329,170,2362,175,2393,186,2424,206,2454,238,2460,252,2462,267,2453,296,2435,322,2414,341,2379,358,2330,371,2208,389,2074,398,1952,401,1952,396,2073,393,2208,384,2329,366,2377,353,2411,336,2431,319,2448,294,2457,266,2455,254,2449,242,2420,210,2391,191,2361,180,2329,175,2257,175,2215,174,2170,169,1977,144,1826,135,1674,131,1479,121,1384,115"/>
+<area shape="rect" href="CD__LookupTable_8H.html" title="Declaration of a table for looking up coefficients etc." alt="" coords="603,167,745,192"/>
+<area shape="poly" title=" " alt="" coords="1252,117,759,171,759,166,1251,112"/>
+<area shape="rect" href="CD__Triangle_8H.html" title="Header file for a simple Triangle class." alt="" coords="1179,240,1292,265"/>
+<area shape="poly" title=" " alt="" coords="1319,120,1311,154,1295,193,1280,214,1262,232,1258,229,1275,211,1290,191,1306,152,1314,118"/>
+<area shape="rect" title=" " alt="" coords="2142,313,2201,339"/>
+<area shape="poly" title=" " alt="" coords="2095,191,2160,300,2155,303,2091,194"/>
+<area shape="rect" title=" " alt="" coords="2225,313,2301,339"/>
+<area shape="poly" title=" " alt="" coords="2102,190,2240,303,2237,307,2099,195"/>
+<area shape="rect" title=" " alt="" coords="1491,313,1553,339"/>
+<area shape="poly" title=" " alt="" coords="2015,191,1886,211,1740,243,1642,276,1560,310,1558,305,1640,271,1739,237,1885,205,2014,186"/>
+<area shape="rect" title=" " alt="" coords="2004,313,2067,339"/>
+<area shape="poly" title=" " alt="" coords="2084,193,2046,301,2041,300,2079,192"/>
+<area shape="rect" href="CD__GenericParticle_8H.html" title="Declaration of a generic particle class." alt="" coords="1751,240,1911,265"/>
+<area shape="poly" title=" " alt="" coords="2046,195,1886,239,1885,234,2044,189"/>
+<area shape="poly" title=" " alt="" coords="2015,185,1582,203,1342,220,1243,230,1168,243,1111,256,1068,269,1027,288,977,316,933,347,897,379,893,375,929,343,974,311,1025,283,1066,264,1110,251,1167,237,1242,225,1341,214,1581,197,2015,180"/>
+<area shape="poly" title=" " alt="" coords="2158,180,2234,185,2316,195,2388,212,2415,224,2434,238,2438,252,2434,266,2416,310,2402,326,2381,341,2347,355,2302,367,2190,384,2065,394,1952,399,1952,394,2065,389,2189,379,2301,362,2345,350,2378,336,2398,322,2411,307,2429,264,2433,252,2429,242,2412,228,2386,217,2315,200,2234,190,2157,185"/>
+<area shape="rect" href="CD__PointParticleImplem_8H.html" title="Implementation of CD_PointParticle.H." alt="" coords="2225,240,2419,265"/>
+<area shape="poly" title=" " alt="" coords="2118,189,2265,234,2263,239,2116,195"/>
+<area shape="poly" title=" " alt="" coords="1887,263,2129,313,2128,318,1885,268"/>
+<area shape="poly" title=" " alt="" coords="1912,262,2048,283,2212,311,2211,316,2047,288,1911,268"/>
+<area shape="poly" title=" " alt="" coords="1782,268,1572,316,1567,317,1566,312,1571,311,1781,263"/>
+<area shape="poly" title=" " alt="" coords="1865,263,1992,307,1990,312,1863,268"/>
+<area shape="rect" title=" " alt="" coords="987,313,1043,339"/>
+<area shape="poly" title=" " alt="" coords="1751,262,1466,283,1106,316,1057,322,1057,316,1106,311,1466,278,1751,257"/>
+<area shape="rect" title=" " alt="" coords="1862,313,1929,339"/>
+<area shape="poly" title=" " alt="" coords="1844,264,1878,301,1874,305,1840,267"/>
+<area shape="rect" title=" " alt="" coords="1323,313,1417,339"/>
+<area shape="poly" title=" " alt="" coords="1758,268,1431,318,1430,313,1757,263"/>
+<area shape="poly" title=" " alt="" coords="1780,268,1702,288,1616,316,1591,329,1566,341,1516,352,1452,362,1295,377,981,396,980,391,1294,372,1451,356,1515,347,1564,336,1589,324,1614,311,1700,283,1778,263"/>
+<area shape="poly" title=" " alt="" coords="1875,263,1913,281,1930,295,1943,312,1947,323,1947,334,1936,354,1916,370,1893,383,1890,379,1913,366,1932,350,1942,333,1942,324,1938,315,1926,299,1910,286,1873,268"/>
+<area shape="rect" href="CD__GenericParticleImplem_8H.html" title="Implementation of CD_GenericParticle.H." alt="" coords="1627,313,1838,339"/>
+<area shape="poly" title=" " alt="" coords="1810,268,1754,307,1751,302,1807,263"/>
+<area shape="poly" title=" " alt="" coords="1754,311,1810,272,1813,276,1757,315"/>
+<area shape="poly" title=" " alt="" coords="1627,340,1609,341,980,392,980,387,1608,336,1627,334"/>
+<area shape="poly" title=" " alt="" coords="1753,336,1819,377,1817,382,1750,341"/>
+<area shape="poly" title=" " alt="" coords="2290,242,2143,198,2145,193,2291,237"/>
+<area shape="poly" title=" " alt="" coords="2328,266,2331,302,2327,323,2316,341,2295,349,2257,357,2131,369,1957,379,1751,387,1319,396,981,400,981,395,1319,391,1751,382,1957,374,2131,364,2256,352,2294,344,2312,337,2322,321,2326,302,2322,266"/>
+<area shape="poly" title=" " alt="" coords="2336,264,2350,280,2362,300,2367,321,2360,340,2340,352,2304,361,2198,377,2071,388,1952,396,1951,391,2071,383,2197,372,2303,356,2338,347,2356,337,2362,320,2357,302,2346,283,2332,267"/>
+<area shape="poly" title=" " alt="" coords="691,190,748,238,801,301,859,374,855,377,797,304,744,242,688,194"/>
+<area shape="poly" title=" " alt="" coords="746,180,1385,200,1726,217,1850,227,1924,237,2015,257,2050,275,2066,291,2082,312,2089,332,2087,349,2076,363,2058,374,2009,389,1952,397,1951,392,2008,384,2056,369,2072,359,2082,347,2084,332,2077,315,2062,294,2047,279,2013,262,1923,243,1850,232,1726,223,1385,206,745,185"/>
+<area shape="rect" title=" " alt="" coords="635,240,713,265"/>
+<area shape="poly" title=" " alt="" coords="677,192,677,226,671,226,671,192"/>
+<area shape="rect" title=" " alt="" coords="400,313,463,339"/>
+<area shape="poly" title=" " alt="" coords="603,191,500,210,457,224,431,242,424,255,422,269,425,299,420,300,416,269,419,253,427,238,455,219,499,205,602,186"/>
+<area shape="rect" title=" " alt="" coords="487,313,579,339"/>
+<area shape="poly" title=" " alt="" coords="603,192,506,211,466,225,441,242,437,251,436,259,446,276,466,292,491,305,489,310,463,296,442,279,431,260,432,249,437,238,463,220,505,206,602,186"/>
+<area shape="rect" title=" " alt="" coords="677,313,757,339"/>
+<area shape="poly" title=" " alt="" coords="690,190,710,211,727,239,732,271,727,301,722,300,726,271,722,241,706,214,686,194"/>
+<area shape="rect" href="CD__LookupTable1D_8H.html" title="Declaration of a lookup table in one independent variable." alt="" coords="451,240,611,265"/>
+<area shape="poly" title=" " alt="" coords="645,194,561,236,558,231,643,190"/>
+<area shape="poly" title=" " alt="" coords="612,261,806,286,969,311,974,312,973,317,968,316,805,292,611,267"/>
+<area shape="poly" title=" " alt="" coords="548,263,598,299,666,336,737,362,805,381,804,386,735,367,664,341,596,303,545,268"/>
+<area shape="poly" title=" " alt="" coords="581,263,755,299,976,336,1190,359,1403,375,1746,392,1746,398,1403,381,1189,364,975,341,754,305,580,268"/>
+<area shape="poly" title=" " alt="" coords="560,237,645,196,647,201,563,242"/>
+<area shape="poly" title=" " alt="" coords="517,268,460,307,457,303,514,263"/>
+<area shape="poly" title=" " alt="" coords="534,266,535,300,530,300,529,266"/>
+<area shape="poly" title=" " alt="" coords="562,263,675,306,673,311,560,268"/>
+<area shape="rect" href="CD__LookupTable1DImplem_8H_source.html" title=" " alt="" coords="114,313,325,339"/>
+<area shape="poly" title=" " alt="" coords="475,268,277,313,276,307,474,263"/>
+<area shape="poly" title=" " alt="" coords="192,341,84,384,82,379,190,336"/>
+<area shape="poly" title=" " alt="" coords="325,336,768,384,768,389,324,341"/>
+<area shape="poly" title=" " alt="" coords="325,332,387,336,1168,371,1746,392,1746,397,1168,377,387,341,325,338"/>
+<area shape="poly" title=" " alt="" coords="276,311,474,266,475,271,277,316"/>
+<area shape="rect" title=" " alt="" coords="285,387,370,412"/>
+<area shape="poly" title=" " alt="" coords="238,336,300,377,297,381,235,341"/>
+<area shape="rect" title=" " alt="" coords="395,387,463,412"/>
+<area shape="poly" title=" " alt="" coords="254,336,382,380,381,385,252,341"/>
+<area shape="rect" title=" " alt="" coords="103,387,178,412"/>
+<area shape="poly" title=" " alt="" coords="208,341,165,379,162,376,205,337"/>
+<area shape="rect" title=" " alt="" coords="202,387,261,412"/>
+<area shape="poly" title=" " alt="" coords="224,339,230,373,224,374,219,339"/>
+<area shape="poly" title=" " alt="" coords="1201,268,1058,314,1056,309,1199,263"/>
+<area shape="poly" title=" " alt="" coords="1258,263,1337,304,1335,309,1256,268"/>
+<area shape="poly" title=" " alt="" coords="1211,268,1107,316,1056,341,928,385,927,380,1054,336,1105,311,1209,263"/>
+<area shape="poly" title=" " alt="" coords="1244,264,1271,301,1290,321,1313,336,1346,349,1392,360,1506,377,1631,387,1746,393,1745,398,1631,392,1505,382,1391,365,1345,354,1310,341,1287,325,1267,305,1240,267"/>
+<area shape="rect" title=" " alt="" coords="1118,313,1249,339"/>
+<area shape="poly" title=" " alt="" coords="1229,267,1202,304,1198,301,1225,264"/>
 </map>
 </div>
 </div><a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>

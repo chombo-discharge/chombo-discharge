@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['k_0',['K',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray']]],
+  ['k_0',['k',['../classSphereArray.html#acf2a1be1aea8652c52a8bf1693f93e16',1,'SphereArray::K'],['../classTriangleCollection.html#a98297b7febe918ac49520ef2454f9011',1,'TriangleCollection::K']]],
   ['kappa_1',['kappa',['../classPhoton.html#aec046ca328c94dc89e505509f05d14a3',1,'Photon::kappa()'],['../classPhoton.html#a6829ce03b4c601610e185b590eb34f03',1,'Photon::kappa() const']]],
   ['kappafunction_2',['KappaFunction',['../classPhysics_1_1CdrPlasma_1_1RteSpeciesJSON.html#aa58fecafe9b48a9ad406b371375cd792',1,'Physics::CdrPlasma::RteSpeciesJSON']]],
   ['kappascale_3',['kappascale',['../classDataOps.html#a7e95d1a5a251b178adf9f508f4ba1077',1,'DataOps::kappaScale(EBAMRCellData &amp;a_data) noexcept'],['../classDataOps.html#a3007f0a487f4185d940f1d38dfcc2d5e',1,'DataOps::kappaScale(LevelData&lt; EBCellFAB &gt; &amp;a_data) noexcept'],['../classDataOps.html#a4afbcfffd8d3def566feaaa58e492b44',1,'DataOps::kappaScale(MFAMRCellData &amp;a_data) noexcept'],['../classDataOps.html#abc7a4da6d97a159097dd9e532d4dd13f',1,'DataOps::kappaScale(LevelData&lt; MFCellFAB &gt; &amp;a_data) noexcept']]],

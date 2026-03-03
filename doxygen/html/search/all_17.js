@@ -85,7 +85,7 @@ var searchData=
   ['_7eebleastsquaresmultigridinterpolator_82',['~EBLeastSquaresMultigridInterpolator',['../classEBLeastSquaresMultigridInterpolator.html#a45475b3f1a128558fbb3d326a4e14d1d',1,'EBLeastSquaresMultigridInterpolator']]],
   ['_7eebmgprolong_83',['~EBMGProlong',['../classEBMGProlong.html#a34817d8331a1e6e51b0f12fb2165efe3',1,'EBMGProlong']]],
   ['_7eebmgrestrict_84',['~EBMGRestrict',['../classEBMGRestrict.html#ae8c17183d8225d755c581f959fa87074',1,'EBMGRestrict']]],
-  ['_7eebmultigridinterpolator_85',['~ebmultigridinterpolator',['../classEBMultigridInterpolator.html#a8d42104483e8039f9a9453f142696e10',1,'EBMultigridInterpolator::~EBMultigridInterpolator()'],['../classEBMultigridInterpolator.html#ac2709129ba0f821f031b78198c312404',1,'EBMultigridInterpolator::~EBMultigridInterpolator()']]],
+  ['_7eebmultigridinterpolator_85',['~ebmultigridinterpolator',['../classEBMultigridInterpolator.html#ac2709129ba0f821f031b78198c312404',1,'EBMultigridInterpolator::~EBMultigridInterpolator()'],['../classEBMultigridInterpolator.html#a8d42104483e8039f9a9453f142696e10',1,'EBMultigridInterpolator::~EBMultigridInterpolator()']]],
   ['_7eebnonconservativedivergence_86',['~EBNonConservativeDivergence',['../classEBNonConservativeDivergence.html#ae1ecfde539ab07b5c24ceae6516ffaa0',1,'EBNonConservativeDivergence']]],
   ['_7eebreflux_87',['~EBReflux',['../classEBReflux.html#ab5332d20ba49a880ddfe5208bcad2de4',1,'EBReflux']]],
   ['_7eeddingtonsp1_88',['~EddingtonSP1',['../classEddingtonSP1.html#a51fba741aef9b6eb857bd16378c4fc71',1,'EddingtonSP1']]],
@@ -215,7 +215,9 @@ var searchData=
   ['_7etracerparticle_212',['~TracerParticle',['../classTracerParticle.html#abd72625c1ebf1dcb136d0b499718cf41',1,'TracerParticle']]],
   ['_7etracerparticlesolver_213',['~TracerParticleSolver',['../classTracerParticleSolver.html#a6d13309aeb59fb4e1c4f7a2db008ffb8',1,'TracerParticleSolver']]],
   ['_7etracerparticlestepper_214',['~TracerParticleStepper',['../classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#ac15ea9b5e47ebbe3b8f54f22c57e0dd1',1,'Physics::TracerParticle::TracerParticleStepper']]],
-  ['_7evessel_215',['~Vessel',['../classVessel.html#a307b24669d894fc8834ff4166f277cd8',1,'Vessel']]],
-  ['_7ewedgeif_216',['~WedgeIF',['../classWedgeIF.html#a53e8a455ac692eec085c622fa8eeb8f3',1,'WedgeIF']]],
-  ['_7ewirewire_217',['~WireWire',['../classWireWire.html#a41ea002186aa61b91cd5d65d4972da37',1,'WireWire']]]
+  ['_7etriangle_215',['~Triangle',['../classTriangle.html#abb3865cf1726d8a755c330a7afc25655',1,'Triangle']]],
+  ['_7etrianglecollection_216',['~TriangleCollection',['../classTriangleCollection.html#abda8aa951c63ebdeddac3047f6809963',1,'TriangleCollection']]],
+  ['_7evessel_217',['~Vessel',['../classVessel.html#a307b24669d894fc8834ff4166f277cd8',1,'Vessel']]],
+  ['_7ewedgeif_218',['~WedgeIF',['../classWedgeIF.html#a53e8a455ac692eec085c622fa8eeb8f3',1,'WedgeIF']]],
+  ['_7ewirewire_219',['~WireWire',['../classWireWire.html#a41ea002186aa61b91cd5d65d4972da37',1,'WireWire']]]
 ];

@@ -9,5 +9,7 @@ var searchData=
   ['torussdf_6',['TorusSdf',['../classTorusSdf.html',1,'']]],
   ['tracerparticle_7',['TracerParticle',['../classTracerParticle.html',1,'']]],
   ['tracerparticlesolver_8',['TracerParticleSolver',['../classTracerParticleSolver.html',1,'']]],
-  ['tracerparticlestepper_9',['TracerParticleStepper',['../classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html',1,'Physics::TracerParticle']]]
+  ['tracerparticlestepper_9',['TracerParticleStepper',['../classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html',1,'Physics::TracerParticle']]],
+  ['triangle_10',['Triangle',['../classTriangle.html',1,'']]],
+  ['trianglecollection_11',['TriangleCollection',['../classTriangleCollection.html',1,'']]]
 ];

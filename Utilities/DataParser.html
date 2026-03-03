@@ -152,7 +152,7 @@ This is typically used, e.g., when parsing transport coefficients or other types
 <p class="admonition-title">Tip</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">DataParser</span></code> C++ API is found at <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/doxygen/html/namespaceDataParser.html">https://chombo-discharge.github.io/chombo-discharge/doxygen/html/namespaceDataParser.html</a>.</p>
 </div>
-<p>Currently, only two types of file reads are supported:</p>
+<p>Currently, three types of file reads are supported:</p>
 <ol class="arabic">
 <li><p>Read column data, where the user can specify the columns that are parsed into a lookup table.</p>
 <p>These files can be arranged in the form</p>
@@ -228,6 +228,41 @@ See <a class="reference internal" href="LookupTable.html#chap-lookuptableregular
 <span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w">      </span><span class="n">a_wColumn</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
 <span class="w">                        </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="w"> </span><span class="n">a_ignoreChars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="sc">&#39;#&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;/&#39;</span><span class="p">});</span>
 </pre></div>
+</div>
+</li>
+<li><p>Read triangle mesh data from PLY or VTK files, returning a list of <code class="docutils literal notranslate"><span class="pre">Triangle</span></code> objects
+with per-vertex scalar metadata.
+The file type is inferred from the extension (<code class="docutils literal notranslate"><span class="pre">.ply</span></code>/<code class="docutils literal notranslate"><span class="pre">.PLY</span></code> or <code class="docutils literal notranslate"><span class="pre">.vtk</span></code>/<code class="docutils literal notranslate"><span class="pre">.VTK</span></code>).
+A named per-vertex scalar property (e.g., a PLY vertex property or VTK point-data scalar)
+is read as the vertex metadata; if the identifier is not found, a warning is issued and
+metadata defaults to zero.
+Non-triangular facets are skipped with a warning.</p>
+<p>The function signature is:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.</span>
+<span class="cm">  @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier</span>
+<span class="cm">  matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK</span>
+<span class="cm">  point-data scalar), that data is stored as the vertex metadata on each Triangle via</span>
+<span class="cm">  setVertexData(). If the identifier is not found, a warning is issued and all vertex data</span>
+<span class="cm">  values are set to zero.</span>
+
+<span class="cm">  Non-triangular facets are skipped with a warning. The file type is inferred from the</span>
+<span class="cm">  extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.</span>
+
+<span class="cm">  @param[in] a_filename             Path to the input mesh file.</span>
+<span class="cm">  @param[in] a_vertexDataIdentifier Name of the per-vertex scalar property to read as</span>
+<span class="cm">                                    Triangle vertex metadata.</span>
+<span class="cm">  @return Vector of fully initialised Triangle objects, sorted in file order.</span>
+<span class="cm">*/</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Triangle</span><span class="o">&gt;&gt;</span>
+<span class="n">readTriangles</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_filename</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">a_vertexDataIdentifier</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">Triangle</span></code> objects are returned in file order.
+To perform efficient spatial queries (e.g., finding the closest triangle to a point),
+pass the result to a <code class="docutils literal notranslate"><span class="pre">TriangleCollection</span></code>.</p>
 </div>
 </li>
 </ol>

@@ -96,6 +96,9 @@ Functions</h2></td></tr>
 <tr class="memitem:abbbc911b3e551c4c59ae57402b5ab85a" id="r_abbbc911b3e551c4c59ae57402b5ab85a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">List</a>&lt; <a class="el" href="classPointParticle.html">PointParticle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDataParser.html#abbbc911b3e551c4c59ae57402b5ab85a">readPointParticlesASCII</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_fileName</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_xColumn</a>=0, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_yColumn</a>=1, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_zColumn</a>=2, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html">unsigned</a> <a class="el" href="classTracerParticleSolver.html">int</a> <a class="el" href="classTracerParticleSolver.html">a_wColumn</a>=3, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html">char</a> &gt; <a class="el" href="classTracerParticleSolver.html">a_ignoreChars</a>={'#', '/'})</td></tr>
 <tr class="memdesc:abbbc911b3e551c4c59ae57402b5ab85a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple file parser which will read particles (position/weight) from an ASCII file.  <br /></td></tr>
 <tr class="separator:abbbc911b3e551c4c59ae57402b5ab85a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ce7cf079c7e2504887f6300a347f898" id="r_a2ce7cf079c7e2504887f6300a347f898"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceDataParser.html#a2ce7cf079c7e2504887f6300a347f898">readTriangles</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_filename</a>, <a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_vertexDataIdentifier</a>)</td></tr>
+<tr class="memdesc:a2ce7cf079c7e2504887f6300a347f898"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a PLY or VTK triangle mesh file and return a list of <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> objects.  <br /></td></tr>
+<tr class="separator:a2ce7cf079c7e2504887f6300a347f898"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class for simple data parsing from IO files. </p>
@@ -227,6 +230,46 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a2ce7cf079c7e2504887f6300a347f898" name="a2ce7cf079c7e2504887f6300a347f898"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ce7cf079c7e2504887f6300a347f898">&#9670;&#160;</a></span>readTriangles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::vector</a>&lt; <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::shared_ptr</a>&lt; <a class="el" href="classTriangle.html">Triangle</a> &gt; &gt; DataParser::readTriangles </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramname"><em>a_filename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a>&#160;</td>
+          <td class="paramname"><em>a_vertexDataIdentifier</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Read a PLY or VTK triangle mesh file and return a list of <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> objects. </p>
+<p>Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK point-data scalar), that data is stored as the vertex metadata on each <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> via setVertexData(). If the identifier is not found, a warning is issued and all vertex data values are set to zero.</p>
+<p>Non-triangular facets are skipped with a warning. The file type is inferred from the extension (.ply / .PLY or .vtk / .VTK); any other extension results in a fatal error.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_filename</td><td>Path to the input mesh file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_vertexDataIdentifier</td><td>Name of the per-vertex scalar property to read as <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> vertex metadata. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of fully initialised <a class="el" href="classTriangle.html" title="Class that represents a single triangle together with associated metadata on the vertices (one float ...">Triangle</a> objects, sorted in file order. </dd></dl>
 
 </div>
 </div>
