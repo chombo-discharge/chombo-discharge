@@ -276,6 +276,52 @@ the simplified format:
    If a named per-vertex scalar is not found in the mesh file, a warning is issued and all
    vertex data defaults to zero.
 
+Radial file-based boundary conditions
+______________________________________
+
+For problems with axisymmetric boundary data, ``FieldSolver`` supports a
+``file_radial`` keyword.
+In this case, the boundary condition value is tabulated as a function of the
+in-plane radial distance from the axis normal to the face:
+
+* z-face: :math:`r = \sqrt{x^2 + y^2}`
+* y-face: :math:`r = \sqrt{x^2 + z^2}`
+* x-face: :math:`r = \sqrt{y^2 + z^2}`
+
+The format is:
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.z.hi = file_radial <dirichlet|neumann> <path> <numPoints> <multiplier>
+
+where
+
+* ``<path>`` is the path to a two-column ASCII file where the first column is
+  the radial distance :math:`r` and the second column is the BC value.
+  The file is read with :func:`DataParser::simpleFileReadASCII`.
+* ``<numPoints>`` is an integer specifying the number of uniformly-spaced
+  interpolation points for the prepared lookup table.
+* ``<multiplier>`` is a real-valued scale factor.
+
+The resulting BC value follows the same convention as the simplified format:
+
+* **Dirichlet**: ``interpolated_value × voltage(t) × multiplier``
+* **Neumann**: ``interpolated_value × multiplier``
+
+Example — Gaussian potential profile on the upper z-face:
+
+.. code-block:: text
+
+   FieldSolverGMG.bc.z.hi = file_radial dirichlet /path/to/radial_profile.txt 200 1.0
+
+where ``radial_profile.txt`` contains two columns: ``r`` and ``value(r)``.
+
+.. note::
+
+   In 2D, ``file_radial`` uses :math:`r = |p_{\perp}|` where :math:`p_\perp`
+   is the single tangential coordinate, making it equivalent to looking up by
+   the absolute tangential distance.
+
 .. _Chap:PoissonEBBC:
    
 EB boundary conditions

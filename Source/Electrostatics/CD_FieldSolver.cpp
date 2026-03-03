@@ -938,6 +938,61 @@ FieldSolver::parseDomainBc()
         }
 #endif
       }
+      else if (str == "file_radial") {
+        // Format: file_radial <dirichlet|neumann> <path> <numPts> <multiplier>
+        if (num != 5) {
+          MayDay::Error("FieldSolver::parseDomainBc -- 'file_radial' BC requires 5 arguments: "
+                        "file_radial <dirichlet|neumann> <path> <numPts> <multiplier>");
+        }
+
+        std::string bcTypeStr;
+        std::string filename;
+        int         numPoints;
+        Real        val;
+
+        pp.get(bcString.c_str(), bcTypeStr, 1);
+        pp.get(bcString.c_str(), filename, 2);
+        pp.get(bcString.c_str(), numPoints, 3);
+        pp.get(bcString.c_str(), val, 4);
+
+        bcType = this->parseBcString(bcTypeStr);
+
+        auto table = std::make_shared<LookupTable1D<Real, 1>>(DataParser::simpleFileReadASCII(filename));
+        table->prepareTable(0, static_cast<size_t>(numPoints), LookupTable::Spacing::Uniform);
+
+        switch (bcType) {
+        case ElectrostaticDomainBc::BcType::Dirichlet: {
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect a_pos,
+                                                                                        const Real     a_time) {
+            Real r2 = 0.0;
+            for (int d = 0; d < SpaceDim; d++) {
+              if (d != dir)
+                r2 += a_pos[d] * a_pos[d];
+            }
+            return table->interpolate<1>(std::sqrt(r2)) * voltage(time) * val;
+          };
+
+          break;
+        }
+        case ElectrostaticDomainBc::BcType::Neumann: {
+          curFunc = [table, val, dir](const RealVect a_pos, const Real a_time) {
+            Real r2 = 0.0;
+            for (int d = 0; d < SpaceDim; d++) {
+              if (d != dir)
+                r2 += a_pos[d] * a_pos[d];
+            }
+            return table->interpolate<1>(std::sqrt(r2)) * val;
+          };
+
+          break;
+        }
+        default: {
+          MayDay::Error("FieldSolver::parseDomainBc -- unsupported BC type for file_radial BC!");
+
+          break;
+        }
+        }
+      }
       else if (str == "dirichlet_custom" || str == "neumann_custom") {
         if (num != 1) {
           MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann_custom takes exactly 1 argument");
