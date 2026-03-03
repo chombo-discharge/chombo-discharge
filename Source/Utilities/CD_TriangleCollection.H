@@ -24,7 +24,25 @@
 
 /*!
   @brief Class that represents a set of triangles.
-  @details This class uses the bounding volume hierarchies supplied by EBGeometry.
+  @details This class uses the bounding volume hierarchies supplied by EBGeometry to organize and
+  query a collection of Triangle objects.
+
+  **Interpolation.** Each Triangle carries a scalar value at each of its three vertices. Given a
+  query point, the typical workflow is:
+  1. Call getClosestTriangles() to obtain the nearest triangle (first entry of the returned list).
+  2. Call Triangle::interpolate() on that triangle to evaluate the scalar field at the query point.
+
+  Triangle::interpolate() uses two different strategies depending on where the query point falls:
+  - **Inside the triangle**: barycentric interpolation via area ratios. Weights u, v, w satisfy
+    u + v + w = 1 and lie in [0, 1], so the result is a convex combination of the vertex values.
+  - **Outside the triangle**: inverse-distance weighting (IDW, Shepard power = 1) over the two
+    nearest vertices. If d_i and d_j are the distances to the two closest vertices, the weights are
+    w_i = d_j/(d_i+d_j) and w_j = d_i/(d_i+d_j). These always sum to one and lie in [0, 1], so
+    the interpolated value is guaranteed to stay within the range of the vertex data. When d_i = d_j
+    = 0, equal weights of 0.5 are used to avoid division by zero.
+
+  The outside-triangle path is therefore a bounded, range-preserving extrapolation rather than an
+  unconstrained linear extrapolation. Degenerate triangles (zero area) always return zero.
 */
 class TriangleCollection
 {

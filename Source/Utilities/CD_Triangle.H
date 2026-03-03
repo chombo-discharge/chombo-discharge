@@ -102,12 +102,13 @@ public:
   isInside(const Vec3& a_point) const noexcept;
 
   /*!
-    @brief Interpolate vertex data at a point using barycentric coordinates.
-    @details Computes barycentric weights from area ratios and returns the weighted sum of the
-    three vertex data values. The result is exact when a_point lies on the triangle plane; for
-    points off the plane the weights will not sum to one and the result is an approximation.
-    No bounds check is performed: points outside the triangle produce barycentric coordinates
-    outside [0,1] and the function extrapolates. Returns zero for degenerate triangles (m_area == 0).
+    @brief Interpolate vertex data at a point using barycentric coordinates or IDW fallback.
+    @details For points inside the triangle, barycentric weights are computed from area ratios and
+    the weighted sum of the three vertex data values is returned. For points outside the triangle,
+    inverse-distance weighting (IDW, Shepard power = 1) over the two nearest vertices is used
+    instead: weights are w_i = d_j/(d_i+d_j) and w_j = d_i/(d_i+d_j), ensuring the interpolated
+    value stays within the data range and is bounded. If both nearest distances are zero, equal
+    weights of 0.5 are used. Returns zero for degenerate triangles (m_area == 0).
     @param[in] a_point Query point in 3D space.
     @return Interpolated vertex data value at a_point.
   */
