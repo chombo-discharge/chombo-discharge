@@ -1574,9 +1574,10 @@ ItoKMCStepper<I, C, R, F>::prePlot() noexcept
 
   if (numPhysicsPlotVars > 0) {
     m_amr->allocate(m_physicsPlotVariables, m_fluidRealm, m_plasmaPhase, numPhysicsPlotVars);
+
+    this->computePhysicsPlotVariables(m_physicsPlotVariables);
   }
 
-  this->computePhysicsPlotVariables(m_physicsPlotVariables);
   this->computeCurrentDensity(this->m_currentDensity);
   m_ito->depositParticles();
 }
