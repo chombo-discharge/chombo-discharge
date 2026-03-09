@@ -2489,7 +2489,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
   // Compute the critical field and the minimum possible inception voltage.
   const Real Ecrit = this->getCriticalField();
 
-  Real curVoltage = (1.0 + m_relativeDeltaU) * Ecrit / maxField;
+  Real curVoltage = m_relativeDeltaU * Ecrit / maxField;
   Real curMaxK    = 0.0;
   int  curIter    = 0;
 
@@ -2534,12 +2534,21 @@ DischargeInceptionStepper<P, F, C>::computeInceptionIntegralStationary() noexcep
 
     curMaxK = std::max(maxKPlus, maxKMinu);
 
-    // Figure out the next voltage.
+    // Figure out the next voltage. User linear extrapolation near the first point and log-linear otherwise.
     K2 = curMaxK;
     U2 = curVoltage;
 
-    const Real dKdU        = (K2 - K1) / (U2 - U1);
-    const Real nextVoltage = U1 + ((K2 - K1) + m_deltaK) / dKdU;
+    Real nextVoltage;
+    if (K1 <= 0.0) {
+      const Real dKdU = (K2 - K1) / (U2 - U1);
+
+      nextVoltage = U1 + ((K2 - K1) + m_deltaK) / dKdU;
+    }
+    else {
+      const Real dKdU = std::log(K2 / K1) / (U2 - U1);
+
+      nextVoltage = U1 + std::log((K2 + m_deltaK) / K1) / dKdU;
+    }
 
     K1 = K2;
     U1 = U2;
