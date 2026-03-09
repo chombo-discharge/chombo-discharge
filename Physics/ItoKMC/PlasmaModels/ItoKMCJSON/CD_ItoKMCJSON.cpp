@@ -356,6 +356,10 @@ ItoKMCJSON::initializeGasLaw()
 
     this->throwParserError(parseError);
   }
+
+  if (m_json["gas"]["law"].contains("plot")) {
+    m_plotGas = m_json["gas"]["law"]["plot"].get<bool>();
+  }
 }
 
 void
