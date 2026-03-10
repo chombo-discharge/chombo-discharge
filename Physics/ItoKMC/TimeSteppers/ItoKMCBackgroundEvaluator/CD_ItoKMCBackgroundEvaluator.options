@@ -1,0 +1,48 @@
+# ====================================================================================================
+# ItoKMCBackgroundEvaluator class options
+# ====================================================================================================
+ItoKMCBackgroundEvaluator.checkpoint_particles                     = true               ## If true, regrid on restart is supported (otherwise it's not)
+ItoKMCBackgroundEvaluator.verbosity                                = -1                 ## Verbosity
+ItoKMCBackgroundEvaluator.secondary_emission                       = after_reactions    ## When to emit secondary particles. Either 'before_reactions' or 'after_reactions'
+ItoKMCBackgroundEvaluator.abort_on_failure                         = true               ## Abort on Poisson solver failure or not
+ItoKMCBackgroundEvaluator.abort_max_field                          = 10000              ## Abort if reduced field exceeds this value
+ItoKMCBackgroundEvaluator.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
+ItoKMCBackgroundEvaluator.profile                                  = false              ## Turn on/off run-time profiling
+ItoKMCBackgroundEvaluator.plt_vars                                 = current_density    ## 'conductivity', 'current_density', 'particles_per_patch'
+ItoKMCBackgroundEvaluator.dual_grid                                = true               ## Turn on/off dual-grid functionality
+ItoKMCBackgroundEvaluator.load_balance_fluid                       = false              ## Turn on/off fluid realm load balancing.
+ItoKMCBackgroundEvaluator.load_balance_particles                   = true               ## Turn on/off particle load balancing
+ItoKMCBackgroundEvaluator.load_indices                             = -1                 ## Which particle containers to use for load balancing (-1 => all)
+ItoKMCBackgroundEvaluator.load_per_cell                            = 1.0                ## Default load per grid cell.
+ItoKMCBackgroundEvaluator.box_sorting                              = morton             ## Box sorting when load balancing
+ItoKMCBackgroundEvaluator.particles_per_cell                       = 64                 ## Max computational particles per cell
+ItoKMCBackgroundEvaluator.merge_interval                           = 1                  ## Time steps between superparticle merging
+ItoKMCBackgroundEvaluator.regrid_superparticles                    = false              ## Make superparticles during regrids
+ItoKMCBackgroundEvaluator.physics_dt_factor                        = 1.0                ## Physics-based time step factor
+ItoKMCBackgroundEvaluator.min_particle_advection_cfl               = 0.0                ## Advective time step CFL restriction
+ItoKMCBackgroundEvaluator.max_particle_advection_cfl               = 1.0                ## Advective time step CFL restriction
+ItoKMCBackgroundEvaluator.min_particle_diffusion_cfl               = 0.0                ## Diffusive time step CFL restriction
+ItoKMCBackgroundEvaluator.max_particle_diffusion_cfl               = 1.E99              ## Diffusive time step CFL restriction
+ItoKMCBackgroundEvaluator.min_particle_advection_diffusion_cfl     = 0.0                ## Advection-diffusion time step CFL restriction
+ItoKMCBackgroundEvaluator.max_particle_advection_diffusion_cfl     = 1.E99              ## Advection-diffusion time step CFL restriction
+ItoKMCBackgroundEvaluator.fluid_advection_diffusion_cfl            = 0.5                ## Advection-diffusion time step CFL restriction
+ItoKMCBackgroundEvaluator.relax_dt_factor                          = 100.0              ## Relaxation time step restriction.
+ItoKMCBackgroundEvaluator.min_dt                                   = 0.0                ## Minimum permitted time step
+ItoKMCBackgroundEvaluator.max_dt                                   = 1.E99              ## Maximum permitted time step
+ItoKMCBackgroundEvaluator.max_growth_dt                            = 1.E99              ## Maximum permitted time step increase (dt * factor)
+ItoKMCBackgroundEvaluator.max_shrink_dt                            = 1.E99              ## Maximum permissible time step reduction (dt/factor)
+ItoKMCBackgroundEvaluator.extend_conductivity                      = true               ## Permit particles to live outside the EB to avoid bad gradients near EB
+ItoKMCBackgroundEvaluator.cond_filter_num                          = 0                  ## Number of filterings for conductivity
+ItoKMCBackgroundEvaluator.cond_filter_max_stride                   = 1                  ## Maximum stride for filter
+ItoKMCBackgroundEvaluator.cond_filter_alpha                        = 0.5                ## Filtering factor (0.5 is a bilinear filter)
+ItoKMCBackgroundEvaluator.rho_filter_num                           = 0                  ## Number of filterings for the space-density
+ItoKMCBackgroundEvaluator.rho_filter_max_stride                    = 1                  ## Maximum stride for filter
+ItoKMCBackgroundEvaluator.rho_filter_alpha                         = 0.5                ## Filtering factor (0.5 is a bilinear filter)
+ItoKMCBackgroundEvaluator.eb_tolerance                             = 0.0                ## EB intersection test tolerance
+ItoKMCBackgroundEvaluator.algorithm                                = euler_maruyama     ## Integration algorithm. 'euler_maruyama' or 'trapezoidal'
+
+# BackgroundEvaluator-specific options
+ItoKMCBackgroundEvaluator.max_field_exit_crit       = 1.E99    ## Exit if max field change (any cell) exceeds this (fraction)
+ItoKMCBackgroundEvaluator.rel_field_exit_crit       = 1.E99    ## Exit if relative field change (any cell) exceeds this (fraction)
+ItoKMCBackgroundEvaluator.optical_solver            = 2PN2     ## Name of optical CDR solver to track
+ItoKMCBackgroundEvaluator.max_initial_time_step     = 0.0      ## Max initial time step (0 = normal operation)
