@@ -40,9 +40,7 @@ ItoKMCBackgroundEvaluator.rho_filter_max_stride                    = 1          
 ItoKMCBackgroundEvaluator.rho_filter_alpha                         = 0.5                ## Filtering factor (0.5 is a bilinear filter)
 ItoKMCBackgroundEvaluator.eb_tolerance                             = 0.0                ## EB intersection test tolerance
 ItoKMCBackgroundEvaluator.algorithm                                = euler_maruyama     ## Integration algorithm. 'euler_maruyama' or 'trapezoidal'
-
-# BackgroundEvaluator-specific options
-ItoKMCBackgroundEvaluator.max_field_exit_crit       = 1.E99    ## Exit if max field change (any cell) exceeds this (fraction)
-ItoKMCBackgroundEvaluator.rel_field_exit_crit       = 1.E99    ## Exit if relative field change (any cell) exceeds this (fraction)
-ItoKMCBackgroundEvaluator.optical_solver            = 2PN2     ## Name of optical CDR solver to track
-ItoKMCBackgroundEvaluator.max_initial_time_step     = 0.0      ## Max initial time step (0 = normal operation)
+ItoKMCBackgroundEvaluator.max_field_exit_crit                      = 1.E99              ## Exit if max field change (any cell) exceeds this (fraction)
+ItoKMCBackgroundEvaluator.rel_field_exit_crit                      = 1.E99              ## Exit if relative field change (any cell) exceeds this (fraction)
+ItoKMCBackgroundEvaluator.optical_solver                           = 2PN2               ## Name of optical CDR solver to track
+ItoKMCBackgroundEvaluator.max_initial_time_step                    = 0.0                ## Max initial time step (0 = normal operation)
