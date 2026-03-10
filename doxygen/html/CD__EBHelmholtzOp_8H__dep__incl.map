@@ -1,71 +1,76 @@
 <map id="Source/Elliptic/CD_EBHelmholtzOp.H" name="Source/Elliptic/CD_EBHelmholtzOp.H">
-<area shape="rect" id="Node000001" title="Declaration of Helmholtz multigrid operators." alt="" coords="1434,5,1579,45"/>
-<area shape="rect" id="Node000002" href="$CD__EBHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="1555,93,1746,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1551,50,1620,91,1618,96,1549,55"/>
-<area shape="rect" id="Node000025" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="1130,181,1278,221"/>
-<area shape="poly" id="edge31_Node000001_Node000025" title=" " alt="" coords="1463,55,1238,183,1236,179,1461,50"/>
-<area shape="rect" id="Node000003" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="1436,181,1639,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1616,144,1564,183,1561,179,1613,140"/>
-<area shape="rect" id="Node000022" href="$CD__EBHelmholtzOpFactory_8cpp.html" title="Implementation of CD_EBHelmholtzOpFactory.H." alt="" coords="1663,181,1865,221"/>
-<area shape="poly" id="edge28_Node000002_Node000022" title=" " alt="" coords="1688,140,1741,179,1737,183,1685,144"/>
-<area shape="rect" id="Node000023" href="$CD__EddingtonSP1_8H.html" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="1889,181,2073,221"/>
-<area shape="poly" id="edge29_Node000002_Node000023" title=" " alt="" coords="1737,134,1910,179,1908,184,1736,139"/>
-<area shape="rect" id="Node000004" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="1370,365,1571,405"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1555,234,1564,271,1564,291,1558,310,1535,343,1505,367,1502,363,1531,339,1554,308,1559,290,1559,271,1550,235"/>
-<area shape="rect" id="Node000018" href="$CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="1619,269,1821,309"/>
-<area shape="poly" id="edge23_Node000003_Node000018" title=" " alt="" coords="1591,225,1681,267,1679,272,1589,230"/>
-<area shape="rect" id="Node000021" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="1328,269,1544,309"/>
-<area shape="poly" id="edge27_Node000003_Node000021" title=" " alt="" coords="1506,232,1460,271,1457,267,1503,228"/>
-<area shape="rect" id="Node000005" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="1101,460,1341,500"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1409,412,1273,462,1271,457,1407,407"/>
-<area shape="rect" id="Node000007" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="770,467,1033,493"/>
-<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="1357,407,971,470,971,465,1356,402"/>
-<area shape="rect" id="Node000017" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="1370,460,1571,500"/>
-<area shape="poly" id="edge22_Node000004_Node000017" title=" " alt="" coords="1473,418,1473,460,1468,460,1468,418"/>
-<area shape="rect" id="Node000006" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="1076,555,1367,595"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1215,514,1217,555,1211,555,1210,514"/>
-<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="1227,542,1226,500,1231,500,1233,542"/>
-<area shape="rect" id="Node000008" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="785,555,1034,595"/>
-<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="898,506,903,555,898,555,893,507"/>
-<area shape="rect" id="Node000009" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="130,563,385,588"/>
-<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="809,497,337,565,336,560,809,492"/>
-<area shape="rect" id="Node000015" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="544,548,760,603"/>
-<area shape="poly" id="edge19_Node000007_Node000015" title=" " alt="" coords="859,500,723,550,721,545,857,495"/>
-<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="913,542,906,493,911,492,918,541"/>
-<area shape="rect" id="Node000010" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="273,658,503,698"/>
-<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="285,595,365,656,362,660,282,599"/>
-<area shape="rect" id="Node000014" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="5,658,248,698"/>
-<area shape="poly" id="edge17_Node000009_Node000014" title=" " alt="" coords="227,598,146,660,142,656,224,594"/>
-<area shape="rect" id="Node000011" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="273,761,503,801"/>
-<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="382,711,383,761,378,761,377,712"/>
-<area shape="rect" id="Node000012" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="527,753,729,808"/>
-<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="446,701,566,751,564,756,444,706"/>
-<area shape="poly" id="edge13_Node000011_Node000010" title=" " alt="" coords="394,747,393,698,398,698,399,747"/>
-<area shape="rect" id="Node000013" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="507,856,749,911"/>
-<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="622,822,623,856,617,856,617,822"/>
-<area shape="poly" id="edge16_Node000013_Node000012" title=" " alt="" coords="634,843,633,808,639,808,639,842"/>
-<area shape="poly" id="edge18_Node000014_Node000009" title=" " alt="" coords="168,648,247,586,250,590,171,652"/>
-<area shape="rect" id="Node000016" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="528,651,776,705"/>
-<area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="646,616,647,651,641,651,641,616"/>
-<area shape="poly" id="edge21_Node000016_Node000015" title=" " alt="" coords="658,637,657,603,663,603,663,637"/>
-<area shape="poly" id="edge25_Node000018_Node000004" title=" " alt="" coords="1658,317,1522,367,1520,362,1656,312"/>
-<area shape="rect" id="Node000019" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="1598,357,1837,412"/>
-<area shape="poly" id="edge24_Node000018_Node000019" title=" " alt="" coords="1722,323,1721,357,1715,357,1716,323"/>
-<area shape="rect" id="Node000020" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="1861,365,2075,405"/>
-<area shape="poly" id="edge26_Node000018_Node000020" title=" " alt="" coords="1784,312,1919,362,1917,367,1782,317"/>
-<area shape="rect" id="Node000024" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="1889,269,2073,309"/>
-<area shape="poly" id="edge30_Node000023_Node000024" title=" " alt="" coords="1984,235,1984,269,1979,269,1979,235"/>
-<area shape="rect" id="Node000026" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="919,269,1081,309"/>
-<area shape="poly" id="edge32_Node000025_Node000026" title=" " alt="" coords="1148,229,1046,272,1044,267,1146,224"/>
-<area shape="rect" id="Node000027" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="702,269,895,309"/>
-<area shape="poly" id="edge33_Node000025_Node000027" title=" " alt="" coords="1117,224,888,272,887,267,1116,218"/>
-<area shape="rect" id="Node000030" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="1105,269,1303,309"/>
-<area shape="poly" id="edge38_Node000025_Node000030" title=" " alt="" coords="1198,235,1199,269,1194,269,1193,235"/>
-<area shape="rect" id="Node000028" href="$CD__FieldSolverGMG_8H.html" title="Declaration of FieldSolverGMG." alt="" coords="781,365,952,405"/>
-<area shape="poly" id="edge34_Node000027_Node000028" title=" " alt="" coords="823,319,855,363,851,366,818,322"/>
-<area shape="rect" id="Node000029" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="977,365,1183,405"/>
-<area shape="poly" id="edge37_Node000027_Node000029" title=" " alt="" coords="869,311,1024,362,1022,367,868,316"/>
-<area shape="poly" id="edge35_Node000028_Node000005" title=" " alt="" coords="950,406,965,409,1149,457,1148,463,963,415,949,411"/>
-<area shape="poly" id="edge36_Node000028_Node000007" title=" " alt="" coords="881,417,899,466,894,468,876,419"/>
-<area shape="poly" id="edge39_Node000030_Node000025" title=" " alt="" coords="1210,256,1209,222,1214,222,1215,256"/>
+<area shape="rect" id="Node000001" title="Declaration of Helmholtz multigrid operators." alt="" coords="1817,5,1962,45"/>
+<area shape="rect" id="Node000002" href="$CD__EBHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making Poisson operators for multigrid." alt="" coords="1938,93,2129,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1934,50,2003,91,2000,96,1931,55"/>
+<area shape="rect" id="Node000027" href="$CD__MFHelmholtzOp_8H.html" title="Declaration of a class for solving multiphase Helmholtz equations." alt="" coords="1513,181,1661,221"/>
+<area shape="poly" id="edge34_Node000001_Node000027" title=" " alt="" coords="1846,55,1621,183,1618,179,1843,50"/>
+<area shape="rect" id="Node000003" href="$CD__CdrMultigrid_8H.html" title="Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves." alt="" coords="1819,181,2021,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1999,144,1947,183,1943,179,1996,140"/>
+<area shape="rect" id="Node000024" href="$CD__EBHelmholtzOpFactory_8cpp.html" title="Implementation of CD_EBHelmholtzOpFactory.H." alt="" coords="2045,181,2248,221"/>
+<area shape="poly" id="edge31_Node000002_Node000024" title=" " alt="" coords="2071,140,2123,179,2120,183,2068,144"/>
+<area shape="rect" id="Node000025" href="$CD__EddingtonSP1_8H.html" title="Declaration of a first order Eddington solver for radiative transfer." alt="" coords="2272,181,2456,221"/>
+<area shape="poly" id="edge32_Node000002_Node000025" title=" " alt="" coords="2120,134,2292,179,2291,184,2118,139"/>
+<area shape="rect" id="Node000004" href="$CD__CdrCTU_8H.html" title="Declaration of a class which implements CdrMultigrid using MUSCL for advection." alt="" coords="1753,365,1954,405"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1938,234,1947,271,1946,291,1941,310,1918,343,1888,367,1885,363,1914,339,1936,308,1941,290,1941,271,1932,235"/>
+<area shape="rect" id="Node000020" href="$CD__CdrGodunov_8H.html" title="Declaration of a class which implements CdrMultigrid using Godunov&#45;type advection." alt="" coords="2001,269,2204,309"/>
+<area shape="poly" id="edge26_Node000003_Node000020" title=" " alt="" coords="1974,225,2064,267,2062,272,1971,230"/>
+<area shape="rect" id="Node000023" href="$CD__CdrMultigrid_8cpp.html" title="Implementation of CD_CdrMultigrid.H." alt="" coords="1711,269,1927,309"/>
+<area shape="poly" id="edge30_Node000003_Node000023" title=" " alt="" coords="1889,232,1843,271,1839,267,1885,228"/>
+<area shape="rect" id="Node000005" href="$CD__DischargeInceptionStepper_8H.html" title="TimeStepper class for evaluating the streamer inception criterion." alt="" coords="1484,460,1724,500"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1791,412,1655,462,1653,457,1789,407"/>
+<area shape="rect" id="Node000007" href="$CD__ItoKMCStepper_8H.html" title="Declaration of an abstract class for integrating the Ito&#45;KMC&#45;Poisson equations." alt="" coords="1153,467,1415,493"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="1739,407,1354,470,1353,465,1738,402"/>
+<area shape="rect" id="Node000019" href="$CD__CdrCTU_8cpp.html" title="Implementation of CD_CdrCTU.H." alt="" coords="1753,460,1954,500"/>
+<area shape="poly" id="edge25_Node000004_Node000019" title=" " alt="" coords="1856,418,1856,460,1851,460,1851,418"/>
+<area shape="rect" id="Node000006" href="$CD__DischargeInceptionStepperImplem_8H.html" title="Implementation of CD_DischargeInceptionStepper.H." alt="" coords="1459,555,1749,595"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1598,514,1599,555,1594,555,1593,514"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="1610,542,1609,500,1614,500,1615,542"/>
+<area shape="rect" id="Node000008" href="$CD__ItoKMCStepperImplem_8H.html" title="Implementation of CD_ItoKMCStepper.H." alt="" coords="1167,555,1417,595"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="1281,506,1286,555,1280,555,1275,507"/>
+<area shape="rect" id="Node000009" href="$CD__ItoKMCTagger_8H.html" title="Parent tagger class for ItoKMC." alt="" coords="501,563,755,588"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="1191,497,709,565,708,560,1190,492"/>
+<area shape="rect" id="Node000015" href="$CD__ItoKMCGodunovStepper_8H.html" title="Declaration of a class which uses a semi&#45;implicit Godunov method for Ito plasma equations." alt="" coords="927,548,1143,603"/>
+<area shape="poly" id="edge19_Node000007_Node000015" title=" " alt="" coords="1241,500,1106,550,1104,545,1240,495"/>
+<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="1295,542,1288,493,1294,492,1300,541"/>
+<area shape="rect" id="Node000010" href="$CD__ItoKMCFieldTagger_8H.html" title="Declaration of an abstract field&#45;only tagging class for ito plasmas." alt="" coords="251,658,482,698"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="586,596,417,660,415,655,584,591"/>
+<area shape="rect" id="Node000014" href="$CD__ItoKMCTaggerImplem_8H.html" title="Implementation of CD_ItoKMCTagger.H." alt="" coords="507,658,749,698"/>
+<area shape="poly" id="edge17_Node000009_Node000014" title=" " alt="" coords="623,602,623,658,618,658,617,602"/>
+<area shape="rect" id="Node000011" href="$CD__ItoKMCFieldTaggerImplem_8H.html" title="Implementation of CD_ItoKMCFieldTagger.H." alt="" coords="251,761,482,801"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="361,711,362,761,357,761,356,712"/>
+<area shape="rect" id="Node000012" href="$CD__ItoKMCStreamerTagger_8H.html" title="Implementation ItoKMCTagger which tags on alpha and curvature of field." alt="" coords="26,753,227,808"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="310,706,190,756,188,751,308,701"/>
+<area shape="poly" id="edge13_Node000011_Node000010" title=" " alt="" coords="372,747,371,698,377,698,378,747"/>
+<area shape="rect" id="Node000013" href="$CD__ItoKMCStreamerTaggerImplem_8H.html" title="Implementation CD_ItoKMCStreamerTagger.H." alt="" coords="5,856,248,911"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="121,822,121,856,116,856,115,822"/>
+<area shape="poly" id="edge16_Node000013_Node000012" title=" " alt="" coords="133,843,132,808,137,808,138,842"/>
+<area shape="poly" id="edge18_Node000014_Node000009" title=" " alt="" coords="634,644,631,588,637,588,639,644"/>
+<area shape="rect" id="Node000016" href="$CD__ItoKMCBackgroundEvaluator_8H.html" title="File containing a subclass of ItoKMCGodunovStepper." alt="" coords="773,651,1024,705"/>
+<area shape="poly" id="edge20_Node000015_Node000016" title=" " alt="" coords="990,613,936,653,933,648,987,609"/>
+<area shape="rect" id="Node000018" href="$CD__ItoKMCGodunovStepperImplem_8H.html" title="Implementation of CD_ItoKMCGodunovStepper.H." alt="" coords="1048,651,1296,705"/>
+<area shape="poly" id="edge23_Node000015_Node000018" title=" " alt="" coords="1075,609,1130,648,1126,653,1072,613"/>
+<area shape="rect" id="Node000017" href="$CD__ItoKMCBackgroundEvaluatorImplem_8H.html" title="Implementation of CD_ItoKMCBackgroundEvaluator.H." alt="" coords="747,753,1050,808"/>
+<area shape="poly" id="edge21_Node000016_Node000017" title=" " alt="" coords="893,719,893,753,888,753,887,719"/>
+<area shape="poly" id="edge22_Node000017_Node000016" title=" " alt="" coords="905,740,904,706,909,706,910,740"/>
+<area shape="poly" id="edge24_Node000018_Node000015" title=" " alt="" coords="1132,644,1077,605,1080,601,1135,640"/>
+<area shape="poly" id="edge28_Node000020_Node000004" title=" " alt="" coords="2041,317,1905,367,1903,362,2039,312"/>
+<area shape="rect" id="Node000021" href="$CD__CdrPlasmaImExSdcStepper_8cpp.html" title="Implementation of CD_CdrPlasmaImExSdcStepper.H." alt="" coords="1981,357,2219,412"/>
+<area shape="poly" id="edge27_Node000020_Node000021" title=" " alt="" coords="2104,323,2103,357,2098,357,2099,323"/>
+<area shape="rect" id="Node000022" href="$CD__CdrGodunov_8cpp.html" title="Implementation of CD_CdrGodunov.H." alt="" coords="2243,365,2458,405"/>
+<area shape="poly" id="edge29_Node000020_Node000022" title=" " alt="" coords="2166,312,2301,362,2300,367,2164,317"/>
+<area shape="rect" id="Node000026" href="$CD__EddingtonSP1_8cpp.html" title="Implementation of CD_EddingtonSP1.H." alt="" coords="2272,269,2456,309"/>
+<area shape="poly" id="edge33_Node000025_Node000026" title=" " alt="" coords="2367,235,2367,269,2361,269,2361,235"/>
+<area shape="rect" id="Node000028" href="$CD__MFHelmholtzOp_8cpp.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="1302,269,1463,309"/>
+<area shape="poly" id="edge35_Node000027_Node000028" title=" " alt="" coords="1530,229,1428,272,1426,267,1528,224"/>
+<area shape="rect" id="Node000029" href="$CD__MFHelmholtzOpFactory_8H.html" title="Declaration of a factory class for making multifluid Helmholtz operators for multigrid." alt="" coords="1085,269,1278,309"/>
+<area shape="poly" id="edge36_Node000027_Node000029" title=" " alt="" coords="1500,224,1271,272,1269,267,1499,218"/>
+<area shape="rect" id="Node000032" href="$CD__MFHelmholtzOpImplem_8H.html" title="Implementation of CD_MFHelmholtzOp.H." alt="" coords="1487,269,1686,309"/>
+<area shape="poly" id="edge41_Node000027_Node000032" title=" " alt="" coords="1581,235,1582,269,1576,269,1575,235"/>
+<area shape="rect" id="Node000030" href="$CD__FieldSolverGMG_8H.html" title="Declaration of FieldSolverGMG." alt="" coords="1164,365,1335,405"/>
+<area shape="poly" id="edge37_Node000029_Node000030" title=" " alt="" coords="1205,319,1238,363,1233,366,1201,322"/>
+<area shape="rect" id="Node000031" href="$CD__MFHelmholtzOpFactory_8cpp.html" title="Implementation of CD_MFHelmholtzOpFactory.H." alt="" coords="1359,365,1566,405"/>
+<area shape="poly" id="edge40_Node000029_Node000031" title=" " alt="" coords="1252,311,1407,362,1405,367,1250,316"/>
+<area shape="poly" id="edge38_Node000030_Node000005" title=" " alt="" coords="1333,406,1347,409,1532,457,1531,463,1346,415,1331,411"/>
+<area shape="poly" id="edge39_Node000030_Node000007" title=" " alt="" coords="1264,417,1282,466,1277,468,1259,419"/>
+<area shape="poly" id="edge42_Node000032_Node000027" title=" " alt="" coords="1593,256,1592,222,1597,222,1598,256"/>
 </map>
