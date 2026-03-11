@@ -28,7 +28,7 @@
 using namespace Physics::ItoKMC;
 
 template <typename I, typename C, typename R, typename F>
-ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysics>& a_physics)
+ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysics>& a_physics, bool a_parseOptions)
   : ItoKMCStepper<I, C, R, F>(a_physics)
 {
   CH_TIME("ItoKMCGodunovStepper::ItoKMCGodunovStepper");
@@ -42,7 +42,9 @@ ItoKMCGodunovStepper<I, C, R, F>::ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysi
   this->m_prevDt                   = 0.0;
   this->m_maxFieldAbort            = std::numeric_limits<Real>::max();
 
-  this->parseOptions();
+  if (a_parseOptions) {
+    this->parseOptions();
+  }
 }
 
 template <typename I, typename C, typename R, typename F>
