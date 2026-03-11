@@ -34,10 +34,12 @@ namespace Physics {
       ItoKMCGodunovStepper() = delete;
 
       /*!
-	@brief Full constructor. 
-	@param[in] a_phyics Physics implementation. 
+	@brief Full constructor.
+	@param[in] a_physics      Physics implementation.
+	@param[in] a_parseOptions If true, parse options immediately. Set to false when constructing through a derived class
+	                          that will re-parse with its own name.
       */
-      ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysics>& a_physics);
+      ItoKMCGodunovStepper(RefCountedPtr<ItoKMCPhysics>& a_physics, bool a_parseOptions = true);
 
       /*!
 	@brief Destructor. Does nothing

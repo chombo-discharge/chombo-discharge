@@ -20,7 +20,7 @@ using namespace Physics::ItoKMC;
 
 template <typename I, typename C, typename R, typename F>
 ItoKMCBackgroundEvaluator<I, C, R, F>::ItoKMCBackgroundEvaluator(RefCountedPtr<ItoKMCPhysics>& a_physics) noexcept
-  : ItoKMCGodunovStepper<I, C, R, F>(a_physics)
+  : ItoKMCGodunovStepper<I, C, R, F>(a_physics, false)
 {
   CH_TIME("ItoKMCBackgroundEvaluator::ItoKMCBackgroundEvaluator");
 
@@ -39,7 +39,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::ItoKMCBackgroundEvaluator(RefCountedPtr<I
   this->parseOptions();
 
   // Parse BackgroundEvaluator-specific options
-  ParmParse pp("ItoKMCBackgroundEvaluator");
+  ParmParse pp(this->m_name.c_str());
   pp.query("max_field_exit_crit", m_maxFieldExitCrit);
   pp.query("rel_field_exit_crit", m_relFieldExitCrit);
   pp.query("optical_solver", m_opticalSolver);
