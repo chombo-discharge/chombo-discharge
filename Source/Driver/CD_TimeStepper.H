@@ -260,12 +260,20 @@ public:
   postRegrid() = 0;
 
   /*!
-    @brief Fuction which can have Driver do regrids at arbitrary points in the simulation. 
-    @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is 
-    on the regular "regrid intervals". 
+    @brief Fuction which can have Driver do regrids at arbitrary points in the simulation.
+    @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is
+    on the regular "regrid intervals".
   */
   virtual bool
   needToRegrid();
+
+  /*!
+    @brief Query whether the time stepper wants to continue stepping.
+    @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal
+    that the simulation should stop after the current time step completes.
+  */
+  bool
+  keepGoing() const;
 
   /*!
     @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
@@ -317,7 +325,14 @@ protected:
   Real m_dt;
 
   /*!
-    @brief AmrMesh. 
+    @brief If false, Driver will stop the time loop after the current step.
+    @details Derived classes can set this to false to request a graceful simulation stop
+    without triggering an error. Defaults to true.
+  */
+  bool m_keepGoing;
+
+  /*!
+    @brief AmrMesh.
   */
   RefCountedPtr<AmrMesh> m_amr;
 

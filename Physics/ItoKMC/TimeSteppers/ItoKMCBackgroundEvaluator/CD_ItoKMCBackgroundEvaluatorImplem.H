@@ -111,6 +111,21 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::advance(const Real a_dt)
   m_sumOpticalPhi   = opticalEmissions.first;
   m_sumOpticalSrc   = opticalEmissions.second;
 
+  bool abortCondition = false;
+  if ((m_maxFieldChange > m_maxFieldExitCrit) && (m_maxFieldExitCrit > 0.0)) {
+    pout() << "ItoKMCBackgroundEvaluator -- stopping because the max field (in any cell) "
+           << "changed by more than specified threshold (max_field_exit_crit)" << endl;
+    abortCondition = true;
+  }
+  if ((m_relFieldChange > m_relFieldExitCrit) && (m_relFieldExitCrit > 0.0)) {
+    pout() << "ItoKMCBackgroundEvaluator -- stopping because the relative field change in a cell "
+           << "is larger than specified threshold (rel_field_exit_crit)" << endl;
+    abortCondition = true;
+  }
+  if (abortCondition) {
+    this->m_keepGoing = false;
+  }
+
   return actualDt;
 }
 
@@ -123,36 +138,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::computeDt()
     pout() << "ItoKMCBackgroundEvaluator::computeDt" << endl;
   }
 
-  Real newDt = 0.0;
-
-  const bool noElectronsPresent = false;
-
-  bool abortCondition = false; // make sure all simultaneous abort reasons are stated in the log
-
-  if ((m_maxFieldChange > m_maxFieldExitCrit) && (m_maxFieldExitCrit > 0.0)) {
-    pout()
-      << "ItoKMCBackgroundEvaluator -- abort because the max field (in any cell) changed by more than specified threshold (max_field_exit_crit)"
-      << endl;
-    abortCondition = true;
-  }
-
-  if ((m_relFieldChange > m_relFieldExitCrit) && (m_relFieldExitCrit > 0.0)) {
-    pout()
-      << "ItoKMCBackgroundEvaluator -- abort because the relative field change in a cell is larger than specified threshold (rel_field_exit_crit)"
-      << endl;
-    abortCondition = true;
-  }
-
-  if (noElectronsPresent) { // Abort if we're out of electrons.
-    pout() << "ItoKMCBackgroundEvaluator -- abort because no electrons are present" << endl;
-    abortCondition = true;
-  }
-  if (abortCondition) {
-    newDt = 0.0;
-  }
-  else {
-    newDt = ItoKMCGodunovStepper<I, C, R, F>::computeDt();
-  }
+  Real newDt = ItoKMCGodunovStepper<I, C, R, F>::computeDt();
 
   if (this->m_timeStep == 0 && m_maxInitialTimeStep > 0.0 && newDt > m_maxInitialTimeStep)
     newDt = m_maxInitialTimeStep;

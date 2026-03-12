@@ -14,7 +14,7 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-TimeStepper::TimeStepper()
+TimeStepper::TimeStepper() : m_keepGoing(true)
 {}
 
 TimeStepper::~TimeStepper()
@@ -44,6 +44,14 @@ TimeStepper::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>
   CH_assert(!a_computationalGeometry.isNull());
 
   m_computationalGeometry = a_computationalGeometry;
+}
+
+bool
+TimeStepper::keepGoing() const
+{
+  CH_TIME("TimeStepper::keepGoing()");
+
+  return m_keepGoing;
 }
 
 bool

@@ -334,6 +334,22 @@ This function is called by :ref:`Chap:Driver` after performing a time step, and 
 For example, the current gas discharge models in ``chombo-discharge`` print the maximum electric field and density at each time step.
 Note that ``printStepReport`` has (or should have!) no side-effects that affect the simulation state.
 
+keepGoing
+---------
+
+``keepGoing`` lets a ``TimeStepper`` request a graceful simulation stop without triggering an error.
+When a derived class sets ``m_keepGoing = false`` (e.g. because a threshold has been exceeded),
+:ref:`Chap:Driver` will finish the current time step — including writing any plot and checkpoint
+files — and then exit the time loop normally.
+This replaces the older pattern of returning ``dt = 0.0`` from ``computeDt``, which caused
+:ref:`Chap:Driver` to treat the stop as a fatal error and write a crash file instead of clean output.
+The function signature is
+
+.. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
+   :language: c++
+   :lines: 270-276
+   :dedent: 2
+
 Regrid routines
 ===============
 
@@ -402,9 +418,9 @@ The function signature for this function is
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 270-275
+   :lines: 278-283
    :dedent: 2
-	      
+
 This function must return true if the input :ref:`Chap:Realm` (``a_realm``) should be load balanced.
 
 loadBalanceBoxes
@@ -414,7 +430,7 @@ If ``loadBalanceThisRealm`` returns true, the following function is responsible 
 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :language: c++
-   :lines: 277-296
+   :lines: 285-304
    :dedent: 2
 
 This is called if ``loadBalanceThisRealm`` evaluates to true, and in this case the ``TimeStepper`` should compute a new set of rank ownership for the input grid boxes.
@@ -425,7 +441,7 @@ The default implementation of this function ensures that when we load balance a 
 .. literalinclude:: ../../../../Source/Driver/CD_TimeStepper.H
    :caption: Default implementation of ``loadBalanceBoxes``.
    :language: c++
-   :lines: 270-275
+   :lines: 278-283
    :dedent: 2
 
 In the above, we use the ``Loads`` class to hold the computational load for each rank, and on each level we compute the load for each patch to be equal to the number of grid cells in the patch.
