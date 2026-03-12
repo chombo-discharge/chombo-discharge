@@ -811,7 +811,7 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
     // for how long the simulation will run.
     m_wallClockStart = Timer::wallClock();
 
-    while (m_time < a_endTime && m_timeStep < a_maxSteps && !isLastStep) {
+    while (m_time < a_endTime && m_timeStep < a_maxSteps && !isLastStep && m_timeStepper->keepGoing()) {
       const int maxSimDepth = m_amr->getMaxSimulationDepth();
       const int maxAmrDepth = m_amr->getMaxAmrDepth();
 
@@ -921,6 +921,11 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
         isLastStep = true;
       }
       if (m_timeStep == m_maxSteps) {
+        isLastStep = true;
+      }
+
+      // Graceful stop requested by TimeStepper (e.g. space-charge threshold exceeded)
+      if (!m_timeStepper->keepGoing()) {
         isLastStep = true;
       }
 

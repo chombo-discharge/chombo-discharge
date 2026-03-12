@@ -293,9 +293,9 @@ ItoKMCGodunovStepper<I, C, R, F>::computeDt()
   Real dt = ItoKMCStepper<I, C, R, F>::computeDt();
 
   if ((this->m_maxReducedField > m_maxFieldAbort) && (m_maxFieldAbort > 0.0)) {
-    pout() << this->m_name + " aborting because maximum field is too high (" << this->m_maxReducedField << ")" << endl;
+    pout() << this->m_name + " stopping because maximum field is too high (" << this->m_maxReducedField << ")" << endl;
 
-    dt = 0.0;
+    this->m_keepGoing = false;
   }
 
   return dt;
