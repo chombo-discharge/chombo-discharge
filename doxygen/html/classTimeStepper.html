@@ -213,6 +213,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aba1d6a5006558bc0e0029a89e88e9899" id="r_aba1d6a5006558bc0e0029a89e88e9899"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aba1d6a5006558bc0e0029a89e88e9899">needToRegrid</a> ()</td></tr>
 <tr class="memdesc:aba1d6a5006558bc0e0029a89e88e9899"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuction which can have <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> do regrids at arbitrary points in the simulation.  <br /></td></tr>
 <tr class="separator:aba1d6a5006558bc0e0029a89e88e9899"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56fb3c2953b664594ecf0f303c7645d3" id="r_a56fb3c2953b664594ecf0f303c7645d3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a56fb3c2953b664594ecf0f303c7645d3">keepGoing</a> () <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
+<tr class="memdesc:a56fb3c2953b664594ecf0f303c7645d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the time stepper wants to continue stepping.  <br /></td></tr>
+<tr class="separator:a56fb3c2953b664594ecf0f303c7645d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a975558fbeeb797d24c27f904666fefe7" id="r_a975558fbeeb797d24c27f904666fefe7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">virtual</a> <a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#a975558fbeeb797d24c27f904666fefe7">loadBalanceThisRealm</a> (<a class="el" href="classTracerParticleSolver.html">const</a> <a class="el" href="classTracerParticleSolver.html#a4fa2ba84feb2e79304ef1d8c0aafd77d">std::string</a> <a class="el" href="classTracerParticleSolver.html">a_realm</a>) <a class="el" href="classTracerParticleSolver.html">const</a></td></tr>
 <tr class="memdesc:a975558fbeeb797d24c27f904666fefe7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.  <br /></td></tr>
 <tr class="separator:a975558fbeeb797d24c27f904666fefe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -238,6 +241,9 @@ Protected Attributes</h2></td></tr>
 <a class="el" href="classTracerParticleSolver.html">Real</a>&#160;</td><td class="memItemRight" valign="bottom"><b>m_dt</b></td></tr>
 <tr class="memdesc:aa4757ed44ffc8a7665ef03d5bb392e35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Previous time step size. <br /></td></tr>
 <tr class="separator:aa4757ed44ffc8a7665ef03d5bb392e35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae8632beed762773e4b007245dfb684e" id="r_aae8632beed762773e4b007245dfb684e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classTracerParticleSolver.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTimeStepper.html#aae8632beed762773e4b007245dfb684e">m_keepGoing</a></td></tr>
+<tr class="memdesc:aae8632beed762773e4b007245dfb684e"><td class="mdescLeft">&#160;</td><td class="mdescRight">If false, <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> will stop the time loop after the current step.  <br /></td></tr>
+<tr class="separator:aae8632beed762773e4b007245dfb684e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb8b1988c11c8a4e257b068f3158f9b3" id="r_abb8b1988c11c8a4e257b068f3158f9b3"><td class="memItemLeft" align="right" valign="top"><a id="abb8b1988c11c8a4e257b068f3158f9b3" name="abb8b1988c11c8a4e257b068f3158f9b3"></a>
 <a class="el" href="classTracerParticleSolver.html">RefCountedPtr</a>&lt; <a class="el" href="classAmrMesh.html">AmrMesh</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>m_amr</b></td></tr>
 <tr class="memdesc:abb8b1988c11c8a4e257b068f3158f9b3"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classAmrMesh.html" title="Class for handling spatial operations.">AmrMesh</a>. <br /></td></tr>
@@ -481,6 +487,26 @@ Protected Attributes</h2></td></tr>
 <p>Fill solvers with initial data. </p>
 
 <p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab6f544b33255d1e3cbbf1279cdc6ec94">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#ab6f544b33255d1e3cbbf1279cdc6ec94">Physics::ItoKMC::ItoKMCStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverGMG &gt;</a>, <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#a8da0fb23dda1fb5c0d068e37c204d64c">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#ada74bc7c5a418213e15f740652e9ff16">Physics::BrownianWalker::BrownianWalkerStepper</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#a86d67023343f8282a651c6c52b2cc64a">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#adcfe9c3f27099f632b74f8f2b7d0d50c">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a3848157d77ba8cce0949f6227eda2113">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a3812d472e5474102a94d455e2566b1b1">Physics::Geometry::GeometryStepper</a>, <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a7a9c853063371e5be4d53264e6dc7b3a">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>, <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#af224a04b55e6b5703afdd908939dec06">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>, and <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a32ceec8f6a557ba656417b30a846dd31">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>.</p>
+
+</div>
+</div>
+<a id="a56fb3c2953b664594ecf0f303c7645d3" name="a56fb3c2953b664594ecf0f303c7645d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56fb3c2953b664594ecf0f303c7645d3">&#9670;&#160;</a></span>keepGoing()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> TimeStepper::keepGoing </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Query whether the time stepper wants to continue stepping. </p>
+<p>Returns m_keepGoing. Derived classes set m_keepGoing = false to signal that the simulation should stop after the current time step completes. </p>
 
 </div>
 </div>
@@ -1184,6 +1210,32 @@ Protected Attributes</h2></td></tr>
 </dl>
 
 <p>Implemented in <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#abe1268eb3a3e2fe1e3b666404be0b95d">Physics::ItoKMC::ItoKMCStepper&lt; I, C, R, F &gt;</a>, <a class="el" href="classPhysics_1_1ItoKMC_1_1ItoKMCStepper.html#abe1268eb3a3e2fe1e3b666404be0b95d">Physics::ItoKMC::ItoKMCStepper&lt; ItoSolver, CdrCTU, McPhoto, FieldSolverGMG &gt;</a>, <a class="el" href="classPhysics_1_1AdvectionDiffusion_1_1AdvectionDiffusionStepper.html#ac64d05fb563b2fedbd3a6529bed8db62">Physics::AdvectionDiffusion::AdvectionDiffusionStepper</a>, <a class="el" href="classPhysics_1_1BrownianWalker_1_1BrownianWalkerStepper.html#af5f5670d1dfd035ef765be3c846a7766">Physics::BrownianWalker::BrownianWalkerStepper</a>, <a class="el" href="classPhysics_1_1CdrPlasma_1_1CdrPlasmaStepper.html#aeeed6f9f1a177c0a849a2197e0c95483">Physics::CdrPlasma::CdrPlasmaStepper</a>, <a class="el" href="classPhysics_1_1DischargeInception_1_1DischargeInceptionStepper.html#a84d61f063c77b09dac956511a5a18b31">Physics::DischargeInception::DischargeInceptionStepper&lt; P, F, C &gt;</a>, <a class="el" href="classPhysics_1_1Electrostatics_1_1FieldStepper.html#a0cee14e40aa3f2551d9eeac9baae1837">Physics::Electrostatics::FieldStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1MeshODE_1_1MeshODEStepper.html#a336f5b490f0e11fec2035e96b4039c74">Physics::MeshODE::MeshODEStepper&lt; N &gt;</a>, <a class="el" href="classPhysics_1_1RadiativeTransfer_1_1RadiativeTransferStepper.html#a3396482eb902894cb703bb28fa7edd6b">Physics::RadiativeTransfer::RadiativeTransferStepper&lt; T &gt;</a>, <a class="el" href="classPhysics_1_1Geometry_1_1GeometryStepper.html#a3cf8b8d768cd9e337d95255350bffb6a">Physics::Geometry::GeometryStepper</a>, and <a class="el" href="classPhysics_1_1TracerParticle_1_1TracerParticleStepper.html#a38f9c9f9b8fa22cf0488025124b5e100">Physics::TracerParticle::TracerParticleStepper&lt; P &gt;</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="aae8632beed762773e4b007245dfb684e" name="aae8632beed762773e4b007245dfb684e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae8632beed762773e4b007245dfb684e">&#9670;&#160;</a></span>m_keepGoing</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTracerParticleSolver.html">bool</a> TimeStepper::m_keepGoing</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If false, <a class="el" href="classDriver.html" title="Main class for time/space advancement of streamer equations.">Driver</a> will stop the time loop after the current step. </p>
+<p>Derived classes can set this to false to request a graceful simulation stop without triggering an error. Defaults to true. </p>
 
 </div>
 </div>

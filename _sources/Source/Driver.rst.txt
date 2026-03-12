@@ -102,6 +102,10 @@ In brief, the algorithm looks like this:
       }
    }
 
+A ``TimeStepper`` can also request a graceful stop mid-simulation by setting ``m_keepGoing = false``
+(see :ref:`Chap:TimeStepper`).
+When this flag is false, ``Driver`` treats the completed step as the last step, triggering normal
+plot and checkpoint output before exiting — no crash file is written.
 
 .. _Chap:DriverRegridding:
    

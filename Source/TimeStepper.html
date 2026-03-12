@@ -87,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#advance">advance</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#synchronizesolvertimes">synchronizeSolverTimes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#printstepreport">printStepReport</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keepgoing">keepGoing</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#regrid-routines">Regrid routines</a><ul>
@@ -459,12 +460,20 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="w">  </span><span class="nf">postRegrid</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief Fuction which can have Driver do regrids at arbitrary points in the simulation. </span>
-<span class="cm">    @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is </span>
-<span class="cm">    on the regular &quot;regrid intervals&quot;. </span>
+<span class="cm">    @brief Fuction which can have Driver do regrids at arbitrary points in the simulation.</span>
+<span class="cm">    @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is</span>
+<span class="cm">    on the regular &quot;regrid intervals&quot;.</span>
 <span class="cm">  */</span>
 <span class="w">  </span><span class="k">virtual</span><span class="w"> </span><span class="kt">bool</span>
 <span class="w">  </span><span class="nf">needToRegrid</span><span class="p">();</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief Query whether the time stepper wants to continue stepping.</span>
+<span class="cm">    @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal</span>
+<span class="cm">    that the simulation should stop after the current time step completes.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kt">bool</span>
+<span class="w">  </span><span class="nf">keepGoing</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/*!</span>
 <span class="cm">    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. </span>
@@ -516,7 +525,14 @@ Below, we include the current header file for <code class="docutils literal notr
 <span class="w">  </span><span class="n">Real</span><span class="w"> </span><span class="n">m_dt</span><span class="p">;</span>
 
 <span class="w">  </span><span class="cm">/*!</span>
-<span class="cm">    @brief AmrMesh. </span>
+<span class="cm">    @brief If false, Driver will stop the time loop after the current step.</span>
+<span class="cm">    @details Derived classes can set this to false to request a graceful simulation stop</span>
+<span class="cm">    without triggering an error. Defaults to true.</span>
+<span class="cm">  */</span>
+<span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="n">m_keepGoing</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/*!</span>
+<span class="cm">    @brief AmrMesh.</span>
 <span class="cm">  */</span>
 <span class="w">  </span><span class="n">RefCountedPtr</span><span class="o">&lt;</span><span class="n">AmrMesh</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_amr</span><span class="p">;</span>
 
@@ -1051,6 +1067,25 @@ The implementation for <a class="reference internal" href="../Applications/Advec
 This function is called by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> after performing a time step, and can be used to print extra information not covered by <a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a>, such as how the time step was limited, or other information that is useful for monitoring the behavior of <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code>.
 For example, the current gas discharge models in <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> print the maximum electric field and density at each time step.
 Note that <code class="docutils literal notranslate"><span class="pre">printStepReport</span></code> has (or should have!) no side-effects that affect the simulation state.</p>
+</section>
+<section id="keepgoing">
+<h3>keepGoing<a class="headerlink" href="#keepgoing" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">keepGoing</span></code> lets a <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> request a graceful simulation stop without triggering an error.
+When a derived class sets <code class="docutils literal notranslate"><span class="pre">m_keepGoing</span> <span class="pre">=</span> <span class="pre">false</span></code> (e.g. because a threshold has been exceeded),
+<a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> will finish the current time step — including writing any plot and checkpoint
+files — and then exit the time loop normally.
+This replaces the older pattern of returning <code class="docutils literal notranslate"><span class="pre">dt</span> <span class="pre">=</span> <span class="pre">0.0</span></code> from <code class="docutils literal notranslate"><span class="pre">computeDt</span></code>, which caused
+<a class="reference internal" href="Driver.html#chap-driver"><span class="std std-ref">Driver</span></a> to treat the stop as a fatal error and write a crash file instead of clean output.
+The function signature is</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cm">/*!</span>
+<span class="cm">  @brief Query whether the time stepper wants to continue stepping.</span>
+<span class="cm">  @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal</span>
+<span class="cm">  that the simulation should stop after the current time step completes.</span>
+<span class="cm">*/</span>
+<span class="kt">bool</span>
+<span class="nf">keepGoing</span><span class="p">()</span><span class="w"> </span><span class="k">const</span><span class="p">;</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="regrid-routines">

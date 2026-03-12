@@ -252,6 +252,10 @@ In brief, the algorithm looks like this:</p>
 }
 </pre></div>
 </div>
+<p>A <code class="docutils literal notranslate"><span class="pre">TimeStepper</span></code> can also request a graceful stop mid-simulation by setting <code class="docutils literal notranslate"><span class="pre">m_keepGoing</span> <span class="pre">=</span> <span class="pre">false</span></code>
+(see <a class="reference internal" href="TimeStepper.html#chap-timestepper"><span class="std std-ref">TimeStepper</span></a>).
+When this flag is false, <code class="docutils literal notranslate"><span class="pre">Driver</span></code> treats the completed step as the last step, triggering normal
+plot and checkpoint output before exiting — no crash file is written.</p>
 </section>
 <section id="regridding">
 <span id="chap-driverregridding"></span><h2>Regridding<a class="headerlink" href="#regridding" title="Permalink to this heading"></a></h2>
