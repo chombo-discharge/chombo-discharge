@@ -1,0 +1,28 @@
+# ====================================================================================================
+# SpherePlane geometry class options
+#
+# This class represents a sphere-plane gap, consisting of a sphere with sphere holder, and a disk with
+# a disk holder. It is oriented along one of the Cartesian axis (user-specified.
+# ====================================================================================================
+SpherePlane.orientation           = 1        ## Orientation. x = 0, y = 1, z = 2
+SpherePlane.use_sphere            = true     ## Rod is on/off
+SpherePlane.use_disk              = true     ## Disk is on/off
+SpherePlane.use_sphere_holder     = true     ## Rod holder is on/off
+SpherePlane.use_disk_holder       = false    ## Disk holder is on/off
+
+SpherePlane.live_sphere     = true     ## Live sphere or not
+SpherePlane.live_disk       = false    ## Live disk or not
+
+SpherePlane.sphere_radius            = 50E-3    ## Sphere radius
+SpherePlane.sphere_center            = 70E-3    ## Sphere center
+SpherePlane.sphere_holder_radius     = 36E-3    ## Sphere holder radius
+SpherePlane.sphere_holder_length     = 1.0      ## Sphere holder length
+SpherePlane.sphere_holder_smooth     = 1E-3     ## Smoothing length for sphere-holder CSG union
+
+SpherePlane.disk_radius            = 12E-2    ## Disk radius
+SpherePlane.disk_center            = 0.0      ## Disk center
+SpherePlane.disk_thickness         = 40E-3    ## Disk thickness
+SpherePlane.disk_curvature         = 12E-3    ## Disk corner curvature
+SpherePlane.disk_holder_radius     = 30E-3    ## Disk holder radius
+SpherePlane.disk_holder_length     = 1        ## Disk holder length
+SpherePlane.disk_holder_smooth     = 1E-3     ## Smoothing length for disk-holder CSG union
