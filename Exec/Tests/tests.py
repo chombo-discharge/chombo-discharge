@@ -352,11 +352,11 @@ for test in config.sections():
                             os.environ['OMP_SCHEDULE'] = "dynamic"
                             os.environ['OMP_PROC_BIND'] = "true"
 
-                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
+                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + os.path.abspath(inputFile)
                         else:
                             # MPI only case
                             num_mpi_ranks = args.cores
-                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + inputFile
+                            runCommand = args.exec_mpi + " -np " + str(num_mpi_ranks) + " ./" + executable + " " + os.path.abspath(inputFile)
                     else:
                         # No MPI case
                         if has_openmp:
