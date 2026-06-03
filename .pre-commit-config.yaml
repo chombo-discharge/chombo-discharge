@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v18.1.8
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
+
+  - repo: local
+    hooks:
+      - id: format-input-files
+        name: Format input files
+        entry: ./FormatInputFiles.sh
+        language: script
+        files: \.(inputs|options)$
+        pass_filenames: false
