@@ -42,9 +42,10 @@ Continuous integration
 
 ``chombo-discharge`` uses continuous integration (CI) with GitHub actions for:
 
-* Running the test suite (see :ref:`Chap:Testing`). 
+* Running the test suite (see :ref:`Chap:Testing`).
 * Building HTML, PDF, and doxygen documentation.
 * Ensuring correct code format.
+* Automated code review via Claude (triggered by commenting ``@claude review`` on the pull request).
 
 When submitting pull request for review, the above tests will start.
 In general, all the above tests should pass before merging the pull request into the main branch.
