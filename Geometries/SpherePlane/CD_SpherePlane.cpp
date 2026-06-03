@@ -49,8 +49,6 @@ SpherePlane::SpherePlane()
 
   ParmParse pp("SpherePlane");
 
-  pp.get("orientation", dir);
-
   pp.get("use_sphere", useSphere);
   pp.get("use_disk", useDisk);
   pp.get("use_sphere_holder", useSphereHolder);
@@ -77,12 +75,10 @@ SpherePlane::SpherePlane()
     ImpFunc holder;
     ImpFunc arrangement;
 
-    sphere      = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
-    holder      = std::make_shared<CylinderSDF<Real>>(Vec3::zero(),
-                                                 sphereHolderLength * Vec3::unit(dir),
-                                                 sphereHolderRadius);
+    sphere = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+    holder = std::make_shared<CylinderSDF<Real>>(Vec3::zero(), sphereHolderLength * Vec3::unit(1), sphereHolderRadius);
     arrangement = useSphereHolder ? EBGeometry::SmoothUnion<Real>(sphere, holder, sphereHolderSmooth) : sphere;
-    arrangement = EBGeometry::Translate<Real>(arrangement, sphereCenter * Vec3::unit(dir));
+    arrangement = EBGeometry::Translate<Real>(arrangement, sphereCenter * Vec3::unit(1));
 
     m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(arrangement, true)), liveSphere));
   }
@@ -94,11 +90,11 @@ SpherePlane::SpherePlane()
 
     disk = std::make_shared<RoundedCylinderSDF<Real>>(0.5 * (diskRadius + diskCurvature), diskCurvature, diskThickness);
     holder = holder = std::make_shared<CylinderSDF<Real>>(Vec3::zero(),
-                                                          -diskHolderLength * Vec3::unit(dir),
+                                                          -diskHolderLength * Vec3::unit(1),
                                                           diskHolderRadius);
 
     arrangement = useDiskHolder ? EBGeometry::SmoothUnion<Real>(disk, holder, diskHolderSmooth) : disk;
-    arrangement = EBGeometry::Translate<Real>(arrangement, -(diskCenter + 0.5 * diskThickness) * Vec3::unit(dir));
+    arrangement = EBGeometry::Translate<Real>(arrangement, -(diskCenter + 0.5 * diskThickness) * Vec3::unit(1));
 
     m_electrodes.push_back(Electrode(RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(arrangement, true)), liveDisk));
   }

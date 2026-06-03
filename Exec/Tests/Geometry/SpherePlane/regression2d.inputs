@@ -63,9 +63,8 @@ Driver.refine_dielectrics           = -1                   ## Refine dielectric 
 # SpherePlane geometry class options
 #
 # This class represents a sphere-plane gap, consisting of a sphere with sphere holder, and a disk with
-# a disk holder. It is oriented along one of the Cartesian axis (user-specified.
+# a disk holder. It is oriented along the Cartesian y-axis.
 # ====================================================================================================
-SpherePlane.orientation           = 1        ## Orientation. x = 0, y = 1, z = 2
 SpherePlane.use_sphere            = true     ## Rod is on/off
 SpherePlane.use_disk              = true     ## Disk is on/off
 SpherePlane.use_sphere_holder     = true     ## Rod holder is on/off
