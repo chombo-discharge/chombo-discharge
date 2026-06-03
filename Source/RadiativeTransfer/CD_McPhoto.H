@@ -646,10 +646,10 @@ protected:
 
   /*!
     @brief Random exponential trial
-    @param[in] a_mean Mean value in exponential distribution. 
+    @param[in] a_rate Rate (lambda) of the exponential distribution. Mean free path = 1/a_rate.
   */
   Real
-  randomExponential(const Real a_mean) const noexcept;
+  randomExponential(const Real a_rate) const noexcept;
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
