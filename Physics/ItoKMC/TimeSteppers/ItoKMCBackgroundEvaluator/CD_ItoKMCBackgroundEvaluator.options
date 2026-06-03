@@ -9,13 +9,13 @@ ItoKMCBackgroundEvaluator.abort_max_field                          = 10000      
 ItoKMCBackgroundEvaluator.redistribute_cdr                         = true               ## Turn on/off reactive redistribution
 ItoKMCBackgroundEvaluator.profile                                  = false              ## Turn on/off run-time profiling
 ItoKMCBackgroundEvaluator.plt_vars                                 = current_density    ## 'conductivity', 'current_density', 'particles_per_patch'
-ItoKMCBackgroundEvaluator.dual_grid                                = true               ## Turn on/off dual-grid functionality
+ItoKMCBackgroundEvaluator.dual_grid                                = false              ## Turn on/off dual-grid functionality
 ItoKMCBackgroundEvaluator.load_balance_fluid                       = false              ## Turn on/off fluid realm load balancing.
-ItoKMCBackgroundEvaluator.load_balance_particles                   = true               ## Turn on/off particle load balancing
+ItoKMCBackgroundEvaluator.load_balance_particles                   = false              ## Turn on/off particle load balancing
 ItoKMCBackgroundEvaluator.load_indices                             = -1                 ## Which particle containers to use for load balancing (-1 => all)
 ItoKMCBackgroundEvaluator.load_per_cell                            = 1.0                ## Default load per grid cell.
 ItoKMCBackgroundEvaluator.box_sorting                              = morton             ## Box sorting when load balancing
-ItoKMCBackgroundEvaluator.particles_per_cell                       = 64                 ## Max computational particles per cell
+ItoKMCBackgroundEvaluator.particles_per_cell                       = 32                 ## Max computational particles per cell
 ItoKMCBackgroundEvaluator.merge_interval                           = 1                  ## Time steps between superparticle merging
 ItoKMCBackgroundEvaluator.regrid_superparticles                    = false              ## Make superparticles during regrids
 ItoKMCBackgroundEvaluator.physics_dt_factor                        = 1.0                ## Physics-based time step factor
