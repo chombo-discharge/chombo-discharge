@@ -21,7 +21,7 @@ jobs:
         directory: [Source, Physics, Geometries, Exec]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.10.1
         with:
@@ -48,7 +48,7 @@ jobs:
       CORES: 2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -71,7 +71,7 @@ jobs:
 
       - name: Restore Chombo library cache
         id: cache-chombo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
           key: gcc-chombo-libs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
@@ -83,7 +83,7 @@ jobs:
 
       - name: Restore discharge library cache
         id: cache-discharge
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Lib/lib*.a
           key: gcc-discharge-libs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
@@ -134,11 +134,11 @@ jobs:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
       CORES: 2
-      # Bump this string to force a full refresh of cached Intel apt packages.
+      # Bump this string to force a full reinstall of the cached Intel oneAPI installation.
       ONEAPI_CACHE_VERSION: v2025.1
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
 
@@ -153,15 +153,15 @@ jobs:
           sudo apt-get update
           sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
 
-      - name: Restore Intel apt package cache
-        uses: actions/cache@v4
+      - name: Restore Intel oneAPI installation cache
+        id: cache-oneapi
+        uses: actions/cache@v5
         with:
-          path: /var/cache/apt/archives
-          key: oneapi-apt-debs-${{ env.ONEAPI_CACHE_VERSION }}
-          restore-keys: |
-            oneapi-apt-debs-
+          path: /opt/intel/oneapi
+          key: oneapi-installation-${{ env.ONEAPI_CACHE_VERSION }}
 
       - name: Install Intel oneAPI
+        if: steps.cache-oneapi.outputs.cache-hit != 'true'
         working-directory: /tmp
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
@@ -179,7 +179,7 @@ jobs:
 
       - name: Restore Chombo library cache
         id: cache-chombo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
           key: oneapi-chombo-libs-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
@@ -192,7 +192,7 @@ jobs:
 
       - name: Restore discharge library cache
         id: cache-discharge
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: Lib/lib*.a
           key: oneapi-discharge-libs-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
@@ -235,7 +235,7 @@ jobs:
     needs: Formatting
     runs-on : ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install dependencies
         run: |
@@ -247,7 +247,7 @@ jobs:
           sudo apt install latexmk
 
       - name: Restore pip cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: docs-pip-sphinx5.0.0-rtd-bibtex
@@ -271,7 +271,7 @@ jobs:
           make latexpdf
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: Docs/Sphinx/build
