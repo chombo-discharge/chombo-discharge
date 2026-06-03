@@ -1,5 +1,5 @@
 <map id="Source/AmrMesh/CD_PetscGrid.H" name="Source/AmrMesh/CD_PetscGrid.H">
-<area shape="rect" id="Node000001" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="4385,5,4623,31"/>
+<area shape="rect" id="Node000001" title="File containing declaration of PetscGrid." alt="" coords="4385,5,4623,31"/>
 <area shape="rect" id="Node000002" href="$CD__Realm_8H.html" title="Declaration of the Realm class." alt="" coords="4395,79,4613,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="4507,44,4507,79,4501,79,4501,44"/>
 <area shape="rect" id="Node000003" href="$CD__AmrMesh_8H.html" title="Declaration of core class for handling AMR&#45;related operations (with embedded boundaries)" alt="" coords="4255,152,4494,177"/>
