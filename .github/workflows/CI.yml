@@ -103,16 +103,8 @@ jobs:
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
 
-      - name: Restore test executable cache
-        id: cache-tests
-        uses: actions/cache@v5
-        with:
-          path: Exec/Tests/**/*.ex
-          key: gcc-test-execs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
-
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: steps.cache-tests.outputs.cache-hit != 'true'
         run: |
           python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
@@ -222,16 +214,8 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
 
-      - name: Restore test executable cache
-        id: cache-tests
-        uses: actions/cache@v5
-        with:
-          path: Exec/Tests/**/*.ex
-          key: oneapi-test-execs-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
-
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: steps.cache-tests.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
           python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
