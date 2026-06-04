@@ -21,7 +21,7 @@ jobs:
         directory: [Source, Physics, Geometries, Exec]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.10.1
         with:
@@ -29,7 +29,7 @@ jobs:
           check-path: ${{ matrix.directory }}
 
   Linux-GNU:
-    if: github.event.pull_request.draft == false    
+    if: github.event.pull_request.draft == false
     needs: Formatting
     name: Linux-GNU
     runs-on: ubuntu-latest
@@ -37,21 +37,28 @@ jobs:
     strategy:
       max-parallel: 16
       matrix:
-        ver: [10, 13]
+        ver: [13]
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
         omp: ["TRUE", "FALSE"]
-        
+
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
       CORES: 2
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
+
+      - name: Get submodule commit hashes
+        id: submodule-sha
+        run: |
+          echo "chombo-sha=$(git ls-tree HEAD Submodules/Chombo-3.3 | awk '{print $3}')" >> $GITHUB_OUTPUT
+          echo "ebgeo-sha=$(git ls-tree HEAD Submodules/EBGeometry | awk '{print $3}')"  >> $GITHUB_OUTPUT
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -63,38 +70,65 @@ jobs:
         run: |
           cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
+      - name: Restore Chombo library cache
+        id: cache-chombo
+        uses: actions/cache@v5
+        with:
+          path: Submodules/Chombo-3.3/lib/lib*.a
+          key: gcc-chombo-libs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
+
       - name: Build Chombo
+        if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
 
+      - name: Restore discharge library cache
+        id: cache-discharge
+        uses: actions/cache@v5
+        with:
+          path: Lib/lib*.a
+          key: gcc-discharge-libs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+
       - name: Build chombo-discharge/source
+        if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-source
 
       - name: Build chombo-discharge/geometries
+        if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
+        if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
 
+      - name: Restore test executables cache
+        id: cache-tests
+        uses: actions/cache@v5
+        with:
+          path: Exec/Tests/**/*.ex
+          key: gcc-test-execs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+
       - name: Compile tests
+        if: steps.cache-tests.outputs.cache-hit != 'true'
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: always()        
         run: |
-          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
+          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: always()        
+        if: always()
+        env:
+          OMP_STACKSIZE: "64M"
         run: |
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
   Linux-oneAPI:
-    if: github.event.pull_request.draft == false    
+    if: github.event.pull_request.draft == false
     needs: Formatting
     name: Linux-oneAPI
     runs-on: ubuntu-latest
@@ -104,25 +138,41 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["FALSE"]
-        omp: ["TRUE", "FALSE"]        
-        
+        omp: ["TRUE", "FALSE"]
+
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
       CORES: 2
+      # Bump this string to force a full reinstall of the cached Intel oneAPI installation.
+      ONEAPI_CACHE_VERSION: v2025.1
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: true
+
+      - name: Get submodule commit hashes
+        id: submodule-sha
+        run: |
+          echo "chombo-sha=$(git ls-tree HEAD Submodules/Chombo-3.3 | awk '{print $3}')" >> $GITHUB_OUTPUT
+          echo "ebgeo-sha=$(git ls-tree HEAD Submodules/EBGeometry | awk '{print $3}')"  >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
 
+      - name: Restore Intel oneAPI installation cache
+        id: cache-oneapi
+        uses: actions/cache@v5
+        with:
+          path: /opt/intel/oneapi
+          key: oneapi-installation-${{ env.ONEAPI_CACHE_VERSION }}
+
       - name: Install Intel oneAPI
-        working-directory: /tmp        
+        if: steps.cache-oneapi.outputs.cache-hit != 'true'
+        working-directory: /tmp
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
@@ -130,56 +180,83 @@ jobs:
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
           sudo apt-get update
           sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp
-          sudo apt-get install intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl          
-           
+          sudo apt-get install intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl
 
       - name: Copy makefile
         run: |
-          source /opt/intel/oneapi/setvars.sh                    
+          source /opt/intel/oneapi/setvars.sh
           cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-oneAPI $CHOMBO_HOME/mk/Make.defs.local
 
+      - name: Restore Chombo library cache
+        id: cache-chombo
+        uses: actions/cache@v5
+        with:
+          path: Submodules/Chombo-3.3/lib/lib*.a
+          key: oneapi-chombo-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+
       - name: Build Chombo
+        if: steps.cache-chombo.outputs.cache-hit != 'true'
         run: |
           source /opt/intel/oneapi/setvars.sh
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} chombo
 
+      - name: Restore discharge library cache
+        id: cache-discharge
+        uses: actions/cache@v5
+        with:
+          path: Lib/lib*.a
+          key: oneapi-discharge-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+
       - name: Build chombo-discharge/source
+        if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          source /opt/intel/oneapi/setvars.sh                    
+          source /opt/intel/oneapi/setvars.sh
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-source
 
       - name: Build chombo-discharge/geometries
+        if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          source /opt/intel/oneapi/setvars.sh                    
+          source /opt/intel/oneapi/setvars.sh
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-geometries
 
       - name: Build chombo-discharge/physics
+        if: steps.cache-discharge.outputs.cache-hit != 'true'
         run: |
-          source /opt/intel/oneapi/setvars.sh                    
+          source /opt/intel/oneapi/setvars.sh
           make -s -j${{ env.CORES }} DIM=${{ matrix.dim }} USE_HDF=${{ matrix.hdf }} MPI=${{ matrix.mpi }} OPENMPCC=${{ matrix.omp }} discharge-physics
 
+      - name: Restore test executables cache
+        id: cache-tests
+        uses: actions/cache@v5
+        with:
+          path: Exec/Tests/**/*.ex
+          key: oneapi-test-execs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+
       - name: Compile tests
+        if: steps.cache-tests.outputs.cache-hit != 'true'
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: always()        
         run: |
-          source /opt/intel/oneapi/setvars.sh                              
-          python3 tests.py --compile --clean --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
+          source /opt/intel/oneapi/setvars.sh
+          python3 tests.py --compile --no_exec -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -hdf=${{ matrix.hdf }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
-        if: always()        
+        if: always()
+        env:
+          OMP_STACKSIZE: "64M"
         run: |
-          source /opt/intel/oneapi/setvars.sh                              
+          source /opt/intel/oneapi/setvars.sh
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
-          if [[ $? == 0 ]]; then exit 0; else exit 1; fi                                                  
+          if [[ $? == 0 ]]; then exit 0; else exit 1; fi
 
   Build-documentation:
     needs: Formatting
     runs-on : ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install depdencies
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt install doxygen
@@ -187,6 +264,15 @@ jobs:
           sudo apt install texlive
           sudo apt install texlive-latex-extra
           sudo apt install latexmk
+
+      - name: Restore pip cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: docs-pip-sphinx5.0.0-rtd-bibtex
+
+      - name: Install Python dependencies
+        run: |
           python3 -m pip install sphinx==5.0.0 sphinx_rtd_theme sphinxcontrib-bibtex
 
       - name: Build doxygen
@@ -194,7 +280,7 @@ jobs:
           doxygen Docs/doxygen.conf
 
       - name: Build HTML documentation
-        working-directory: ${{ github.workspace }}/Docs/Sphinx        
+        working-directory: ${{ github.workspace }}/Docs/Sphinx
         run: |
           make html
 
@@ -204,7 +290,7 @@ jobs:
           make latexpdf
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: Docs/Sphinx/build
@@ -214,11 +300,11 @@ jobs:
         run: |
           cp -a Sphinx/build/html/* ./
           mv Sphinx/build/latex/chombo-discharge.pdf ./
-          rm -rf Sphinx/build          
-        
+          rm -rf Sphinx/build
+
   CI-passed:
     needs: [Linux-GNU, Linux-oneAPI, Build-documentation]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing
-        run: |          
+        run: |

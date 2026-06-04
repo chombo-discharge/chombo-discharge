@@ -11,6 +11,7 @@
 */
 
 // Std includes
+#include <limits>
 #include <time.h>
 #include <chrono>
 
@@ -880,9 +881,12 @@ McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side)
 }
 
 Real
-McPhoto::randomExponential(const Real a_mean) const noexcept
+McPhoto::randomExponential(const Real a_rate) const noexcept
 {
-  std::exponential_distribution<Real> dist(a_mean);
+  if (a_rate <= 0.0) {
+    return std::numeric_limits<Real>::infinity();
+  }
+  std::exponential_distribution<Real> dist(a_rate);
   return Random::get(dist);
 }
 
@@ -974,7 +978,6 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
 size_t
 McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) const noexcept
 {
-  CH_TIME("McPhoto::drawPhotons");
   if (m_verbosity > 5) {
     pout() << m_name + "::drawPhotons" << endl;
   }
