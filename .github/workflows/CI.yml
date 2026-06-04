@@ -37,7 +37,7 @@ jobs:
     strategy:
       max-parallel: 16
       matrix:
-        ver: [10, 13]
+        ver: [13]
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
