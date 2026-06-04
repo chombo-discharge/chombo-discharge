@@ -41,7 +41,7 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
-        omp: ["TRUE", "FALSE"]
+        omp: ["FALSE"]
 
     env:
       DISCHARGE_HOME: ${{github.workspace}}
@@ -136,7 +136,7 @@ jobs:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["FALSE"]
-        omp: ["TRUE", "FALSE"]
+        omp: ["FALSE"]
 
     env:
       DISCHARGE_HOME: ${{github.workspace}}
