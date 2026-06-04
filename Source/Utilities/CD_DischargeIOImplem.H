@@ -106,18 +106,26 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 #endif
 
   hid_t fileID = H5Fcreate(a_filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fileAccess);
+#ifdef CH_MPI
   H5Pclose(fileAccess);
+#endif
 
   // Define the top group necessary for the H5Part file format
   hid_t grp = H5Gcreate2(fileID, "Step#0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-  // Write the time attribute
-  hid_t  scal = H5Screate(H5S_SCALAR);
-  hid_t  attr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
-  herr_t err  = H5Awrite(attr, H5T_NATIVE_DOUBLE, &a_time);
+  // Write the Timestep (integer, required by H5Part) and time (double) attributes
+  hid_t scal = H5Screate(H5S_SCALAR);
+
+  long long timestep = 0LL;
+  hid_t     tsAttr   = H5Acreate(grp, "Timestep", H5T_NATIVE_LLONG, scal, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(tsAttr, H5T_NATIVE_LLONG, &timestep);
+  H5Aclose(tsAttr);
+
+  hid_t timeAttr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(timeAttr, H5T_NATIVE_DOUBLE, &a_time);
+  H5Aclose(timeAttr);
 
   H5Sclose(scal);
-  H5Aclose(attr);
 
   // Define dataspace dimensions.
   hsize_t dims[1];
@@ -189,7 +197,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
   H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, &x[0]);
   H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, &y[0]);
 #if CH_SPACEDIM == 3
-  H5Dwrite(datasetZ, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, &z[0]);
+  H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, &z[0]);
 #endif
 
   id.resize(0);
