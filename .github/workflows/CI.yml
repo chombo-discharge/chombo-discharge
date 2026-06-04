@@ -35,7 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     strategy:
-      max-parallel: 16
+      fail-fast: false
+      max-parallel: 8
       matrix:
         ver: [13]
         dim: [2, 3]
@@ -134,6 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     strategy:
+      fail-fast: false
       matrix:
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
