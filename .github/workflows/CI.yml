@@ -121,6 +121,8 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()
+        env:
+          OMP_STACKSIZE: "64M"
         run: |
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
           if [[ $? == 0 ]]; then exit 0; else exit 1; fi
@@ -241,6 +243,8 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Exec/Tests
         if: always()
+        env:
+          OMP_STACKSIZE: "64M"
         run: |
           source /opt/intel/oneapi/setvars.sh
           python3 tests.py -cores=${{ env.CORES }} -dim=${{ matrix.dim }} -mpi=${{ matrix.mpi }} -openmp=${{ matrix.omp }}
