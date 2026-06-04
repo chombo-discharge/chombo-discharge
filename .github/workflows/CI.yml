@@ -108,7 +108,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Exec/Tests/**/*.ex
-          key: gcc-test-execs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-test-execs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Compile tests
         if: steps.cache-tests.outputs.cache-hit != 'true'
@@ -189,7 +189,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
-          key: oneapi-chombo-libs-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+          key: oneapi-chombo-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
 
       - name: Build Chombo
         if: steps.cache-chombo.outputs.cache-hit != 'true'
@@ -202,7 +202,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Lib/lib*.a
-          key: oneapi-discharge-libs-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+          key: oneapi-discharge-libs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
 
       - name: Build chombo-discharge/source
         if: steps.cache-discharge.outputs.cache-hit != 'true'
@@ -227,7 +227,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Exec/Tests/**/*.ex
-          key: oneapi-test-execs-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
+          key: oneapi-test-execs-${{ env.ONEAPI_CACHE_VERSION }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-oneAPI') }}
 
       - name: Compile tests
         if: steps.cache-tests.outputs.cache-hit != 'true'
