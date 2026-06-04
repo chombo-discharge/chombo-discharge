@@ -48,6 +48,7 @@ jobs:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
       CORES: 2
+      GCC_CACHE_VERSION: v1
 
     steps:
       - uses: actions/checkout@v6
@@ -76,7 +77,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Submodules/Chombo-3.3/lib/lib*.a
-          key: gcc-chombo-libs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-chombo-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-${{ steps.submodule-sha.outputs.chombo-sha }}-${{ hashFiles('Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Build Chombo
         if: steps.cache-chombo.outputs.cache-hit != 'true'
@@ -88,7 +89,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Lib/lib*.a
-          key: gcc-discharge-libs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-discharge-libs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Build chombo-discharge/source
         if: steps.cache-discharge.outputs.cache-hit != 'true'
@@ -110,7 +111,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: Exec/Tests/**/*.ex
-          key: gcc-test-execs-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
+          key: gcc-test-execs-${{ env.GCC_CACHE_VERSION }}-v${{ matrix.ver }}-dim${{ matrix.dim }}-mpi${{ matrix.mpi }}-omp${{ matrix.omp }}-hdf${{ matrix.hdf }}-chombo${{ steps.submodule-sha.outputs.chombo-sha }}-ebgeo${{ steps.submodule-sha.outputs.ebgeo-sha }}-${{ hashFiles('Exec/Tests/**/*.cpp', 'Exec/Tests/**/*.H', 'Source/**/*.cpp', 'Source/**/*.H', 'Geometries/**/*.cpp', 'Geometries/**/*.H', 'Physics/**/*.cpp', 'Physics/**/*.H', 'Lib/Definitions.make', 'Lib/Local/GitHub/Make.defs.linux-gcc') }}
 
       - name: Compile tests
         if: steps.cache-tests.outputs.cache-hit != 'true'
