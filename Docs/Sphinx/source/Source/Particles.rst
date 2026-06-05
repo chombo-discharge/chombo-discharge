@@ -738,7 +738,7 @@ Simple particle visualization can be performed by writing ``H5Part`` compatible 
 This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DischargeIO.H
-   :lines: 138-159
+   :lines: 138-161
    :language: c++
    :dedent: 2
 
