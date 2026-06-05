@@ -472,10 +472,10 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
 
     const Real u = Random::getUniformReal01();
 
-    size_t r = std::numeric_limits<size_t>::max();
+    size_t r = numReactions - 1;
 
     Real sumProp = 0.0;
-    for (size_t i = 0; i < a_reactions.size(); i++) {
+    for (size_t i = 0; i + 1 < numReactions; i++) {
       sumProp += a_propensities[i];
 
       if (sumProp >= u * A) {
@@ -484,6 +484,8 @@ KMCSolver<R, State, T>::stepSSA(State&                   a_state,
         break;
       }
     }
+
+    CH_assert(r < a_reactions.size());
 
     // Advance by one reaction.
     a_reactions[r]->advanceState(a_state, one);
