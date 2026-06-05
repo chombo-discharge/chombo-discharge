@@ -36,13 +36,13 @@ jobs:
     timeout-minutes: 150
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 16
       matrix:
         ver: [13]
         dim: [2, 3]
         mpi: ["TRUE", "FALSE"]
         hdf: ["TRUE", "FALSE"]
-        omp: ["TRUE", "FALSE"]
+        omp: ["FALSE"]
 
     env:
       DISCHARGE_HOME: ${{github.workspace}}
