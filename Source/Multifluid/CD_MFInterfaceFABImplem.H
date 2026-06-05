@@ -65,6 +65,8 @@ template <class T>
 BaseIVFAB<T>&
 MFInterfaceFAB<T>::getIVFAB(const int a_phase)
 {
+  CH_assert(a_phase >= 0 && a_phase < m_phase.size());
+  CH_assert(m_phase[a_phase] != nullptr);
   return *m_phase[a_phase];
 }
 
@@ -72,6 +74,8 @@ template <class T>
 const BaseIVFAB<T>&
 MFInterfaceFAB<T>::getIVFAB(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_phase.size());
+  CH_assert(m_phase[a_phase] != nullptr);
   return *m_phase[a_phase];
 }
 
@@ -79,6 +83,7 @@ template <class T>
 BaseIVFAB<T>*
 MFInterfaceFAB<T>::getPhasePtr(int a_phase)
 {
+  CH_assert(a_phase >= 0 && a_phase < m_phase.size());
   return m_phase[a_phase];
 }
 

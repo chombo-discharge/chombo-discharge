@@ -33,18 +33,23 @@ MFReflux::define(const Vector<RefCountedPtr<EBReflux>>& a_fluxRegs)
 const RefCountedPtr<EBReflux>&
 MFReflux::getFluxRegPointer(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_fluxRegs.size());
   return m_fluxRegs[a_phase];
 }
 
 EBReflux&
 MFReflux::getFluxReg(const int a_phase)
 {
+  CH_assert(a_phase >= 0 && a_phase < m_fluxRegs.size());
+  CH_assert(!m_fluxRegs[a_phase].isNull());
   return *m_fluxRegs[a_phase];
 }
 
 const EBReflux&
 MFReflux::getFluxReg(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_fluxRegs.size());
+  CH_assert(!m_fluxRegs[a_phase].isNull());
   return *m_fluxRegs[a_phase];
 }
 

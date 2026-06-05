@@ -41,6 +41,7 @@ MFMultigridInterpolator::define(const Vector<RefCountedPtr<EBMultigridInterpolat
 RefCountedPtr<EBMultigridInterpolator>&
 MFMultigridInterpolator::getInterpolator(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_interpolators.size());
   return m_interpolators[a_phase];
 }
 
