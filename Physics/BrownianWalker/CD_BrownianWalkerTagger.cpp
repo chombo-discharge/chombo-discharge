@@ -55,7 +55,7 @@ BrownianWalkerTagger::parseOptions()
 bool
 BrownianWalkerTagger::tagCells(EBAMRTags& a_tags)
 {
-  return true;
+  return false;
 }
 
 #include <CD_NamespaceFooter.H>

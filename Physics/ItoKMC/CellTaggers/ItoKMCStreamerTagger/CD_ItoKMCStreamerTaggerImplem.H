@@ -74,9 +74,9 @@ template <typename S>
 void
 ItoKMCStreamerTagger<S>::parseRuntimeOptions() noexcept
 {
-  CH_TIME("ItoKMCStreamerTagger::parseOptions");
+  CH_TIME("ItoKMCStreamerTagger::parseRuntimeOptions");
   if (this->m_verbosity > 5) {
-    pout() << "ItoKMCStreamerTagger::parseOptions" << endl;
+    pout() << "ItoKMCStreamerTagger::parseRuntimeOptions" << endl;
   }
 
   this->parseVerbosity();

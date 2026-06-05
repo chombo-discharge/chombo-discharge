@@ -278,7 +278,7 @@ template <size_t N>
 Real
 MeshODEStepper<N>::advance(const Real a_dt)
 {
-  CH_TIME("MeshODEStepper::avdvance(Real)");
+  CH_TIME("MeshODEStepper::advance(Real)");
   if (m_verbosity > 5) {
     pout() << "MeshODEStepper::advance(Real)" << endl;
   }

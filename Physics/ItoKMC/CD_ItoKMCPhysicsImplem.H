@@ -128,7 +128,7 @@ ItoKMCPhysics::defineKMC() const noexcept
 inline void
 ItoKMCPhysics::killKMC() const noexcept
 {
-  CH_TIME("ItoKMCPhysics::defineKMC");
+  CH_TIME("ItoKMCPhysics::killKMC");
 
   CH_assert(m_hasKMCSolver);
 
