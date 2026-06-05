@@ -1,0 +1,5 @@
+<map id="Geometries/SpherePlane/CD_SpherePlane.H" name="Geometries/SpherePlane/CD_SpherePlane.H">
+<area shape="rect" id="Node000001" title="Sphere&#45;plane gap geometry." alt="" coords="5,5,188,45"/>
+<area shape="rect" id="Node000002" href="$CD__SpherePlane_8cpp.html" title="Implementation of CD_SpherePlane.H." alt="" coords="5,93,188,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,59,99,93,94,93,94,59"/>
+</map>

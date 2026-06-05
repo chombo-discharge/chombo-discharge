@@ -5,6 +5,7 @@ var searchData=
   ['signeddistancebvh_2',['SignedDistanceBVH',['../classSignedDistanceBVH.html',1,'']]],
   ['signeddistancedcel_3',['SignedDistanceDCEL',['../classSignedDistanceDCEL.html',1,'']]],
   ['spherearray_4',['SphereArray',['../classSphereArray.html',1,'']]],
-  ['spheresdf_5',['SphereSdf',['../classSphereSdf.html',1,'']]],
-  ['surfaceodesolver_6',['SurfaceODESolver',['../classSurfaceODESolver.html',1,'']]]
+  ['sphereplane_5',['SpherePlane',['../classSpherePlane.html',1,'']]],
+  ['spheresdf_6',['SphereSdf',['../classSphereSdf.html',1,'']]],
+  ['surfaceodesolver_7',['SurfaceODESolver',['../classSurfaceODESolver.html',1,'']]]
 ];
