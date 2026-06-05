@@ -20,9 +20,9 @@ OPENMPCC        = FALSE
 #HDFLIBFLAGS    = -L<hdf_serial_dir>/lib -lhdf5 -lz
 #HDFMPIINCFLAGS = -I<hdf_parallel_dir>/include
 #HDFMPILIBFLAGS = -L<hdf_parallel_dir>/lib -lhdf5 -lz
-cxxoptflags     = -O3 -march=native
+cxxoptflags     = -O3 -march=x86-64-v2
 cxxdbgflags     = -O0
-foptflags       = -O3 -march=native
+foptflags       = -O3 -march=x86-64-v2
 fdbgflags       = -O0
 syslibflags     = -qmkl=sequential -lstdc++ -lifcore
 
