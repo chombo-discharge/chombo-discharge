@@ -123,7 +123,7 @@ MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePh
       a_Lphi(vof, m_comp) += kappaDivF;
     };
 
-    BoxLoops::loop(a_singlePhaseVofs, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_singlePhaseVofs, kernel);
   }
 
   return;

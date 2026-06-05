@@ -697,7 +697,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
         }
       };
 
-      BoxLoops::loop(cellBox, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
 
       loads[din.intCode()] = lround(sum);
     }

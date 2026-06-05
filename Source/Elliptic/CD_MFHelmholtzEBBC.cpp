@@ -100,7 +100,7 @@ MFHelmholtzEBBC::defineMultiPhase()
         stencils(vof, m_comp) *= areaFrac / m_dx;
       };
 
-      BoxLoops::loop(multiPhaseVofs, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(multiPhaseVofs, kernel);
     }
   }
 }
@@ -146,7 +146,7 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
     a_Lphi(vof, m_comp) += a_beta * phiB * Bcoef * m_boundaryWeights[a_dit](vof, m_comp);
   };
 
-  BoxLoops::loop(a_multiPhaseVofs, kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_multiPhaseVofs, kernel);
 
   return;
 }

@@ -72,7 +72,7 @@ EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
   };
 
   // Execute kernel.
-  BoxLoops::loop(a_flux.box(), kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_flux.box(), kernel);
 }
 
 #include <CD_NamespaceFooter.H>

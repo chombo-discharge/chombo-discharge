@@ -215,7 +215,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
       }
     };
 
-    BoxLoops::loop(singlePhaseVofs, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(singlePhaseVofs, kernel);
   }
 }
 
@@ -262,7 +262,7 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhas
       }
     };
 
-    BoxLoops::loop(a_singlePhaseVofs, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_singlePhaseVofs, kernel);
   }
 
   return;

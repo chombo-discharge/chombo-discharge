@@ -181,11 +181,11 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       VoFIterator& fineVoFs = m_vofitFine[din];
 
       CH_START(t1);
-      BoxLoops::loop(coarBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
       CH_STOP(t1);
 
       CH_START(t2);
-      BoxLoops::loop(fineVoFs, irregularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(fineVoFs, irregularKernel);
       CH_STOP(t2);
     }
   }

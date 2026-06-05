@@ -1807,7 +1807,7 @@ ItoKMCStepper<I, C, R, F>::fillNeutralDensity() noexcept
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -3121,7 +3121,7 @@ ItoKMCStepper<I, C, R, F>::computeMobilities(Vector<EBCellFAB*>& a_itoMobilities
   VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
   // Run the kernels.
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 
   // Covered is bogus.
@@ -3401,7 +3401,7 @@ ItoKMCStepper<I, C, R, F>::computeDiffusionCoefficients(Vector<EBCellFAB*>& a_it
   // Run kernels.
   VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 
   // Covered is bogus.
@@ -3597,7 +3597,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveItoParticlesPerCell(EBCellFAB&      a_
     // Run the kernels.
     VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_din];
 
-    BoxLoops::loop(a_box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -3702,7 +3702,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveCdrParticlesPerCell(EBCellFAB&      a_
     // Run the kernels.
     VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
-    BoxLoops::loop(a_box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -3837,7 +3837,7 @@ ItoKMCStepper<I, C, R, F>::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_
     // Run the kernels.
     VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_din];
 
-    BoxLoops::loop(a_box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -4209,7 +4209,7 @@ ItoKMCStepper<I, C, R, F>::advanceReactionNetwork(EBCellFAB&       a_particlesPe
   // Run the kernels.
   VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[a_level])[a_din];
 
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 
@@ -4556,7 +4556,7 @@ ItoKMCStepper<I, C, R, F>::reconcileParticles(const EBCellFAB& a_newParticlesPer
   VoFIterator& vofit = (*m_amr->getVofIterator(m_particleRealm, m_plasmaPhase)[a_level])[a_din];
 
   CH_START(t2);
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   CH_STOP(t2);
 
   CH_START(t3);
@@ -5693,7 +5693,7 @@ ItoKMCStepper<I, C, R, F>::loadBalanceParticleRealm(Vector<Vector<int>>&        
         }
       };
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     }
 
     ParallelOps::sum(levelLoads);
@@ -6145,7 +6145,7 @@ ItoKMCStepper<I, C, R, F>::computePhysicsPlotVariables(EBAMRCellData& a_physicsP
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_fluidRealm, m_plasmaPhase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }

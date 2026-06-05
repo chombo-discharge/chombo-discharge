@@ -176,11 +176,11 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
       VoFIterator& coarVoFs = m_vofitCoar[din];
 
       CH_START(t2);
-      BoxLoops::loop(coarBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
       CH_STOP(t2);
 
       CH_START(t3);
-      BoxLoops::loop(coarVoFs, irregularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(coarVoFs, irregularKernel);
       CH_STOP(t3);
     }
 

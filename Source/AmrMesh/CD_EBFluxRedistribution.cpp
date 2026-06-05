@@ -360,7 +360,7 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
         }
       };
 
-      BoxLoops::loop(mask.box(), kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(mask.box(), kernel);
     }
   }
 }

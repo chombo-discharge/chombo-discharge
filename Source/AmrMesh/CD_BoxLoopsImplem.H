@@ -55,27 +55,6 @@ BoxLoops::loop(const Box& computeBox, Functor&& func)
 
 template <typename Functor>
 ALWAYS_INLINE void
-BoxLoops::loop(const Box& computeBox, Functor&& func)
-{
-  const int* lo = computeBox.loVect();
-  const int* hi = computeBox.hiVect();
-
-#if CH_SPACEDIM == 3
-  for (int k = lo[2]; k <= hi[2]; ++k) {
-#endif
-    for (int j = lo[1]; j <= hi[1]; ++j) {
-      CD_PRAGMA_SIMD
-      for (int i = lo[0]; i <= hi[0]; ++i) {
-        func(IntVect(D_DECL(i, j, k)));
-      }
-    }
-#if CH_SPACEDIM == 3
-  }
-#endif
-}
-
-template <typename Functor>
-ALWAYS_INLINE void
 BoxLoops::loop(const IntVectSet& a_ivs, Functor&& a_kernel)
 {
   for (IVSIterator iter(a_ivs); iter.ok(); ++iter) {

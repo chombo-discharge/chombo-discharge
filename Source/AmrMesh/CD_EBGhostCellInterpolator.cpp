@@ -247,7 +247,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
 
       // Set phiFine = phiCoar
       CH_START(t1);
-      BoxLoops::loop(interpBox, regSetFineToCoar);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interpBox, regSetFineToCoar);
       CH_STOP(t1);
 
       // Add contributions from slopes.
@@ -349,11 +349,11 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
           const Box coarsenedInterpBox = coarsen(interpBox, m_refRat);
 
           CH_START(t2);
-          BoxLoops::loop(coarsenedInterpBox, regularSlopeKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(coarsenedInterpBox, regularSlopeKernel);
           CH_STOP(t2);
 
           CH_START(t3);
-          BoxLoops::loop(interpBox, addRegularSlopeContribution);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(interpBox, addRegularSlopeContribution);
           CH_STOP(t3);
         }
       }

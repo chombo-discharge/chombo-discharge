@@ -271,7 +271,7 @@ FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const 
         };
 
         // Launch kernels.
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -347,7 +347,7 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, a_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -1137,8 +1137,8 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
   VoFIterator      irregRegion(irreg, ebgraph);
 
   // Launch kernels.
-  BoxLoops::loop(a_cellBox, regularKernel);
-  BoxLoops::loop(irregRegion, irregularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(irregRegion, irregularKernel);
 }
 
 void
@@ -1180,7 +1180,7 @@ FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
     };
 
     // Launch kernels.
-    BoxLoops::loop(facebox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
     BoxLoops::loop(faceit, irregularKernel);
   }
 }
@@ -1617,13 +1617,13 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
           // go into the output region. We happen to know that all gas-side data is already filled, so we only need to grok
           // the solid-side data.
           for (comp = 0; comp < numComp; comp++) {
-            BoxLoops::loop(fabGas.box() & domain, kernel);
+            BoxLoops::loop<D_DECL(1, 1, 1)>(fabGas.box() & domain, kernel);
           }
         }
         else if (isSolidCovered && isGasIrregular) {
           // In this case we are looking at a grid patch that lies on the gas-electrode boundary.
           for (comp = 0; comp < numComp; comp++) {
-            BoxLoops::loop(fabGas.box() & domain, kernel);
+            BoxLoops::loop<D_DECL(1, 1, 1)>(fabGas.box() & domain, kernel);
           }
         }
       }
@@ -1980,7 +1980,7 @@ FieldSolver::fillCoveredPotential(MFAMRCellData& a_phi) const noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       }
     }
   }

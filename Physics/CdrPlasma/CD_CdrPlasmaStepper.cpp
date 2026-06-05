@@ -896,7 +896,7 @@ CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<FArrayBox*>&       a
 
   // Execute the kernel. This puts the source terms in cdrSrc and rteSrc, but our target data holders are the input data holders
   // with single components. So, copy the result back to these.
-  BoxLoops::loop(a_cellBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 
   // Do it for the CDR solvers.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -1495,7 +1495,7 @@ CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<FArrayBox*>&       a_cdr
   };
 
   // Launch the kernel over the input box.
-  BoxLoops::loop(a_cellBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 
   // Linearize back -- we had all the diffusion coefficients stored in the temporary data holder -- now put them in the output data holders.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
@@ -2021,7 +2021,7 @@ CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<FArrayBox*>&       a_c
   };
 
   // Launch the kernel
-  BoxLoops::loop(a_cellBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
 }
 
 void
@@ -4722,7 +4722,7 @@ CdrPlasmaStepper::computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexce
         };
 
         // Execute the kernels.
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }

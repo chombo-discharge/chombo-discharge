@@ -678,7 +678,7 @@ ItoSolver::generateParticlesFromDensity(ParticleContainer<ItoParticle>&         
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1152,7 +1152,7 @@ ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) co
     };
 
     // Execute kernel.
-    BoxLoops::loop(cellBox, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
   }
 
   // Finally, write the particle numbers to HDF5.
@@ -1345,7 +1345,7 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
     };
 
     // Run the kernels.
-    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -3162,7 +3162,7 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
   VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[a_dit];
 
   // Run kernel
-  BoxLoops::loop(cellBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 

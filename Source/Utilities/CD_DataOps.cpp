@@ -103,7 +103,7 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
       };
 
       // Run kernels
-      BoxLoops::loop(faceBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
       BoxLoops::loop(faceIt, irregularKernel);
 
       // Fix up domain faces
@@ -300,19 +300,19 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
         // Execute kernels.
         switch (a_average) {
         case Average::Arithmetic: {
-          BoxLoops::loop(faceBox, arithmeticRegular);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, arithmeticRegular);
           BoxLoops::loop(faceIt, arithmeticIrregular);
 
           break;
         }
         case Average::Harmonic: {
-          BoxLoops::loop(faceBox, harmonicRegular);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, harmonicRegular);
           BoxLoops::loop(faceIt, harmonicIrregular);
 
           break;
         }
         case Average::Geometric: {
-          BoxLoops::loop(faceBox, geometricRegular);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, geometricRegular);
           BoxLoops::loop(faceIt, geometricIrregular);
 
           break;
@@ -448,7 +448,7 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
       };
 
       // Run the kernels.
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -523,7 +523,7 @@ DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Re
         data(vof, comp) = a_func(tmp(vof, comp));
       };
 
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -652,7 +652,7 @@ DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellF
   };
 
   // Run the kernels.
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 
@@ -791,7 +791,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
         data(vof, icomp) = clone(vof, icomp);
       };
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       //      BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1307,7 +1307,7 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
       };
 
       // Run the kernels.
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1384,7 +1384,7 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
       };
 
       // Execute the kernels.
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1439,7 +1439,7 @@ DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
       };
 
       // Execute the kernels.
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1537,7 +1537,7 @@ DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
       };
 
       // Execute the kernels.
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1642,7 +1642,7 @@ DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, 
     VoFIterator       vofit(ivs, ebgraph);
 
     // Run kernels
-    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -1704,7 +1704,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const
 
     VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 
-    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 
@@ -1769,7 +1769,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBFluxFAB>& a_data, const
 
       FaceIterator faceIt(ebisBox.getIrregIVS(cellBox), ebGraph, dir, FaceStop::SurroundingWithBoundary);
 
-      BoxLoops::loop(faceBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
       BoxLoops::loop(faceIt, irregularKernel);
     }
   }
@@ -1874,7 +1874,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
     };
 
     // Run the kernels.
-    BoxLoops::loop(box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 
@@ -2003,7 +2003,7 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data)
         };
 
         // Run the kernels.
-        BoxLoops::loop(facebox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }
@@ -2047,7 +2047,7 @@ DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_c
 
     VoFIterator vofit(ebisbox.getIrregIVS(cellbox), ebgraph);
 
-    BoxLoops::loop(cellbox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 
@@ -2362,7 +2362,7 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_com
         L = std::max(L, std::abs(data(vof, a_comp)));
       };
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
     else if (a_p > 0) {
@@ -2376,7 +2376,7 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_com
         L += std::pow(std::abs(data(vof, a_comp)), a_p);
       };
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -2584,7 +2584,7 @@ DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Re
       }
     };
 
-    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
   }
 }
 
@@ -2719,7 +2719,7 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
             };
 
             // Execute kernels.
-            BoxLoops::loop(overlapBox, regularKernel);
+            BoxLoops::loop<D_DECL(1, 1, 1)>(overlapBox, regularKernel);
             BoxLoops::loop(vofit, irregularKernel);
           }
         }
@@ -2790,7 +2790,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
       };
 
       // Run kernels.
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -2854,7 +2854,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
     };
 
     // Run kernels.
-    BoxLoops::loop(box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -2917,7 +2917,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
       };
 
       // Run the kernels.
-      BoxLoops::loop(facebox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
       BoxLoops::loop(faceit, irregularKernel);
     }
   }
@@ -3040,7 +3040,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
     };
 
     // Run the kernels.
-    BoxLoops::loop(box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -3343,7 +3343,7 @@ DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs)
         };
 
         // Execute the kernels.
-        BoxLoops::loop(facebox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }
@@ -3399,7 +3399,7 @@ DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
         };
 
         // Run kernels.
-        BoxLoops::loop(box, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -3489,7 +3489,7 @@ DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box
   };
 
   // Run the kernels
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 
@@ -3573,7 +3573,7 @@ DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_bo
   };
 
   // Run the kernels
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 

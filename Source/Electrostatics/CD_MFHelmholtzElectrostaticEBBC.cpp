@@ -199,7 +199,7 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
       }
     };
 
-    BoxLoops::loop(singlePhaseVofs, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(singlePhaseVofs, kernel);
   }
 }
 
@@ -233,7 +233,7 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&           a_si
       a_Lphi(vof, m_comp) += a_beta * Bcoef * value * m_boundaryWeights[a_dit](vof, m_comp);
     };
 
-    BoxLoops::loop(a_singlePhaseVofs, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(a_singlePhaseVofs, kernel);
   }
 
   return;

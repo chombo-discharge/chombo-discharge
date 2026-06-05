@@ -133,7 +133,7 @@ CdrGodunov::computeAdvectionDt()
         };
 
         // Execute the kernels.
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }

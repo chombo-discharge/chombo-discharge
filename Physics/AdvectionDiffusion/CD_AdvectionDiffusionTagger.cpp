@@ -131,7 +131,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
       };
 
       // Execute kernel. Regular cells only.
-      BoxLoops::loop(cellBox, taggingKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, taggingKernel);
     }
   }
 

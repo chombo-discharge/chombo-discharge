@@ -186,7 +186,7 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
 
       // Now apply the kernels using our nifty BoxLoops.
       CH_START(t1);
-      BoxLoops::loop(dbl[din], regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
       CH_STOP(t1);
 
       // Irregular cells done using AggStencil. Which is faster.
@@ -269,7 +269,7 @@ EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const Leve
 
       // Launch our C++ kernels.
       CH_START(t1);
-      BoxLoops::loop(interiorFaces, regularFaceDerivative);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(interiorFaces, regularFaceDerivative);
       CH_STOP(t1);
       CH_START(t2);
       BoxLoops::loop(faceit, irregularFaceDerivative);
@@ -347,7 +347,7 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
       };
 
       CH_START(t1);
-      BoxLoops::loop(m_ebcfIterator[din], kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(m_ebcfIterator[din], kernel);
       CH_STOP(t1);
     }
   }
@@ -421,7 +421,7 @@ EBGradient::defineLevelStencils() noexcept
       }
     };
 
-    BoxLoops::loop(bndryIterator, kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryIterator, kernel);
     CH_STOP(t4);
   }
 }
@@ -641,7 +641,7 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
       };
 
       // Launch kernel.
-      BoxLoops::loop(cellBox, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
     }
     CH_STOP(t3);
 
@@ -716,7 +716,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     };
 
     CH_START(t2);
-    BoxLoops::loop(grownBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(grownBox, regularKernel);
     CH_STOP(t2);
 
     // Compute the stencils. Try to achieve the highest order we can.
@@ -763,7 +763,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     };
 
     CH_START(t3);
-    BoxLoops::loop(ebcfIterator, irregularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(ebcfIterator, irregularKernel);
     CH_STOP(t3);
   }
 }
@@ -1130,7 +1130,7 @@ EBGradient::makeAggStencils() noexcept
         dstBaseStencil.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(derivDirStencil)));
       };
 
-      BoxLoops::loop(m_levelIterator[din], kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(m_levelIterator[din], kernel);
       CH_STOP(t3);
 
       CH_START(t4);

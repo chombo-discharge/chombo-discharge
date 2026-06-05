@@ -301,7 +301,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::evaluateSpaceChargeEffects() noexcept
 
       VoFIterator& vofit = (*(this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase)[lvl])[din];
 
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -439,7 +439,7 @@ ItoKMCBackgroundEvaluator<I, C, R, F>::integrateOpticalExcitations() const noexc
 
           VoFIterator& vofit = (*(this->m_amr)->getVofIterator(this->m_fluidRealm, this->m_plasmaPhase)[lvl])[din];
 
-          BoxLoops::loop(cellBox, regularKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
           BoxLoops::loop(vofit, irregularKernel);
         }
       }
