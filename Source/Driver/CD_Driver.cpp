@@ -503,7 +503,7 @@ Driver::gridReport()
   validLevelCells = totalLevelCells;
 
   for (int lvl = 0; lvl < finestLevel; lvl++) {
-    validLevelCells[lvl] -= totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim);
+    validLevelCells[lvl] -= llround(totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim));
 
     totalValidCells += validLevelCells[lvl];
   }
@@ -1003,9 +1003,9 @@ Driver::setupAndRun()
 
   // TLDR: Call setup(...), which will select among the various setup functions.
 
-  char iter_str[100];
-  sprintf(iter_str, ".check%07d.%dd.hdf5", m_restartStep, SpaceDim);
-  const std::string restartFile = m_outputDirectory + "/chk/" + m_outputFileNames + std::string(iter_str);
+  char suffix[32];
+  snprintf(suffix, sizeof(suffix), ".check%07d.%dd.hdf5", m_restartStep, SpaceDim);
+  const std::string restartFile = m_outputDirectory + "/chk/" + m_outputFileNames + suffix;
 
   this->setup(dischargeInputFile, m_initialRegrids, m_restart, restartFile);
 
@@ -1987,10 +1987,10 @@ Driver::writeMemoryUsage()
   }
 
 #ifdef CH_USE_MEMORY_TRACKING
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/mpi/memory/" + m_outputFileNames;
-  sprintf(file_char, "%s.memory.step%07d.%dd.dat", prefix.c_str(), m_timeStep, SpaceDim);
-  std::string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".memory.step%07d.%dd.dat", m_timeStep, SpaceDim);
+  std::string fname = prefix + suffix;
 
   // Get memory stuff
   Vector<Real> peakMemory;
@@ -2033,10 +2033,10 @@ Driver::writeComputationalLoads()
   const int nProc = numProc();
 
   // Filename for output.
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/mpi/loads/" + m_outputFileNames;
-  sprintf(file_char, "%s.loads.step%07d.%dd.dat", prefix.c_str(), m_timeStep, SpaceDim);
-  std::string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".loads.step%07d.%dd.dat", m_timeStep, SpaceDim);
+  std::string fname = prefix + suffix;
 
   // Get sum of all loads on all realms
   std::map<std::string, Vector<long int>> realmLoads;
@@ -2136,10 +2136,10 @@ Driver::writeGeometry()
   m_amr->alias(outputPtr, output);
 
   // Dummy file name
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/geo/" + m_outputFileNames;
-  sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".geometry.%dd.hdf5", SpaceDim);
+  string fname = prefix + suffix;
 
 #ifdef CH_USE_HDF5
   DischargeIO::writeEBHDF5(fname,
@@ -2168,10 +2168,10 @@ Driver::writePlotFile()
   // TLDR: This writes a plot file to the /plt/ folder
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/plt/" + m_outputFileNames;
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".step%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   // Write.
   this->writePlotFile(fname);
@@ -2186,10 +2186,10 @@ Driver::writePreRegridFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/regrid/" + m_outputFileNames;
-  sprintf(file_char, "%s.preRegrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".preRegrid%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2203,10 +2203,10 @@ Driver::writePostRegridFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/regrid/" + m_outputFileNames;
-  sprintf(file_char, "%s.postRegrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".postRegrid%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2220,10 +2220,10 @@ Driver::writeRestartFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/restart/" + m_outputFileNames;
-  sprintf(file_char, "%s.restart%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".restart%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2237,10 +2237,10 @@ Driver::writeCrashFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/crash/" + m_outputFileNames;
-  sprintf(file_char, "%s.crash%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".crash%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2579,12 +2579,13 @@ Driver::writeCheckpointFile()
   m_timeStepper->writeCheckpointHeader(header);
 
   // Create the output file name.
-  char              str[100];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/chk/" + m_outputFileNames;
-  sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
+  snprintf(suffix, sizeof(suffix), ".check%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  const std::string str = prefix + suffix;
 
   // Output file
-  HDF5Handle handleOut(str, HDF5Handle::CREATE);
+  HDF5Handle handleOut(str.c_str(), HDF5Handle::CREATE);
   header.writeToFile(handleOut);
 
   Timer timer("Driver::writeCheckpointFile");
@@ -2820,6 +2821,8 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
         foundCheckedLoads = true;
       }
     }
+
+    CH_assert(checkpointedLoads.count(Realm::Primal) > 0);
 
     curLoads = (foundCheckedLoads) ? checkpointedLoads.at(curRealm) : checkpointedLoads.at(Realm::Primal);
   }
