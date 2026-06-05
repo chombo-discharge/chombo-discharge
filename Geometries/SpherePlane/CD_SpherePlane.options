@@ -4,9 +4,9 @@
 # This class represents a sphere-plane gap, consisting of a sphere with sphere holder, and a disk with
 # a disk holder. It is oriented along the Cartesian y-axis.
 # ====================================================================================================
-SpherePlane.use_sphere            = true     ## Rod is on/off
+SpherePlane.use_sphere            = true     ## Sphere is on/off
 SpherePlane.use_disk              = true     ## Disk is on/off
-SpherePlane.use_sphere_holder     = true     ## Rod holder is on/off
+SpherePlane.use_sphere_holder     = true     ## Sphere holder is on/off
 SpherePlane.use_disk_holder       = false    ## Disk holder is on/off
 
 SpherePlane.live_sphere     = true     ## Live sphere or not

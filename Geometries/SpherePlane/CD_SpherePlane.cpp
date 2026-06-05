@@ -10,6 +10,7 @@
 */
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -17,12 +18,13 @@
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
-using namespace EBGeometry;
-using ImpFunc = std::shared_ptr<ImplicitFunction<Real>>;
-using Vec3    = Vec3T<Real>;
-
-SpherePlane::SpherePlane()
+SpherePlane::SpherePlane() noexcept
 {
+  CH_TIME("SpherePlane::SpherePlane");
+
+  using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+  using Vec3    = EBGeometry::Vec3T<Real>;
+
   bool useSphere;
   bool useDisk;
   bool useSphereHolder;
@@ -45,8 +47,6 @@ SpherePlane::SpherePlane()
   Real diskCenter;
   Real diskHolderSmooth;
 
-  int dir;
-
   ParmParse pp("SpherePlane");
 
   pp.get("use_sphere", useSphere);
@@ -67,16 +67,20 @@ SpherePlane::SpherePlane()
   pp.get("disk_center", diskCenter);
   pp.get("disk_holder_radius", diskHolderRadius);
   pp.get("disk_holder_length", diskHolderLength);
+  pp.get("disk_holder_smooth", diskHolderSmooth);
   pp.get("disk_thickness", diskThickness);
   pp.get("disk_curvature", diskCurvature);
 
   if (useSphere) {
-    ImpFunc sphere;
-    ImpFunc holder;
-    ImpFunc arrangement;
+    std::shared_ptr<ImpFunc> sphere;
+    std::shared_ptr<ImpFunc> holder;
+    std::shared_ptr<ImpFunc> arrangement;
 
-    sphere = std::make_shared<SphereSDF<Real>>(Vec3::zero(), sphereRadius);
-    holder = std::make_shared<CylinderSDF<Real>>(Vec3::zero(), sphereHolderLength * Vec3::unit(1), sphereHolderRadius);
+    sphere = std::make_shared<EBGeometry::SphereSDF<Real>>(Vec3::zero(), sphereRadius);
+    holder = std::make_shared<EBGeometry::CylinderSDF<Real>>(Vec3::zero(),
+                                                             sphereHolderLength * Vec3::unit(1),
+                                                             sphereHolderRadius);
+
     arrangement = useSphereHolder ? EBGeometry::SmoothUnion<Real>(sphere, holder, sphereHolderSmooth) : sphere;
     arrangement = EBGeometry::Translate<Real>(arrangement, sphereCenter * Vec3::unit(1));
 
@@ -84,14 +88,16 @@ SpherePlane::SpherePlane()
   }
 
   if (useDisk) {
-    ImpFunc disk;
-    ImpFunc holder;
-    ImpFunc arrangement;
+    std::shared_ptr<ImpFunc> disk;
+    std::shared_ptr<ImpFunc> holder;
+    std::shared_ptr<ImpFunc> arrangement;
 
-    disk = std::make_shared<RoundedCylinderSDF<Real>>(0.5 * (diskRadius + diskCurvature), diskCurvature, diskThickness);
-    holder = holder = std::make_shared<CylinderSDF<Real>>(Vec3::zero(),
-                                                          -diskHolderLength * Vec3::unit(1),
-                                                          diskHolderRadius);
+    disk   = std::make_shared<EBGeometry::RoundedCylinderSDF<Real>>(0.5 * (diskRadius + diskCurvature),
+                                                                  diskCurvature,
+                                                                  diskThickness);
+    holder = std::make_shared<EBGeometry::CylinderSDF<Real>>(Vec3::zero(),
+                                                             -diskHolderLength * Vec3::unit(1),
+                                                             diskHolderRadius);
 
     arrangement = useDiskHolder ? EBGeometry::SmoothUnion<Real>(disk, holder, diskHolderSmooth) : disk;
     arrangement = EBGeometry::Translate<Real>(arrangement, -(diskCenter + 0.5 * diskThickness) * Vec3::unit(1));
@@ -100,7 +106,9 @@ SpherePlane::SpherePlane()
   }
 }
 
-SpherePlane::~SpherePlane()
-{}
+SpherePlane::~SpherePlane() noexcept
+{
+  CH_TIME("SpherePlane::~SpherePlane");
+}
 
 #include <CD_NamespaceFooter.H>

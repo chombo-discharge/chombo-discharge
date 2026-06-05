@@ -26,12 +26,12 @@ public:
   /*!
     @brief Constructor
   */
-  SpherePlane();
+  SpherePlane() noexcept;
 
   /*!
     @brief Destructor
   */
-  virtual ~SpherePlane();
+  virtual ~SpherePlane() noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
