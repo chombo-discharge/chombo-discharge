@@ -64,24 +64,28 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
 const RefCountedPtr<EBIndexSpace>&
 MultiFluidIndexSpace::getEBIndexSpace(const phase::which_phase a_phase) const
 {
+  CH_assert(!m_ebis[a_phase].isNull());
   return m_ebis[a_phase];
 }
 
 const RefCountedPtr<EBIndexSpace>&
 MultiFluidIndexSpace::getEBIndexSpace(const int a_phase) const
 {
+  CH_assert(!m_ebis[a_phase].isNull());
   return m_ebis[a_phase];
 }
 
 RefCountedPtr<EBIndexSpace>&
 MultiFluidIndexSpace::getEBIndexSpace(const phase::which_phase a_phase)
 {
+  CH_assert(!m_ebis[a_phase].isNull());
   return m_ebis[a_phase];
 }
 
 RefCountedPtr<EBIndexSpace>&
 MultiFluidIndexSpace::getEBIndexSpace(const int a_phase)
 {
+  CH_assert(!m_ebis[a_phase].isNull());
   return m_ebis[a_phase];
 }
 
