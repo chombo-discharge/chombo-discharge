@@ -266,6 +266,10 @@ EBHelmholtzOpFactory::coarsenCoefficientsMG()
       AmrFluxData& mgBco      = m_mgBcoef[amrLevel];
       AmrIrreData& mgBcoIrreg = m_mgBcoefIrreg[amrLevel];
 
+      CH_assert(mgAco.size() == (size_t)mgGrids.size());
+      CH_assert(mgBco.size() == (size_t)mgGrids.size());
+      CH_assert(mgBcoIrreg.size() == (size_t)mgGrids.size());
+
       for (int mgLevel = 0; mgLevel < mgGrids.size() - 1; mgLevel++) {
         const EBLevelGrid& mflgCoar = *mgGrids[mgLevel + 1];
         const EBLevelGrid& mflgFine = *mgGrids[mgLevel];
@@ -491,11 +495,13 @@ EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
     const AmrIrreData&   mgBcoefIrreg = m_mgBcoefIrreg[amrLevel];
 
     // See if we have a corresponding multigrid level.
-    int mgLevel;
+    int mgLevel = 0;
+
     for (int img = 0; img < mgLevelGrids.size(); img++) {
       if (mgLevelGrids[img]->getDomain() == coarDomain) {
         mgLevel      = img;
         foundMgLevel = true;
+
         break;
       }
     }

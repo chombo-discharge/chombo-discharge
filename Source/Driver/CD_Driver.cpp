@@ -1804,35 +1804,57 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   sprintf(metrics, "%31c -- Last time step        : %3.3ih %2.2im %2.2is %3.3ims", ' ', advHrs, advMin, advSec, advMs);
   pout() << metrics << endl;
 
-  // Hours, minutes, seconds and millisecond of the previous iteration
-  const Real wt_factor = std::pow(10.0, 3.0 * (int(std::floor(log10(m_dt))) / 3));
-  const Real wt_ns     = (m_wallClockTwo - m_wallClockOne) * wt_factor / m_dt;
-  const int  wt_Hrs    = floor(wt_ns / 3600);
-  const int  wt_Min    = floor((wt_ns - 3600 * wt_Hrs) / 60);
-  const int  wt_Sec    = floor(wt_ns - 3600 * wt_Hrs - 60 * wt_Min);
-  const int  wt_Ms     = floor((wt_ns - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
-  sprintf(metrics, "%31c -- Wall time per ns      : %3.3ih %2.2im %2.2is %3.3ims", ' ', wt_Hrs, wt_Min, wt_Sec, wt_Ms);
-  sprintf(metrics,
-          "%31c -- Wall time per/%1.0E   : %3.3ih %2.2im %2.2is %3.3ims",
-          ' ',
-          wt_factor,
-          wt_Hrs,
-          wt_Min,
-          wt_Sec,
-          wt_Ms);
-  pout() << metrics << endl;
+  if (m_dt > 0.0 && lastadv > 0.0) {
+    constexpr std::array<std::pair<Real, const char*>, 6> siUnits{
+      {{1e-15, "fs"}, {1e-12, "ps"}, {1e-9, "ns"}, {1e-6, "us"}, {1e-3, "ms"}, {1.0, "s"}}};
+
+    // Pick the smallest SI unit that keeps wall-time-per-unit >= 1 second.
+    const Real  minScale  = m_dt / lastadv;
+    Real        unitScale = siUnits.back().first;
+    const char* unitName  = siUnits.back().second;
+    for (const auto& unit : siUnits) {
+      if (unit.first >= minScale) {
+        unitScale = unit.first;
+        unitName  = unit.second;
+        break;
+      }
+    }
+
+    const Real wt_per_unit = lastadv * unitScale / m_dt;
+    const int  wt_Hrs      = floor(wt_per_unit / 3600);
+    const int  wt_Min      = floor((wt_per_unit - 3600 * wt_Hrs) / 60);
+    const int  wt_Sec      = floor(wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min);
+    const int  wt_Ms       = floor((wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
+    sprintf(metrics,
+            "%31c -- Wall time per %-2s      : %3.3ih %2.2im %2.2is %3.3ims",
+            ' ',
+            unitName,
+            wt_Hrs,
+            wt_Min,
+            wt_Sec,
+            wt_Ms);
+    pout() << metrics << endl;
+  }
 
   // This is the time remaining
   const Real maxPercent = Max(percentTime, percentStep);
-  const Real remaining  = 100. * elapsed / maxPercent - elapsed;
-  const int  remHrs     = floor(remaining / 3600);
-  const int  remMin     = floor((remaining - 3600 * remHrs) / 60);
-  const int  remSec     = floor(remaining - 3600 * remHrs - 60 * remMin);
-  const int  remMs      = floor((remaining - 3600 * remHrs - 60 * remMin - remSec) * 1000);
 
-  // Write a string with the previous iteration metrics
-  sprintf(metrics, "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims", ' ', remHrs, remMin, remSec, remMs);
-  pout() << metrics << endl;
+  if (maxPercent > 0.0) {
+    const Real remaining = 100. * elapsed / maxPercent - elapsed;
+    const int  remHrs    = floor(remaining / 3600);
+    const int  remMin    = floor((remaining - 3600 * remHrs) / 60);
+    const int  remSec    = floor(remaining - 3600 * remHrs - 60 * remMin);
+    const int  remMs     = floor((remaining - 3600 * remHrs - 60 * remMin - remSec) * 1000);
+
+    sprintf(metrics,
+            "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims",
+            ' ',
+            remHrs,
+            remMin,
+            remSec,
+            remMs);
+    pout() << metrics << endl;
+  }
 
   // Write memory usage
 #ifdef CH_USE_MEMORY_TRACKING
