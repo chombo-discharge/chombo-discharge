@@ -43,7 +43,7 @@ public:
   /*!
     @brief Destructor - does nothing
   */
-  ~PetscAMRCell() noexcept;
+  virtual ~PetscAMRCell() noexcept;
 
   /*!
     @brief Copy constructor -- can use default
