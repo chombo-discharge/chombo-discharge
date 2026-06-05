@@ -142,9 +142,9 @@ ItoKMCJSON::throwParserError(const std::string a_error) const noexcept
 void
 ItoKMCJSON::throwParserWarning(const std::string a_warning) const noexcept
 {
-  CH_TIME("ItoKMCJSON::throwParserError");
+  CH_TIME("ItoKMCJSON::throwParserWarning");
   if (m_verbose) {
-    pout() << m_className + "::trim" << endl;
+    pout() << m_className + "::throwParserWarning" << endl;
   }
 
   pout() << a_warning << endl;
@@ -944,7 +944,7 @@ ItoKMCJSON::printFluidRates() const noexcept
   pp.query("print_rates", printRates);
 
   if (printRates) {
-    Vector<Real> pos;
+    Vector<Real> pos(SpaceDim, 0.0);
     pp.query("print_rates_minEN", minEByN);
     pp.query("print_rates_maxEN", maxEByN);
     pp.query("print_rates_num_points", numPoints);
@@ -2007,7 +2007,7 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
     pout() << m_className + "::initializeSurfaceEmission" << endl;
   }
 
-  const std::string baseError = "ItoKMCJSON::initializeSufaceEmission";
+  const std::string baseError = "ItoKMCJSON::initializeSurfaceEmission";
 
   std::string reactionSpecifier;
   if (a_surface == "dielectric") {
@@ -3693,7 +3693,7 @@ ItoKMCJSON::getPlotVariables(const RealVect          a_E,
     }
   }
 
-  for (int i = 0; i < m_kmcReactions.size(); i++) {
+  for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
     if (std::get<0>(m_kmcReactionRatePlots[i])) {
       plotVars.push_back(m_fluidRates[i](E, a_pos));
     }

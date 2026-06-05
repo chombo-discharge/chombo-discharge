@@ -125,7 +125,7 @@ AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
           if (curv > m_refCurv && std::abs(phiReg(iv, 0)) > m_refMagn) {
             tags |= iv;
 
-            foundTags = 1;
+            foundTags += 1;
           }
         }
       };

@@ -196,7 +196,7 @@ CdrPlasmaFieldTagger::computeTracers() const
 
         // Put the tracer field where it belongs.
         for (int i = 0; i < m_numTracers; i++) {
-          (*tr[i])(vof, comp);
+          (*tr[i])(vof, comp) = tracers[i];
         }
       };
 

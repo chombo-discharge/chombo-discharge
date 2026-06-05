@@ -69,7 +69,7 @@ namespace Physics {
       if (str == "none") {
         m_boxSort = BoxSorting::None;
       }
-      if (str == "std") {
+      else if (str == "std") {
         m_boxSort = BoxSorting::Std;
       }
       else if (str == "shuffle") {

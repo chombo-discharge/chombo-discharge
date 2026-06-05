@@ -113,7 +113,10 @@ CdrPlasmaStreamerTagger::coarsenCell(const RealVect         a_pos,
   // TLDR: Coarsen if both criteria are met.
 
   if (a_lvl >= m_maxCoarsenLevel) {
-    coarsen = a_gradTracers[0].vectorLength() * a_dx / a_tracers[0] < m_coarCurv && a_tracers[1] * a_dx < m_coarAlpha;
+    const bool curvCriterion = (a_tracers[0] > 0.0)
+                                 ? (a_gradTracers[0].vectorLength() * a_dx / a_tracers[0] < m_coarCurv)
+                                 : true;
+    coarsen                  = curvCriterion && a_tracers[1] * a_dx < m_coarAlpha;
   }
   else {
     coarsen = false;
@@ -132,7 +135,7 @@ CdrPlasmaStreamerTagger::refineCell(const RealVect         a_pos,
 {
   // TLDR: Refine if either criterion are met.
 
-  const bool refine1 = a_gradTracers[0].vectorLength() * a_dx / a_tracers[0] > m_refiCurv;
+  const bool refine1 = (a_tracers[0] > 0.0) && (a_gradTracers[0].vectorLength() * a_dx / a_tracers[0] > m_refiCurv);
   const bool refine2 = a_tracers[1] * a_dx > m_refiAlpha;
   const bool refine3 = a_lvl < this->getManualRefinementLevel(a_pos);
 
