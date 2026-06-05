@@ -13,6 +13,6 @@ dependencies:
 	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) geometry
 
-# Make advection-diffusion headers and library visible. 
+# Make headers and libraries visible
 XTRACPPFLAGS += $(GEOMETRYONLY_INCLUDE)
 XTRALIBFLAGS += $(addprefix -l, $(GEOMETRYONLY_LIB))$(config)

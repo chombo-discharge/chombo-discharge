@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_SpherePlane.cpp
-  @brief  High-voltage SpherePlane geometry
+  @brief  Implementation of CD_SpherePlane.H
   @author Robert Marskar
 */
 
