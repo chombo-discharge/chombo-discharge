@@ -1790,19 +1790,30 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
     const BaseFab<Real>& rhsReg  = a_resid.getSingleValuedFAB();
     const BaseFab<Real>& relReg  = relCoef.getSingleValuedFAB();
 
-    // Regular kernel. Several ways we can do this -- we can either check if the cell is red/black like we do here, which is the easiest. This should
-    // not come at a performance cost, I think. An alternative is to compute an offset on the starting index on the innermost loop, like we used to do
-    // with Fortran.
-    auto regularKernel = [&](const IntVect& iv) -> void {
-      const bool doThisCell = std::abs((iv.sum() + a_redBlack) % 2) == 0;
-
-      if (doThisCell) {
-        phiReg(iv, m_comp) += relReg(iv, m_comp) * (rhsReg(iv, m_comp) - LphiReg(iv, m_comp));
+    // Regular cells: per-row i-start offset eliminates the red/black branch so the inner
+    // i-loop is branch-free and auto-vectorizes (stride-2 AVX2 with load-permute-store).
+    CH_START(t1);
+    {
+      const int* lo = a_cellBox.loVect();
+      const int* hi = a_cellBox.hiVect();
+#if CH_SPACEDIM == 3
+      for (int k = lo[2]; k <= hi[2]; ++k) {
+#endif
+        for (int j = lo[1]; j <= hi[1]; ++j) {
+          const int i_start = lo[0] + ((D_TERM(lo[0], +j, +k) + a_redBlack) & 1);
+          CD_PRAGMA_SIMD
+          for (int i = i_start; i <= hi[0]; i += 2) {
+            const IntVect iv = IntVect(D_DECL(i, j, k));
+            phiReg(iv, m_comp) += relReg(iv, m_comp) * (rhsReg(iv, m_comp) - LphiReg(iv, m_comp));
+          }
+        }
+#if CH_SPACEDIM == 3
       }
-    };
+#endif
+    }
+    CH_STOP(t1);
 
-    // Irregular red-black kernel -- note that this is on the multi-valued cells. Singly-cut cells
-    // are done in regularKernel.
+    // Irregular red-black kernel -- multi-valued cells only; singly-cut cells are covered above.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect& iv = vof.gridIndex();
 
@@ -1812,11 +1823,6 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
         a_corr(vof, m_comp) += relCoef(vof, m_comp) * (a_resid(vof, m_comp) - a_Lcorr(vof, m_comp));
       }
     };
-
-    // Launch the kernels over their respective domains.
-    CH_START(t1);
-    BoxLoops::loop(a_cellBox, regularKernel);
-    CH_STOP(t1);
 
     CH_START(t2);
     BoxLoops::loop(m_vofIterMulti[a_dit], irregularKernel);

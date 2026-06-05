@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_BoxLoops.H
-  @brief  Declaration of a namespace for proto-typing grid and EB loops. 
+  @brief  Declaration of a namespace for proto-typing grid and EB loops.
   @author Robert Marskar
 */
 
@@ -25,25 +25,96 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Namespace for encapsulating loop types. 
+  @brief Namespace for encapsulating loop types.
+  @details BoxLoops provides several overloads of @c loop for iterating over structured and
+  unstructured grid data. The general pattern is:
+
+  @code{.cpp}
+  BoxLoops::loop(domain, kernel);
+  @endcode
+
+  where @c kernel is a callable (lambda or functor) taking the element type for that overload.
+
+  <b>Box loop — unit stride (default):</b>
+
+  @code{.cpp}
+  BoxLoops::loop(box, [&](const IntVect& iv) {
+      phi(iv, 0) = 0.0;
+  });
+  @endcode
+
+  <b>Box loop — runtime IntVect stride:</b>
+  Useful when the stride is data-dependent. Not guaranteed to vectorize because the stride
+  value is not known at compile time.
+
+  @code{.cpp}
+  BoxLoops::loop(box, [&](const IntVect& iv) {
+      phi(iv, 0) = 0.0;
+  }, 2 * IntVect::Unit);
+  @endcode
+
+  <b>Box loop — compile-time stride (vectorizable):</b>
+  Use this form when the stride is a known constant. The compile-time value lets the
+  auto-vectorizer emit SIMD instructions. Use @c D_DECL for dimension-independent call sites:
+
+  @code{.cpp}
+  BoxLoops::loop<D_DECL(2, 2, 2)>(box, [&](const IntVect& iv) {
+      phi(iv, 0) = 0.0;
+  });
+  @endcode
+
+  <b>VoF, face, and set iterators:</b>
+
+  @code{.cpp}
+  BoxLoops::loop(vofIt,  [&](const VolIndex&  vof)  { ... });
+  BoxLoops::loop(faceIt, [&](const FaceIndex& face) { ... });
+  BoxLoops::loop(ivs,    [&](const IntVect&   iv)   { ... });
+  @endcode
 */
 namespace BoxLoops {
 
   /*!
-    @brief Launch a C++ kernel over a regular grid. 
-    @details The stride argument lets the user use different strides along the different coordinate axes. The default 
-    is to use a stride of one along each coordinate. Note that the stride must be positive for each coordinate axis. 
+    @brief Launch a C++ kernel over a regular grid.
+    @details The stride argument lets the user use different strides along the different coordinate
+    axes. The default is to use a stride of one along each coordinate. Note that the stride must be
+    positive for each coordinate axis (enforced by a runtime assertion).
     @param[in]    a_computeBox Computation box
-    @param[inout] a_kernel     Kernel to launch. 
-    @param[in]    a_stride     Stride for each loop. 
+    @param[inout] a_kernel     Kernel to launch.
+    @param[in]    a_stride     Stride for each loop.
   */
   template <typename Functor>
   ALWAYS_INLINE void
   loop(const Box& a_computeBox, Functor&& kernel, const IntVect& a_stride = IntVect::Unit);
 
   /*!
-    @brief Launch a C++ kernel over a subset of cells. 
-    @param[inout] a_cells   Grid cells where we launch the kernel. 
+    @brief Launch a C++ kernel over a regular grid with compile-time per-dimension strides.
+    @details Strides are encoded as non-type template parameters, making them visible to the
+    compiler as constants and enabling auto-vectorization of the innermost loop. All strides must
+    be >= 1 (enforced by @c static_assert).
+
+    Note: @c IntVect cannot be a non-type template parameter in C++14, so per-dimension @c int
+    parameters are used instead. Call sites can use @c D_DECL for dimension independence, e.g.:
+
+    @code{.cpp}
+    BoxLoops::loop<D_DECL(2, 2, 2)>(box, kernel);
+    @endcode
+
+    @param[in]    a_computeBox Computation box
+    @param[inout] a_kernel     Kernel to launch.
+  */
+#if CH_SPACEDIM == 2
+  template <int Si, int Sj, typename Functor>
+  ALWAYS_INLINE void
+  loop(const Box& a_computeBox, Functor&& kernel);
+#else
+  template <int Si, int Sj, int Sk, typename Functor>
+  ALWAYS_INLINE void
+  loop(const Box& a_computeBox, Functor&& kernel);
+#endif
+
+  /*!
+    @brief Launch a C++ kernel over a subset of cells.
+    @param[inout] a_cells   Grid cells where we launch the kernel.
     @param[inout] a_kernel  Kernel to launch
   */
   template <typename Functor>
@@ -51,8 +122,8 @@ namespace BoxLoops {
   loop(const IntVectSet& a_ivs, Functor&& a_kernel);
 
   /*!
-    @brief Launch a C++ kernel over a subset of cells. 
-    @param[inout] a_cells   Grid cells where we launch the kernel. 
+    @brief Launch a C++ kernel over a subset of cells.
+    @param[inout] a_cells   Grid cells where we launch the kernel.
     @param[inout] a_kernel  Kernel to launch
   */
   template <typename Functor>
@@ -60,8 +131,8 @@ namespace BoxLoops {
   loop(const DenseIntVectSet& a_ivs, Functor&& a_kernel);
 
   /*!
-    @brief Launch a C++ kernel over cut-cells. 
-    @param[inout] a_vofit   Grid cells where we launch the kernel. 
+    @brief Launch a C++ kernel over cut-cells.
+    @param[inout] a_vofit   Grid cells where we launch the kernel.
     @param[inout] a_kernel  Kernel to launch
   */
   template <typename Functor>
@@ -70,7 +141,7 @@ namespace BoxLoops {
 
   /*!
     @brief Launch a C++ kernel over faces
-    @param[inout] a_faceit  Grid faces where we launch the kernel. 
+    @param[inout] a_faceit  Grid faces where we launch the kernel.
     @param[inout] a_kernel  Kernel to launch
   */
   template <typename Functor>

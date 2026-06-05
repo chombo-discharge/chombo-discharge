@@ -15,6 +15,44 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
+#if CH_SPACEDIM == 2
+template <int Si, int Sj, typename Functor>
+ALWAYS_INLINE void
+BoxLoops::loop(const Box& computeBox, Functor&& func)
+{
+  static_assert(Si >= 1 && Sj >= 1, "BoxLoops::loop strides must be >= 1");
+
+  const int* lo = computeBox.loVect();
+  const int* hi = computeBox.hiVect();
+
+  for (int j = lo[1]; j <= hi[1]; j += Sj) {
+    CD_PRAGMA_SIMD
+    for (int i = lo[0]; i <= hi[0]; i += Si) {
+      func(IntVect(i, j));
+    }
+  }
+}
+#else
+template <int Si, int Sj, int Sk, typename Functor>
+ALWAYS_INLINE void
+BoxLoops::loop(const Box& computeBox, Functor&& func)
+{
+  static_assert(Si >= 1 && Sj >= 1 && Sk >= 1, "BoxLoops::loop strides must be >= 1");
+
+  const int* lo = computeBox.loVect();
+  const int* hi = computeBox.hiVect();
+
+  for (int k = lo[2]; k <= hi[2]; k += Sk) {
+    for (int j = lo[1]; j <= hi[1]; j += Sj) {
+      CD_PRAGMA_SIMD
+      for (int i = lo[0]; i <= hi[0]; i += Si) {
+        func(IntVect(i, j, k));
+      }
+    }
+  }
+}
+#endif
+
 template <typename Functor>
 ALWAYS_INLINE void
 BoxLoops::loop(const Box& computeBox, Functor&& func, const IntVect& a_stride)
