@@ -31,7 +31,8 @@ DischargeIO::writeH5Part(const std::string                               a_filen
                          const std::vector<std::string>                  a_realVars,
                          const std::vector<std::string>                  a_vectVars,
                          const RealVect                                  a_shift,
-                         const Real                                      a_time) noexcept
+                         const Real                                      a_time,
+                         const int                                       a_timeStep) noexcept
 {
 #ifdef CH_USE_HDF5
   CH_TIME("DischargeIO::writeH5Part");
@@ -106,18 +107,27 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 #endif
 
   hid_t fileID = H5Fcreate(a_filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fileAccess);
+#ifdef CH_MPI
   H5Pclose(fileAccess);
+#endif
 
   // Define the top group necessary for the H5Part file format
-  hid_t grp = H5Gcreate2(fileID, "Step#0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  const std::string groupName = "Step#" + std::to_string(a_timeStep);
+  hid_t             grp       = H5Gcreate2(fileID, groupName.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-  // Write the time attribute
-  hid_t  scal = H5Screate(H5S_SCALAR);
-  hid_t  attr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
-  herr_t err  = H5Awrite(attr, H5T_NATIVE_DOUBLE, &a_time);
+  // Write the Timestep (integer, required by H5Part) and time (double) attributes
+  hid_t scal = H5Screate(H5S_SCALAR);
+
+  long long timestep = static_cast<long long>(a_timeStep);
+  hid_t     tsAttr   = H5Acreate(grp, "Timestep", H5T_NATIVE_LLONG, scal, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(tsAttr, H5T_NATIVE_LLONG, &timestep);
+  H5Aclose(tsAttr);
+
+  hid_t timeAttr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(timeAttr, H5T_NATIVE_DOUBLE, &a_time);
+  H5Aclose(timeAttr);
 
   H5Sclose(scal);
-  H5Aclose(attr);
 
   // Define dataspace dimensions.
   hsize_t dims[1];
@@ -185,11 +195,11 @@ DischargeIO::writeH5Part(const std::string                               a_filen
     }
   }
 
-  H5Dwrite(datasetID, H5Dget_type(datasetID), memSpaceID, fileSpaceID, H5P_DEFAULT, &id[0]);
-  H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, &x[0]);
-  H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, &y[0]);
+  H5Dwrite(datasetID, H5Dget_type(datasetID), memSpaceID, fileSpaceID, H5P_DEFAULT, id.data());
+  H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, x.data());
+  H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, y.data());
 #if CH_SPACEDIM == 3
-  H5Dwrite(datasetZ, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, &z[0]);
+  H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, z.data());
 #endif
 
   id.resize(0);
