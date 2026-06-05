@@ -2058,13 +2058,12 @@ ItoKMCStepper<I, C, R, F>::computeCurrentDensity(EBAMRCellData& a_J) noexcept
 
   CH_assert(a_J[0]->nComp() == SpaceDim);
 
-  // TLDR: a_J is defined over the fluid Realm but the computation takes place on the particle Realm.
-  //       If the Realms are different we compute on a scratch storage instead
+  EBAMRCellData conductivity;
+  m_amr->allocate(conductivity, m_fluidRealm, m_plasmaPhase, 1);
+  this->computeConductivityCell(conductivity);
 
-  this->computeConductivityCell(m_fluidScratch1);
   DataOps::copy(a_J, m_electricFieldFluid);
-
-  DataOps::multiplyScalar(a_J, m_fluidScratch1);
+  DataOps::multiplyScalar(a_J, conductivity);
 }
 
 template <typename I, typename C, typename R, typename F>
