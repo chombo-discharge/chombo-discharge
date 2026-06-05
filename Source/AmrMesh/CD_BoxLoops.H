@@ -43,16 +43,6 @@
   });
   @endcode
 
-  <b>Box loop — runtime IntVect stride:</b>
-  Useful when the stride is data-dependent. Not guaranteed to vectorize because the stride
-  value is not known at compile time.
-
-  @code{.cpp}
-  BoxLoops::loop(box, [&](const IntVect& iv) {
-      phi(iv, 0) = 0.0;
-  }, 2 * IntVect::Unit);
-  @endcode
-
   <b>Box loop — compile-time stride (vectorizable):</b>
   Use this form when the stride is a known constant. The compile-time value lets the
   auto-vectorizer emit SIMD instructions. Use @c D_DECL for dimension-independent call sites:
@@ -74,17 +64,13 @@
 namespace BoxLoops {
 
   /*!
-    @brief Launch a C++ kernel over a regular grid.
-    @details The stride argument lets the user use different strides along the different coordinate
-    axes. The default is to use a stride of one along each coordinate. Note that the stride must be
-    positive for each coordinate axis (enforced by a runtime assertion).
+    @brief Launch a C++ kernel over a regular grid with unit stride.
     @param[in]    a_computeBox Computation box
     @param[inout] a_kernel     Kernel to launch.
-    @param[in]    a_stride     Stride for each loop.
   */
   template <typename Functor>
   ALWAYS_INLINE void
-  loop(const Box& a_computeBox, Functor&& kernel, const IntVect& a_stride = IntVect::Unit);
+  loop(const Box& a_computeBox, Functor&& kernel);
 
   /*!
     @brief Launch a C++ kernel over a regular grid with compile-time per-dimension strides.

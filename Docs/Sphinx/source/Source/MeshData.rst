@@ -115,23 +115,41 @@ Iterating over cells
 --------------------
 
 For single-valued data, ``chombo-discharge`` uses standard loops (in column-major order) for iterating over data.
-For example, the standard loops for iterating over cell-centered data are
+``BoxLoops`` provides three overloads for structured box iteration:
 
 .. code-block:: c++
 
    namespace BoxLoops {
-   
+
+      // Unit-stride iteration (most common form).
       template <typename Functor>
       ALWAYS_INLINE void
-      loop(const Box& a_computeBox, Functor&& kernel, const IntVect& a_stride = IntVect::Unit);
+      loop(const Box& a_computeBox, Functor&& kernel);
 
+      // Compile-time stride (vectorizable; use D_DECL for dimension independence).
+      // Example: BoxLoops::loop<D_DECL(2, 2, 2)>(box, kernel);
+   #if CH_SPACEDIM == 2
+      template <int Si, int Sj, typename Functor>
+      ALWAYS_INLINE void
+      loop(const Box& a_computeBox, Functor&& kernel);
+   #else
+      template <int Si, int Sj, int Sk, typename Functor>
+      ALWAYS_INLINE void
+      loop(const Box& a_computeBox, Functor&& kernel);
+   #endif
+
+      // Unstructured iteration over cut-cells.
       template <typename Functor>
       ALWAYS_INLINE void
       loop(VoFIterator& a_iter, Functor&& a_kernel);
    }
 
-Here, the ``Functor`` argument is a C++ lambda or ``std::function`` which takes a grid cell as a single argument.
-For the first loop, we iterate over all grid cells in ``a_computeBox``.
+The ``Functor`` argument is a C++ lambda or ``std::function`` taking a grid cell as its single argument.
+Unit-stride iteration visits every cell in ``a_computeBox``.
+The compile-time stride form encodes the stride as non-type template parameters so the compiler can emit
+SIMD instructions; the stride values must be ``>= 1`` (enforced by ``static_assert``).
+Use ``D_DECL`` at call sites to keep code dimension-independent, e.g.
+``BoxLoops::loop<D_DECL(2, 2, 2)>(colorBox, kernel)``.
 Iterating over the cut-cells in a patch data holder (like the ``EBCellFAB``) can be done with a ``VoFIterator``, which can iterate through cells on an ``EBCellFAB`` that are not covered by the geometry.
 For example:
 

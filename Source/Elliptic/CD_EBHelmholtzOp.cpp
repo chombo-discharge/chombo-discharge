@@ -1937,7 +1937,7 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
       };
 
       // Launch the kernels.
-      BoxLoops::loop(colorBox, regularKernel, 2 * IntVect::Unit);
+      BoxLoops::loop<D_DECL(2, 2, 2)>(colorBox, regularKernel);
       BoxLoops::loop(m_vofIterMulti[a_dit], irregularKernel);
     }
   }

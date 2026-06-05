@@ -55,21 +55,17 @@ BoxLoops::loop(const Box& computeBox, Functor&& func)
 
 template <typename Functor>
 ALWAYS_INLINE void
-BoxLoops::loop(const Box& computeBox, Functor&& func, const IntVect& a_stride)
+BoxLoops::loop(const Box& computeBox, Functor&& func)
 {
-
-  CH_assert(a_stride > IntVect::Zero);
-
   const int* lo = computeBox.loVect();
   const int* hi = computeBox.hiVect();
 
-  // TLDR: This runs through all cells in the computeBox and calls the kernel function.
 #if CH_SPACEDIM == 3
-  for (int k = lo[2]; k <= hi[2]; k += a_stride[2]) {
+  for (int k = lo[2]; k <= hi[2]; ++k) {
 #endif
-    for (int j = lo[1]; j <= hi[1]; j += a_stride[1]) {
+    for (int j = lo[1]; j <= hi[1]; ++j) {
       CD_PRAGMA_SIMD
-      for (int i = lo[0]; i <= hi[0]; i += a_stride[0]) {
+      for (int i = lo[0]; i <= hi[0]; ++i) {
         func(IntVect(D_DECL(i, j, k)));
       }
     }
