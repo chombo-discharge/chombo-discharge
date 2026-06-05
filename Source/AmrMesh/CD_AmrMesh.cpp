@@ -54,6 +54,7 @@ AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noex
     pout() << "AmrMesh::alias(phase::which_phase, MFAMRCellData)" << endl;
   }
 
+  CH_assert(a_original.size() > 0);
   EBAMRCellData ret;
   this->allocatePointer(ret, a_original.getRealm(), a_original.size() - 1);
 
@@ -74,6 +75,7 @@ AmrMesh::slice(const EBAMRCellData& a_original, const Interval a_variables) cons
     pout() << "AmrMesh::alias(phase::which_phase, MFAMRCellData)" << endl;
   }
 
+  CH_assert(a_original.size() > 0);
   EBAMRCellData ret;
   this->allocatePointer(ret, a_original.getRealm(), a_original.size() - 1);
 
@@ -1045,6 +1047,7 @@ AmrMesh::postRegrid()
 
   // Define copiers for making regrids go faster.
   for (const auto& r : m_realms) {
+    CH_assert(m_oldGrids.count(r.first) > 0);
     const Vector<DisjointBoxLayout>& oldGrids = m_oldGrids.at(r.first);
     const Vector<DisjointBoxLayout>& newGrids = this->getGrids(r.first);
 
@@ -2123,6 +2126,7 @@ AmrMesh::interpToNewGrids(EBAMRCellData&                   a_newData,
 
   CH_assert(a_newData.getRealm() == a_oldData.getRealm());
   CH_assert(a_newData[0]->nComp() == a_oldData[0]->nComp());
+  CH_assert(!m_hasRegridCopiers || m_oldToNewCellCopiers.count(a_newData.getRealm()) > 0);
 
   const int      nComp  = a_newData[0]->nComp();
   const Interval interv = Interval(0, nComp - 1);
@@ -2195,6 +2199,7 @@ AmrMesh::interpToNewGrids(EBAMRIVData&                     a_newData,
 
   CH_assert(a_newData.getRealm() == a_oldData.getRealm());
   CH_assert(a_newData[0]->nComp() == a_oldData[0]->nComp());
+  CH_assert(!m_hasRegridCopiers || m_oldToNewEBCopiers.count(a_newData.getRealm()) > 0);
 
   const int      nComp  = a_newData[0]->nComp();
   const Interval interv = Interval(0, nComp - 1);
@@ -3130,6 +3135,7 @@ AmrMesh::getBaseImplicitFunction(const phase::which_phase a_phase) const
     pout() << "AmrMesh::getBaseImplicitFunctions()" << endl;
   }
 
+  CH_assert(m_baseif.count(a_phase) > 0);
   return m_baseif.at(a_phase);
 }
 

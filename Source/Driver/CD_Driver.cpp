@@ -503,7 +503,7 @@ Driver::gridReport()
   validLevelCells = totalLevelCells;
 
   for (int lvl = 0; lvl < finestLevel; lvl++) {
-    validLevelCells[lvl] -= totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim);
+    validLevelCells[lvl] -= llround(totalLevelCells[lvl + 1] / std::pow(refRat[lvl], SpaceDim));
 
     totalValidCells += validLevelCells[lvl];
   }
@@ -1003,9 +1003,9 @@ Driver::setupAndRun()
 
   // TLDR: Call setup(...), which will select among the various setup functions.
 
-  char iter_str[100];
-  sprintf(iter_str, ".check%07d.%dd.hdf5", m_restartStep, SpaceDim);
-  const std::string restartFile = m_outputDirectory + "/chk/" + m_outputFileNames + std::string(iter_str);
+  char suffix[32];
+  snprintf(suffix, sizeof(suffix), ".check%07d.%dd.hdf5", m_restartStep, SpaceDim);
+  const std::string restartFile = m_outputDirectory + "/chk/" + m_outputFileNames + suffix;
 
   this->setup(dischargeInputFile, m_initialRegrids, m_restart, restartFile);
 
@@ -1804,35 +1804,57 @@ Driver::stepReport(const Real a_startTime, const Real a_endTime, const int a_max
   sprintf(metrics, "%31c -- Last time step        : %3.3ih %2.2im %2.2is %3.3ims", ' ', advHrs, advMin, advSec, advMs);
   pout() << metrics << endl;
 
-  // Hours, minutes, seconds and millisecond of the previous iteration
-  const Real wt_factor = std::pow(10.0, 3.0 * (int(std::floor(log10(m_dt))) / 3));
-  const Real wt_ns     = (m_wallClockTwo - m_wallClockOne) * wt_factor / m_dt;
-  const int  wt_Hrs    = floor(wt_ns / 3600);
-  const int  wt_Min    = floor((wt_ns - 3600 * wt_Hrs) / 60);
-  const int  wt_Sec    = floor(wt_ns - 3600 * wt_Hrs - 60 * wt_Min);
-  const int  wt_Ms     = floor((wt_ns - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
-  sprintf(metrics, "%31c -- Wall time per ns      : %3.3ih %2.2im %2.2is %3.3ims", ' ', wt_Hrs, wt_Min, wt_Sec, wt_Ms);
-  sprintf(metrics,
-          "%31c -- Wall time per/%1.0E   : %3.3ih %2.2im %2.2is %3.3ims",
-          ' ',
-          wt_factor,
-          wt_Hrs,
-          wt_Min,
-          wt_Sec,
-          wt_Ms);
-  pout() << metrics << endl;
+  if (m_dt > 0.0 && lastadv > 0.0) {
+    constexpr std::array<std::pair<Real, const char*>, 6> siUnits{
+      {{1e-15, "fs"}, {1e-12, "ps"}, {1e-9, "ns"}, {1e-6, "us"}, {1e-3, "ms"}, {1.0, "s"}}};
+
+    // Pick the smallest SI unit that keeps wall-time-per-unit >= 1 second.
+    const Real  minScale  = m_dt / lastadv;
+    Real        unitScale = siUnits.back().first;
+    const char* unitName  = siUnits.back().second;
+    for (const auto& unit : siUnits) {
+      if (unit.first >= minScale) {
+        unitScale = unit.first;
+        unitName  = unit.second;
+        break;
+      }
+    }
+
+    const Real wt_per_unit = lastadv * unitScale / m_dt;
+    const int  wt_Hrs      = floor(wt_per_unit / 3600);
+    const int  wt_Min      = floor((wt_per_unit - 3600 * wt_Hrs) / 60);
+    const int  wt_Sec      = floor(wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min);
+    const int  wt_Ms       = floor((wt_per_unit - 3600 * wt_Hrs - 60 * wt_Min - wt_Sec) * 1000);
+    sprintf(metrics,
+            "%31c -- Wall time per %-2s      : %3.3ih %2.2im %2.2is %3.3ims",
+            ' ',
+            unitName,
+            wt_Hrs,
+            wt_Min,
+            wt_Sec,
+            wt_Ms);
+    pout() << metrics << endl;
+  }
 
   // This is the time remaining
   const Real maxPercent = Max(percentTime, percentStep);
-  const Real remaining  = 100. * elapsed / maxPercent - elapsed;
-  const int  remHrs     = floor(remaining / 3600);
-  const int  remMin     = floor((remaining - 3600 * remHrs) / 60);
-  const int  remSec     = floor(remaining - 3600 * remHrs - 60 * remMin);
-  const int  remMs      = floor((remaining - 3600 * remHrs - 60 * remMin - remSec) * 1000);
 
-  // Write a string with the previous iteration metrics
-  sprintf(metrics, "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims", ' ', remHrs, remMin, remSec, remMs);
-  pout() << metrics << endl;
+  if (maxPercent > 0.0) {
+    const Real remaining = 100. * elapsed / maxPercent - elapsed;
+    const int  remHrs    = floor(remaining / 3600);
+    const int  remMin    = floor((remaining - 3600 * remHrs) / 60);
+    const int  remSec    = floor(remaining - 3600 * remHrs - 60 * remMin);
+    const int  remMs     = floor((remaining - 3600 * remHrs - 60 * remMin - remSec) * 1000);
+
+    sprintf(metrics,
+            "%31c -- Estimated remaining   : %3.3ih %2.2im %2.2is %3.3ims",
+            ' ',
+            remHrs,
+            remMin,
+            remSec,
+            remMs);
+    pout() << metrics << endl;
+  }
 
   // Write memory usage
 #ifdef CH_USE_MEMORY_TRACKING
@@ -1965,10 +1987,10 @@ Driver::writeMemoryUsage()
   }
 
 #ifdef CH_USE_MEMORY_TRACKING
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/mpi/memory/" + m_outputFileNames;
-  sprintf(file_char, "%s.memory.step%07d.%dd.dat", prefix.c_str(), m_timeStep, SpaceDim);
-  std::string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".memory.step%07d.%dd.dat", m_timeStep, SpaceDim);
+  std::string fname = prefix + suffix;
 
   // Get memory stuff
   Vector<Real> peakMemory;
@@ -2011,10 +2033,10 @@ Driver::writeComputationalLoads()
   const int nProc = numProc();
 
   // Filename for output.
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/mpi/loads/" + m_outputFileNames;
-  sprintf(file_char, "%s.loads.step%07d.%dd.dat", prefix.c_str(), m_timeStep, SpaceDim);
-  std::string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".loads.step%07d.%dd.dat", m_timeStep, SpaceDim);
+  std::string fname = prefix + suffix;
 
   // Get sum of all loads on all realms
   std::map<std::string, Vector<long int>> realmLoads;
@@ -2114,10 +2136,10 @@ Driver::writeGeometry()
   m_amr->alias(outputPtr, output);
 
   // Dummy file name
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/geo/" + m_outputFileNames;
-  sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".geometry.%dd.hdf5", SpaceDim);
+  string fname = prefix + suffix;
 
 #ifdef CH_USE_HDF5
   DischargeIO::writeEBHDF5(fname,
@@ -2146,10 +2168,10 @@ Driver::writePlotFile()
   // TLDR: This writes a plot file to the /plt/ folder
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/plt/" + m_outputFileNames;
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".step%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   // Write.
   this->writePlotFile(fname);
@@ -2164,10 +2186,10 @@ Driver::writePreRegridFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/regrid/" + m_outputFileNames;
-  sprintf(file_char, "%s.preRegrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".preRegrid%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2181,10 +2203,10 @@ Driver::writePostRegridFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/regrid/" + m_outputFileNames;
-  sprintf(file_char, "%s.postRegrid%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".postRegrid%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2198,10 +2220,10 @@ Driver::writeRestartFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/restart/" + m_outputFileNames;
-  sprintf(file_char, "%s.restart%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".restart%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2215,10 +2237,10 @@ Driver::writeCrashFile()
   }
 
   // Filename
-  char              file_char[1000];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/crash/" + m_outputFileNames;
-  sprintf(file_char, "%s.crash%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
-  string fname(file_char);
+  snprintf(suffix, sizeof(suffix), ".crash%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  string fname = prefix + suffix;
 
   this->writePlotFile(fname);
 }
@@ -2557,12 +2579,13 @@ Driver::writeCheckpointFile()
   m_timeStepper->writeCheckpointHeader(header);
 
   // Create the output file name.
-  char              str[100];
+  char              suffix[32];
   const std::string prefix = m_outputDirectory + "/chk/" + m_outputFileNames;
-  sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
+  snprintf(suffix, sizeof(suffix), ".check%07d.%dd.hdf5", m_timeStep, SpaceDim);
+  const std::string str = prefix + suffix;
 
   // Output file
-  HDF5Handle handleOut(str, HDF5Handle::CREATE);
+  HDF5Handle handleOut(str.c_str(), HDF5Handle::CREATE);
   header.writeToFile(handleOut);
 
   Timer timer("Driver::writeCheckpointFile");
@@ -2798,6 +2821,8 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
         foundCheckedLoads = true;
       }
     }
+
+    CH_assert(checkpointedLoads.count(Realm::Primal) > 0);
 
     curLoads = (foundCheckedLoads) ? checkpointedLoads.at(curRealm) : checkpointedLoads.at(Realm::Primal);
   }

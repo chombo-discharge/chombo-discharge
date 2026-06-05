@@ -106,7 +106,7 @@ TracerParticle<M, N>::linearOut(void* const a_buffer) const
     detail::pushParticleProperty(p, this->m_scalars[i]);
   }
 
-  for (size_t i = 0; i < M; i++) {
+  for (size_t i = 0; i < N; i++) {
     detail::pushParticleProperty(p, this->m_vectors[i][0]);
     detail::pushParticleProperty(p, this->m_vectors[i][1]);
 #if CH_SPACEDIM == 3
@@ -142,7 +142,7 @@ TracerParticle<M, N>::linearIn(const void* const a_buffer)
     detail::pullParticleProperty(p, this->m_scalars[i]);
   }
 
-  for (size_t i = 0; i < M; i++) {
+  for (size_t i = 0; i < N; i++) {
     detail::pullParticleProperty(p, this->m_vectors[i][0]);
     detail::pullParticleProperty(p, this->m_vectors[i][1]);
 #if CH_SPACEDIM == 3
@@ -190,7 +190,7 @@ TracerParticle<M, N>::H5linearOut(void* const a_buffer) const
     detail::pushParticleProperty(p, this->m_scalars[i]);
   }
 
-  for (size_t i = 0; i < M; i++) {
+  for (size_t i = 0; i < N; i++) {
     detail::pushParticleProperty(p, this->m_vectors[i][0]);
     detail::pushParticleProperty(p, this->m_vectors[i][1]);
 #if CH_SPACEDIM == 3
@@ -223,7 +223,7 @@ TracerParticle<M, N>::H5linearIn(const void* const a_buffer)
     detail::pullParticleProperty(p, this->m_scalars[i]);
   }
 
-  for (size_t i = 0; i < M; i++) {
+  for (size_t i = 0; i < N; i++) {
     detail::pullParticleProperty(p, this->m_vectors[i][0]);
     detail::pullParticleProperty(p, this->m_vectors[i][1]);
 #if CH_SPACEDIM == 3

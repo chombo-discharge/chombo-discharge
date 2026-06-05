@@ -319,10 +319,6 @@ CdrSolver::allocate()
     m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient, m_realm);
   }
 
-  // Allocate stuff for holding fluxes -- this data is used when computing advection and diffusion fluxes.
-  if (m_isDiffusive || m_isMobile) {
-  }
-
   // These don't consume (much) memory so we always allocate them.
   m_amr->allocate(m_ebFlux, m_realm, m_phase, m_nComp);
   m_amr->allocate(m_ebZero, m_realm, m_phase, m_nComp);

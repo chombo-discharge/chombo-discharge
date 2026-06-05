@@ -33,6 +33,7 @@ MFCoarAve::define(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps)
 const RefCountedPtr<EBCoarAve>&
 MFCoarAve::getAveOp(const int a_phase) const
 {
+  CH_assert(a_phase >= 0 && a_phase < m_aveOps.size());
   return m_aveOps[a_phase];
 }
 

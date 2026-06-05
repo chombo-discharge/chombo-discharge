@@ -1467,6 +1467,8 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
         Photon& p = lit();
 
         // Draw a new random absorption position
+        CH_assert(p.velocity().vectorLength() > 0.0);
+
         const RealVect& oldPos    = p.position();
         const RealVect& direction = p.velocity() / (p.velocity().vectorLength());
         const RealVect  newPos    = oldPos + direction * this->randomExponential(p.kappa());

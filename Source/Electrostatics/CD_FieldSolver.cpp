@@ -1929,57 +1929,59 @@ FieldSolver::fillCoveredPotential(MFAMRCellData& a_phi) const noexcept
 
   const Vector<Electrode>& electrodes = m_computationalGeometry->getElectrodes();
 
-  EBAMRCellData phiGas = m_amr->alias(phase::gas, a_phi);
+  if (electrodes.size() != 0) {
+    EBAMRCellData phiGas = m_amr->alias(phase::gas, a_phi);
 
-  // Lambda which returns the electrode potential at some position.
-  auto potential = [&electrodes, this](const RealVect& pos) -> Real {
-    Real minDist = std::numeric_limits<Real>::infinity();
-    int  closest = -1;
+    // Lambda which returns the electrode potential at some position.
+    auto potential = [&electrodes, this](const RealVect& pos) -> Real {
+      Real minDist = std::numeric_limits<Real>::infinity();
+      int  closest = 0;
 
-    for (int i = 0; i < electrodes.size(); i++) {
-      const RefCountedPtr<BaseIF> func = electrodes[i].getImplicitFunction();
+      for (int i = 0; i < electrodes.size(); i++) {
+        const RefCountedPtr<BaseIF> func = electrodes[i].getImplicitFunction();
 
-      const Real curDist = std::abs(func->value(pos));
+        const Real curDist = std::abs(func->value(pos));
 
-      if (curDist <= minDist) {
-        minDist = curDist;
-        closest = i;
-      }
-    }
-
-    const bool live     = electrodes[closest].isLive();
-    const Real U        = m_voltage(m_time);
-    const Real fraction = electrodes[closest].getFraction();
-
-    return live ? fraction * U : 0.0;
-  };
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const DataIterator&      dit    = dbl.dataIterator();
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
-    const Real               dx     = m_amr->getDx()[lvl];
-    const RealVect           probLo = m_amr->getProbLo();
-
-    const int nbox = dit.size();
-#pragma omp parallel for schedule(runtime)
-    for (int mybox = 0; mybox < nbox; mybox++) {
-      const DataIndex& din     = dit[mybox];
-      const EBISBox&   ebisbox = ebisl[din];
-      const Box        cellBox = dbl[din];
-
-      EBCellFAB& data    = (*phiGas[lvl])[din];
-      FArrayBox& dataReg = data.getFArrayBox();
-
-      auto regularKernel = [&](const IntVect& iv) -> void {
-        if (ebisbox.isCovered(iv)) {
-          const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
-
-          dataReg(iv, 0) = potential(pos);
+        if (curDist <= minDist) {
+          minDist = curDist;
+          closest = i;
         }
-      };
+      }
 
-      BoxLoops::loop(cellBox, regularKernel);
+      const bool live     = electrodes[closest].isLive();
+      const Real U        = m_voltage(m_time);
+      const Real fraction = electrodes[closest].getFraction();
+
+      return live ? fraction * U : 0.0;
+    };
+
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const DataIterator&      dit    = dbl.dataIterator();
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
+      const Real               dx     = m_amr->getDx()[lvl];
+      const RealVect           probLo = m_amr->getProbLo();
+
+      const int nbox = dit.size();
+#pragma omp parallel for schedule(runtime)
+      for (int mybox = 0; mybox < nbox; mybox++) {
+        const DataIndex& din     = dit[mybox];
+        const EBISBox&   ebisbox = ebisl[din];
+        const Box        cellBox = dbl[din];
+
+        EBCellFAB& data    = (*phiGas[lvl])[din];
+        FArrayBox& dataReg = data.getFArrayBox();
+
+        auto regularKernel = [&](const IntVect& iv) -> void {
+          if (ebisbox.isCovered(iv)) {
+            const RealVect pos = probLo + (RealVect(iv) + 0.5 * RealVect::Unit) * dx;
+
+            dataReg(iv, 0) = potential(pos);
+          }
+        };
+
+        BoxLoops::loop(cellBox, regularKernel);
+      }
     }
   }
 }
