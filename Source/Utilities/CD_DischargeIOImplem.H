@@ -195,11 +195,11 @@ DischargeIO::writeH5Part(const std::string                               a_filen
     }
   }
 
-  H5Dwrite(datasetID, H5Dget_type(datasetID), memSpaceID, fileSpaceID, H5P_DEFAULT, &id[0]);
-  H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, &x[0]);
-  H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, &y[0]);
+  H5Dwrite(datasetID, H5Dget_type(datasetID), memSpaceID, fileSpaceID, H5P_DEFAULT, id.data());
+  H5Dwrite(datasetX, H5Dget_type(datasetX), memSpaceID, fileSpaceID, H5P_DEFAULT, x.data());
+  H5Dwrite(datasetY, H5Dget_type(datasetY), memSpaceID, fileSpaceID, H5P_DEFAULT, y.data());
 #if CH_SPACEDIM == 3
-  H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, &z[0]);
+  H5Dwrite(datasetZ, H5Dget_type(datasetZ), memSpaceID, fileSpaceID, H5P_DEFAULT, z.data());
 #endif
 
   id.resize(0);
