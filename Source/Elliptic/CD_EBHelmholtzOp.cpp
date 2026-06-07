@@ -611,11 +611,11 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
     if (isIrregular) {
       VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
     else if (isCovered) {
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     }
   }
 
@@ -715,7 +715,7 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order)
 
     // Launch the kernels.
     CH_START(t1);
-    BoxLoops::loop(box, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
     CH_STOP(t1);
 
     CH_START(t2);
@@ -944,7 +944,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
         LphiReg(iv, m_comp) += inverseDx * (fluxReg(iv + BASISV(dir), m_comp) - fluxReg(iv, m_comp));
       };
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     }
 
     // Kernel for cut-cells. This will add everything except the inhomogeneous flux through the EB
@@ -1270,7 +1270,7 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&             a_Lphi,
 
   // Launch the kernel.
   CH_START(t2);
-  BoxLoops::loop(a_cellBox, kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, kernel);
   CH_STOP(t2);
 }
 
@@ -1327,7 +1327,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
         phiFAB(iv, m_comp) = phiFAB(iv + BASISV(dir), m_comp) - scaledFlux * m_dx;
       };
 
-      BoxLoops::loop(ghostBox, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(ghostBox, kernel);
     }
 
     if (hasHi == 1) {
@@ -1356,7 +1356,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
         phiFAB(iv, m_comp) = phiFAB(iv - BASISV(dir), m_comp) + scaledFlux * m_dx;
       };
 
-      BoxLoops::loop(ghostBox, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(ghostBox, kernel);
     }
   }
 }
@@ -1396,7 +1396,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
         fluxReg(iv, m_comp) = m_beta * faceFlux(iv, m_comp);
       };
 
-      BoxLoops::loop(loBox, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(loBox, kernel);
     }
 
     if (hasHi == 1) {
@@ -1410,7 +1410,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
         fluxReg(iv + BASISV(dir), m_comp) = m_beta * faceFlux(iv, m_comp);
       };
 
-      BoxLoops::loop(hiBox, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(hiBox, kernel);
     }
   }
 }
@@ -1790,19 +1790,30 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
     const BaseFab<Real>& rhsReg  = a_resid.getSingleValuedFAB();
     const BaseFab<Real>& relReg  = relCoef.getSingleValuedFAB();
 
-    // Regular kernel. Several ways we can do this -- we can either check if the cell is red/black like we do here, which is the easiest. This should
-    // not come at a performance cost, I think. An alternative is to compute an offset on the starting index on the innermost loop, like we used to do
-    // with Fortran.
-    auto regularKernel = [&](const IntVect& iv) -> void {
-      const bool doThisCell = std::abs((iv.sum() + a_redBlack) % 2) == 0;
-
-      if (doThisCell) {
-        phiReg(iv, m_comp) += relReg(iv, m_comp) * (rhsReg(iv, m_comp) - LphiReg(iv, m_comp));
+    // Regular cells: per-row i-start offset eliminates the red/black branch so the inner
+    // i-loop is branch-free and auto-vectorizes (stride-2 AVX2 with load-permute-store).
+    CH_START(t1);
+    {
+      const int* lo = a_cellBox.loVect();
+      const int* hi = a_cellBox.hiVect();
+#if CH_SPACEDIM == 3
+      for (int k = lo[2]; k <= hi[2]; ++k) {
+#endif
+        for (int j = lo[1]; j <= hi[1]; ++j) {
+          const int i_start = lo[0] + ((D_TERM(lo[0], +j, +k) + a_redBlack) & 1);
+          CD_PRAGMA_SIMD
+          for (int i = i_start; i <= hi[0]; i += 2) {
+            const IntVect iv = IntVect(D_DECL(i, j, k));
+            phiReg(iv, m_comp) += relReg(iv, m_comp) * (rhsReg(iv, m_comp) - LphiReg(iv, m_comp));
+          }
+        }
+#if CH_SPACEDIM == 3
       }
-    };
+#endif
+    }
+    CH_STOP(t1);
 
-    // Irregular red-black kernel -- note that this is on the multi-valued cells. Singly-cut cells
-    // are done in regularKernel.
+    // Irregular red-black kernel -- multi-valued cells only; singly-cut cells are covered above.
     auto irregularKernel = [&](const VolIndex& vof) -> void {
       const IntVect& iv = vof.gridIndex();
 
@@ -1812,11 +1823,6 @@ EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB&             a_Lcorr,
         a_corr(vof, m_comp) += relCoef(vof, m_comp) * (a_resid(vof, m_comp) - a_Lcorr(vof, m_comp));
       }
     };
-
-    // Launch the kernels over their respective domains.
-    CH_START(t1);
-    BoxLoops::loop(a_cellBox, regularKernel);
-    CH_STOP(t1);
 
     CH_START(t2);
     BoxLoops::loop(m_vofIterMulti[a_dit], irregularKernel);
@@ -1931,7 +1937,7 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
       };
 
       // Launch the kernels.
-      BoxLoops::loop(colorBox, regularKernel, 2 * IntVect::Unit);
+      BoxLoops::loop<D_DECL(2, 2, 2)>(colorBox, regularKernel);
       BoxLoops::loop(m_vofIterMulti[a_dit], irregularKernel);
     }
   }
@@ -2027,14 +2033,14 @@ EBHelmholtzOp::computeRelaxationCoefficient()
         regRel(iv, m_comp) -= factor * (regBcoDir(iv + BASISV(dir), m_comp) + regBcoDir(iv, m_comp));
       };
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     }
 
     // At this point we have computed kappa*diag(L), but we need to invert it.
     auto inversionKernel = [&](const IntVect& iv) -> void {
       regRel(iv, m_comp) = m_relaxFactor / regRel(iv, m_comp);
     };
-    BoxLoops::loop(cellBox, inversionKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, inversionKernel);
 
     // Do the same for the irregular cells
     auto irregularKernel = [&](const VolIndex& vof) -> void {
@@ -2242,7 +2248,7 @@ EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   const Box faceBox = surroundingNodes(a_cellBox, a_dir);
 
   // Launch kernel.
-  BoxLoops::loop(faceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
 }
 
 void

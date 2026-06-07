@@ -341,7 +341,7 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
         coFiDataReg(ivCoar, comp) += fineDataReg(ivFine, comp) * factor;
       };
 
-      BoxLoops::loop(fineBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);
     }
 
     // Now do the irregular cells. First reset the coarse cell values and then increment with the fine-grid values.
@@ -497,11 +497,11 @@ EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>&       a_f
         fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);
       };
 
-      BoxLoops::loop(Box(IntVect::Zero, m_refRat * IntVect::Unit), fineKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(Box(IntVect::Zero, m_refRat * IntVect::Unit), fineKernel);
     };
 
     // Execute kernel over the entire coarse-grid patch.
-    BoxLoops::loop(coarBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
 
     // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and set the value in the
     // fine cells to be the same as the value in the underlying coarse cell.
@@ -631,7 +631,7 @@ EBCoarseFineParticleMesh::conservativeAverageAndAdd(EBCellFAB&       a_coarData,
     }
   };
 
-  BoxLoops::loop(m_eblgCoar.getDBL()[a_din], regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(m_eblgCoar.getDBL()[a_din], regularKernel);
   BoxLoops::loop(m_vofIterCoar[a_din], irregularKernel);
 }
 
@@ -674,7 +674,7 @@ EBCoarseFineParticleMesh::arithmeticAverageAndAdd(EBCellFAB&       a_coarData,
     }
   };
 
-  BoxLoops::loop(m_eblgCoar.getDBL()[a_din], regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(m_eblgCoar.getDBL()[a_din], regularKernel);
   BoxLoops::loop(m_vofIterCoar[a_din], irregularKernel);
 }
 

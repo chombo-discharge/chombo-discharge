@@ -123,7 +123,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   };
 
   // Run the kernel
-  BoxLoops::loop(a_faceFlux.box(), kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient.
   this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);

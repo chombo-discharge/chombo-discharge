@@ -339,7 +339,7 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   };
 
   CH_START(t1);
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
@@ -393,7 +393,7 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
   };
 
   CH_START(t1);
-  BoxLoops::loop(fineBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
@@ -551,12 +551,12 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
 
     // Compute slopes in interior cells. Crap on boundary and cut-cells.
     CH_START(t1);
-    BoxLoops::loop(interiorCells, interiorKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, interiorKernel);
     BoxLoops::loop(m_coarVoFs[a_dit], resetSlopeIrreg);
     CH_STOP(t1);
 
     CH_START(t2);
-    BoxLoops::loop(fineBox, slopeExtrapRegular);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, slopeExtrapRegular);
     CH_STOP(t2);
   }
 
@@ -575,7 +575,7 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
   };
 
   CH_START(t3);
-  BoxLoops::loop(fineBox, regularConstantTerm);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regularConstantTerm);
   CH_STOP(t3);
 
   CH_START(t4);
@@ -694,8 +694,8 @@ EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
     sumFine += ebisBoxFine.volFrac(fineVoF) * a_fineData(fineVoF, a_fineVar);
   };
 
-  BoxLoops::loop(coarBox, regCoar);
-  BoxLoops::loop(fineBox, regFine);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regCoar);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regFine);
   BoxLoops::loop(m_coarVoFs[a_dit], irregCoar);
   BoxLoops::loop(m_fineVoFs[a_dit], irregFine);
 

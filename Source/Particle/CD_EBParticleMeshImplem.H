@@ -275,7 +275,7 @@ EBParticleMesh::depositParticleCIC(EBCellFAB&      a_rho,
 
     const Box particleBox = a_particleBox + particleIV;
 
-    BoxLoops::loop(particleBox, cicKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(particleBox, cicKernel);
   }
 }
 
@@ -331,7 +331,7 @@ EBParticleMesh::depositParticleTSC(EBCellFAB&      a_rho,
 
     const Box particleBox = a_particleBox + particleIV;
 
-    BoxLoops::loop(particleBox, tscKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(particleBox, tscKernel);
   }
 }
 
@@ -401,7 +401,7 @@ EBParticleMesh::interpolateParticleCIC(Real*            a_particleField,
 
     const Box gatherBox = a_gatherBox + loIndex;
 
-    BoxLoops::loop(gatherBox, cicKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(gatherBox, cicKernel);
   }
 }
 
@@ -461,7 +461,7 @@ EBParticleMesh::interpolateParticleTSC(Real*            a_particleField,
 
     const Box gatherBox = a_gatherBox + loIndex;
 
-    BoxLoops::loop(gatherBox, tscKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(gatherBox, tscKernel);
   }
 }
 

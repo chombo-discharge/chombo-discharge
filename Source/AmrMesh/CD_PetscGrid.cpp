@@ -154,7 +154,7 @@ PetscGrid::defineAMRCells() noexcept
         }
       };
 
-      BoxLoops::loop(ghostedCellBox, setValidCells);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(ghostedCellBox, setValidCells);
 
       // Fix CF region flags
       if (lvl < m_finestLevel) {
@@ -164,7 +164,7 @@ PetscGrid::defineAMRCells() noexcept
           amrToPetsc(iv).setCoarCF(haloCells(iv));
         };
 
-        BoxLoops::loop(cellBox, setOuterCFRegion);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, setOuterCFRegion);
       }
 
       if (lvl > 0) {
@@ -174,7 +174,7 @@ PetscGrid::defineAMRCells() noexcept
           amrToPetsc(iv).setFineCF(haloCells(iv));
         };
 
-        BoxLoops::loop(cellBox, setInnerCFRegion);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, setInnerCFRegion);
       }
 
       // Fix up domain side flags
@@ -188,7 +188,7 @@ PetscGrid::defineAMRCells() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, setDomainFlag);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, setDomainFlag);
       }
     }
 
@@ -255,7 +255,7 @@ PetscGrid::definePetscRows() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       }
     }
   }
@@ -452,7 +452,7 @@ PetscGrid::putChomboInPetsc(Vec& a_x, const MFAMRCellData& a_y) const noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, kernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
       }
     }
   }
@@ -570,7 +570,7 @@ PetscGrid::dumpPetscGrid(const std::string a_filename) const noexcept
         }
       };
 
-      BoxLoops::loop(data.box(), kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(data.box(), kernel);
     }
   }
 

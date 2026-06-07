@@ -174,7 +174,7 @@ EBReflux::defineRegionsCF() noexcept
           }
         };
 
-        BoxLoops::loop(cellBox, findIrregCells);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, findIrregCells);
 
         // Define appropriate iterators.
         auto& irregularCoarseFineRegions = m_irregularCoarseFineRegions[din];
@@ -411,7 +411,7 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
         CH_STOP(t1);
 
         CH_START(t2);
-        BoxLoops::loop(faceBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
         CH_STOP(t2);
 
         CH_START(t3);

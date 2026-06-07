@@ -337,7 +337,7 @@ EBAMRParticleMesh::defineOuterHaloMasks()
           }
         };
 
-        BoxLoops::loop(box, kernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
 
         // Undefine the BaseFab if the mask is empty. This means we can never do a copy.
         if (emptyMask) {
@@ -450,7 +450,7 @@ EBAMRParticleMesh::defineTransitionMasks()
           }
         };
 
-        BoxLoops::loop(cellBox, kernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
 
         // Undefine the BaseFab if the mask is empty. This means we can never do a copy.
         if (emptyMask) {

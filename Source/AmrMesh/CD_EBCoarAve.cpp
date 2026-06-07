@@ -484,7 +484,7 @@ EBCoarAve::arithmeticAverage(EBCellFAB&       a_coarData,
   CH_START(t1);
   const Box& coarBox = m_eblgCoFi.getDBL()[a_datInd];
 
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
@@ -546,7 +546,7 @@ EBCoarAve::harmonicAverage(EBCellFAB&       a_coarData,
   CH_START(t1);
   const Box& coarBox = m_eblgCoFi.getDBL()[a_datInd];
 
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular cells
@@ -607,7 +607,7 @@ EBCoarAve::conservativeAverage(EBCellFAB&       a_coarData,
   CH_START(t1);
   const Box& coarBox = m_eblgCoFi.getDBL()[a_datInd];
 
-  BoxLoops::loop(coarBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regularKernel);
   CH_STOP(t1);
 
   CH_START(t2);
@@ -755,7 +755,7 @@ EBCoarAve::arithmeticAverage(EBFaceFAB&       a_coarData,
   const Box& coarBox     = m_eblgCoFi.getDBL()[a_datInd];
   const Box  coarFaceBox = surroundingNodes(coarBox, a_dir);
 
-  BoxLoops::loop(coarFaceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarFaceBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular faces
@@ -832,7 +832,7 @@ EBCoarAve::harmonicAverage(EBFaceFAB&       a_coarData,
   const Box& coarBox     = m_eblgCoFi.getDBL()[a_datInd];
   const Box  coarFaceBox = surroundingNodes(coarBox, a_dir);
 
-  BoxLoops::loop(coarFaceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarFaceBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular faces
@@ -907,7 +907,7 @@ EBCoarAve::conservativeAverage(EBFaceFAB&       a_coarData,
   const Box& coarBox     = m_eblgCoFi.getDBL()[a_datInd];
   const Box  coarFaceBox = surroundingNodes(coarBox, a_dir);
 
-  BoxLoops::loop(coarFaceBox, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(coarFaceBox, regularKernel);
   CH_STOP(t1);
 
   // Irregular faces

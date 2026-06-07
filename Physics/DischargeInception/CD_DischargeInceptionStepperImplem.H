@@ -2158,7 +2158,7 @@ DischargeInceptionStepper<P, F, C>::seedUniformParticles() noexcept
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
 
       for (ListIterator<P> lit(particles); lit.ok(); ++lit) {
@@ -2283,7 +2283,7 @@ DischargeInceptionStepper<P, F, C>::seedIonizationParticles(const Real a_voltage
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
 
@@ -3616,7 +3616,7 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -3757,7 +3757,7 @@ DischargeInceptionStepper<P, F, C>::computeBackgroundIonizationStationary() noex
         // Execute kernels
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(dbl[din], regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -3842,7 +3842,7 @@ DischargeInceptionStepper<P, F, C>::computeDetachmentStationary() noexcept
         // Execute kernels
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(dbl[din], regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4095,7 +4095,7 @@ DischargeInceptionStepper<P, F, C>::evaluateFunction(LevelData<EBCellFAB>& a_dat
     Box          cellBox = dbl[din];
     VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[din];
 
-    BoxLoops::loop(cellBox, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -4350,7 +4350,7 @@ DischargeInceptionStepper<P, F, C>::computeInceptionVoltageVolume() noexcept
         const Box&   cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4428,7 +4428,7 @@ DischargeInceptionStepper<P, F, C>::computeMinimumInceptionVoltage(const EBAMRCe
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -4517,7 +4517,7 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeStationary() noexcept
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4583,7 +4583,7 @@ DischargeInceptionStepper<P, F, C>::computeCriticalVolumeTransient() const noexc
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -4803,7 +4803,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeStationary() noexcept
         const Box    cellBox = dbl[din];
         VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -4886,7 +4886,7 @@ DischargeInceptionStepper<P, F, C>::computeIonizationVolumeTransient(const Real&
       const Box    cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5180,7 +5180,7 @@ DischargeInceptionStepper<P, F, C>::computeIonVelocity(const Real& a_voltage) no
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
       Box          cellBox = dbl[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5245,7 +5245,7 @@ DischargeInceptionStepper<P, F, C>::computeIonDiffusion(const Real& a_voltage) n
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
       Box          cellBox = dbl[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -5357,7 +5357,7 @@ DischargeInceptionStepper<P, F, C>::getMaxValueAndLocation(Real&                
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }

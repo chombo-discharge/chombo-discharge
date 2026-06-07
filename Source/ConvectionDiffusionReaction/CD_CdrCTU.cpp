@@ -138,7 +138,7 @@ CdrCTU::computeAdvectionDt()
           };
 
           // Execute the kernels.
-          BoxLoops::loop(cellBox, regularKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
           BoxLoops::loop(vofit, irregularKernel);
         }
       }
@@ -449,9 +449,9 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
     };
 
     // Apply the kernels. Beware of corrected slopes near the boundaries.
-    BoxLoops::loop(interiorCells, regularKernel);
-    BoxLoops::loop(bndryLo, boundaryKernelLo);
-    BoxLoops::loop(bndryHi, boundaryKernelHi);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryLo, boundaryKernelLo);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryHi, boundaryKernelHi);
     BoxLoops::loop(vofit, irregularKernel);
   }
 }
@@ -751,9 +751,9 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     };
 
     // Launch the kernels.
-    BoxLoops::loop(interiorFaces, regularKernel);
-    BoxLoops::loop(bndryFacesLo, boundaryKernelLo);
-    BoxLoops::loop(bndryFacesHi, boundaryKernelHi);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(interiorFaces, regularKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesLo, boundaryKernelLo);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesHi, boundaryKernelHi);
     BoxLoops::loop(irregFaces, irregularKernel);
   }
 }

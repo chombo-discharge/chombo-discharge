@@ -500,7 +500,7 @@ PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
             fab(iv, comp) = m_baseif->value(pos);
           };
 
-          BoxLoops::loop(bx, kernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(bx, kernel);
         }
         else {
           fab.setVal(minVal, comp);

@@ -306,7 +306,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
           };
 
           // Apply the kernel.
-          BoxLoops::loop(ghostBox, interpHomo);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(ghostBox, interpHomo);
         }
       }
     }
@@ -894,7 +894,7 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
         CH_STOP(t1);
 
         CH_START(t2);
-        BoxLoops::loop(interpBox, interpOnFine);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(interpBox, interpOnFine);
         CH_STOP(t2);
       }
     }

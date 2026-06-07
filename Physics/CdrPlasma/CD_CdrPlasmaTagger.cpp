@@ -343,7 +343,7 @@ CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refinedCells,
   VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
   // Execute the kernels.
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 
@@ -432,7 +432,7 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
   VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
 
   // Execute the kernels
-  BoxLoops::loop(a_box, regularKernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(a_box, regularKernel);
   BoxLoops::loop(vofit, irregularKernel);
 }
 
