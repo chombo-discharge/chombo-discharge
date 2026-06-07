@@ -180,7 +180,7 @@ EBMGRestrict::restrictResidual(LevelData<EBCellFAB>&       a_coarData,
       CH_STOP(t2);
 
       CH_START(t3);
-      BoxLoops::loop<D_DECL(1, 1, 1)>(coarVoFs, irregularKernel);
+      BoxLoops::loop(coarVoFs, irregularKernel);
       CH_STOP(t3);
     }
 

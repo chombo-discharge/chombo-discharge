@@ -754,7 +754,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     BoxLoops::loop<D_DECL(1, 1, 1)>(interiorFaces, regularKernel);
     BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesLo, boundaryKernelLo);
     BoxLoops::loop<D_DECL(1, 1, 1)>(bndryFacesHi, boundaryKernelHi);
-    BoxLoops::loop<D_DECL(1, 1, 1)>(irregFaces, irregularKernel);
+    BoxLoops::loop(irregFaces, irregularKernel);
   }
 }
 

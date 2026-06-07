@@ -1138,7 +1138,7 @@ FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
 
   // Launch kernels.
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_cellBox, regularKernel);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(irregRegion, irregularKernel);
+  BoxLoops::loop(irregRegion, irregularKernel);
 }
 
 void

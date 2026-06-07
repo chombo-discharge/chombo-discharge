@@ -488,11 +488,11 @@ EBReflux::refluxIntoCoarse(LevelData<EBCellFAB>&       a_Lphi,
         VoFIterator&           irregularCFIVS = m_irregularCoarseFineRegions[din].at(std::make_pair(dir, sit()));
 
         CH_START(t1);
-        BoxLoops::loop<D_DECL(1, 1, 1)>(regularCFIVS, regularKernel);
+        BoxLoops::loop(regularCFIVS, regularKernel);
         CH_STOP(t1);
 
         CH_START(t1);
-        BoxLoops::loop<D_DECL(1, 1, 1)>(irregularCFIVS, irregularKernel);
+        BoxLoops::loop(irregularCFIVS, irregularKernel);
         CH_STOP(t1);
       }
     }

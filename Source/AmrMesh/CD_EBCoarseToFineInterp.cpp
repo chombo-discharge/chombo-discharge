@@ -157,7 +157,7 @@ EBCoarseToFineInterp::defineWeights() noexcept
       }
     };
 
-    BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[din], kernel);
+    BoxLoops::loop(m_fineVoFs[din], kernel);
   }
 }
 
@@ -343,7 +343,7 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   CH_STOP(t1);
 
   CH_START(t2);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_coarVoFs[a_dit], irregularKernel);
+  BoxLoops::loop(m_coarVoFs[a_dit], irregularKernel);
   CH_STOP(t2);
 }
 
@@ -397,7 +397,7 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
   CH_STOP(t1);
 
   CH_START(t2);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[a_dit], irregularKernel);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregularKernel);
   CH_STOP(t2);
 
 #ifndef NDEBUG
@@ -552,7 +552,7 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
     // Compute slopes in interior cells. Crap on boundary and cut-cells.
     CH_START(t1);
     BoxLoops::loop<D_DECL(1, 1, 1)>(interiorCells, interiorKernel);
-    BoxLoops::loop<D_DECL(1, 1, 1)>(m_coarVoFs[a_dit], resetSlopeIrreg);
+    BoxLoops::loop(m_coarVoFs[a_dit], resetSlopeIrreg);
     CH_STOP(t1);
 
     CH_START(t2);
@@ -579,7 +579,7 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
   CH_STOP(t3);
 
   CH_START(t4);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[a_dit], irregularInterp);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregularInterp);
   CH_STOP(t4);
 
 #ifndef NDEBUG
@@ -614,7 +614,7 @@ EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>&       a_fineData,
     a_fineData(fineVoF, a_fineVar) = a_coarData(coarVoF, a_coarVar);
   };
 
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[a_dit], kernel);
+  BoxLoops::loop(m_fineVoFs[a_dit], kernel);
 }
 
 void
@@ -646,7 +646,7 @@ EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>&       a_fineDa
     a_fineData(fineVoF, a_fineVar) = a_coarData(coarVoF, a_coarVar) * weights(fineVoF, 0);
   };
 
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[a_dit], kernel);
+  BoxLoops::loop(m_fineVoFs[a_dit], kernel);
 
 #ifndef NDEBUG
   this->checkConservation(a_fineData, a_coarData, a_dit, a_fineVar, a_coarVar);
@@ -696,8 +696,8 @@ EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
 
   BoxLoops::loop<D_DECL(1, 1, 1)>(coarBox, regCoar);
   BoxLoops::loop<D_DECL(1, 1, 1)>(fineBox, regFine);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_coarVoFs[a_dit], irregCoar);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[a_dit], irregFine);
+  BoxLoops::loop(m_coarVoFs[a_dit], irregCoar);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregFine);
 
   sumCoar *= std::pow(m_refRat, SpaceDim);
 
@@ -739,8 +739,8 @@ EBCoarseToFineInterp::checkConservation(const BaseIVFAB<Real>& a_fineData,
     sumFine += ebisBoxFine.bndryArea(fineVoF) * a_fineData(fineVoF, a_fineVar);
   };
 
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_coarVoFs[a_dit], irregCoar);
-  BoxLoops::loop<D_DECL(1, 1, 1)>(m_fineVoFs[a_dit], irregFine);
+  BoxLoops::loop(m_coarVoFs[a_dit], irregCoar);
+  BoxLoops::loop(m_fineVoFs[a_dit], irregFine);
 
   sumCoar *= std::pow(m_refRat, SpaceDim - 1);
 

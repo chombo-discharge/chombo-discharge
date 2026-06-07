@@ -185,7 +185,7 @@ EBMGProlong::prolongResidual(LevelData<EBCellFAB>&       a_fineData,
       CH_STOP(t1);
 
       CH_START(t2);
-      BoxLoops::loop<D_DECL(1, 1, 1)>(fineVoFs, irregularKernel);
+      BoxLoops::loop(fineVoFs, irregularKernel);
       CH_STOP(t2);
     }
   }

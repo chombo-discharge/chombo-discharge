@@ -187,7 +187,7 @@ EBCoarAve::defineCellStencils() noexcept
       }
     };
 
-    BoxLoops::loop<D_DECL(1, 1, 1)>(irregCells, buildStencils);
+    BoxLoops::loop(irregCells, buildStencils);
   }
 }
 
@@ -352,7 +352,7 @@ EBCoarAve::defineEBStencils() noexcept
 
     VoFIterator& irregCells = m_irregCellsCoFi[din];
 
-    BoxLoops::loop<D_DECL(1, 1, 1)>(irregCells, buildStencils);
+    BoxLoops::loop(irregCells, buildStencils);
   }
 }
 

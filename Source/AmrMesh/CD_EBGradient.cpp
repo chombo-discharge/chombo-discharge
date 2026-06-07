@@ -347,7 +347,7 @@ EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
       };
 
       CH_START(t1);
-      BoxLoops::loop<D_DECL(1, 1, 1)>(m_ebcfIterator[din], kernel);
+      BoxLoops::loop(m_ebcfIterator[din], kernel);
       CH_STOP(t1);
     }
   }
@@ -421,7 +421,7 @@ EBGradient::defineLevelStencils() noexcept
       }
     };
 
-    BoxLoops::loop<D_DECL(1, 1, 1)>(bndryIterator, kernel);
+    BoxLoops::loop(bndryIterator, kernel);
     CH_STOP(t4);
   }
 }
@@ -763,7 +763,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     };
 
     CH_START(t3);
-    BoxLoops::loop<D_DECL(1, 1, 1)>(ebcfIterator, irregularKernel);
+    BoxLoops::loop(ebcfIterator, irregularKernel);
     CH_STOP(t3);
   }
 }
@@ -1130,7 +1130,7 @@ EBGradient::makeAggStencils() noexcept
         dstBaseStencil.push_back(RefCountedPtr<BaseStencil>(new VoFStencil(derivDirStencil)));
       };
 
-      BoxLoops::loop<D_DECL(1, 1, 1)>(m_levelIterator[din], kernel);
+      BoxLoops::loop(m_levelIterator[din], kernel);
       CH_STOP(t3);
 
       CH_START(t4);
