@@ -1,0 +1,253 @@
+BoxLoops::loop Vectorization Instructions
+==========================================
+Build: GCC -O3 -march=native (AVX2), DIM=2, NDEBUG
+Date:  2026-06-07
+
+
+BACKGROUND
+----------
+BoxLoops::loop<D_DECL(Si,Sj,Sk)>(Box, Functor) is the sole vectorization
+target. GCC vectorizes only the inner i-loop (CD_BoxLoopsImplem.H:30:23).
+Each vectorized call site emits two GCC reports:
+
+  CD_BoxLoopsImplem.H:30:23: optimized: loop vectorized using 32 byte vectors
+  CD_BoxLoopsImplem.H:30:23: optimized: loop vectorized using 16 byte vectors
+
+The 32-byte report is the AVX2 main loop (4 doubles per cycle); the 16-byte
+report is the SSE2 epilogue for remainder elements. Only the 32-byte line is
+counted as "vectorized" for this work.
+
+All other BoxLoops overloads (VoFIterator, FaceIterator, IntVectSet,
+DenseIntVectSet, Vector<T>) are excluded from the vectorization report.
+The report only cares about Box loops.
+
+
+HOW TO ADD VECTORIZATION DIAGNOSTICS
+-------------------------------------
+In Make.defs.local, temporarily change:
+
+  cxxoptflags = -O3 -march=native
+
+to:
+
+  cxxoptflags = -O3 -march=native -fopt-info-vec-optimized -fopt-info-vec-missed
+
+Rebuild a single file with `touch <file> && make -j12` and redirect stderr to
+a report file. Search for CD_BoxLoopsImplem.H:30:23 to find which call sites
+vectorize or not, and what the reason is.
+
+Remember to revert Make.defs.local when done.
+
+
+ROOT CAUSES AND THEIR FIXES
+-----------------------------
+
+ROOT CAUSE 1 — BRANCH (if inside the lambda)
+---------------------------------------------
+GCC reason: "not vectorized: control flow in loop."
+
+Pattern A: isRegular / isCovered check
+  The lambda checks ebisbox.isRegular(iv) or !ebisbox.isCovered(iv) to skip
+  covered/irregular cells. The fix is to split into two paths:
+
+    if (ebisbox.isAllRegular()) {
+      // Clean lambda with no isRegular check — vectorizes.
+      BoxLoops::loop<D_DECL(1,1,1)>(box, cleanKernel);
+    } else {
+      // Original lambda with branch — does not vectorize, but rarely called.
+      BoxLoops::loop<D_DECL(1,1,1)>(box, branchingKernel);
+      BoxLoops::loop(vofit, irregularKernel);  // cut cells handled separately
+    }
+
+  Important: for the all-regular path, the VoFIterator and any FaceIterator
+  must NOT be constructed in the enclosing scope before the BoxLoops call
+  (see ROOT CAUSE 3). Declare them inside the else branch.
+
+Pattern B: tolerance check (e.g., if (std::abs(B) > tol))
+  Replace with a ternary expression:
+
+    const Real scaledFlux = (std::abs(B) > tol) ? val / B : 0.0;
+
+  GCC can emit a VBLENDVPD/VCMPPD pair for the ternary, which is branchless.
+
+Pattern C: conditional bool-FAB write (if (mask > 0) boolFab(iv) = true/false)
+  Replace with branchless assignment:
+
+    boolFab(iv, comp) |= (mask(iv, comp) > 0.0);   // set to true
+    boolFab(iv, comp) &= (mask(iv, comp) <= 0.0);  // set to false
+
+  Note: BaseFab<bool> stores bytes. GCC may not vectorize this pattern if it
+  cannot find a "vectype" for the bool dereference. Verify with assembly.
+
+Pattern D: std::function kernel
+  When the lambda is stored in a std::function<void(const IntVect&)> before
+  being passed to BoxLoops, GCC cannot see through the type erasure. The fix
+  is to call BoxLoops directly inside each if-branch with a concrete lambda:
+
+    if (cond1) {
+      BoxLoops::loop<D_DECL(1,1,1)>(box, [&](const IntVect& iv) { ... });
+    } else if (cond2) {
+      BoxLoops::loop<D_DECL(1,1,1)>(box, [&](const IntVect& iv) { ... });
+    }
+
+
+ROOT CAUSE 2 — INNER for LOOP INSIDE THE LAMBDA
+-------------------------------------------------
+GCC reason: "not vectorized: loop nest containing two or more consecutive
+            inner loops" / "multiple nested loops."
+
+The lambda contains a for (int d = 0; d < SpaceDim; d++) loop. Fix by
+unrolling with D_TERM:
+
+  // Before (non-vectorizable):
+  for (int d = 0; d < SpaceDim; d++) {
+    vel += std::abs(veloReg(iv, d));
+  }
+
+  // After (vectorizable):
+  D_TERM(vel += std::abs(veloReg(iv, 0));,
+         vel += std::abs(veloReg(iv, 1));,
+         vel += std::abs(veloReg(iv, 2));)
+
+D_TERM(A,B,C) expands to A in 1D, A B in 2D, A B C in 3D (concatenation,
+no separator). Use it to eliminate compile-time-constant-bounded direction
+loops. Cannot unroll a BoxIterator or runtime-bounded loop.
+
+
+ROOT CAUSE 3 — RAII OBJECT WITH DESTRUCTOR IN SCOPE
+-----------------------------------------------------
+GCC reason: "statement can throw an exception: VoFIterator::operator" /
+            "not vectorized: statement can throw an exception: resx N"
+
+Any object with a non-trivial destructor constructed in the enclosing scope
+of the BoxLoops call may block vectorization. GCC conservatively assumes the
+destructor could be called during exception unwind from within the loop.
+
+Affected types (confirmed):
+  - VoFIterator (strong blocker)
+  - FaceIterator (strong blocker)
+  - FArrayBox constructed in the same scope (heap-allocating destructor)
+  - std::vector members inside EBCellFAB, EBFluxFAB, EBISBox (weaker, but
+    can still prevent vectorization in some function contexts)
+
+Fix A — reorder: construct RAII objects AFTER the BoxLoops call.
+
+    // Before:
+    FaceIterator faceit(...);
+    BoxLoops::loop<D_DECL(1,1,1)>(box, kernel);  // blocked
+    BoxLoops::loop(faceit, kernel2);
+
+    // After:
+    BoxLoops::loop<D_DECL(1,1,1)>(box, kernel);  // vectorizes
+    FaceIterator faceit(...);
+    BoxLoops::loop(faceit, kernel2);
+
+Fix B — nested scope: wrap the BoxLoops call in { } so the RAII object goes
+out of scope before the loop runs. Use this when reordering is impossible
+because the RAII object is needed before the loop.
+
+    { BoxLoops::loop<D_DECL(1,1,1)>(box, kernel); }
+    VoFIterator vofit(...);
+    BoxLoops::loop(vofit, kernel2);
+
+Fix C — split all-regular / else branches: for the isAllRegular path, move
+the VoFIterator declaration into the else branch so it is never in scope when
+the all-regular Box loop executes (see ROOT CAUSE 1, Pattern A).
+
+
+ROOT CAUSE 4 — TOO COMPLEX TO ATTEMPT (SILENT)
+-----------------------------------------------
+GCC emits NO missed reports. No action possible without making called
+functions header-inlineable. Includes:
+
+  - Virtual dispatch (base class pointers, std::function wrapping a lambda)
+  - Calls to opaque library functions (Chombo stencil apply, Random::get,
+    ParticleManagement::*, particle list mutations, push_back to std::vector)
+  - Lambda captures of DenseIntVectSet with |= iv (sequential set mutation)
+
+For these, note the reason in the file's investigation notes and skip.
+
+
+MIN/MAX REDUCTIONS IN LAMBDAS
+-------------------------------
+When a lambda captured by [&] updates a scalar via a min/max reduction:
+
+  minDt = std::min(dx / vel, minDt);
+
+GCC sees "control flow in loop" because std::min contains a ternary branch.
+Two additional requirements for the loop to vectorize:
+
+  1. Use __builtin_fmin / __builtin_fmax / __builtin_fabs instead of
+     std::min / std::max / std::abs for the in-loop arithmetic. These map
+     directly to VMINPD / VMAXPD / VANDPD without any branches.
+
+  2. Ensure no RAII object with a non-trivial destructor is in scope
+     (ROOT CAUSE 3). In particular, do NOT declare a VoFIterator before
+     the if (isAllRegular()) block.
+
+Example — advection dt kernel:
+
+    if (ebisBox.isAllRegular()) {
+      // VoFIterator declared below in the else — not in scope here.
+      BoxLoops::loop<D_DECL(1,1,1)>(cellBox, [&](const IntVect& iv) {
+        Real velMax = 0.0;
+        D_TERM(velMax = __builtin_fmax(velMax, __builtin_fabs(veloReg(iv,0)));,
+               velMax = __builtin_fmax(velMax, __builtin_fabs(veloReg(iv,1)));,
+               velMax = __builtin_fmax(velMax, __builtin_fabs(veloReg(iv,2)));)
+        minDt = __builtin_fmin(dx / velMax, minDt);
+      });
+    } else {
+      VoFIterator& vofit = ...;
+      ...
+    }
+
+Note: even with __builtin_fmin and no RAII objects, GCC may still refuse to
+vectorize if the function context contains EBCellFAB or EBFluxFAB objects
+(which have internal std::vector members). In that case the vectorization is
+blocked by the function-level ROOT CAUSE 3 analysis on those objects, which
+is not fixable without bypassing the Chombo abstraction.
+
+
+INVESTIGATION PROCEDURE FOR EACH FILE
+---------------------------------------
+1. Read all BoxLoops::loop<D_DECL(...)> calls in the file and note:
+   - What is the lambda body doing? (arithmetic, reduction, opaque call, ...)
+   - Is there a branch inside the lambda?
+   - Is there a SpaceDim loop inside the lambda?
+   - Are there RAII objects (VoFIterator, FaceIterator, FArrayBox) in the
+     enclosing scope of the BoxLoops call?
+
+2. Determine the root cause for each non-vectorizing call:
+   - ROOT CAUSE 1: branch inside lambda → can fix
+   - ROOT CAUSE 2: SpaceDim loop inside lambda → can fix with D_TERM
+   - ROOT CAUSE 3: RAII object in scope → can fix by reordering / scoping
+   - ROOT CAUSE 4: opaque call, virtual dispatch → cannot fix
+
+3. Apply fixes as described above. Do ONE file at a time.
+
+4. Ask the user for a hint if the root cause is unclear or the fix is
+   non-obvious. The user may provide a specific refactoring approach.
+
+5. Verify with GCC diagnostics:
+   - Add -fopt-info-vec-optimized -fopt-info-vec-missed to Make.defs.local
+   - Touch the file and rebuild
+   - Check that CD_BoxLoopsImplem.H:30:23: optimized: loop vectorized using
+     32 byte vectors appears for the target call site
+   - Revert Make.defs.local
+
+6. Alternatively, verify via assembly:
+   - objdump -d <.o file> | grep -c "vmovapd\|vaddpd\|vmulpd\|vfmadd\|vmaxpd\|vminpd"
+   - A high count of ymm-register instructions indicates successful AVX2 use.
+
+
+IMPORTANT CONSTRAINTS
+---------------------
+- Do NOT modify CD_DataOps.cpp (user instruction).
+- Do NOT attempt to fix ROOT CAUSE 4 loops; note them and move on.
+- Always keep the isAllRegular() fast path semantically equivalent to the
+  original code with the isRegular(iv) per-cell check.
+- The all-regular kernel must not read from EBCellFAB/EBISBox directly (use
+  the FArrayBox/BaseFab extracted via getSingleValuedFAB() instead).
+- After restructuring, always run make -s -j12 to confirm the build succeeds
+  before reporting progress.
+- Work on ONE file per session unless the user explicitly asks for more.
