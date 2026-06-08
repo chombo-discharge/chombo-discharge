@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+version = 1
+
+# ParmParse option files and Chombo input files are plain-text configuration
+# files. Adding SPDX comment headers to them causes duplication when setup
+# scripts merge or template-expand these files, so their copyright and license
+# information is declared here in bulk instead.
+
+[[annotations]]
+path = "**/*.options"
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "**/*.inputs"
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
