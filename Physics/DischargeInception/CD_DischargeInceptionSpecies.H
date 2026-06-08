@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DischargeInceptionSpecies.H
-  @brief  Simple species for DischargeInception test problem
-  @author Robert Marskar
+/**
+   @file   CD_DischargeInceptionSpecies.H
+   @brief  Declaration of the Physics::DischargeInception::DischargeInceptionSpecies CDR species
+   @author Robert Marskar
 */
 
-#ifndef CD_DischargeInceptionSpecies_H
-#define CD_DischargeInceptionSpecies_H
+#ifndef CD_DISCHARGEINCEPTIONSPECIES_H
+#define CD_DISCHARGEINCEPTIONSPECIES_H
 
 // Our includes
 #include <CD_CdrSpecies.H>
@@ -19,18 +20,20 @@
 namespace Physics {
   namespace DischargeInception {
 
-    /*!
-      @brief Advection and diffused species for DischargeInceptionStepper
-      @details The initial conditions and mobility/diffusion settings are initialized upon construction.
+    /**
+       @brief CdrSpecies subclass for use with DischargeInceptionStepper.
+       @details Represents a charged or neutral species whose initial density, mobility, and
+       diffusivity are all set at construction time via function and flag arguments. The initial
+       density is provided as a callable that maps a position to a density value.
     */
     class DischargeInceptionSpecies : public CdrSpecies
     {
     public:
-      /*!
-	@brief Constructor
-	@param[in] a_initialData Initial data
-	@param[in] a_mobile      Mobile or not
-	@param[in] a_diffusive   Diffusive or not
+      /**
+         @brief Full constructor.
+         @param[in] a_initialData Callable returning the initial density at a given position.
+         @param[in] a_mobile      True if the species has a non-zero drift velocity.
+         @param[in] a_diffusive   True if the species has a non-zero diffusion coefficient.
       */
       DischargeInceptionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData,
                                 const bool                                        a_mobile,
@@ -43,17 +46,17 @@ namespace Physics {
         m_name         = "Ion distribution";
       }
 
-      /*!
-	@brief Destructor
+      /**
+         @brief Destructor.
       */
       virtual ~DischargeInceptionSpecies()
       {}
 
-      /*!
-	@brief Initial data. 
-	@details This returns a super-Gaussian blob. 
-	@param[in] a_pos  Position.
-	@param[in] a_time Time
+      /**
+         @brief Return the initial species density at the given position.
+         @param[in] a_pos  Physical position.
+         @param[in] a_time Current time (not used; initial data is time-independent).
+         @return Initial density value from the stored function.
       */
       Real
       initialData(const RealVect a_pos, const Real a_time) const override
@@ -62,8 +65,8 @@ namespace Physics {
       }
 
     protected:
-      /*!
-	@brief Initial ion density. 
+      /**
+         @brief Callable that maps a position to the initial species density.
       */
       std::function<Real(const RealVect& a_pos)> m_initialData;
     };

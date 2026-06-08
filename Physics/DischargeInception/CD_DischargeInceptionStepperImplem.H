@@ -1,20 +1,21 @@
-/*! chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Copyright © 2022 NTNU.
- * Copyright © 2022 Fanny Skirbekk
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ * SPDX-FileCopyrightText: 2022-2026 NTNU
+ * SPDX-FileCopyrightText: 2022-2026 Fanny Skirbekk
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_DischargeInceptionStepperImplem.H
-  @brief  Implementation of CD_DischargeInceptionStepper.H
-  @author Robert Marskar (SINTEF)
-  @author Rasmus Hoholm (SINTEF)
-  @author Fanny Skirbekk (NTNU)
+/**
+   @file   CD_DischargeInceptionStepperImplem.H
+   @brief  Implementation of CD_DischargeInceptionStepper.H
+   @author Robert Marskar (SINTEF)
+   @author Rasmus Hoholm (SINTEF)
+   @author Fanny Skirbekk (NTNU)
 */
 
-#ifndef CD_DischargeInceptionStepperImplem_H
-#define CD_DischargeInceptionStepperImplem_H
+#ifndef CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
+#define CD_DISCHARGEINCEPTIONSTEPPERIMPLEM_H
 
 // Std includes
 #include <iostream>
@@ -5402,7 +5403,7 @@ DischargeInceptionStepper<P, F, C>::writeData(LevelData<EBCellFAB>& a_output,
 
   CH_START(t2);
   m_amr->copyData(scratch, *a_data[a_level], a_level, m_realm, m_realm);
-  CH_START(t2);
+  CH_STOP(t2);
 
   // Interpolate ghost cells
   CH_START(t3);
