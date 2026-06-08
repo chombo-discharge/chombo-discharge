@@ -1,14 +1,15 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Copyright © 2022 NTNU.
- * Copyright © 2022 Fanny Skirbekk. 
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2022-2026 SINTEF Energy Research
+ * SPDX-FileCopyrightText: 2022-2026 NTNU
+ * SPDX-FileCopyrightText: 2022-2026 Fanny Skirbekk
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaJSON.cpp
-  @brief  Implementation of CD_CdrPlasmaJSON.H
-  @author Robert Marskar, Fanny Skirbekk
+/**
+   @file   CD_CdrPlasmaJSON.cpp
+   @brief  Implementation of CD_CdrPlasmaJSON.H
+   @author Robert Marskar, Fanny Skirbekk
 */
 
 // Std includees
@@ -1203,7 +1204,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       // Create the absorption function.
       kappaFunction = [f1, f2, udist, x1 = chi_min, x2 = chi_max, m = molarFraction, &P = this->m_gasPressure](
-                        const RealVect a_position) mutable -> Real {
+                                                                                                               const RealVect a_position) mutable -> Real {
         // Create a uniform distribution on the range [f1,f2]
         const Real f = Random::get(udist);
         const Real a = (f - f1) / (f2 - f1);
@@ -2291,10 +2292,10 @@ CdrPlasmaJSON::parsePlasmaReactions()
   for (const auto& R : m_json["plasma reactions"]) {
     if (!(R.contains("reaction")))
       this->throwParserError(
-        "CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing from one of the reactions");
+                             "CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing from one of the reactions");
     if (!(R.contains("lookup")))
       this->throwParserError(
-        "CdrPlasmaJSON::parsePlasmaReactions -- field 'lookup' is missing from one of the reactions");
+                             "CdrPlasmaJSON::parsePlasmaReactions -- field 'lookup' is missing from one of the reactions");
 
     const std::string reaction  = trim(R["reaction"].get<std::string>());
     const std::string baseError = "CdrPlasmaJSON::parsePlasmaReactions for reaction '" + reaction + "' ";
@@ -2505,8 +2506,8 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
   // There can only be one photon species on the left-hand side of the reaction.
   if (numPhotonSpecies != 1) {
     this->throwParserError(
-      "CdrPlasmaJSON::sanctifyPhotoReaction -- only one photon species allowed on left-hand side of photo-reaction '" +
-      a_reaction + "'");
+                           "CdrPlasmaJSON::sanctifyPhotoReaction -- only one photon species allowed on left-hand side of photo-reaction '" +
+                           a_reaction + "'");
   }
 
   // All products should be in the list of plasma, neutral, or photon species.
@@ -2662,8 +2663,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real c2 = a_R["c2"].get<Real>();
 
     FunctionT functionT = [=](const Real a_T) -> Real {
-			    return c1 * std::pow(a_T, c2);
-			  };
+      return c1 * std::pow(a_T, c2);
+    };
 
     int index = -1;
     if(isPlasmaT) {
@@ -3249,7 +3250,7 @@ CdrPlasmaJSON::parsePhotoReactions()
   for (const auto& R : m_json["photo reactions"]) {
     if (!(R.contains("reaction")))
       this->throwParserError(
-        "CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
+                             "CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
 
     const std::string reaction = trim(R["reaction"].get<std::string>());
 
@@ -4590,7 +4591,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
         }
         default: {
           MayDay::Error(
-            "CdrPlasmaJSON::computePlasmaSpeciesTemperatures -- logic bust when computing species energies");
+                        "CdrPlasmaJSON::computePlasmaSpeciesTemperatures -- logic bust when computing species energies");
 
           break;
         }
