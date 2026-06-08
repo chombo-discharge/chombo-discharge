@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_AdvectionDiffusionSpecies.H
-  @brief  Simple species for AdvectionDiffusion test problem
+  @brief  Declaration of the Physics::AdvectionDiffusion::AdvectionDiffusionSpecies class
   @author Robert Marskar
 */
 
-#ifndef CD_AdvectionDiffusionSpecies_H
-#define CD_AdvectionDiffusionSpecies_H
+#ifndef CD_ADVECTIONDIFFUSIONSPECIES_H
+#define CD_ADVECTIONDIFFUSIONSPECIES_H
 
 // Our includes
 #include <CD_CdrSpecies.H>
@@ -19,18 +20,20 @@
 namespace Physics {
   namespace AdvectionDiffusion {
 
-    /*!
-      @brief Advection and diffused species for AdvectionDiffusionStepper
-      @details The initial conditions and mobility/diffusion settings are initialized upon construction.
+    /**
+      @brief Concrete CdrSpecies implementation for the advection-diffusion test problem.
+      @details This class defines a single passive scalar species for use with
+      AdvectionDiffusionStepper. The initial data, mobility, and diffusivity are set at
+      construction time. The species carries no net charge.
     */
     class AdvectionDiffusionSpecies : public CdrSpecies
     {
     public:
-      /*!
-	@brief Constructor
-	@param[in] a_initialData Initial data
-	@param[in] a_mobile      Mobile or not
-	@param[in] a_diffusive   Diffusive or not
+      /**
+        @brief Full constructor.
+        @param[in] a_initialData Functor returning the initial scalar concentration at a given position.
+        @param[in] a_mobile      If true, the species is advected by the velocity field.
+        @param[in] a_diffusive   If true, the species undergoes diffusion.
       */
       AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData,
                                 const bool                                        a_mobile,
@@ -43,17 +46,17 @@ namespace Physics {
         m_name         = "AdvectionDiffusionSpecies";
       }
 
-      /*!
-	@brief Destructor
+      /**
+        @brief Destructor.
       */
       virtual ~AdvectionDiffusionSpecies()
       {}
 
-      /*!
-	@brief Initial data. 
-	@details This returns a super-Gaussian blob. 
-	@param[in] a_pos  Position.
-	@param[in] a_time Time
+      /**
+        @brief Return the initial scalar concentration at a given position and time.
+        @param[in] a_pos  Physical position.
+        @param[in] a_time Current time (unused; initial data is time-independent).
+        @return Initial concentration evaluated at a_pos.
       */
       Real
       initialData(const RealVect a_pos, const Real a_time) const override
@@ -62,6 +65,9 @@ namespace Physics {
       }
 
     protected:
+      /**
+        @brief Functor encoding the initial concentration profile.
+      */
       std::function<Real(const RealVect& a_pos)> m_initialData;
     };
   } // namespace AdvectionDiffusion

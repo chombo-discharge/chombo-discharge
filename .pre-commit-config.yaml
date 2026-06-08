@@ -17,3 +17,9 @@ repos:
         language: script
         files: \.(inputs|options)$
         pass_filenames: false
+
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.1.0 # Use the latest stable version of reuse-tool
+    hooks:
+      - id: reuse
+        files: ^(Source/|Exec/|Physics/)        

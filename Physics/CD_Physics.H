@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_Physics_H
-#define CD_Physics_H
+#ifndef CD_PHYSICS_H
+#define CD_PHYSICS_H
 
 /**
   @brief Namespace containing physics models for use with chombo-discharge.
