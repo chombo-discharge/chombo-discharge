@@ -47,28 +47,32 @@ public:
   virtual ~MFBaseIVFAB();
 
   /*!
-    @brief Get BaseIVFAB for specified phase
-    @param[in] a_phase Phase
+    @brief Get BaseIVFAB for specified phase.
+    @param[in] a_phase Phase.
+    @return Reference to the BaseIVFAB for the given phase.
   */
   virtual BaseIVFAB<Real>&
   getIVFAB(const int a_phase);
 
   /*!
-    @brief Get BaseIVFAB for specified phase
-    @param[in] a_phase Phase
+    @brief Get BaseIVFAB for specified phase.
+    @param[in] a_phase Phase.
+    @return Const reference to the BaseIVFAB for the given phase.
   */
   virtual const BaseIVFAB<Real>&
   getIVFAB(const int a_phase) const;
 
   /*!
-    @brief Get BaseIVFAB pointer for phase
-    @param[in] a_phase Phase
+    @brief Get BaseIVFAB pointer for phase.
+    @param[in] a_phase Phase.
+    @return Pointer to the BaseIVFAB for the given phase.
   */
   virtual BaseIVFAB<Real>*
   getPhasePtr(int a_phase);
 
   /*!
-    @brief Get number of phases
+    @brief Get number of phases.
+    @return Number of phases.
   */
   virtual int
   numPhases();

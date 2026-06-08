@@ -43,10 +43,22 @@ This file tracks the remaining work for the documentation/REUSE/linting overhaul
 
 ### Doxygen warnings — Source/ directories (ordered by warning count)
 
-Fix all undocumented entities in each subdirectory. For each file: add SPDX header,
-convert `/*!` to `/**`, uppercase header guards, add `@return`/`@param` where missing,
-and document all non-trivial protected/private members. Approximate warning counts
-(will decrease as files are processed):
+**Per-file checklist** — when touching any `.H` or `.cpp` file, do ALL of the following:
+1. Replace the legacy `/* chombo-discharge … */` block with the SPDX header:
+   ```
+   /*
+    * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+    *
+    * SPDX-License-Identifier: GPL-3.0-or-later
+    */
+   ```
+2. Convert every `/*!` doc comment to `/**`.
+3. Uppercase the header guard (e.g. `CD_FooBar_H` → `CD_FOOBAR_H`).
+4. Add `@return`/`@param[in]`/`@param[out]`/`@param[in,out]` where missing.
+5. Document all non-trivial protected/private member variables with at least `@brief`.
+6. Wrap any local `using` / `typedef` aliases in `.cpp` files with `/// @cond DOXYGEN_SKIP` / `/// @endcond`.
+
+Approximate warning counts (will decrease as files are processed):
 
 - [ ] `Source/AmrMesh/` — ~293 warnings
 - [ ] `Source/Elliptic/` — ~244 warnings
@@ -80,4 +92,5 @@ via `bear` or an equivalent wrapper. This is a separate task.
 
 ### Cleanup
 After completing the above checklists, warn the user about various stubs that are still present in this branch.
-For example, the TODO.md should not be a part of the PR, and clang-tidy must be integrated into the CI pipeline.
+*  TODO.md should not be a part of the PR, and clang-tidy must be integrated into the CI pipeline.
+* Check if ANY /*! block appears in the code, and fix the files that contain such blocks.
