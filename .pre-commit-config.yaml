@@ -22,7 +22,14 @@ repos:
     rev: v6.1.0 # Use the latest stable version of reuse-tool
     hooks:
       - id: reuse
-        files: ^(Source/|Exec/|Physics/|Docs/)                
+        files: ^(Source/|Exec/|Physics/|Docs/)
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+        files: ^.*\.(py|c|h|md|rst|yml)$
+        args: ["--ignore-words", ".codespellignore" ]        
 
   - repo: local
     hooks:
