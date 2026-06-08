@@ -33,9 +33,9 @@ namespace Physics {
     {
     public:
       /**
-         @brief Disallowed default constructor.
+         @brief Default constructor. Leaves all members uninitialised; call allocateStorage() after construction.
       */
-      CdrStorage() = delete;
+      CdrStorage();
 
       /**
          @brief Full constructor.
@@ -427,9 +427,9 @@ namespace Physics {
     {
     public:
       /**
-         @brief Disallowed default constructor.
+         @brief Default constructor. Leaves all members uninitialised; call allocateStorage() after construction.
       */
-      FieldStorage() = delete;
+      FieldStorage();
 
       /**
          @brief Full constructor.
@@ -572,9 +572,9 @@ namespace Physics {
     {
     public:
       /**
-         @brief Disallowed default constructor.
+         @brief Default constructor. Leaves all members uninitialised; call allocateStorage() after construction.
       */
-      RtStorage() = delete;
+      RtStorage();
 
       /**
          @brief Full constructor.
@@ -687,9 +687,9 @@ namespace Physics {
     {
     public:
       /**
-         @brief Disallowed default constructor.
+         @brief Default constructor. Leaves all members uninitialised; call allocateStorage() after construction.
       */
-      SigmaStorage() = delete;
+      SigmaStorage();
 
       /**
          @brief Full constructor.
