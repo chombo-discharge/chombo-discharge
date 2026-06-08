@@ -56,43 +56,48 @@ public:
   virtual ~CdrIterator();
 
   /*!
-    @brief Get number of solvers. 
+    @brief Get number of solvers.
+    @return Total number of solvers in the layout.
   */
   virtual int
   getNumberOfSolvers();
 
   /*!
-    @brief Get current solver number (i.e. index in CdrLayouts solvers). 
+    @brief Get current solver number (i.e. index in CdrLayouts solvers).
+    @return Current solver index.
   */
   virtual int
   index() const;
 
   /*!
-    @brief Reset iterator
+    @brief Reset iterator to the beginning.
   */
   virtual void
   reset();
 
   /*!
-    @brief Ok or not
+    @brief Check if the iterator is valid.
+    @return True if the iterator points to a valid solver.
   */
   virtual bool
   ok() const;
 
   /*!
-    @brief Increment. This is different for different iteration modes
+    @brief Increment the iterator. Behavior depends on iteration mode.
   */
   virtual void
   operator++();
 
   /*!
-    @brief Return the current solver. 
+    @brief Return the current solver.
+    @return Reference to the current solver.
   */
   virtual RefCountedPtr<T>&
   operator()();
 
   /*!
-    @brief Return the current species. 
+    @brief Return the current species.
+    @return Reference to the current species.
   */
   virtual RefCountedPtr<CdrSpecies>&
   getSpecies();
@@ -104,7 +109,7 @@ protected:
   SpeciesIteration m_mode;
 
   /*!
-    @brief 
+    @brief Current solver index.
   */
   int m_isolver;
 

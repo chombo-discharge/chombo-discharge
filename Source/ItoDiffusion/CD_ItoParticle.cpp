@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_ItoParticleImplem.cpp
+  @file   CD_ItoParticle.cpp
   @brief  Implementation of CD_ItoParticle.H
   @author Robert Marskar
 */

@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   FieldSolverGMG.cpp
+  @file   CD_FieldSolverGMG.cpp
   @brief  Implementation of FieldSolverGMG.H
   @author Robert Marskar
   @todo   Once the new operator is in, check the computeLoads routine. 

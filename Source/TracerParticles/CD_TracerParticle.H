@@ -78,6 +78,7 @@ public:
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
+    @return Size in bytes.
   */
   inline virtual int
   size() const override;
@@ -100,6 +101,7 @@ public:
   /*!
     @brief Function that is used when writing particles to HDF5.
     @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
+    @return Size in bytes of the HDF5 representation.
   */
   inline virtual int
   H5size() const;
@@ -173,9 +175,10 @@ protected:
 };
 
 /*!
-  @brief Particle printing function
-  @param[in] ostr       Output stream
-  @param[in] a_particle Particle to output
+  @brief Particle printing function.
+  @param[in,out] ostr Output stream.
+  @param[in]     p    Particle to output.
+  @return Reference to the output stream.
 */
 template <size_t M, size_t N>
 inline std::ostream&

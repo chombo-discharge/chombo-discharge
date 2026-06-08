@@ -126,33 +126,37 @@ public:
   computeRHS(const RHSFunction& a_rhsFunction) noexcept;
 
   /*!
-    @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t). 
-    @param[out] a_rhs         Right-hand side on the mesh. 
-    @param[in]  a_rhsFunction Function for computing the right-hand side. 
+    @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t).
+    @param[out] a_rhs         Right-hand side on the mesh.
+    @param[in]  a_rhsFunction Function for computing the right-hand side.
   */
   virtual void
-  computeRHS(EBAMRCellData& rhs, const RHSFunction& a_rhsFunction) const noexcept;
+  computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunction) const noexcept;
 
   /*!
     @brief Get the solution vector (left-hand side of equation).
+    @return m_phi
   */
   EBAMRCellData&
   getPhi() noexcept;
 
   /*!
-    @brief Get the solution vector (left-hand side of equation).
+    @brief Get the solution vector (left-hand side of equation). Const version.
+    @return m_phi
   */
   const EBAMRCellData&
   getPhi() const noexcept;
 
   /*!
-    @brief Get the solution vector (left-hand side of equation).
+    @brief Get the right-hand side vector.
+    @return m_rhs
   */
   EBAMRCellData&
   getRHS() noexcept;
 
   /*!
-    @brief Get the solution vector (left-hand side of equation).
+    @brief Get the right-hand side vector. Const version.
+    @return m_rhs
   */
   const EBAMRCellData&
   getRHS() const noexcept;
@@ -184,8 +188,9 @@ public:
   getRealm() const noexcept;
 
   /*!
-    @brief Get solver name
-    @note Not necessarily equal to class name (we can have many CdrSolvers instantiated). 
+    @brief Get solver name.
+    @note Not necessarily equal to class name (we can have many MeshODESolvers instantiated).
+    @return m_name
   */
   virtual std::string
   getName() const noexcept;
@@ -272,7 +277,7 @@ public:
 
   /*!
     @brief Write checkpoint data into HDF5 file. 
-    @paramo[out] a_handle HDF5 file. 
+    @param[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
 #ifdef CH_USE_HDF5
@@ -368,14 +373,14 @@ protected:
   EBAMRCellData m_cache;
 
   /*!
-    @brief Write data to output. Convenience function. 
-    @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
-    @param[in]    a_data   Data to write. 
-    @param[in]    a_outputRealm Realm where a_output belongs
-    @param[in]    a_level  Grid level
-    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
-    @param[in]    a_interpGhost If true, interpolate ghost cells
+    @brief Write data to output. Convenience function.
+    @param[in,out] a_output            Output data holder.
+    @param[in,out] a_comp              Starting component where this solver begins writing the output.
+    @param[in]    a_data              Data to write.
+    @param[in]    a_outputRealm       Realm where a_output belongs.
+    @param[in]    a_level             Grid level.
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output.
+    @param[in]    a_interpGhost       If true, interpolate ghost cells.
   */
   virtual void
   writeData(LevelData<EBCellFAB>& a_output,

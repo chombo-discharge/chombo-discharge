@@ -190,7 +190,8 @@ public:
   deposit(EBAMRCellData& a_phi) const noexcept;
 
   /*!
-    @brief Interpolate a scalar field onto the particle weight
+    @brief Interpolate a scalar field onto the particle weight.
+    @param[in] a_scalar Scalar field to interpolate from.
   */
   virtual void
   interpolateWeight(const EBAMRCellData& a_scalar) noexcept;
@@ -236,12 +237,12 @@ public:
   getPlotVariableNames() const;
 
   /*!
-    @brief Write plot data
-    @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
-    @param[in]    a_outputRealm Realm where a_output belongs
-    @param[in]    a_level  Grid level
-    @note This will write the plot data in this solver to a_output, starting on a_comp
+    @brief Write plot data.
+    @param[in,out] a_output      Output data holder.
+    @param[in,out] a_comp        Starting component where this solver begins writing the output.
+    @param[in]    a_outputRealm Realm where a_output belongs.
+    @param[in]    a_level       Grid level.
+    @note This will write the plot data in this solver to a_output, starting on a_comp.
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
@@ -251,7 +252,7 @@ public:
 
   /*!
     @brief Write checkpoint data into HDF5 file. 
-    @paramo[out] a_handle HDF5 file. 
+    @param[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
 #ifdef CH_USE_HDF5
@@ -270,7 +271,8 @@ public:
 #endif
 
   /*!
-    @brief Compute dt = dx/max(v_x,v_y, v_z) minimized over all particles
+    @brief Compute dt = dx/max(v_x, v_y, v_z) minimized over all particles.
+    @return Stable advection time step.
   */
   virtual Real
   computeDt() const;
@@ -297,18 +299,22 @@ public:
   getVelocityField() const;
 
   /*!
-    @brief Get the deposition type. 
+    @brief Get the deposition type.
+    @return Active deposition type.
   */
   virtual DepositionType
   getDepositionType() const;
+
   /*!
-    @brief Get the coarse-fine deposition type. 
+    @brief Get the coarse-fine deposition type.
+    @return Active coarse-fine deposition strategy.
   */
   virtual CoarseFineDeposition
   getCoarseFineDepositionType() const;
 
   /*!
     @brief Get the interpolation type.
+    @return Active interpolation type.
   */
   virtual DepositionType
   getInterpolationType() const;
@@ -437,14 +443,14 @@ protected:
                    const CoarseFineDeposition  a_coarseFineDeposition) const noexcept;
 
   /*!
-    @brief Write data to output. Convenience function. 
-    @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
-    @param[in]    a_data   Data to write. 
-    @param[in]    a_outputRealm Realm where a_output belongs
-    @param[in]    a_level  Grid level
-    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
-    @param[in]    a_interpGhost If true, interpolate ghost cells
+    @brief Write data to output. Convenience function.
+    @param[in,out] a_output            Output data holder.
+    @param[in,out] a_comp              Starting component where this solver begins writing the output.
+    @param[in]    a_data              Data to write.
+    @param[in]    a_outputRealm       Realm where a_output belongs.
+    @param[in]    a_level             Grid level.
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output.
+    @param[in]    a_interpGhost       If true, interpolate ghost cells.
   */
   virtual void
   writeData(LevelData<EBCellFAB>& a_output,

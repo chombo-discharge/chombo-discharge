@@ -4,7 +4,7 @@
  */
 
 /*
-  @file   CD_EBHelmholtzEddingtonDomainBC.H
+  @file   CD_EBHelmholtzEddingtonSP1DomainBC.H
   @brief  Declaration of a domain boundary condition class for EBHelmholtzOp.
   @author Robert Marskar
 */

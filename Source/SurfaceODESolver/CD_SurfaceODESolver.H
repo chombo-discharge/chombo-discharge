@@ -148,17 +148,19 @@ public:
   setTime(const int a_step, const Real a_time, const Real a_dt) noexcept;
 
   /*!
-    @brief Compute the total mass for component a_comp in m_phi
-    @param[in] a_comp Component
+    @brief Compute the total mass for component a_comp in m_phi.
+    @param[in] a_comp Component index.
+    @return Total mass integrated over the surface.
     @note Computation runs only over the valid cells.
   */
   virtual Real
   computeMass(const int a_comp = 0) const noexcept;
 
   /*!
-    @brief Compute the total mass in a_phi
-    @param[in] a_phi  Input data
-    @param[in] a_comp Component
+    @brief Compute the total mass in a_data.
+    @param[in] a_data Input data.
+    @param[in] a_comp Component index.
+    @return Total mass integrated over the surface.
     @note Computation runs only over the valid cells.
   */
   virtual Real
@@ -296,39 +298,39 @@ public:
   regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept;
 
   /*!
-    @brief Reset m_phi on electrode cells. 
-    @details This will set a_data to the specified value (in electrode cells)
-    @param[in] a_val  Value
-    @note Does not include ghost cells. 
+    @brief Reset m_phi on electrode cells.
+    @details This will set m_phi to the specified value in electrode cells.
+    @param[in] a_value Reset value.
+    @note Does not include ghost cells.
   */
   virtual void
   resetElectrodes(const Real a_value) noexcept;
 
   /*!
-    @brief Reset the input data holder on electrode cells. 
-    @details This will set a_data to the specified value (in electrode cells)
-    @param[in] a_data Input data to be set.
-    @param[in] a_val  Value
-    @note Does not include ghost cells. 
+    @brief Reset the input data holder on electrode cells.
+    @details This will set a_phi to the specified value in electrode cells.
+    @param[in,out] a_phi  Input data to be set.
+    @param[in]     a_value Reset value.
+    @note Does not include ghost cells.
   */
   virtual void
   resetElectrodes(EBAMRIVData& a_phi, const Real a_value) const noexcept;
 
   /*!
-    @brief Reset m_phi on dielectric cells. 
-    @details This will set a_data to the specified value (in dielectric cells)
-    @param[in] a_val  Value
-    @note Does not include ghost cells. 
+    @brief Reset m_phi on dielectric cells.
+    @details This will set m_phi to the specified value in dielectric cells.
+    @param[in] a_value Reset value.
+    @note Does not include ghost cells.
   */
   virtual void
   resetDielectrics(const Real a_value) noexcept;
 
   /*!
-    @brief Reset the input data holder on dielectric cells. 
-    @details This will set a_data to the specified value (in dielectric cells)
-    @param[in] a_data Input data to be set.
-    @param[in] a_val  Value
-    @note Does not include ghost cells. 
+    @brief Reset the input data holder on dielectric cells.
+    @details This will set a_phi to the specified value in dielectric cells.
+    @param[in,out] a_phi  Input data to be set.
+    @param[in]     a_value Reset value.
+    @note Does not include ghost cells.
   */
   virtual void
   resetDielectrics(EBAMRIVData& a_phi, const Real a_value) const noexcept;
@@ -336,7 +338,7 @@ public:
 #ifdef CH_USE_HDF5
   /*!
     @brief Write checkpoint data into handle
-    @paramo[out] a_handle HDF5 file. 
+    @param[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
   virtual void
@@ -361,7 +363,8 @@ public:
   writePlotFile() const noexcept;
 
   /*!
-    @brief Get number of variables to be plotted. 
+    @brief Get number of variables to be plotted.
+    @return Number of plot variables.
   */
   virtual int
   getNumberOfPlotVariables() const noexcept;
@@ -374,13 +377,13 @@ public:
   getPlotVariableNames() const noexcept;
 
   /*!
-    @brief Write output data to a_output
-    @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
-    @param[in]    a_outputRealm Realm where a_output belongs
-    @param[in]    a_level  Grid level
-    @note This will write the plot data in this solver to a_output, starting on a_comp
-    @note This routine writes m_phi and m_rhs into a_ouput. 
+    @brief Write output data to a_output.
+    @param[in,out] a_output      Output data holder.
+    @param[in,out] a_comp        Starting component where this solver begins writing the output.
+    @param[in]    a_outputRealm Realm where a_output belongs.
+    @param[in]    a_level       Grid level.
+    @note This will write the plot data in this solver to a_output, starting on a_comp.
+    @note This routine writes m_phi and m_rhs into a_output.
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,

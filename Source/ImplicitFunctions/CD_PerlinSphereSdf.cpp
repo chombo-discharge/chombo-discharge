@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_PerlinSphereSdf.H
+  @file   CD_PerlinSphereSdf.cpp
   @brief  Implementation of CD_PerlinSphereSdf.H
   @author Robert Marskar
 */

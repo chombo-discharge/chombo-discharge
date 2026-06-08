@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_RandomInterface.H
   @brief  Random interface geometry
   @author Robert Marskar
 */
 
-#ifndef CD_RandomInterface_H
-#define CD_RandomInterface_H
+#ifndef CD_RANDOMINTERFACE_H
+#define CD_RANDOMINTERFACE_H
 
 #include <CD_EBGeometryIF.H>
 #include <CD_ComputationalGeometry.H>
@@ -77,15 +78,17 @@ protected:
     ~ClampedNoisePlane() = default;
 
     /*!
-      @brief Shuffle the permutation array
+      @brief Shuffle the permutation array.
+      @param[in,out] a_rng Uniform random number generator.
     */
     template <class URNG>
     void
     shuffle(URNG& a_rng) noexcept;
 
     /*!
-      @brief Signed distance function
-      @param[in] a_point Input point
+      @brief Signed distance function.
+      @param[in] a_point Input point.
+      @return Signed distance to the noisy plane surface.
     */
     virtual Real
     signedDistance(const Vec3& a_point) const noexcept override;

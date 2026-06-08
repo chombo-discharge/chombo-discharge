@@ -21,7 +21,9 @@
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using T = float;
+/// @endcond
 
 Tessellation::Tessellation()
 {

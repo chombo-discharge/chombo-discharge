@@ -60,7 +60,8 @@ public:
   getPhase() const;
 
   /*!
-    @brief Get an iterator which can iterate through the various Cdr solvers. 
+    @brief Get an iterator which can iterate through the various Cdr solvers.
+    @return Iterator over CdrSolvers.
   */
   virtual CdrIterator<T>
   iterator();
@@ -154,8 +155,8 @@ public:
   setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
-    @brief Set phase
-    @param[i] a_phase Phase
+    @brief Set phase for all CdrSolvers.
+    @param[in] a_phase Phase identifier.
   */
   virtual void
   setPhase(const phase::which_phase a_phase = phase::gas);
@@ -211,55 +212,64 @@ public:
   getSolvers();
 
   /*!
-    @brief Get species
+    @brief Get species.
+    @return All CdrSpecies registered in this layout.
   */
   virtual Vector<RefCountedPtr<CdrSpecies>>&
   getSpecies();
 
   /*!
-    @brief Get all source terms
+    @brief Get all source terms.
+    @return Pointers to source term data in each solver.
   */
   virtual Vector<EBAMRCellData*>
   getSources();
 
   /*!
-    @brief Get all cell-centered states. 
+    @brief Get all cell-centered states.
+    @return Pointers to cell-centered phi data in each solver.
   */
   virtual Vector<EBAMRCellData*>
   getPhis();
 
   /*!
-    @brief Get all cell-centered velocities. 
+    @brief Get all cell-centered velocities.
+    @return Pointers to cell-centered velocity data in each solver.
   */
   virtual Vector<EBAMRCellData*>
   getVelocities();
 
   /*!
-    @brief Get all cell-centered diffusion coefficients. 
+    @brief Get all cell-centered diffusion coefficients.
+    @return Pointers to cell-centered diffusion coefficient data in each solver.
   */
   virtual Vector<EBAMRCellData*>
   getCellCenteredDiffusionCoefficients();
 
   /*!
-    @brief Get all face-centered diffusion coefficients. 
+    @brief Get all face-centered diffusion coefficients.
+    @return Pointers to face-centered diffusion coefficient data in each solver.
   */
   virtual Vector<EBAMRFluxData*>
   getFaceCenteredDiffusionCoefficient();
 
   /*!
-    @brief Get all EB-centered diffusion coefficients
+    @brief Get all EB-centered diffusion coefficients.
+    @return Pointers to EB-centered diffusion coefficient data in each solver.
   */
   virtual Vector<EBAMRIVData*>
   getEbCenteredDiffusionCoefficient();
 
   /*!
-    @brief Get all EB flux data holders. 
+    @brief Get all EB flux data holders.
+    @return Pointers to EB flux data in each solver.
   */
   virtual Vector<EBAMRIVData*>
   getEbFlux();
 
   /*!
-    @brief Get domain flux data holders. 
+    @brief Get domain flux data holders.
+    @return Pointers to domain flux data in each solver.
   */
   virtual Vector<EBAMRIFData*>
   getDomainFlux();
@@ -312,8 +322,10 @@ public:
   ~CdrFactory();
 
   /*!
-    @brief Factory method, create a new CdrLayout
-    @details This creates a collection of CdrSolvers. Run-time errors will occur if the template S is not a derived class of T. 
+    @brief Factory method, create a new CdrLayout.
+    @details This creates a collection of CdrSolvers. Run-time errors will occur if the template S is not a derived class of T.
+    @param[in] a_species Species list for the new layout.
+    @return New CdrLayout holding one solver per species.
   */
   RefCountedPtr<CdrLayout<T>>
   newLayout(const Vector<RefCountedPtr<CdrSpecies>>& a_species) const;

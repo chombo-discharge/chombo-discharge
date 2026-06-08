@@ -152,9 +152,10 @@ protected:
 };
 
 /*!
-  @brief State printing function
-  @param[in] ostr    Output stream
-  @param[in] a_state State vector
+  @brief State printing function.
+  @param[in,out] ostr    Output stream.
+  @param[in]     a_state State vector.
+  @return Reference to the output stream.
 */
 template <typename T>
 inline std::ostream&

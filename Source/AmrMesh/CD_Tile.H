@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_Tile.cpp
+  @file   CD_Tile.H
   @brief  Simple class for representing a tile in arbitrary-dimensional space.
   @author Robert Marskar
 */

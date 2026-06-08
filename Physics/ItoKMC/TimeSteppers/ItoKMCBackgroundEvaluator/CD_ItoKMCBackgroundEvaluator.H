@@ -101,7 +101,7 @@ namespace Physics {
       Real m_relFieldChange;
 
       /**
-        @brief Total charge on the electrode, given by \int(eps*E dA)
+        @brief Total charge on the electrode, given by @f$\int \epsilon E \, dA@f$
       */
       Real m_electrodeCharge;
 
@@ -147,7 +147,7 @@ namespace Physics {
 
       /**
         @brief Compute total charge on electrode
-        @details This returns \int(eps * E)*dA
+        @details This returns @f$\int \epsilon E \, dA@f$
       */
       [[nodiscard]]
       virtual Real

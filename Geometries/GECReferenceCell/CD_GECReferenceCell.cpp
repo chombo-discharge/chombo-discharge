@@ -14,8 +14,10 @@
 #include <CD_GECReferenceCell.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = std::shared_ptr<EBGeometry::ImplicitFunction<Real>>;
+/// @endcond
 
 GECReferenceCell::GECReferenceCell()
 {

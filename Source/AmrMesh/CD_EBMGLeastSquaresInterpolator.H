@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_EBMultigridInterpolator.H
+  @file   CD_EBMGLeastSquaresInterpolator.H
   @brief  Declaration of a class that can interpolate more ghost cells near the coarse-fine boundary near the EB. 
   @author Robert Marskar
   @todo   When performance and stability has settled in for the AggStencil routines, the "slow" routines can be removed. 

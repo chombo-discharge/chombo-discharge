@@ -40,13 +40,15 @@ public:
   virtual ~RtSolver();
 
   /*!
-    @brief Get solver name
+    @brief Get solver name.
+    @return m_name
   */
   virtual std::string
   getName();
 
   /*!
-    @brief Get the realm where the solver lives
+    @brief Get the realm where the solver lives.
+    @return m_realm
   */
   virtual const std::string
   getRealm() const;
@@ -308,7 +310,7 @@ public:
 #ifdef CH_USE_HDF5
   /*!
     @brief Write checkpoint data into HDF5 file. 
-    @paramo[out] a_handle HDF5 file. 
+    @param[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
   virtual void

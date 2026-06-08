@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   RegularGeometry.cpp
+  @file   CD_RegularGeometry.cpp
   @brief  Implementation of CD_RegularGeometry.H
   @author Robert Marskar
 */

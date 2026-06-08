@@ -268,13 +268,15 @@ public:
   setRealm(const std::string a_realm);
 
   /*!
-    @brief Get the CDR species
+    @brief Get the CDR species.
+    @return m_species
   */
   virtual RefCountedPtr<CdrSpecies>&
   getSpecies() noexcept;
 
   /*!
-    @brief Get the CDR species
+    @brief Get the CDR species. Const version.
+    @return m_species
   */
   virtual const RefCountedPtr<CdrSpecies>&
   getSpecies() const noexcept;
@@ -451,7 +453,7 @@ public:
 
   /*!
     @brief Write checkpoint data into HDF5 file. 
-    @paramo[out] a_handle HDF5 file. 
+    @param[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
 #ifdef CH_USE_HDF5
@@ -524,9 +526,10 @@ public:
   computeDiffusionDt();
 
   /*!
-    @brief Compute the largest possible diffusive time step (for explicit methods)
-    @details This computes dt = 1/[ dx/(|vx|+|vy|+|vz|) + (dx*dx)/(2*D*d) ] and minimizes the result over all grid levels and patches. 
-    @note This is the appropriate time step routine for explicit advection-diffusion solvers. 
+    @brief Compute the largest possible diffusive time step (for explicit methods).
+    @details This computes dt = 1/[ dx/(|vx|+|vy|+|vz|) + (dx*dx)/(2*D*d) ] and minimizes the result over all grid levels and patches.
+    @note This is the appropriate time step routine for explicit advection-diffusion solvers.
+    @return Maximum stable advection-diffusion time step.
   */
   virtual Real
   computeAdvectionDiffusionDt();
@@ -575,13 +578,15 @@ public:
   computeCharge();
 
   /*!
-    @brief Return true if the solver is diffusive and false otherwise
+    @brief Return true if the solver is diffusive and false otherwise.
+    @return True if diffusive.
   */
   virtual bool
   isDiffusive();
 
   /*!
-    @brief Return true if the solver is mobile and false otherwise
+    @brief Return true if the solver is mobile and false otherwise.
+    @return True if mobile.
   */
   virtual bool
   isMobile();
@@ -622,7 +627,8 @@ public:
   getEbCenteredVelocity();
 
   /*!
-    @brief Get the cell-centered diffusion coefficient
+    @brief Get the cell-centered diffusion coefficient.
+    @return m_cellCenteredDiffusionCoefficient
   */
   virtual EBAMRCellData&
   getCellCenteredDiffusionCoefficient();

@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_EddingtonSP1DomainBC.H
+  @file   CD_EddingtonSP1DomainBc.H
   @brief  Simple data holder for holding domain boundary condition types for EddingtonSP1
   @author Robert Marskar
 */

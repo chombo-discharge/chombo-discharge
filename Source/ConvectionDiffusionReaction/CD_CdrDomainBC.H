@@ -74,8 +74,9 @@ public:
   CdrDomainBC(const CdrDomainBC&& a_other) = delete;
 
   /*!
-    @brief Copy assignment
-    @param[in] a_other Other 
+    @brief Copy assignment.
+    @param[in] a_other Other object.
+    @return Reference to this object.
   */
   CdrDomainBC&
   operator=(const CdrDomainBC& a_other) = default;

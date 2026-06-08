@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   MultiIndex.H
+  @file   CD_MultiIndex.H
   @brief  Declaration of a SpaceDim multi-index type for use with higher order Taylor series
   @author Robert Marskar
 */

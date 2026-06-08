@@ -55,8 +55,9 @@ public:
   advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_dt) override;
 
   /*!
-    @brief Compute the largest possible advective time step (for explicit methods)
-    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
+    @brief Compute the largest possible advective time step (for explicit methods).
+    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches.
+    @return Maximum stable advection time step.
   */
   virtual Real
   computeAdvectionDt() override;
@@ -135,25 +136,28 @@ protected:
   parseSlopeLimiter();
 
   /*!
-    @brief minmod slope function. 
-    @param[in] dwl Left slope
-    @param[in] dwr Right slope
+    @brief minmod slope function.
+    @param[in] dwl Left slope.
+    @param[in] dwr Right slope.
+    @return Limited slope.
   */
   Real
   minmod(const Real& dwl, const Real& dwr) const noexcept;
 
   /*!
-    @brief Superbee slope limiter. 
-    @param[in] dwl Left slope
-    @param[in] dwr Right slope
+    @brief Superbee slope limiter.
+    @param[in] dwl Left slope.
+    @param[in] dwr Right slope.
+    @return Limited slope.
   */
   Real
   superbee(const Real& dwl, const Real& dwr) const noexcept;
 
   /*!
     @brief Monotonized central difference slope limiter.
-    @param[in] dwl Left slope
-    @param[in] dwr Right slope
+    @param[in] dwl Left slope.
+    @param[in] dwr Right slope.
+    @return Limited slope.
   */
   Real
   monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;

@@ -4,7 +4,7 @@
  */
 
 /*
-  @file   CD_EBHelmholtzEBBCFactoryFactory.cpp
+  @file   CD_EBHelmholtzEBBCFactory.cpp
   @brief  Implementation of CD_EBHelmholtzEBBCFactory.H
   @author Robert Marskar
 */

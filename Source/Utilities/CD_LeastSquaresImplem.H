@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_LeastSquaresImplem.cpp
+  @file   CD_LeastSquaresImplem.H
   @brief  Implementation of CD_LeastSquares.H
   @author Robert Marskar
 */

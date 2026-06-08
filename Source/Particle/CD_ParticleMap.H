@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_ParticleOpsImplem.H
+  @file   CD_ParticleMap.H
   @brief  Implementation of CD_ParticleOps.H
   @author Robert Marskar
 */
@@ -63,7 +63,7 @@ struct PairHash
 
 /*!
   @brief Underlying particle map when gathering/scattering particles.
-  @detail This is a map that maps a list of particles to a specific grid level and grid patch.
+  @details This is a map that maps a list of particles to a specific grid level and grid patch.
 */
 template <typename T>
 using ParticleMap = std::unordered_map<std::pair<uint32_t, uint32_t>, T, PairHash>;

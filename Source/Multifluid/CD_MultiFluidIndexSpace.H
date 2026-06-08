@@ -22,15 +22,21 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief phase names
+  @brief Phase names namespace.
 */
 namespace phase {
+  /**
+    @brief Number of supported phases.
+  */
   const int numPhases = 2;
 
+  /**
+    @brief Enumeration of supported phases.
+  */
   enum which_phase
   {
-    gas   = 0,
-    solid = 1
+    gas   = 0, ///< Gas phase.
+    solid = 1  ///< Solid (dielectric) phase.
   };
 } // namespace phase
 

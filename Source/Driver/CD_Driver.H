@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   Driver.H
+  @file   CD_Driver.H
   @brief  Declaration of the simulation driver class for chombo-discharge. 
   @author Robert Marskar
 */
@@ -54,8 +54,7 @@ public:
   virtual ~Driver();
 
   /*!
-    @brief Setup and run simulations
-    @param[in] a_inputFile Input file containing parameters for the simulation. 
+    @brief Setup and run simulations.
   */
   void
   setupAndRun();
@@ -238,7 +237,7 @@ protected:
   Real m_time;
 
   /*!
-    @brief 
+    @brief Capacitance of the geometry (used for electrical energy calculations).
   */
   Real m_capacitance;
 
@@ -432,7 +431,8 @@ protected:
   allocateInternals();
 
   /*!
-    @brief Cache tags. This is used
+    @brief Cache tags for use after regrid.
+    @param[in] a_tags Tags to cache.
   */
   void
   cacheTags(const EBAMRTags& a_tags);
@@ -455,10 +455,10 @@ protected:
     @brief Get statistics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. 
     @param[out] a_numLocalCells       Local number of grid cells, excluding ghost cells. 
     @param[out] a_numLocalCellsGhosts Local number of grid cells, including ghost cells. 
-    @param[out] a_numLocalBox         Local number of grid patches (over all levels)
-    @param[out] a_numTotalCells       Total number of grid cells, excluding ghost cells. 
-    @param[out] a_numTotalCellsGhosts Total number of grid cells, including ghost cells. 
-    @param[out] a_numTotalBox         Total number of grid patches
+    @param[out] a_numLocalBoxes       Local number of grid patches (over all levels)
+    @param[out] a_numTotalCells       Total number of grid cells, excluding ghost cells.
+    @param[out] a_numTotalCellsGhosts Total number of grid cells, including ghost cells.
+    @param[out] a_numTotalBoxes       Total number of grid patches
     @param[out] a_numLocalLevelBoxes  Local number of grid boxes (per level)
     @param[out] a_numTotalLevelBoxes  Total number of grid boxes (per level)
     @param[out] a_numLocalLevelCells  Local number of grid cells (per level)
@@ -535,7 +535,8 @@ protected:
   setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
 
   /*!
-    @brief Setup function
+    @brief Setup function for fresh (non-restart) simulations.
+    @param[in] a_initialRegrids Number of initial regrids to perform during setup.
   */
   void
   setupFresh(const int a_initialRegrids);
@@ -555,21 +556,24 @@ protected:
   setupGeometryOnly();
 
   /*!
-    @brief Check if restart file exists
+    @brief Check if restart file exists and abort if not found.
+    @param[in] a_restartFile Path to the restart file.
   */
   void
   checkRestartFile(const std::string a_restartFile) const;
 
   /*!
-    @brief Write a time step report
+    @brief Write a time step report to stdout.
+    @param[in] a_startTime Simulation start time.
+    @param[in] a_endTime   Simulation end time.
+    @param[in] a_maxSteps  Maximum number of time steps.
   */
   void
   stepReport(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
 
   /*!
-    @brief Write a plot file
-    @param[in] a_file File name
-    @details This can write an arbitrary folder. E.g. filename = /crash/abc.hdf5
+    @brief Write a plot file to the specified path.
+    @param[in] a_filename File name including path. E.g. /crash/abc.hdf5.
   */
   void
   writePlotFile(const std::string a_filename);
@@ -683,7 +687,10 @@ protected:
   writeGeometry();
 
   /*!
-    @brief Tag cells for refinement. This computes cell tags and global tags (union of cell tags with geometric tags);
+    @brief Tag cells for refinement. Computes cell tags and global tags (union of cell tags with geometric tags).
+    @param[out] a_allTags   Global tags (cell + geometric).
+    @param[out] a_cellTags  Tags from cell tagger only.
+    @return True if any tags changed.
   */
   bool
   tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags);
@@ -696,7 +703,8 @@ protected:
   getNumberOfPlotVariables() const;
 
   /*!
-    @brief Get the string identifiers for the internal plot variables from Driver
+    @brief Get the string identifiers for the internal plot variables from Driver.
+    @return Names of the internal plot variables.
   */
   Vector<std::string>
   getPlotVariableNames() const;
@@ -733,9 +741,10 @@ protected:
 
   /*!
     @brief Write level sets
-    @param[in,out] a_output Output data holder
-    @param[in,out] a_comp   Starting component
-    @details This adds data to a_output where the cell-centered data is the level-set value. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_comp   Starting component.
+    @param[in]    a_level  AMR level.
+    @details This adds data to a_output where the cell-centered data is the level-set value.
     @note This writes directly to a_output.
   */
   virtual void
@@ -752,7 +761,9 @@ protected:
   writeLoads(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level) const noexcept;
 
   /*!
-    @brief Return the finest tag level
+    @brief Return the finest AMR level that contains any cell tags.
+    @param[in] a_cellTags Cell tags on all AMR levels.
+    @return Finest AMR level with at least one tagged cell.
   */
   int
   getFinestTagLevel(const EBAMRTags& a_cellTags) const;

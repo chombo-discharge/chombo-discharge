@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_SphereSdf.H
-  @brief  Implementationo CD_SphereSdf.H
+  @file   CD_SphereSdf.cpp
+  @brief  Implementation of CD_SphereSdf.H
   @author Robert Marskar
 */
 

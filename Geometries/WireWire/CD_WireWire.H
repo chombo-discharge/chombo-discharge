@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_WireWire.H
   @brief  Declaration of a Wire-wire geometry
   @author Robert Marskar
 */
 
-#ifndef CD_WireWire_H
-#define CD_WireWire_H
+#ifndef CD_WIREWIRE_H
+#define CD_WIREWIRE_H
 
 // Chombo includes
 #include <ParmParse.H>
@@ -38,15 +39,17 @@ public:
 
 protected:
   /*!
-    @brief Add another cylinder electrode
-    @param[in] a_pp Parameter parser object for the wire. 
+    @brief Add another cylinder electrode.
+    @param[in] a_pp Parameter parser object for the wire.
+    @return Pair of implicit function and permittivity for the electrode.
   */
   virtual std::pair<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>, Real>
   addElectrode(ParmParse& a_pp);
 
   /*!
-    @brief Add another cylinder dielectric
-    @param[in] a_pp Parameter parser object for the wire. 
+    @brief Add another cylinder dielectric.
+    @param[in] a_pp Parameter parser object for the wire.
+    @return Implicit function for the dielectric cylinder.
   */
   virtual std::shared_ptr<EBGeometry::ImplicitFunction<Real>>
   addDielectric(ParmParse& a_pp);

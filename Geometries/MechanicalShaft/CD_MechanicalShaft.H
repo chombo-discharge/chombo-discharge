@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MechanicalShaft.H
   @brief  Declaration of a mechanical shaft geometry
   @author Robert Marskar
 */
 
-#ifndef CD_MechanicalShaft_H
-#define CD_MechanicalShaft_H
+#ifndef CD_MECHANICALSHAFT_H
+#define CD_MECHANICALSHAFT_H
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
@@ -47,19 +48,22 @@ protected:
   defineDielectric() noexcept;
 
   /*!
-    @brief Get a cylinder oriented along the z-axis
+    @brief Get a cylinder oriented along the z-axis.
+    @return Implicit function for a cylinder.
   */
   virtual std::shared_ptr<EBGeometry::ImplicitFunction<Real>>
   getSimpleCylinder() const noexcept;
 
   /*!
-    @brief Get a polygonal shaft oriented along the z-axis
+    @brief Get a polygonal shaft oriented along the z-axis.
+    @return Implicit function for a polygonal shaft.
   */
   virtual std::shared_ptr<EBGeometry::ImplicitFunction<Real>>
   getPolygon() const noexcept;
 
   /*!
-    @brief Get a profiled shaft oriented along the z-axis
+    @brief Get a profiled shaft oriented along the z-axis.
+    @return Implicit function for a circularly profiled shaft.
   */
   virtual std::shared_ptr<EBGeometry::ImplicitFunction<Real>>
   getCircularProfiles() const noexcept;

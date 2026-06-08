@@ -101,26 +101,30 @@ public:
   setGasPermittivity(const Real a_eps0);
 
   /*!
-    @brief Get the multifluid index space
+    @brief Get the multifluid index space.
+    @return m_multiFluidIndexSpace
   */
   const RefCountedPtr<MultiFluidIndexSpace>&
   getMfIndexSpace() const;
 
   /*!
-    @brief Get the implicit function used to generate the gas-phase EBIS
+    @brief Get the implicit function used to generate the gas-phase EBIS.
+    @return Gas-phase implicit function.
   */
   const RefCountedPtr<BaseIF>&
   getGasImplicitFunction() const;
 
   /*!
-    @brief Get the implicit function used to generate the solid-phase EBIS
+    @brief Get the implicit function used to generate the solid-phase EBIS.
+    @return Solid-phase implicit function.
   */
   const RefCountedPtr<BaseIF>&
   getSolidImplicitFunction() const;
 
   /*!
-    @brief Get implicit function
-    @param[in] a_phase Phase
+    @brief Get implicit function for the specified phase.
+    @param[in] a_phase Phase identifier.
+    @return Implicit function for the requested phase.
   */
   const RefCountedPtr<BaseIF>&
   getImplicitFunction(const phase::which_phase a_phase) const;
@@ -131,7 +135,7 @@ public:
     @param[in] a_probLo       Lower-left corner
     @param[in] a_finestDx     Finest grid resolution
     @param[in] a_nCellMax     Patch size
-    @param[in] a_numEbGhost   Maximum number of EB ghosts that will be encountered.
+    @param[in] a_maxGhostEB   Maximum number of EB ghosts that will be encountered.
     @param[in] a_maxCoarsen   Max coarsenings to run. If = -1 then coarsen all the way down. 
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_probLo, a_probLo + a_box*a_dx)

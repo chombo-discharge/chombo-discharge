@@ -56,6 +56,7 @@ initialize(int argc, char* argv[]);
 
 /*!
   @brief chombo-discharge finalization functions. Exits MPI and writes timer report if called for.
+  @return Exit code (0 on success).
 */
 #if defined(CH_USE_PETSC)
 PetscErrorCode

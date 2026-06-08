@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   PerlinRodSdf.cpp
+  @file   CD_PerlinRodSdf.cpp
   @brief  Implementation of CD_PerlinRodSdf.H
   @author Robert Marskar
 */

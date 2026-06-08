@@ -29,7 +29,7 @@
 namespace detail {
   /*!
     @brief Helper function for linearizing a particle onto a buffer.
-    @detail This copies T into the buffer p and increments the pointer.
+    @details This copies T into the buffer p and increments the pointer.
     @param[in,out] p Buffer
     @param[in] a_x Particle property. Must be a trivial type.
   */
@@ -47,7 +47,7 @@ namespace detail {
 
   /*!
     @brief Helper function for linearizing a buffer onto a particle property.
-    @detail This copies from the buffer p into the particle property T. 
+    @details This copies from the buffer p into the particle property T. 
     @param[in,out] p Buffer. 
     @param[in] a_x Particle property. Must be a trivial type.
   */

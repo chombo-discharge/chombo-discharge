@@ -153,7 +153,8 @@ public:
   getNumberOfPlotVariables() const = 0;
 
   /*!
-    @brief Get plot variable names
+    @brief Get plot variable names.
+    @return Names of plot variables written by this time stepper.
   */
   virtual Vector<std::string>
   getPlotVariableNames() const = 0;
@@ -203,7 +204,8 @@ public:
   getCheckpointLoads(const std::string a_realm, const int a_level) const;
 
   /*!
-    @brief Compute a time step to be used by Driver. 
+    @brief Compute a time step to be used by Driver.
+    @return Time step size.
   */
   virtual Real
   computeDt() = 0;
@@ -263,6 +265,7 @@ public:
     @brief Function which can have Driver do regrids at arbitrary points in the simulation.
     @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is
     on the regular "regrid intervals".
+    @return True if an out-of-schedule regrid is requested.
   */
   virtual bool
   needToRegrid();
@@ -271,13 +274,15 @@ public:
     @brief Query whether the time stepper wants to continue stepping.
     @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal
     that the simulation should stop after the current time step completes.
+    @return True if the simulation should continue.
   */
   bool
   keepGoing() const;
 
   /*!
-    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
-    @param[in] a_realm Realm name
+    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.
+    @param[in] a_realm Realm name.
+    @return True if the realm should be load-balanced during regrids.
   */
   virtual bool
   loadBalanceThisRealm(const std::string a_realm) const;

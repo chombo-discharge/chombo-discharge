@@ -279,7 +279,7 @@ public:
 
   /*!
     @brief Write checkpoint data for a level
-    @paramo[out] a_handle HDF5 handle.
+    @param[out] a_handle HDF5 handle.
     @param[in]   a_level Grid level
     @details This writes m_potential[a_level] to the checkpoint file. 
   */

@@ -59,9 +59,10 @@ public:
   allocate() override;
 
   /*!
-    @brief Compute the largest possible advective time step (for explicit methods)
-    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches. 
-    @note This is the appropriate time step routine for the BCG reconstruction. 
+    @brief Compute the largest possible advective time step (for explicit methods).
+    @details This computes dt = dx/max(|vx|,|vy|,|vz|), minimized over all grid levels and patches.
+    @note This is the appropriate time step routine for the BCG reconstruction.
+    @return Maximum stable advection time step.
   */
   virtual Real
   computeAdvectionDt() override;
@@ -95,11 +96,11 @@ protected:
   parseExtrapolateSourceTerm();
 
   /*!
-    @brief Godunov face extrapolation method for advection
-    @param[out] a_facePhi  Phi on face centers
-    @param[in]  a_cellPhi  Phi on cell centers
-    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
-    @details This functions calls Chombo code which implements the Graves/Trebotich discretization. 
+    @brief Godunov face extrapolation method for advection.
+    @param[out] a_facePhi  Phi on face centers.
+    @param[in]  a_phi      Phi on cell centers.
+    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states.
+    @details This functions calls Chombo code which implements the Graves/Trebotich discretization.
   */
   virtual void
   advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;

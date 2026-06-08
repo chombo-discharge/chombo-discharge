@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_LookupTable1D.H
+  @file   CD_LookupTable1DImplem.H
   @brief  Declaration of a lookup table in one independent variable.
   @author Robert Marskar
 */

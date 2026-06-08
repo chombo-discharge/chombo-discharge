@@ -72,8 +72,9 @@ public:
     @brief Tag cells
     @param[in,out] a_tags Tags on grid levels
     @details EBAMRTags is a data-type Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >. The vector indicates the grid level, the LayoutData indicates data ownership (in
-    much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch). 
-    This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags. 
+    much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch).
+    This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags.
+    @return Returns true if tags changed.
   */
   virtual bool
   tagCells(EBAMRTags& a_tags) = 0;
@@ -92,7 +93,8 @@ public:
   getNumberOfPlotVariables() const;
 
   /*!
-    @brief Get plot variable names. 
+    @brief Get plot variable names.
+    @return Names of plot variables that will be written to file.
   */
   virtual Vector<std::string>
   getPlotVariableNames() const;
@@ -111,7 +113,7 @@ public:
     @brief Get tag buffer. 
     @details This returns an integer > 0 which adds additional tags around the cells that were refined. This is used by Driver to grow the refined region. 
     @return Returns m_buffer
-    @note This will look for a string in the form "m_name.buffer = <integer>". 
+    @note This will look for a string in the form "m_name.buffer = &lt;integer&gt;". 
   */
   virtual int
   getBuffer() const;
@@ -151,14 +153,16 @@ protected:
   insideTagBox(const RealVect a_pos) const;
 
   /*!
-    @brief Get the specified level for this position when doing manual refinement. 
+    @brief Get the specified level for this position when doing manual refinement.
+    @param[in] a_pos Physical coordinates of the point.
+    @return Refinement level assigned to a_pos by the manual refinement boxes. Returns -1 if not in any box.
   */
   int
   getManualRefinementLevel(const RealVect a_pos) const;
 
   /*!
     @brief Parse boxes.
-    @details This will look for input parameters in the form m_name.num_boxes = <integer>. If <integer> = 0 then the function will process additional lines
+    @details This will look for input parameters in the form m_name.num_boxes = &lt;integer&gt;. If &lt;integer&gt; = 0 then the function will process additional lines
     in the form "m_name.box1_lo = <float> <float> <float>" which indicates the lower corner of the "tag box". 
   */
   virtual void
@@ -172,7 +176,7 @@ protected:
 
   /*!
     @brief Parse refinement buffer.
-    @details This will look for an input parameter in the form "m_name.buffer = <integer>". If this is called but the string does not exist, it will cause
+    @details This will look for an input parameter in the form "m_name.buffer = &lt;integer&gt;". If this is called but the string does not exist, it will cause
     a run-time error. 
   */
   virtual void
@@ -180,7 +184,7 @@ protected:
 
   /*!
     @brief Parse the verbosity from the input file or command line.
-    @details This will look for an input parameter in the form "m_name.verbosity = <integer>". This is used to control "verbosity" for the cell tagger class. Turning
+    @details This will look for an input parameter in the form "m_name.verbosity = &lt;integer&gt;". This is used to control "verbosity" for the cell tagger class. Turning
     on verbosity for this class is mostly for debugging purposes. 
   */
   virtual void

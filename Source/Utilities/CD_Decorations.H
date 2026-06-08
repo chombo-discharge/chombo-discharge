@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CD_SIMD.H
+  @file   CD_Decorations.H
   @brief  Declaration of various decoration macros. 
   @author Robert Marskar
 */

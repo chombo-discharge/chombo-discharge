@@ -14,8 +14,10 @@
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using Vec3    = EBGeometry::Vec3T<Real>;
 using ImpFunc = EBGeometry::ImplicitFunction<Real>;
+/// @endcond
 
 WireWire::WireWire()
 {
