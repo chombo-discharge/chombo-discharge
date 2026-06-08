@@ -115,23 +115,37 @@ Iterating over cells
 --------------------
 
 For single-valued data, ``chombo-discharge`` uses standard loops (in column-major order) for iterating over data.
-For example, the standard loops for iterating over cell-centered data are
+``BoxLoops`` provides two overloads for structured box iteration:
 
 .. code-block:: c++
 
    namespace BoxLoops {
-   
-      template <typename Functor>
-      ALWAYS_INLINE void
-      loop(const Box& a_computeBox, Functor&& kernel, const IntVect& a_stride = IntVect::Unit);
 
+      // Compile-time stride (use D_DECL for dimension independence).
+      // Stride values must be >= 1 (enforced by static_assert).
+      // Unit-stride example: BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
+   #if CH_SPACEDIM == 2
+      template <int Si, int Sj, typename Functor>
+      ALWAYS_INLINE void
+      loop(const Box& a_computeBox, Functor&& kernel);
+   #else
+      template <int Si, int Sj, int Sk, typename Functor>
+      ALWAYS_INLINE void
+      loop(const Box& a_computeBox, Functor&& kernel);
+   #endif
+
+      // Unstructured iteration over cut-cells.
       template <typename Functor>
       ALWAYS_INLINE void
       loop(VoFIterator& a_iter, Functor&& a_kernel);
    }
 
-Here, the ``Functor`` argument is a C++ lambda or ``std::function`` which takes a grid cell as a single argument.
-For the first loop, we iterate over all grid cells in ``a_computeBox``.
+The ``Functor`` argument is a C++ lambda or ``std::function`` taking a grid cell as its single argument.
+Strides are non-type template parameters, making them compile-time constants that the auto-vectorizer
+can exploit to emit SIMD instructions.
+Use ``D_DECL`` at call sites to keep code dimension-independent.
+Unit-stride iteration is ``BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel)``;
+stride-2 (e.g. for multi-color Gauss-Seidel) is ``BoxLoops::loop<D_DECL(2, 2, 2)>(colorBox, kernel)``.
 Iterating over the cut-cells in a patch data holder (like the ``EBCellFAB``) can be done with a ``VoFIterator``, which can iterate through cells on an ``EBCellFAB`` that are not covered by the geometry.
 For example:
 

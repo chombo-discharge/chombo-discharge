@@ -249,21 +249,35 @@ See <a class="reference internal" href="Realm.html#chap-realm"><span class="std 
 <section id="iterating-over-cells">
 <h2>Iterating over cells<a class="headerlink" href="#iterating-over-cells" title="Permalink to this heading"></a></h2>
 <p>For single-valued data, <code class="docutils literal notranslate"><span class="pre">chombo-discharge</span></code> uses standard loops (in column-major order) for iterating over data.
-For example, the standard loops for iterating over cell-centered data are</p>
+<code class="docutils literal notranslate"><span class="pre">BoxLoops</span></code> provides two overloads for structured box iteration:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">namespace</span><span class="w"> </span><span class="nn">BoxLoops</span><span class="w"> </span><span class="p">{</span>
 
-<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span>
+<span class="w">   </span><span class="c1">// Compile-time stride (use D_DECL for dimension independence).</span>
+<span class="w">   </span><span class="c1">// Stride values must be &gt;= 1 (enforced by static_assert).</span>
+<span class="w">   </span><span class="c1">// Unit-stride example: BoxLoops::loop&lt;D_DECL(1, 1, 1)&gt;(box, kernel);</span>
+<span class="cp">#if CH_SPACEDIM == 2</span>
+<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">Si</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Sj</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span>
 <span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span>
-<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">IntVect</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_stride</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IntVect</span><span class="o">::</span><span class="n">Unit</span><span class="p">);</span>
+<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+<span class="cp">#else</span>
+<span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">Si</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Sj</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">Sk</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span>
+<span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span>
+<span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Box</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_computeBox</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">kernel</span><span class="p">);</span>
+<span class="cp">#endif</span>
 
+<span class="w">   </span><span class="c1">// Unstructured iteration over cut-cells.</span>
 <span class="w">   </span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Functor</span><span class="o">&gt;</span>
 <span class="w">   </span><span class="n">ALWAYS_INLINE</span><span class="w"> </span><span class="kt">void</span>
 <span class="w">   </span><span class="n">loop</span><span class="p">(</span><span class="n">VoFIterator</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a_iter</span><span class="p">,</span><span class="w"> </span><span class="n">Functor</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">a_kernel</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Here, the <code class="docutils literal notranslate"><span class="pre">Functor</span></code> argument is a C++ lambda or <code class="docutils literal notranslate"><span class="pre">std::function</span></code> which takes a grid cell as a single argument.
-For the first loop, we iterate over all grid cells in <code class="docutils literal notranslate"><span class="pre">a_computeBox</span></code>.
+<p>The <code class="docutils literal notranslate"><span class="pre">Functor</span></code> argument is a C++ lambda or <code class="docutils literal notranslate"><span class="pre">std::function</span></code> taking a grid cell as its single argument.
+Strides are non-type template parameters, making them compile-time constants that the auto-vectorizer
+can exploit to emit SIMD instructions.
+Use <code class="docutils literal notranslate"><span class="pre">D_DECL</span></code> at call sites to keep code dimension-independent.
+Unit-stride iteration is <code class="docutils literal notranslate"><span class="pre">BoxLoops::loop&lt;D_DECL(1,</span> <span class="pre">1,</span> <span class="pre">1)&gt;(box,</span> <span class="pre">kernel)</span></code>;
+stride-2 (e.g. for multi-color Gauss-Seidel) is <code class="docutils literal notranslate"><span class="pre">BoxLoops::loop&lt;D_DECL(2,</span> <span class="pre">2,</span> <span class="pre">2)&gt;(colorBox,</span> <span class="pre">kernel)</span></code>.
 Iterating over the cut-cells in a patch data holder (like the <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code>) can be done with a <code class="docutils literal notranslate"><span class="pre">VoFIterator</span></code>, which can iterate through cells on an <code class="docutils literal notranslate"><span class="pre">EBCellFAB</span></code> that are not covered by the geometry.
 For example:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">component</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
