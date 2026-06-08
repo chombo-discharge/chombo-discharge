@@ -7,11 +7,11 @@
  */
 
 /**
-  @file   CD_DischargeInceptionStepper.H
-  @brief  Declaration of the Physics::DischargeInception::DischargeInceptionStepper TimeStepper
-  @author Robert Marskar (SINTEF)
-  @author Rasmus Hoholm (SINTEF)
-  @author Fanny Skirbekk (NTNU)
+   @file   CD_DischargeInceptionStepper.H
+   @brief  Declaration of the Physics::DischargeInception::DischargeInceptionStepper TimeStepper
+   @author Robert Marskar (SINTEF)
+   @author Rasmus Hoholm (SINTEF)
+   @author Fanny Skirbekk (NTNU)
 */
 
 #ifndef CD_DISCHARGEINCEPTIONSTEPPER_H
@@ -31,7 +31,7 @@ namespace Physics {
   namespace DischargeInception {
 
     /**
-      @brief Integration algorithm for the streamer inception (K-value) integral.
+       @brief Integration algorithm for the streamer inception (K-value) integral.
     */
     enum class IntegrationAlgorithm
     {
@@ -40,17 +40,17 @@ namespace Physics {
     };
 
     /**
-      @brief Transport algorithm for advancing negative ions in transient mode.
+       @brief Transport algorithm for advancing negative ions in transient mode.
     */
     enum class TransportAlgorithm
     {
-      Euler,   ///< Explicit forward Euler step.
-      Heun,    ///< Heun's method (explicit second-order Runge-Kutta).
-      ImExCTU  ///< Implicit-explicit corner-transport-upwind scheme.
+      Euler,  ///< Explicit forward Euler step.
+      Heun,   ///< Heun's method (explicit second-order Runge-Kutta).
+      ImExCTU ///< Implicit-explicit corner-transport-upwind scheme.
     };
 
     /**
-      @brief Solver mode: stationary (voltage sweep) or transient (time-dependent).
+       @brief Solver mode: stationary (voltage sweep) or transient (time-dependent).
     */
     enum class Mode
     {
@@ -59,7 +59,7 @@ namespace Physics {
     };
 
     /**
-      @brief Reason the time step was restricted in transient mode.
+       @brief Reason the time step was restricted in transient mode.
     */
     enum class TimeStepRestriction
     {
@@ -71,23 +71,23 @@ namespace Physics {
     };
 
     /**
-      @brief TimeStepper for evaluating the streamer inception criterion in static or transient electric fields.
-      @details This class solves for the streamer inception voltage (stationary mode) or the
-      time-dependent inception probability (transient mode) by tracing the paths of seed electrons
-      through the electric field and integrating the effective ionization coefficient along those paths.
+       @brief TimeStepper for evaluating the streamer inception criterion in static or transient electric fields.
+       @details This class solves for the streamer inception voltage (stationary mode) or the
+       time-dependent inception probability (transient mode) by tracing the paths of seed electrons
+       through the electric field and integrating the effective ionization coefficient along those paths.
 
-      The class is templated on three solver types:
-      - @p P: Tracer particle type (default TracerParticle<2,3>). Each particle carries the inception
-        integral K and additional per-particle state.
-      - @p F: Field solver type (default FieldSolverGMG). Solves the Poisson equation for the electric
-        potential, decomposed into homogeneous (V=1 on live electrodes, no charges) and inhomogeneous
-        (V=0 on all electrodes, space/surface charges) contributions that are superimposed at run time.
-      - @p C: CDR solver type (default CdrCTU). Advances the negative ion density in transient mode.
+       The class is templated on three solver types:
+       - @p P: Tracer particle type (default TracerParticle<2,3>). Each particle carries the inception
+       integral K and additional per-particle state.
+       - @p F: Field solver type (default FieldSolverGMG). Solves the Poisson equation for the electric
+       potential, decomposed into homogeneous (V=1 on live electrodes, no charges) and inhomogeneous
+       (V=0 on all electrodes, space/surface charges) contributions that are superimposed at run time.
+       - @p C: CDR solver type (default CdrCTU). Advances the negative ion density in transient mode.
 
-      In stationary mode the class sweeps over a user-supplied voltage range, computes the inception
-      integral K for each seed position and voltage, and derives the inception voltage map and the
-      critical volume/area. In transient mode the voltage follows a user-supplied curve and the
-      inception probability is accumulated over time together with ion transport.
+       In stationary mode the class sweeps over a user-supplied voltage range, computes the inception
+       integral K for each seed position and voltage, and derives the inception voltage map and the
+       critical volume/area. In transient mode the voltage follows a user-supplied curve and the
+       inception probability is accumulated over time together with ion transport.
     */
     template <typename P = TracerParticle<2, 3>, typename F = FieldSolverGMG, typename C = CdrCTU>
     class DischargeInceptionStepper : public TimeStepper
@@ -541,8 +541,8 @@ namespace Physics {
       Vector<EBAMRCellData> m_townsendCriterionPlus;
 
       /**
-         @brief Townsend criterion for starting positive ions
-         @note Stationary mode   
+         @brief Townsend criterion for starting negative ions (electrons arriving at anode).
+         @note Stationary mode.
       */
       Vector<EBAMRCellData> m_townsendCriterionMinu;
 
@@ -595,14 +595,14 @@ namespace Physics {
       EBAMRCellData m_townsendCriterion;
 
       /**
-         @brief Detachment factor
-         @note Transient mdoe.        
+         @brief Detachment factor.
+         @note Transient mode.
       */
       EBAMRCellData m_detachment;
 
       /**
          @brief Background ionization.
-         @note Transient mdoe.
+         @note Transient mode.
       */
       EBAMRCellData m_backgroundIonization;
 
@@ -909,12 +909,12 @@ namespace Physics {
       std::string m_realm;
 
       /**
-         @brief output data file
+         @brief File name for the tabular data output (inception voltages, K-values, etc.).
       */
       std::string m_dataOutputFile;
 
       /**
-         @brief Output file
+         @brief File name prefix for HDF5 plot output.
       */
       std::string m_outputFile;
 

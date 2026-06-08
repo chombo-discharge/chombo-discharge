@@ -6,7 +6,7 @@
 
 /**
    @file   CD_DischargeInceptionTagger.H
-   @brief  Cell tagger for DischargeInception module. 
+   @brief  Declaration of the Physics::DischargeInception::DischargeInceptionTagger cell tagger
    @author Robert Marskar
 */
 
@@ -21,9 +21,11 @@ namespace Physics {
   namespace DischargeInception {
 
     /**
-       @brief Class for tagging cells in the DischargeInception module. 
-       @details This flags cells for refinement if alpha_eff * dx > threshold. User must supply the
-       effective ionization coefficient through the constructor. 
+       @brief CellTagger for the DischargeInception module.
+       @details Flags cells for refinement where the effective ionization coefficient scaled by the
+       local grid spacing exceeds a threshold: @f$ \alpha_\mathrm{eff} \cdot \Delta x > \text{threshold} @f$.
+       The effective ionization coefficient @f$ \alpha_\mathrm{eff}(E, \mathbf{x}) @f$ is supplied by
+       the caller and is typically the net Townsend coefficient @f$ \alpha - \eta @f$.
     */
     class DischargeInceptionTagger : public CellTagger
     {
@@ -45,10 +47,10 @@ namespace Physics {
 
       /**
          @brief Full constructor.
-         @param[in] a_amrMesh       Amr mesh. 
-         @param[in] a_electricField Pointer to electric field data.
-         @param[in] a_alphaEff      Ionization coefficient
-         @param[in] a_phase         Default phase. 
+         @param[in] a_amrMesh       AMR mesh.
+         @param[in] a_electricField Pointer to the cell-centred electric field data (not owned).
+         @param[in] a_alphaEff      Net effective ionization coefficient as a function of field magnitude E and position x.
+         @param[in] a_phase         Phase (gas/solid) on which the tagger operates.
       */
       DischargeInceptionTagger(const RefCountedPtr<AmrMesh>&                              a_amrMesh,
                                const EBAMRCellData* const                                 a_electricField,
@@ -67,7 +69,7 @@ namespace Physics {
       parseOptions() override final;
 
       /**
-         @brief Parse options
+         @brief Regrid hook. Re-allocates internal data holders after the AMR hierarchy changes.
       */
       virtual void
       regrid() override final;
@@ -113,32 +115,32 @@ namespace Physics {
       mutable EBAMRCellData m_tracerField;
 
       /**
-         @brief Ionization coefficient
+         @brief Net effective ionization coefficient @f$ \alpha_\mathrm{eff}(E, x) @f$ callable.
       */
       std::function<Real(const Real& E, const RealVect x)> m_alphaEff;
 
       /**
-         @brief Phase
+         @brief Phase (gas/solid) on which the tagger operates.
       */
       phase::which_phase m_phase;
 
       /**
-         @brief Realm
+         @brief Realm name where solver data lives.
       */
       std::string m_realm;
 
       /**
-         @brief Curvature refinement factor
+         @brief Threshold for refinement: refine if @f$ \alpha_\mathrm{eff} \cdot \Delta x > m\_refAlpha @f$.
       */
       Real m_refAlpha;
 
       /**
-         @brief Max voltage
+         @brief Reference voltage used to scale the electric field when computing the tracer field.
       */
       Real m_maxVoltage;
 
       /**
-         @brief Plot tracer field or not
+         @brief If true, write the tracer field to the plot file.
       */
       bool m_plot;
 
