@@ -64,23 +64,26 @@ public:
 
   /*!
     @brief Get the population of the reactant in the input state.
-    @param[in] a_reactant Reactant
-    @param[in] a_state    State
+    @param[in] a_reactant Reactant.
+    @param[in] a_state    State.
+    @return Population of the reactant.
   */
   static inline T
   population(const size_t& a_reactant, const State& a_state) noexcept;
 
   /*!
-    @brief Compute the propensity function for this reaction type. 
-    @param[in] a_state State vector
-    @note User should set the rate before calling this routine. 
+    @brief Compute the propensity function for this reaction type.
+    @param[in] a_state State vector.
+    @return Reaction propensity.
+    @note User should set the rate before calling this routine.
   */
   inline Real
   propensity(const State& a_state) const noexcept;
 
   /*!
     @brief Compute the number of times the reaction can fire before exhausting one of the reactants.
-    @param[in] a_state State vector
+    @param[in] a_state State vector.
+    @return Critical number of reactions.
   */
   inline T
   computeCriticalNumberOfReactions(const State& a_state) const noexcept;
@@ -94,7 +97,8 @@ public:
 
   /*!
     @brief Get the state change due to a change in the input reactant species.
-    @param[in] a_rectant Reactant species. 
+    @param[in] a_reactant Reactant species.
+    @return State change for the reactant.
   */
   inline T
   getStateChange(const size_t a_reactant) const noexcept;

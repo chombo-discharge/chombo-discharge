@@ -73,7 +73,7 @@ public:
   Timer(const Timer& a_other) = default;
 
   /*!
-    @brief Copy assignement
+    @brief Copy assignment
     @param[in] a_other Other Timer
   */
   Timer&

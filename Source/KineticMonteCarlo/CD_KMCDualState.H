@@ -30,6 +30,9 @@ template <typename T = long long>
 class KMCDualState
 {
 public:
+  /*!
+    @brief Alias for the state type.
+  */
   using State = std::vector<T>;
 
   /*!
@@ -60,10 +63,12 @@ public:
   virtual ~KMCDualState();
 
   /*!
-    @brief Copy assignment constructor
+    @brief Copy assignment operator.
+    @param[in] a_other Other state.
+    @return Reference to this object.
   */
   inline KMCDualState&
-  operator=(const KMCDualState&) = default;
+  operator=(const KMCDualState& a_other) = default;
 
   /*!
     @brief Disallowed move assignment
@@ -80,7 +85,8 @@ public:
   define(const size_t a_numReactiveSpecies, const size_t a_numNonReactiveSpecies) noexcept;
 
   /*!
-    @brief Check if state is a valid state. An invalid state will have a negative number of reactants/non-reactants. 
+    @brief Check if state is a valid state. An invalid state will have a negative number of reactants/non-reactants.
+    @return Returns false if any populations are negative.
   */
   inline bool
   isValidState() const noexcept;
@@ -115,7 +121,8 @@ public:
 
   /*!
     @brief Linearize the state onto an output vector.
-    @details This is mostly by KMCSolver when computing the necessary Jacobians for implicit updates
+    @details This is mostly by KMCSolver when computing the necessary Jacobians for implicit updates.
+    @return Linearized state vector.
   */
   inline std::vector<T>
   linearOut() const noexcept;

@@ -29,6 +29,9 @@ template <typename T = long long>
 class KMCSingleState
 {
 public:
+  /*!
+    @brief Alias for the state type.
+  */
   using State = std::vector<T>;
 
   /*!
@@ -38,7 +41,7 @@ public:
 
   /*!
     @brief Copy constructor.
-    @param[in] a_other Other state
+    @param[in] a_state Other state.
   */
   inline KMCSingleState(const KMCSingleState& a_state) = default;
 
@@ -59,10 +62,12 @@ public:
   virtual ~KMCSingleState();
 
   /*!
-    @brief Copy assignment constructor
+    @brief Copy assignment operator.
+    @param[in] a_other Other state.
+    @return Reference to this object.
   */
   inline KMCSingleState&
-  operator=(const KMCSingleState&) = default;
+  operator=(const KMCSingleState& a_other) = default;
 
   /*!
     @brief Disallowed move assignment
@@ -71,15 +76,17 @@ public:
   operator=(const KMCSingleState&&) = delete;
 
   /*!
-    @brief Get the population of the input index
-    @param[in] a_idx Index in state vector
+    @brief Get the population of the input index.
+    @param[in] a_idx Index in state vector.
+    @return Reference to the population.
   */
   inline T&
   operator[](const size_t a_idx) noexcept;
 
   /*!
-    @brief Get the population of the input index
-    @param[in] a_idx Index in state vector
+    @brief Get the population of the input index.
+    @param[in] a_idx Index in state vector.
+    @return Population at the given index.
   */
   inline const T&
   operator[](const size_t a_idx) const noexcept;
@@ -93,7 +100,8 @@ public:
 
   /*!
     @brief Linearize the state onto an output vector.
-    @details This is mostly by KMCSolver when computing the necessary Jacobians for implicit updates
+    @details This is mostly by KMCSolver when computing the necessary Jacobians for implicit updates.
+    @return Linearized state vector.
   */
   inline std::vector<T>
   linearOut() const noexcept;

@@ -250,22 +250,22 @@ public:
                 const std::string     a_outputRealm,
                 const int             a_level) const noexcept;
 
-  /*!
-    @brief Write checkpoint data into HDF5 file. 
-    @param[out] a_handle HDF5 file. 
-    @param[in]   a_level Grid level
-  */
 #ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpoint data into HDF5 file.
+    @param[out] a_handle HDF5 file handle.
+    @param[in]  a_level  Grid level.
+  */
   virtual void
   writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 #endif
 
-  /*!
-    @brief Read checkpoint data from HDF5 file. 
-    @param[in] a_handle HDF5 handle.
-    @param[in] const int a_level Grid level
-  */
 #ifdef CH_USE_HDF5
+  /*!
+    @brief Read checkpoint data from HDF5 file.
+    @param[in] a_handle HDF5 handle.
+    @param[in] a_level  Grid level.
+  */
   virtual void
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif

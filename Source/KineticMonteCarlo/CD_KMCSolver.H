@@ -45,7 +45,7 @@ enum class KMCLeapPropagator
   1. Real R::propensity(State) const -> Computes the reaction propensity for the input state.
   2. T R::computeCriticalNumberOfReactions(State) const -> Computes the minimum number of reactions that exhausts one of the reactants. 
   3. void R::advanceState(State&, const T numReactions) const -> Advance state by numReactions
-  4. std::<some_container> getReactants() const -> Get reactants involved in the reactions.
+  4. std::&lt;some_container&gt; getReactants() const -> Get reactants involved in the reactions.
   5. static T R::population(const <some_type> reactant, const State& a_state) -> Get the population of the input reactant in the input state. 
 
   The template parameter T should agree across both both R, State, and KMCSolver. Note that this must be a signed integer type.
@@ -54,6 +54,9 @@ template <typename R, typename State, typename T = long long>
 class KMCSolver
 {
 public:
+  /*!
+    @brief Alias for the list of reactions.
+  */
   using ReactionList = std::vector<std::shared_ptr<const R>>;
 
   /*!
@@ -83,10 +86,12 @@ public:
   virtual ~KMCSolver() noexcept;
 
   /*!
-    @brief Copy assignment operator. 
+    @brief Copy assignment operator.
+    @param[in] a_other Other solver.
+    @return Reference to this object.
   */
   KMCSolver&
-  operator=(const KMCSolver&) = default;
+  operator=(const KMCSolver& a_other) = default;
 
   /*!
     @brief Disallowed move assignment operator. 
@@ -120,116 +125,130 @@ public:
 
   /*!
     @brief Compute the state vector changes for all reactions.
-    @param[in] a_state Input state.
+    @param[in] a_state     Input state.
     @param[in] a_reactions Reaction list.
-    @note The input parameter a_state can be a dummy state because the state change vector does not depend on it. 
+    @return State change vectors for each reaction.
+    @note The input parameter a_state can be a dummy state because the state change vector does not depend on it.
   */
   inline std::vector<std::vector<T>>
   getNu(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
-    @brief Compute propensities for ALL reactions
-    @param[in] a_state State vector
+    @brief Compute propensities for ALL reactions.
+    @param[in] a_state State vector.
+    @return Propensities for each reaction.
     @note Calls the other version with m_reactions.
   */
   inline std::vector<Real>
   propensities(const State& a_state) const noexcept;
 
   /*!
-    @brief Compute propensities for a subset of reactions
-    @param[in] a_state     State vector
-    @param[in] a_reactions Reaction list
+    @brief Compute propensities for a subset of reactions.
+    @param[in] a_state     State vector.
+    @param[in] a_reactions Reaction list.
+    @return Propensities for each reaction.
   */
   inline std::vector<Real>
   propensities(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
-    @brief Compute the total propensity for ALL reactions
-    @param[in] a_state     State vector
+    @brief Compute the total propensity for ALL reactions.
+    @param[in] a_state State vector.
+    @return Sum of all reaction propensities.
     @note Calls the other version with m_reactions.
   */
   inline Real
   totalPropensity(const State& a_state) const noexcept;
 
   /*!
-    @brief Compute the total propensity for a subset of reactions
-    @param[in] a_state     State vector
-    @param[in] a_reactions Reaction list
+    @brief Compute the total propensity for a subset of reactions.
+    @param[in] a_state     State vector.
+    @param[in] a_reactions Reaction list.
+    @return Sum of propensities for the given reactions.
   */
   inline Real
   totalPropensity(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
-    @brief Partition reactions into critical and non-critical reactions. 
+    @brief Partition reactions into critical and non-critical reactions.
     @details First member in the pair is the critical reactions, then the non-critical reactions.
-    @param[in] a_state     State vector
-    @note Calls the other version with m_reactions
+    @param[in] a_state State vector.
+    @return Pair of (critical reactions, non-critical reactions).
+    @note Calls the other version with m_reactions.
   */
   inline std::pair<ReactionList, ReactionList>
   partitionReactions(const State& a_state) const noexcept;
 
   /*!
-    @brief Partition reactions into critical and non-critical reactions. 
-    @details First member in the pair is the critical reactions, then the non-critical reactions
-    @param[in] a_state     State vector
-    @param[in] a_reactions Reaction list to be partitioned
+    @brief Partition reactions into critical and non-critical reactions.
+    @details First member in the pair is the critical reactions, then the non-critical reactions.
+    @param[in] a_state     State vector.
+    @param[in] a_reactions Reaction list to be partitioned.
+    @return Pair of (critical reactions, non-critical reactions).
   */
   inline std::pair<ReactionList, ReactionList>
   partitionReactions(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
-    @brief Get the time to the next critical reaction
-    @param[in] a_state State vector
-    @note Calls the other version with m_reactions
+    @brief Get the time to the next critical reaction.
+    @param[in] a_state State vector.
+    @return Time step for the next critical reaction.
+    @note Calls the other version with m_reactions.
   */
   inline Real
   getCriticalTimeStep(const State& a_state) const noexcept;
 
   /*!
-    @brief Get the time to the next critical reaction
-    @param[in] a_state             State vector
+    @brief Get the time to the next critical reaction.
+    @param[in] a_state             State vector.
     @param[in] a_criticalReactions Reaction list.
-    @note Computes the total propensity and calls the other version. 
+    @return Time step for the next critical reaction.
+    @note Computes the total propensity and calls the other version.
   */
   inline Real
   getCriticalTimeStep(const State& a_state, const ReactionList& a_criticalReactions) const noexcept;
 
   /*!
     @brief Get the time to the next critical reaction.
-    @param[in] a_propensities Reaction propensities
+    @param[in] a_propensities Reaction propensities.
+    @return Time step for the next critical reaction.
   */
   inline Real
   getCriticalTimeStep(const std::vector<Real>& a_propensities) const noexcept;
 
   /*!
-    @brief Get the time to the next critical reaction
-    @param[in] a_totalPropensity Total propensity
+    @brief Get the time to the next critical reaction.
+    @param[in] a_totalPropensity Total propensity.
+    @return Time step for the next critical reaction.
   */
   inline Real
   getCriticalTimeStep(const Real& a_totalPropensity) const noexcept;
 
   /*!
     @brief Get the non-critical time step.
-    @param[in] a_state State vector
-    @note Calls the other version with m_reactions
+    @param[in] a_state State vector.
+    @return Non-critical tau-leaping time step.
+    @note Calls the other version with m_reactions.
   */
   inline Real
   getNonCriticalTimeStep(const State& a_state) const noexcept;
 
   /*!
     @brief Get the non-critical time step.
-    @param[in] a_state     State vector
-    @param[in] a_reactions Reaction list
-    @note Computes propensities and calls the other version. 
+    @param[in] a_state     State vector.
+    @param[in] a_reactions Reaction list.
+    @return Non-critical tau-leaping time step.
+    @note Computes propensities and calls the other version.
   */
   inline Real
   getNonCriticalTimeStep(const State& a_state, const ReactionList& a_reactions) const noexcept;
 
   /*!
-    @brief Get the non-critical time step. 
-    @param[in] a_state                   State vector
-    @param[in] a_nonCriticalReactions    Non-critical reactions
-    @param[in] a_nonCriticalPropensities Non-critical propensities
+    @brief Get the non-critical time step.
+    @param[in] a_state                   State vector.
+    @param[in] a_nonCriticalReactions    Non-critical reactions.
+    @param[in] a_nonCriticalPropensities Non-critical propensities.
+    @return Non-critical tau-leaping time step.
   */
   inline Real
   getNonCriticalTimeStep(const State&             a_state,
@@ -238,11 +257,12 @@ public:
 
   /*!
     @brief Compute a time step, using the leap condition on the mean value with eps = 1.
-    @details This is just like getNonCriticalTimeStep EXCEPT that the leap condition is not applied for the deviation
-    @param[in] a_state        State vector
-    @param[in] a_reactions    Reactions
-    @param[in] a_propensities Propensities
-    @param[in] a_epsilon      Epsilon value for maximum change in propensities
+    @details This is just like getNonCriticalTimeStep EXCEPT that the leap condition is not applied for the deviation.
+    @param[in] a_state        State vector.
+    @param[in] a_reactions    Reactions.
+    @param[in] a_propensities Propensities.
+    @param[in] a_epsilon      Epsilon value for maximum change in propensities.
+    @return Tau-leaping time step.
   */
   inline Real
   computeDt(const State&             a_state,
@@ -420,11 +440,11 @@ public:
                 const KMCLeapPropagator& a_leapPropagator = KMCLeapPropagator::ExplicitEuler) const noexcept;
 
   /*!
-    @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. 
-    @param[in,out] a_state          State vector to advance
-    @param[in]    a_reactions      Reactions to advance with
-    @param[in]    a_dt             Time increment
-    @param[in]    a_leapPropagator Leaping propagator
+    @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
+    @param[in,out] a_state       State vector to advance.
+    @param[in]    a_reactions   Reactions to advance with.
+    @param[in]    a_dt          Time increment.
+    @param[in]    a_propagator  Leaping propagator function.
   */
   inline void
   advanceHybrid(
