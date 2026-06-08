@@ -1,12 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaStreamerTagger.cpp
-  @brief  Implementation CD_CdrPlasmaStreamerTagger.H
-  @author Robert Marskar
+/**
+   @file   CD_CdrPlasmaStreamerTagger.cpp
+   @brief  Implementation CD_CdrPlasmaStreamerTagger.H
+   @author Robert Marskar
 */
 
 // Chombo includes
