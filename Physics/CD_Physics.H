@@ -1,19 +1,24 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_Physics.H
-  @brief  Documentation of physics namespace
+  @brief  Declaration of the Physics namespace
   @author Robert Marskar
 */
 
 #ifndef CD_Physics_H
 #define CD_Physics_H
 
-/*!
-  @brief Name containing various physics models for running chombo-discharge code
+/**
+  @brief Namespace containing physics models for use with chombo-discharge.
+
+  @details This namespace collects self-contained physics modules built on top of
+  the core chombo-discharge solvers and infrastructure. Each sub-module defines a complete
+  problem specification including species, time steppers, and cell taggers.
 */
 namespace Physics {};
 
