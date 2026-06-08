@@ -23,3 +23,65 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = "**/*.png"
 SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# ---------------------------------------------------------------------------
+# Documentation
+# ---------------------------------------------------------------------------
+
+[[annotations]]
+path = ["**/*.rst", "**/*.md", "**/*.tex", "**/*.bib", "**/*.pdf", "**/*.gif", "**/*.css", "Docs/.nojekyll"]
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# ---------------------------------------------------------------------------
+# Build system
+# ---------------------------------------------------------------------------
+
+[[annotations]]
+path = ["**/GNUmakefile", "**/Makefile", "**/*.make", "**/*.GNU", "**/*.Intel", "Lib/Local/**"]
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# ---------------------------------------------------------------------------
+# CI / tooling configuration
+# ---------------------------------------------------------------------------
+
+[[annotations]]
+path = ["**/*.yml", "**/*.yaml", "**/.gitignore", ".gitmodules", ".clang-format", "CITATION.cff", ".codespellignore"]
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# ---------------------------------------------------------------------------
+# Scripts
+# ---------------------------------------------------------------------------
+
+[[annotations]]
+path = ["**/*.py", "**/*.sh", "**/*.conf"]
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# ---------------------------------------------------------------------------
+# Data / physics configuration
+# ---------------------------------------------------------------------------
+
+[[annotations]]
+path = ["**/*.json", "**/*.dat", "**/*.ini", "**/*.txt", "**/*.stl", "**/*.slurm", "**/*.inc", "**/*.template", "**/README"]
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# ---------------------------------------------------------------------------
+# Transitional C++ catch-all
+# These let reuse lint pass while inline SPDX headers are being added
+# file-by-file during the ongoing Doxygen revision.  Remove once all .H
+# and .cpp files carry inline headers.
+# ---------------------------------------------------------------------------
+
+[[annotations]]
+path = "**/*.H"
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "**/*.cpp"
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"

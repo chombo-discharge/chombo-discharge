@@ -19,10 +19,9 @@ repos:
         files: ^(Source/|Exec/|Physics/)
 
   - repo: https://github.com/fsfe/reuse-tool
-    rev: v6.1.0 # Use the latest stable version of reuse-tool
+    rev: v6.1.0
     hooks:
       - id: reuse
-        files: ^(Source/|Exec/|Physics/|Docs/)
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.1.0
@@ -40,4 +39,16 @@ repos:
         files: \.(inputs|options)$
         pass_filenames: false
 
+      - id: check-literalincludes
+        name: Validate Sphinx literalinclude directives
+        entry: python3 Docs/check_literalincludes.py
+        language: system
+        pass_filenames: false
+        files: \.(rst|H|cpp|options|inputs)$
 
+      - id: doxygen-check
+        name: Check doxygen documentation (warnings as errors)
+        entry: doxygen Docs/doxygen.conf
+        language: system
+        pass_filenames: false
+        files: \.(H|cpp)$

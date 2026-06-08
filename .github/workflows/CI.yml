@@ -28,9 +28,28 @@ jobs:
           clang-format-version: '18'
           check-path: ${{ matrix.directory }}
 
+  REUSE:
+    name: REUSE compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: fsfe/reuse-action@v5
+
+  Codespell:
+    name: Spell check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          path: Source Docs Exec Physics
+          ignore_words_file: .codespellignore
+
   Linux-GNU:
     if: github.event.pull_request.draft == false
-    needs: Formatting
+    needs: [Formatting, REUSE, Codespell]
     name: Linux-GNU
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -131,7 +150,7 @@ jobs:
 
   Linux-oneAPI:
     if: github.event.pull_request.draft == false
-    needs: Formatting
+    needs: [Formatting, REUSE, Codespell]
     name: Linux-oneAPI
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -278,6 +297,10 @@ jobs:
         run: |
           python3 -m pip install sphinx==5.0.0 sphinx_rtd_theme sphinxcontrib-bibtex
 
+      - name: Validate literalinclude directives
+        run: |
+          python3 Docs/check_literalincludes.py
+
       - name: Build doxygen
         run: |
           doxygen Docs/doxygen.conf
@@ -306,7 +329,7 @@ jobs:
           rm -rf Sphinx/build
 
   CI-passed:
-    needs: [Linux-GNU, Linux-oneAPI, Build-documentation]
+    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing
