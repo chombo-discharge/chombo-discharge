@@ -120,7 +120,7 @@ public:
 
   /*!
     @brief Fill a particle container randomly with particles such that we obtain the target uniform density.
-    @param[inout] a_particles Particle container to fill. Particles already in the container will be kept.
+    @param[in,out] a_particles Particle container to fill. Particles already in the container will be kept.
     @param[in] a_densityFunc Density function.
     @param[in] a_maxParticlesPerCell Maximum number of computational particles generated per cell. 
   */
@@ -473,8 +473,8 @@ public:
 
   /*!
     @brief Write plot data
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp
@@ -579,7 +579,7 @@ public:
 
   /*!
     @brief Add particles to a contain. This adds into a specific grid level and patch. The user can delete the input particles. 
-    @param[inout] a_inputParticles Input particles -- can be destroyed if a_destructive=true
+    @param[in,out] a_inputParticles Input particles -- can be destroyed if a_destructive=true
     @param[in]    a_lvl            Grid level
     @param[in]    a_dit            Grid index
     @param[in]    a_destructive    If true, delete the input particles. 
@@ -803,7 +803,7 @@ public:
 
   /*!
     @brief General superparticle merging with underlying algorithm through m_particleMerger
-    @param[inout] a_particles        Particles to be merged/split
+    @param[in,out] a_particles        Particles to be merged/split
     @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
@@ -814,7 +814,7 @@ public:
 
   /*!
     @brief Superparticle merging with KD/BVH trees
-    @param[inout] a_particles        Particles to be merged/split
+    @param[in,out] a_particles        Particles to be merged/split
     @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
@@ -825,7 +825,7 @@ public:
 
   /*!
     @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node. 
-    @param[inout] a_particles        Particles to be merged/split
+    @param[in,out] a_particles        Particles to be merged/split
     @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
@@ -836,7 +836,7 @@ public:
 
   /*!
     @brief Particle re-initialization algorithm
-    @param[inout] a_particles        Particles to be merged/split
+    @param[in,out] a_particles        Particles to be merged/split
     @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
@@ -1426,7 +1426,7 @@ protected:
     we will be missing a mass m_i*(1-kappa_i) from the cell. This mass can be smooshed into neighboring cells such as to make the total scheme conservative. As an option,
     we can also use a "non-conservative" divergence but the scheme is not guaranteed to be non-negative. All of this is just to say that we take the mass that fell inside
     the EB and put it back into the domain. 
-    @param[inout] a_phi Quantity to be redistributed. 
+    @param[in,out] a_phi Quantity to be redistributed. 
   */
   virtual void
   redistributeAMR(EBAMRCellData& a_phi) const;
@@ -1441,7 +1441,7 @@ protected:
 
   /*!
     @brief Make the "hybrid" deposition phiH = kappa*phiC + (1-kappa)*phiNC. On input, a_depositionH should contain phiC
-    @param[inout] a_depositionH    On input, contains phiC. On output, contain phiH
+    @param[in,out] a_depositionH    On input, contains phiC. On output, contain phiH
     @param[out]   a_massDifference On output, contains mass loss in each cut-cell.
     @param[in]    a_depositionNC   The "non-conservative" deposited variable.
   */
@@ -1505,8 +1505,8 @@ protected:
 
   /*!
     @brief Write data to output. Convenience function. 
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level

@@ -99,8 +99,8 @@ public:
   /*!
     @brief Override of GeometryShop's fillGraph.
     @details This just wraps a timer around the base version to spot load imbalance.
-    @param[inout] a_regIrregCovered Regular/Covered/Irregular cells
-    @param[inout] a_nodes           Nodes
+    @param[in,out] a_regIrregCovered Regular/Covered/Irregular cells
+    @param[in,out] a_nodes           Nodes
     @param[in]    a_validRegion     Grid region
     @param[in]    a_ghostRegion     Grid region, including ghost cells
     @param[in]    a_domain          Domain
@@ -155,7 +155,7 @@ protected:
   RealVect m_probLo;
 
   /*!
-    @brief Implicit function used to generate geometrys. 
+    @brief Implicit function used to generate geometries. 
   */
   const BaseIF* m_baseIF;
 
@@ -195,7 +195,7 @@ protected:
     @param[in] a_dx           Grid resolution
     @param[in] a_probLo       Lower-left corner of computational domain
     @param[in] a_finestDomain Finest AMR domain
-    @param[in] a_scanLevel    Domain where we initiate the load balanced recusion process. 
+    @param[in] a_scanLevel    Domain where we initiate the load balanced recursion process. 
   */
   void
   makeDomains(const Real          a_dx,

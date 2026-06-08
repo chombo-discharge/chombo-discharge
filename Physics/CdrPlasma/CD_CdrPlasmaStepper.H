@@ -118,7 +118,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**  
            @brief Write checkpoint data to file.
-           @param[inout] a_handle HDF5 fil
+           @param[in,out] a_handle HDF5 fil
            @param[in]    a_lvl    Grid level
       */
       virtual void
@@ -128,7 +128,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
          @brief Read checkpoint data from file. Used for restarts. 
-         @param[inout] a_handle HDF5 file
+         @param[in,out] a_handle HDF5 file
          @param[in]    a_lvl    Grid level
       */
       virtual void
@@ -151,8 +151,8 @@ namespace Physics {
 
       /**
          @brief Write plot data to output holder. 
-         @param[inout] a_output      Output data holder.
-         @param[inout] a_icomp       Starting component in a_output to begin at. 
+         @param[in,out] a_output      Output data holder.
+         @param[in,out] a_icomp       Starting component in a_output to begin at. 
          @param[in]    a_outputRealm Realm where a_output belongs
          @param[in]    a_level       Grid level
       */
@@ -396,7 +396,7 @@ namespace Physics {
       /**
          @brief General electrostatic Poisson solver routine. 
          @details This will compute the space charge density onto a_rho and then solve for the potential. 
-         @param[inout] a_potential    Electrostatic potential
+         @param[in,out] a_potential    Electrostatic potential
          @param[out]   a_rho          Centroid-centered space charge density. 
          @param[in]    a_cdrDensities Plasma species densities. 
          @param[in]    a_sigma        Surface charge density on dielectric EBs.
@@ -838,7 +838,7 @@ namespace Physics {
 
       /**
          @brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the AMR version. 
-         @param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
+         @param[out] a_cdrFluxes           CDR domain boundary fluxes for solvers.
          @param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated to the domain faces. 
          @param[in]  a_extrapCdrDensities  CDR densities extrapolated to the domain faces. 
          @param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
@@ -860,7 +860,7 @@ namespace Physics {
       /**
          @brief Compute CDR fluxes on domain faces for usage in boundary conditions. This is the level version. 
          @details This will iterate over the patches on each level and compute the domain fluxes. 
-         @param[out] a_cdrFluxes           CDR domain bounadry fluxes for solvers.
+         @param[out] a_cdrFluxes           CDR domain boundary fluxes for solvers.
          @param[in]  a_extrapCdrFluxes     CDR fluxes extrapolated to the domain faces. 
          @param[in]  a_extrapCdrDensities  CDR densities extrapolated to the domain faces. 
          @param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
@@ -1426,8 +1426,8 @@ namespace Physics {
 
       /**
          @brief Compute and put the current density in output data holder
-         @param[inout] a_output Output data holder.
-         @param[inout] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
+         @param[in,out] a_output Output data holder.
+         @param[in,out] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
          @param[in]    a_outputRealm Realm where a_output lives    
          @param[in]    a_level  Grid level
       */
@@ -1442,8 +1442,8 @@ namespace Physics {
 
       /**
          @brief Write data to output. Convenience function. 
-         @param[inout] a_output Output data holder.
-         @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+         @param[in,out] a_output Output data holder.
+         @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
          @param[in]    a_data   Data to write. 
          @param[in]    a_outputRealm Realm where a_output lives
          @param[in]    a_level  Grid level

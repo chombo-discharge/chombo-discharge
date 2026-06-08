@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_SignedDistanceDCEL.H
-  @brief  Declaration of an implicit-function class that gets its value function from a DCEL surface Tesselation
+  @brief  Declaration of an implicit-function class that gets its value function from a DCEL surface Tessellation
   @author Robert Marskar
   @date   March 2021
 */

@@ -77,7 +77,7 @@ namespace Physics {
       /**
          @brief Tag cells for refinement. 
          @details This tags based on |grad(E)|*dx/E. 
-         @param[inout] a_tags Tags on grid levels.
+         @param[in,out] a_tags Tags on grid levels.
       */
       virtual bool
       tagCells(EBAMRTags& a_tags) override final;
@@ -91,9 +91,9 @@ namespace Physics {
 
       /**
          @brief Write plot data.
-         @param[inout] a_output            Output data holder
-         @param[inout] a_plotVariableNames Plot variable names
-         @param[inout] a_icomp             Starting variable in a_output where we begin appending data.
+         @param[in,out] a_output            Output data holder
+         @param[in,out] a_plotVariableNames Plot variable names
+         @param[in,out] a_icomp             Starting variable in a_output where we begin appending data.
       */
       virtual void
       writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;

@@ -148,7 +148,7 @@ All of these boundary condition specifications take the form ``<type> <value>``.
 
       \partial_n\Psi + \frac{3\kappa}{2}\Psi = g.   
       
-   The user must then pass a value ``larsen <value>``, where the ``value`` corresponds to the souce term :math:`g`.
+   The user must then pass a value ``larsen <value>``, where the ``value`` corresponds to the source term :math:`g`.
    Typically, this term is zero.
 
 .. tip::

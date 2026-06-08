@@ -2675,7 +2675,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateEuler(const Real& a_voltag
           const Real     tol       = 1E-10;
           const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
 
-          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
           deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
@@ -2859,7 +2859,7 @@ DischargeInceptionStepper<P, F, C>::inceptionIntegrateTrapezoidal(const Real& a_
           const Real     tol       = 1E-10;
           const Real     gradAlpha = tol + (p.template vect<2>()).vectorLength();
 
-          // Select a step size equal to the avalance length, but never exceed the physical and grid hardcaps
+          // Select a step size equal to the avalanche length, but never exceed the physical and grid hardcaps
           Real deltaX;
           deltaX = std::min(m_alphaDx / (tol + std::abs(alphaEff)), m_gradAlphaDx * std::abs(alphaEff / gradAlpha));
           deltaX = std::max(deltaX, m_minGridDx * dx);
@@ -3534,7 +3534,7 @@ DischargeInceptionStepper<P, F, C>::computeRdot(const Real& a_voltage) const noe
 
   Real Rdot = 0.0;
 
-  // TLDR: We are computing the integral of dne/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
+  // TLDR: We are computing the integral of done/dt * (1-eta/alpha) over the critical volume and integral(j/e * dS) over the "critical surface"
   const RealVect probLo = m_amr->getProbLo();
 
   // Compute the electric field at the input voltage

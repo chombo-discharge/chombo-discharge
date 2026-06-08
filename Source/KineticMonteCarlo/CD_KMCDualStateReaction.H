@@ -117,7 +117,7 @@ public:
 
   /*!
     @brief Advance the incoming state with the number of reactions. 
-    @param[inout] a_state        State vector
+    @param[in,out] a_state        State vector
     @param[in]    a_numReactions Number of reactions.
   */
   inline void

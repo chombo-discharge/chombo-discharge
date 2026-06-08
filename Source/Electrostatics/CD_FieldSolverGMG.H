@@ -71,7 +71,7 @@ public:
 
   /*!
     @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
-    @param[inout] a_potential Potential
+    @param[in,out] a_potential Potential
     @param[in] a_rho Space charge density
     @param[in] a_sigma Surface charge density. 
     @param[in] a_zeroPhi Set a_potential to zero first. 

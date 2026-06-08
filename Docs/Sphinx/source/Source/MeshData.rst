@@ -3,7 +3,7 @@
 Mesh data
 =========
 
-Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hiearchy.
+Mesh data structures of the type discussed in :ref:`Chap:SpatialDiscretization` are derived from a class ``EBAMRData<T>`` which holds a ``T`` in every grid patch across the AMR hierarchy.
 A requirement on the datatype ``T`` is that it must be linearizable so that it can be communicated across MPI ranks. 
 Internally, the data is stored as a ``Vector<RefCountedPtr<LevelData<T>>>``.
 Here, the ``Vector`` holds data on each AMR level; the data is allocated with a smart pointer called ``RefCountedPtr`` which points to a ``LevelData`` template structure, see :ref:`Chap:Basics`.
@@ -44,7 +44,7 @@ These are outlined below:
 For example, ``EBAMRCellData`` is a ``Vector<RefCountedPtr<LevelData<EBCellFAB> > >``, describing cell-centered data across the entire AMR hierarchy.
 There are many more data structures in place, but the above data structures are the most commonly used ones.
 Here, ``EBAMRFluxData`` is precisely like ``EBAMRCellData``, except that the data is stored on *cell faces* rather than cell centers.
-Likewise, ``EBAMRIVData`` is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierachy.
+Likewise, ``EBAMRIVData`` is a data holder that holds data on each EB centroid (or boundary centroid) across the entire AMR hierarchy.
 In the same way, ``EBAMRIFData`` holds data on each face of all cut-cells in the hierarchy. 
 
 Allocating mesh data

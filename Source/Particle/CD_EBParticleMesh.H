@@ -72,7 +72,7 @@ public:
     @details The template parameters indicate the particle type and a pointer to a particle function. The user can scale
     the particle width by changing a_widthScale. If this is set to one, the standard width for CIC becomes the grid cell size,
     and the standard width for TSC becomes twice the grid size. 
-    @param[inout] a_rho            Mesh data
+    @param[in,out] a_rho            Mesh data
     @param[in]    a_particles      Particles to be deposited    
     @param[in]    a_depositionType Deposition method
     @param[in]    a_widthScale     Particle scale multiplier.  
@@ -90,7 +90,7 @@ public:
   /*!
     @brief Interpolate mesh data onto a particle. 
     @details The template parameters indicate the particle type and a pointer to a particle function. 
-    @param[inout] a_particles      Particles to be deposited
+    @param[in,out] a_particles      Particles to be deposited
     @param[in]    a_meshData       Mesh data    
     @param[in]    a_depositionType Deposition method
     @param[in]    a_widthScale     Particle scale multiplier.  
@@ -154,7 +154,7 @@ protected:
 
   /*!
     @brief Wrapper function for depositing a single particle with a standard NGP scheme. 
-    @param[inout] a_rho            Mesh data
+    @param[in,out] a_rho            Mesh data
     @param[in]    a_position       Particle position
     @param[in]    a_volumeFactor   Volume factor to multiply by
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
@@ -172,7 +172,7 @@ protected:
     @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
     box a_particleBox must be large enough to contain the particle. E.g., if a_particleWidth = 1, then the box must be at least
     Box(-IntVect::Unit, IntVect::Unit).
-    @param[inout] a_rho            Mesh data
+    @param[in,out] a_rho            Mesh data
     @param[in]    a_position       Particle position
     @param[in]    a_particleWidth  Particle width (relative to grid resolution)
     @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
@@ -196,7 +196,7 @@ protected:
     @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
     box (a_particleBox) must be large enough to contain a particle. E.g., if a_particleWidth = 2, then the box must be at least
     Box(-2*IntVect::Unit, 2*IntVect::Unit).
-    @param[inout] a_rho            Mesh data
+    @param[in,out] a_rho            Mesh data
     @param[in]    a_position       Particle position
     @param[in]    a_particleWidth  Particle width (relative to grid resolution)
     @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.

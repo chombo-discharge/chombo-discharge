@@ -553,7 +553,7 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     if (this->containsWildcard(speciesName))
       this->throwParserError(baseError + " -- species name must not contain '@' letter");
 
-    // Names can not contain paranthesis either
+    // Names can not contain parenthesis either
     if (this->containsBracket(speciesName))
       this->throwParserError(baseError + "but species '" + speciesName + "' can not contain brackets");
 
@@ -1107,7 +1107,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
     if (this->containsWildcard(name))
       this->throwParserError(baseError + "but photon species '" + name + "' cannot contain '@'");
 
-    // Names can not contain paranthesis either
+    // Names can not contain parenthesis either
     if (this->containsBracket(name))
       this->throwParserError(baseError + "but photon species '" + name + "' can not contain brackets");
 
@@ -1317,7 +1317,7 @@ CdrPlasmaJSON::parseAlpha()
     if (!(this->doesFileExist(filename)))
       this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
 
-    // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+    // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
     // second column.
     m_alphaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
@@ -1469,7 +1469,7 @@ CdrPlasmaJSON::parseEta()
     if (!(this->doesFileExist(filename)))
       this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
 
-    // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+    // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
     // second column.
     m_etaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
@@ -1632,7 +1632,7 @@ CdrPlasmaJSON::parseMobilities()
           this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
                                  "' but file was not found");
 
-        // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+        // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
         // second column.
         LookupTable1D<Real, 1> mobilityTable =
@@ -1718,7 +1718,7 @@ CdrPlasmaJSON::parseMobilities()
           this->throwParserError(baseError + "and got 'table energy' with file = '" + filename +
                                  "' but file was not found");
 
-        // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+        // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct eV column then that data will be put in the first column. The data for mu*N will be in the
         // second column.
         LookupTable1D<Real, 1> mobilityTable =
@@ -1939,7 +1939,7 @@ CdrPlasmaJSON::parseDiffusion()
           this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
                                  "' but file was not found");
 
-        // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+        // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
         LookupTable1D<Real, 1> diffusionTable =
@@ -2027,7 +2027,7 @@ CdrPlasmaJSON::parseDiffusion()
           this->throwParserError(baseError + "and got 'table energy' for diffusion with file = '" + filename +
                                  "' but file was not found");
 
-        // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+        // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
         LookupTable1D<Real, 1> diffusionTable =
@@ -2232,7 +2232,7 @@ CdrPlasmaJSON::parseTemperatures()
           scale = S["scale"].get<Real>();
         }
 
-        // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+        // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
         // second column.
         LookupTable1D<Real, 1> temperatureTable =
@@ -2775,7 +2775,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     if (!(this->doesFileExist(filename)))
       this->throwParserError(baseError + "and got 'table E/N' but file '" + filename + "' does not exist");
 
-    // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+    // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
     // second column.
     LookupTable1D<Real, 1> reactionTable =
@@ -2853,7 +2853,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     if (!(this->doesFileExist(filename)))
       this->throwParserError(baseError + "and got 'table energy' but file '" + filename + "' does not exist");
 
-    // Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+    // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
     // second column.
     LookupTable1D<Real, 1> reactionTable =

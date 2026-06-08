@@ -65,7 +65,7 @@ public:
   operator=(const KMCSingleState&) = default;
 
   /*!
-    @brief Disallowed move assignement
+    @brief Disallowed move assignment
   */
   inline KMCSingleState&
   operator=(const KMCSingleState&&) = delete;

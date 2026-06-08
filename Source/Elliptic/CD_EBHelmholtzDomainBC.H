@@ -72,7 +72,7 @@ public:
 
   /*!
     @brief Get face flux. This is for regular cells. 
-    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in,out] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
     @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction
@@ -152,7 +152,7 @@ protected:
   /*!
     @brief Utility function which multiplies the flux (or actually, dphi/dn) by the B-coefficient. This is used 
     by the implementation classes when they compute the regular flux at the domain edges/faces. 
-    @param[inout] a_flux    On input, contains dphi/dn. On output, contains B*dphi/dn
+    @param[in,out] a_flux    On input, contains dphi/dn. On output, contains B*dphi/dn
     @param[in]    a_bco     Helmholtz B-coefficient
     @param[in]    a_dir     Coordinate direction
     @param[in]    a_side    Side

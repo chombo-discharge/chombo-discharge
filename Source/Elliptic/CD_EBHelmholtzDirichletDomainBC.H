@@ -63,7 +63,7 @@ public:
 
   /*!
     @brief Get face flux. This is for regular cells, and it uses first order finite differences for filling the flux. 
-    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in,out] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
     @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction

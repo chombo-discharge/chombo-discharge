@@ -100,14 +100,14 @@ public:
          const int&         a_refRat) noexcept;
 
   /*!
-    @brief Assignement not allowed.
+    @brief Assignment not allowed.
   */
   virtual void
   operator=(const EBCoarAve& fabin) = delete;
 
   /*!
     @brief Do an average of cell data. 
-    @param[inout] a_coarData  Coarse data
+    @param[in,out] a_coarData  Coarse data
     @param[in]    a_fineData  Fine data
     @param[in]    a_variables Variables to coarsen
     @param[in]    a_average   Averaging method
@@ -120,7 +120,7 @@ public:
 
   /*!
     @brief Do an average of face data. 
-    @param[inout] a_coarData  Coarse data
+    @param[in,out] a_coarData  Coarse data
     @param[in]    a_fineData  Fine data
     @param[in]    a_variables Variables to coarsen
     @param[in]    a_average   Averaging method
@@ -133,7 +133,7 @@ public:
 
   /*!
     @brief Do an average of EB data. 
-    @param[inout] a_coarData  Coarse data
+    @param[in,out] a_coarData  Coarse data
     @param[in]    a_fineData  Fine data
     @param[in]    a_variables Variables to coarsen
     @param[in]    a_average   Averaging method
@@ -273,7 +273,7 @@ protected:
 
   /*!
     @brief Do an arithmetic average of cell-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variables 
@@ -287,7 +287,7 @@ protected:
                     const int&       a_fineVar) const noexcept;
   /*!
     @brief Do a harmonic average of cell-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variables 
@@ -302,7 +302,7 @@ protected:
 
   /*!
     @brief Do a conservative average of cell-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variables 
@@ -317,7 +317,7 @@ protected:
 
   /*!
     @brief Do an arithmetic average of face-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
@@ -334,7 +334,7 @@ protected:
 
   /*!
     @brief Do a harmonic average of face-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
@@ -351,7 +351,7 @@ protected:
 
   /*!
     @brief Do a conservative average of face-centered data when coarsening. 
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
@@ -368,7 +368,7 @@ protected:
 
   /*!
     @brief Arithmetic average data defined on irregular cells
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
@@ -383,7 +383,7 @@ protected:
 
   /*!
     @brief Harmonic average data defined on irregular cells
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
@@ -398,7 +398,7 @@ protected:
 
   /*!
     @brief Conservatively average data defined on irregular cells
-    @param[inout] a_coarData Coarse data
+    @param[in,out] a_coarData Coarse data
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable

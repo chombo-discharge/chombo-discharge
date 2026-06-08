@@ -179,7 +179,7 @@ LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     const double eps = std::numeric_limits<double>::epsilon();
     const double tol = eps * std::max(a_M, a_N) * maxS;
 
-    // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them.
+    // Need to storage the matrices in a form usable by LaPack, and then use dgemm to multiply them.
     double* U               = new double[a_M * a_M];
     double* SigmaReciprocal = new double[a_M * a_N];
     double* VT              = new double[a_N * a_N];
@@ -277,7 +277,7 @@ LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     const float eps = std::numeric_limits<float>::epsilon();
     const float tol = eps * std::max(a_M, a_N) * maxS;
 
-    // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them.
+    // Need to storage the matrices in a form usable by LaPack, and then use dgemm to multiply them.
     float* U               = new float[a_M * a_M];
     float* SigmaReciprocal = new float[a_M * a_N];
     float* VT              = new float[a_N * a_N];

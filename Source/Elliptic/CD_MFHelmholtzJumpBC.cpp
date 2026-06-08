@@ -147,7 +147,7 @@ MFHelmholtzJumpBC::defineStencils()
   CH_assert(m_weight >= 0);
 
   // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
-  //       stencils can later be used to compute the bounadry value on the interface.
+  //       stencils can later be used to compute the boundary value on the interface.
 
   // MFHelmholtzJumpBC internals should never be called unless it's a multiphase problem.
   if (m_multiPhase) {

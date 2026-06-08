@@ -512,7 +512,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
     interiorFaces.grow(dir, -1);
     interiorFaces.surroundingNodes(dir);
 
-    // Bounary faces on lo/high side.
+    // Boundary faces on lo/high side.
     Box bndryFacesLo = adjCellLo(domainBox, dir, -1);
     Box bndryFacesHi = adjCellHi(domainBox, dir, -1);
 

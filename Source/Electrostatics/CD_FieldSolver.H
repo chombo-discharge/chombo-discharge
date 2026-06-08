@@ -100,7 +100,7 @@ public:
 
   /*!
     @brief Solve Poisson equation onto a_phi using m_rho, and m_sigma as right-hand sides. 
-    @param[inout] a_potential Potential
+    @param[in,out] a_potential Potential
     @param[in]    a_zeroPhi Set a_potential to zero before calling other function. 
     @return       True if we found a solution and false otherwise. 
     @note         This calls the other (pure) version.
@@ -110,7 +110,7 @@ public:
 
   /*!
     @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
-    @param[inout] a_potential Potential
+    @param[in,out] a_potential Potential
     @param[in]    a_rho Space charge density
     @param[in]    a_sigma Surface charge density. 
     @param[in]    a_zeroPhi Set a_potential to zero first. 
@@ -308,8 +308,8 @@ public:
 
   /*!
     @brief Write output data to a_output
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp Current component in a_output. 
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp Current component in a_output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level Grid level
     @param[in]    a_forceNoInterp Forces data to be written using native centering
@@ -325,8 +325,8 @@ public:
   /*!
     @brief Write multifluid data to single-fluid data holders. 
     @details This takes the valid data from each phase and writes it to a_output. On cut-cells, the a_phase flag determines which phase will be plotted.
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Current component in a_output. 
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Current component in a_output. 
     @param[in]    a_data   Multifluid data holder
     @param[in]    a_phase  Main phase in cut-cells. 
     @param[in]    a_outputRealm Realm where a_output belongs
@@ -345,8 +345,8 @@ public:
   /*!
     @brief Write surface data to volume data holder. 
     @details This takes the valid data from a_data and puts in onto a_output. 
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Current component in a_output. 
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Current component in a_output. 
     @param[in]    a_data   Surface data. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level Grid level
@@ -678,7 +678,7 @@ protected:
   bool m_regridSlopes;
 
   /*!
-    @brief Verbosity for this calss. 
+    @brief Verbosity for this class. 
   */
   int m_verbosity;
 

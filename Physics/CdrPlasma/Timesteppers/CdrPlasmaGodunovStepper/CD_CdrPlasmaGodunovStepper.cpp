@@ -702,7 +702,7 @@ CdrPlasmaGodunovStepper::deallocateInternals()
 
   // TLDR: This routine simply deallocates the transient memory used by CdrPlasmaGodunovStepper.
 
-  // Run through CDR solvers and deallocate the transient memory assocaited with them.
+  // Run through CDR solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
@@ -710,7 +710,7 @@ CdrPlasmaGodunovStepper::deallocateInternals()
     m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
-  // Run through RTE solvers and deallocate the transient memory assocaited with them.
+  // Run through RTE solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
@@ -744,7 +744,7 @@ CdrPlasmaGodunovStepper::deallocateScratch()
 
   // TLDR: This routine simply deallocates the transient memory used by CdrPlasmaGodunovStepper.
 
-  // Run through CDR solvers and deallocate the transient memory assocaited with them.
+  // Run through CDR solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
@@ -752,7 +752,7 @@ CdrPlasmaGodunovStepper::deallocateScratch()
     m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
-  // Run through RTE solvers and deallocate the transient memory assocaited with them.
+  // Run through RTE solvers and deallocate the transient memory associated with them.
   for (auto solverIt = m_rte->iterator(); solverIt.ok(); ++solverIt) {
     const int idx = solverIt.index();
 
@@ -860,7 +860,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToEB()
     pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToEB()" << endl;
   }
 
-  // TLDR: This routine is reponsible for computing the cell-centered states and gradients at the EB. This is necessary because
+  // TLDR: This routine is responsible for computing the cell-centered states and gradients at the EB. This is necessary because
   //       the boundary condition routines require these things to be known at the EB. This is the routine that computes them. We
   //       will later fetch these quantities and pass them into our boundary condition routines.
 
@@ -994,7 +994,7 @@ CdrPlasmaGodunovStepper::extrapolateCdrToDomain()
     pout() << "CdrPlasmaGodunovStepper::extrapolateCdrToDomain()" << endl;
   }
 
-  // TLDR: This routine is reponsible for computing the cell-centered states and gradients at domainfaces. This is necessary because
+  // TLDR: This routine is responsible for computing the cell-centered states and gradients at domainfaces. This is necessary because
   //       the boundary condition routines require these things to be known. This is the routine that computes them. We
   //       will later fetch these quantities and pass them into our boundary condition routines.
 
@@ -1177,7 +1177,7 @@ CdrPlasmaGodunovStepper::advanceTransportExplicitField(const Real a_dt)
     pout() << "CdrPlasmaGodunovStepper::advanceTransportExplicitField(Real)" << endl;
   }
 
-  // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be explictly discretized, or
+  // TLDR: This advances the CDR equations using an Euler rule. The right-hand side of the CDR equations can be explicitly discretized, or
   //       with implicit diffusion. If we use implicit diffusion we first advance the advective problem to the end state and use that as
   //       an initial condition in the diffusion equation.
 

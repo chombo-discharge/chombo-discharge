@@ -51,7 +51,7 @@ This class can advance a set of computational particles (see :ref:`Chap:ItoParti
 #. Move particles the a microscopic drift-diffusion model.
 #. Compute particle intersection with embedded boundaries and domain edges.
 #. Deposit particles and other particle types on the mesh.
-#. Interpolate velocities and diffusion coefficients to the particle positons.
+#. Interpolate velocities and diffusion coefficients to the particle positions.
 #. Manage superparticle splitting and merging.
 
 Internally, ``ItoSolver`` stores its particles in various ``ParticleContainer<ItoParticle>`` containers.

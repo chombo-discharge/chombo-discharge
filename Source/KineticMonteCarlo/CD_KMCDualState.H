@@ -66,7 +66,7 @@ public:
   operator=(const KMCDualState&) = default;
 
   /*!
-    @brief Disallowed move assignement
+    @brief Disallowed move assignment
   */
   inline KMCDualState&
   operator=(const KMCDualState&&) = delete;

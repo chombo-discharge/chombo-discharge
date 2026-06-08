@@ -37,8 +37,8 @@ public:
 
   /*!
     @brief Linearization function. We linearize the buffer onto arg, but since this is an addition operator we need to add the result.
-    @param[inout] a_data   Data to be incremented with buffer
-    @param[inout] a_buffer Data buffer (this is another EBCellFAB)
+    @param[in,out] a_data   Data to be incremented with buffer
+    @param[in,out] a_buffer Data buffer (this is another EBCellFAB)
     @param[in]    a_region Region
     @param[in]    a_comps  Components to do.
   */
@@ -47,7 +47,7 @@ public:
 
   /*!
     @brief Operator function. Increments data with source.
-    @param[inout] a_dst        Destination data.
+    @param[in,out] a_dst        Destination data.
     @param[in]    a_regionFrom Source regionw
     @param[in]    a_dstVars    Destination variables
     @param[in]    a_regionTo   Destination region

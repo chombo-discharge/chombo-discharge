@@ -89,7 +89,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
         @brief Write checkpoint data to file (no-op).
-        @param[inout] a_handle HDF5 file handle.
+        @param[in,out] a_handle HDF5 file handle.
         @param[in]    a_lvl    Grid level.
       */
       virtual void
@@ -99,7 +99,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
         @brief Read checkpoint data from file (no-op).
-        @param[inout] a_handle HDF5 file handle.
+        @param[in,out] a_handle HDF5 file handle.
         @param[in]    a_lvl    Grid level.
       */
       virtual void
@@ -122,8 +122,8 @@ namespace Physics {
 
       /**
         @brief Write plot data to output holder (no-op).
-        @param[inout] a_output       Output data holder.
-        @param[inout] a_icomp        Starting component in a_output.
+        @param[in,out] a_output       Output data holder.
+        @param[in,out] a_icomp        Starting component in a_output.
         @param[in]    a_realm        Output realm name.
         @param[in]    a_level        Grid level.
       */

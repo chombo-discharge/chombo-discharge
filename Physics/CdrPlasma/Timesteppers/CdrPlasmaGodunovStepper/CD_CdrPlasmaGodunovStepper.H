@@ -87,7 +87,7 @@ namespace Physics {
 
       /**
          @brief Pre-regrid method. Used for storing important variables for the solvers
-         @details This is overriden because the semi-implicit scheme requires us to store some extra variables on the old grids. 
+         @details This is overridden because the semi-implicit scheme requires us to store some extra variables on the old grids. 
          @param[in] a_lmin           The coarsest level that changes
          @param[in] a_oldFinestLevel The finest level before the regrid. 
       */
@@ -282,7 +282,7 @@ namespace Physics {
       std::vector<bool> m_useImplicitDiffusion;
 
       /**
-         @brief Function for getting the transient storage assocaited with a particular CDR solver
+         @brief Function for getting the transient storage associated with a particular CDR solver
          @param[in] a_solverIt Solver iterator
          @return This returns the entry in m_cdrScratch corresponding to the solver. 
       */
@@ -290,7 +290,7 @@ namespace Physics {
       getCdrStorage(const CdrIterator<CdrSolver>& a_solverIt);
 
       /**
-         @brief Function for getting the transient storage assocaited with a particular RTE solver
+         @brief Function for getting the transient storage associated with a particular RTE solver
          @param[in] a_solverIt Solver iterator
          @return This returns the entry in m_rteScratch corresponding to the solver. 
       */
@@ -529,8 +529,8 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**  
            @brief Write checkpoint data to file.
-           @details Overriden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
-           @param[inout] a_handle HDF5 fil
+           @details Overridden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
+           @param[in,out] a_handle HDF5 fil
            @param[in]    a_lvl    Grid level
       */
       virtual void
@@ -540,8 +540,8 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
          @brief Read checkpoint data from file. Used for restarts. 
-         @details Overriden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
-         @param[inout] a_handle HDF5 file
+         @details Overridden because semi-implicit scheme requires additioanl stuff in HDF5 files. 
+         @param[in,out] a_handle HDF5 file
          @param[in]    a_lvl    Grid level
       */
       virtual void

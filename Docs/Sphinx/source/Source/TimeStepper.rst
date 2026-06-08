@@ -106,7 +106,7 @@ Again using :ref:`Chap:AdvectionDiffusionModel` as an example,
    :lines: 188-197
 
 In the above snippet, ``TimeStepper`` only calls the solver allocation function (solvers generally know how to allocate their own internal data).
-For more complex problems this routine will probably allocate additonal data that only lives within ``TimeStepper`` (and not the solvers). 
+For more complex problems this routine will probably allocate additional data that only lives within ``TimeStepper`` (and not the solvers). 
 
 initialData
 -----------
@@ -270,7 +270,7 @@ We have chosen to call this a trial time step because
 #. :ref:`Chap:Driver` might choose to use a smaller time step in order to write plot files at specific times.
 #. When calling the actual advance method (see below), it is possible to return a different time step than the one computed through ``computeDt``.
 
-The calculation of a time step can be quite involved, depending on the application being imlemented.
+The calculation of a time step can be quite involved, depending on the application being implemented.
 Moreover, many ``TimeStepper`` implementations will provide hooks for swapping algorithms, and in this case the time step might be limited differently.
 For the :ref:`Chap:AdvectionDiffusionModel` the implementation is as follows:
 
@@ -355,7 +355,7 @@ Regrid routines
 
 The regrid routines in ``TimeStepper`` must, in combination, be able to transfer the simulation between old and new grids.
 For an explanation to how regridding occurs in ``chombo-discharge``, see :ref:`Chap:DriverRegridding`.
-In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from whan transfer the state to the new grids. 
+In particular, when regrids occur the old grids are eventually destroyed so it is necessary to cache the old-grid simulation states so that we have something to interpolate from when transfer the state to the new grids. 
 
 preRegrid
 ---------

@@ -577,7 +577,7 @@ For example, specification of tropospheric conditions can be included by
 Tabulated
 _________
 
-To specify temperature, density, and pressure as function of altitude, set ``law`` to ``table`` and incldue the following fields:
+To specify temperature, density, and pressure as function of altitude, set ``law`` to ``table`` and include the following fields:
 
 * ``file`` For specifying which file we read the data from.
 * ``height`` For specifying the column where the height is stored (in meters).

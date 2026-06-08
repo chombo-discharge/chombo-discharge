@@ -60,8 +60,8 @@ Driver.refine_electrodes            = -1                   ## Refine electrode s
 Driver.refine_dielectrics           = -1                   ## Refine dielectric surfaces. -1 => equal to refine_geometry
 
 # ====================================================================================================
-# TESSELATION GEOMETRY CLASS
+# TESSELLATION GEOMETRY CLASS
 # ====================================================================================================
-Tesselation.mesh_file       = sphere.stl    ## STL file
-Tesselation.flip_inside     = false         ## Flip inside/outside
-Tesselation.z_coord         = 0.0           ## z-coordinate for 2D slicing this object
+Tessellation.mesh_file       = sphere.stl    ## STL file
+Tessellation.flip_inside     = false         ## Flip inside/outside
+Tessellation.z_coord         = 0.0           ## z-coordinate for 2D slicing this object

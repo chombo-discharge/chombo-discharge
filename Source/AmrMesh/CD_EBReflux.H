@@ -80,7 +80,7 @@ public:
     @brief Reflux into the coarse data. 
     @details This subtracts the coarse-fluxes from the EB and adds in the sum offine-grid fluxes. Multiplication by area 
     fractions and grid resolutions are done in this routine. 
-    @param[inout] a_data      Data
+    @param[in,out] a_data      Data
     @param[in]    a_flux      Fluxes
     @param[in]    a_fineFlux  Fine-grid flux. 
     @param[in]    a_variables Variables to reflux.
@@ -168,7 +168,7 @@ protected:
   /*!
     @brief Coarsen the input fine fluxes onto the coarse fluxes. 
     @details This replaces the coarse fluxes along the coarse-fine interface by the conservative average of the fine fluxes.
-    @param[inout] a_coarFluxes Coarse-grid fluxes
+    @param[in,out] a_coarFluxes Coarse-grid fluxes
     @param[in]    a_fineFluxes Fine-grid fluxes
     @param[in]    a_coarVar    Coarse-flux variable
     @param[in]    a_fineVar    Fine-flux variable
@@ -182,7 +182,7 @@ protected:
   /*!
     @brief Reflux data into a_Lphi
     @details This subtracts the old fluxes (scaled by a_scaleOldFlux) from a_Lphi and adds in the new fluxes (scaled by a_scaleFineFlux).
-    @param[inout] a_Lphi
+    @param[in,out] a_Lphi
     @param[in]    a_oldFluxes     Previous fluxes from which a_Lphi was computed
     @param[in]    a_newFluxes     New fluxes to be put into a_Lphi
     @param[in]    a_phiVar        Variable in a_Lphi to reflux

@@ -120,7 +120,7 @@ public:
     @details If the face is oriented along dir, this computes the dir-component of the gradient using
     centered differences on the face. This routine is useful after e.g. averaging a cell-centered gradient
     to faces (in order to shrink the stencil). 
-    @param[inout] a_gradient Gradient of input scalar
+    @param[in,out] a_gradient Gradient of input scalar
     @param[in]    a_phi      Input scalar
   */
   virtual void

@@ -49,7 +49,7 @@ static const std::string s_eb_irreg_interp     = "eb_irreg_interp";     // For d
 static const std::string s_eb_coar_ave         = "eb_coar_ave";         // For coarsening
 static const std::string s_eb_fill_patch       = "eb_fill_patch";       // For regridding data
 static const std::string s_eb_fine_interp      = "eb_fine_interp";      // For linearly filling ghost cells
-static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registeration
+static const std::string s_eb_flux_reg         = "eb_flux_reg";         // For flux registration
 static const std::string s_eb_redist           = "eb_redist";           // For redistribution
 static const std::string s_noncons_div         = "eb_non_cons_div";     // For computing non-conservative divergences
 static const std::string s_eb_multigrid        = "eb_multigrid";        // For multigrid interpolation
@@ -198,7 +198,7 @@ public:
   getEBIndexSpace() const;
 
   /*!
-    @brief Get refinment ratios
+    @brief Get refinement ratios
     @return Returns m_refinementRatios
   */
   const Vector<int>&

@@ -151,7 +151,7 @@ namespace Physics {
 
       /**
          @brief Post checkpoint operations. 
-         @note Not needed for this time stepper beacuse checkpoint-restart is not supported. 
+         @note Not needed for this time stepper because checkpoint-restart is not supported. 
       */
       void
       postCheckpointSetup() override
@@ -185,7 +185,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**  
            @brief Write checkpoint data to file
-           @param[inout] a_handle HDF5 file
+           @param[in,out] a_handle HDF5 file
            @param[in]    a_lvl    Grid level
            @note Module does not support checkpoint-restart and calling this is an error. 
       */
@@ -196,7 +196,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
          @brief Read checkpoint data from file
-         @param[inout] a_handle HDF5 file
+         @param[in,out] a_handle HDF5 file
          @param[in]    a_lvl    Grid level.
          @note Module does not support checkpoint-restart and calling this is an error. 
       */
@@ -220,8 +220,8 @@ namespace Physics {
 
       /**
          @brief Write plot data to output holder. 
-         @param[inout] a_output Output data holder.
-         @param[inout] a_icomp  Starting component in a_output to begin at. 
+         @param[in,out] a_output Output data holder.
+         @param[in,out] a_icomp  Starting component in a_output to begin at. 
          @param[in]    a_outputRealm Realm where a_output belongs
          @param[in]    a_level  Grid level
       */
@@ -697,7 +697,7 @@ namespace Physics {
 
       /**
          @brief Integral factor for cumulative integration.
-         @details This is the integral_Vcr dne/dt * (1 - eta/alpha) dV + integral(j/e*dS)  stored at each time step. 
+         @details This is the integral_Vcr done/dt * (1 - eta/alpha) dV + integral(j/e*dS)  stored at each time step. 
          @note Only for transient mode. 
       */
       std::vector<std::pair<Real, Real>> m_Rdot;
@@ -874,7 +874,7 @@ namespace Physics {
       bool m_plotBackgroundIonization;
 
       /**
-         @brief If true, plot electron detachment rate, i.e. dne/dt due to detachment from negative ions. 
+         @brief If true, plot electron detachment rate, i.e. done/dt due to detachment from negative ions. 
       */
       bool m_plotDetachment;
 
@@ -1067,7 +1067,7 @@ namespace Physics {
       townsendTrackTrapezoidal(const Real& a_voltage) noexcept;
 
       /**
-         @brief Compute integral_Vcr(dne/dt * (1 - eta/alpha) dV)
+         @brief Compute integral_Vcr(done/dt * (1 - eta/alpha) dV)
          @param[in] a_voltage Voltage multiplier. 
       */
       virtual Real
@@ -1212,8 +1212,8 @@ namespace Physics {
 
       /**
          @brief Write plot data for the 'stationary' mode
-         @param[inout] a_output Output data holder.
-         @param[inout] a_icomp  Starting component in a_output to begin at. 
+         @param[in,out] a_output Output data holder.
+         @param[in,out] a_icomp  Starting component in a_output to begin at. 
          @param[in]    a_outputRealm Realm where a_output belongs
          @param[in]    a_level  Grid level
       */
@@ -1225,10 +1225,10 @@ namespace Physics {
 
       /**
          @brief Write plot data for the 'transient' mode
-         @param[inout] a_output            Output data holder.
+         @param[in,out] a_output            Output data holder.
          @param[in]    a_plotVariableNames Plot variable names.
          @param[in]    a_outputRealm Realm where a_output belongs
-         @param[inout] a_icomp             Starting component in a_output to begin at. 
+         @param[in,out] a_icomp             Starting component in a_output to begin at. 
       */
       virtual void
       writePlotDataTransient(LevelData<EBCellFAB>& a_output,
@@ -1339,8 +1339,8 @@ namespace Physics {
 
       /**
          @brief Write data to output. Convenience function used for IO.
-         @param[inout] a_output Output data holder.
-         @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+         @param[in,out] a_output Output data holder.
+         @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
          @param[in]    a_data   Data to write. 
          @param[in]    a_outputRealm Realm where a_output belongs
          @param[in]    a_level  Grid level

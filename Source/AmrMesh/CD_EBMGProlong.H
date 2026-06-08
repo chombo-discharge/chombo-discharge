@@ -35,7 +35,7 @@ public:
   EBMGProlong() noexcept;
 
   /*!
-    @brief Full constructor. Calls the define fucntion
+    @brief Full constructor. Calls the define function
     @param[in] a_eblgFine Fine level that we prolong to.
     @param[in] a_eblgCoar Coarse level that we prolong from.
     @param[in] a_refRat   Refinement factor between levels.
@@ -58,7 +58,7 @@ public:
 
   /*!
     @brief Prolong residual onto the coarse grid. 
-    @param[inout] a_fineData  Fine-grid residual.
+    @param[in,out] a_fineData  Fine-grid residual.
     @param[in]    a_coarData  Coarse-grid residual
     @param[in]    a_variables Variables to prolong.
   */

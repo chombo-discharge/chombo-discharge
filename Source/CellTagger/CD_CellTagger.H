@@ -70,7 +70,7 @@ public:
 
   /*!
     @brief Tag cells
-    @param[inout] a_tags Tags on grid levels
+    @param[in,out] a_tags Tags on grid levels
     @details EBAMRTags is a data-type Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >. The vector indicates the grid level, the LayoutData indicates data ownership (in
     much the same way as LevelData. The DenseIntVectSet is essentially an IntVectSet restricted to the patch (i.e. one cannot add IntVects that are outside the patch). 
     This function cells for refinement or coarsening. The user's responsibility is to add (or remove) tags from a_tags. 
@@ -99,8 +99,8 @@ public:
 
   /*!
     @brief Write plot data.
-    @param[inout] a_output Output data holder
-    @param[inout] a_icomp Starting variable in a_output where we begin appending data.
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_icomp Starting variable in a_output where we begin appending data.
     @param[in] a_outputRealm Realm where a_output belongs
     @param[in] a_level Grid level
   */

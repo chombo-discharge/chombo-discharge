@@ -30,7 +30,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. 
+  @brief Radiative transfer equation solver in the SP1 (diffusion) approximation. 
 */
 class EddingtonSP1 : public RtSolver
 {
@@ -80,7 +80,7 @@ public:
   /*!
     @brief Advance RTE onto state a_phi
     @param[in]    a_dt      Time step
-    @param[inout] a_phi     RTE solution
+    @param[in,out] a_phi     RTE solution
     @param[in]    a_source  Source term
     @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve
     @note If you're not doing a stationary solve, this does a backward Euler solve. 
@@ -92,7 +92,7 @@ public:
     @brief Advance using the Euler rule
     @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
     that the incoming source term a_source HAS been weighted by the volume fraction. 
-    @param[inout] a_newPhi  On exit, contains solution at time t + dt. On entry, containes solution at tim et
+    @param[in,out] a_newPhi  On exit, contains solution at time t + dt. On entry, contains solution at tim et
     @param[in]    a_source  Source term. Should be weighted by the volume fraction. 
     @param[in]    a_dt      Time step.
     @param[in]    a_zeroPhi Set phi to zero before multigrid solving
@@ -409,7 +409,7 @@ protected:
   EBAMRIVData m_helmBcoIrreg;
 
   /*!
-    @brief Wrapper calss. 
+    @brief Wrapper class. 
   */
   EddingtonSP1DomainBc m_domainBc;
 
@@ -467,7 +467,7 @@ protected:
     @brief Make domain bc string
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Side
-    @details Used for pasing boundary conditions from input script. 
+    @details Used for passing boundary conditions from input script. 
     @returns Returns string of type "bc.x.lo", "bc.y.hi" etc. 
   */
   virtual std::string

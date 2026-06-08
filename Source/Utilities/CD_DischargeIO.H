@@ -87,7 +87,7 @@ namespace DischargeIO {
 #ifdef CH_USE_HDF5
   /*!
     @brief Write HDF5 header to the input handle
-    @param[inout] a_handleH5 Handle to HDF5 file
+    @param[in,out] a_handleH5 Handle to HDF5 file
     @param[in] a_numLevels Number of levels to write
     @param[in] a_probLo Lower-left corner of problem domain
     @param[in] a_variableNames Variable names

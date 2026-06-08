@@ -375,8 +375,8 @@ public:
 
   /*!
     @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp

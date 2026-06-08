@@ -28,7 +28,9 @@ repos:
     hooks:
       - id: codespell
         files: ^(Source|Docs|Exec|Physics)/
-        args: ["--ignore-words", ".codespellignore" ]        
+        args:
+          - "--ignore-words=.codespellignore"
+          - "--skip=*.bib,*.js,Docs/Sphinx/build,Docs/doxygen"
 
   - repo: local
     hooks:
@@ -45,6 +47,12 @@ repos:
         language: system
         pass_filenames: false
         files: \.(rst|H|cpp|options|inputs)$
+
+      - id: check-doxygen-param-direction
+        name: Forbid @param[inout] — correct form is @param[in,out]
+        entry: bash -c 'grep -rn "@param\[inout\]" "$@" && exit 1 || exit 0' --
+        language: system
+        types_or: [c++, c]
 
       - id: doxygen-check
         name: Check doxygen documentation (warnings as errors)

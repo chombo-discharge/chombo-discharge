@@ -143,13 +143,13 @@ public:
   virtual ~MFHelmholtzOp();
 
   /*!
-    @brief No copy assigment allowed
+    @brief No copy assignment allowed
   */
   MFHelmholtzOp&
   operator=(const MFHelmholtzOp& a_oper) = delete;
 
   /*!
-    @brief No move assigment allowed
+    @brief No move assignment allowed
   */
   MFHelmholtzOp&
   operator=(const MFHelmholtzOp&& a_oper) = delete;
@@ -214,7 +214,7 @@ public:
 
   /*!
     @brief Divide by the a-coefficient
-    @param[inout] a_rhs Divided data
+    @param[in,out] a_rhs Divided data
   */
   void
   divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs) override final;
@@ -291,7 +291,7 @@ public:
 
   /*!
     @brief Relaxation method. This does smoothing for the system L(correction) = residual
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -300,7 +300,7 @@ public:
 
   /*!
     @brief Jacobi relaxation
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -309,7 +309,7 @@ public:
 
   /*!
     @brief Jacobi relaxation
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -318,7 +318,7 @@ public:
 
   /*!
     @brief Multi-colored gauss-seidel relaxation
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -353,7 +353,7 @@ public:
 
   /*!
     @brief Increment function
-    @param[inout] a_lhs   On output, a_lhs = a_lhs + a_rhs*a_scale
+    @param[in,out] a_lhs   On output, a_lhs = a_lhs + a_rhs*a_scale
     @param[in]    a_rhs   Data
     @param[in]    a_scale Scaling factor
   */
@@ -368,7 +368,7 @@ public:
 
   /*!
     @brief Scale function
-    @param[inout] a_lhs   On output, a_lhs = a_lhs*a_scale
+    @param[in,out] a_lhs   On output, a_lhs = a_lhs*a_scale
     @param[in]    a_scale Scaling factor
   */
   void
@@ -382,7 +382,7 @@ public:
   setToZero(LevelData<MFCellFAB>& a_lhs) override final;
 
   /*!
-    @brief Assignment fucntion
+    @brief Assignment function
     @param[out] a_lhs. Equal to a_rhs on output
     @param[in]  a_rhs. Data
   */
@@ -442,8 +442,8 @@ public:
 
   /*!
     @brief Restrict residual onto coarse level
-    @param[inout] a_resCoar      Coarse residual
-    @param[inout] a_phi Phi on this level
+    @param[in,out] a_resCoar      Coarse residual
+    @param[in,out] a_phi Phi on this level
     @param[in]    a_rhs Rhs on this level
   */
   void
@@ -660,17 +660,17 @@ protected:
   MFCoarAve m_coarAve;
 
   /*!
-    @brief Helmholtz A-coefficeint
+    @brief Helmholtz A-coefficient
   */
   RefCountedPtr<LevelData<MFCellFAB>> m_Acoef;
 
   /*!
-    @brief Helmholtz B-coefficeint
+    @brief Helmholtz B-coefficient
   */
   RefCountedPtr<LevelData<MFFluxFAB>> m_Bcoef;
 
   /*!
-    @brief Helmholtz B-coefficeint on EB
+    @brief Helmholtz B-coefficient on EB
   */
   RefCountedPtr<LevelData<MFBaseIVFAB>> m_BcoefIrreg;
 
@@ -746,7 +746,7 @@ protected:
 
   /*!
     @brief Do coarse-fine interpolation
-    @param[inout] a_phi Fine-level data
+    @param[in,out] a_phi Fine-level data
     @param[in]    a_phiCoar Coarse-level data
     @param[in]    a_homogeneousCF Homogeneous interpolation or not. 
     @note Only ghost cells in a_phi are touched. 

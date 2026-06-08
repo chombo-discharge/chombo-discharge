@@ -826,7 +826,7 @@ FieldSolver::parseDomainBc()
   //       anywhere in space and time on a domain edge (face). The FieldSolver class supports Dirichlet and Neumann, and the below code simply
   //       creates those functions and associates them with an edge.
   //
-  //       For flexibility we want to be able to specify the potential directy without invoking m_voltage, while at the same time we want to offer
+  //       For flexibility we want to be able to specify the potential directly without invoking m_voltage, while at the same time we want to offer
   //       the simplistic method of setting a domain side to be "grounded", "live", or otherwise given by some fraction of m_voltage.
   //       We thus make a distinction between "dirichlet" and "dirichlet_custom". The difference between these is that for "dirichlet_custom" the contents
   //       of m_domainBcFunctions are used as boundary conditions. For "dirichlet 0.5" the contents of m_domainBcFunctions are multiplied by 0.5*m_voltage.

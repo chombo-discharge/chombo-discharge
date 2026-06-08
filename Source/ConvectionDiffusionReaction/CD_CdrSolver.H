@@ -59,7 +59,7 @@ public:
   operator=(const CdrSolver& a_other) = delete;
 
   /*!
-    @brief Disallowed move assignement operator
+    @brief Disallowed move assignment operator
     @param[in] a_other Other solver
   */
   CdrSolver&
@@ -110,7 +110,7 @@ public:
 
   /*!
     @brief Implicit diffusion Euler advance without source term.
-    @param[inout] a_newPhi Solution at time t + dt
+    @param[in,out] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
     @param[in]    a_dt     Time step
     @note This calls the other version with a zero source term. 
@@ -120,7 +120,7 @@ public:
 
   /*!
     @brief Implicit diffusion Euler advance with source term.
-    @param[inout] a_newPhi Solution at time t + dt
+    @param[in,out] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
     @param[in]    a_source Source term. 
     @param[in]    a_dt     Time step
@@ -135,7 +135,7 @@ public:
 
   /*!
     @brief Implicit diffusion Crank-Nicholson advance without source term.
-    @param[inout] a_newPhi Solution at time t + dt
+    @param[in,out] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
     @param[in]    a_dt     Time step
     @note This calls the other version with a zero source term. 
@@ -145,7 +145,7 @@ public:
 
   /*!
     @brief Implicit diffusion Crank-Nicholson advance with source term.
-    @param[inout] a_newPhi Solution at time t + dt
+    @param[in,out] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
     @param[in]    a_source Source term. 
     @param[in]    a_dt     Time step
@@ -213,7 +213,7 @@ public:
   /*!
     @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers. This can involve mass redistribution.
     @param[in]    a_divG             div(G) or kappa*div(G).
-    @param[inout] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. 
+    @param[in,out] a_G                Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. 
     @param[in]    a_ebFlux           Flux on the EB centroids
     @param[in]    a_conservativeOnly If true, we compute div(G)=1/dx*sum(fluxes), which does not involve redistribution.
   */
@@ -436,8 +436,8 @@ public:
 
   /*!
     @brief Write output data to a_output
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp
@@ -675,7 +675,7 @@ public:
 
   /*!
     @brief Add data through redistribution into cell-centered holders
-    @param[inout] a_phi   Target data
+    @param[in,out] a_phi   Target data
     @param[in]    a_delta Data to be redistributed
   */
   virtual void
@@ -1017,14 +1017,14 @@ protected:
 
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
-    @param[inout] a_flux Flux to be modified. 
+    @param[in,out] a_flux Flux to be modified. 
   */
   virtual void
   fillDomainFlux(EBAMRFluxData& a_flux);
 
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
-    @param[inout] a_flux  Flux to be modified. 
+    @param[in,out] a_flux  Flux to be modified. 
     @param[in]    a_level Grid level
   */
   virtual void
@@ -1053,7 +1053,7 @@ protected:
 
   /*!
     @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence. 
-    @param[inout] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
+    @param[in,out] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
     @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true divergence
     @param[in]    a_nonConservativeDivergence Non-conservative divergence.
   */
@@ -1064,7 +1064,7 @@ protected:
 
   /*!
     @brief Make the hybrid divergence. On the way in, a_hybridDivergence must hold the conservative divergence
-    @param[inout] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
+    @param[in,out] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
     @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true divergence
     @param[in]    a_nonConservativeDivergence Non-conservative divergence.
     @param[in]    a_lvl                       Grid level. 
@@ -1087,7 +1087,7 @@ protected:
 
   /*!
     @brief Interpolate flux to centroids
-    @param[inout] a_flux On input, contains centered fluxes. Output contains centroid fluxes
+    @param[in,out] a_flux On input, contains centered fluxes. Output contains centroid fluxes
     @details This interpolates face fluxes to centroids. 
   */
   virtual void
@@ -1095,7 +1095,7 @@ protected:
 
   /*!
     @brief Interpolate flux to centroids
-    @param[inout] a_flux On input, contains centered fluxes. Output contains centroid fluxes
+    @param[in,out] a_flux On input, contains centered fluxes. Output contains centroid fluxes
     @param[in]    a_lvl  Grid level
     @details This interpolates face fluxes to centroids. 
   */
@@ -1125,7 +1125,7 @@ protected:
 
   /*!
     @brief Fill initial data from particles
-    @note This will set m_phi to zero before depositing the particles (which are deposited with an NGP scheme, ignoring modifactions near cut-cells)
+    @note This will set m_phi to zero before depositing the particles (which are deposited with an NGP scheme, ignoring modifications near cut-cells)
   */
   virtual void
   initialDataParticles();
@@ -1195,8 +1195,8 @@ protected:
 
   /*!
     @brief Write data to output. Convenience function. 
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level

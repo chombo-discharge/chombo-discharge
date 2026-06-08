@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EBParticleMeshImplem.H
-  @brief  Implementatoin of CD_EBParticleMesh.H
+  @brief  Implementation of CD_EBParticleMesh.H
   @author Robert Marskar
 */
 

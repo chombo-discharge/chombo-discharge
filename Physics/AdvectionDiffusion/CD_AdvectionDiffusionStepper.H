@@ -72,7 +72,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
          @brief Write the solver state to an HDF5 checkpoint file.
-         @param[inout] a_handle HDF5 file handle.
+         @param[in,out] a_handle HDF5 file handle.
          @param[in]    a_lvl    AMR level to write.
       */
       void
@@ -82,7 +82,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
          @brief Read the solver state from an HDF5 checkpoint file.
-         @param[inout] a_handle HDF5 file handle.
+         @param[in,out] a_handle HDF5 file handle.
          @param[in]    a_lvl    AMR level to read.
       */
       void
@@ -112,8 +112,8 @@ namespace Physics {
 
       /**
          @brief Write plot data into the output holder.
-         @param[inout] a_output      Output data holder.
-         @param[inout] a_icomp       Starting component index in a_output; incremented on return.
+         @param[in,out] a_output      Output data holder.
+         @param[in,out] a_icomp       Starting component index in a_output; incremented on return.
          @param[in]    a_outputRealm Realm that owns a_output.
          @param[in]    a_level       AMR level to write.
       */

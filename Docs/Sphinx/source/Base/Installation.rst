@@ -313,7 +313,7 @@ If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Li
 Configuration on clusters
 _________________________
 
-To configure ``chombo-discharge`` for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Lib/Local`` if it exists for your computer.
+To configure ``chombo-discharge`` for execution on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Lib/Local`` if it exists for your computer.
 Alternatively, copy ``$DISCHARGE_HOME/Lib/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
 
 On clusters, MPI and HDF5 are usually already installed, but must usually be loaded (e.g. as modules) before compilation.

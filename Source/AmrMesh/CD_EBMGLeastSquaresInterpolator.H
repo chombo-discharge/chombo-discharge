@@ -95,7 +95,7 @@ public:
 
   /*!
     @brief Do inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine phi
+    @param[in,out] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
   */
@@ -104,7 +104,7 @@ public:
 
   /*!
     @brief Do inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine phi
+    @param[in,out] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
     @details This is the "slow" version which does not use the AggStencil performance optimization objects. 

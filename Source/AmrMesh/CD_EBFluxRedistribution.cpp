@@ -100,7 +100,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
     m_hasFine   = true;
 
     // Gods how I hate filling EBISLayouts. But in this case we need it because if the user has asked for
-    // a larger refinement ratio than we have ghost cells, we need to explicity fetch the necessary geometric
+    // a larger refinement ratio than we have ghost cells, we need to explicitly fetch the necessary geometric
     // data in a larger radius than what is available in the input arguments.
     if (m_refToFine > a_eblgRefined.getGhost()) {
       DisjointBoxLayout dblRefined;

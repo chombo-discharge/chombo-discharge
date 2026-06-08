@@ -110,7 +110,7 @@ CdrPlasmaFieldTagger::computeTracers() const
   Real maxGradElectricField = -std::numeric_limits<Real>::max();
   Real minGradElectricField = std::numeric_limits<Real>::max();
 
-  // Get the maximum and minium value of the electric field and its gradient. This is the
+  // Get the maximum and minimum value of the electric field and its gradient. This is the
   // norm so we are getting the max of |E| and the max of |grad(|E|)|.
   DataOps::getMaxMinNorm(maxElectricField, minElectricField, m_electricField);
   DataOps::getMaxMinNorm(maxGradElectricField, minGradElectricField, m_gradElectricField);

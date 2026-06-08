@@ -61,7 +61,7 @@
 	"header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)", // Optional argument. Contains line immediately preceding the data to be read.
 	"E/N column" : 0,                                          // Optional specification of column containing E/N (defaults to 0)
 	"alpha/N column" : 1,                                      // Optional specification of column containing alpha/N (defaults to 1)
-	"min E/N" : 1.0,                                           // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	"min E/N" : 1.0,                                           // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	"max E/N" : 10000.0,                                       // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	"num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
 	"spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
@@ -76,7 +76,7 @@
 	"header" : "E/N (Td)\tTownsend attach. coef. eta/N (m2)", // Optional argument. Contains the line immediately preceding the data to be read.
 	"E/N column" : 0,                                         // Optional specification of column containing E/N (defaults to 0)
 	"eta/N column" : 1,                                       // Optional specification of column containing eta/N (defaults to 1)
-	"min E/N" : 1.0,                                          // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	"min E/N" : 1.0,                                          // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	"max E/N" : 10000.0,                                      // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	"num points" : 1000,                                      // Optional number of points kept when resamplnig the table (defaults to 1000)
 	"spacing" : "exponential",                                // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
@@ -98,8 +98,8 @@
 		// Specification of the mobilility coefficient when the species is mobile. User can specify various forms of the mobility. E.g. constant, function-based, or
 		// tabulated vs E/N
 		"type" : "table vs E/N",			// Specification of tabulated mobility lookup method
-		"file" : "bolsig_air.dat",			// File containg the mobility data
-		"header" : "E/N (Td)\tMobility *N (1/m/V/s)",	// Line immediately preceding the colum data
+		"file" : "bolsig_air.dat",			// File containing the mobility data
+		"header" : "E/N (Td)\tMobility *N (1/m/V/s)",	// Line immediately preceding the column data
 		"E/N column" : 0,                               // Column containing E/N
 		"mu*N column" : 1,                              // Column containing mu*N
 		"min E/N" : 1,					// Minimum E/N kept when resampling table
@@ -110,7 +110,7 @@
 		"mu*N scale" : 1.0				// Optional argument for scaling the E/N column
 	    },
 	    "diffusion" : {
-		// Definition of the diffusion coefficient similiar to mobility coefficient above.
+		// Definition of the diffusion coefficient similar to mobility coefficient above.
 		"type" : "table vs E/N",
 		"file" : "bolsig_air.dat",
 		"header" : "E/N (Td)\tDiffusion coefficient *N (1/m/s)",
@@ -271,7 +271,7 @@
 	    "header" : "C25   N2    Ionization    15.60 eV",	// Header line preceding data
 	    "E/N column" : 0,					// Optional specification of column containing E/N (defaults to 0)
 	    "rate/N column" : 1,				// Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,					// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "min E/N" : 1.0,					// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
 	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
@@ -290,7 +290,7 @@
 	    "header" : "C42   O2    Ionization    12.06 eV",	// Header line preceding data
 	    "E/N column" : 0,					// Optional specification of column containing E/N (defaults to 0)
 	    "rate/N column" : 1,				// Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,					// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "min E/N" : 1.0,					// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
 	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
@@ -309,7 +309,7 @@
 	    "header" : "C27   O2    Attachment",	// Header line preceding data
 	    "E/N column" : 0,				// Optional specification of column containing E/N (defaults to 0)
 	    "rate/N column" : 1,			// Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,				// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "min E/N" : 1.0,				// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,				// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,			// Optional number of points kept when resamplnig the table (defaults to 1000)
 	    "spacing" : "exponential",			// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
@@ -328,7 +328,7 @@
 	    "header" : "C25   N2    Ionization    15.60 eV",	// Header line preceding data
 	    "E/N column" : 0,					// Optional specification of column containing E/N (defaults to 0)
 	    "rate/N column" : 1,				// Optional specification of column containing alpha/N (defaults to 1)
-	    "min E/N" : 1.0,					// Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	    "min E/N" : 1.0,					// Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	    "max E/N" : 1000.0,					// Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	    "num points" : 1000,				// Optional number of points kept when resamplnig the table (defaults to 1000)
 	    "spacing" : "exponential",				// Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'

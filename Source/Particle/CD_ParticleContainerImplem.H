@@ -776,7 +776,7 @@ ParticleContainer<P>::addParticles(const ParticleContainer<P>& a_otherContainer)
   }
   else {
     // If we're adding particles across realms we need to collect the input particles onto lists that get remapped
-    // into m_particles. A full explanation of how this works is given in the remap routin.
+    // into m_particles. A full explanation of how this works is given in the remap routine.
 
     const uint32_t numRanks = numProc();
     const uint32_t myRank   = procID();
@@ -863,7 +863,7 @@ ParticleContainer<P>::addParticlesDestructive(ParticleContainer<P>& a_otherConta
   }
   else {
     // If we're adding particles across realms we need to collect the input particles onto lists that get remapped
-    // into m_particles. A full explanation of how this works is given in the remap routin.
+    // into m_particles. A full explanation of how this works is given in the remap routine.
 
     const uint32_t numRanks = numProc();
     const uint32_t myRank   = procID();

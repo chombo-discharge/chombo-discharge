@@ -579,7 +579,7 @@ ItoKMCGodunovStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFin
   DataOps::copy(m_scratchSemiImplicitRhoCDR, m_semiImplicitRhoCDR);
   DataOps::copy(m_scratchSemiImplicitConductivityCDR, m_semiImplicitConductivityCDR);
 
-  // Release unecessary storage.
+  // Release unnecessary storage.
   for (int i = 0; i < numCdrSpecies; i++) {
     m_cdrDivD[i].clear();
   }
@@ -617,7 +617,7 @@ ItoKMCGodunovStepper<I, C, R, F>::regrid(const int a_lmin,
   (this->m_ito)->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   if (this->m_timeStep == 0) {
     // Necessary because first time step is not semi-implicit, so it will use the densities from the
-    // Ito and CDr solvers. Howver,  ItoSolver does not re-deposit the particles during regrid, so we
+    // Ito and CDr solvers. However,  ItoSolver does not re-deposit the particles during regrid, so we
     // enforce it here.
     (this->m_ito)->depositParticles();
   }

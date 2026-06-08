@@ -152,7 +152,7 @@ public:
     @brief Implicit diffusion Euler advance with source term. 
     @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
     that the incoming source term a_source HAS been weighted by the volume fraction. 
-    @param[inout] a_newPhi Solution at time t + dt
+    @param[in,out] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t. Should be unweighted by the volume fraction. 
     @param[in]    a_source Source term. Should be weighted by the volume fraction. 
     @param[in]    a_dt     Time step.
@@ -167,7 +167,7 @@ public:
     @brief Implicit diffusion Crank-Nicholson advance with source term.
     @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
     that the incoming source term a_source HAS been weighted by the volume fraction. 
-    @param[inout] a_newPhi Solution at time t + dt
+    @param[in,out] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
     @param[in]    a_source Source term. 
     @param[in]    a_dt     Time step

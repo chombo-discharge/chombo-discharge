@@ -106,7 +106,7 @@ namespace Physics {
          @brief Flag cells for refinement and coarsening using the tracer-field approach.
          @details Calls computeTracers(), then iterates over grid cells calling refineCell()
          and coarsenCell() on each. Returns true if the tag set changed on any MPI rank.
-         @param[inout] a_tags Cell tags across the AMR hierarchy.
+         @param[in,out] a_tags Cell tags across the AMR hierarchy.
          @return True if any new tags were added or removed.
       */
       virtual bool
@@ -128,8 +128,8 @@ namespace Physics {
 
       /**
          @brief Write tracer field data into the output holder.
-         @param[inout] a_output      Output data holder.
-         @param[inout] a_icomp       Starting component index; incremented on return.
+         @param[in,out] a_output      Output data holder.
+         @param[in,out] a_icomp       Starting component index; incremented on return.
          @param[in]    a_outputRealm Realm that owns a_output.
          @param[in]    a_level       AMR level to write.
       */

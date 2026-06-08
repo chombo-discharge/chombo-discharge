@@ -9,7 +9,7 @@
   @author Robert Marskar
 */
 
-// Chombo inculdes
+// Chombo includes
 #include <CH_Timer.H>
 
 // Our includes

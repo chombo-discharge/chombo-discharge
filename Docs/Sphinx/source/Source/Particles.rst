@@ -101,7 +101,7 @@ ParticleContainer
 
 The ``ParticleContainer<P>`` is a template class that
 
-#. Stores computational particles of type ``P`` over an AMR hierchy.
+#. Stores computational particles of type ``P`` over an AMR hierarchy.
 #. Provides infrastructure for remapping particles.
 #. Provides functionality for getting a list of particles within a specified grid patch.
 #. Provides functionality that is required during regrids.
@@ -779,7 +779,7 @@ At each level in the tree recursion one chooses an axis for partitioning one sub
 
 The kD-tree partitioner requires a user-supplied criterion for particle partitioning.
 Only the partitioner ``PartitionEqualWeight`` is currently supported, and this partitioner will divide the original subset into two new subsets such that the particle weights in the two halves differs by at most one physical particle.
-This partitioner is imlemented as
+This partitioner is implemented as
 
 .. code-block:: c++
 

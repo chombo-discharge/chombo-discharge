@@ -29,7 +29,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Radiative tranfer equation solver using Monte-Carlo simulation.
+  @brief Radiative transfer equation solver using Monte-Carlo simulation.
   @details This class is, by default, a non-stationary radiative transfer solver which simulates computational photons that can also be deposited on the mesh. Various
   options are available for specifying how the photons are generated, and how they are propagated (e.g. with speed of light or instantaneously). Note that this solver
   runs its own intersection tests with the EB due to dependencies on how the photons are moved (we store free-flight photons, absorbed photons, intersected photons, etc).
@@ -72,7 +72,7 @@ public:
   operator=(const McPhoto& a_other);
 
   /*!
-    @brief Disallowed move assignement operator
+    @brief Disallowed move assignment operator
   */
   McPhoto&
   operator=(const McPhoto&& a_other);
@@ -108,7 +108,7 @@ public:
     @param[out]   a_bulkPhotons   Photons absorbed on the mesh
     @param[out]   a_ebPhotons     Photons absorbed on the EB
     @param[out]   a_domainPhotons Photons absorbed on the domain edges (faces)
-    @param[inout] a_photons       Original photons
+    @param[in,out] a_photons       Original photons
     @note This routine moves photons with an instantaneous kernel, i.e. all photons are always absorbed and none are left behind as free-flight photons (i.e. a_photons will
     be empty on output)
   */
@@ -123,7 +123,7 @@ public:
     @param[out]   a_bulkPhotons   Photons absorbed on the mesh
     @param[out]   a_ebPhotons     Photons absorbed on the EB
     @param[out]   a_domainPhotons Photons absorbed on the domain edges (faces)
-    @param[inout] a_photons       Original photons
+    @param[in,out] a_photons       Original photons
     @param[in]    a_dt            Time step
     @note This routine moves photons with a transient kernel, i.e. all photons propagate at most c*dt and checks are made to determine if they are absorbed on the mesh
     or various objects (EB, domain). a_photons may be non-empty on output, in which case there are still free-flight photons in the solver. 
@@ -150,7 +150,7 @@ public:
 
   /*!
     @brief Generate computational photons.
-    @param[inout] a_photons Computational photons
+    @param[in,out] a_photons Computational photons
     @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
     @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
   */
@@ -165,8 +165,8 @@ public:
     If you also use an NGP scheme this avoids communication between sampling buckets. But this is not something that we recommend using,
     unless you have a geometry-less domain. If those are good for you, feel free to 
     use this routine. 
-    @param[inout] a_photons Computational photons. Will be populated and depleted inside the routine.
-    @param[inout] a_phi Mesh-based density. Will be incremented by the generated photons.
+    @param[in,out] a_photons Computational photons. Will be populated and depleted inside the routine.
+    @param[in,out] a_phi Mesh-based density. Will be incremented by the generated photons.
     @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
     @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
   */
@@ -199,7 +199,7 @@ public:
   /*!
     @brief Deposit photons
     @param[out]   a_phi        Deposited mesh density
-    @param[inout] a_photons    Computational photons to be deposited
+    @param[in,out] a_photons    Computational photons to be deposited
     @param[in]    a_deposition Deposition method
   */
   template <class P, class Ret, Ret (P::*MemberFunc)() const>
@@ -343,8 +343,8 @@ public:
 
   /*!
     @brief Write plot data
-    @param[inout] a_ouput       Output data holder
-    @param[inout] a_icomp       Starting component where we begin to write data to a_output
+    @param[in,out] a_ouput       Output data holder
+    @param[in,out] a_icomp       Starting component where we begin to write data to a_output
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level       Grid level
   */
@@ -356,7 +356,7 @@ public:
 
   /*!
     @brief Write checkpoint data into handle
-    @param[inout] a_handle HDF5 file
+    @param[in,out] a_handle HDF5 file
     @param[in]    a_level Grid level
   */
 #ifdef CH_USE_HDF5
@@ -366,7 +366,7 @@ public:
 
   /*!
     @brief Read checkpoint data from handle
-    @param[inout] a_handle HDF5 file
+    @param[in,out] a_handle HDF5 file
     @param[in]    a_level Grid level
   */
 #ifdef CH_USE_HDF5
@@ -675,7 +675,7 @@ protected:
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
-    @param[inout] a_depositionH    On input this should be the conservative deposition
+    @param[in,out] a_depositionH    On input this should be the conservative deposition
     @param[out]   a_massDifference Mass difference between conservative and non-conservative
     @param[in]    a_depositioNC    Non-conservative deposition
   */

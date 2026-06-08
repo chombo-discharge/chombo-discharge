@@ -65,7 +65,7 @@ public:
   operator=(const MeshODESolver&) = delete;
 
   /*!
-    @brief Disallowed move assignement operator
+    @brief Disallowed move assignment operator
   */
   MeshODESolver&
   operator=(const MeshODESolver&&) = delete;
@@ -259,8 +259,8 @@ public:
 
   /*!
     @brief Write plot data to output holder. 
-    @param[inout] a_output            Output data holder.
-    @param[inout] a_icomp             Starting component in a_output to begin at. 
+    @param[in,out] a_output            Output data holder.
+    @param[in,out] a_icomp             Starting component in a_output to begin at. 
     @param[in]    a_outputRealm       Realm where a_output belongs
     @param[in]    a_level             Grid level
   */
@@ -369,8 +369,8 @@ protected:
 
   /*!
     @brief Write data to output. Convenience function. 
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level

@@ -126,7 +126,7 @@ To set a domain boundary condition function on a side, one can use the following
 					     const std::function<Real(const RealVect a_position, const Real a_time)>);
 
 For a general way of setting the function value on the domain side, one will use the above function together with an identifier ``dirichlet_custom`` or ``neumann_custom`` in the input script.
-This identifier simply tells ``FieldSolver`` to use that function to either specifiy :math:`\Phi` or :math:`\partial_n\Phi` on the boundary. 
+This identifier simply tells ``FieldSolver`` to use that function to either specify :math:`\Phi` or :math:`\partial_n\Phi` on the boundary. 
 These functions are then directly processed by the numerical discretizations.
 
 .. note::
@@ -368,7 +368,7 @@ In principle, one can then also set spatially varying voltages along an electrod
 
 In the majority of cases the voltage on electrodes is either a live voltage or ground.
 Thus, although the above format is a general way of setting the voltage individually on each electrode (in both space and time) ``FieldSolver`` supports a simpler way of generating these voltage waveforms.
-When ``FieldSolver`` is instantiated, it will interally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
+When ``FieldSolver`` is instantiated, it will internally generate these functions through simplified expression such that the user only needs to set a single wave form that applies to all electrodes.
 The voltages that are set on the various electrodes are thus in the form:
 
 .. code-block:: c++

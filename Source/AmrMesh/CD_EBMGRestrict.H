@@ -35,7 +35,7 @@ public:
   EBMGRestrict() noexcept;
 
   /*!
-    @brief Full constructor. Calls the define fucntion
+    @brief Full constructor. Calls the define function
     @param[in] a_eblgFine Fine level
     @param[in] a_eblgCoar Coarse level
     @param[in] a_refRat   Refinement factor between levels.
@@ -60,7 +60,7 @@ public:
     @brief Restrict residual onto the coarse grid.
     @details This replaces the coarse-grid residual by an average of the fine-grid residual. Only affects the invalid
     region of the coarse grid. 
-    @param[inout] a_coarData  Coarse-grid residual.
+    @param[in,out] a_coarData  Coarse-grid residual.
     @param[in]    a_fineData  Fine-grid residual
     @param[in]    a_variables Variables to restrict
   */

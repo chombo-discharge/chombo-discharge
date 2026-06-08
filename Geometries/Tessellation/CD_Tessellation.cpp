@@ -1,11 +1,12 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_Tesselation.cpp
-  @brief  Implementation of CD_Tesselation.H
+/**
+  @file   CD_Tessellation.cpp
+  @brief  Implementation of CD_Tessellation.H
   @author Robert Marskar
 */
 
@@ -16,13 +17,13 @@
 #include <EBGeometry.hpp>
 
 // Our includes
-#include <CD_Tesselation.H>
+#include <CD_Tessellation.H>
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
 using T = float;
 
-Tesselation::Tesselation()
+Tessellation::Tessellation()
 {
 
   std::string filename;
@@ -30,7 +31,7 @@ Tesselation::Tesselation()
   bool        flipInside;
 
   // Get input options.
-  ParmParse pp("Tesselation");
+  ParmParse pp("Tessellation");
 
   pp.get("mesh_file", filename);
   pp.get("z_coord", zCoord);
@@ -45,7 +46,7 @@ Tesselation::Tesselation()
   m_electrodes.push_back(Electrode(baseIF, true));
 }
 
-Tesselation::~Tesselation()
+Tessellation::~Tessellation()
 {}
 
 #include <CD_NamespaceFooter.H>

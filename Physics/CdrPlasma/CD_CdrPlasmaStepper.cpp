@@ -1236,7 +1236,7 @@ CdrPlasmaStepper::computeCdrDiffusion()
     pout() << "CdrPlasmaStepper::computeCdrDiffusion()" << endl;
   }
 
-  // Allcoate storage for the electric field.
+  // Allocate storage for the electric field.
   EBAMRCellData electricFieldCell;
   EBAMRIVData   electricFieldEB;
 
@@ -1296,7 +1296,7 @@ CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_electricFieldCell, 
     m_amr->interpToEB(*cdrDensitiesExtrap[idx], *cdrDensities[idx], m_realm, m_cdr->getPhase());
   }
 
-  // 2b. Compute the diffusion coefficeints on the EB.
+  // 2b. Compute the diffusion coefficients on the EB.
   this->computeCdrDiffusionEb(cdrDcoEB, cdrDensitiesExtrap, a_electricFieldEB, m_time);
 
   // 2c. Release the extra storage allocate in 2a.
@@ -1694,7 +1694,7 @@ CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_cdrDcoEB,
 
   CH_assert(a_electricFieldEB[0]->nComp() == SpaceDim);
 
-  // Numer of CDR species.
+  // Number of CDR species.
   const int numCdrSpecies = m_physics->getNumCdrSpecies();
 
   CH_assert(a_cdrDcoEB.size() == numCdrSpecies);
@@ -2677,7 +2677,7 @@ CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_c
   CH_assert(a_cdrVelocitiesEB.size() == numCdrSolvers);
   CH_assert(a_cdrVelocitiesCell.size() == numCdrSolvers);
 
-  // Allocate some scratch data -- it is used for extrapolating the vell-centered data to the EB.
+  // Allocate some scratch data -- it is used for extrapolating the well-centered data to the EB.
   EBAMRIVData scratch;
   m_amr->allocate(scratch, m_realm, a_phase, SpaceDim);
 
@@ -3408,7 +3408,7 @@ CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
   CH_assert(a_projectedFlux.nComp() == 1);
   CH_assert(a_flux.nComp() == SpaceDim);
 
-  // Get the grid infromation on this level.
+  // Get the grid information on this level.
   const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
   const DataIterator&      dit   = dbl.dataIterator();
   const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];

@@ -33,7 +33,7 @@ McPhoto::depositPhotons(EBAMRCellData&        a_phi,
   // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
   this->depositNonConservative(m_depositionNC, a_phi);
 
-  // Compute hybrid deposition, including mass differnce
+  // Compute hybrid deposition, including mass difference
   this->depositHybrid(a_phi, m_massDiff, m_depositionNC);
 
   // Redistribute

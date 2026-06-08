@@ -94,7 +94,7 @@ public:
 
   /*!
     @brief Do inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine phi
+    @param[in,out] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
     @param[in]    a_type      Interpolation type

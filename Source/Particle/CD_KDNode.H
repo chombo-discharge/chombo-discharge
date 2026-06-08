@@ -67,7 +67,7 @@ public:
 
   /*!
     @brief Valid constructor. Takes list of particles.
-    @param[inout] a_particles List of particles to be partitioned later. 
+    @param[in,out] a_particles List of particles to be partitioned later. 
     @note The input particle list is transferred to m_particles. 
   */
   KDNode(ParticleList& a_particles);
@@ -162,14 +162,14 @@ protected:
 
   /*!
     @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
-    @param[inout] a_particles List of particles
+    @param[in,out] a_particles List of particles
   */
   inline void
   gatherParticles(ParticleList& a_particles) const noexcept;
 
   /*!
     @brief Move particles further down in the subtree and return all particles (in the leaf nodes)
-    @param[inout] a_particles List of particles
+    @param[in,out] a_particles List of particles
     @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
     want to change the tree contents. 
   */

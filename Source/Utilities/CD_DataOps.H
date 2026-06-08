@@ -165,7 +165,7 @@ public:
   /*!
     @brief Compute a new value given the old cell value. 
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
-    @param[inout] a_data Input data
+    @param[in,out] a_data Input data
     @param[in]    a_func Function for transforming the data
   */
   static void
@@ -174,7 +174,7 @@ public:
   /*!
     @brief Compute a new value given the old cell value. 
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
-    @param[inout] a_data Input data
+    @param[in,out] a_data Input data
     @param[in]    a_func Function for transforming the data
   */
   static void
@@ -234,7 +234,7 @@ public:
   /*!
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
     @details Ghost cells and coarsening must be done before entering this routine
-    @param[inout] a_data   Data to be filtered.
+    @param[in,out] a_data   Data to be filtered.
     @param[in]    a_alpha  Filter factor
     @param[in]    a_stride Cell stride s
     @param[in]    a_zeroEB Set value in covered cells to zero or not
@@ -247,7 +247,7 @@ public:
   /*!
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
     @details Ghost cells must be updated before entering this routine. 
-    @param[inout] a_data   Data to be filtered.
+    @param[in,out] a_data   Data to be filtered.
     @param[in]    a_alpha  Filter factor
     @param[in]    a_stride Cell stride s
     @param[in]    a_zeroEB Set value in covered cells to zero or not
@@ -259,7 +259,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -268,7 +268,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -277,7 +277,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -286,7 +286,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -295,7 +295,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -304,7 +304,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -313,7 +313,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -322,7 +322,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -331,7 +331,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -340,7 +340,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -349,7 +349,7 @@ public:
 
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -359,7 +359,7 @@ public:
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data from an EBAMRIVFAB. It ignores regular cells. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -369,7 +369,7 @@ public:
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data from an EBAMRIVFAB. It ignores regular cells. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -379,7 +379,7 @@ public:
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data form an EBCellFAB to an BaseIVFAB. It ignores regular cells. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -389,7 +389,7 @@ public:
   /*!
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data form an EBCellFAB to an BaseIVFAB. It ignores regular cells. 
-    @param[inout] a_lhs   Data to be incremented.
+    @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
     @param[in]    a_scale Scale factor.
   */
@@ -433,7 +433,7 @@ public:
 
   /*!
     @brief Divide one data holder by another. Does specified components.
-    @param[inout] a_lhs Data to be divided
+    @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
     @param[in]    a_lhsComp Destination data component
     @param[in]    a_rhsComp Source data component
@@ -443,7 +443,7 @@ public:
 
   /*!
     @brief Divide one data holder by another. Does specified components.
-    @param[inout] a_lhs Data to be divided
+    @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
     @param[in]    a_lhsComp Destination data component
     @param[in]    a_rhsComp Source data component
@@ -453,7 +453,7 @@ public:
 
   /*!
     @brief Divide all components in a data holder by a scalar value
-    @param[inout] a_lhs Data to be divided
+    @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor. Must have exactly one component. 
   */
   static void
@@ -461,7 +461,7 @@ public:
 
   /*!
     @brief Divide all components in a data holder by a scalar value
-    @param[inout] a_lhs Data to be divided
+    @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor. Must have exactly one component. 
   */
   static void
@@ -469,7 +469,7 @@ public:
 
   /*!
     @brief Divide data. If the denominator is zero, set the value to a fallback option
-    @param[inout] a_numerator   Dividend
+    @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback value in case denominator is zero.
   */
@@ -478,7 +478,7 @@ public:
 
   /*!
     @brief Divide data. If the denominator is zero, set the value to a fallback option
-    @param[inout] a_numerator   Dividend
+    @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback value in case denominator is zero.
     @note Does all components. 
@@ -488,7 +488,7 @@ public:
 
   /*!
     @brief Divide data. If the denominator is zero, set the value to a fallback option
-    @param[inout] a_numerator   Dividend
+    @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback data
   */
@@ -497,7 +497,7 @@ public:
 
   /*!
     @brief Divide data. If the denominator is zero, set the value to a fallback option
-    @param[inout] a_numerator   Dividend
+    @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback data
     @note Does all components. 
@@ -509,7 +509,7 @@ public:
 
   /*!
     @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[inout] a_lhs Data to be floored.
+    @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
     @note Also floors ghost cells. 
   */
@@ -518,7 +518,7 @@ public:
 
   /*!
     @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[inout] a_lhs Data to be floored.
+    @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
     @note Also floors ghost cells. 
   */
@@ -527,7 +527,7 @@ public:
 
   /*!
     @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[inout] a_lhs Data to be floored.
+    @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
     @note Also floors ghost cells. 
   */
@@ -536,7 +536,7 @@ public:
 
   /*!
     @brief Floor values in data holder. This sets all values below a_value to a_value
-    @param[inout] a_lhs Data to be floored.
+    @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
     @note Also floors ghost cells. 
   */
@@ -545,7 +545,7 @@ public:
 
   /*!
     @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[inout] a_lhs Data to be roofed.
+    @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
     @note Also roofs ghost cells. 
   */
@@ -554,7 +554,7 @@ public:
 
   /*!
     @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[inout] a_lhs Data to be roofed.
+    @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
     @note Also roofs ghost cells. 
   */
@@ -563,7 +563,7 @@ public:
 
   /*!
     @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[inout] a_lhs Data to be roofed.
+    @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
     @note Also roofs ghost cells. 
   */
@@ -572,7 +572,7 @@ public:
 
   /*!
     @brief Roof values in data holder. This sets all values above a_value to a_value
-    @param[inout] a_lhs Data to be roofed.
+    @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
     @note Also roofs ghost cells. 
   */
@@ -600,7 +600,7 @@ public:
   /*!
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @param[in]  a_comp Component
     @note This does the calculation over all levels, including grids that is covered by other grids. 
@@ -611,7 +611,7 @@ public:
   /*!
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @param[in]  a_comp Component
   */
@@ -621,7 +621,7 @@ public:
   /*!
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @param[in]  a_comp Component
     @note This does the calculation over all levels, including grids that is covered by other grids. 
@@ -632,7 +632,7 @@ public:
   /*!
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @param[in]  a_comp Component
   */
@@ -642,7 +642,7 @@ public:
   /*!
     @brief Get maximum and minimum value. Assumes single-component data.
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @note This does the calculation over all levels, including grids that is covered by other grids. 
   */
@@ -652,7 +652,7 @@ public:
   /*!
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @note This does the calculation over all levels, including grids that is covered by other grids. 
   */
@@ -662,7 +662,7 @@ public:
   /*!
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
   */
   static void
@@ -671,7 +671,7 @@ public:
   /*!
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @note This does the calculation over all levels, including grids that is covered by other grids. 
   */
@@ -681,7 +681,7 @@ public:
   /*!
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
-    @param[out] a_min  Minium value
+    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
   */
   static void
@@ -689,7 +689,7 @@ public:
 
   /*!
     @brief Invert data
-    @param[inout] Data to be inverted. On output we have a_data = 1/a_data.
+    @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
   */
   static void
@@ -697,7 +697,7 @@ public:
 
   /*!
     @brief Invert data
-    @param[inout] Data to be inverted. On output we have a_data = 1/a_data.
+    @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
   */
   static void
@@ -705,7 +705,7 @@ public:
 
   /*!
     @brief Invert data
-    @param[inout] Data to be inverted. On output we have a_data = 1/a_data.
+    @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
   */
   static void
@@ -722,42 +722,42 @@ public:
 
   /*!
     @brief Scale data by volume fraction
-    @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(EBAMRCellData& a_data) noexcept;
 
   /*!
     @brief Scale data by volume fraction
-    @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(LevelData<EBCellFAB>& a_data) noexcept;
 
   /*!
     @brief Scale data by volume fraction
-    @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(MFAMRCellData& a_data) noexcept;
 
   /*!
     @brief Scale data by volume fraction
-    @param[inout] a_data Data to be scaled. On output we have a_data = kappa * a_data
+    @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(LevelData<MFCellFAB>& a_data) noexcept;
 
   /*!
     @brief Scale data by dx^SpaceDim
-    @param[inout] a_data Data to be scaled. On output we have a_data = dx^SpaceDim * a_data
+    @param[in,out] a_data Data to be scaled. On output we have a_data = dx^SpaceDim * a_data
   */
   static void
   volumeScale(EBAMRCellData& a_data, const Vector<Real>& a_dx);
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note Does all components
   */
@@ -766,7 +766,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note Does all components
   */
@@ -775,7 +775,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note Does all components
   */
@@ -784,7 +784,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note Does all components
   */
@@ -793,7 +793,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note Does all components
   */
@@ -802,7 +802,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note Does all components
   */
@@ -811,7 +811,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note This multiplies all components in a_lhs with the single component in a_rhs
   */
@@ -820,7 +820,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note This multiplies all components in a_lhs with the single component in a_rhs
   */
@@ -829,7 +829,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note This multiplies all components in a_lhs with the single component in a_rhs
   */
@@ -838,7 +838,7 @@ public:
 
   /*!
     @brief Multiply data holder by another data holder
-    @param[inout] a_lhs Data to be multiplied
+    @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
     @note This multiplies all components in a_lhs with the single component in a_rhs
   */
@@ -857,8 +857,8 @@ public:
 
   /*!
     @brief General addition operator for adding together data. The user can choose which components to add. 
-    @param[inout] a_lhs     Output data component
-    @param[inout] a_rhs     Data to be added to a_lhs
+    @param[in,out] a_lhs     Output data component
+    @param[in,out] a_rhs     Data to be added to a_lhs
     @param[in]    a_srcComp Component in a_rhs to add from.
     @param[in]    a_dstComp Component in a_lhs to add into.
     @param[in]    a_numComp Number of components to add. 
@@ -869,8 +869,8 @@ public:
 
   /*!
     @brief General addition operator for adding together data. The user can choose which components to add. 
-    @param[inout] a_lhs     Output data component
-    @param[inout] a_rhs     Data to be added to a_lhs
+    @param[in,out] a_lhs     Output data component
+    @param[in,out] a_rhs     Data to be added to a_lhs
     @param[in]    a_srcComp Component in a_rhs to add from.
     @param[in]    a_dstComp Component in a_lhs to add into.
     @param[in]    a_numComp Number of components to add. 
@@ -885,7 +885,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -893,7 +893,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -901,7 +901,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -909,7 +909,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -917,7 +917,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -925,7 +925,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -933,7 +933,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -941,7 +941,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -949,7 +949,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -957,7 +957,7 @@ public:
 
   /*!
     @brief Scale data by factor
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
   */
   static void
@@ -965,7 +965,7 @@ public:
 
   /*!
     @brief Set value in covered cells. Does specified component
-    @param[inout] a_lhs   Input/output data. 
+    @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
     @param[in]   a_value Value to set
   */
@@ -974,7 +974,7 @@ public:
 
   /*!
     @brief Set value in covered cells. Does specified component
-    @param[inout] a_lhs   Input/output data. 
+    @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
     @param[in]   a_value Value to set
   */
@@ -983,7 +983,7 @@ public:
 
   /*!
     @brief Version of setCoveredValue which does all components
-    @param[inout] a_lhs   Data 
+    @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
   */
   static void
@@ -991,7 +991,7 @@ public:
 
   /*!
     @brief Version of setCoveredValue which does all component
-    @param[inout] a_lhs   Data 
+    @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
   */
   static void
@@ -999,7 +999,7 @@ public:
 
   /*!
     @brief Set value on covered faces.
-    @param[inout] a_lhs   Input/output data. 
+    @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
     @param[in]   a_value Value to set
   */
@@ -1008,7 +1008,7 @@ public:
 
   /*!
     @brief Set value on covered faces.
-    @param[inout] a_lhs   Input/output data. 
+    @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
     @param[in]   a_value Value to set
   */
@@ -1017,7 +1017,7 @@ public:
 
   /*!
     @brief Set all covered face values.
-    @param[inout] a_lhs   Data 
+    @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
   */
   static void
@@ -1025,7 +1025,7 @@ public:
 
   /*!
     @brief Set all covered face values.
-    @param[inout] a_lhs   Data 
+    @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
   */
   static void
@@ -1033,7 +1033,7 @@ public:
 
   /*!
     @brief Set value in cells that are covered by a finer grid.
-    @param[inout] a_lhs    AMR data
+    @param[in,out] a_lhs    AMR data
     @param[in]    a_refRat Refinement ratios between levels.
     @param[in]    a_value  Value to set in cells covered by a finer grid. 
   */
@@ -1328,14 +1328,14 @@ public:
 
   /*!
     @brief Compute the sum of the input value.
-    @param[inout] a_value On output, contains the sum of a_value over all MPI processes.
+    @param[in,out] a_value On output, contains the sum of a_value over all MPI processes.
   */
   static void
   sum(Real& a_value);
 
   /*!
     @brief Compute the square root of the input data
-    @param[inout] a_lhs On output, contains sqrt(a_lhs)
+    @param[in,out] a_lhs On output, contains sqrt(a_lhs)
     @note Does not do ghosted faces. 
   */
   static void
@@ -1343,7 +1343,7 @@ public:
 
   /*!
     @brief Compute the square root of the input data
-    @param[inout] a_lhs On output, contains sqrt(a_lhs)
+    @param[in,out] a_lhs On output, contains sqrt(a_lhs)
     @note Does not do ghosted faces. 
   */
   static void
@@ -1351,14 +1351,14 @@ public:
 
   /*!
     @brief Take the square root of the input data
-    @param[inout] a_data Input data
+    @param[in,out] a_data Input data
   */
   static void
   squareRoot(MFAMRCellData& a_data);
 
   /*!
     @brief Take the square root of the input data
-    @param[inout] a_data Input data
+    @param[in,out] a_data Input data
   */
   static void
   squareRoot(LevelData<MFCellFAB>& a_data);
@@ -1439,9 +1439,9 @@ public:
   allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
 
   /*!
-    @brief Shift pointes by a specified distance
+    @brief Shift points by a specified distance
     @details On output, every point in a_corners is shifted by a_distance. 
-    @param[inout] a_corners  Points to be shifted
+    @param[in,out] a_corners  Points to be shifted
     @param[in]    a_distance Shift vector
   */
   static void

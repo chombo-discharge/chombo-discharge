@@ -24,7 +24,7 @@
 
 /*!
   @brief Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This
-  is used in conjuction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. 
+  is used in conjunction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. 
 
   @details This should be defined over the fine grid. It will store stencils for computing the various required terms in the 
   Taylor series, and the user can call various functions for getting those terms. For the record, all stencils in this object

@@ -698,7 +698,7 @@ CdrPlasmaImExSdcStepper::computeFD0()
       if (solver->isDiffusive()) {
         solver->computeDivD(FD_0, phi_0, false, false, false); // Domain fluxes always come in through advection terms.
 
-        // Shouldn't be necesary
+        // Shouldn't be necessary
         m_amr->conservativeAverage(FD_0, m_realm, m_cdr->getPhase());
         m_amr->interpGhost(FD_0, m_realm, m_cdr->getPhase());
       }
@@ -787,7 +787,7 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
       }
     }
 
-    // If we need another step, we should update boundary conditions agains. We DONT do this on the last step
+    // If we need another step, we should update boundary conditions against. We DONT do this on the last step
     // because this was also done on the way INTO this routine. If we've updated m=m_p, we either recompute
     // boundary conditions in the next SDC sweep, or we allow the next time step to take care of this.
     const int last = m == m_p - 1;
@@ -869,7 +869,7 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
       EBAMRCellData& FAR_m = storage->getFAR()[a_m]; // Currently the old slope
       EBAMRCellData& src   = solver->getSource();    // Updated source
 
-      // Increment swith source and then compute slope. This has already been done
+      // Increment switch source and then compute slope. This has already been done
       DataOps::incr(phi_m1, src, m_dtm[a_m]); // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary

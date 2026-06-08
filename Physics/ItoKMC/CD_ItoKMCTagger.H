@@ -79,8 +79,8 @@ namespace Physics {
 
       /**
 	@brief Write plot data.
-	@param[inout] a_output Output data holder
-	@param[inout] a_icomp Starting variable in a_output where we begin appending data.
+	@param[in,out] a_output Output data holder
+	@param[in,out] a_icomp Starting variable in a_output where we begin appending data.
 	@param[in] a_level Grid level
       */
       virtual void
@@ -115,7 +115,7 @@ namespace Physics {
 
       /**
 	@brief Tag cells for refinement and coarsening
-	@param[inout] a_tags Cell tags that become the new grids. 
+	@param[in,out] a_tags Cell tags that become the new grids. 
       */
       virtual bool
       tagCells(EBAMRTags& a_tags) noexcept override;

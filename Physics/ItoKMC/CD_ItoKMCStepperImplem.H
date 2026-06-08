@@ -1627,7 +1627,7 @@ ItoKMCStepper<I, C, R, F>::preRegrid(const int a_lmin, const int a_oldFinestLeve
     }
   }
 
-  // Release some unecessary storage.
+  // Release some unnecessary storage.
   m_fluidScratch1.clear();
   m_fluidScratchD.clear();
   m_fluidScratchEB.clear();

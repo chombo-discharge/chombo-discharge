@@ -83,7 +83,7 @@ namespace Physics {
       /**
 	@brief Write checkpoint data to file.
 	@note This module does not support checkpoint-restart; calling this is an error.
-	@param[inout] a_handle HDF5 file handle.
+	@param[in,out] a_handle HDF5 file handle.
 	@param[in]    a_lvl    Grid level.
       */
       void
@@ -93,7 +93,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Read checkpoint data from file -- this physics does not checkpoint data.
-	@param[inout] a_handle HDF5 file
+	@param[in,out] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
       void
@@ -123,8 +123,8 @@ namespace Physics {
 
       /**
 	@brief Write plot data to output holder.
-	@param[inout] a_output       Output data holder.
-	@param[inout] a_icomp        Starting component in a_output; incremented by the number of components written.
+	@param[in,out] a_output       Output data holder.
+	@param[in,out] a_icomp        Starting component in a_output; incremented by the number of components written.
 	@param[in]    a_outputRealm  Realm where a_output lives.
 	@param[in]    a_level        Grid level.
       */

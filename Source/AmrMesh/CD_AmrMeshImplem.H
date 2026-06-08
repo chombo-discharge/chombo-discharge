@@ -569,7 +569,7 @@ AmrMesh::removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
 
             bool insideAtLeastOneVoF = false;
 
-            // For each VoF, compute the projection of the particle position onth the EB face. Beacuse the EB normal points outwards, we have a positive
+            // For each VoF, compute the projection of the particle position onth the EB face. Because the EB normal points outwards, we have a positive
             // value if the particle lies in the valid region.
             const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
             for (const auto& vof : vofs) {
@@ -796,7 +796,7 @@ AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesF
 
             bool insideAtLeastOneVoF = false;
 
-            // For each VoF, compute the projection of the particle position onth the EB face. Beacuse the EB normal points outwards, we have a positive
+            // For each VoF, compute the projection of the particle position onth the EB face. Because the EB normal points outwards, we have a positive
             // value if the particle lies in the valid region.
             const std::vector<VolIndex> vofs = ebisBox.getVoFs(iv).stdVector();
             for (const auto& vof : vofs) {

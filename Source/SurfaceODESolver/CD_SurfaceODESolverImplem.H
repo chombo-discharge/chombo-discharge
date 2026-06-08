@@ -791,7 +791,7 @@ SurfaceODESolver<N>::writePlotFile() const noexcept
     sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_step, SpaceDim);
     std::string fname(filename);
 
-    // Alias, becuase Chombo is a bit anal about smart pointers.
+    // Alias, because Chombo is a bit anal about smart pointers.
     Vector<LevelData<EBCellFAB>*> outputPtr;
     m_amr->alias(outputPtr, output);
 

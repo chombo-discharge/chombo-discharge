@@ -63,7 +63,7 @@ namespace ParallelOps {
   /*!
     @brief Get the minimum value and the position corresponding to the minimum value of a_val
     @details This returns the value a_val and position a_pos such that they correspond to the 
-    input variables for the processer which held the smallest value a_val. 
+    input variables for the processor which held the smallest value a_val. 
   */
   inline std::pair<Real, RealVect>
   min(const Real& a_val, const RealVect& a_pos) noexcept;
@@ -92,7 +92,7 @@ namespace ParallelOps {
   /*!
     @brief Get the maximum value and the position corresponding to the maximum value of a_val
     @details This returns the value a_val and position a_pos such that they correspond to the 
-    input variables for the processer which held the largest value a_val. 
+    input variables for the processor which held the largest value a_val. 
   */
   inline std::pair<Real, RealVect>
   max(const Real& a_val, const RealVect& a_pos) noexcept;
@@ -164,7 +164,7 @@ namespace ParallelOps {
     @brief Perform a summation of all the MPI ranks's input data. 
     @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
     on both ranks is (4,6,8).
-    @param[inout] a_data On 
+    @param[in,out] a_data On 
   */
   inline void
   sum(Vector<Real>& a_data) noexcept;
@@ -173,7 +173,7 @@ namespace ParallelOps {
     @brief Perform a summation of all the MPI ranks's input data. 
     @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
     on both ranks is (4,6,8).
-    @param[inout] a_data On 
+    @param[in,out] a_data On 
   */
   inline void
   sum(Vector<int>& a_data) noexcept;
@@ -182,7 +182,7 @@ namespace ParallelOps {
     @brief Perform a summation of all the MPI ranks's input data. 
     @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
     on both ranks is (4,6,8).
-    @param[inout] a_data On 
+    @param[in,out] a_data On 
   */
   inline void
   sum(Vector<long int>& a_data) noexcept;
@@ -191,7 +191,7 @@ namespace ParallelOps {
     @brief Perform a summation of all the MPI ranks's input data. 
     @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
     on both ranks is (4,6,8).
-    @param[inout] a_data On 
+    @param[in,out] a_data On 
   */
   inline void
   sum(Vector<long long int>& a_data) noexcept;

@@ -21,7 +21,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Multigrid interpolator parent class. Virtual beause I want different implementations to do different things. 
+  @brief Multigrid interpolator parent class. Virtual because I want different implementations to do different things. 
 */
 class EBMultigridInterpolator
 {
@@ -74,7 +74,7 @@ public:
 
   /*!
     @brief Do inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine phi
+    @param[in,out] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
   */

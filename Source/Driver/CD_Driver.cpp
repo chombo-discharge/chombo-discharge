@@ -1944,7 +1944,7 @@ Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      // Implicity converts to TreeIntVecSet
+      // Implicitly converts to TreeIntVecSet
       tags |= IntVectSet((*a_cellTags[lvl])[din]);
     }
 

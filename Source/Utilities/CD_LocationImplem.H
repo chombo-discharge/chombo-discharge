@@ -76,7 +76,7 @@ Location::position(const Location::Face a_position, const FaceIndex& a_face, con
     break;
   }
   default: {
-    MayDay::Error("LeastSquares::positon - bad location input.");
+    MayDay::Error("LeastSquares::position - bad location input.");
 
     break;
   }

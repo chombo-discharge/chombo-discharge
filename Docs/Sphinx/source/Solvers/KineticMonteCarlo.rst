@@ -3,7 +3,7 @@
 Kinetic Monte Carlo
 ===================
 
-Kinetic Monte Carlo (KMC) algoritms are composed of various methods for stochastically simulating chemically reacting systems.
+Kinetic Monte Carlo (KMC) algorithms are composed of various methods for stochastically simulating chemically reacting systems.
 While various flavors of KMC are encountered in different fields of science, KMC in the context of ``chombo-discharge`` is primarily associated with chemistry kernels.
 
 Concept
@@ -78,7 +78,7 @@ For the SSA we compute the time until the next reaction by
    T = \frac{1}{\sum_{r\in\vec{R}} a_r}\ln\left(\frac{1}{u_1}\right)
 
 where :math:`A = \sum_{r\in\vec{R}} a_r` and :math:`u_1` is a uniformly distributed random variable between :math:`0` and :math:`1`.
-The type of reaction that fires is deterimined from
+The type of reaction that fires is determined from
 
 .. math::
 

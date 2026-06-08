@@ -46,7 +46,7 @@ CellCentroidInterpolation::interpolate(T&               a_centroidData,
 
   for (int comp = 0; comp < nComp; comp++) {
 
-    // This is the kernel that is used when the interpolation is expressable as a stencil.
+    // This is the kernel that is used when the interpolation is expressible as a stencil.
     auto stencilKernel = [&](const VolIndex& vof) -> void {
       a_centroidData(vof, comp) = 0.0;
 

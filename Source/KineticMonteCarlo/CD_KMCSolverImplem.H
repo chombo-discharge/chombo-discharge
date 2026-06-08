@@ -1092,7 +1092,7 @@ KMCSolver<R, State, T>::advanceHybrid(
             }
             else {
 
-              // Next reaction occured outside the substep -- break out of the loop.
+              // Next reaction occurred outside the substep -- break out of the loop.
               dtSSA = curDt;
             }
           }

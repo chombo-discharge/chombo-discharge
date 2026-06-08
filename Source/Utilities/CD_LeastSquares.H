@@ -121,7 +121,7 @@ public:
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
     @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
     @param[in]  a_vof            Input vof
-    @param[in]  a_neighborhood   Neighboorhood specification
+    @param[in]  a_neighborhood   Neighborhood specification
     @param[in]  a_cellPositions  How to interpret cell positions
     @param[in]  a_ebisbox        ebisbox
     @param[in]  a_radius         Stencil radius

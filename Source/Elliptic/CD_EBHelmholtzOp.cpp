@@ -1538,7 +1538,7 @@ EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs)
 void
 EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi)
 {
-  CH_TIME("EBHelmholtzOp::applyOpNoBounary(LD<EBCellFAB>, LD<EBCellFAB>)");
+  CH_TIME("EBHelmholtzOp::applyOpNoBoundary(LD<EBCellFAB>, LD<EBCellFAB>)");
 
   m_doInterpCF = false;
   this->applyOp(a_Lphi, a_phi, true);

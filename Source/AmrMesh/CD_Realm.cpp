@@ -589,7 +589,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
           }
 
           // Increment the data from the coarse grid to the coarsened fine grid. This must
-          // also increment with the ghost vell values.
+          // also increment with the ghost well values.
           const Interval srcInterv(comp, comp);
           const Interval dstInterv(comp, comp);
 

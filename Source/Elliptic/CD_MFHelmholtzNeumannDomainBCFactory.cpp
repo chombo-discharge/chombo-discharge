@@ -36,7 +36,7 @@ MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(const Real 
 MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(
   const std::function<Real(const RealVect& a_pos)>& a_DphiDn)
 {
-  CH_TIME("MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(std::functino<Real(RealVect)>)");
+  CH_TIME("MFHelmholtzNeumannDomainBCFactory::MFHelmholtzNeumannDomainBCFactory(std::function<Real(RealVect)>)");
 
   this->setDphiDn(a_DphiDn);
 }

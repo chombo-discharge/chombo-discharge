@@ -127,7 +127,7 @@ public:
 
   /*!
     @brief Do inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine phi
+    @param[in,out] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
   */
@@ -351,7 +351,7 @@ protected:
 
   /*!
     @brief Do regular coarse-fine interpolation as if the EB is not there.
-    @param[inout] a_finePhi Fine-level data.
+    @param[in,out] a_finePhi Fine-level data.
     @param[in] a_coarPhi Coarse-grid data.
     @param[in] a_fineVar Fine variable
     @param[in] a_coarVar Coarse variable

@@ -137,7 +137,7 @@ public:
 
   /*!
     @brief Match the BC
-    @param[inout] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in,out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
     @param[in]    a_phi               Cell-centered data
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not
   */
@@ -146,7 +146,7 @@ public:
 
   /*!
     @brief Match the BC
-    @param[inout] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in,out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
     @param[in]    a_phi               Cell-centered data
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not
     @param[in]    a_dit               Grid index
@@ -350,7 +350,7 @@ protected:
     @param[out] a_stencil      Weight and stencil
     @param[out] a_vof          Grid cell
     @param[out] a_ebisbox      EBISBox
-    @param[out] a_neighborhood Neighboorhood specifier
+    @param[out] a_neighborhood Neighborhood specifier
     @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 

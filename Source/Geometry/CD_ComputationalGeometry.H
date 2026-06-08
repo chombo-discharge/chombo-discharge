@@ -197,7 +197,7 @@ protected:
 
   /*!
     @brief Set up the geometry generation tool for the gas phase.
-    @param[inout] a_geoserver     Geometry service object which is later used for making build the EB information.
+    @param[in,out] a_geoserver     Geometry service object which is later used for making build the EB information.
     @param[in]    a_finestDomain  Finest domain which will be used
     @param[in]    a_probLo        Lower-left corner of simulation domain.
     @param[in]    a_finestDx      Finest resolution which will be used.
@@ -210,7 +210,7 @@ protected:
 
   /*!
     @brief Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics. 
-    @param[inout] a_geoserver     Geometry service object which is later used for making build the EB information.
+    @param[in,out] a_geoserver     Geometry service object which is later used for making build the EB information.
     @param[in]    a_finestDomain  Finest domain which will be used
     @param[in]    a_probLo        Lower-left corner of simulation domain.
     @param[in]    a_finestDx      Finest resolution which will be used.

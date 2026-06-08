@@ -64,7 +64,7 @@ namespace Physics {
 
       /**
          @brief Flag cells for refinement based on curvature and magnitude of the scalar field.
-         @param[inout] a_tags Cell tags across the AMR hierarchy.
+         @param[in,out] a_tags Cell tags across the AMR hierarchy.
          @return True if at least one cell was tagged on any MPI rank.
       */
       bool

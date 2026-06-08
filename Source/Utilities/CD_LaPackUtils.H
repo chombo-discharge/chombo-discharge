@@ -185,7 +185,7 @@ namespace LaPackUtils {
     @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
     @param[in]  a_linA Input matrix in column major Fortran order
     @param[in]  a_M Number of rows in A
-    @param[in]  a_N Number of colums in A
+    @param[in]  a_N Number of columns in A
   */
   bool
   computePseudoInverse(std::vector<double>&       a_linAplus,
@@ -198,7 +198,7 @@ namespace LaPackUtils {
     @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
     @param[in]  a_linA Input matrix in column major Fortran order
     @param[in]  a_M Number of rows in A
-    @param[in]  a_N Number of colums in A
+    @param[in]  a_N Number of columns in A
   */
   bool
   computePseudoInverse(std::vector<float>&       a_linAplus,
@@ -207,7 +207,7 @@ namespace LaPackUtils {
                        const int&                a_N);
 
   /*!
-    @brief Linearize a matrix to column major Fortran form by assuming row or major colum format of the input matrix. 
+    @brief Linearize a matrix to column major Fortran form by assuming row or major column format of the input matrix. 
     @param[out] a_linA Linearized matrix
     @param[out] a_M Number of rows
     @param[out] a_N Number of columns
@@ -246,7 +246,7 @@ namespace LaPackUtils {
   linearizeRowMajorMatrix(std::vector<double>& a_linA, int& a_M, int& a_N, const std::vector<std::vector<double>>& a_A);
 
   /*!
-    @brief Delinearize a linearized matrix from column major Fortran to row or major colum matrix format.
+    @brief Delinearize a linearized matrix from column major Fortran to row or major column matrix format.
     @param[out] a_A Output matrix
     @param[in]  a_M Number of rows
     @param[in]  a_N Number of columns

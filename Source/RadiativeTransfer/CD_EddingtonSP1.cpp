@@ -804,7 +804,7 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
 #endif
 
   // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa, B = 1/(3*kappa). We happen to know that
-  //       the interior face stencils are interpolated using the neigboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
+  //       the interior face stencils are interpolated using the neighboring face, so we must fill the "ghost faces" around the B-coefficient grid patch.
 
   const RealVect probLo = m_amr->getProbLo();
   const Real     dx     = m_amr->getDx()[a_lvl];

@@ -62,7 +62,7 @@ Driver.refine_dielectrics           = 0                    ## Refine dielectric 
 # ====================================================================================================
 # VESSEL CLASS OPTIONS
 #
-# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vaccum
+# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vacuum
 # Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================

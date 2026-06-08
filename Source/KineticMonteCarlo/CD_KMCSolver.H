@@ -252,7 +252,7 @@ public:
 
   /*!
     @brief Perform a single SSA step.
-    @param[inout] a_state State vector to advance
+    @param[in,out] a_state State vector to advance
     @note Calls the other version with m_reactions
   */
   inline void
@@ -260,7 +260,7 @@ public:
 
   /*!
     @brief Perform a single SSA step.
-    @param[inout] a_state     State vector to advance
+    @param[in,out] a_state     State vector to advance
     @param[in]    a_reactions Reactions to advance with
     @note Computes propensities and calls the other version
   */
@@ -269,7 +269,7 @@ public:
 
   /*!
     @brief Perform a single SSA step. This version has pre-computed propensities (for optimization reasons)
-    @param[inout] a_state        State vector to advance
+    @param[in,out] a_state        State vector to advance
     @param[in]    a_reactions    Reactions to advance with
     @param[in]    a_propensities Propensities for the reactions
   */
@@ -278,7 +278,7 @@ public:
 
   /*!
     @brief Advance with the SSA over the input time. This can end up using substepping
-    @param[inout] a_state State vector to advance
+    @param[in,out] a_state State vector to advance
     @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
@@ -287,7 +287,7 @@ public:
 
   /*!
     @brief Advance with the SSA over the input time. This can end up using substepping
-    @param[inout] a_state     State vector to advance
+    @param[in,out] a_state     State vector to advance
     @param[in]    a_reactions Reactions to advance with
     @param[in]    a_dt        Time increment
   */
@@ -296,7 +296,7 @@ public:
 
   /*!
     @brief Perform one plain tau-leaping step using ALL reactions. 
-    @param[inout] a_state State vector to be advanced
+    @param[in,out] a_state State vector to be advanced
     @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
@@ -305,7 +305,7 @@ public:
 
   /*!
     @brief Perform one plain tau-leaping step over the input reactions using a time step a_dt
-    @param[inout] a_state     State vector to be advanced
+    @param[in,out] a_state     State vector to be advanced
     @param[in]    a_reactions List of reactions to advance with
     @param[in]    a_dt        Time increment
   */
@@ -314,7 +314,7 @@ public:
 
   /*!
     @brief Perform one leaping step using the midpoint method for ALL reactions over a time step a_dt
-    @param[inout] a_state State vector to be advanced
+    @param[in,out] a_state State vector to be advanced
     @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
@@ -323,7 +323,7 @@ public:
 
   /*!
     @brief Perform one leaping step using the midpoint method for the input reactions over a time step a_dt
-    @param[inout] a_state        State vector to be advanced
+    @param[in,out] a_state        State vector to be advanced
     @param[in]    a_reactions    List of reactions to advance with
     @param[in]    a_dt           Time increment
   */
@@ -332,7 +332,7 @@ public:
 
   /*!
     @brief Perform one leaping step using the PRC method for ALL reactions over a time step a_dt
-    @param[inout] a_state State vector to be advanced
+    @param[in,out] a_state State vector to be advanced
     @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
@@ -341,7 +341,7 @@ public:
 
   /*!
     @brief Perform one leaping step using the PRC method for the input reactions over a time step a_dt
-    @param[inout] a_state        State vector to be advanced
+    @param[in,out] a_state        State vector to be advanced
     @param[in]    a_reactions    List of reactions to advance with
     @param[in]    a_dt           Time increment
   */
@@ -350,7 +350,7 @@ public:
 
   /*!
     @brief Perform one implicit Euler tau-leaping step using ALL reactions.
-    @param[inout] a_state State vector to be advanced
+    @param[in,out] a_state State vector to be advanced
     @param[in]    a_dt    Time increment
     @note Calls the other version with m_reactions
   */
@@ -359,7 +359,7 @@ public:
 
   /*!
     @brief Perform one implicit Euler tau-leaping step over the input reactions using a time step a_dt
-    @param[inout] a_state     State vector to be advanced
+    @param[in,out] a_state     State vector to be advanced
     @param[in]    a_reactions List of reactions to advance with
     @param[in]    a_dt        Time increment
   */
@@ -368,7 +368,7 @@ public:
 
   /*!
     @brief Advance using a specified tau-leaping algorithm.
-    @param[inout] a_state          State vector to advance
+    @param[in,out] a_state          State vector to advance
     @param[in]    a_dt             Time increment
     @param[in]    a_leapPropagator Which leap propagator to use.     
     @note Calls the other version with m_reactions
@@ -380,7 +380,7 @@ public:
 
   /*!
     @brief Advance using a specified tau-leaping algorithm.
-    @param[inout] a_state          State vector to advance.
+    @param[in,out] a_state          State vector to advance.
     @param[in]    a_reactions      Reactions to advance. 
     @param[in]    a_dt             Time increment.
     @param[in]    a_leapPropagator Which leap propagator to use. 
@@ -395,7 +395,7 @@ public:
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
-    @param[inout] a_state          State vector to advance
+    @param[in,out] a_state          State vector to advance
     @param[in]    a_dt             Time increment
     @param[in]    a_leapPropagator Which leap propagator to use. 
     @note Calls the other version with m_reactions
@@ -407,7 +407,7 @@ public:
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping.
-    @param[inout] a_state          State vector to advance.
+    @param[in,out] a_state          State vector to advance.
     @param[in]    a_reactions      Reactions to advance. 
     @param[in]    a_dt             Time increment.
     @param[in]    a_leapPropagator Which leap propagator to use. 
@@ -421,7 +421,7 @@ public:
 
   /*!
     @brief Advance using Cao et. al. hybrid algorithm over the input time. This can end up using substepping. 
-    @param[inout] a_state          State vector to advance
+    @param[in,out] a_state          State vector to advance
     @param[in]    a_reactions      Reactions to advance with
     @param[in]    a_dt             Time increment
     @param[in]    a_leapPropagator Leaping propagator

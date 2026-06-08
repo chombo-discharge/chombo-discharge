@@ -20,7 +20,7 @@
 
 /*!
   @brief Class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp. 
-  @details This calss is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions are passed in through EddingtonDomainBc
+  @details This class is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions are passed in through EddingtonDomainBc
   @note For this class to operate correctly with time-dependent boundary conditions, the user must ensure that
   the time dependence is captured by reference. The time argument in ElectrostaticDomainBc::BcFunction by this class,
   so whatever function is put in there, it must capture time by reference. 
@@ -92,7 +92,7 @@ public:
 
   /*!
     @brief Get face flux. This is for regular cells. 
-    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in,out] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
     @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction

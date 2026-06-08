@@ -547,7 +547,7 @@ CdrFactory<T, S>::newLayout(const Vector<RefCountedPtr<CdrSpecies>>& a_species) 
 {
   CH_TIME("CdrFactory<T, S>::newLayout(Vector<RefCountedPtr<CdrSpecies> >)");
 
-  // Instatiate the return CdrLayout object first.
+  // Instantiate the return CdrLayout object first.
   auto cdr = RefCountedPtr<CdrLayout<T>>(new CdrLayout<T>(a_species));
 
   // Cast solvers and instantiate them

@@ -245,7 +245,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
       }
     }
 
-    // Write and clsoe dataset
+    // Write and close dataset
     H5Dwrite(dataset, H5Dget_type(dataset), memSpaceID, fileSpaceID, H5P_DEFAULT, &ds[0]);
     H5Dclose(dataset);
   }
@@ -342,7 +342,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
                              MPI_SUM,
                              Chombo_MPI::comm);
   if (result != MPI_SUCCESS) {
-    MayDay::Error("MPI communcation error in ParticleIO");
+    MayDay::Error("MPI communication error in ParticleIO");
   }
 
 #else
@@ -514,7 +514,7 @@ DischargeIO::readCheckParticlesFromHDF(HDF5Handle&        a_handle,
 
   hid_t dataspace = H5Dget_space(dataset);
 
-  // read in data relative to this proc in small chuncks
+  // read in data relative to this proc in small chunks
   const size_t chunkSize = objSize * _CHUNK;
 
   // allocate data buffer to read in linearized particle data chunks

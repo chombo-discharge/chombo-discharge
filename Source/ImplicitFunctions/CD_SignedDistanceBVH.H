@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_SignedDistanceBVH.H
-  @brief  Declaration of an signe distance function class that gets its value function from a DCEL surface Tesselation
+  @brief  Declaration of an signe distance function class that gets its value function from a DCEL surface Tessellation
   @author Robert Marskar
 */
 

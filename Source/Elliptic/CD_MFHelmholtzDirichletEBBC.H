@@ -124,8 +124,8 @@ protected:
 
   /*!
     @brief Apply flux single phase
-    @param[inout] a_singlePhaseVofs   Iterator for single-phase cut-cells
-    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in,out] a_singlePhaseVofs   Iterator for single-phase cut-cells
+    @param[in,out] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
     @param[in]    a_Bcoef             EB-centered B-coefficient
     @param[in]    a_dit               Data index    

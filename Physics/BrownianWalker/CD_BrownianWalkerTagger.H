@@ -61,7 +61,7 @@ namespace Physics {
 
       /**
          @brief Tag cells for refinement. Currently tags no cells but returns true to trigger load balancing.
-         @param[inout] a_tags Cell tags across the AMR hierarchy.
+         @param[in,out] a_tags Cell tags across the AMR hierarchy.
          @return Always true.
       */
       bool

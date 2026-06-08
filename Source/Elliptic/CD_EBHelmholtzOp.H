@@ -134,14 +134,14 @@ public:
   virtual ~EBHelmholtzOp();
 
   /*!
-    @brief No copy assigment allowed
+    @brief No copy assignment allowed
     @param[in] a_other Other operator
   */
   EBHelmholtzOp&
   operator=(const EBHelmholtzOp& a_oper) = delete;
 
   /*!
-    @brief No move assigment allowed
+    @brief No move assignment allowed
     @param[in] a_other Other operator
   */
   EBHelmholtzOp&
@@ -241,8 +241,8 @@ public:
 
   /*!
     @brief Point Jacobi kernel. 
-    @param[inout] a_Lcorr      Storage for computing L(a_corr)
-    @param[inout] a_corr       Correction
+    @param[in,out] a_Lcorr      Storage for computing L(a_corr)
+    @param[in,out] a_corr       Correction
     @param[in]    a_resid      Residual
     @param[in]    a_Acoef      A-coefficient
     @param[in]    a_Bcoef      B-coefficient
@@ -262,8 +262,8 @@ public:
 
   /*!
     @brief Red-black Gauss-Seidel kernel
-    @param[inout] a_Lcorr      Storage for computing L(a_corr)
-    @param[inout] a_corr       Correction
+    @param[in,out] a_Lcorr      Storage for computing L(a_corr)
+    @param[in,out] a_corr       Correction
     @param[in]    a_resid      Residual
     @param[in]    a_Acoef      A-coefficient
     @param[in]    a_Bcoef      B-coefficient
@@ -285,8 +285,8 @@ public:
 
   /*!
     @brief Multi-color Gauss-Seidel kernel
-    @param[inout] a_Lcorr      Storage for computing L(a_corr)
-    @param[inout] a_corr       Correction
+    @param[in,out] a_Lcorr      Storage for computing L(a_corr)
+    @param[in,out] a_corr       Correction
     @param[in]    a_resid      Residual
     @param[in]    a_Acoef      A-coefficient
     @param[in]    a_Bcoef      B-coefficient
@@ -330,8 +330,8 @@ public:
 
   /*!
     @brief Apply coarse-fine boundary conditions
-    @param[inout] a_phiFine         Fine data
-    @param[inout] a_phiCoar         Coarse data
+    @param[in,out] a_phiFine         Fine data
+    @param[in,out] a_phiCoar         Coarse data
     @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
   */
   void
@@ -346,8 +346,8 @@ public:
 
   /*!
     @brief Inhomogeneous coarse-fine interpolation
-    @param[inout] a_phiFine Fine data. Ghost cells will be filled.
-    @param[inout] a_phiCoar Coarse data. 
+    @param[in,out] a_phiFine Fine data. Ghost cells will be filled.
+    @param[in,out] a_phiCoar Coarse data. 
   */
   void
   inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
@@ -429,7 +429,7 @@ public:
 
   /*!
     @brief Apply domain flux. 
-    @param[inout] a_phi               Cell data
+    @param[in,out] a_phi               Cell data
     @param[in]    a_Bcoef             Helmholtz B-coefficient
     @param[in]    a_cellBox           Computation box
     @param[in]    a_dit               Data index
@@ -447,8 +447,8 @@ public:
   /*!
     @brief Fill domain flux. This fills the flux on the domain face using centered differencing ala applyDomainFlux
     @details a_flux is replaced by the user-specified flux on the domain faces. 
-    @param[inout] a_flux              Flux data holder.
-    @param[inout] a_phi               Cell-centered data
+    @param[in,out] a_flux              Flux data holder.
+    @param[in,out] a_phi               Cell-centered data
     @param[in]    a_cellBox           Computation box
     @param[in]    a_dit               Data index
   */
@@ -525,7 +525,7 @@ public:
 
   /*!
     @brief Increment operator
-    @param[inout] a_lhs   Data to be incremented
+    @param[in,out] a_lhs   Data to be incremented
     @param[in]    a_rhs   Incrementation data
     @param[in]    a_scale Scaling factor
   */
@@ -549,7 +549,7 @@ public:
 
   /*!
     @brief Scale data. Returns a_lhs = a_lhs*a_scale
-    @param[inout] a_lhs   Data to be scaled
+    @param[in,out] a_lhs   Data to be scaled
     @param[i]     a_scale Scaling factor
   */
   void
@@ -573,7 +573,7 @@ public:
 
   /*!
     @brief Set data to zero
-    @param[inout] a_lhs Data to be set to zero. 
+    @param[in,out] a_lhs Data to be set to zero. 
   */
   void
   setToZero(LevelData<EBCellFAB>& a_lhs) override final;
@@ -589,7 +589,7 @@ public:
 
   /*!
     @brief Relaxation method. This does smoothing for the system L(correction) = residual
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -598,8 +598,8 @@ public:
 
   /*!
     @brief Restrict residual onto coarse level
-    @param[inout] a_resCoar      Coarse residual
-    @param[inout] a_phi Phi on this level
+    @param[in,out] a_resCoar      Coarse residual
+    @param[in,out] a_phi Phi on this level
     @param[in]    a_rhs Rhs on this level
   */
   void
@@ -791,7 +791,7 @@ public:
 
   /*!
     @brief Do diagonal scaling
-    @param[inout] a_rhs           Data to be scaled
+    @param[in,out] a_rhs           Data to be scaled
     @param[in]    a_kappaWeighted Use kappa-weighted scaling or not
   */
   void
@@ -799,7 +799,7 @@ public:
 
   /*!
     @brief Divide by the a-coefficient
-    @param[inout] a_rhs Divided data
+    @param[in,out] a_rhs Divided data
   */
   void
   divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) override final;
@@ -1170,7 +1170,7 @@ protected:
 
   /*!
     @brief Jacobi relaxation
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -1179,7 +1179,7 @@ protected:
 
   /*!
     @brief Jacobi relaxation
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -1188,7 +1188,7 @@ protected:
 
   /*!
     @brief Multi-colored gauss-seidel relaxation
-    @param[inout] a_correction Correction
+    @param[in,out] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
@@ -1294,7 +1294,7 @@ protected:
 
   /*!
     @brief Reflux algorithm.
-    @param[inout] a_Lphi L(phiFine, phiCoar). This is modified along the CF interface to consistently account for fine-level fluxes. 
+    @param[in,out] a_Lphi L(phiFine, phiCoar). This is modified along the CF interface to consistently account for fine-level fluxes. 
     @param[in]    a_phiFine Data on finer level
     @param[in]    a_phi     Data on this operator's level
     @param[in]    a_finerOp Operator on fine level

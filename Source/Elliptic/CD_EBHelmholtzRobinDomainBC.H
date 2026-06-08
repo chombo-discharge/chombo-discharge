@@ -60,7 +60,7 @@ public:
 
   /*!
     @brief Get face flux. This is for regular cells
-    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in,out] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
     @param[in]    a_Bcoef          Face-centered B-coefficient
     @param[in]    a_dir            Coordinate direction

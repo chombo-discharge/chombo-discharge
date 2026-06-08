@@ -130,7 +130,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Write header data to checkpoint file.
-	@param[inout] a_header HDF5 header.
+	@param[in,out] a_header HDF5 header.
       */
       virtual void
       writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept override;
@@ -139,7 +139,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Read header data from checkpoint file.
-	@param[inout] a_header HDF5 header.
+	@param[in,out] a_header HDF5 header.
       */
       virtual void
       readCheckpointHeader(HDF5HeaderData& a_header) noexcept override;
@@ -148,7 +148,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Write checkpoint data to file.
-	@param[inout] a_handle HDF5 file.
+	@param[in,out] a_handle HDF5 file.
 	@param[in]    a_lvl    Grid level.
       */
       virtual void
@@ -158,7 +158,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Read checkpoint data from file
-	@param[inout] a_handle HDF5 file
+	@param[in,out] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
       virtual void
@@ -181,8 +181,8 @@ namespace Physics {
 
       /**
 	@brief Write plot data to output holder. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in,out] a_output Output data holder.
+	@param[in,out] a_icomp  Starting component in a_output to begin at. 
 	@param[in]    a_outputRealm Realm where a_output belongs
 	@param[in]    a_level  Grid level
       */
@@ -930,8 +930,8 @@ namespace Physics {
 
       /**
 	@brief Write data to output. Convenience function. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component where this solver begins writing the output. 
+	@param[in,out] a_output Output data holder.
+	@param[in,out] a_icomp  Starting component where this solver begins writing the output. 
 	@param[in]    a_data   Data to write. 
 	@param[in]    a_outputRealm Realm where a_output belogns
 	@param[in]    a_level  Grid level
@@ -949,8 +949,8 @@ namespace Physics {
 
       /**
 	@brief Write number of particles per patch to output holder. 
-	@param[inout] a_output Output data holder.
-	@param[inout] a_icomp  Starting component in a_output to begin at. 
+	@param[in,out] a_output Output data holder.
+	@param[in,out] a_icomp  Starting component in a_output to begin at. 
 	@param[in]    a_outputRealm Realm where a_output belogns
 	@param[in]    a_level  Grid level
       */
@@ -962,10 +962,10 @@ namespace Physics {
 
       /**
 	@brief Get maximum density of the Ito species (only for charged species)
-	@param[inout] a_maxDensity Maximum mesh density
-	@param[inout] a_minDensity Minium mesh density
-	@param[inout] a_maxSolver  Solver with highest density
-	@param[inout] a_minSolver  Solver with lowest density
+	@param[in,out] a_maxDensity Maximum mesh density
+	@param[in,out] a_minDensity Minimum mesh density
+	@param[in,out] a_maxSolver  Solver with highest density
+	@param[in,out] a_minSolver  Solver with lowest density
       */
       virtual void
       getMaxMinRelativeItoDensity(Real&        a_maxDensity,
@@ -975,10 +975,10 @@ namespace Physics {
 
       /**
 	@brief Get maximum density of the CDR species (only for charged species)
-	@param[inout] a_maxDensity Maximum mesh density
-	@param[inout] a_minDensity Minium mesh density
-	@param[inout] a_maxSolver  Solver with highest density
-	@param[inout] a_minSolver  Solver with lowest density
+	@param[in,out] a_maxDensity Maximum mesh density
+	@param[in,out] a_minDensity Minimum mesh density
+	@param[in,out] a_maxSolver  Solver with highest density
+	@param[in,out] a_minSolver  Solver with lowest density
       */
       virtual void
       getMaxMinRelativeCDRDensity(Real&        a_maxDensity,
@@ -988,7 +988,7 @@ namespace Physics {
 
       /**
 	@brief Compute some particle statistics
-	@param[out] a_avgParticles Average numer of particles
+	@param[out] a_avgParticles Average number of particles
 	@param[out] a_sigma        Particle standard deviation (across MPI ranks)
 	@param[out] a_minParticles Minimum number of particles
 	@param[out] a_maxParticles Maximum number of particles
@@ -1425,8 +1425,8 @@ namespace Physics {
 
       /**
 	@brief Chemistry advance over time a_dt. Level version. 
-	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
-	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+	@param[in,out] a_particlesPerCell      Number of particles per cell for each plasma species
+	@param[in,out] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
 	@param[in]    a_electricField         Electric field. 
 	@param[in]    a_level                 Grid level
 	@param[in]    a_dt                    Time increment
@@ -1442,8 +1442,8 @@ namespace Physics {
 
       /**
 	@brief Chemistry advance over time a_dt. Patch version. 
-	@param[inout] a_particlesPerCell      Number of particles per cell for each plasma species
-	@param[inout] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
+	@param[in,out] a_particlesPerCell      Number of particles per cell for each plasma species
+	@param[in,out] a_newPhotonsPerCell     Number of physical photons to be generated for each photon species
 	@param[in]    a_electricField         Electric field. 
 	@param[in]    a_level                 Grid level
 	@param[in]    a_din                   Grid index.
@@ -1467,7 +1467,7 @@ namespace Physics {
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
 	@param[in] a_electricField        Electric field
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
       */
@@ -1481,7 +1481,7 @@ namespace Physics {
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
 	@param[in] a_electricField        Electric field	
 	@param[in] a_level                Grid level
 	@note All data should be defined on the particle realm since this is where the particle reconciliation takes place. 
@@ -1497,7 +1497,7 @@ namespace Physics {
 	@brief Reconcile particles. At the bottom, this will call the physics interface for particle reconciliation
 	@param[in] a_newParticlesPerCell  Particles per cell after the chemistry advance. 
 	@param[in] a_oldParticlesPerCell  Particles per cell before the chemistry advance. 
-	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry avance.
+	@param[in] a_newPhotonsPerCell    Newly generated photons per cell after the chemistry advance.
 	@param[in] a_electricField        Electric field				 	
 	@param[in] a_level                Grid level
 	@param[in] a_din                  Grid index

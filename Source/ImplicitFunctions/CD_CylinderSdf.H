@@ -54,7 +54,7 @@ public:
 
 protected:
   /*!
-    @brief One end poitn
+    @brief One end point
   */
   RealVect m_endPoint1;
 

@@ -106,7 +106,7 @@ public:
 #ifdef CH_USE_HDF5
   /*!
     @brief Read header data from checkpoint file.
-    @param[inout] a_header HDF5 header.
+    @param[in,out] a_header HDF5 header.
   */
   virtual void
   readCheckpointHeader(HDF5HeaderData& a_header);
@@ -115,7 +115,7 @@ public:
 #ifdef CH_USE_HDF5
   /*!
     @brief Write header data to checkpoint file.
-    @param[inout] a_header HDF5 header.
+    @param[in,out] a_header HDF5 header.
   */
   virtual void
   writeCheckpointHeader(HDF5HeaderData& a_header) const;
@@ -124,7 +124,7 @@ public:
 #ifdef CH_USE_HDF5
   /*!  
     @brief Write checkpoint data to file
-    @param[inout] a_handle HDF5 file
+    @param[in,out] a_handle HDF5 file
     @param[in]    a_lvl    Grid level
     @details Implement this routine for checkpointing data for restarts. This will
     typically call the solvers' checkpointing routine, but more data can be added.
@@ -136,7 +136,7 @@ public:
 #ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint data from file
-    @param[inout] a_handle HDF5 file
+    @param[in,out] a_handle HDF5 file
     @param[in]    a_lvl    Grid level
     @details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting routine. 
   */
@@ -160,8 +160,8 @@ public:
 
   /*!
     @brief Write plot data to output holder. 
-    @param[inout] a_output      Output data holder.
-    @param[inout] a_icomp       Starting component in a_output to begin at. 
+    @param[in,out] a_output      Output data holder.
+    @param[in,out] a_icomp       Starting component in a_output to begin at. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level       Grid level
   */
@@ -260,7 +260,7 @@ public:
   postRegrid() = 0;
 
   /*!
-    @brief Fuction which can have Driver do regrids at arbitrary points in the simulation.
+    @brief Function which can have Driver do regrids at arbitrary points in the simulation.
     @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is
     on the regular "regrid intervals".
   */

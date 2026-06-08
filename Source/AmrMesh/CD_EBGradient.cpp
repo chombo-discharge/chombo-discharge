@@ -506,7 +506,7 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
     a_coarMaskInvalid[din].setVal(zero);
   }
 
-  // Ned to copy from the buffer masks to this mask.
+  // Need to copy from the buffer masks to this mask.
   Copier copierCF;
   Copier copierInvalid;
 

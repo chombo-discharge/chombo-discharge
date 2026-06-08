@@ -385,7 +385,7 @@ then we can estimate the inception voltage for a starting electron at position :
 Minimum inception voltage
 _________________________
 
-The minium inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
+The minimum inception voltage is the minimum voltage required for starting a critical avalanche (or Townsend process) for an arbitrary starting electron.
 For any position :math:`\mathbf{x}`, then
 
 .. math::

@@ -176,7 +176,7 @@ public:
 
   /*!
     @brief Compute the boundary flux given a state (a_phi will be different for different RTE approximations)
-    @param[inout] a_ebFlux The flux on the EB
+    @param[in,out] a_ebFlux The flux on the EB
     @param[in]    a_phi    Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
   */
   virtual void
@@ -184,7 +184,7 @@ public:
 
   /*!
     @brief Compute the domain flux given a state (a_phi will be different for different RTE approximations)
-    @param[inout] a_domainFlux The flux on the domain wall
+    @param[in,out] a_domainFlux The flux on the domain wall
     @param[in]    a_phi        Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
   */
   virtual void
@@ -192,7 +192,7 @@ public:
 
   /*!
     @brief Compute the flux
-    @param[inout] a_flux The RTE flux on the domain wall
+    @param[in,out] a_flux The RTE flux on the domain wall
     @param[in]    a_phi  Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
     @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
     will be contained in a_phi (somehow).
@@ -202,7 +202,7 @@ public:
 
   /*!
     @brief Get isotropic part. 
-    @param[inout] a_isotropic Isotropic part of the RTE solution
+    @param[in,out] a_isotropic Isotropic part of the RTE solution
     @param[in]    a_phi       Full RTE solution.
     @details This is normally just a copy, but I need the function signature in order to have a clear plasma-coupling interface
   */
@@ -293,8 +293,8 @@ public:
 
   /*!
     @brief Write output data to a_output
-    @param[inout] a_output      Output data holder.
-    @param[inout] a_icomp       Starting component where this solver begins writing the output. 
+    @param[in,out] a_output      Output data holder.
+    @param[in,out] a_icomp       Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level       Grid level
     @note This routine writes m_phi on centroids (and not cell-centers). 
@@ -507,8 +507,8 @@ protected:
 
   /*!
     @brief Write data to output. Convenience function. 
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_level  Grid level
     @param[in]    a_outputRealm Realm to which a_output belongs

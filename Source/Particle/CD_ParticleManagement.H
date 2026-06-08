@@ -32,7 +32,7 @@ namespace ParticleManagement {
 
   /*!
     @brief Concept for splitting/merging particles
-    @param[inout] a_particles Particles to be merged/split
+    @param[in,out] a_particles Particles to be merged/split
     @param[in] a_cellInfo Cell info
     @param[in] a_numTargetParticles Number of target particles
   */
@@ -42,7 +42,7 @@ namespace ParticleManagement {
 
   /*!
     @brief Declaration of a reconciliation function when splitting particles.
-    @details This is, for example, passed into the KD-tree equal-weight partioning structure, which may split a particle
+    @details This is, for example, passed into the KD-tree equal-weight partitioning structure, which may split a particle
     such that the weight of the two nodes differ by at most one physical particle. By default, that method will call the
     particle copy constructor, but this function permits the user to input a reconciliation function that manipulates other
     class members in the split particles. 
@@ -53,7 +53,7 @@ namespace ParticleManagement {
   /*!
     @brief Partition and split a KD-node with particles so that the weights are approximately the same. 
 
-    @param[inout] a_node Node to split. This MUST be a leaf node and it MUST be possible to split it. 
+    @param[in,out] a_node Node to split. This MUST be a leaf node and it MUST be possible to split it. 
     @param[in] a_particleReconcile Optional reconciliation function when splitting a particle into two new particles.
     @details This will partition particles on two sides of a plane parallel to one of the coordinate axis. The middle
     particle closest to this plane may be split, and the weights of the resulting particles are assigned such that the
@@ -79,7 +79,7 @@ namespace ParticleManagement {
 
   /*!
     @brief Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.
-    @param[inout] a_inputParticles Input particles. These are destroyed on output.
+    @param[in,out] a_inputParticles Input particles. These are destroyed on output.
     @param[in] a_maxLeaves Maximum number of leaves in the tree.
     @return Returns leaf nodes containing the particles
     @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
@@ -107,7 +107,7 @@ namespace ParticleManagement {
 
   /*!
     @brief Remove physical particles from the input particles.
-    @param[inout] a_particles           Input list of particles. Must have a weight function. 
+    @param[in,out] a_particles           Input list of particles. Must have a weight function. 
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove
     @note May fail if particle weights are not (close to) integers. 
   */
@@ -117,7 +117,7 @@ namespace ParticleManagement {
 
   /*!
     @brief Remove particles if their weight is below the input weight
-    @param[inout] a_particles    Input list of particles. Must have a weight function. 
+    @param[in,out] a_particles    Input list of particles. Must have a weight function. 
     @param[in]    a_weightThresh Weight threshold for removal
   */
   template <typename P>

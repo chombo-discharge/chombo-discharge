@@ -80,7 +80,7 @@ public:
   virtual ~EBFluxRedistribution() noexcept;
 
   /*!
-    @brief Define fucntion. Puts object in usable state. 
+    @brief Define function. Puts object in usable state. 
     @details If there is a finer level, a_eblgFine and a_eblgRefined must be defined. If there is a coarser grid level then
     a_eblgCoar and a_eblgCoarsened must be defined. 
     @param[in] a_eblgCoar             Coarser grid level
@@ -106,9 +106,9 @@ public:
     @brief Redistribute the input quantity into the coarse level, this level, and the fine level.
     @details If calling this, pass in a_phiFine/a_phiCoar = nullptr if there is no finer/coarser level. The a_scaleCoar and a_scaleFine arguments
     do not matter if there is no coarser/finer level.
-    @param[inout] a_phiCoar   Data on coarse level
-    @param[inout] a_phi       Data on this level
-    @param[inout] a_phiFine   Data on finer level
+    @param[in,out] a_phiCoar   Data on coarse level
+    @param[in,out] a_phi       Data on this level
+    @param[in,out] a_phiFine   Data on finer level
     @param[in]    a_deltaM    Redistribution data on this level
     @param[in]    a_scaleCoar Scaling factor for redistribution into the coarse level
     @param[in]    a_scale     Scaling factor for redistribution into this level
@@ -127,7 +127,7 @@ public:
 
   /*!
     @brief Redistribute the input quantity to the coarse level.
-    @param[inout] a_phiCoar   Data on coarse level
+    @param[in,out] a_phiCoar   Data on coarse level
     @param[in]    a_deltaM    Redistribution data on this level
     @param[in]    a_scaleCoar Scaling factor for redistribution into the coarse level
     @param[in]    a_variables Variables to redistribute
@@ -140,7 +140,7 @@ public:
 
   /*!
     @brief Redistribute the input quantity to this level.
-    @param[inout] a_phi       Data on this level
+    @param[in,out] a_phi       Data on this level
     @param[in]    a_deltaM    Redistribution data on this level
     @param[in]    a_scale     Scaling factor for redistribution on this level
     @param[in]    a_variables Variables to redistribute
@@ -153,7 +153,7 @@ public:
 
   /*!
     @brief Redistribute the input quantity to the coarse level.
-    @param[inout] a_phiCoar   Data on fine level
+    @param[in,out] a_phiCoar   Data on fine level
     @param[in]    a_deltaM    Redistribution data on this level
     @param[in]    a_scaleFine Scaling factor for redistribution into the fine level
     @param[in]    a_variables Variables to redistribute
@@ -277,14 +277,14 @@ protected:
 
   /*!
     @brief Define the valid region of this level.
-    @param[inout] a_validCells Valid grid cells on this level. 
+    @param[in,out] a_validCells Valid grid cells on this level. 
   */
   virtual void
   defineValidCells(LevelData<BaseFab<bool>>& a_validCells) const noexcept;
 
   /*!
     @brief Define the cells on the coarse side of the CF interface that we would redistribute to. 
-    @param[inout] a_validCells Valid grid cells on this level. 
+    @param[in,out] a_validCells Valid grid cells on this level. 
   */
   virtual void
   defineInterfaceCells(LevelData<BaseFab<bool>>& a_interfaceCells) const noexcept;

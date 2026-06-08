@@ -139,7 +139,7 @@ LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
     // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
     //
     // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
-    // This will also correspond to a modification of the right-hand side, but the required modifications are not accesible
+    // This will also correspond to a modification of the right-hand side, but the required modifications are not accessible
     // in this routine, and so the user will have to make sense of them.
 
     int       i = 0;                // Exists just because we fill memory linearly.

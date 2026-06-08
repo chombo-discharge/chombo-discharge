@@ -132,7 +132,7 @@ Retrieving compound implicit functions
 When generating the geometry we compute the implicit functions for each *phase*, the gas-phase, the dielectric-phase, and the electrodes.
 We outlined this process in :eq:`ElectrodeRegion` and :eq:`DielectricRegion`.
 
-To retrive the implicit function corresponding to a particular phase, use
+To retrieve the implicit function corresponding to a particular phase, use
 
 .. code-block:: c++
 

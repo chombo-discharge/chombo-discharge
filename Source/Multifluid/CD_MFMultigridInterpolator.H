@@ -26,7 +26,7 @@ class MFMultigridInterpolator
 {
 public:
   /*!
-    @brief Weak constructor. Must subsquently call define.
+    @brief Weak constructor. Must subsequently call define.
   */
   MFMultigridInterpolator();
 

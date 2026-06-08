@@ -28,7 +28,7 @@
   @brief Class for interpolating cell-centered data to the EB centroid.
 
   @details Various interpolation methods are supported, where some are supported by explicitly
-  expressable stencils and others through limiters. 
+  expressible stencils and others through limiters. 
 
   This is a per-level class without AMR functionality. On coarse-fine interfaces near the EB the
   user must fill the ghost cells prior to the interpolation. 
@@ -126,7 +126,7 @@ protected:
   mutable LayoutData<VoFIterator> m_vofIterator;
 
   /*!
-    @brief Stencils. This is only populated when the interpolation is expressable as a stencil.
+    @brief Stencils. This is only populated when the interpolation is expressible as a stencil.
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_interpStencils;
 

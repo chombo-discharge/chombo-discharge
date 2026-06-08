@@ -752,7 +752,7 @@ namespace Physics {
 	@param[in] a_reactants List of reactants. Can contain wildcard.
 	@param[in] a_products List of products. Can contain wildcard.
 	@param[in] a_reactionJSON  JSON reaction entry. 
-	@return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
+	@return Returns a list of reactants and products with wildcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
       virtual std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
       parseReactionWildcards(const std::vector<std::string>& a_reactants,

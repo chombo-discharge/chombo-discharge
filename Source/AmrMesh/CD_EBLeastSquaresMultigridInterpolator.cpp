@@ -299,7 +299,7 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
         if (!ghostBox.isEmpty()) {
           BaseFab<Real>& phiReg = a_phi.getSingleValuedFAB();
 
-          // C++ kernel for homogeneous interpolation along a line, assumning that coarse-grid
+          // C++ kernel for homogeneous interpolation along a line, assuming that coarse-grid
           // data is zero.
           auto interpHomo = [&](const IntVect& iv) -> void {
             phiReg(iv, ivar) = c1 * phiReg(iv - shift, ivar) + c2 * phiReg(iv - 2 * shift, ivar);

@@ -658,7 +658,7 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
         regFlux(iv, m_comp) = inverseDx * regDco(iv, m_comp) * (regPhi(iv, m_comp) - regPhi(iv - BASISV(dir), m_comp));
       };
 
-      // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+      // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
       // we may have multi-cells but the above kernel only does single-valued cells).
       auto irregularKernel = [&](const FaceIndex& face) -> void {
         if (!face.isBoundary()) {
@@ -751,7 +751,7 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
           faceFlux -= idx * faceDco * (cellPhiHi - cellPhiLo);
         };
 
-        // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+        // Cut-cell kernel. Basically the same as the above but we need to explicitly get vofs on the low/high side (because
         // we may have multi-cells but the above kernel only does single-valued cells).
         auto irregularKernel = [&](const FaceIndex& face) -> void {
           const VolIndex hiVoF = face.getVoF(Side::Hi);
@@ -953,7 +953,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
             break;
           }
           case CdrDomainBC::BcType::Solver: {
-            // Don't do anything beacuse the solver will have filled the flux already.
+            // Don't do anything because the solver will have filled the flux already.
 
             break;
           }
@@ -2997,7 +2997,7 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
   // It is inspired by a desire to gradually turn off fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we
   // compute the value of phi on faces with the following rules:
   //
-  //    1. If theres more than one particle in the cells, we take the arithmetic average as usual.
+  //    1. If there's more than one particle in the cells, we take the arithmetic average as usual.
   //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo + phiHi) * loFactor * hiFactor
   //       where loFactor and hiFactor are the number of particles in the grid cell.
 

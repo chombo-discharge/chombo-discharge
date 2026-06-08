@@ -219,7 +219,7 @@ This is the natural boundary conditions on a dielectric surface, for example.
 Jump conditions
 _______________
 
-For the case of discontinous coefficients there is a jump condition on the interface between two materials:
+For the case of discontinuous coefficients there is a jump condition on the interface between two materials:
 
 .. math::
    :label: jump_condition

@@ -304,7 +304,7 @@ namespace Physics {
 
       /**
 	@brief Advance the reaction network using the KMC algorithm.
-	@param[inout] a_numParticles  Number of physical particles
+	@param[in,out] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
 	@param[out]   a_physicsDt     Reasonable KMC time step computed at end of integration with eps = 1
 	@param[in]    a_phi           Plasma species densities. 
@@ -330,7 +330,7 @@ namespace Physics {
       /**
 	@brief Reconcile the number of particles.
 	@details This will add/remove particles and potentially also adjust the particle weights.
-	@param[inout] a_particles Computational particles
+	@param[in,out] a_particles Computational particles
 	@param[in]    a_newNumParticles New number of particles (i.e., after the KMC advance)
 	@param[in]    a_oldNumParticles Previous number of particles (i.e., before the KMC advance)
 	@param[in]    a_electricField   Electric field in cell
@@ -387,8 +387,8 @@ namespace Physics {
 
       /**
 	@brief Reconcile photoionization reactions.
-	@param[inout] a_itoPrticles       Particle products placed in Ito solvers. 
-	@param[inout] a_cdrParticles      Particle products placed in CDR solvers. 
+	@param[in,out] a_itoPrticles       Particle products placed in Ito solvers. 
+	@param[in,out] a_cdrParticles      Particle products placed in CDR solvers. 
 	@param[in]    a_absorbedPhotons Photons absorbed on the mesh. 
 	@details This runs through the photo-reactions and associates photo-ionization products. 
       */
@@ -641,7 +641,7 @@ namespace Physics {
       /**
 	@brief Remove particles from the input list.
 	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. 
-	@param[inout] a_particles   List of (super-)particles to remove from. 
+	@param[in,out] a_particles   List of (super-)particles to remove from. 
 	@param[in]    a_numToRemove Number of physical particles to remove from the input list
       */
       inline void

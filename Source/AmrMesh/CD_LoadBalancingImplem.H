@@ -56,7 +56,7 @@ LoadBalancing::makeBalance(Vector<int>&       a_ranks,
     boxLoads.push_back(1.0 * a_boxLoads[i]);
   }
 
-  // Minimum number of grid subsets is the number of boxe, and the maximum number of grid subsets
+  // Minimum number of grid subsets is the number of boxes, and the maximum number of grid subsets
   // is the number of ranks.
   const int numBoxes   = a_boxes.size();
   const int numRanks   = numProc();

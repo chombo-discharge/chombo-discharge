@@ -452,7 +452,7 @@ protected:
   getGeometryTags();
 
   /*!
-    @brief Get statics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. 
+    @brief Get statistics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. 
     @param[out] a_numLocalCells       Local number of grid cells, excluding ghost cells. 
     @param[out] a_numLocalCellsGhosts Local number of grid cells, including ghost cells. 
     @param[out] a_numLocalBox         Local number of grid patches (over all levels)
@@ -703,8 +703,8 @@ protected:
 
   /*!
     @brief Write internal plot data
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Starting component
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Starting component
     @param[in]    a_level  AMR level
     @details This will copy Driver's plot data into a_output, starting on component a_comp. 
   */
@@ -713,8 +713,8 @@ protected:
 
   /*!
     @brief Write cell tags to file
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Starting component
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Starting component
     @param[in]    a_level  AMR level
     @details This will write cell tags data into a_output, starting on component a_comp. 
   */
@@ -723,8 +723,8 @@ protected:
 
   /*!
     @brief Write MPI ranks to output
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Starting component
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Starting component
     @param[in]    a_level  AMR level
     @details This adds data to a_output where the data in each grid patch is the MPI rank. 
   */
@@ -733,8 +733,8 @@ protected:
 
   /*!
     @brief Write level sets
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Starting component
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Starting component
     @details This adds data to a_output where the cell-centered data is the level-set value. 
     @note This writes directly to a_output.
   */
@@ -743,8 +743,8 @@ protected:
 
   /*!
     @brief Write computational loads to output
-    @param[inout] a_output Output data holder
-    @param[inout] a_comp   Starting component
+    @param[in,out] a_output Output data holder
+    @param[in,out] a_comp   Starting component
     @param[in]    a_level  AMR level
     @details This adds data to a_output where the data in each grid patch is the MPI rank. 
   */

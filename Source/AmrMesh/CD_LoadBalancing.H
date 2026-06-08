@@ -43,7 +43,7 @@ public:
     @details This version takes into account loads already assigned to ranks, and assigns grid subsets to the least
     loaded ranks. 
     @param[out]   a_ranks Vector containing processor IDs corresponding to boxes (and loads)
-    @param[inout] a_rankLoads MPI rank loads so far
+    @param[in,out] a_rankLoads MPI rank loads so far
     @param[in]    a_boxLoads Computational loads for each box
     @param[in]    a_boxes Grid boxes
   */
@@ -53,8 +53,8 @@ public:
 
   /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.
-    @param[inout] a_boxes Grid boxes
-    @param[inout] a_loads Computational loads
+    @param[in,out] a_boxes Grid boxes
+    @param[in,out] a_loads Computational loads
     @param[in]    a_whichSorting
     @return Returns a_boxes and a_loads, sorting according to the argument a_whichSorting.
   */
@@ -64,8 +64,8 @@ public:
 
   /*!
     @brief Sorting function for sorting boxes and loads
-    @param[inout] a_boxes Grid boxes
-    @param[inout] a_loads Computational loads
+    @param[in,out] a_boxes Grid boxes
+    @param[in,out] a_loads Computational loads
     @param[in]    a_whichSorting
     @return Returns a_boxes and a_loads, sorting according to the argument a_whichSorting.
   */
@@ -75,14 +75,14 @@ public:
 
   /*!
     @brief Sorts boxes (according to sorting argument)
-    @param[inout] a_boxes Grid boxes
+    @param[in,out] a_boxes Grid boxes
   */
   static void
   sort(Vector<Box>& a_boxes, const BoxSorting a_which);
 
   /*!
     @brief Gather boxes
-    @param[inout] a_boxes Local boxes
+    @param[in,out] a_boxes Local boxes
     @return On output, a_boxes contains the global boxes. 
   */
   static void
@@ -90,7 +90,7 @@ public:
 
   /*!
     @brief Gather computational loads
-    @param[inout] a_loads Computational loads
+    @param[in,out] a_loads Computational loads
     @return On output, a_loads contains the loads from all ranks. 
   */
   static void
@@ -98,7 +98,7 @@ public:
 
   /*!
     @brief Gather compute loads
-    @param[inout] a_loads Computational loads
+    @param[in,out] a_loads Computational loads
     @return On output, a_loads contains the loads from all ranks. 
   */
   static void
@@ -106,7 +106,7 @@ public:
 
   /*!
     @brief Gather compute loads
-    @param[inout] a_loads Computational loads
+    @param[in,out] a_loads Computational loads
     @return On output, a_loads contains the loads from all ranks. 
   */
   static void
@@ -114,8 +114,8 @@ public:
 
   /*!
     @brief Gather boxes and loads
-    @param[inout] a_boxes Grid boxes
-    @param[inout] a_loads Computational loads
+    @param[in,out] a_boxes Grid boxes
+    @param[in,out] a_loads Computational loads
     @return On output, a_boxes and a_loads have been globally gathered from all ranks. 
   */
   static void
@@ -143,8 +143,8 @@ protected:
 
   /*!
     @brief Standard box sorting, calls C++ std::sort
-    @param[inout] a_boxes Boxes to be sorted. 
-    @param[inout] a_loads Loads to be sorted. 
+    @param[in,out] a_boxes Boxes to be sorted. 
+    @param[in,out] a_loads Loads to be sorted. 
     @details This uses lexicographical indexing of boxes. On output, the boxes/loads are sorted with this ordering. 
   */
   template <class T>
@@ -153,8 +153,8 @@ protected:
 
   /*!
     @brief Randomly shuffles boxes and loads.
-    @param[inout] a_boxes Grid boxes to be shuffled. 
-    @param[inout] a_loads Computational loads to be shuffled. 
+    @param[in,out] a_boxes Grid boxes to be shuffled. 
+    @param[in,out] a_loads Computational loads to be shuffled. 
     @details This shuffles the boxes and loads so that the box distribution is random. 
   */
   template <class T>
@@ -163,8 +163,8 @@ protected:
 
   /*!
     @brief Generic SFC sorting function
-    @param[inout] a_boxes Grid boxes to be sorted
-    @param[inout] a_loads Computational loads to be sorted along with the boxes.
+    @param[in,out] a_boxes Grid boxes to be sorted
+    @param[in,out] a_loads Computational loads to be sorted along with the boxes.
     @param[in]    a_sfcEncoder Function for turning a grid index into an SFC index.
   */
   template <class T, int DIM>

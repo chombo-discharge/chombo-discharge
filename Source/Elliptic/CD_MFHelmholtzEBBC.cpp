@@ -82,7 +82,7 @@ MFHelmholtzEBBC::defineMultiPhase()
     weights.define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
-    // Safety hook becase jumpBC might not have defined the data holders if we're not doing multiphase.
+    // Safety hook because jumpBC might not have defined the data holders if we're not doing multiphase.
     if (m_jumpBC->isMultiPhase()) {
       VoFIterator& multiPhaseVofs = m_jumpBC->getMultiPhaseVofs(m_phase, din);
 

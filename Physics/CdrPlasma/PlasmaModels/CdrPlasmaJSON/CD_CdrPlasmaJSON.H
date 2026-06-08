@@ -1003,7 +1003,7 @@ namespace Physics {
          @param[in] a_reactants List of reactants. Can contain wildcard.
          @param[in] a_products  List of products. Can contain wildcard.
          @param[in] a_reaction  JSON reaction entry. 
-         @return Returns a list of reactants and products with wilcards replaced. The tuple entries are: <wildcard, reactants, products>
+         @return Returns a list of reactants and products with wildcards replaced. The tuple entries are: <wildcard, reactants, products>
       */
       virtual std::list<std::tuple<std::string, std::vector<std::string>, std::vector<std::string>>>
       parseReactionWildcards(const std::vector<std::string>& a_reactants,
@@ -1360,7 +1360,7 @@ namespace Physics {
       containsBracket(const std::string a_str) const;
 
       /**
-         @brief Return true if string starts and ends with a paranthesis.
+         @brief Return true if string starts and ends with a parenthesis.
          @param[in] a_str Input string. 
          @return True if the first character in the string is ( and the last character is )
       */
@@ -1403,7 +1403,7 @@ namespace Physics {
 
       /**
          @brief Add photoionization products to transport equations source terms.
-         @param[inout] a_cdrSources   Source terms for CDR densities.
+         @param[in,out] a_cdrSources   Source terms for CDR densities.
          @param[in]    a_rteDensities RTE mesh densities.
          @param[in]    a_position     Physical coordinates
          @param[in]    a_E            Electric field (SI units)
@@ -1420,7 +1420,7 @@ namespace Physics {
 
       /**
          @brief Routine for integrating the reactive-only problem using various algorithms. 
-         @param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+         @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
          @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
          @param[in]    a_cdrGradients     CDR gradients at time a_time
          @param[in]    a_E                Electric field
@@ -1465,7 +1465,7 @@ namespace Physics {
 
       /**
          @brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
-         @param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+         @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
          @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
          @param[in]    a_cdrGradients     CDR gradients at time a_time
          @param[in]    a_E                Electric field
@@ -1488,7 +1488,7 @@ namespace Physics {
 
       /**
          @brief Routine for integrating the reactive-only problem using the implicit Euler rule. 
-         @param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+         @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
          @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
          @param[in]    a_cdrGradients     CDR gradients at time a_time
          @param[in]    a_E                Electric field
@@ -1512,7 +1512,7 @@ namespace Physics {
       /**
          @brief Routine for integrating the reactive-only problem using a second order Runge-Kutta method. 
          @details This includes the tableu through the a_tableuAlpha parameter. 
-         @param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+         @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
          @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
          @param[in]    a_cdrGradients     CDR gradients at time a_time
          @param[in]    a_E                Electric field
@@ -1537,7 +1537,7 @@ namespace Physics {
 
       /**
          @brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method. 
-         @param[inout] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
+         @param[in,out] a_cdrDensities     On input, contains n(t). On output it contains n(t+dt).
          @param[out]   a_photonProduction On input, should be equal to zero. On output it will contain the number of photons produced during the time step. 
          @param[in]    a_cdrGradients     CDR gradients at time a_time
          @param[in]    a_E                Electric field

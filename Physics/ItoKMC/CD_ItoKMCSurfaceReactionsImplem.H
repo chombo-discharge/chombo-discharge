@@ -35,7 +35,7 @@ ItoKMCSurfaceReactions::add(const ItoKMCSurfaceReaction& a_surfaceReaction) noex
   if (m_isDefined) {
 
     if (m_reactant != a_surfaceReaction.getReactant()) {
-      MayDay::Warning("ItoKMCSurfaceReaction::addReaction - reactant indicies do not match!");
+      MayDay::Warning("ItoKMCSurfaceReaction::addReaction - reactant indices do not match!");
     }
   }
   else {

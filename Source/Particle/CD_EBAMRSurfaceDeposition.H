@@ -82,7 +82,7 @@ public:
   /*!
     @brief Deposition function which deposites the particles on the surface. 
     @details P is the particle type, Ret is a Real or a const Real&, and MemberFunc is a member function of P.
-    @param[inout] a_meshData Mesh data. Must defined on cut-cells only.
+    @param[in,out] a_meshData Mesh data. Must defined on cut-cells only.
     @param[in] a_particles Particles to deposit
     @note This will throw an error if a particle is located on a grid cell that is NOT an irregular cell
   */
@@ -235,7 +235,7 @@ protected:
   /*!
     @brief Add the invalid coarse data (i.e., underneath the fine grid) to the fine level. 
     @details This does conservative interpolation to the fine grid. This all takes place on our buffer storage.
-    @param[inout] a_meshData EB surface data
+    @param[in,out] a_meshData EB surface data
   */
   virtual void
   addInvalidCoarseDataToFineData() const noexcept;

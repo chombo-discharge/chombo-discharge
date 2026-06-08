@@ -54,7 +54,7 @@ public:
   TracerParticleSolver(const TracerParticleSolver&& a_other) = delete;
 
   /*!
-    @brief Full contructor
+    @brief Full constructor
     @param[in] a_amr      Handle to AmrMesh.
     @param[in] a_compGeom Computational geometry. 
   */
@@ -237,8 +237,8 @@ public:
 
   /*!
     @brief Write plot data
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp
@@ -438,8 +438,8 @@ protected:
 
   /*!
     @brief Write data to output. Convenience function. 
-    @param[inout] a_output Output data holder.
-    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in,out] a_output Output data holder.
+    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level

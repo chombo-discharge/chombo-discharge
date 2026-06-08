@@ -137,8 +137,8 @@ protected:
   /*!
     @brief Apply flux single phase
     @details This iterates over single-phase cells only, multi-phase cells are automatically enforced (in MFHelmholtzEBBC) by the jump boundary conditions. 
-    @param[inout] a_singlePhaseVofs   Iterator for single-phase cut-cells
-    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in,out] a_singlePhaseVofs   Iterator for single-phase cut-cells
+    @param[in,out] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered.
     @param[in]    a_Bcoef             EB-centered B-coefficient
     @param[in]    a_dit               Data index    

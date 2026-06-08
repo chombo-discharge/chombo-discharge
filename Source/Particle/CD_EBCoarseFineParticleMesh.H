@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EBCoarseFineParticleMesh.H
-  @brief  Declaration of a class for handling particle deposition arithmetics near refinement boundaries.
+  @brief  Declaration of a class for handling particle deposition arithmetic near refinement boundaries.
   @author Robert Marskar
 */
 
@@ -86,7 +86,7 @@ public:
     @details On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine
     is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, i.e. over the refinement
     boundary. This routine coarsens that data and adds the mass to the coarse level. 
-    @param[inout] a_coarData Coarse mesh data. 
+    @param[in,out] a_coarData Coarse mesh data. 
     @param[in]    a_fineData Fine mesh data. 
   */
   virtual void
@@ -96,7 +96,7 @@ public:
     @brief Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.
     @details This routine is used when the user have deposited coarse-level particles into a_fiCoData (which is a refinement of the coarse level). This 
     routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -> valid, which is what we want.
-    @param[inout] a_fineData Fine mesh data
+    @param[in,out] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
   virtual void
@@ -106,7 +106,7 @@ public:
     @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. 
     @details The data-motion plan is to use the valid+ghost cells on the coarse level and add it into the valid region on the fine level. However, the 
     buffers' ghost regions are set to zero so this should only add non-ghosted data between the levels.
-    @param[inout] a_fineData Fine-level data.
+    @param[in,out] a_fineData Fine-level data.
     @param[in]    a_coarData Coarse-level data.
   */
   virtual void
@@ -120,7 +120,7 @@ public:
 
   /*!
     @brief Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout
-    @param[inout] a_coarData Coarse-grid data
+    @param[in,out] a_coarData Coarse-grid data
     @param[in] a_fineData Data on the refined coarse grid
     @param[in] a_average Averaging method. Either arithmetic or conservative.
   */
@@ -275,7 +275,7 @@ protected:
 
   /*!
     @brief Conservatively average and add data from the refined coarse data to the coarse data
-    @param[inout] a_coarData Coarse-grid data
+    @param[in,out] a_coarData Coarse-grid data
     @param[in] a_fineData Fine-grid data (must be on a refined layout of the coarse grid)
     @param[in] a_din Grid index
   */
@@ -284,7 +284,7 @@ protected:
 
   /*!
     @brief Arithmetically average and add data from the refined coarse data to the coarse data
-    @param[inout] a_coarData Coarse-grid data
+    @param[in,out] a_coarData Coarse-grid data
     @param[in] a_fineData Fine-grid data (must be on a refined layout of the coarse grid)
     @param[in] a_din Grid idnex
   */

@@ -49,7 +49,7 @@ public:
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
     @details Users get a new interface to the subset of cells that are not multi-phase cells. 
-    @param[inout] a_vofit             Iterator for cut-cells
+    @param[in,out] a_vofit             Iterator for cut-cells
     @param[in]    a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
     @param[in]    a_Bcoef             EB-centered B-coefficient
@@ -102,8 +102,8 @@ protected:
 
   /*!
     @brief Apply flux single phase
-    @param[inout] a_singlePhaseVofs   Iterator for single-phase cut-cells
-    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in,out] a_singlePhaseVofs   Iterator for single-phase cut-cells
+    @param[in,out] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
     @param[in]    a_Bcoef             EB-centered B-coefficient
     @param[in]    a_dit               Data index    
@@ -121,8 +121,8 @@ protected:
 
   /*!
     @brief Apply flux in multiphase cells.
-    @param[inout] a_multiPhaseVofs    Iterator for multi-phase cut-cells
-    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in,out] a_multiPhaseVofs    Iterator for multi-phase cut-cells
+    @param[in,out] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
     @param[in]    a_Bcoef             EB-centered B-coefficient
     @param[in]    a_dit               Data index    
@@ -142,7 +142,7 @@ protected:
     @brief Get stencil with specified order. 
     @param[out] a_stencil      Weight and stencil
     @param[out] a_vof          Grid cell
-    @param[out] a_neighborhood Neighboorhood specifier
+    @param[out] a_neighborhood Neighborhood specifier
     @param[in]  a_dit          Data index
     @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
     @param[in]  a_weight       Weighting factor for weighted least squares

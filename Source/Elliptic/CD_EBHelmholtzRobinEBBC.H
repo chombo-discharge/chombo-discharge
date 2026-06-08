@@ -105,7 +105,7 @@ public:
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
-    @param[inout] a_vofit             Iterator for cut-cells
+    @param[in,out] a_vofit             Iterator for cut-cells
     @param[in]    a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
     @param[in]    a_Bcoef             EB-centered B-coefficient

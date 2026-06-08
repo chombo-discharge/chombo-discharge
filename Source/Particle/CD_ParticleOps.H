@@ -175,7 +175,7 @@ public:
 
   /*!
     @brief Remove particles if they fulfill certain removal criterion
-    @param[inout] a_particles       Particles
+    @param[in,out] a_particles       Particles
     @param[in]    a_removeCriterion Removal criterion.
   */
   template <typename P>
@@ -184,8 +184,8 @@ public:
 
   /*!
     @brief Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles and puts them in a_dstParticles
-    @param[inout] a_dstParticles    Destination particle data holder
-    @param[inout] a_srcParticles    Source particle data holder
+    @param[in,out] a_dstParticles    Destination particle data holder
+    @param[in,out] a_srcParticles    Source particle data holder
     @param[in]    a_removeCriterion Removal criterion.
   */
   template <typename P>
@@ -196,7 +196,7 @@ public:
 
   /*!
     @brief Set value function. Lets the user set particle parameters. 
-    @param[inout] a_particles Particles
+    @param[in,out] a_particles Particles
     @param[in]    a_functor   Lambda for setting particle values
   */
   template <typename P>
@@ -205,7 +205,7 @@ public:
 
   /*!
     @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc. 
-    @param[inout] a_particles Particles
+    @param[in,out] a_particles Particles
     @param[in]    a_value     Value to set
   */
   template <typename P, Real& (P::*particleScalarField)()>
@@ -214,7 +214,7 @@ public:
 
   /*!
     @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::velocity>(particles, RealVect::Unit) etc. 
-    @param[inout] a_particles Particles
+    @param[in,out] a_particles Particles
     @param[in]    a_value     Value to set
   */
   template <typename P, RealVect& (P::*particleVectorField)()>
@@ -228,8 +228,8 @@ public:
     sent form this rank to the other ranks (including itself), so the size of this vector must be equal to the number of MPI ranks. The particles
     are collected on a_receivedParticles. Note that the pair<unsigned int, unsigned int> will usually indicate the grid level and grid index that
     the particles will eventually be assigned to. 
-    @param[inout] a_receivedParticles Received particles on this rank
-    @param[inout] a_sentParticles Particles sent from this rank to all the other ranks. 
+    @param[in,out] a_receivedParticles Received particles on this rank
+    @param[in,out] a_sentParticles Particles sent from this rank to all the other ranks. 
   */
   template <typename P>
   static inline void

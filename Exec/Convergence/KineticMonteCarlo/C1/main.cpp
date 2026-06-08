@@ -145,7 +145,7 @@ main(int argc, char* argv[])
           kmcSolver.advanceHybrid(state, nextDt, KMCLeapPropagator::PRC);
         }
         else {
-          const std::string err = "Don't know the algoritm '" + alg + "'";
+          const std::string err = "Don't know the algorithm '" + alg + "'";
 
           MayDay::Error(err.c_str());
         }

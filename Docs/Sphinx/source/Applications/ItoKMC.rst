@@ -691,7 +691,7 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
 	  "header" : "E/N (Td)\tTownsend ioniz. coef. alpha/N (m2)", // Optional argument. Contains line immediately preceding the data to be read.
 	  "E/N column" : 0,                                          // Optional specification of column containing E/N (defaults to 0)
 	  "alpha/N column" : 1,                                      // Optional specification of column containing alpha/N (defaults to 1)
-	  "min E/N" : 1.0,                                           // Optional truncation of minium E/N kept when resampling the table (occurs after scaling)
+	  "min E/N" : 1.0,                                           // Optional truncation of minimum E/N kept when resampling the table (occurs after scaling)
 	  "max E/N" : 1000.0,                                        // Optional truncation of maximum E/N kept when resampling the table (happens after scaling)
 	  "num points" : 1000,                                       // Optional number of points kept when resamplnig the table (defaults to 1000)
 	  "spacing" : "exponential",                                 // Optional spcification of table representation. Defaults to 'exponential' but can also be 'linear'
@@ -881,9 +881,9 @@ An example JSON specification that uses a BOLSIG+ output file for parsing the da
           "diffusive" : false,                             // Not diffusive
           "mobility" : {
 	     "type" : "table vs E/N",                      // Specification of tabulated mobility lookup method
-	     "file" : "bolsig_air.dat",                    // File containg the mobility data
+	     "file" : "bolsig_air.dat",                    // File containing the mobility data
 	     "dump" : "debug_mobility.dat",                // Optional argument for dumping table to disk (useful for debugging)		
-	     "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the colum data
+	     "header" : "E/N (Td)\tMobility *N (1/m/V/s)", // Line immediately preceding the column data
 	     "E/N column" : 0,                             // Column containing E/N
 	     "mu*N column" : 1,                            // Column containing mu*N
 	     "min E/N" : 1,                                // Minimum E/N kept when resampling table
@@ -904,7 +904,7 @@ Parallel diffusion
 ^^^^^^^^^^^^^^^^^^
 
 ``ItoKMCJSON`` can limit diffusion against the electric field (or strictly speaking, the particle drift direction).
-The species specification permits a flag ``diffusion model`` that defauls to isotropic diffusion.
+The species specification permits a flag ``diffusion model`` that defaults to isotropic diffusion.
 However, it is possible to set this to other types of diffusion models.
 Currently, the available options are
 
@@ -1325,7 +1325,7 @@ A basic definition of a single photon species is
 	    "id": "Y",              // Photon species id. Must be unique
 	    "kappa": {              // Specification of absorption coefficient. 
 		"type": "constant", // Specify constant absorption coefficient
-		"value": 1E4        // Value of the absorption coefficeint
+		"value": 1E4        // Value of the absorption coefficient
 	    }
 	}
     ]
@@ -1340,14 +1340,14 @@ Multiple photon species are added by appending with more entries, e.g.
 	    "id": "Y1",             // Photon species id. Must be unique
 	    "kappa": {              // Specification of absorption coefficient. 
 		"type": "constant", // Specify constant absorption coefficient
-		"value": 1E4        // Value of the absorption coefficeint
+		"value": 1E4        // Value of the absorption coefficient
 	    }
 	},
 	{
 	    "id": "Y2",             // Photon species id. Must be unique
 	    "kappa": {              // Specification of absorption coefficient. 
 		"type": "constant", // Specify constant absorption coefficient
-		"value": 1E4        // Value of the absorption coefficeint
+		"value": 1E4        // Value of the absorption coefficient
 	    }
 	}	
     ]
@@ -1496,7 +1496,7 @@ For example, the specification ``A + B + C`` will be interpreted as a reaction :
 
 Internally, both the left- and right-hand sides are checked against background and plasma species.
 The program will perform a run-time exit if the species are not defined in these lists.
-Note that the right-hand side can additonal contain photon species.
+Note that the right-hand side can additional contain photon species.
 
 .. tip::
 
@@ -1753,7 +1753,7 @@ An example file is e.g.
    500  0.8
    1000 1.0
    
-This data is then internally convered to a uniformly spaced lookup table (see :ref:`Chap:LookupTable`).
+This data is then internally converted to a uniformly spaced lookup table (see :ref:`Chap:LookupTable`).
 
 Efficiency vs E
 ^^^^^^^^^^^^^^^^^
@@ -1812,13 +1812,13 @@ Rate-based
 The reaction rate can be modified by a factor :math:`k_r/\left[k_r + k_p + k_q\right]`.
 The intention behind this scaling is that reaction :math:`r` occurs only if it is not predissociated (by rate :math:`k_p`) or quenched (by rate :math:`k_q`).
 Such processes can occur, for example, in excited molecules.
-This will modifiy the rate constant as
+This will modify the rate constant as
 
 .. math::
 
    k \rightarrow k\frac{k_r}{k_r + k_p + k_q},
 
-where the user will specifiy :math:`k_r`, :math:`k_p`, and :math:`k_q/N`.
+where the user will specify :math:`k_r`, :math:`k_p`, and :math:`k_q/N`.
 The JSON specification must contain ``quenching rates``, for example:
 
 .. code-block:: json

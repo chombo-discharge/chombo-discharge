@@ -180,7 +180,7 @@ public:
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
     @param[in] a_vofs List of vofs to be modified
     @param[in] a_excludeBox Box to be excluded
-    @return Modifed list of vofs which do not include cell in a box
+    @return Modified list of vofs which do not include cell in a box
   */
   static void
   excludeCells(Vector<VolIndex>& a_vofs, const Box& a_excludeBox);
@@ -189,7 +189,7 @@ public:
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
     @param[in] a_vofs List of vofs to be modified
     @param[in] a_excludeIVS List of cells to be excluded. 
-    @return Modifed list of vofs which do not include a_excludeIVS cells. 
+    @return Modified list of vofs which do not include a_excludeIVS cells. 
   */
   static void
   excludeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_excludeIVS);
@@ -198,7 +198,7 @@ public:
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeBox List of cells to be excluded. 
-    @return Modifed list of vofs which are guaranteed to lie in a_box
+    @return Modified list of vofs which are guaranteed to lie in a_box
   */
   static void
   includeCells(Vector<VolIndex>& a_vofs, const Box& a_includeBox);
@@ -207,7 +207,7 @@ public:
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeIVS List of cells to be included
-    @return Modifed list of vofs which are guaranteed to lie in specified grid cells
+    @return Modified list of vofs which are guaranteed to lie in specified grid cells
   */
   static void
   includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
@@ -216,14 +216,14 @@ public:
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeIVS List of cells to be included
-    @return Modifed list of vofs which are guaranteed to lie in specified grid cells
+    @return Modified list of vofs which are guaranteed to lie in specified grid cells
   */
   static void
   includeCells(Vector<VolIndex>& a_vofs, const DenseIntVectSet& a_includeIVS);
 
   /*!
     @brief Discard duplicates
-    @param[inout] a_vofs List of Vofs
+    @param[in,out] a_vofs List of Vofs
     @return Returns the same vofs with discarded duplicates. 
   */
   static void
@@ -323,7 +323,7 @@ protected:
 
   /*!
     @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
-    @param[inout] a_vofList    List of vofs that were within the monotone path
+    @param[in,out] a_vofList    List of vofs that were within the monotone path
     @param[in]    a_startVof   Starting vof. 
     @param[in]    a_ebisbox    EBISBox.
     @param[in]    a_radius     Maximum radius. 
@@ -340,7 +340,7 @@ protected:
 
   /*!
     @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
-    @param[inout] a_vofList    List of vofs that were within the monotone path
+    @param[in,out] a_vofList    List of vofs that were within the monotone path
     @param[in]    a_startVof   Starting vof. 
     @param[in]    a_ebisbox    EBISBox.
     @param[in]    a_radius     Maximum radius. 

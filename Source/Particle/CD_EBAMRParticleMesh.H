@@ -98,7 +98,7 @@ public:
     @brief Class for deposition of particles of a type P to the mesh. This is the main function that users should call. 
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     RealVect. MemFunc is a pointer to a member function of P. E.g., deposit<P, const RealVect&, &P::position>.
-    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
+    @param[out] a_meshData             Mesh data. Must have exactly one component. 
     @πaram[in]  a_particles            Particle container. Must be in "usable state" for deposition.
     @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
@@ -117,7 +117,7 @@ public:
     @brief Interpolate a scalar field onto the particle position.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     RealVect. MemFunc is a pointer to a member function of P. E.g., interpolate<P, RealVect&, &P::position>.    
-    @param[inout] a_particles     Particles to be interpolated. 
+    @param[in,out] a_particles     Particles to be interpolated. 
     @param[in]    a_meshData      Mesh data
     @param[in]    a_interpType    Interpolation type. 
     @param[in]    a_forceIrregNGP Force NGP interpolation in cut-cells. 
@@ -334,7 +334,7 @@ protected:
 
   /*!
     @brief Support function for transferring particles that lie in the transition zone around a refinement boundary
-    @param[inout] a_particles Input particles
+    @param[in,out] a_particles Input particles
     @param[in] a_depositionType Deposition type.
   */
   template <class P>

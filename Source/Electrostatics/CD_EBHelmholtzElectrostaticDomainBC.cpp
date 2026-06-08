@@ -81,7 +81,7 @@ EBHelmholtzElectrostaticDomainBC::define(const Location::Cell a_dataLocation,
   CH_TIME(
     "EBHelmholtzElectrostaticDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
 
-  // This function is called by EBHelmholtzOp and is used for defining the boudnary condition object (it needs stencils and all that). Since
+  // This function is called by EBHelmholtzOp and is used for defining the boundary condition object (it needs stencils and all that). Since
   // this class is just a wrapper for Dirichlet/Neumann BCs, we've allocated the BC objects already (one for each side). But they have not
   // been defined yet, so we do that here.
 

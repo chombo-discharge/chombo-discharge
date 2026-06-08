@@ -209,7 +209,7 @@ public:
 
   /*!
     @brief Clear particles on input data holder
-    @param[inout] a_particles
+    @param[in,out] a_particles
   */
   void
   clear(AMRParticles<P>& a_particles) const;
@@ -415,7 +415,7 @@ public:
 
   /*!
     @brief Add particles to a certain level and patch. The input particles are cell-sorted (and destroyed on output). 
-    @param[inout] a_particles Input particles (cell-sorted). Destroyed on exit. 
+    @param[in,out] a_particles Input particles (cell-sorted). Destroyed on exit. 
     @param[in]    a_lvl       Grid level
     @param[in]    a_dit       Grid index
   */
@@ -431,7 +431,7 @@ public:
 
   /*!
     @brief Add particles from other container to this one. This destroys the particles in the other container. 
-    @param[inout] a_otherContainer Other particle container (destroyed on output). 
+    @param[in,out] a_otherContainer Other particle container (destroyed on output). 
   */
   void
   addParticlesDestructive(ParticleContainer<P>& a_otherContainer);
@@ -450,7 +450,7 @@ public:
 
   /*!
     @brief Move particles into this container. 
-    @param[inout] a_otherContainer Other particle container. 
+    @param[in,out] a_otherContainer Other particle container. 
     @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
   */
   void
@@ -458,7 +458,7 @@ public:
 
   /*!
     @brief Move particles into this container. 
-    @param[inout] a_otherContainer Other particle container. 
+    @param[in,out] a_otherContainer Other particle container. 
     @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
   */
   void
@@ -466,8 +466,8 @@ public:
 
   /*!
     @brief Evict particles if they move out of the valid region.
-    @param[inout] a_evictedParticles List that the particles are moved into.
-    @param[inout] a_particles        Particles.
+    @param[in,out] a_evictedParticles List that the particles are moved into.
+    @param[in,out] a_particles        Particles.
     @param[in]    a_level            Grid level.
   */
   void
@@ -670,8 +670,8 @@ protected:
 
   /*!
     @brief Gather the particles onto a single list
-    @param[inout] a_list List containing all the particles in a_particles
-    @param[inout] a_particles Particles to transfer to list
+    @param[in,out] a_list List containing all the particles in a_particles
+    @param[in,out] a_particles Particles to transfer to list
     @note This is supposed to get inside an OpenMP parallel region.
   */
   inline void
@@ -679,8 +679,8 @@ protected:
 
   /*!
     @brief Copy the input particles onto a single list
-    @param[inout] a_list List containing all the particles in a_particles
-    @param[inout] a_particles Particles to transfer to list
+    @param[in,out] a_list List containing all the particles in a_particles
+    @param[in,out] a_particles Particles to transfer to list
     @note This is supposed to get inside an OpenMP parallel region.
   */
   inline void
@@ -688,8 +688,8 @@ protected:
 
   /*!
     @brief Iterate through the unmapped particles and map them to proper level, grid indices, and grid ranks
-    @param[inout] a_mappedParticles Particles mapped according to rank ownership (vector index) and grid level and index (std::pair)
-    @param[inout] a_unmappedParticles Particles that are not mapped (yet)
+    @param[in,out] a_mappedParticles Particles mapped according to rank ownership (vector index) and grid level and index (std::pair)
+    @param[in,out] a_unmappedParticles Particles that are not mapped (yet)
   */
   inline void
   mapParticlesToAMRGrid(std::vector<ParticleMap<List<P>>>& a_mappedParticles,
@@ -697,8 +697,8 @@ protected:
 
   /*!
     @brief Catenate the particles. This is usually called within OpenMP parallel regions.
-    @param[inout] a_globalParticles Global particle map
-    @param[inout] a_localParticles Local particle map
+    @param[in,out] a_globalParticles Global particle map
+    @param[in,out] a_localParticles Local particle map
    */
   inline void
   catenateParticleMaps(std::vector<ParticleMap<List<P>>>& a_globalParticles,
@@ -706,8 +706,8 @@ protected:
 
   /*!
     @brief Gather particles locally
-    @param[inout] a_mappedParticles Particles that have been mapped to this rank. 
-    @param[inout] a_particleData Where to assign the mapped particles
+    @param[in,out] a_mappedParticles Particles that have been mapped to this rank. 
+    @param[in,out] a_particleData Where to assign the mapped particles
   */
   inline void
   assignLocalParticles(ParticleMap<List<P>>& a_mappedParticles, AMRParticles<P>& a_particleData) const noexcept;

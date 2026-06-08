@@ -80,7 +80,7 @@ public:
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
     about from/to regions. 
-    @param[inout] a_dst        Destination data 
+    @param[in,out] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_toRegion   Region we copy into
     @param[in]    a_fromRegion Region we copy from
@@ -96,7 +96,7 @@ public:
 
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
-    @param[inout] a_dst        Destination data 
+    @param[in,out] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_dstComps   Destination components
     @param[in]    a_srcComps   Source components
@@ -117,7 +117,7 @@ public:
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
     about from/to regions. 
-    @param[inout] a_dst        Destination data 
+    @param[in,out] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_level      Grid level
     @param[in]    a_toRealm    Destination realm
@@ -140,7 +140,7 @@ public:
   /*!
     @brief Method for copying from a source container to a destination container. User supplies information
     about from/to regions. 
-    @param[inout] a_dst        Destination data 
+    @param[in,out] a_dst        Destination data 
     @param[in]    a_src        Source data
     @param[in]    a_level      Grid level
     @param[in]    a_toRealm    Destination realm
@@ -166,7 +166,7 @@ public:
 
   /*!
     @brief Deallocate data. 
-    @param[inout] a_data Data to be deleted. 
+    @param[in,out] a_data Data to be deleted. 
   */
   template <typename T>
   void
@@ -174,7 +174,7 @@ public:
 
   /*!
     @brief Deallocate smart pointer data.
-    @param[inout] a_data Data to be deallocated. 
+    @param[in,out] a_data Data to be deallocated. 
   */
   template <typename T>
   void
@@ -182,7 +182,7 @@ public:
 
   /*!
     @brief Deallocate data.
-    @param[inout] a_data Data to be deallocated.
+    @param[in,out] a_data Data to be deallocated.
   */
   template <typename T>
   void
@@ -388,7 +388,7 @@ public:
         const int                a_finestLevel) const;
 
   /*!
-    @brief Alias an entire hiearchy of multifluid data. 
+    @brief Alias an entire hierarchy of multifluid data. 
     @param[out] a_data        Single-phased data on specific phase
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
@@ -397,7 +397,7 @@ public:
   alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const;
 
   /*!
-    @brief Alias an entire hiearchy of multifluid data. 
+    @brief Alias an entire hierarchy of multifluid data. 
     @param[out] a_data        Single-phased data on specific phase
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
@@ -406,7 +406,7 @@ public:
   alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const;
 
   /*!
-    @brief Alias an entire hiearchy of multifluid data. 
+    @brief Alias an entire hierarchy of multifluid data. 
     @param[out] a_data        Single-phased data on specific phase
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
@@ -415,7 +415,7 @@ public:
   alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const;
 
   /*!
-    @brief Alias an entire hiearchy of multifluid data. 
+    @brief Alias an entire hierarchy of multifluid data. 
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
@@ -424,7 +424,7 @@ public:
   alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const;
 
   /*!
-    @brief Alias an entire hiearchy of multifluid data. 
+    @brief Alias an entire hierarchy of multifluid data. 
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
@@ -433,7 +433,7 @@ public:
   alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const;
 
   /*!
-    @brief Alias an entire hiearchy of multifluid data. 
+    @brief Alias an entire hierarchy of multifluid data. 
     @param[in]  a_phase       Phase (gas or solid).
     @param[in]  a_mfdata      Multifluid data to be aliased
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
@@ -696,7 +696,7 @@ public:
 
   /*!
     @brief Average multifluid data over a specified realm
-    @param[inout] a_data    Data to be coarsened.
+    @param[in,out] a_data    Data to be coarsened.
     @param[in]    a_realm   Realm name
     @param[in]    a_average Averaging method
   */
@@ -705,7 +705,7 @@ public:
 
   /*!
     @brief Arithmetic coarsening of multifluid data.
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
@@ -713,7 +713,7 @@ public:
 
   /*!
     @brief Harmonic coarsening of multifluid data.
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
@@ -721,7 +721,7 @@ public:
 
   /*!
     @brief Conservative coarsening of multifluid data.
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
@@ -729,7 +729,7 @@ public:
 
   /*!
     @brief Average multifluid data over a specified realm
-    @param[inout] a_data    Data to be coarsened.
+    @param[in,out] a_data    Data to be coarsened.
     @param[in]    a_realm   Realm name
     @param[in]    a_average Averaging method
   */
@@ -739,7 +739,7 @@ public:
   /*!
     @brief Average multifluid data over a realm. 
     @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
@@ -748,7 +748,7 @@ public:
   /*!
     @brief Average multifluid data over a realm. 
     @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
@@ -756,7 +756,7 @@ public:
 
   /*!
     @brief Average down multifluid data over a realm. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
   void
@@ -764,7 +764,7 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
     @param[in]    a_average Averaging method
@@ -777,7 +777,7 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @param[inout] a_data      Data to be coarsened.
+    @param[in,out] a_data      Data to be coarsened.
     @param[in]    a_realm     Realm
     @param[in]    a_phase     Phase (gas or solid)
     @param[in]    a_variables Variables to average
@@ -792,7 +792,7 @@ public:
 
   /*!
     @brief Arithmetic average of data. Does all components. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -801,7 +801,7 @@ public:
 
   /*!
     @brief Arithmetic average of data. 
-    @param[inout] a_data      Data to be coarsened.
+    @param[in,out] a_data      Data to be coarsened.
     @param[in]    a_realm     Realm name
     @param[in]    a_phase     Phase (gas or solid)
     @param[in]    a_variables Variables
@@ -814,7 +814,7 @@ public:
 
   /*!
     @brief Harmonic average of data. Does all components. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -823,7 +823,7 @@ public:
 
   /*!
     @brief Harmonic average of data. Does all components. 
-    @param[inout] a_data      Data to be coarsened.
+    @param[in,out] a_data      Data to be coarsened.
     @param[in]    a_realm     Realm name
     @param[in]    a_phase     Phase (gas or solid)
     @param[in]    a_variables Variables
@@ -836,7 +836,7 @@ public:
 
   /*!
     @brief Conseratively average data. Does all components. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -845,7 +845,7 @@ public:
 
   /*!
     @brief Conseratively average data. Does all components. 
-    @param[inout] a_data      Data to be coarsened.
+    @param[in,out] a_data      Data to be coarsened.
     @param[in]    a_realm     Realm name
     @param[in]    a_phase     Phase (gas or solid)
     @param[in]    a_variables Variables
@@ -858,7 +858,7 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
     @param[in]    a_average Averaging method
@@ -872,7 +872,7 @@ public:
   /*!
     @brief Average down on specific realm and phase. 
     @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
-    @param[inout] a_data  Data to be average.
+    @param[in,out] a_data  Data to be average.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -882,7 +882,7 @@ public:
   /*!
     @brief Average down on specific realm and phase. 
     @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
-    @param[inout] a_data  Data to be average.
+    @param[in,out] a_data  Data to be average.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -891,7 +891,7 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -900,7 +900,7 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
     @param[in]    a_average Averaging method
@@ -913,7 +913,7 @@ public:
 
   /*!
     @brief Arithmetic average on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -922,7 +922,7 @@ public:
 
   /*!
     @brief Harmonic average on specific realm and phase. 
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -931,7 +931,7 @@ public:
 
   /*!
     @brief Conservative averaging on specific realm and phase.
-    @param[inout] a_data  Data to be coarsened.
+    @param[in,out] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -942,7 +942,7 @@ public:
     @brief Deposit scalar particle quantities on the mesh.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     RealVect. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const RealVect&, &P::position>.    
-    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
+    @param[out] a_meshData             Mesh data. Must have exactly one component. 
     @param[in]  a_realm                Realm where data is registered.
     @param[in]  a_phase                Phase where data is registered.
     @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
@@ -964,7 +964,7 @@ public:
     @brief Deposit scalar particle quantities on the mesh.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     const Real&. MemFunc is a pointer to a member function of P. E.g., depositParticles<P, const Real&, &P::weight>.        
-    @param[out] a_meshData   Mesh data. MUST have exactly one compnent. 
+    @param[out] a_meshData   Mesh data. MUST have exactly one component. 
     @param[in]  a_realm      Realm where data is registered.
     @param[in]  a_phase      Phase where data is registered.
     @param[in]  a_particles  Particle container. Must be in "usable state" for deposition.
@@ -980,7 +980,7 @@ public:
     @brief Interpolate mesh data onto a particle position.
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real& or a
     RealVect&. MemFunc is a pointer to a member function of P. E.g., interpolate<P, Real&, &P::weight>.        
-    @param[inout] a_particles            Particles to be interpolated. 
+    @param[in,out] a_particles            Particles to be interpolated. 
     @param[in]    a_realm                Realm where data is registered.
     @param[in]    a_phase                Phase where data is registered.
     @param[in]    a_meshScalarField      Scalar field on the mesh 
@@ -1001,7 +1001,7 @@ public:
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be removed from
     the container if f(x) > a_tolerance*dx. 
-    @param[inout] a_particles Particle data
+    @param[in,out] a_particles Particle data
     @param[in]    a_phase     Phase where the particles live. 
     @param[in]    a_tolerance Tolerance. 
     @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct EBISBox.
@@ -1017,7 +1017,7 @@ public:
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be removed from
     the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
-    @param[inout] a_particles Particle data
+    @param[in,out] a_particles Particle data
     @param[in]    a_phase     Phase where the particles live. 
     @param[in]    a_tolerance Tolerance when to remove particles
     @note This function will only work if the particles are mapped to the correct EBISBox. 
@@ -1032,7 +1032,7 @@ public:
     @brief Function which removes particles from the domain if they fall inside the EB.
     @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
     @details This version removes all particles that live in covered cells.
-    @param[inout] a_particles Particle data
+    @param[in,out] a_particles Particle data
     @param[in]    a_phase     Phase where the particles live. 
     @note This function will only work if the particles are mapped to the correct EBISBox. 
   */
@@ -1045,8 +1045,8 @@ public:
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be transferred from
     the container if f(x) > a_tolerance*dx.
-    @param[inout] a_particlesFrom Container to transfer from
-    @param[inout] a_particlesTo   Container to transfer to
+    @param[in,out] a_particlesFrom Container to transfer from
+    @param[in,out] a_particlesTo   Container to transfer to
     @param[in]    a_phase         Phase where the particles live. 
     @param[in]    a_tolerance     Tolerance (Note: relative to grid resolution)
     @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct boxes (but remapping will be necessary)
@@ -1063,8 +1063,8 @@ public:
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be transferred from
     the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
-    @param[inout] a_particlesFrom Container to transfer from
-    @param[inout] a_particlesTo   Container to transfer to
+    @param[in,out] a_particlesFrom Container to transfer from
+    @param[in,out] a_particlesTo   Container to transfer to
     @param[in]    a_phase         Phase where the particles live. 
     @param[in]    a_tolerance     Tolerance. 
     @note This function will only work if the particles are mapped to the correct EBISBox. 
@@ -1080,8 +1080,8 @@ public:
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
     @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version transfers all particles that live in covered cells.
-    @param[inout] a_particlesFrom Container to transfer from
-    @param[inout] a_particlesTo   Container to transfer to
+    @param[in,out] a_particlesFrom Container to transfer from
+    @param[in,out] a_particlesTo   Container to transfer to
     @param[in]    a_phase         Phase where the particles live. 
     @param[in]    a_tolerance     Tolerance. 
     @note This function will only work if the particles are mapped to the correct EBISBox. 
@@ -1094,8 +1094,8 @@ public:
 
   /*!
     @brief Transfer particles that are on the wrong side of the EB to a different container.
-    @param[inout] a_dstParticles     Destination particle container
-    @param[inout] a_srcParticles     Source particle container
+    @param[in,out] a_dstParticles     Destination particle container
+    @param[in,out] a_srcParticles     Source particle container
     @param[in]    a_phase            Phase where the particles should live
     @param[in]    a_transferModifier Optional input argument for letting the user manipulate particles that were transferred
   */
@@ -1120,7 +1120,7 @@ public:
     (assuming that the implicit function is a signed distance function). Particles are then moved that
     distance along their trajectory and we then update the new distance to the EB. This is done recursively until the particles
     have either moved the entire length or been absorbed by the EB or domain side. 
-    @param[inout] a_activeParticles     Particles to be intersected with geometry
+    @param[in,out] a_activeParticles     Particles to be intersected with geometry
     @param[out]   a_ebParticles         Particles that intersected with the EB
     @param[out]   a_domainParticles     Particles that intersected with the domain faces
     @param[in]    a_phase               Phase where the input particles live
@@ -1148,7 +1148,7 @@ public:
     functions that determine the start and stop position of the particle trajectory. This routine uses a bisection method
     to check for intersections with the EB (the domain side is much easier). Their position are updated and they are placed
     in the a_ebParticles argument. 
-    @param[inout] a_activeParticles     Particles to be intersected with geometry
+    @param[in,out] a_activeParticles     Particles to be intersected with geometry
     @param[out]   a_ebParticles         Particles that intersected with the EB
     @param[out]   a_domainParticles     Particles that intersected with the domain faces
     @param[in]    a_phase               Phase where the input particles live
@@ -1171,7 +1171,7 @@ public:
 
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
-    @param[inout] a_data  Data to be interpolated.
+    @param[in,out] a_data  Data to be interpolated.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -1180,8 +1180,8 @@ public:
 
   /*!
     @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level. 
-    @param[inout] a_fineData Fine grid data
-    @param[inout] a_coarData Coarse grid data
+    @param[in,out] a_fineData Fine grid data
+    @param[in,out] a_coarData Coarse grid data
     @param[in]    a_level    The grid level corresponding to a_fineData
     @param[in]    a_realm    Realm name
     @param[in]    a_phase    Phase (gas or solid)
@@ -1195,7 +1195,7 @@ public:
 
   /*!
     @brief Interpolate ghost cells over a realm. Calls the default ghost cell interpolation method. 
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
   */
   void
@@ -1203,7 +1203,7 @@ public:
 
   /*!
     @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -1212,7 +1212,7 @@ public:
 
   /*!
     @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -1223,7 +1223,7 @@ public:
     @brief Interpolate ghost cells over a realm and phase. 
     @details This routine uses the multigrid interpolator, which does not reach into invalid regions. I.e., all
     ghost cells are interpolated using valid data only. 
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -1234,7 +1234,7 @@ public:
     @brief Interpolate ghost cells over a realm and phase. 
     @details This routine uses the multigrid interpolator, which does not reach into invalid regions. I.e., all
     ghost cells are interpolated using valid data only. 
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
@@ -1314,7 +1314,7 @@ public:
 
   /*!
     @brief Interpolate data to centroids on realm and phase
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
     @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
@@ -1324,7 +1324,7 @@ public:
 
   /*!
     @brief Interpolate data to centroids
-    @param[inout] a_data  Data to be interpolated
+    @param[in,out] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
     @param[in]    a_level Grid level
@@ -1337,7 +1337,7 @@ public:
 
   /*!
     @brief Interpolate data to centroids
-    @param[inout] a_centroidData Centroid-centered data
+    @param[in,out] a_centroidData Centroid-centered data
     @param[in]    a_cellData Cell-centered data
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
@@ -2053,7 +2053,7 @@ protected:
 
   /*!
     @brief Build new internal AMR grids.
-    @param[inout] a_tags Sets of cell tags used for the grid generation.
+    @param[in,out] a_tags Sets of cell tags used for the grid generation.
     @param[in]    a_lmin The finest grid level which changes. 
     @param[in]    a_hardcap Hardcap for the maximum grid level which can be generated. If a_hardcap < 0 there is no restriction beyond the AmrMesh restrictions.
     @details This will call the specified grid generation method and fill m_grids with the new grids. 

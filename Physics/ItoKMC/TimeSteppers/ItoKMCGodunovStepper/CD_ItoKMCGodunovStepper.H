@@ -108,7 +108,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Write checkpoint data to file.
-	@param[inout] a_handle HDF5 file.
+	@param[in,out] a_handle HDF5 file.
 	@param[in]    a_lvl    Grid level.
       */
       virtual void
@@ -118,7 +118,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Read header data from checkpoint file.
-	@param[inout] a_header HDF5 header.
+	@param[in,out] a_header HDF5 header.
       */
       virtual void
       readCheckpointHeader(HDF5HeaderData& a_header) noexcept override;
@@ -127,7 +127,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Write header data to checkpoint file.
-	@param[inout] a_header HDF5 header.
+	@param[in,out] a_header HDF5 header.
       */
       virtual void
       writeCheckpointHeader(HDF5HeaderData& a_header) const noexcept override;
@@ -136,7 +136,7 @@ namespace Physics {
 #ifdef CH_USE_HDF5
       /**
 	@brief Read checkpoint data from file
-	@param[inout] a_handle HDF5 file
+	@param[in,out] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
       */
       virtual void
@@ -322,7 +322,7 @@ namespace Physics {
 
       /**
 	@brief Remap the input point particles
-	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in,out] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
 	@param[in]    a_subset    Particle subset to remap.
       */
       virtual void
@@ -331,7 +331,7 @@ namespace Physics {
 
       /**
 	@brief Deposit the input point particles on the mesh
-	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in,out] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
 	@param[in]    a_subset    Particle subset to remap. 
 	@note This deposits into the ItoSolver m_phi data. 
       */
@@ -341,7 +341,7 @@ namespace Physics {
 
       /**
 	@brief Clear the input particle data holders
-	@param[inout] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
+	@param[in,out] a_particles List of particle containers to remap. Indices must correspond to indices in the ItoSolvers
 	@param[in]    a_subset    Particle subset to remap. 
       */
       virtual void
@@ -397,7 +397,7 @@ namespace Physics {
 
       /**
 	@brief Remove covered particles
-	@param[inout] a_particles      Particles to remove
+	@param[in,out] a_particles      Particles to remove
 	@param[in]    a_representation Representation of the EB
 	@param[in]    a_tolerance      EB tolerance
       */

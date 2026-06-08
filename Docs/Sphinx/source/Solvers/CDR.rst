@@ -78,7 +78,7 @@ Computing explicit divergences for equations like
 .. math::
    \frac{\partial \phi}{\partial t} + \nabla\cdot\mathbf{G} = 0
 
-is problematic because of the arbitarily small volume fractions of cut cells.
+is problematic because of the arbitrarily small volume fractions of cut cells.
 In general, we seek a method-of-lines update :math:`\phi^{k+1} = \phi^k - \Delta t \left[\nabla\cdot \mathbf{G}^k\right]` where :math:`\left[\nabla\cdot\mathbf{G}\right]` is a stable numerical approximation based on some finite volume approximation.
 
 Pure finite volume methods use
