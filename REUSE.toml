@@ -18,3 +18,8 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 path = "**/*.inputs"
 SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
 SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = "**/*.png"
+SPDX-FileCopyrightText = "2021-2026 SINTEF Energy Research"
+SPDX-License-Identifier = "GPL-3.0-or-later"
