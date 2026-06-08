@@ -16,7 +16,7 @@ repos:
         name: check clang-tidy
         args:
           - -p=build
-        files: ^(Source/|Exec/|Physics/)
+        files: ^(Source/|Exec/|Physics/|Geometries/)
 
   - repo: https://github.com/fsfe/reuse-tool
     rev: v6.1.0
@@ -27,7 +27,7 @@ repos:
     rev: v2.1.0
     hooks:
       - id: codespell
-        files: ^(Source|Docs|Exec|Physics)/
+        files: ^(Source|Docs|Exec|Physics|Geometries)/
         args:
           - "--ignore-words=.codespellignore"
           - "--skip=*.bib,*.js,Docs/Sphinx/build,Docs/doxygen"

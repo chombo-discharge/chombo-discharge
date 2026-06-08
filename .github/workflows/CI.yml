@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: codespell-project/actions-codespell@v2
         with:
-          path: Source Docs Exec Physics
+          path: Source Docs Exec Physics Geometries
           ignore_words_file: .codespellignore
 
   Linux-GNU:

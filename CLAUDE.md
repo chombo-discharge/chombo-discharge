@@ -248,7 +248,7 @@ pre-commit run --all-files  # run all hooks on every file
 | `clang-format` | C++ formatting (`.clang-format` config) |
 | `clang-tidy` | Static analysis (requires `compile_commands.json`; skipped in CI) |
 | `reuse` | REUSE/SPDX licence compliance |
-| `codespell` | Spelling in `Source/`, `Docs/`, `Exec/`, `Physics/` |
+| `codespell` | Spelling in `Source/`, `Docs/`, `Exec/`, `Physics/`, `Geometries/` |
 | `format-input-files` | Banner comment format in `.options`/`.inputs` |
 | `check-literalincludes` | Validates all `.. literalinclude::` paths in RST files |
 | `doxygen-check` | Runs `doxygen Docs/doxygen.conf`; fails if warnings remain |
@@ -268,7 +268,7 @@ pre-commit run --all-files  # run all hooks on every file
 ### Codespell ignore list (`.codespellignore`)
 
 Entries must be **lowercase** (codespell lowercases tokens before lookup). Current minimum
-set needed for `Source/`, `Physics/`, `Exec/`, `Docs/`:
+set needed for `Source/`, `Physics/`, `Exec/`, `Docs/`, `Geometries/`:
 
 ```
 ans       # LevelData<EBCellFAB> ans variable in CD_MFHelmholtzOp.cpp

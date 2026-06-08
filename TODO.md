@@ -25,7 +25,7 @@ This file tracks the remaining work for the documentation/REUSE/linting overhaul
   - `Source/SurfaceODESolver/CD_SurfaceODESolver.H`
   - `Source/ConvectionDiffusionReaction/CD_CdrSolver.H`, `CD_CdrGodunov.H`, `CD_CdrCTU.H`,
     `CD_CdrMultigrid.H`, `CD_CdrIterator.H`, `CD_CdrLayout.H`, `CD_CdrDomainBC.H`
-  - `Source/KineticMonteCarlo/CD_KMCDualState.H`
+  - `Source/KineticMonteCarlo/CD_KMCDualState.H`, `CD_KMCDualStateReaction.H`, `CD_KMCSingleState.H`, `CD_KMCSingleStateReaction.H`, `CD_KMCSolver.H` (full reformat: SPDX, `/**`, uppercase guards, all warnings)
   - `Source/Geometry/CD_ComputationalGeometry.H`
   - `Source/RadiativeTransfer/CD_RtSolver.H` (partial)
   - `Source/Multifluid/CD_MultiFluidIndexSpace.H`
@@ -60,6 +60,7 @@ This file tracks the remaining work for the documentation/REUSE/linting overhaul
 
 Approximate warning counts (will decrease as files are processed):
 
+- [ ] `Geometries/` — unknown warning count (not yet run through doxygen)
 - [ ] `Source/AmrMesh/` — ~293 warnings
 - [ ] `Source/Elliptic/` — ~244 warnings
 - [ ] `Source/Utilities/` — ~202 warnings
