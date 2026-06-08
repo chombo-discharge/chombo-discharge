@@ -5,10 +5,10 @@
  */
 
 /**
-  @file   CD_AdvectionDiffusionStepper.cpp
-  @brief  Implementation of CD_AdvectionDiffusionStepper.H
-  @author Robert Marskar
-  @date   March 2020
+   @file   CD_AdvectionDiffusionStepper.cpp
+   @brief  Implementation of CD_AdvectionDiffusionStepper.H
+   @author Robert Marskar
+   @date   March 2020
 */
 
 // Chombo includes
@@ -147,7 +147,7 @@ AdvectionDiffusionStepper::setupSolvers()
 
   // Instantiate the species.
   m_species = RefCountedPtr<AdvectionDiffusionSpecies>(
-    new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
+                                                       new AdvectionDiffusionSpecies(m_initialData, m_mobile, m_diffusive));
 
   // Prep the solver.
   m_solver->setVerbosity(m_verbosity);
@@ -551,7 +551,7 @@ AdvectionDiffusionStepper::setVelocity(const std::function<RealVect(const RealVe
 
 void
 AdvectionDiffusionStepper::setDiffusionCoefficient(
-  const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept
+                                                   const std::function<Real(const RealVect& a_position)>& a_diffusion) noexcept
 {
   CH_TIME("AdvectionDiffusionStepper::setDiffusionCoefficient");
   if (m_verbosity > 5) {
