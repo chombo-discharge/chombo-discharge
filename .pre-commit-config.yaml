@@ -28,7 +28,7 @@ repos:
     rev: v2.1.0
     hooks:
       - id: codespell
-        files: ^.*\.(py|c|h|md|rst|yml)$
+        files: ^(Source|Docs|Exec|Physics)/
         args: ["--ignore-words", ".codespellignore" ]        
 
   - repo: local
