@@ -23,6 +23,10 @@ Every file must carry a REUSE-compliant SPDX header instead of the old hand-writ
 
 Use `reuse annotate` to apply the header, then remove any leftover legacy copyright lines manually.
 
+**Do not** add SPDX comment headers to `.options` or `.inputs` files. Setup scripts merge these files
+and inline headers cause duplication and clutter. Instead, `REUSE.toml` at the repository root
+declares their copyright and license in bulk via glob patterns — no per-file action needed.
+
 ## Header guards
 
 Header guards must be fully uppercased. For example, a file named `CD_FooBar.H` uses:
