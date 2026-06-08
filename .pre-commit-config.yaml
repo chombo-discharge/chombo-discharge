@@ -9,6 +9,21 @@ repos:
         name: Format source files (clang-format)
         types_or: [c++, c]
 
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: clang-tidy
+        name: check clang-tidy
+        args:
+          - -p=build
+        files: ^(Source/|Exec/|Physics/)
+
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.1.0 # Use the latest stable version of reuse-tool
+    hooks:
+      - id: reuse
+        files: ^(Source/|Exec/|Physics/|Docs/)                
+
   - repo: local
     hooks:
       - id: format-input-files
@@ -18,8 +33,4 @@ repos:
         files: \.(inputs|options)$
         pass_filenames: false
 
-  - repo: https://github.com/fsfe/reuse-tool
-    rev: v6.1.0 # Use the latest stable version of reuse-tool
-    hooks:
-      - id: reuse
-        files: ^(Source/|Exec/|Physics/)        
+
