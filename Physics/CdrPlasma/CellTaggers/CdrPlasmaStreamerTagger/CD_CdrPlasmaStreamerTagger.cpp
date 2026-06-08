@@ -6,7 +6,7 @@
 
 /**
    @file   CD_CdrPlasmaStreamerTagger.cpp
-   @brief  Implementation CD_CdrPlasmaStreamerTagger.H
+   @brief  Implementation of CD_CdrPlasmaStreamerTagger.H
    @author Robert Marskar
 */
 

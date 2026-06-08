@@ -1,5 +1,19 @@
 # chombo-discharge — Claude Code guidelines
 
+## File-level Doxygen block
+
+Every `.H` and `.cpp` file must have a Doxygen block near the top containing exactly `@file`, `@brief`,
+and `@author`. For implementation files the `@brief` must say "Implementation of `<header>.H`" where
+`<header>.H` is the corresponding header file that actually exists in the same directory. Example:
+
+```cpp
+/**
+  @file   CD_Foo.cpp
+  @brief  Implementation of CD_Foo.H
+  @author Robert Marskar
+*/
+```
+
 ## Doxygen documentation
 
 When revising or adding Doxygen documentation to files in `Source/` or `Physics/`:
