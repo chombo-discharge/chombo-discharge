@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCPhotonSpecies.H
   @brief  Declaration of a simple PhotonSpecies derived class for usage in ItoKMC
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCPhotonSpecies_H
-#define CD_ItoKMCPhotonSpecies_H
+#ifndef CD_ITOKMCPHOTONSPECIES_H
+#define CD_ITOKMCPHOTONSPECIES_H
 
 // Our includes
 #include <CD_RtSpecies.H>
@@ -19,13 +20,13 @@
 namespace Physics {
   namespace ItoKMC {
 
-    /*!
+    /**
       @brief Simple RtSpecies class for usage with ItoKMCJSON
     */
     class ItoKMCPhotonSpecies : public RtSpecies
     {
     public:
-      /*!
+      /**
 	@brief Full constructor
 	@param[in] a_name          Name of the species
 	@param[in] a_kappaFunction Absorption function
@@ -36,14 +37,16 @@ namespace Physics {
         m_kappa = a_kappaFunction;
       }
 
-      /*!
+      /**
 	@brief Destructor. Does nothing
       */
       virtual ~ItoKMCPhotonSpecies() noexcept
       {}
 
-      /*!
-	@brief Initial data
+      /**
+	@brief Get absorption coefficient at a physical position.
+	@param[in] a_pos Physical position.
+	@return Absorption coefficient (inverse absorption length) at a_pos.
       */
       Real
       getAbsorptionCoefficient(const RealVect a_pos) const override final
@@ -52,7 +55,7 @@ namespace Physics {
       }
 
     protected:
-      /*!
+      /**
 	@brief Absorption function
       */
       std::function<Real(const RealVect& a_position)> m_kappa;

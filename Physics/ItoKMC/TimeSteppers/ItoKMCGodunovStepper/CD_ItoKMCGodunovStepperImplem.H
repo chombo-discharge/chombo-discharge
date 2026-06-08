@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCGodunovStepperImplem.H
   @brief  Implementation of CD_ItoKMCGodunovStepper.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCGodunovStepperImplem_H
-#define CD_ItoKMCGodunovStepperImplem_H
+#ifndef CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
+#define CD_ITOKMCGODUNOVSTEPPERIMPLEM_H
 
 // Chombo includes
 #include <ParmParse.H>

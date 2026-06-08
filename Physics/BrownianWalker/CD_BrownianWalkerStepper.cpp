@@ -51,7 +51,7 @@ BrownianWalkerStepper::BrownianWalkerStepper()
   }
   else {
     MayDay::Error(
-                  "BrownianWalkerStepper::BrownianWalkerStepper -- logic bust. Do not understand the load balancing argument 'which_balance'");
+      "BrownianWalkerStepper::BrownianWalkerStepper -- logic bust. Do not understand the load balancing argument 'which_balance'");
   }
 }
 
@@ -382,10 +382,10 @@ BrownianWalkerStepper::preRegrid(const int a_lbase, const int a_oldFinestLevel)
 
   // Deposit mass to scratch data holder. Then make sure the number of particles per cell
   m_solver->depositParticles<ItoParticle, const Real&, &ItoParticle::weight>(
-                                                                             m_regridPPC,
-                                                                             m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
-                                                                             DepositionType::NGP,
-                                                                             CoarseFineDeposition::Interp);
+    m_regridPPC,
+    m_solver->getParticles(ItoSolver::WhichContainer::Bulk),
+    DepositionType::NGP,
+    CoarseFineDeposition::Interp);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const Real dx = m_amr->getDx()[lvl];

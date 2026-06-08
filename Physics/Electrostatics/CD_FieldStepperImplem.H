@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_FieldStepperImplem.H
   @brief  Implementation of CD_FieldStepper.H
   @author Robert Marskar
 */
 
-#ifndef CD_FieldStepperImplem_H
-#define CD_FieldStepperImplem_H
+#ifndef CD_FIELDSTEPPERIMPLEM_H
+#define CD_FIELDSTEPPERIMPLEM_H
 
 // Std includes
 #include <math.h>

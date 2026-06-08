@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCPhysics.H
-  @brief  Main file for describing Ito-based plasma physics
+  @brief  Declaration of the Physics::ItoKMC::ItoKMCPhysics abstract base class
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCPhysics_H
-#define CD_ItoKMCPhysics_H
+#ifndef CD_ITOKMCPHYSICS_H
+#define CD_ITOKMCPHYSICS_H
 
 // Std includes
 #include <memory>
@@ -38,72 +39,73 @@
 namespace Physics {
   namespace ItoKMC {
 
-    /*!
-      @brief Numerical representation of the KMC state. Can be floating-point or integer type
+    /**
+      @brief Floating-point type used to represent particle counts in the KMC state.
     */
     using FPR = Real;
 
-    /*!
-      @brief KMC state used in the Kinetic Monte Carlo advancement
+    /**
+      @brief KMC state (dual-state representation) used in the Kinetic Monte Carlo advancement.
     */
     using KMCState = KMCDualState<FPR>;
 
-    /*!
-      @brief KMC reaction used in the Kinetic Monte Carlo advancement
+    /**
+      @brief KMC reaction type used in the Kinetic Monte Carlo advancement.
     */
     using KMCReaction = KMCDualStateReaction<KMCState, FPR>;
 
-    /*!
-      @brief KMC solverl type used in the Kinetic Monte carlo advancement
+    /**
+      @brief KMC solver type used in the Kinetic Monte Carlo advancement.
     */
     using KMCSolverType = KMCSolver<KMCReaction, KMCState, FPR>;
 
-    /*!
+    /**
       @brief Basic function for diffusing a particle
     */
     using DiffusionFunction = std::function<RealVect(const ItoParticle& p, const Real& a_dt)>;
 
-    /*!
-      @brief Map to species type
-      @details This is just for distinguishing between species that are treated with an Ito or CDR formalism
+    /**
+      @brief Tag for distinguishing species solved with an Ito diffusion or CDR fluid formalism.
     */
     enum SpeciesType
     {
-      Ito,
-      CDR
+      Ito, ///< Ito stochastic drift-diffusion solver.
+      CDR  ///< Convection-diffusion-reaction (fluid) solver.
     };
 
-    /*!
-      @brief Base class for interaction between Kinetic Monte Carlo and Ito-based plasma solvers. 
-      @details When using this class, the user should populate m_kmcReactions with the appropriate reactions AND implement routines
-      for computing the mobility/diffusion coefficeints. 
+    /**
+      @brief Abstract base class coupling Kinetic Monte Carlo chemistry to Ito/CDR plasma solvers.
+      @details Subclasses must implement `updateReactionRates()`, `computeMobilities()`,
+      `computeDiffusionCoefficients()`, `secondaryEmissionEB()`, `computeAlpha()`, `computeEta()`,
+      and `getNeutralDensity()`. The reaction network is specified by populating `m_kmcReactions` and
+      (optionally) `m_photoReactions` and `m_surfaceReactions` in the subclass constructor.
     */
     class ItoKMCPhysics
     {
     public:
-      /*!
+      /**
 	@brief Constructor. Does nothing.
       */
       inline ItoKMCPhysics() noexcept;
 
-      /*!
+      /**
 	@brief Destructor. Does nothing. 
       */
       inline virtual ~ItoKMCPhysics() noexcept;
 
-      /*!
+      /**
 	@brief Define the KMC solver and state
       */
       inline void
       defineKMC() const noexcept;
 
-      /*!
+      /**
 	@brief Kill the KMC solver
       */
       inline void
       killKMC() const noexcept;
 
-      /*!
+      /**
 	@brief Get the neutral density at a position in space
 	@param[in] a_pos Physical position
 	@return Neutral density
@@ -111,7 +113,7 @@ namespace Physics {
       virtual Real
       getNeutralDensity(const RealVect a_pos) const noexcept = 0;
 
-      /*!
+      /**
 	@brief Compute Townsend ionization coefficient
 	@param[in] a_E Electric field magnitude
 	@param[in] a_x Physical coordinate
@@ -120,7 +122,7 @@ namespace Physics {
       virtual Real
       computeAlpha(const Real a_E, const RealVect a_x) const = 0;
 
-      /*!
+      /**
 	@brief Compute Townsend attachment coefficient
 	@param[in] a_E Electric field magnitude
 	@param[in] a_x Physical coordinate
@@ -129,40 +131,42 @@ namespace Physics {
       virtual Real
       computeEta(const Real a_E, const RealVect a_x) const = 0;
 
-      /*!
+      /**
 	@brief Get all particle drift-diffusion species
 	@return m_itoSpecies
       */
       const Vector<RefCountedPtr<ItoSpecies>>&
       getItoSpecies() const;
 
-      /*!
+      /**
 	@brief Get all fluid drift-diffusion species
 	@return m_cdrSpecies
       */
       const Vector<RefCountedPtr<CdrSpecies>>&
       getCdrSpecies() const;
 
-      /*!
+      /**
 	@brief Get all photon species
 	@return m_rtSpecies
       */
       const Vector<RefCountedPtr<RtSpecies>>&
       getRtSpecies() const;
 
-      /*!
-        @brief Get diffusion functions
+      /**
+        @brief Get diffusion functions for all Ito species.
+        @return Vector of per-species diffusion displacement functors.
       */
       const Vector<DiffusionFunction>&
       getItoDiffusionFunctions() const noexcept;
 
-      /*!
-	@brief Get number of plot variables
+      /**
+	@brief Get plot variable names.
+	@return Vector of variable name strings for extra diagnostic quantities.
       */
       virtual Vector<std::string>
       getPlotVariableNames() const noexcept;
 
-      /*!
+      /**
 	@brief Get plot variables
 	@param[in] a_E       Electric field
 	@param[in] a_pos     Physical position
@@ -179,55 +183,58 @@ namespace Physics {
                        const Real              a_dx,
                        const Real              a_kappa) const noexcept;
 
-      /*!
-	@brief Get number of plot variables
+      /**
+	@brief Get number of extra plot variables contributed by this physics model.
+	@return Number of diagnostic plot variables.
       */
       virtual int
       getNumberOfPlotVariables() const noexcept;
 
-      /*!
+      /**
 	@brief Return number of Ito solvers.
       */
       inline int
       getNumItoSpecies() const;
 
-      /*!
+      /**
 	@brief Return number of CDR solvers.
       */
       inline int
       getNumCdrSpecies() const;
 
-      /*!
+      /**
 	@brief Return total number of plasma species.
       */
       inline int
       getNumPlasmaSpecies() const;
 
-      /*!
+      /**
 	@brief Return number of RTE solvers.
       */
       inline int
       getNumPhotonSpecies() const;
 
-      /*!
-	@brief Return true/false if physics model needs species gradients.
+      /**
+	@brief Return true if the physics model requires species density gradients.
+	@return True if density gradients must be computed and passed to updateReactionRates().
       */
       virtual bool
       needGradients() const noexcept;
 
-      /*!
-	@brief Get the internal mapping between plasma species and Ito solvers
+      /**
+	@brief Get the internal mapping from plasma-species index to solver type and solver index.
+	@return Map from plasma species index to (SpeciesType, solver index) pair.
       */
       inline const std::map<int, std::pair<SpeciesType, int>>&
       getSpeciesMap() const noexcept;
 
-      /*!
+      /**
 	@brief Parse run-time options
       */
       inline virtual void
       parseRuntimeOptions() noexcept;
 
-      /*!
+      /**
 	@brief Set initial surface charge. Default is 0, override if you want.
 	@param[in] a_time Simulation time
 	@param[in] a_pos  Physical coordinate
@@ -235,7 +242,7 @@ namespace Physics {
       inline virtual Real
       initialSigma(const Real a_time, const RealVect a_pos) const;
 
-      /*!
+      /**
 	@brief Compute the Ito solver mobilities.
 	@param[in] a_time Time
 	@param[in] a_pos  Position
@@ -245,7 +252,7 @@ namespace Physics {
       virtual Vector<Real>
       computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
-      /*!
+      /**
 	@brief Compute the Ito solver diffusion coefficients
 	@param[in] a_time Time
 	@param[in] a_pos  Position
@@ -255,7 +262,7 @@ namespace Physics {
       virtual Vector<Real>
       computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept = 0;
 
-      /*!
+      /**
 	@brief Resolve secondary emission at the EB.
 	@details Routine is here to handle charge injection, secondary emission etc.
 	@param[out] a_secondaryParticles Outgoing plasma species particles.
@@ -295,7 +302,7 @@ namespace Physics {
                           const bool                       a_isDielectric,
                           const int                        a_matIndex) const noexcept = 0;
 
-      /*!
+      /**
 	@brief Advance the reaction network using the KMC algorithm.
 	@param[inout] a_numParticles  Number of physical particles
 	@param[out]   a_numNewPhotons Number of new physical photons to generate (of each type)
@@ -320,7 +327,7 @@ namespace Physics {
                  const Real              a_dx,
                  const Real              a_kappa) const;
 
-      /*!
+      /**
 	@brief Reconcile the number of particles.
 	@details This will add/remove particles and potentially also adjust the particle weights.
 	@param[inout] a_particles Computational particles
@@ -351,7 +358,7 @@ namespace Physics {
                          const Real                  a_dx,
                          const Real                  a_kappa) const noexcept;
 
-      /*!
+      /**
 	@brief Generate new photons. 
 	@details This will add photons
 	@param[in] a_newPhotons      New photons
@@ -378,7 +385,7 @@ namespace Physics {
                        const Real             a_dx,
                        const Real             a_kappa) const noexcept;
 
-      /*!
+      /**
 	@brief Reconcile photoionization reactions.
 	@param[inout] a_itoPrticles       Particle products placed in Ito solvers. 
 	@param[inout] a_cdrParticles      Particle products placed in CDR solvers. 
@@ -391,106 +398,104 @@ namespace Physics {
                                const Vector<List<Photon>*>&  a_absorbedPhotons) const noexcept;
 
     protected:
-      /*!
-	@brief Enum for switching between KMC algorithms
-	@details 'SSA' is the Gillespie algorithm, 'Tau' is tau-leaping and 'Hybrid' is the Cao et. al. algorithm. 
+      /**
+	@brief KMC time-stepping algorithms available for advancing the reaction network.
       */
       enum class Algorithm
       {
-        SSA,
-        ExplicitEuler,
-        Midpoint,
-        PRC,
-        ImplicitEuler,
-        HybridExplicitEuler,
-        HybridMidpoint,
-        HybridPRC,
-        HybridImplicitEuler
+        SSA,                 ///< Gillespie's Stochastic Simulation Algorithm (exact).
+        ExplicitEuler,       ///< Explicit tau-leaping with Euler steps.
+        Midpoint,            ///< Explicit tau-leaping with midpoint (second-order) steps.
+        PRC,                 ///< Partially-rejected corrections tau-leaping.
+        ImplicitEuler,       ///< Implicit tau-leaping with Euler steps.
+        HybridExplicitEuler, ///< Hybrid SSA / explicit Euler (Cao et al.).
+        HybridMidpoint,      ///< Hybrid SSA / midpoint (Cao et al.).
+        HybridPRC,           ///< Hybrid SSA / PRC (Cao et al.).
+        HybridImplicitEuler  ///< Hybrid SSA / implicit Euler (Cao et al.).
       };
 
-      /*!
-	@brief Enum for switching between various particle placement algorithms
+      /**
+	@brief Strategies for placing secondary particles created during the KMC advance.
       */
       enum class ParticlePlacement
       {
-        Random,
-        Centroid,
-        Downstream
+        Random,    ///< Place particles at a uniformly random position within the cell.
+        Centroid,  ///< Place particles at the cell centroid.
+        Downstream ///< Place particles in the downstream region relative to the primary particle drift.
       };
 
-      /*!
+      /**
 	@brief Algorithm to use for KMC advance
       */
       Algorithm m_algorithm;
 
-      /*!
+      /**
 	@brief Particle placement algorithm
       */
       ParticlePlacement m_particlePlacement;
 
-      /*!
+      /**
 	@brief Map for associating a plasma species with an Ito solver or CDR solver.
       */
       std::map<int, std::pair<SpeciesType, int>> m_speciesMap;
 
-      /*!
+      /**
 	@brief Class name. Used for options parsing
       */
       std::string m_className;
 
-      /*!
+      /**
 	@brief Turn on/off debugging
       */
       bool m_debug;
 
-      /*!
+      /**
 	@brief Is defined or not
       */
       bool m_isDefined;
 
-      /*!
+      /**
 	@brief If true, increment onto existing particles rather than creating new ones
       */
       bool m_incrementNewParticles;
 
-      /*!
+      /**
 	@brief Is the KMC solver defined or not.
       */
       static thread_local bool m_hasKMCSolver;
 
-      /*!
+      /**
 	@brief Kinetic Monte Carlo solver used in advanceReactionNetwork.
       */
       static thread_local KMCSolverType m_kmcSolver;
 
-      /*!
+      /**
 	@brief KMC state used in advanceReactionNetwork.
       */
       static thread_local KMCState m_kmcState;
 
-      /*!
-	@brief KMC reactions used in advanceReactionNetowkr
-	@note This is set up via setupKMC in order toi ensure OpenMP thread safety when calling advanceReactionNetwork. The vector
-	is later depopulated in killKMC().
+      /**
+	@brief Thread-local copies of KMC reactions used in advanceReactionNetwork.
+	@details Set up via defineKMC() to ensure OpenMP thread safety; depopulated by killKMC().
       */
       static thread_local std::vector<std::shared_ptr<const KMCReaction>> m_kmcReactionsThreadLocal;
 
-      /*!
+      /**
 	@brief List of reactions for the KMC solver
       */
       std::vector<KMCReaction> m_kmcReactions;
 
-      /*!
+      /**
 	@brief List of photoionization reactions
       */
       std::vector<ItoKMCPhotoReaction> m_photoReactions;
 
-      /*!
+      /**
         @brief List of reactions that are a part of the time step limitation. 
       */
       std::vector<Real> m_reactiveDtFactors;
 
-      /*!
+      /**
 	@brief Random number generators for photoionization pathways. 
 	@details The first index is the photon index, i.e. entry in m_photonSpecies. The second index in the
 	map is an RNG generator for selecting photo-reactions, and a map which associates the returned
@@ -498,120 +503,120 @@ namespace Physics {
       */
       std::map<int, std::pair<std::discrete_distribution<int>, std::map<int, int>>> m_photoPathways;
 
-      /*!
+      /**
 	@brief Surface reactions.
       */
       ItoKMCSurfaceReactionSet m_surfaceReactions;
 
-      /*!
+      /**
         @brief Diffusion functions for the various Ito species
       */
       Vector<DiffusionFunction> m_itoDiffusionFunctions;
 
-      /*!
+      /**
 	@brief List of solver-tracked particle drift-diffusion species. 
       */
       Vector<RefCountedPtr<ItoSpecies>> m_itoSpecies;
 
-      /*!
+      /**
 	@brief List of solver-tracked fluid drift-diffusion species. 
       */
       Vector<RefCountedPtr<CdrSpecies>> m_cdrSpecies;
 
-      /*!
+      /**
 	@brief List of solver-tracked photon species. 
       */
       Vector<RefCountedPtr<RtSpecies>> m_rtSpecies;
 
-      /*!
+      /**
 	@brief An internal integer describing which species is the "ionizing" species.
 	@details This is used by the particle reconciliation routine when only placing secondary particles
 	in the downstream region of the primary particles. 
       */
       int m_downstreamSpecies;
 
-      /*!
+      /**
 	@brief Maximum new number of particles generated by the chemistry advance
       */
       int m_maxNewParticles;
 
-      /*!
+      /**
 	@brief Maximum new number of photons generated by the chemistry advance
       */
       int m_maxNewPhotons;
 
-      /*!
+      /**
 	@brief Solver setting for the Cao et. al algorithm. 
 	@details Determines critical reactions. A reaction is critical if it is m_Ncrit firings away from depleting a reactant. 
       */
       int m_Ncrit;
 
-      /*!
+      /**
 	@brief Solver setting for the Cao et. al algorithm. 
 	@details Maximum number of SSA steps to run when switching into SSA-based advancement for non-critical reactions. 
       */
       int m_NSSA;
 
-      /*!
+      /**
 	@brief Maximum number of iterations for implicit KMC-leaping algorithms
       */
       int m_maxIter;
 
-      /*!
+      /**
 	@brief Solver setting for the Cao et. al. algorithm. 
 	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
       */
       Real m_SSAlim;
 
-      /*!
+      /**
 	@brief Solver setting for the Cao et. al. algorithm. 
 	@details Equal to the maximum permitted change in the relative propensity for non-critical reactions
       */
       Real m_eps;
 
-      /*!
+      /**
 	@brief Exit tolerance for implicit KMC-leaping algorithms
       */
       Real m_exitTol;
 
-      /*!
+      /**
 	@brief Define method -- defines all the internal machinery
       */
       inline void
       define() noexcept;
 
-      /*!
+      /**
 	@brief Build internal representation of how we distinguish the Ito and CDR solvers
 	@note This should ALWAYS be called after initializing the species since ItoKMCStepper will rely on it. 
       */
       inline void
       defineSpeciesMap() noexcept;
 
-      /*!
+      /**
 	@brief Define pathways for photo-reactions
       */
       inline void
       definePhotoPathways() noexcept;
 
-      /*!
+      /**
 	@brief Parse the maximum number of particles generated per cell
       */
       inline void
       parsePPC() noexcept;
 
-      /*!
+      /**
 	@brief Parse the maximum number of particles generated per cell
       */
       inline void
       parseDebug() noexcept;
 
-      /*!
+      /**
 	@brief Parse reaction algorithm
       */
       inline void
       parseAlgorithm() noexcept;
 
-      /*!
+      /**
 	@brief Update reaction rates
 	@param[out] a_kmcReactions Reaction rates to be set. 
 	@param[in] a_E       Electric field
@@ -633,7 +638,7 @@ namespace Physics {
                           const Real                                       a_dx,
                           const Real                                       a_kappa) const noexcept = 0;
 
-      /*!
+      /**
 	@brief Remove particles from the input list.
 	@details This will remove weight from the input particles if we can. Otherwise we remove full particles. 
 	@param[inout] a_particles   List of (super-)particles to remove from. 
@@ -642,7 +647,7 @@ namespace Physics {
       inline void
       removeParticles(List<ItoParticle>& a_particles, const long long a_numToRemove) const;
 
-      /*!
+      /**
 	@brief Compute the upstream position in a grid cell. Returns false if an upstream position was undefinable.
 	@details This routine will compute the position of the "most upstream" particle in the input list.
 	For all particles we assume that they advect in the direction of Z*E, where Z is the charge number.
@@ -667,7 +672,7 @@ namespace Physics {
                               const RealVect&          a_cellPos,
                               const Real&              a_dx) const noexcept;
 
-      /*!
+      /**
         @brief No diffusion function for a particle
         @param[in] a_particle Particle to diffuse
         @param[in] a_dt Time step
@@ -676,7 +681,7 @@ namespace Physics {
       inline RealVect
       noDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept;
 
-      /*!
+      /**
         @brief Isotropic diffusion function for a particle
         @param[in] a_particle Particle to diffuse
         @param[in] a_dt Time step
@@ -685,7 +690,7 @@ namespace Physics {
       inline RealVect
       isotropicDiffusion(const ItoParticle& a_particle, const Real a_dt) const noexcept;
 
-      /*!
+      /**
         @brief Quasi-isotropic diffusion function for a particle which does not permit backward diffusion.
         @param[in] a_particle Particle to diffuse
         @param[in] a_dt Time step

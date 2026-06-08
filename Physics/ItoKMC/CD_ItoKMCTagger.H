@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCTagger.H
-  @brief  Parent tagger class for ItoKMC
+  @brief  Declaration of the Physics::ItoKMC::ItoKMCTagger abstract CellTagger
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCTagger_H
-#define CD_ItoKMCTagger_H
+#ifndef CD_ITOKMCTAGGER_H
+#define CD_ITOKMCTAGGER_H
 
 // Our includes
 #include <CD_CellTagger.H>
@@ -21,20 +22,22 @@
 namespace Physics {
   namespace ItoKMC {
 
-    /*!
-      @brief Class for tagging grid cells using the Ito-KMC-Poisson module. Note that S is the time integrator
-      type that is used. 
+    /**
+      @brief Abstract CellTagger for the Ito-KMC-Poisson physics module.
+      @details The template parameter @p S is the concrete ItoKMCStepper type. Subclasses implement
+      `computeTagFields()`, `refineCell()`, and `coarsenCell()` to define the refinement criterion.
+      Tag fields are computed on the Primal realm and live on the phase set by `setPhase()`.
     */
     template <typename S>
     class ItoKMCTagger : public CellTagger
     {
     public:
-      /*!
+      /**
 	@brief Weak constructor. User MUST subsequently call the define function. 
       */
       ItoKMCTagger();
 
-      /*!
+      /**
 	@brief Full constructor
 	@param[in] a_physics Physics implementation. 
 	@param[in] a_timeStepper Time integrator. 
@@ -44,12 +47,12 @@ namespace Physics {
                    const RefCountedPtr<S>&             a_timeStepper,
                    const RefCountedPtr<AmrMesh>&       a_amr) noexcept;
 
-      /*!
+      /**
 	@brief Destructor.
       */
       virtual ~ItoKMCTagger() noexcept;
 
-      /*!
+      /**
 	@brief Define function
 	@param[in] a_physics Physics implementation. 
 	@param[in] a_timeStepper Time integrator. 
@@ -60,20 +63,21 @@ namespace Physics {
              const RefCountedPtr<S>&             a_timeStepper,
              const RefCountedPtr<AmrMesh>&       a_amr) noexcept;
 
-      /*!
+      /**
 	@brief Get number of plot variables that will be written to file (by Driver).
 	@return Returns number of plot variables that Driver will write to plot files. 
       */
       virtual int
       getNumberOfPlotVariables() const noexcept override;
 
-      /*!
-	@brief Get plot variable names. 
+      /**
+	@brief Get plot variable names.
+	@return Vector of variable name strings for the tag fields.
       */
       virtual Vector<std::string>
       getPlotVariableNames() const noexcept override;
 
-      /*!
+      /**
 	@brief Write plot data.
 	@param[inout] a_output Output data holder
 	@param[inout] a_icomp Starting variable in a_output where we begin appending data.
@@ -85,102 +89,103 @@ namespace Physics {
                     const std::string     a_outputRealm,
                     const int             a_level) const noexcept override;
 
-      /*!
+      /**
 	@brief Compute tagging fields.
       */
       virtual void
       computeTagFields() const noexcept = 0;
 
-      /*!
+      /**
 	@brief Parse class options
       */
       virtual void
       parseOptions() override = 0;
 
-      /*!
+      /**
 	@brief Parse run-time configurable class options
       */
       virtual void
       parseRuntimeOptions() override = 0;
 
-      /*!
+      /**
 	@brief Regrid this class. Note that there is no preRegrid method.
       */
       virtual void
       regrid() noexcept override;
 
-      /*!
+      /**
 	@brief Tag cells for refinement and coarsening
 	@param[inout] a_tags Cell tags that become the new grids. 
       */
       virtual bool
       tagCells(EBAMRTags& a_tags) noexcept override;
 
-      /*!
+      /**
 	@brief Set the phase where we do the tagging.
 	@param[in] a_phase Phase
       */
       virtual void
       setPhase(const phase::which_phase a_phase) noexcept;
 
-      /*!
-	@brief Get tag fields. This is data that live on the primal realm and specified input phase. 
+      /**
+	@brief Get the tagging fields (mutable reference).
+	@return Reference to the vector of cell-centred tagging fields on the Primal realm.
       */
       virtual Vector<EBAMRCellData>&
       getTagFields() noexcept;
 
     protected:
-      /*!
+      /**
 	@brief Defined or not
       */
       bool m_isDefined;
 
-      /*!
+      /**
 	@brief Plot data or not
       */
       bool m_plotData;
 
-      /*!
+      /**
 	@brief Realm where data is allocated.
       */
       std::string m_realm;
 
-      /*!
+      /**
 	@brief Phase where data is allocated.
       */
       phase::which_phase m_phase;
 
-      /*!
+      /**
 	@brief Physics implementation. 
       */
       RefCountedPtr<ItoKMCPhysics> m_physics;
 
-      /*!
+      /**
 	@brief Time stepper
       */
       RefCountedPtr<S> m_timeStepper;
 
-      /*!
+      /**
 	@brief AmrMesh. Needed for allocating memory and things like that. 
       */
       RefCountedPtr<AmrMesh> m_amr;
 
-      /*!
+      /**
 	@brief Number of tagging fields. 
       */
       int m_numTagFields;
 
-      /*!
+      /**
 	@brief Tagging fields. 
       */
       mutable Vector<EBAMRCellData> m_tagFields;
 
-      /*!
+      /**
 	@brief Gradient of tagging fields
       */
       mutable Vector<EBAMRCellData> m_gradTagFields;
 
-      /*!
+      /**
 	@brief Per-box refinement tagging routine. 
 	@param[out] a_refinedCells Cells to be refined
 	@param[out] a_coarsenedCells Cells to be coarsened
@@ -207,7 +212,7 @@ namespace Physics {
                   const Real                a_dx,
                   const RealVect            a_probLo) const noexcept;
 
-      /*!
+      /**
 	@brief Determine if a particular cell should be coarsened or not. 
 	@param[in] a_pos Physical position. 
 	@param[in] a_time Current time
@@ -224,7 +229,7 @@ namespace Physics {
                   const Vector<Real>     a_tagFields,
                   const Vector<RealVect> a_gradTagFields) const noexcept = 0;
 
-      /*!
+      /**
 	@brief Determine if a particular cell should be refined or not. 
 	@param[in] a_pos Physical position. 
 	@param[in] a_time Current time

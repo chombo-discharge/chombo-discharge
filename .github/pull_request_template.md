@@ -17,4 +17,5 @@
 - [ ] I have added all relevant APIs to the doxygen documentation.
 - [ ] I have run CheckDocs.py and fixed potentially broken literalincludes
 - [ ] I have added appropriate labels to this PR
+- [ ] I have added/revised proper licensing and copyright information
 - [ ] I have run a PR review using `@claude review`

@@ -1,11 +1,12 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_ItoKMCBackgroundSpeciesImplem.cpp
-  @brief  Implementation of ItoKMCBackgroundSpecies.H
+/**
+  @file   CD_ItoKMCBackgroundSpecies.cpp
+  @brief  Implementation of CD_ItoKMCBackgroundSpecies.H
   @author Robert Marskar
 */
 

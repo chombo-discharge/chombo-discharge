@@ -19,8 +19,9 @@ and `@author`. For implementation files the `@brief` must say "Implementation of
 When revising or adding Doxygen documentation to files in `Source/` or `Physics/`:
 
 - Use `/**` for all Doxygen comment blocks, never `/*!`.
+- Every function — public, protected, or private — must have at minimum a `@brief` description.
 - Expand brief descriptions into meaningful `@brief` + `@details` blocks where appropriate.
-- Document all parameters with `@param[in]`, `@param[out]`, or `@param[in,out]`, and return values with `@return`.
+- Document **all** parameters with `@param[in]`, `@param[out]`, or `@param[in,out]`, and return values with `@return`.
 - Document non-trivial protected and private member variables.
 
 ## Copyright headers
@@ -40,6 +41,20 @@ Use `reuse annotate` to apply the header, then remove any leftover legacy copyri
 **Do not** add SPDX comment headers to `.options` or `.inputs` files. Setup scripts merge these files
 and inline headers cause duplication and clutter. Instead, `REUSE.toml` at the repository root
 declares their copyright and license in bulk via glob patterns — no per-file action needed.
+
+## Options and inputs file headers
+
+Every `.options` and `.inputs` file must begin with a banner comment that names the class whose
+options are contained in that file. The format is exactly:
+
+```
+# ====================================================================================================
+# ClassName class options
+# ====================================================================================================
+```
+
+where `ClassName` matches the C++ class name exactly (e.g. `FieldSolverGMG`, `CdrPlasmaGodunovStepper`).
+No other text may appear before this three-line block.
 
 ## Header guards
 

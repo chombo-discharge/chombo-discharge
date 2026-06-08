@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCSurfaceReactionImplem.H
-  @brief  Declaration of a class that encapsulates secondary emission at EBs and domain edges/faces
+  @brief  Implementation of CD_ItoKMCSurfaceReaction.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCSurfaceReactionImplem_H
-#define CD_ItoKMCSurfaceReactionImplem_H
+#ifndef CD_ITOKMCSURFACEREACTIONIMPLEM_H
+#define CD_ITOKMCSURFACEREACTIONIMPLEM_H
 
 // Our includes
 #include <CD_ItoKMCSurfaceReaction.H>

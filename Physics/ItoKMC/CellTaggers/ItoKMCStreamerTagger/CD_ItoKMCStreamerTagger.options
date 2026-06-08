@@ -1,5 +1,5 @@
 # ====================================================================================================
-# ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
+# ItoKMCStreamerTagger class options
 # ====================================================================================================
 ItoKMCStreamerTagger.verbosity         = -1             ## Verbosity
 ItoKMCStreamerTagger.plot              = false          ## Turn on/off plotting of input fields.

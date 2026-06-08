@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_FieldStepper.H
-  @brief  TimeStepper class for only solving the Poisson equation (with surface charge)
+  @brief  Declaration of the Physics::Electrostatics::FieldStepper TimeStepper
   @author Robert Marskar
 */
 
-#ifndef CD_FieldStepper_H
-#define CD_FieldStepper_H
+#ifndef CD_FIELDSTEPPER_H
+#define CD_FIELDSTEPPER_H
 
 // Our includes
 #include <CD_TimeStepper.H>
@@ -21,72 +22,76 @@
 namespace Physics {
   namespace Electrostatics {
 
-    /*!
-      @brief Implementation of TimeStepper for solving electrostatic problems. The template parameter is the FieldSolver implementation type. 
-      @details This is just a one-step method -- it currently does not feature adaptive mesh refinement but uses the static grid set up by Driver. If the
-      user wants to add mesh refinement he/she can add a CellTagger which flags cells for refinement. 
+    /**
+      @brief TimeStepper for solving the electrostatic Poisson equation, optionally with surface charge.
+      @details This module solves the electrostatic problem on a static or adaptively refined AMR hierarchy.
+      The template parameter @p T is the concrete FieldSolver type (e.g. FieldSolverGMG).
 
-      The voltage on electrodes/domain faces is set to one. If the user wants to set a different voltage he will need to fetch the FieldSolver from the FieldStepper
-      and call FieldStepper::setVoltage(...).
+      The solver decomposes the potential into contributions from the applied voltage and from space/surface
+      charges. On live electrodes the voltage defaults to 1 V; use setRho() and setSigma() before calling
+      postInitialize() to override the default zero charges.
 
-      The initial space charge is set to a Gaussian blob, specified in the input script. The initial surface charge is set to a constant value specified in the input script. 
+      Adaptive mesh refinement is supported when a CellTagger is attached via Driver — the stepper
+      re-solves the Poisson equation after every regrid in postRegrid().
     */
     template <class T>
     class FieldStepper : public TimeStepper
     {
     public:
-      /*!
+      /**
 	@brief Constructor -- parses some input options
       */
       FieldStepper();
 
-      /*!
+      /**
 	@brief Destructor (does nothing)
       */
       virtual ~FieldStepper();
 
-      /*!
+      /**
 	@brief Solver setup routine. This instantiates the FieldSolver and parses input options
       */
       void
       setupSolvers() override;
 
-      /*!
+      /**
 	@brief Set initial data -- this sets the space and surface charges
       */
       void
       initialData() override;
 
-      /*!
+      /**
 	@brief Post-initialization routine. This solves the Poisson equation. 
       */
       void
       postInitialize() override;
 
-      /*!
+      /**
 	@brief Allocation method -- allocates memory and internal data for solvers
       */
       void
       allocate() override;
 
-      /*!
-	@brief Get the potential.
+      /**
+	@brief Get the electrostatic potential.
+	@return Reference to the multifluid AMR cell data holding the potential.
       */
       MFAMRCellData&
       getPotential();
 
 #ifdef CH_USE_HDF5
-      /*!  
-	@brief Write checkpoint data to file -- this physics module does not checkpoint data. 
-	@param[inout] a_handle HDF5 fil
-	@param[in]    a_lvl    Grid level
+      /**
+	@brief Write checkpoint data to file.
+	@note This module does not support checkpoint-restart; calling this is an error.
+	@param[inout] a_handle HDF5 file handle.
+	@param[in]    a_lvl    Grid level.
       */
       void
       writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
 
 #ifdef CH_USE_HDF5
-      /*!
+      /**
 	@brief Read checkpoint data from file -- this physics does not checkpoint data.
 	@param[inout] a_handle HDF5 file
 	@param[in]    a_lvl    Grid level
@@ -95,32 +100,33 @@ namespace Physics {
       readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
 
-      /*!
+      /**
 	@brief Post-initialize operations to be performed -- does nothing. 
       */
       void
       postCheckpointSetup() override
       {}
 
-      /*!
-	@brief Get number of plot variables
-	@return Returns plot variables for FieldSolver
+      /**
+	@brief Get number of plot variables contributed by this TimeStepper.
+	@return Number of plot variables written by writePlotData().
       */
       int
       getNumberOfPlotVariables() const override;
 
-      /*!
-	@brief Get plot variable names
+      /**
+	@brief Get plot variable names.
+	@return Vector of plot variable name strings.
       */
       Vector<std::string>
       getPlotVariableNames() const override;
 
-      /*!
-	@brief Write plot data to file
-	@param[inout] a_output            Output data holder.
-	@param[inout] a_icomp             Starting component in a_output to begin at. 
-	@param{in]    a_outputRealm       Realm where a_output belongs
-	@param[in]    a_level             Grid level
+      /**
+	@brief Write plot data to output holder.
+	@param[inout] a_output       Output data holder.
+	@param[inout] a_icomp        Starting component in a_output; incremented by the number of components written.
+	@param[in]    a_outputRealm  Realm where a_output lives.
+	@param[in]    a_level        Grid level.
       */
       void
       writePlotData(LevelData<EBCellFAB>& a_output,
@@ -128,7 +134,7 @@ namespace Physics {
                     const std::string     a_outputRealm,
                     const int             a_level) const override;
 
-      /*!
+      /**
 	@brief Compute time step
 	@details This is a static solver so it returns 0.0
       */
@@ -138,7 +144,7 @@ namespace Physics {
         return 0.0;
       }
 
-      /*!
+      /**
 	@brief Perform a single time step with step a_dt.
 	@param[in] a_dt Time step
 	@return a_dt
@@ -146,49 +152,49 @@ namespace Physics {
       Real
       advance(const Real a_dt) override;
 
-      /*!
-	@brief Synchronzie solver times and time steps
-	@param[in] a_step Time step
-	@param[in] a_time Time (in seconds)
-	@param[in] a_dt   Time step that was used. 
+      /**
+	@brief Synchronize solver times and time steps.
+	@param[in] a_step Current time step number.
+	@param[in] a_time Current simulation time in seconds.
+	@param[in] a_dt   Time step that was used.
       */
       void
       synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
 
-      /*!
+      /**
 	@brief Print step report -- this does nothing. 
       */
       void
       printStepReport() override {};
 
-      /*!
+      /**
 	@brief Register simulation realms to be used for this simulation module. 
       */
       void
       registerRealms() override;
 
-      /*!
+      /**
 	@brief Register operators for this simulation module
       */
       void
       registerOperators() override;
 
-      /*!
+      /**
 	@brief Perform pre-regrid operations.
-	@param[in] a_lmin           The coarsest level that changes
-	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_lbase        The coarsest level that changes.
+	@param[in] a_finestLevel  The finest level before the regrid.
       */
       void
       preRegrid(const int a_lbase, const int a_finestLevel) override;
 
-      /*!
+      /**
 	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
 	@param[in] a_realm Realm name
       */
       bool
       loadBalanceThisRealm(const std::string a_realm) const override;
 
-      /*!
+      /**
 	@brief Load balance grid boxes for a specified realm. 
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
 	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
@@ -209,7 +215,7 @@ namespace Physics {
                        const int                        a_lmin,
                        const int                        a_finestLevel) override;
 
-      /*!
+      /**
 	@brief Regrid method -- regrids the potential distribution in FieldSolver (but does not solve the Poisson equation, that is done in postRegrid()).
 	@param[in] a_lmin           The coarsest level that changed. 
 	@param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -218,70 +224,72 @@ namespace Physics {
       void
       regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
-      /*!
+      /**
 	@brief Perform post-regrid operations -- this will resolve the Poisson equation. 
 	@details This includes all operations to be done AFTER interpolating data to new grids. 
       */
       void
       postRegrid() override;
 
-      /*!
-        @brief Set space charge
-        @param[in] a_rho Space charge distribution
+      /**
+        @brief Set the space charge distribution.
+        @param[in] a_rho   Callable returning the charge density (C/m^3) at a given position.
+        @param[in] a_phase Phase (gas or solid) in which to apply the space charge.
       */
       void
       setRho(const std::function<Real(const RealVect& a_pos)>& a_rho, const phase::which_phase a_phase) noexcept;
 
-      /*!
-        @brief Set surface charge
-        @param[in] a_sigma Surface charge distribution
+      /**
+        @brief Set the surface charge distribution.
+        @param[in] a_sigma Callable returning the surface charge density (C/m^2) at a given position.
       */
       void
       setSigma(const std::function<Real(const RealVect& a_pos)>& a_sigma) noexcept;
 
     protected:
-      /*!
+      /**
 	@brief If true, the simulation will be introspectively load balanced. 
       */
       bool m_loadBalance;
 
-      /*!
+      /**
 	@brief If using load balancing, this specifies how boxes will be sorted (in space) before load balancing. 
       */
       BoxSorting m_boxSort;
 
-      /*!
+      /**
 	@brief Reference to the FieldSolver
       */
       RefCountedPtr<FieldSolver> m_fieldSolver;
 
-      /*!
+      /**
 	@brief Reference to the surface charge solver.
       */
       RefCountedPtr<SurfaceODESolver<1>> m_sigma;
 
-      /*!
+      /**
 	@brief Realm where the solver lives
       */
       std::string m_realm;
 
-      /*!
+      /**
 	@brief Space charge inside gas phase.
       */
       std::function<Real(const RealVect& a_pos)> m_rhoGas;
 
-      /*!
+      /**
 	@brief Space charge inside dielectric.
       */
       std::function<Real(const RealVect& a_pos)> m_rhoDielectric;
 
-      /*!
+      /**
 	@brief Surface charge distribution
       */
       std::function<Real(const RealVect& a_pos)> m_surfaceChargeDensity;
 
-      /*!
-	@brief Internal routine for solving the Poisson equation
+      /**
+	@brief Solve the Poisson equation and compute the electric field.
+	@details Called from postInitialize() and postRegrid().
       */
       void
       solvePoisson();

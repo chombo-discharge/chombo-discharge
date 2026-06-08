@@ -238,10 +238,10 @@ namespace Physics {
          @brief Supported time integration methods.
       */
       enum Integrator
-        {
-          Heun, ///< Second-order explicit Heun (trapezoidal) method.
-          IMEX  ///< IMEX: explicit advection, implicit (Crank-Nicholson) diffusion.
-        };
+      {
+        Heun, ///< Second-order explicit Heun (trapezoidal) method.
+        IMEX  ///< IMEX: explicit advection, implicit (Crank-Nicholson) diffusion.
+      };
 
       /**
          @brief The CDR solver used for advancing the scalar field.

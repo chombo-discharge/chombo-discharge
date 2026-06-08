@@ -255,10 +255,10 @@ namespace Physics {
          @brief Supported load balancing strategies.
       */
       enum LoadBalancingMethod
-        {
-          Mesh,    ///< Estimate particle counts from mesh-deposited data (fast).
-          Particle ///< Count particles directly by remapping to the new grids (accurate).
-        };
+      {
+        Mesh,    ///< Estimate particle counts from mesh-deposited data (fast).
+        Particle ///< Count particles directly by remapping to the new grids (accurate).
+      };
 
       /**
          @brief Selected load balancing strategy.

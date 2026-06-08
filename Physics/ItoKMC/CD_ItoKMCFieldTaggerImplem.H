@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoKMCFieldTaggerImplem.H
   @brief  Implementation of CD_ItoKMCFieldTagger.H
   @author Robert Marskar
 */
 
-#ifndef CD_ItoKMCFieldTaggerImplem_H
-#define CD_ItoKMCFieldTaggerImplem_H
+#ifndef CD_ITOKMCFIELDTAGGERIMPLEM_H
+#define CD_ITOKMCFIELDTAGGERIMPLEM_H
 
 // Our includes
 #include <CD_ItoKMCFieldTagger.H>
