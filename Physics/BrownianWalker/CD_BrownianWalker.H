@@ -1,21 +1,25 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_BrownianWalker.H
-  @brief  Documentation of Physics/BrownianWalker namespace
+  @brief  Declaration of the BrownianWalker namespace
   @author Robert Marskar
 */
 
-#ifndef CD_BrownianWalker_H
-#define CD_BrownianWalker_H
+#ifndef CD_BROWNIANWALKER_H
+#define CD_BROWNIANWALKER_H
 
 namespace Physics {
 
-  /*!
-    @brief Namespace for encapsulating physics code for describing Brownian walkers. 
+  /**
+    @brief Namespace for encapsulating Brownian walker physics.
+    @details This namespace contains a particle-based physics module in which particles undergo
+    stochastic Brownian motion and deterministic advection on an adaptive mesh. It includes a
+    species definition, a time stepper, and a cell tagger.
   */
   namespace BrownianWalker {}
 

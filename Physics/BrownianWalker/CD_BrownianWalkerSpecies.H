@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_BrownianWalkerSpecies.H
-  @brief  Declaration of a Brownian walker species for the ItoSolver
+  @brief  Declaration of the Physics::BrownianWalker::BrownianWalkerSpecies class
   @author Robert Marskar
 */
 
-#ifndef CD_BrownianWalkerSpecies_H
-#define CD_BrownianWalkerSpecies_H
+#ifndef CD_BROWNIANWALKERSPECIES_H
+#define CD_BROWNIANWALKERSPECIES_H
 
 // Std includes
 #include <random>
@@ -22,41 +23,44 @@
 namespace Physics {
   namespace BrownianWalker {
 
-    /*!
-      @brief Species which is advected/diffused in Brownian walker code
-      @details The initial particles are drawn from a Gaussian distribution. The user specifies how many, and the parameters for the distribution.
+    /**
+      @brief Concrete ItoSpecies for the Brownian walker physics module.
+      @details Initial particles are drawn from a Gaussian distribution centered at a
+      user-specified position with a user-specified radius. The number of particles, blob
+      center, and blob radius are read from ParmParse at construction time. Each particle
+      is assigned unit weight.
     */
     class BrownianWalkerSpecies : public ItoSpecies
     {
     public:
-      /*!
-	@brief Constructor -- reads in input parameters
+      /**
+        @brief Constructor. Reads input parameters and draws the initial particle distribution.
       */
       BrownianWalkerSpecies();
 
-      /*!
-	@brief Destructor (does nothing)
+      /**
+        @brief Destructor.
       */
       ~BrownianWalkerSpecies();
 
     protected:
-      /*!
-	@brief Number of initial particles
+      /**
+        @brief Number of initial computational particles to draw.
       */
       int m_numParticles;
 
-      /*!
-	@brief Radius for the initial Gaussian distribution of particles
+      /**
+        @brief Standard deviation of the initial Gaussian particle distribution.
       */
       Real m_blobRadius;
 
-      /*!
-	@brief Center-point for the Gaussian particle distribution
+      /**
+        @brief Center of the initial Gaussian particle distribution.
       */
       RealVect m_blobCenter;
 
-      /*!
-	@brief Draw initial particles
+      /**
+        @brief Draw the initial particle positions from a Gaussian distribution and assign unit weights.
       */
       void
       drawInitParticles();

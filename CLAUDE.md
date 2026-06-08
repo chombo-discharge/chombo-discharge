@@ -33,3 +33,22 @@ Header guards must be fully uppercased. For example, a file named `CD_FooBar.H` 
 // ...
 #endif
 ```
+
+## Include ordering
+
+Includes must be grouped and ordered as follows: standard library / third-party first, then Chombo, then our own headers. Each group is preceded by a comment label. Example:
+
+```cpp
+// Std includes
+#include <iostream>
+
+// Chombo includes
+#include <ParmParse.H>
+#include <EBISBox.H>
+
+// Our includes
+#include <CD_Location.H>
+#include <CD_NamespaceHeader.H>
+```
+
+Omit a group label if that group has no entries for the file in question.
