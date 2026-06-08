@@ -1,13 +1,13 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
-  @file   CD_CdrPlasmaGodunovStorage.cpp
-  @brief  Implementation of CdrPlasmaGodunovStepper_storage.H
-  @author Robert Marskar
-  @date   Aug. 2019
+/**
+   @file   CD_CdrPlasmaGodunovStorage.cpp
+   @brief  Implementation of CD_CdrPlasmaGodunovStepperStorage.H
+   @author Robert Marskar
 */
 
 // Our includes
