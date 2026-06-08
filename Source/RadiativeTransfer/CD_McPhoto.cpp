@@ -969,7 +969,7 @@ McPhoto::computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1124,7 +1124,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -1240,7 +1240,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       // Run the kernels.
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }

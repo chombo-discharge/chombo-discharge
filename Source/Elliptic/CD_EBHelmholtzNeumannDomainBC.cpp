@@ -128,7 +128,7 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       };
 
       // Execute the kernel.
-      BoxLoops::loop(a_faceFlux.box(), kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
     }
 
     // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the input value

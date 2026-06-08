@@ -235,7 +235,7 @@ VofUtils::getAllVofsInRadius(const VolIndex& a_startVof,
     }
   };
 
-  BoxLoops::loop(bx, kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(bx, kernel);
 
   if (a_addStartVof) {
     allVofs.push_back(a_startVof);

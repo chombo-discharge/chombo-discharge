@@ -763,7 +763,7 @@ Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel)
         }
       };
 
-      BoxLoops::loop(box, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
     }
   }
 }
@@ -2418,7 +2418,7 @@ Driver::writeTags(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_level
       }
     };
 
-    BoxLoops::loop(dbl[din], kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
   }
 
   // Copy 'tags' over to 'a_output', starting on component a_comp.
@@ -2499,7 +2499,7 @@ Driver::writeLevelset(LevelData<EBCellFAB>& a_output, int& a_comp, const int a_l
       }
     };
 
-    BoxLoops::loop(fab.box(), kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(fab.box(), kernel);
   }
 
   a_comp = a_comp + 2;
@@ -2670,7 +2670,7 @@ Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level)
       }
     };
 
-    BoxLoops::loop(dbl[din], kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
 
     DataOps::setCoveredValue(scratch, 0, 0.0);
   }
@@ -2897,7 +2897,7 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
       }
     };
 
-    BoxLoops::loop(dbl[din], kernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
   }
 }
 #endif

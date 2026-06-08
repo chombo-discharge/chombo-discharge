@@ -15,30 +15,43 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-template <typename Functor>
+#if CH_SPACEDIM == 2
+template <int Si, int Sj, typename Functor>
 ALWAYS_INLINE void
-BoxLoops::loop(const Box& computeBox, Functor&& func, const IntVect& a_stride)
+BoxLoops::loop(const Box& computeBox, Functor&& func)
 {
-
-  CH_assert(a_stride > IntVect::Zero);
+  static_assert(Si >= 1 && Sj >= 1, "BoxLoops::loop strides must be >= 1");
 
   const int* lo = computeBox.loVect();
   const int* hi = computeBox.hiVect();
 
-  // TLDR: This runs through all cells in the computeBox and calls the kernel function.
-#if CH_SPACEDIM == 3
-  for (int k = lo[2]; k <= hi[2]; k += a_stride[2]) {
-#endif
-    for (int j = lo[1]; j <= hi[1]; j += a_stride[1]) {
+  for (int j = lo[1]; j <= hi[1]; j += Sj) {
+    CD_PRAGMA_SIMD
+    for (int i = lo[0]; i <= hi[0]; i += Si) {
+      func(IntVect(i, j));
+    }
+  }
+}
+#else
+template <int Si, int Sj, int Sk, typename Functor>
+ALWAYS_INLINE void
+BoxLoops::loop(const Box& computeBox, Functor&& func)
+{
+  static_assert(Si >= 1 && Sj >= 1 && Sk >= 1, "BoxLoops::loop strides must be >= 1");
+
+  const int* lo = computeBox.loVect();
+  const int* hi = computeBox.hiVect();
+
+  for (int k = lo[2]; k <= hi[2]; k += Sk) {
+    for (int j = lo[1]; j <= hi[1]; j += Sj) {
       CD_PRAGMA_SIMD
-      for (int i = lo[0]; i <= hi[0]; i += a_stride[0]) {
-        func(IntVect(D_DECL(i, j, k)));
+      for (int i = lo[0]; i <= hi[0]; i += Si) {
+        func(IntVect(i, j, k));
       }
     }
-#if CH_SPACEDIM == 3
   }
-#endif
 }
+#endif
 
 template <typename Functor>
 ALWAYS_INLINE void

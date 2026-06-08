@@ -670,7 +670,7 @@ CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EB
       };
 
       // Execute kernels.
-      BoxLoops::loop(grownFaceBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(grownFaceBox, regularKernel);
       BoxLoops::loop(faceit, irregularKernel);
     }
   }
@@ -765,7 +765,7 @@ CdrSolver::computeAdvectionDiffusionFlux(EBAMRFluxData&       a_flux,
         };
 
         // Execute kernels.
-        BoxLoops::loop(interiorFaces, interiorKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(interiorFaces, interiorKernel);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }
@@ -832,7 +832,7 @@ CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux)
           };
 
           // Execute kernels
-          BoxLoops::loop(boundaryCellBox, regularKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(boundaryCellBox, regularKernel);
           BoxLoops::loop(faceit, irregularKernel);
         }
       }
@@ -1119,7 +1119,7 @@ CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>&       a_divJ,
       };
 
       // Execute the kernel.
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
     }
 
     // Reset irregular grid cells. These will be computed in a different way.
@@ -2037,7 +2037,7 @@ CdrSolver::computeAdvectionDt()
         };
 
         // Execute the kernels.
-        BoxLoops::loop(cellBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -2101,7 +2101,7 @@ CdrSolver::computeDiffusionDt()
           };
 
           // Execute the kernel.
-          BoxLoops::loop(cellBox, regularKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         }
 
         // Same kernel as above, but we need to fetch grid faces differently.
@@ -2241,7 +2241,7 @@ CdrSolver::computeAdvectionDiffusionDt()
         };
 
         // Execute the kernels.
-        BoxLoops::loop(dbl[din], regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -2304,7 +2304,7 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
         };
 
         // Execute kernels.
-        BoxLoops::loop(dbl[din], regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], regularKernel);
         BoxLoops::loop(vofit, irregularKernel);
       }
     }
@@ -2390,7 +2390,7 @@ CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow)
           };
 
           // Execute the kernel
-          BoxLoops::loop(cellBox, regularKernel);
+          BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
         }
 
         // Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids since
@@ -2545,7 +2545,7 @@ CdrSolver::computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale)
 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellbox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellbox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -3100,7 +3100,7 @@ CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a
         FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
         // Execute the kernels.
-        BoxLoops::loop(faceBox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }
@@ -3171,7 +3171,7 @@ CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma)
         };
 
         // Execute the kernels.
-        BoxLoops::loop(facebox, regularKernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(facebox, regularKernel);
         BoxLoops::loop(faceit, irregularKernel);
       }
     }

@@ -177,7 +177,7 @@ ItoKMCFieldTagger<S>::computeTagFields() const noexcept
 
       // Run the kernels
       VoFIterator& vofit = (*this->m_amr->getVofIterator(this->m_realm, this->m_phase)[lvl])[din];
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
 

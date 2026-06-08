@@ -204,7 +204,7 @@ CdrPlasmaFieldTagger::computeTracers() const
       VoFIterator vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Execute the kernels
-      BoxLoops::loop(box, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }

@@ -463,7 +463,7 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
         }
       };
 
-      BoxLoops::loop(box, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
     }
   }
 }
@@ -574,7 +574,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
               }
             };
 
-            BoxLoops::loop(cellBox, flagGrownRegion);
+            BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, flagGrownRegion);
           }
 
           // Reset the mask on the coarsened grid
@@ -613,7 +613,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
               }
             };
 
-            BoxLoops::loop(cellBox, kernel);
+            BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, kernel);
           }
         }
       }
@@ -802,7 +802,7 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
         }
       };
 
-      BoxLoops::loop(box, kernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(box, kernel);
     }
   }
 }
@@ -877,8 +877,8 @@ Realm::defineInnerCFMask(const int a_lmin)
                 mask(iv) = (c == 0) ? false : true;
               };
 
-              BoxLoops::loop(sideBoxLo, kernel);
-              BoxLoops::loop(sideBoxHi, kernel);
+              BoxLoops::loop<D_DECL(1, 1, 1)>(sideBoxLo, kernel);
+              BoxLoops::loop<D_DECL(1, 1, 1)>(sideBoxHi, kernel);
             }
           }
         }
@@ -1035,7 +1035,7 @@ Realm::defineValidCells()
           }
         };
 
-        BoxLoops::loop(fabMask.box(), kernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(fabMask.box(), kernel);
       }
     }
   }

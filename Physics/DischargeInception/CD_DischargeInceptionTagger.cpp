@@ -151,7 +151,7 @@ DischargeInceptionTagger::tagCells(EBAMRTags& a_tags)
       VoFIterator vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
       // Execute the kernels.
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }
@@ -242,7 +242,7 @@ DischargeInceptionTagger::computeTracerField() const noexcept
       Box          cellBox = dbl[din];
       VoFIterator& vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
-      BoxLoops::loop(cellBox, regularKernel);
+      BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularKernel);
       BoxLoops::loop(vofit, irregularKernel);
     }
   }

@@ -536,7 +536,7 @@ ParticleContainer<P>::organizeParticlesByPatch()
           patchParticles.addItemsDestructive(cellParticles(iv, comp));
         };
 
-        BoxLoops::loop(dbl[din], kernel);
+        BoxLoops::loop<D_DECL(1, 1, 1)>(dbl[din], kernel);
 
         cellParticles.clear();
       }
@@ -705,7 +705,7 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
     myParticles.join(inputParticles);
   };
 
-  BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(m_grids[a_lvl][a_dit], kernel);
 }
 
 template <class P>
@@ -735,7 +735,7 @@ ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int 
     myParticles.catenate(inputParticles);
   };
 
-  BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
+  BoxLoops::loop<D_DECL(1, 1, 1)>(m_grids[a_lvl][a_dit], kernel);
 }
 
 template <class P>

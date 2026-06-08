@@ -826,7 +826,7 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     helmAcoReg(iv, m_comp) = kappa;
   };
 
-  BoxLoops::loop(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.
+  BoxLoops::loop<D_DECL(1, 1, 1)>(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.
 
   // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring face-centered fluxes. The interpolating stencil
   // will have a radius of 1, so we need to fill one of the ghost faces outside of the grid patch. Only the ones that are "tangential" to the face direction
@@ -870,7 +870,7 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     };
 
     // Run the kernels
-    BoxLoops::loop(faceBox, regularBcoKernel);
+    BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularBcoKernel);
     BoxLoops::loop(faceit, irregularBcoKernel);
   }
 
