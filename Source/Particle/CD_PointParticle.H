@@ -39,12 +39,19 @@ public:
     @param[in] a_position Position (in physical space)
     @param[in] a_weight     Particle weight
   */
-  inline PointParticle(const RealVect a_position, const Real a_weight);
+  inline PointParticle(RealVect a_position, Real a_weight);
 
   /**
     @brief Dtor - does nothing.
   */
-  inline virtual ~PointParticle();
+  inline ~PointParticle() override;
+
+  PointParticle(const PointParticle&) = delete;
+  PointParticle&
+  operator=(const PointParticle&) = delete;
+  PointParticle(PointParticle&&)  = delete;
+  PointParticle&
+  operator=(PointParticle&&) = delete;
 
   /**
     @brief Full define function
@@ -52,7 +59,7 @@ public:
     @param[in] a_weight     Particle weight
   */
   inline void
-  define(const RealVect a_position, const Real a_weight);
+  define(RealVect a_position, Real a_weight);
 
   /**
     @brief Get weight

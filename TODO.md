@@ -93,49 +93,56 @@ pass, but inline headers are the long-term goal so the catch-all can eventually 
    (run `grep -r "literalinclude" Docs/Sphinx/source/ | grep <filename>`).
    If a reference exists, verify that the RST file still points to the same code block after your changes.
 
-- [ ] `Exec/Convergence/AdvectionDiffusion/C2/main.cpp`
-- [ ] `Exec/Convergence/KineticMonteCarlo/C1/main.cpp`
-- [ ] `Exec/Convergence/RadiativeTransfer/C2/main.cpp`
-- [ ] `Exec/Tests/Utilities/LookupTable/main.cpp`
-- [ ] `Geometries/NoisePlane/CD_NoisePlane.H`
-- [ ] `Geometries/SpherePlane/CD_SpherePlane.H`
-- [ ] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp`
-- [ ] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.H`
-- [ ] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStorage.H`
-- [ ] `Physics/ItoKMC/CD_ItoKMCSurfaceReactionsImplem.H`
-- [ ] `Source/AmrMesh/CD_EBAMRData.H`
-- [ ] `Source/AmrMesh/CD_EBAMRDataImplem.H`
-- [ ] `Source/AmrMesh/CD_EBCentroidInterpolation.cpp`
-- [ ] `Source/AmrMesh/CD_LinearStencil.cpp`
-- [ ] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBC.H`
-- [ ] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBCImplem.H`
-- [ ] `Source/Elliptic/CD_EBHelmholtzOpFactory.H`
-- [ ] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp`
-- [ ] `Source/ImplicitFunctions/CD_HyperboloidIF.cpp`
-- [ ] `Source/ImplicitFunctions/CD_SphereArray.H`
-- [ ] `Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H`
-- [ ] `Source/KineticMonteCarlo/CD_KMCSingleStateReactionImplem.H`
+**Verification steps** — after all files are done, run:
+1. `pre-commit run clang-tidy --all-files` — must produce no warnings
+2. `pre-commit run doxygen-check --all-files` — must produce no warnings
+3. For each changed file, check for RST literalincludes:
+   `grep -r "literalinclude" Docs/Sphinx/source/ | grep <filename>`
+   and verify that each matching RST block still references valid code after edits.
+
+- [x] `Exec/Convergence/AdvectionDiffusion/C2/main.cpp`
+- [x] `Exec/Convergence/KineticMonteCarlo/C1/main.cpp`
+- [x] `Exec/Convergence/RadiativeTransfer/C2/main.cpp`
+- [x] `Exec/Tests/Utilities/LookupTable/main.cpp`
+- [x] `Geometries/NoisePlane/CD_NoisePlane.H`
+- [x] `Geometries/SpherePlane/CD_SpherePlane.H`
+- [x] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp`
+- [x] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.H`
+- [x] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStorage.H`
+- [x] `Physics/ItoKMC/CD_ItoKMCSurfaceReactionsImplem.H`
+- [x] `Source/AmrMesh/CD_EBAMRData.H`
+- [x] `Source/AmrMesh/CD_EBAMRDataImplem.H`
+- [x] `Source/AmrMesh/CD_EBCentroidInterpolation.cpp`
+- [x] `Source/AmrMesh/CD_LinearStencil.cpp`
+- [x] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBC.H`
+- [x] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBCImplem.H`
+- [x] `Source/Elliptic/CD_EBHelmholtzOpFactory.H`
+- [x] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp`
+- [x] `Source/ImplicitFunctions/CD_HyperboloidIF.cpp`
+- [x] `Source/ImplicitFunctions/CD_SphereArray.H`
+- [x] `Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H`
+- [x] `Source/KineticMonteCarlo/CD_KMCSingleStateReactionImplem.H`
 - [ ] `Source/KineticMonteCarlo/CD_KMCSolver.H`
 - [ ] `Source/KineticMonteCarlo/CD_KMCSolverImplem.H`
 - [ ] `Source/MeshODESolver/CD_MeshODESolver.H`
-- [ ] `Source/MeshODESolver/CD_MeshODESolverImplem.H`
-- [ ] `Source/Particle/CD_EBAMRParticleMesh.H`
-- [ ] `Source/Particle/CD_EBAMRParticleMeshImplem.H`
-- [ ] `Source/Particle/CD_GenericParticle.H`
-- [ ] `Source/Particle/CD_GenericParticleImplem.H`
-- [ ] `Source/Particle/CD_ParticleContainer.H`
+- [x] `Source/MeshODESolver/CD_MeshODESolverImplem.H`
+- [x] `Source/Particle/CD_EBAMRParticleMesh.H`
+- [x] `Source/Particle/CD_EBAMRParticleMeshImplem.H`
+- [x] `Source/Particle/CD_GenericParticle.H`
+- [x] `Source/Particle/CD_GenericParticleImplem.H`
+- [x] `Source/Particle/CD_ParticleContainer.H`
 - [ ] `Source/Particle/CD_ParticleContainerImplem.H`
-- [ ] `Source/Particle/CD_PointParticle.H`
+- [x] `Source/Particle/CD_PointParticle.H`
 - [ ] `Source/Particle/CD_PointParticleImplem.H`
-- [ ] `Source/Utilities/CD_DischargeIO.H`
-- [ ] `Source/Utilities/CD_DischargeIOImplem.H`
-- [ ] `Source/Utilities/CD_LeastSquares.H`
-- [ ] `Source/Utilities/CD_LeastSquaresImplem.H`
-- [ ] `Source/Utilities/CD_Location.H`
-- [ ] `Source/Utilities/CD_LocationImplem.H`
-- [ ] `Source/Utilities/CD_LookupTable.H`
-- [ ] `Source/Utilities/CD_LookupTable1D.H`
-- [ ] `Source/Utilities/CD_ParallelOps.H`
+- [x] `Source/Utilities/CD_DischargeIO.H`
+- [x] `Source/Utilities/CD_DischargeIOImplem.H`
+- [x] `Source/Utilities/CD_LeastSquares.H`
+- [x] `Source/Utilities/CD_LeastSquaresImplem.H`
+- [x] `Source/Utilities/CD_Location.H`
+- [x] `Source/Utilities/CD_LocationImplem.H`
+- [x] `Source/Utilities/CD_LookupTable.H`
+- [x] `Source/Utilities/CD_LookupTable1D.H`
+- [x] `Source/Utilities/CD_ParallelOps.H`
 
 ### clang-tidy CI
 

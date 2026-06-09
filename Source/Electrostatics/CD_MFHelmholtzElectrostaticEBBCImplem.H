@@ -21,7 +21,8 @@
 #include <CD_NamespaceHeader.H>
 
 Real
-MFHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) const
+MFHelmholtzElectrostaticEBBC::getElectrodePotential(
+  const RealVect& a_pos) const // NOLINT(readability-convert-member-functions-to-static)
 {
   CH_TIME("MFHelmholtzElectrostaticEBBC::getElectrodePotential(RealVect)");
 

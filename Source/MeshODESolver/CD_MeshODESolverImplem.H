@@ -25,15 +25,13 @@
 #include <CD_NamespaceHeader.H>
 
 template <size_t N>
-MeshODESolver<N>::MeshODESolver()
+MeshODESolver<N>::MeshODESolver() : m_verbosity(-1), m_phase(phase::gas)
 {
   CH_TIME("MeshODESolver::MeshODESolver()");
 
   // Default settings.
-  m_verbosity = -1;
   m_name      = "MeshODESolver";
   m_className = "MeshODESolver";
-  m_phase     = phase::gas;
   m_realm     = Realm::Primal;
 
   this->parseOptions();
@@ -390,7 +388,7 @@ MeshODESolver<N>::allocate() noexcept
 
 template <size_t N>
 void
-MeshODESolver<N>::preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept
+MeshODESolver<N>::preRegrid(const int /*a_lbase*/, const int /*a_oldFinestLevel*/) noexcept
 {
   CH_TIME("MeshODESolver::preRegrid(int, int)");
   if (m_verbosity > 5) {

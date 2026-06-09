@@ -118,7 +118,7 @@ public:
     @param[in] a_ghostRHS Ghost r h s
     @param[in] a_mgBlockingFactor Mg blocking factor
   */
-  EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
+  EBHelmholtzOpFactory(Location::Cell          a_dataLocation,
                        const Real&             a_alpha,
                        const Real&             a_beta,
                        const RealVect&         a_probLo,
@@ -382,10 +382,7 @@ protected:
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we coarsen directly. 
   */
   bool
-  getCoarserLayout(EBLevelGrid&       a_coarseGrid,
-                   const EBLevelGrid& a_fineGrid,
-                   const int          a_refRat,
-                   const int          a_blockingFactor) const;
+  getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, int a_refRat, int a_blockingFactor) const;
 
   /**
     @brief Coarsen coefficients (conservatively)
@@ -408,7 +405,7 @@ protected:
                       const LevelData<BaseIVFAB<Real>>& a_fineBcoefIrreg,
                       const EBLevelGrid&                a_eblgCoar,
                       const EBLevelGrid&                a_eblgFine,
-                      const int                         a_refRat);
+                      int                               a_refRat);
 
   /**
     @brief Find level corresponding to amr level

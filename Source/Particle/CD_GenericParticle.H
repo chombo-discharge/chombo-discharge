@@ -203,22 +203,22 @@ public:
   vect() const;
 
   /**
-    @brief Comparison operator with other particle. 
-    @param[in] a_other Other particle
-    @note Does not compare the M and N Reals and RealVects. 
+    @brief Comparison operator with other particle.
+    @param[in] a_p Other particle
+    @note Does not compare the M and N Reals and RealVects.
     @return Return value
   */
   inline bool
-  operator==(const GenericParticle<M, N>& a_other) const;
+  operator==(const GenericParticle<M, N>& a_p) const;
 
   /**
     @brief Comparison operator with other particle.
-    @param[in] a_other Other particle
-    @note Does not compare the M and N Reals and RealVects. 
+    @param[in] a_p Other particle
+    @note Does not compare the M and N Reals and RealVects.
     @return Return value
   */
   inline bool
-  operator!=(const GenericParticle<M, N>& a_other) const;
+  operator!=(const GenericParticle<M, N>& a_p) const;
 
   /**
     @brief Particle comparison operator. Returns lexicographical ordering.
@@ -241,14 +241,14 @@ public:
     @param[in] a_buffer Pointer to memory block
   */
   inline virtual void
-  linearOut(void* const a_buffer) const;
+  linearOut(void* a_buffer) const;
 
   /**
     @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
     @param[in] a_buffer Pointer to memory block.
   */
   inline virtual void
-  linearIn(const void* const a_buffer);
+  linearIn(const void* a_buffer);
 
   /**
     @brief Function that is used when writing particles to HDF5.
@@ -266,7 +266,7 @@ public:
     @note Please do not try to output anything other than Real components. Chombo will expect only Reals.     
   */
   inline virtual void
-  H5linearOut(void* const a_buffer) const;
+  H5linearOut(void* a_buffer) const;
 
   /**
     @brief Delinearize the buffer onto the real components in the particle class.
@@ -275,7 +275,7 @@ public:
     @note Please do not try to output anything other than Real components. Chombo will expect only Reals.     
   */
   inline virtual void
-  H5linearIn(const void* const a_buffer);
+  H5linearIn(const void* a_buffer);
 
 protected:
   /**

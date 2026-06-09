@@ -53,7 +53,7 @@ namespace Location {
     @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
   inline RealVect
-  position(const Location::Cell a_location, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real& a_dx);
+  position(Location::Cell a_location, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real& a_dx);
 
   /**
     @brief Compute the position (ignoring the "origin) of a FaceIndex
@@ -64,7 +64,7 @@ namespace Location {
     @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
   inline RealVect
-  position(const Location::Face a_location, const FaceIndex& a_face, const EBISBox& a_ebisbox, const Real& a_dx);
+  position(Location::Face a_location, const FaceIndex& a_face, const EBISBox& a_ebisbox, const Real& a_dx);
 } // namespace Location
 
 #include <CD_NamespaceFooter.H>

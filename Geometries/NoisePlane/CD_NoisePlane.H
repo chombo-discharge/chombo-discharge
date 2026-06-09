@@ -30,7 +30,14 @@ public:
   /**
     @brief Destructor (does nothing)
   */
-  virtual ~NoisePlane();
+  ~NoisePlane() override;
+
+  NoisePlane(const NoisePlane&) = delete;
+  NoisePlane&
+  operator=(const NoisePlane&) = delete;
+  NoisePlane(NoisePlane&&)     = delete;
+  NoisePlane&
+  operator=(NoisePlane&&) = delete;
 };
 
 #include <CD_NamespaceFooter.H>

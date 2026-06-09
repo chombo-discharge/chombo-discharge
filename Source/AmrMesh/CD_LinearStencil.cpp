@@ -53,12 +53,12 @@ LinearStencil::getLinearInterpStencil(VoFStencil&          a_stencil,
 }
 
 bool
-LinearStencil::computeInterpStencil1D(VoFStencil&          a_stencil,
-                                      const RealVect&      a_pos,
-                                      const VolIndex&      a_vof,
-                                      const ProblemDomain& a_domain,
-                                      const EBISBox&       a_ebisbox,
-                                      const int            a_interpDir)
+LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
+                                      const RealVect& a_pos,
+                                      const VolIndex& a_vof,
+                                      const ProblemDomain& /*a_domain*/,
+                                      const EBISBox& a_ebisbox,
+                                      const int      a_interpDir)
 {
   CH_TIME("LinearStencil::computeInterpStencil1D");
 
@@ -135,12 +135,12 @@ LinearStencil::computeInterpStencil1D(VoFStencil&          a_stencil,
 }
 
 bool
-LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
-                                      const RealVect&      a_pos,
-                                      const VolIndex&      a_vof,
-                                      const ProblemDomain& a_domain,
-                                      const EBISBox&       a_ebisbox,
-                                      const int            a_noInterpDir)
+LinearStencil::computeInterpStencil2D(VoFStencil&     a_stencil,
+                                      const RealVect& a_pos,
+                                      const VolIndex& a_vof,
+                                      const ProblemDomain& /*a_domain*/,
+                                      const EBISBox& a_ebisbox,
+                                      const int /*a_noInterpDir*/)
 {
   CH_TIME("LinearStencil::computeInterpStencil2D");
   CH_assert(SpaceDim == 2 || SpaceDim == 3);
@@ -297,10 +297,12 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       //    we accessed. otherVoFsInterpStencilDir0 then contains the interpolation stencil along dir0 from the cell that
       //    was displaced along dir1 from a_vof. E.g. if dir0=x and dir1=y, then otherVoFsInterpStencilDir0 contains the
       //    interpolation stencil B-C in the figure above.
-      if (numStencilsAdded0 > 0)
+      if (numStencilsAdded0 > 0) {
         otherVoFsInterpStencilDir0 *= 1. / numStencilsAdded0;
-      if (numStencilsAdded1 > 0)
+      }
+      if (numStencilsAdded1 > 0) {
         otherVoFsInterpStencilDir1 *= 1. / numStencilsAdded1;
+      }
 
 #if DEBUG_LINEARSTENCIL // Debug, all stencils should have positive weights with weights summing to 1 at this point.
       Real s0 = 0.0;
@@ -308,38 +310,46 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       for (int i = 0; i < curStenDir0.size(); i++) {
         const Real w = curStenDir0.weight(i);
         s0 += w;
-        if (w < 0.0)
+        if (w < 0.0) {
           MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in curStenDir0");
+        }
       }
       for (int i = 0; i < curStenDir1.size(); i++) {
         const Real w = curStenDir1.weight(i);
         s1 += w;
-        if (w < 0.0)
+        if (w < 0.0) {
           MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in curStenDir1");
+        }
       }
-      if ((s0 - 1.0) > 1.E-5)
+      if ((s0 - 1.0) > 1.E-5) {
         MayDay::Warning("LinearStencil::computeInterpStencil2D - curStenDir0 weights do not sum to 1");
-      if ((s1 - 1.0) > 1.E-5)
+      }
+      if ((s1 - 1.0) > 1.E-5) {
         MayDay::Warning("LinearStencil::computeInterpStencil2D - curStenDir1 weights do not sum to 1");
+      }
 
       s0 = 0.0;
       s1 = 0.0;
       for (int i = 0; i < otherVoFsInterpStencilDir0.size(); i++) {
         const Real w = otherVoFsInterpStencilDir0.weight(i);
         s0 += w;
-        if (w < 0.0)
+        if (w < 0.0) {
           MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in otherVoFsDir0");
+        }
       }
       for (int i = 0; i < otherVoFsInterpStencilDir1.size(); i++) {
         const Real w = otherVoFsInterpStencilDir1.weight(i);
         s1 += w;
-        if (w < 0.0)
+        if (w < 0.0) {
           MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight in otherVoFsDir1");
+        }
       }
-      if ((s0 - 1.0) > 1.E-5)
+      if ((s0 - 1.0) > 1.E-5) {
         MayDay::Warning("LinearStencil::computeInterpStencil2D - otherVoFsDir0 weights do not sum to 1");
-      if ((s1 - 1.0) > 1.E-5)
+      }
+      if ((s1 - 1.0) > 1.E-5) {
         MayDay::Warning("LinearStencil::computeInterpStencil2D - otherVoFsDir1 weights do not sum to 1");
+      }
 #endif
 
       // 4. We might only be able to find one of the stencils
@@ -428,8 +438,9 @@ LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
   Real sumweights = 0.0;
   for (int i = 0; i < a_stencil.size(); i++) {
     const Real w = a_stencil.weight(i);
-    if (w < 0.0)
+    if (w < 0.0) {
       MayDay::Warning("LinearStencil::computeInterpStencil2D - bilinear negative weight");
+    }
     sumweights += w;
   }
   if (std::abs((sumweights - 1.0)) > 1.E-5) {

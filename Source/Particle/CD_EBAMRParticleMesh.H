@@ -122,14 +122,14 @@ public:
     @details P is the particle type, Ret is the returned value of the particle member function, and must be a Real or a
     RealVect. MemFunc is a pointer to a member function of P. E.g., interpolate<P, RealVect&, &P::position>.    
     @param[in,out] a_particles     Particles to be interpolated. 
-    @param[in]    a_meshData      Mesh data
+    @param[in]    a_meshScalarField Mesh scalar field data
     @param[in]    a_interpType    Interpolation type. 
     @param[in]    a_forceIrregNGP Force NGP interpolation in cut-cells. 
   */
   template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
   interpolate(ParticleContainer<P>& a_particles,
-              const EBAMRCellData&  a_meshData,
+              const EBAMRCellData&  a_meshScalarField,
               const DepositionType  a_interpType,
               const bool            a_forceIrregNGP = false) const;
 

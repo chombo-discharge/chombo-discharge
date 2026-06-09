@@ -44,7 +44,7 @@ namespace DischargeIO {
     @return Return value
   */
   std::string
-  numberFmt(const long long a_number, char a_sep = ',') noexcept;
+  numberFmt(long long a_number, char a_sep = ',') noexcept;
 
   /**
     @brief Number formatting game. This just prints the number 123456 as 123,456
@@ -53,7 +53,7 @@ namespace DischargeIO {
     @return Return value
   */
   Vector<std::string>
-  numberFmt(const Vector<long long> a_numbers, char a_sep = ',') noexcept;
+  numberFmt(Vector<long long> a_numbers, char a_sep = ',') noexcept;
 
 #ifdef CH_USE_HDF5
   /**
@@ -78,13 +78,13 @@ namespace DischargeIO {
               const Vector<DisjointBoxLayout>&     a_grids,
               const Vector<LevelData<EBCellFAB>*>& a_data,
               const Vector<ProblemDomain>&         a_domains,
-              const Vector<Real>                   a_dx,
-              const Vector<int>                    a_refinementRatios,
-              const Real                           a_dt,
-              const Real                           a_time,
-              const RealVect                       a_probLo,
-              const int                            a_numLevels,
-              const int                            a_numGhost) noexcept;
+              Vector<Real>                         a_dx,
+              Vector<int>                          a_refinementRatios,
+              Real                                 a_dt,
+              Real                                 a_time,
+              RealVect                             a_probLo,
+              int                                  a_numLevels,
+              int                                  a_numGhost) noexcept;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -97,7 +97,7 @@ namespace DischargeIO {
   */
   void
   writeEBHDF5Header(HDF5Handle&                a_handleH5,
-                    const int                  a_numLevels,
+                    int                        a_numLevels,
                     const RealVect&            a_probLo,
                     const Vector<std::string>& a_variableNames) noexcept;
 
@@ -119,13 +119,13 @@ namespace DischargeIO {
   void
   writeEBHDF5Level(HDF5Handle&                 a_handleH5,
                    const LevelData<EBCellFAB>& a_outputData,
-                   const ProblemDomain         a_domain,
-                   const Real                  a_dx,
-                   const Real                  a_dt,
-                   const Real                  a_time,
-                   const int                   a_level,
-                   const int                   a_refRatio,
-                   const int                   a_numGhost) noexcept;
+                   ProblemDomain               a_domain,
+                   Real                        a_dx,
+                   Real                        a_dt,
+                   Real                        a_time,
+                   int                         a_level,
+                   int                         a_refRatio,
+                   int                         a_numGhost) noexcept;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -154,12 +154,12 @@ namespace DischargeIO {
   */
   template <size_t M, size_t N>
   void
-  writeH5Part(const std::string                               a_filename,
+  writeH5Part(std::string                                     a_filename,
               const ParticleContainer<GenericParticle<M, N>>& a_particles,
-              const std::vector<std::string>                  a_realVars,
-              const std::vector<std::string>                  a_vectVars,
-              const RealVect                                  a_shift,
-              const Real                                      a_time) noexcept;
+              std::vector<std::string>                        a_realVars,
+              std::vector<std::string>                        a_vectVars,
+              RealVect                                        a_shift,
+              Real                                            a_time) noexcept;
 
 #ifdef CH_USE_HDF5
   /**

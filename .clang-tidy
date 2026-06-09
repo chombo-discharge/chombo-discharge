@@ -26,6 +26,7 @@ Checks: >
        -cppcoreguidelines-pro-*,
      misc-*,
        -misc-const-correctness,
+       -misc-header-include-cycle,
        -misc-include-cleaner,
        -misc-non-private-member-variables-in-classes,
        -misc-no-recursion,

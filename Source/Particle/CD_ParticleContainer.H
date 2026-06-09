@@ -79,14 +79,21 @@ public:
                     const Vector<ValidMask>&                 a_validMask,
                     const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
                     const RealVect&                          a_probLo,
-                    const int                                a_blockingFactor,
-                    const int                                a_finestLevel,
-                    const std::string                        a_realm);
+                    int                                      a_blockingFactor,
+                    int                                      a_finestLevel,
+                    std::string                              a_realm);
 
   /**
     @brief Destructor ( does nothing)
   */
   virtual ~ParticleContainer();
+
+  ParticleContainer(const ParticleContainer&) = delete;
+  ParticleContainer&
+  operator=(const ParticleContainer&)    = delete;
+  ParticleContainer(ParticleContainer&&) = delete;
+  ParticleContainer&
+  operator=(ParticleContainer&&) = delete;
 
   /**
     @brief Define the container. This will do a clear-out of all particles. 
@@ -109,9 +116,9 @@ public:
          const Vector<ValidMask>&                 a_validMask,
          const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
          const RealVect&                          a_probLo,
-         const int                                a_blockingFactor,
-         const int                                a_finestLevel,
-         const std::string                        a_realm);
+         int                                      a_blockingFactor,
+         int                                      a_finestLevel,
+         std::string                              a_realm);
 
   /**
     @brief Regrid function. a_base is the coarsest grid level which did not change
@@ -131,15 +138,15 @@ public:
          const Vector<int>&                       a_refRat,
          const Vector<ValidMask>&                 a_validMask,
          const Vector<RefCountedPtr<LevelTiles>>& a_levelTiles,
-         const int                                a_base,
-         const int                                a_newFinestLevel);
+         int                                      a_base,
+         int                                      a_newFinestLevel);
 
   /**
     @brief Cache particles before calling regrid. 
     @param[in] a_base Coarsest grid level which will not change. 
   */
   void
-  preRegrid(const int a_base);
+  preRegrid(int a_lmin);
 
   /**
     @brief Compute new particle IDs.
@@ -161,7 +168,7 @@ public:
     @param[in] a_mask  Mask
   */
   void
-  copyMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask) const;
+  copyMaskParticles(int a_level, const LevelData<BaseFab<bool>>& a_mask) const;
 
   /**
     @brief Copy particles to the mask particle data holder.
@@ -177,7 +184,7 @@ public:
     @param[in] a_mask  Mask
   */
   void
-  transferMaskParticles(const int a_level, const LevelData<BaseFab<bool>>& a_mask);
+  transferMaskParticles(int a_level, const LevelData<BaseFab<bool>>& a_mask);
 
   /**
     @brief Sort particles according to the < operator in the particle.
@@ -306,15 +313,15 @@ public:
     @return Return value
   */
   ParticleData<P>&
-  operator[](const int a_level);
+  operator[](int a_lvl);
 
   /**
-    @brief Get data on a level. Const version. 
-    @param[in] a_level AMR level
+    @brief Get data on a level. Const version.
+    @param[in] a_lvl AMR level
     @return Return value
   */
   const ParticleData<P>&
-  operator[](const int a_level) const;
+  operator[](int a_level) const;
 
   /**
     @brief Get all cell particles. 
@@ -339,36 +346,36 @@ public:
     @return Cell particles
   */
   LayoutData<BinFab<P>>&
-  getCellParticles(const int a_level);
+  getCellParticles(int a_level);
 
   /**
-    @brief Get cell particles, const version. 
+    @brief Get cell particles, const version.
     @param[in] a_level Grid level
-    @note This will issue an error if the particles are not sorted by cell. 
+    @note This will issue an error if the particles are not sorted by cell.
     @return Cell particles
   */
   const LayoutData<BinFab<P>>&
-  getCellParticles(const int a_level) const;
+  getCellParticles(int a_level) const;
 
   /**
-    @brief Get cell particles on a specific level and grid inex. 
+    @brief Get cell particles on a specific level and grid inex.
     @param[in] a_level Grid level
     @param[in] a_dit   Grid index
-    @note This will issue an error if the particles are not sorted by cell. 
+    @note This will issue an error if the particles are not sorted by cell.
     @return Cell particles
   */
   BinFab<P>&
-  getCellParticles(const int a_level, const DataIndex a_dit);
+  getCellParticles(int a_level, DataIndex a_dit);
 
   /**
-    @brief Get cell particles, const version. 
+    @brief Get cell particles, const version.
     @param[in] a_level Grid level
     @param[in] a_dit   Grid index
-    @note This will issue an error if the particles are not sorted by cell. 
+    @note This will issue an error if the particles are not sorted by cell.
     @return Cell particles
   */
   const BinFab<P>&
-  getCellParticles(const int a_level, const DataIndex a_dit) const;
+  getCellParticles(int a_level, DataIndex a_dit) const;
 
   /**
     @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. 
@@ -378,7 +385,7 @@ public:
     @param[in] a_lvl Lvl
   */
   void
-  getCellParticles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
+  getCellParticles(BinFab<P>& a_cellParticles, int a_lvl, DataIndex a_dit) const;
 
   /**
     @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. The original particles are destroyed. 
@@ -388,7 +395,7 @@ public:
     @param[in] a_lvl Lvl
   */
   void
-  getCellParticlesDestructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
+  getCellParticlesDestructive(BinFab<P>& a_cellParticles, int a_lvl, DataIndex a_dit);
 
   /**
     @brief Sort particles by cell
@@ -425,7 +432,7 @@ public:
     @param[in] a_dit       Grid index
   */
   void
-  addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
+  addParticles(const BinFab<P>& a_particles, int a_lvl, DataIndex a_dit);
 
   /**
     @brief Add particles to a certain level and patch. The input particles are cell-sorted (and destroyed on output). 
@@ -434,7 +441,7 @@ public:
     @param[in]    a_dit       Grid index
   */
   void
-  addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
+  addParticlesDestructive(BinFab<P>& a_particles, int a_lvl, DataIndex a_dit);
 
   /**
     @brief Add particles from other container to this one
@@ -485,7 +492,7 @@ public:
     @param[in] a_coarseLevel Coarse level
   */
   void
-  admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
+  admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, int a_coarseLevel);
 
   /**
     @brief Set the particle member to the input value
@@ -496,7 +503,7 @@ public:
   */
   template <Real& (P::*particleScalarField)()>
   inline void
-  setValue(const Real a_value);
+  setValue(Real a_value);
 
   /**
     @brief Set the particle member to the input value
@@ -507,7 +514,7 @@ public:
   */
   template <RealVect& (P::*particleVectorField)()>
   inline void
-  setValue(const RealVect a_value);
+  setValue(RealVect a_value);
 
   /**
     @brief Get local number of particles
@@ -678,7 +685,7 @@ protected:
     @param[in] a_finestLevel Finest AMR level
   */
   void
-  setupGrownGrids(const int a_base, const int a_finestLevel);
+  setupGrownGrids(int a_base, int a_finestLevel);
 
   /**
     @brief Setup function for the particle data (m_particles and m_maskParticles)
@@ -686,7 +693,7 @@ protected:
     @param[in] a_finestLevel Finest AMR level
   */
   void
-  setupParticleData(const int a_base, const int a_finestLevel);
+  setupParticleData(int a_base, int a_finestLevel);
 
   /**
     @brief Gather the particles onto a single list

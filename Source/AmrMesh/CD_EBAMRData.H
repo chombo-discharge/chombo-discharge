@@ -49,7 +49,7 @@ public:
     @brief Destructor. Sets m_data to size a_size but does not allocate anything. 
     @param[in] a_size Description
   */
-  EBAMRData(const int a_size) noexcept;
+  EBAMRData(int a_size) noexcept;
 
   /**
     @brief Destructor. Does nothing.
@@ -77,14 +77,14 @@ public:
     @param[in] a_size Data size
   */
   void
-  resize(const int a_size) noexcept;
+  resize(int a_size) noexcept;
 
   /**
     @brief Sets the realm for this object
     @param[in] a_realm Realm name
   */
   void
-  setRealm(const std::string a_realm) noexcept;
+  setRealm(std::string a_realm) noexcept;
 
   /**
     @brief Get size of m_data

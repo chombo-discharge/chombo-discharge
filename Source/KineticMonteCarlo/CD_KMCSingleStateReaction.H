@@ -98,11 +98,11 @@ public:
 
   /**
     @brief Get the state change due to a change in the input reactant species.
-    @param[in] a_reactant Reactant species.
+    @param[in] a_particleReactant Reactant species.
     @return State change for the reactant.
   */
   inline T
-  getStateChange(const size_t a_reactant) const noexcept;
+  getStateChange(const size_t a_particleReactant) const noexcept;
 
   /**
     @brief Advance the incoming state with the number of reactions.

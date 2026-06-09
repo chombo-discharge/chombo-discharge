@@ -82,7 +82,7 @@ public:
     @param[in] a_columnTwo Column to swap.
   */
   inline void
-  swap(const size_t a_columnOne, const size_t a_columnTwo) noexcept;
+  swap(size_t a_columnOne, size_t a_columnTwo) noexcept;
 
   /**
     @brief Utility function which scales one of the columns (either dependent or independent variable)
@@ -101,7 +101,7 @@ public:
     @param[in] a_column Description
   */
   inline void
-  truncate(const T& a_min, const T& a_max, const size_t a_column) noexcept;
+  truncate(const T& a_min, const T& a_max, size_t a_column) noexcept;
 
   /**
     @brief Set the out-of-range strategy on the low end

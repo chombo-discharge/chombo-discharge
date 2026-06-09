@@ -83,7 +83,7 @@ namespace Physics {
          @return Returns a_dt (no adjustable time step for this class)
       */
       Real
-      advance(const Real a_dt) override;
+      advance(Real a_dt) override;
 
       /**
          @brief Pre-regrid method. Used for storing important variables for the solvers
@@ -92,7 +92,7 @@ namespace Physics {
         @param[in] a_lbase Lbase
       */
       void
-      preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
+      preRegrid(int a_lbase, int a_oldFinestLevel) override;
 
       /**
          @brief Regrid method. 
@@ -102,7 +102,7 @@ namespace Physics {
          @param[in] a_newFinestLevel The finest level after the regrid. 
       */
       void
-      regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      regrid(int a_lmin, int a_oldFinestLevel, int a_newFinestLevel) override;
 
       /**
          @brief Perform post-regrid operations. 
@@ -305,7 +305,7 @@ namespace Physics {
          @param[in] a_newFinestLevel The finest level after the regrid. 
       */
       void
-      regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      regridInternals(int a_lmin, int a_oldFinestLevel, int a_newFinestLevel) override;
 
       /**
          @brief Allocate internal storage.
@@ -353,7 +353,7 @@ namespace Physics {
          @param[in] a_dt Time step size. 
       */
       void
-      extrapolateWithSourceTerm(const Real a_dt);
+      extrapolateWithSourceTerm(Real a_dt);
 
       /**
          @brief Extrapolate the cell-centered states to the EB. 
@@ -393,14 +393,14 @@ namespace Physics {
          @note This will switch between transport algorithms and call the other methods. 
       */
       void
-      advanceTransport(const Real a_dt);
+      advanceTransport(Real a_dt);
 
       /**
          @brief Advance the transport problem using the explicit or explicit-implicit Euler rule
          @param[in] a_dt Time step.
       */
       void
-      advanceTransportExplicitField(const Real a_dt);
+      advanceTransportExplicitField(Real a_dt);
 
       /**
          @brief Advance the transport problem using a semi-implicit formulation for the electric field. 
@@ -408,7 +408,7 @@ namespace Physics {
          @param[in] a_dt Time step. 
       */
       void
-      advanceTransportSemiImplicit(const Real a_dt);
+      advanceTransportSemiImplicit(Real a_dt);
 
       /**
          @brief Advance the reactive problem over a time step dt.
@@ -416,7 +416,7 @@ namespace Physics {
          @note Only does the CDR solvers.
       */
       void
-      advanceCdrReactions(const Real a_dt);
+      advanceCdrReactions(Real a_dt);
 
       /**
          @brief Advance the radiative transfer problem. 
@@ -424,7 +424,7 @@ namespace Physics {
          @note This should be called after advanceReactions because that routine sets up the source terms
       */
       void
-      advanceRadiativeTransfer(const Real a_dt);
+      advanceRadiativeTransfer(Real a_dt);
 
       /**
          @brief Print how much mass was injected into the system. 
@@ -435,7 +435,7 @@ namespace Physics {
         @param[in] a_data Description
       */
       void
-      floorMass(EBAMRCellData& a_data, const std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
+      floorMass(EBAMRCellData& a_data, std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
 
       /**
          @brief Perform post-step operations
@@ -449,7 +449,7 @@ namespace Physics {
          @param[in] a_time Time step
       */
       void
-      computeCdrDriftVelocities(const Real a_time);
+      computeCdrDriftVelocities(Real a_time);
 
       /**
          @brief Compute CDR diffusion coefficients
@@ -457,14 +457,14 @@ namespace Physics {
          @param[in] a_time Time step
       */
       void
-      computeCdrDiffusionCoefficients(const Real a_time);
+      computeCdrDiffusionCoefficients(Real a_time);
 
       /**
          @brief Compute source terms for the CDR and RTE equations
          @param[in] a_dt Time step
       */
       void
-      computeSourceTerms(const Real a_dt);
+      computeSourceTerms(Real a_dt);
 
       /**
          @brief Parse centering for the advective integrator.

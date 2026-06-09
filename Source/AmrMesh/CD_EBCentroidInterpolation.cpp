@@ -21,12 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCentroidInterpolation::EBCentroidInterpolation() noexcept
+EBCentroidInterpolation::EBCentroidInterpolation() noexcept : m_dx(-1.0), m_isDefined(false)
 {
   CH_TIME("EBCentroidInterpolation:EBCentroidInterpolation(weak)");
-
-  m_dx        = -1.0;
-  m_isDefined = false;
 }
 
 EBCentroidInterpolation::EBCentroidInterpolation(const EBLevelGrid& a_eblg,
@@ -178,10 +175,10 @@ EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
 }
 
 bool
-EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_stencil,
-                                                       const VolIndex&      a_vof,
-                                                       const EBISBox&       a_ebisBox,
-                                                       const ProblemDomain& a_domain) const noexcept
+EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil,
+                                                       const VolIndex& a_vof,
+                                                       const EBISBox&  a_ebisBox,
+                                                       const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getTaylorExtrapolationStencil");
 
@@ -198,10 +195,10 @@ EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&          a_st
 }
 
 bool
-EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil,
-                                                const VolIndex&      a_vof,
-                                                const EBISBox&       a_ebisBox,
-                                                const ProblemDomain& a_domain) const noexcept
+EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
+                                                const VolIndex& a_vof,
+                                                const EBISBox&  a_ebisBox,
+                                                const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getLeastSquaresStencil");
 
@@ -226,10 +223,10 @@ EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&          a_stencil,
 }
 
 bool
-EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&          a_stencil,
-                                                   const VolIndex&      a_vof,
-                                                   const EBISBox&       a_ebisBox,
-                                                   const ProblemDomain& a_domain) const noexcept
+EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
+                                                   const VolIndex& a_vof,
+                                                   const EBISBox&  a_ebisBox,
+                                                   const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getPiecewiseLinearStencil");
 
@@ -438,7 +435,7 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
 }
 
 Real
-EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) const noexcept
+EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -450,7 +447,7 @@ EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) const noex
 }
 
 Real
-EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) const noexcept
+EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
 

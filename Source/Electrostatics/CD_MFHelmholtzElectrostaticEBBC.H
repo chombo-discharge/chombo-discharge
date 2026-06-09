@@ -32,7 +32,7 @@ public:
     @param[in] a_electrostaticBCs Electrostatic boundary conditions on EBs
     @param[in] a_jumpBC           Jumpc BC object. 
   */
-  MFHelmholtzElectrostaticEBBC(const int                               a_phase,
+  MFHelmholtzElectrostaticEBBC(int                                     a_phase,
                                const ElectrostaticEbBc&                a_electrostaticBCs,
                                const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
@@ -56,7 +56,7 @@ public:
   /**
     @brief Default constructor (does nothing). 
   */
-  virtual ~MFHelmholtzElectrostaticEBBC();
+  ~MFHelmholtzElectrostaticEBBC() override;
 
   /**
     @brief No copy assignment
@@ -80,7 +80,7 @@ public:
     @note The radius of the stencil is the same as the order -- do not use an order larger than the number of ghost cells that you will use. 
   */
   void
-  setOrder(const int a_order);
+  setOrder(int a_order);
 
   /**
     @brief Set stencil weight
@@ -88,21 +88,21 @@ public:
     @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the equation weights in that reconstruction. 
   */
   void
-  setWeight(const int a_weight);
+  setWeight(int a_weight);
 
   /**
     @brief Drop BC order if domain size is equal or below this.
     @param[in] a_domainSize Description
   */
   void
-  setDomainDropOrder(const int a_domainSize);
+  setDomainDropOrder(int a_domainSize);
 
   /**
     @brief Signal that it should drop the stencil order if the cell is a coarsened cell
     @param[in] a_dropOrder
   */
   void
-  setCoarseGridDropOrder(const bool a_dropOrder);
+  setCoarseGridDropOrder(bool a_dropOrder);
 
 protected:
   /**

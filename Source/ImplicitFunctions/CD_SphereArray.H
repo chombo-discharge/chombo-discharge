@@ -48,13 +48,13 @@ public:
     @param[in] a_zCoord     If 2D, this sets the z-coordinate
     @param[in] a_loCenter Lo center
   */
-  SphereArray(const Real     a_radius,
-              const RealVect a_loCenter,
-              const RealVect a_sphereGap,
-              const IntVect  a_numSpheres,
-              const bool     a_useFast,
-              const bool     a_flipInside,
-              const Real     a_zCoord = 0.0);
+  SphereArray(Real     a_radius,
+              RealVect a_loCenter,
+              RealVect a_sphereGap,
+              IntVect  a_numSpheres,
+              bool     a_useFast,
+              bool     a_flipInside,
+              Real     a_zCoord = 0.0);
 
   /**
     @brief Copy constructor. Sends the pointers to the object. 
@@ -65,21 +65,27 @@ public:
   /**
     @brief Destructor (does nothing)
   */
-  virtual ~SphereArray();
+  ~SphereArray() override;
+
+  SphereArray&
+  operator=(const SphereArray&) = delete;
+  SphereArray(SphereArray&&)    = delete;
+  SphereArray&
+  operator=(SphereArray&&) = delete;
 
   /**
     @brief Value function
     @param[in] a_point Coordinate
     @return Function value at the given point
   */
-  virtual Real
+  Real
   value(const RealVect& a_point) const override;
 
   /**
     @brief Factory method -- calls the copy constructor
     @return New copy of this implicit function
   */
-  virtual BaseIF*
+  BaseIF*
   newImplicitFunction() const override;
 
 protected:

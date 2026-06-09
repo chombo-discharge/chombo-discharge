@@ -39,7 +39,7 @@ namespace ParallelOps {
     @return Return value
   */
   inline std::pair<int, int>
-  partition(const int a_N) noexcept;
+  partition(int a_N) noexcept;
 
   /**
     @brief Get the minimum of the input, reduced over MPI ranks (in the Chombo communicator)

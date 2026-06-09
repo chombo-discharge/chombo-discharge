@@ -18,11 +18,10 @@
 #include <CD_NamespaceHeader.H>
 
 template <size_t M, size_t N>
-inline GenericParticle<M, N>::GenericParticle()
+inline GenericParticle<M, N>::GenericParticle() : m_position(RealVect::Zero)
 {
   m_particleID = -1;
   m_rankID     = -1;
-  m_position   = RealVect::Zero;
 
   for (auto& s : m_scalars) {
     s = 0.0;
@@ -42,8 +41,7 @@ inline GenericParticle<M, N>::GenericParticle(const GenericParticle<M, N>& a_oth
 }
 
 template <size_t M, size_t N>
-inline GenericParticle<M, N>::~GenericParticle()
-{}
+inline GenericParticle<M, N>::~GenericParticle() = default;
 
 template <size_t M, size_t N>
 inline RealVect&

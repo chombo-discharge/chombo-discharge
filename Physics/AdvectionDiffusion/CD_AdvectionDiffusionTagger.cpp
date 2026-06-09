@@ -57,7 +57,7 @@ AdvectionDiffusionTagger::parseOptions()
 }
 
 bool
-AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags)
+AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags) // NOLINT(readability-convert-member-functions-to-static)
 {
   CH_TIME("AdvectionDiffusionTagger::tagCells");
 

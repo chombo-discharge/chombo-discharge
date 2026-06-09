@@ -32,7 +32,14 @@ public:
   /**
     @brief Destructor
   */
-  virtual ~SpherePlane() noexcept;
+  ~SpherePlane() noexcept override;
+
+  SpherePlane(const SpherePlane&) = delete;
+  SpherePlane&
+  operator=(const SpherePlane&) = delete;
+  SpherePlane(SpherePlane&&)    = delete;
+  SpherePlane&
+  operator=(SpherePlane&&) = delete;
 };
 
 #include <CD_NamespaceFooter.H>

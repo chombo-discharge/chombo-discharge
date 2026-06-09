@@ -1,3 +1,15 @@
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+  @file   main.cpp
+  @brief  Convergence test for the KMC solver.
+  @author Robert Marskar
+*/
+
 #include <CD_Driver.H>
 #include <CD_KMCSolver.H>
 #include <CD_KMCSingleStateReaction.H>
@@ -19,7 +31,7 @@ main(int argc, char* argv[])
 #endif
 
   // Read input file.
-  ParmParse pp(argc - 2, argv + 2, NULL, argv[1]);
+  ParmParse pp(argc - 2, argv + 2, nullptr, argv[1]);
 
   // State that we advance.
   KMCState state(1);

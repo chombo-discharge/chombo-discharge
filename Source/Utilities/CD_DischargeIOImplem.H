@@ -374,7 +374,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
   hsize_t dataSize = totNumParticles * numComps;
 
   // a single dataspace
-  hid_t dataspace = H5Screate_simple(1, &dataSize, NULL);
+  hid_t dataspace = H5Screate_simple(1, &dataSize, nullptr);
 
   // create data type
   hid_t H5T_type = H5T_NATIVE_DOUBLE;
@@ -400,7 +400,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
     const size_t chunkSize = objSize * _CHUNK;
     char*        chunk     = new char[chunkSize];
 
-    if (chunk == NULL) {
+    if (chunk == nullptr) {
       MayDay::Error("WritePart::Error: new returned NULL pointer ");
     }
 
@@ -435,7 +435,7 @@ DischargeIO::writeCheckParticlesToHDF(HDF5Handle&            a_handle,
 
     // free buffer
     delete[] chunk;
-    chunk = NULL;
+    chunk = nullptr;
   }
 
   // done

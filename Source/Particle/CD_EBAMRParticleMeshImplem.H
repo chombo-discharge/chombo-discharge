@@ -255,7 +255,7 @@ EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
   constexpr int coarseMaskWidth = 1;
 
   // Doing the nasty here...
-  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+  auto& particles = const_cast<ParticleContainer<P>&>(a_particles);
 
   particles.transferMaskParticles(m_outerHaloMasks.at(coarseMaskWidth));
 
@@ -340,7 +340,7 @@ EBAMRParticleMesh::depositTransition(EBAMRCellData&              a_meshData,
   // This piece of code transfers the particles that lie on the coarse-side interface to a different particle container than
   // a_particles. We can not use ParticleContainer::transferMaskParticles because the mask is defined on the refined coarse
   // level. So we do this transfer directly.
-  ParticleContainer<P>& particles = const_cast<ParticleContainer<P>&>(a_particles);
+  auto& particles = const_cast<ParticleContainer<P>&>(a_particles);
 
   this->transferMaskParticlesTransition(particles, a_depositionType);
 

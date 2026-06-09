@@ -194,8 +194,8 @@ protected:
     @param[in] a_dwr Right slope
     @return Return value
   */
-  inline Real
-  MinMod(const Real& a_dwl, const Real& a_dwr) const noexcept;
+  static inline Real
+  MinMod(const Real& a_dwl, const Real& a_dwr) noexcept;
 
   /**
     @brief Monotonized central difference slope limiter.
@@ -203,8 +203,8 @@ protected:
     @param[in] a_dwr Right slope
     @return Return value
   */
-  inline Real
-  MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) const noexcept;
+  static inline Real
+  MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) noexcept;
 
   /**
     @brief Superbee slope limiter. 

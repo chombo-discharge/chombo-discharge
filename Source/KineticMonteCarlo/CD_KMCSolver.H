@@ -118,12 +118,7 @@ public:
     @param[in] a_exitTol Exit tolerance for implicit solvers.
   */
   inline void
-  setSolverParameters(const T    a_numCrit,
-                      const T    a_numSSA,
-                      const T    a_maxIter,
-                      const Real a_eps,
-                      const Real a_SSAlim,
-                      const Real a_exitTol) noexcept;
+  setSolverParameters(T a_numCrit, T a_numSSA, T a_maxIter, Real a_eps, Real a_SSAlim, Real a_exitTol) noexcept;
 
   /**
     @brief Compute the state vector changes for all reactions.
@@ -270,7 +265,7 @@ public:
   computeDt(const State&             a_state,
             const ReactionList&      a_reactions,
             const std::vector<Real>& a_propensities,
-            const Real               a_epsilon) const noexcept;
+            Real                     a_epsilon) const noexcept;
 
   /**
     @brief Perform a single SSA step.
