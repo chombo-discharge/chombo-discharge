@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,15 +10,15 @@
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzElectrostaticDomainBC_H
-#define CD_EBHelmholtzElectrostaticDomainBC_H
+#ifndef CD_EBHELMHOLTZELECTROSTATICDOMAINBC_H
+#define CD_EBHELMHOLTZELECTROSTATICDOMAINBC_H
 
 // Our includes
 #include <CD_ElectrostaticDomainBc.H>
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for passing electrostatic domain boundary conditions into EBHelmholtzOp. 
   @details This class is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions are passed in through ElectrostaticDomainBc. This
   class will simply instantiate one such BC object for each edge/face in the computational domain, and call the appropriate BC function when EBHelmholtzOp
@@ -29,49 +30,49 @@
 class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC
 {
 public:
-  /*!
+  /**
     @brief Not allowed, use the full constructor. 
   */
   EBHelmholtzElectrostaticDomainBC() = delete;
 
-  /*!
+  /**
     @brief Full constructor.
     @param[in] a_electrostaticBCs Electrostatic domain boundary condition functions (in time and space)
   */
   EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs);
 
-  /*!
+  /**
     @brief Disallowed -- don't see why you would need it.
     @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
 
-  /*!
+  /**
     @brief Disallowed -- don't see why you would need it.
     @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
 
-  /*!
+  /**
     @brief Destructor
   */
   ~EBHelmholtzElectrostaticDomainBC();
 
-  /*!
+  /**
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC&
   operator=(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
 
-  /*!
+  /**
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC&
   operator=(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
 
-  /*!
+  /**
     @brief Define function
     @param[in] a_dataLocation Data location (either Location::Cell::Center or Location::Cell::Centroid). 
     @param[in] a_eblg         Level grids
@@ -85,7 +86,7 @@ public:
          const RealVect&      a_probLo,
          const Real           a_dx) override final;
 
-  /*!
+  /**
     @brief Get face flux. This is for regular cells. 
     @param[in,out] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
@@ -105,7 +106,7 @@ public:
               const DataIndex&      a_dit,
               const bool            a_useHomogeneous) const override final;
 
-  /*!
+  /**
     @brief Get face flux. This is for irregular cells. 
     @param[in] a_vof            Grid cell
     @param[in] a_phi            Cell-centered data
@@ -125,12 +126,12 @@ public:
               const bool            a_useHomogeneous) const override final;
 
 protected:
-  /*!
+  /**
     @brief Electrostatic domain boundary conditions
   */
   ElectrostaticDomainBc m_electrostaticBCs;
 
-  /*!
+  /**
     @brief BC objects on each domain side. 
     @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */

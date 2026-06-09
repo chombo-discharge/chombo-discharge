@@ -1,33 +1,34 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzSaturationChargeJumpBC.H
   @brief  Declaration of an MFHelmholtzJumpBC class which implements the saturation charge boundary condition. 
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzSaturationChargeJumpBC_H
-#define CD_MFHelmholtzSaturationChargeJumpBC_H
+#ifndef CD_MFHELMHOLTZSATURATIONCHARGEJUMPBC_H
+#define CD_MFHELMHOLTZSATURATIONCHARGEJUMPBC_H
 
 // Our includes
 #include <CD_MFHelmholtzJumpBC.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for computing matching the saturation charge boundary condition in an MFHelmholtzOp context
 */
 class MFHelmholtzSaturationChargeJumpBC : public MFHelmholtzJumpBC
 {
 public:
-  /*!
+  /**
     @brief Disallowe weak construction. 
   */
   MFHelmholtzSaturationChargeJumpBC() = delete;
 
-  /*!
+  /**
     @brief Full constructor. 
     @param[in] a_dataLocation Data centering
     @param[in] a_mflg         Grids
@@ -52,12 +53,12 @@ public:
                                     const int                a_ghostCF,
                                     const IntVect            a_ghostPhi);
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~MFHelmholtzSaturationChargeJumpBC();
 
-  /*!
+  /**
     @brief Match the BC. 
     @details MFhelmholtzJumpBC uses a_jump as the *fixed* parameter, computing the fluxes from the boundary potential and surface source.
     This function, however, specifies a zero flux into one of the phases and uses a_jump as a *free* parameter (it is computed from the fluxes). 
@@ -73,7 +74,7 @@ public:
           const DataIndex& a_dit) const override;
 
 protected:
-  /*!
+  /**
     @brief Phase where the saturation charge BC is applied
   */
   phase::which_phase m_phase;

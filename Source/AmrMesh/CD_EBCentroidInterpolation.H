@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2025 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBCentroidInterpolation.H
   @brief  Declaration of class for interpolating cell-centered data to cell centroids. 
   @author Robert Marskar
 */
 
-#ifndef CD_EBCentroidInterpolation_H
-#define CD_EBCentroidInterpolation_H
+#ifndef CD_EBCENTROIDINTERPOLATION_H
+#define CD_EBCENTROIDINTERPOLATION_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -24,7 +25,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for interpolating cell-centered data to the EB centroid.
 
   @details Various interpolation methods are supported, where some are supported by explicitly
@@ -36,7 +37,7 @@
 class EBCentroidInterpolation
 {
 public:
-  /*!
+  /**
     @brief Supported interpolation types
   */
   enum class Type
@@ -51,17 +52,17 @@ public:
     Superbee            // Uses slope limiter with superbee limiter
   };
 
-  /*!
+  /**
     @brief Default constructor. Must call the define function afterwards
   */
   EBCentroidInterpolation() noexcept;
 
-  /*!
+  /**
     @brief Copy constructor. Not allowed.
   */
   EBCentroidInterpolation(const EBCentroidInterpolation& a_other) = delete;
 
-  /*!
+  /**
     @brief Defining constructor. This calls the define function.
     @param[in] a_eblg Grids
     @param[in] a_dx Grid resolution
@@ -69,12 +70,12 @@ public:
   */
   EBCentroidInterpolation(const EBLevelGrid& a_eblg, const Real& a_dx, const Type& a_interpolationType) noexcept;
 
-  /*!
+  /**
     @brief Destructor. Does nothing.
   */
   virtual ~EBCentroidInterpolation() noexcept;
 
-  /*!
+  /**
     @brief Define function. Puts object in usable state. 
     @param[in] a_eblg Grids
     @param[in] a_dx Grid resolution
@@ -83,7 +84,7 @@ public:
   virtual void
   define(const EBLevelGrid& a_eblg, const Real& a_dx, const Type& a_interpolationType) noexcept;
 
-  /*!
+  /**
     @brief Function for interpolating data. 
     @param[out] a_centroidData Centroid-centered data.
     @param[in] a_cellData Cell-centered data.
@@ -91,7 +92,7 @@ public:
   virtual void
   interpolate(LevelData<BaseIVFAB<Real>>& a_centroidData, const LevelData<EBCellFAB>& a_cellData) const noexcept;
 
-  /*!
+  /**
     @brief Interpolation function. 
     @param[out] a_centroidData Centroid-centered data.
     @param[in] a_cellData Cell-centered data.
@@ -100,37 +101,37 @@ public:
   interpolate(BaseIVFAB<Real>& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
 
 protected:
-  /*!
+  /**
     @brief Defined or not
   */
   bool m_isDefined;
 
-  /*!
+  /**
     @brief Grids
   */
   EBLevelGrid m_eblg;
 
-  /*!
+  /**
     @brief Interpolation type
   */
   Type m_interpolationType;
 
-  /*!
+  /**
     @brief Grid resolution
   */
   Real m_dx;
 
-  /*!
+  /**
     @brief VoF iterator for iterating through the cut-cells. 
   */
   mutable LayoutData<VoFIterator> m_vofIterator;
 
-  /*!
+  /**
     @brief Stencils. This is only populated when the interpolation is expressible as a stencil.
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_interpStencils;
 
-  /*!
+  /**
     @brief Utility function for fetching a bilinear/trilinear stencil
     @param[out] a_stencil Stencil
     @param[in] a_vof VolIndex for cut-cell
@@ -143,7 +144,7 @@ protected:
                    const EBISBox&       a_ebisBox,
                    const ProblemDomain& a_domain) const noexcept;
 
-  /*!
+  /**
     @brief Utility function for fetching a Taylor-extrapolation stencil.
     @param[out] a_stencil Stencil
     @param[in] a_vof VolIndex for cut-cell
@@ -156,7 +157,7 @@ protected:
                                 const EBISBox&       a_ebisBox,
                                 const ProblemDomain& a_domain) const noexcept;
 
-  /*!
+  /**
     @brief Utility function for fetching a least-squares based interpolation stencil.
     @param[out] a_stencil Stencil
     @param[in] a_vof VolIndex for cut-cell
@@ -169,7 +170,7 @@ protected:
                          const EBISBox&       a_ebisBox,
                          const ProblemDomain& a_domain) const noexcept;
 
-  /*!
+  /**
     @brief Utility function for fetching a piecewise linear stencil
     @param[out] a_stencil Stencil
     @param[in] a_vof VolIndex for cut-cell
@@ -182,7 +183,7 @@ protected:
                             const EBISBox&       a_ebisBox,
                             const ProblemDomain& a_domain) const noexcept;
 
-  /*!
+  /**
     @brief Minmod slope function. 
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
@@ -190,7 +191,7 @@ protected:
   inline Real
   MinMod(const Real& a_dwl, const Real& a_dwr) const noexcept;
 
-  /*!
+  /**
     @brief Monotonized central difference slope limiter.
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
@@ -198,7 +199,7 @@ protected:
   inline Real
   MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) const noexcept;
 
-  /*!
+  /**
     @brief Superbee slope limiter. 
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ItoParticle.H
   @brief  Declaration of a particle class for Ito diffusion
   @author Robert Marskar
 */
 
-#ifndef CD_ItoParticle_H
-#define CD_ItoParticle_H
+#ifndef CD_ITOPARTICLE_H
+#define CD_ITOPARTICLE_H
 
 // Std includes
 #include <string>
@@ -22,7 +23,7 @@
 #include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief A particle class for use with ItoSolvers, i.e. drifting Brownian walkers.
   @details This class is used to encapsulate the requirements for running an ItoSolver. This computational particle contains position, weight, velocity, as well as a
   diffusion coefficient, a mobility, energy, and previous particle position. These are stored as follows:
@@ -39,23 +40,23 @@
 class ItoParticle : public GenericParticle<5, 3>
 {
 public:
-  /*!
+  /**
     @brief Naming convention for scalar fields
   */
   static std::vector<std::string> s_realVariables;
 
-  /*!
+  /**
     @brief Naming convention for vector fields
   */
   static std::vector<std::string> s_vectVariables;
 
-  /*!
+  /**
     @brief Default constructor -- user should subsequently set the variables or call define.
     @note If the user has called setNumRuntimeScalars/Vectors then  will allocate runtime buffers
   */
   inline ItoParticle();
 
-  /*!
+  /**
     @brief Constructor. This calls the define function.
     @param[in] a_weight    Particle weight
     @param[in] a_position  Particle position
@@ -72,18 +73,18 @@ public:
                      const Real      a_mobility  = 1.0,
                      const Real      a_energy    = 0.0);
 
-  /*!
+  /**
     @brief Copy constructor. Copies all fields.
     @param[in] a_other Other particle. 
   */
   inline ItoParticle(const ItoParticle& a_other);
 
-  /*!
+  /**
     @brief Destructor (deallocates runtime memory storage)
   */
   inline virtual ~ItoParticle();
 
-  /*!
+  /**
     @brief Full define function. 
     @param[in] a_weight        Particle weight
     @param[in] a_position      Particle position
@@ -100,143 +101,143 @@ public:
          const Real      a_mobility  = 1.0,
          const Real      a_energy    = 0.0);
 
-  /*!
+  /**
     @brief Get particle weight
     @return m_weight
   */
   inline Real&
   weight();
 
-  /*! 
+  /** 
     @brief Get particle weight
     @return m_weight
   */
   inline const Real&
   weight() const;
 
-  /*!
+  /**
     @brief Get particle diffusion coefficient
     @return m_diffusion
   */
   inline Real&
   diffusion();
 
-  /*! 
+  /** 
     @brief Get particle diffusion coefficient
     @return m_diffusion
   */
   inline const Real&
   diffusion() const;
 
-  /*!
+  /**
     @brief Get mobility coefficient
     @return m_mobility
   */
   inline Real&
   mobility();
 
-  /*! 
+  /** 
     @brief Get mobility coefficient
     @return m_mobility
   */
   inline const Real&
   mobility() const;
 
-  /*!
+  /**
     @brief Get average particle energy
     @return m_energy
   */
   inline Real&
   energy();
 
-  /*! 
+  /** 
     @brief Get average particle energy
     @return m_energy
   */
   inline const Real&
   energy() const;
 
-  /*!
+  /**
     @brief Get the old particle position
     @return m_oldPosition.
   */
   inline RealVect&
   oldPosition();
 
-  /*!
+  /**
     @brief Get the old particle position
     @return m_oldPosition.
   */
   inline const RealVect&
   oldPosition() const;
 
-  /*!
+  /**
     @brief Get the particle velocity
     @return m_velocity
   */
   inline RealVect&
   velocity();
 
-  /*!
+  /**
     @brief Get the particle velocity
     @return m_velocity
   */
   inline const RealVect&
   velocity() const;
 
-  /*!
+  /**
     @brief Get the total energy
     @return Returns m_weight * m_energy
   */
   inline Real
   totalEnergy() const;
 
-  /*!
+  /**
     @brief Get the particle conductivity
     @return Returns m_weight * m_mobility
   */
   inline Real
   conductivity() const;
 
-  /*!
+  /**
     @brief Get the particle diffusivity
     @return Returns m_weight * m_diffusion
   */
   inline Real
   diffusivity() const;
 
-  /*!
+  /**
     @brief Return scratch scalar storage
   */
   inline Real&
   tmpReal();
 
-  /*! 
+  /** 
     @brief Return scratch scalar storage
   */
   inline const Real&
   tmpReal() const;
 
-  /*!
+  /**
     @brief Return scratch RealVect storage
   */
   inline RealVect&
   tmpVect();
 
-  /*! 
+  /** 
     @brief Return scratch RealVect storage
   */
   inline const RealVect&
   tmpVect() const;
 
-  /*!
+  /**
     @brief Function that is used when writing particles to HDF5.
     @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
   */
   inline virtual int
   H5size() const;
 
-  /*!
+  /**
     @brief Linearize the checkpointed Real components onto a buffer workable by HDF5.
     @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
     @param[in] a_buffer Pointer to memory block
@@ -244,7 +245,7 @@ public:
   inline virtual void
   H5linearOut(void* const a_buffer) const;
 
-  /*!
+  /**
     @brief Delinearize the buffer onto the checkpointed real components in the particle class.
     @details Ignores the particleID and rankID, so we can directly plug into Chombo's HDF5 API.
     @param[in] a_buffer Pointer to memory block

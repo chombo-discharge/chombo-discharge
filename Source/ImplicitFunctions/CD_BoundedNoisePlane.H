@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_BoundedNoisePlane.H
   @brief  Declaration of a signed distance function for a noisy plane
   @author Robert Marskar
 */
 
-#ifndef CD_BoundedNoisePlane_H
-#define CD_BoundedNoisePlane_H
+#ifndef CD_BOUNDEDNOISEPLANE_H
+#define CD_BOUNDEDNOISEPLANE_H
 
 // Chombo includes
 #include <PlaneIF.H>
@@ -20,7 +21,7 @@
 #include <CD_PerlinSdf.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Infinite plane with spatially bounded surface noise (Perlin noise). 
   @details The surface noise is bounded by a smoothed boxcar function between the input arguments. The boxcar function is given by
   b(x) = h(x-a) - h(x-b) where h(x) = 1/(1 + exp(-2*k*x)) where k determines the falloff.
@@ -28,7 +29,7 @@
 class BoundedNoisePlane : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief Full constructor
     @param[in] a_orientation Plane orientation. Must be x+, x-, y+, y-, etc
     @param[in] a_point       Point on the plane
@@ -52,25 +53,25 @@ public:
                     const Real        a_persistence,
                     const int         a_octaves,
                     const bool        a_reseed = false);
-  /*!
+  /**
     @brief Copy constructor
     @param[in] a_inputIF Other plane
   */
   BoundedNoisePlane(const BoundedNoisePlane& a_inputIF);
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~BoundedNoisePlane();
 
-  /*!
+  /**
     @brief Value function
     @param[in] a_pos Position
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
-  /*!
+  /**
     @brief Factory method
     @return Returns new plane with same parameters. 
   */
@@ -78,42 +79,42 @@ public:
   newImplicitFunction() const;
 
 protected:
-  /*!
+  /**
     @brief Plane normal. This is in the form of a coordinate direction and a sign.
   */
   std::pair<int, int> m_normal;
 
-  /*!
+  /**
     @brief Plane point
   */
   RealVect m_point;
 
-  /*!
+  /**
     @brief Low clamped value
   */
   RealVect m_clampLo;
 
-  /*!
+  /**
     @brief Low clamped value
   */
   RealVect m_clampHi;
 
-  /*!
+  /**
     @brief Transition length
   */
   Real m_clampK;
 
-  /*!
+  /**
     @brief Maximum noise amplitude
   */
   Real m_maxAmp;
 
-  /*!
+  /**
     @brief BaseIF function for a plane without noise
   */
   RefCountedPtr<BaseIF> m_plane;
 
-  /*!
+  /**
     @brief Noise function. 
   */
   RefCountedPtr<BaseIF> m_perlin;

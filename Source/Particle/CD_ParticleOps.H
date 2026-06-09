@@ -1,17 +1,18 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ParticleOps.H
   @brief  Declaration of a static class containing some common useful particle routines that would otherwise be replicated across classes. 
   @author Robert Marskar
   @todo   In ebIntersectionRaycast we should check if the path is tangential to the EB since that can consume a lot of resources. 
 */
 
-#ifndef CD_ParticleOps_H
-#define CD_ParticleOps_H
+#ifndef CD_PARTICLEOPS_H
+#define CD_PARTICLEOPS_H
 
 // Chombo includes
 #include <RefCountedPtr.H>
@@ -26,13 +27,13 @@
 template <typename P>
 class ParticleContainer;
 
-/*!
+/**
   @brief A shallow static class for doing various kinds of particle-related operations.
 */
 class ParticleOps
 {
 public:
-  /*!
+  /**
     @brief Get the cell index corresponding to the particle position
     @param[in] a_particlePosition Particle position
     @param[in] a_probLo Lower-left corner of computational domain
@@ -41,7 +42,7 @@ public:
   static inline IntVect
   getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const Real& a_dx) noexcept;
 
-  /*!
+  /**
     @brief Get the cell index corresponding to the particle position
     @param[in] a_particlePosition Particle position
     @param[in] a_probLo Lower-left corner of computational domain
@@ -50,7 +51,7 @@ public:
   static inline IntVect
   getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
 
-  /*!
+  /**
     @brief Get the number of physical particles per cell
     @param[out] a_ppc Physical particles per cell
     @param[in]  a_src Particle source container. 
@@ -63,7 +64,7 @@ public:
   static inline void
   getPhysicalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
 
-  /*!
+  /**
     @brief Get the number of computational particles per cell
     @param[out] a_ppc Physical particles per cell
     @param[in]  a_src Particle source container. 
@@ -72,7 +73,7 @@ public:
   static inline void
   getComputationalParticlesPerCell(EBAMRCellData& a_ppc, const ParticleContainer<P>& a_src) noexcept;
 
-  /*!
+  /**
     @brief Get the grid cell where the particle lives
     @param[in] a_particlePosition Physical particle position
     @param[in] a_probLo           Lower-left physical corner of simulation domain 
@@ -81,7 +82,7 @@ public:
   static inline IntVect
   getParticleGridCell(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
 
-  /*!
+  /**
     @brief Compute the intersection point between a particle path and a domain side.
     @details If the particle crossed the domain side, the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where
     x0 is the starting position (a_oldPos), x1 is the end position (a_newPos), and x(s) is the intersection point with the boundary. 
@@ -99,7 +100,7 @@ public:
                      const RealVect& a_probHi,
                      Real&           a_s);
 
-  /*!
+  /**
     @brief Compute the intersection point between a particle path and an implicit function using a bisection algorithm. 
     @details This routine will bisect the particle path into intervals of length a_bisectStep. Each interval is examined for a crossing with the implicit function
     and if the particle crossed the into the EB, the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where x0 is the starting
@@ -118,7 +119,7 @@ public:
                        const Real&                  a_bisectStep,
                        Real&                        a_s);
 
-  /*!
+  /**
     @brief Compute the intersection point between a particle path and an implicit function using a ray-casting algorithm.
     @details This routine will assume that a_impcFunc is an approximation to the signed distance function and compute the intersection point using ray-marching. Starting
     on the starting position we compute the distance to the EB and move the particle the compute distance along the particle trajectory. If the particle comes too close
@@ -138,7 +139,7 @@ public:
                         const Real&                  a_tolerance,
                         Real&                        a_s);
 
-  /*!
+  /**
     @brief Copy all the particles from the a_src to a_dst
     @param[out] a_dst Copy of original particles. 
     @param[out] a_src Source particles
@@ -147,7 +148,7 @@ public:
   static inline void
   copy(ParticleContainer<P>& a_dst, const ParticleContainer<P>& a_src) noexcept;
 
-  /*!
+  /**
     @brief Copy all the particles from the a_src to a_dst. This destroys the source particles
     @param[out] a_dst Copy of original particles. 
     @param[out] a_src Source particles
@@ -156,7 +157,7 @@ public:
   static inline void
   copyDestructive(ParticleContainer<P>& a_dst, ParticleContainer<P>& a_src) noexcept;
 
-  /*!
+  /**
     @brief Perform a sum of some particle quantity
     @param[in] a_particles Particles
   */
@@ -164,7 +165,7 @@ public:
   static inline Real
   sum(const ParticleContainer<P>& a_particles) noexcept;
 
-  /*!
+  /**
     @brief Perform a sum of some particle quantity
     @param[in] a_particles Particles
     @note Just like the other version, except that this one doesn't take a member function. 
@@ -173,7 +174,7 @@ public:
   static inline Real
   sum(const ParticleContainer<P>& a_particles) noexcept;
 
-  /*!
+  /**
     @brief Remove particles if they fulfill certain removal criterion
     @param[in,out] a_particles       Particles
     @param[in]    a_removeCriterion Removal criterion.
@@ -182,7 +183,7 @@ public:
   static inline void
   removeParticles(ParticleContainer<P>& a_particles, const std::function<bool(const P&)>& a_removeCriterion) noexcept;
 
-  /*!
+  /**
     @brief Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles and puts them in a_dstParticles
     @param[in,out] a_dstParticles    Destination particle data holder
     @param[in,out] a_srcParticles    Source particle data holder
@@ -194,7 +195,7 @@ public:
                     ParticleContainer<P>&                a_srcParticles,
                     const std::function<bool(const P&)>& a_transferCrit) noexcept;
 
-  /*!
+  /**
     @brief Set value function. Lets the user set particle parameters. 
     @param[in,out] a_particles Particles
     @param[in]    a_functor   Lambda for setting particle values
@@ -203,7 +204,7 @@ public:
   static inline void
   setData(ParticleContainer<P>& a_particles, const std::function<void(P&)>& a_functor) noexcept;
 
-  /*!
+  /**
     @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::weight>(particles, 0.0) etc. 
     @param[in,out] a_particles Particles
     @param[in]    a_value     Value to set
@@ -212,7 +213,7 @@ public:
   static inline void
   setValue(ParticleContainer<P>& a_particles, const Real a_value) noexcept;
 
-  /*!
+  /**
     @brief Set value function. Lets the user set scalar particle quantity. Use with e.g. setValue<P, &P::velocity>(particles, RealVect::Unit) etc. 
     @param[in,out] a_particles Particles
     @param[in]    a_value     Value to set
@@ -222,7 +223,7 @@ public:
   setValue(ParticleContainer<P>& a_particles, const RealVect a_value) noexcept;
 
 #ifdef CH_MPI
-  /*!
+  /**
     @brief Scatter particles across MPI ranks
     @details This will scatter the particles from a_sentParticles onto a_receivedParticles. Each entry in a_sentParticles is the particles 
     sent form this rank to the other ranks (including itself), so the size of this vector must be equal to the number of MPI ranks. The particles

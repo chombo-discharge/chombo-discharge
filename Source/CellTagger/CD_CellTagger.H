@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CellTagger.H
-  @brief  Declaration of a base class for tagging cells across an AMR hierarchy. 
+  @brief  Declaration of a base class for tagging cells across an AMR hierarchy.
   @author Robert Marskar
 */
 
-#ifndef CD_CellTagger_H
-#define CD_CellTagger_H
+#ifndef CD_CELLTAGGER_H
+#define CD_CELLTAGGER_H
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
@@ -19,7 +20,7 @@
 #include <CD_EBAMRTags.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Base class for tagging cells across an AMR hierarchy.
   @details This is a pure class that users must implemented in order to enable refinement/coarsening of grid cells. This class will require implementing at least 
   three functions, one for parsing options, one for regridding, and one which flags/removes cell for refinement. This class can also provide data to plot files, in which
@@ -30,23 +31,23 @@
 class CellTagger
 {
 public:
-  /*!
+  /**
     @brief Weak constructor (does nothing)
   */
   CellTagger();
 
-  /*!
+  /**
     @brief Destructor (does nothing). 
   */
   virtual ~CellTagger();
 
-  /*!
+  /**
     @brief Pre-regrid function for cell-tagger
   */
   virtual void
   preRegrid() noexcept;
 
-  /*!
+  /**
     @brief Regrid function for cell tagger (in case it uses transient storage to do things)
     @details This function exists because implementations may require data to be allocated on a mesh. This function is
     called by Driver to make sure data is reallocated when it needs to. 
@@ -54,21 +55,21 @@ public:
   virtual void
   regrid() = 0;
 
-  /*!
+  /**
     @brief Parse class options.
     @note This function is called by Driver. 
   */
   virtual void
   parseOptions() = 0;
 
-  /*!
+  /**
     @brief Parse runtime class options
     @details This function is called by Driver at every time step; the user can use this for run-time updates of e.g. refinement criteria.
   */
   virtual void
   parseRuntimeOptions();
 
-  /*!
+  /**
     @brief Tag cells
     @param[in,out] a_tags Tags on grid levels
     @details EBAMRTags is a data-type Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >. The vector indicates the grid level, the LayoutData indicates data ownership (in
@@ -79,27 +80,27 @@ public:
   virtual bool
   tagCells(EBAMRTags& a_tags) = 0;
 
-  /*!
+  /**
     @brief Perform pre-plotting operations (if necessary)
   */
   virtual void
   prePlot() const noexcept;
 
-  /*!
+  /**
     @brief Get number of plot variables that will be written to file (by Driver).
     @return Returns number of plot variables that Driver will write to plot files. 
   */
   virtual int
   getNumberOfPlotVariables() const;
 
-  /*!
+  /**
     @brief Get plot variable names.
     @return Names of plot variables that will be written to file.
   */
   virtual Vector<std::string>
   getPlotVariableNames() const;
 
-  /*!
+  /**
     @brief Write plot data.
     @param[in,out] a_output Output data holder
     @param[in,out] a_icomp Starting variable in a_output where we begin appending data.
@@ -109,7 +110,7 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const;
 
-  /*!
+  /**
     @brief Get tag buffer. 
     @details This returns an integer > 0 which adds additional tags around the cells that were refined. This is used by Driver to grow the refined region. 
     @return Returns m_buffer
@@ -119,32 +120,32 @@ public:
   getBuffer() const;
 
 protected:
-  /*!
+  /**
     @brief Cell tagger class name (default is CellTagger).
   */
   std::string m_name;
 
-  /*!
+  /**
     @brief Class verbosity. 
   */
   int m_verbosity;
 
-  /*!
+  /**
     @brief Tag buffer. Grow tags by this amount (finest level only)
   */
   int m_buffer;
 
-  /*!
+  /**
     @brief Boxes that can be used to restrict tagging. 
   */
   Vector<RealBox> m_tagBoxes;
 
-  /*!
+  /**
     @brief Refinement boxes for adding manual refinement.
   */
   std::vector<std::pair<RealBox, int>> m_refBoxes;
 
-  /*!
+  /**
     @brief Check if a point is inside a tagging box
     @param[in] a_pos Physical coordinates. 
     @return Returns true if a_pos is inside any of the boxes in m_tagBoxes. Otherwise it returns false. 
@@ -152,7 +153,7 @@ protected:
   bool
   insideTagBox(const RealVect a_pos) const;
 
-  /*!
+  /**
     @brief Get the specified level for this position when doing manual refinement.
     @param[in] a_pos Physical coordinates of the point.
     @return Refinement level assigned to a_pos by the manual refinement boxes. Returns -1 if not in any box.
@@ -160,7 +161,7 @@ protected:
   int
   getManualRefinementLevel(const RealVect a_pos) const;
 
-  /*!
+  /**
     @brief Parse boxes.
     @details This will look for input parameters in the form m_name.num_boxes = &lt;integer&gt;. If &lt;integer&gt; = 0 then the function will process additional lines
     in the form "m_name.box1_lo = <float> <float> <float>" which indicates the lower corner of the "tag box". 
@@ -168,13 +169,13 @@ protected:
   virtual void
   parseTagBoxes();
 
-  /*!
+  /**
     @brief Parse refinement boxes
   */
   virtual void
   parseRefinementBoxes();
 
-  /*!
+  /**
     @brief Parse refinement buffer.
     @details This will look for an input parameter in the form "m_name.buffer = &lt;integer&gt;". If this is called but the string does not exist, it will cause
     a run-time error. 
@@ -182,7 +183,7 @@ protected:
   virtual void
   parseBuffer();
 
-  /*!
+  /**
     @brief Parse the verbosity from the input file or command line.
     @details This will look for an input parameter in the form "m_name.verbosity = &lt;integer&gt;". This is used to control "verbosity" for the cell tagger class. Turning
     on verbosity for this class is mostly for debugging purposes. 

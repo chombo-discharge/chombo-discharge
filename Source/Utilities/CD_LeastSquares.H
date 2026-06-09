@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_LeastSquares.H
   @brief  Agglomeration of various routines that use least squares computations
   @author Robert Marskar
 */
 
-#ifndef CD_LeastSquares_H
-#define CD_LeastSquares_H
+#ifndef CD_LEASTSQUARES_H
+#define CD_LEASTSQUARES_H
 
 // Chombo includes
 #include <Stencils.H>
@@ -24,18 +25,18 @@
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Static class containing useful routines for (weighted) least squares polynomial reconstruction. 
 */
 class LeastSquares
 {
 public:
-  /*!
+  /**
     @brief Static class, no construction here.
   */
   LeastSquares() = delete;
 
-  /*!
+  /**
     @brief Static class, no destruction here. 
   */
   ~LeastSquares() = delete;
@@ -45,7 +46,7 @@ public:
   using Connectivity = VofUtils::Connectivity;
   using Neighborhood = VofUtils::Neighborhood;
 
-  /*!
+  /**
     @brief Get an interpolation stencil to a point in a cell with a specified order and radius. 
     @param[in] a_cellPos        Position in the cell of the starting Vof.
     @param[in] a_otherCellsPos  Positions in the other cells.
@@ -69,7 +70,7 @@ public:
                           const int          a_order,
                           const bool         a_addStartingVof);
 
-  /*!
+  /**
     @brief Compute a least squares gradient stencil in a cell.
     @details This routine computes grad(phi) using a least squares reconstruction to specified order. 
     @param[in]  a_vof          Input vof
@@ -93,7 +94,7 @@ public:
               const int          a_order,
               const IntVectSet   a_knownTerms = IntVectSet());
 
-  /*!
+  /**
     @brief Compute a least squares gradient stencil on a grid face. 
     @details This routine computes grad(phi) using a least squares reconstruction to specified order. 
     @param[in]  a_face         Input face
@@ -117,7 +118,7 @@ public:
               const int          a_order,
               const IntVectSet   a_knownTerms = IntVectSet());
 
-  /*!
+  /**
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
     @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
     @param[in]  a_vof            Input vof
@@ -142,7 +143,7 @@ public:
                    const int          a_order,
                    const bool         a_addStartingVof);
 
-  /*!
+  /**
     @brief Return the sum of weights in the stencil, for a specific variable. 
     @param[in] a_stencil Stencil
     @param[in] a_variable Which variable to sum. 
@@ -151,7 +152,7 @@ public:
   static Real
   sumWeights(const VoFStencil& a_stencil, const int a_variable);
 
-  /*!
+  /**
     @brief Compute the sum of all weights in a stencil. 
     @param[in] a_stencil Stencil
     @return    Returns sum of weights in a_stencil (over all variables).
@@ -159,7 +160,7 @@ public:
   static Real
   sumAllWeights(const VoFStencil& a_stencil);
 
-  /*!
+  /**
     @brief Assuming that a_stencil is a gradient stencil, project it along a direction. 
     @param[in] a_stencil Stencil describing a gradient. 
     @param[in] a_projection Vector to project stencil along. 
@@ -169,7 +170,7 @@ public:
   static VoFStencil
   projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
 
-  /*!
+  /**
     @brief Computes the distance between two Vofs that are defined on the same grid level. 
     @param[in] a_from     Specifying position in the cell defined by a_fromVof
     @param[in] a_to       Specifying position in the cell defined by a_toVof
@@ -187,7 +188,7 @@ public:
                const EBISBox&     a_ebisbox,
                const Real&        a_dx);
 
-  /*!
+  /**
     @brief Computes the distance between a vof and and a face
     @param[in] a_fromLoc   Specifying position in the cell defined by a_fromVof
     @param[in] a_toLoc     Specifying position in the cell defined by a_toVof
@@ -205,7 +206,7 @@ public:
                const EBISBox&     a_ebisbox,
                const Real&        a_dx);
 
-  /*!
+  /**
     @brief Computes the distance between two Vofs that are defined on two different grid levels. 
     @param[in] a_from        Specifying position in the cell defined by a_fromVof
     @param[in] a_to          Specifying position in the cell defined by a_toVof
@@ -227,7 +228,7 @@ public:
                const Real&        a_dxFrom,
                const Real&        a_dxTo);
 
-  /*!
+  /**
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
     @param[in] a_from    From this position
     @param[in] a_to      To this position. 
@@ -244,7 +245,7 @@ public:
                    const EBISBox&          a_ebisbox,
                    const Real&             a_dx);
 
-  /*!
+  /**
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
     @param[in] a_fromLoc  Location on face
     @param[in] a_toLoc    Location in Vofs
@@ -261,7 +262,7 @@ public:
                    const EBISBox&          a_ebisbox,
                    const Real&             a_dx);
 
-  /*!
+  /**
     @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
     are given as 1/||x1-x0||^a where a is the power. 
     @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
@@ -270,7 +271,7 @@ public:
   inline static Vector<Real>
   makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
 
-  /*!
+  /**
     @brief Get a least squares gradient stencil solution for computing the gradient at a point. This routine eliminates the value in the point where
     the gradient is computed (which is assumed to be known.)
     @param[in] a_allVofs       Vofs for which the displacement vectors were computed. 
@@ -287,7 +288,7 @@ public:
                   const int               a_order,
                   const IntVectSet        a_knownTerms);
 
-  /*!
+  /**
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
     @details This routine eliminates the value in the point where the gradient is computed (which is assumed to be known.)
     @param[in] a_allVofs       Vofs for which the displacement vectors were computed. 
@@ -305,7 +306,7 @@ public:
                   const int               a_order,
                   const IntVectSet        a_knownTerms);
 
-  /*!
+  /**
     @brief Get the size of a Taylor expansion for a given order
     @param[in] a_order Desired order in Taylor expansion
     @return Returns number of terms in Taylor expansion. 
@@ -313,7 +314,7 @@ public:
   static int
   getTaylorExpansionSize(const int a_order);
 
-  /*!
+  /**
     @brief Compute an interpolation stencil to specified order by solving a least squares system
     @param[in] a_allVofs Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
@@ -328,7 +329,7 @@ public:
                               const int               a_pow,
                               const int               a_order);
 
-  /*!
+  /**
     @brief Compute an interpolation stencil to specified order by solving a least squares system
     @param[in] a_allVofs Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
@@ -344,7 +345,7 @@ public:
                               const Vector<Real>&     a_weights,
                               const int               a_order);
 
-  /*!
+  /**
     @brief Compute a least squares interpolation to a specified order. 
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
@@ -370,7 +371,7 @@ public:
                              const int               a_p,
                              const int               a_order);
 
-  /*!
+  /**
     @brief Compute a least squares interpolation to a specified order. 
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
@@ -397,7 +398,7 @@ public:
                              const Vector<Real>&     a_weights,
                              const int               a_order);
 
-  /*!
+  /**
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
@@ -431,7 +432,7 @@ public:
                            const int               a_p,
                            const int               a_order);
 
-  /*!
+  /**
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBParticleMeshImplem.H
   @brief  Implementation of CD_EBParticleMesh.H
   @author Robert Marskar
 */
 
-#ifndef CD_EBParticleMeshImplem_H
-#define CD_EBParticleMeshImplem_H
+#ifndef CD_EBPARTICLEMESHIMPLEM_H
+#define CD_EBPARTICLEMESHIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>
@@ -145,13 +146,13 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
   }
   }
 
-  /*!
+  /**
     @brief Local helper class for turning a Real or a RealVect into a pointer to the beginning of the object. I'm doing this so that I can
     use a single version of interpolateParticle that does not require template specialization. 
   */
   struct GetPointer
   {
-    /*!
+    /**
       @brief Return as pointer
     */
     Real*
@@ -160,7 +161,7 @@ EBParticleMesh::interpolate(List<P>&             a_particleList,
       return &r;
     }
 
-    /*!
+    /**
       @brief Return pointer to start of RealVect object
     */
     auto

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_BoxLoops.H
   @brief  Declaration of a namespace for proto-typing grid and EB loops.
   @author Robert Marskar
 */
 
-#ifndef CD_BoxLoops_H
-#define CD_BoxLoops_H
+#ifndef CD_BOXLOOPS_H
+#define CD_BOXLOOPS_H
 
 // Chombo includes
 #include <Box.H>
@@ -24,7 +25,7 @@
 #include <CD_Decorations.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Namespace for encapsulating loop types.
   @details BoxLoops provides several overloads of @c loop for iterating over structured and
   unstructured grid data. The general pattern is:
@@ -60,7 +61,7 @@
 */
 namespace BoxLoops {
 
-  /*!
+  /**
     @brief Launch a C++ kernel over a regular grid with compile-time per-dimension strides.
     @details Strides are encoded as non-type template parameters, making them visible to the
     compiler as constants and enabling auto-vectorization of the innermost loop. All strides must
@@ -86,7 +87,7 @@ namespace BoxLoops {
   loop(const Box& a_computeBox, Functor&& kernel);
 #endif
 
-  /*!
+  /**
     @brief Launch a C++ kernel over a subset of cells.
     @param[in,out] a_cells   Grid cells where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
@@ -95,7 +96,7 @@ namespace BoxLoops {
   ALWAYS_INLINE void
   loop(const IntVectSet& a_ivs, Functor&& a_kernel);
 
-  /*!
+  /**
     @brief Launch a C++ kernel over a subset of cells.
     @param[in,out] a_cells   Grid cells where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
@@ -104,7 +105,7 @@ namespace BoxLoops {
   ALWAYS_INLINE void
   loop(const DenseIntVectSet& a_ivs, Functor&& a_kernel);
 
-  /*!
+  /**
     @brief Launch a C++ kernel over cut-cells.
     @param[in,out] a_vofit   Grid cells where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
@@ -113,7 +114,7 @@ namespace BoxLoops {
   ALWAYS_INLINE void
   loop(VoFIterator& a_iter, Functor&& a_kernel);
 
-  /*!
+  /**
     @brief Launch a C++ kernel over faces
     @param[in,out] a_faceit  Grid faces where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
@@ -122,7 +123,7 @@ namespace BoxLoops {
   ALWAYS_INLINE void
   loop(FaceIterator& a_iter, Functor&& a_kernel);
 
-  /*!
+  /**
     @brief Launch a C++ kernel over a specified subset of something.
     @param[in,out] a_subset Subset. E.g. a std::vector<VolIndex>
     @param[in,out] a_kernel Kernel to launch

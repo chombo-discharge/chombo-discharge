@@ -1,17 +1,19 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_KMCDualStateImplem.H
   @brief  Implementation of CD_KMCDualState.H
   @author Robert Marskar
 */
 
-#ifndef CD_KMCDualStateImplem_H
-#define CD_KMCDualStateImplem_H
+#ifndef CD_KMCDUALSTATEIMPLEM_H
+#define CD_KMCDUALSTATEIMPLEM_H
 
+// Chombo includes
 #include <CH_Timer.H>
 
 // Our includes

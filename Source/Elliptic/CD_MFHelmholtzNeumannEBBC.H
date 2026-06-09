@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzNeumannEBBC_H
-#define CD_MFHelmholtzNeumannEBBC_H
+#ifndef CD_MFHELMHOLTZNEUMANNEBBC_H
+#define CD_MFHELMHOLTZNEUMANNEBBC_H
 
 // Std includes
 #include <functional>
@@ -19,7 +20,7 @@
 #include <CD_MFHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Base class for passing Neumann MF boundary conditions into MFHelmholtzOp. 
   @details This allows the user to specify dphi/dn on the boundary or B*dphi/dn, either using a constant value
   or with a function. 
@@ -27,17 +28,17 @@
 class MFHelmholtzNeumannEBBC : public MFHelmholtzEBBC
 {
 public:
-  /*!
+  /**
     @brief Full constructor
   */
   MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~MFHelmholtzNeumannEBBC();
 
-  /*!
+  /**
     @brief Set value of dphi/dn on the MF. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -45,7 +46,7 @@ public:
   void
   setDphiDn(const Real a_DphiDn);
 
-  /*!
+  /**
     @brief Set spatially dependent value of dphi/dn on the MF. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -53,7 +54,7 @@ public:
   void
   setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
-  /*!
+  /**
     @brief Set the value of B*dphi/dn on the MF.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -61,7 +62,7 @@ public:
   void
   setBxDphiDn(const Real a_BxDphiDn);
 
-  /*!
+  /**
     @brief Set the spatially dependent value of B*dphi/dn on the MF.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -70,38 +71,38 @@ public:
   setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 
 protected:
-  /*!
+  /**
     @brief Multiply by b-coefficient or not
   */
   bool m_multByBco;
 
-  /*!
+  /**
     @brief Use constant for BC
   */
   bool m_useConstant;
 
-  /*!
+  /**
     @brief Use function for BC value
   */
   bool m_useFunction;
 
-  /*!
+  /**
     @brief Value on MF
   */
   Real m_constantDphiDn;
 
-  /*!
+  /**
     @brief Value on the MF. 
   */
   std::function<Real(const RealVect& a_pos)> m_functionDphiDn;
 
-  /*!
+  /**
     @brief User define function. 
   */
   virtual void
   defineSinglePhase() override;
 
-  /*!
+  /**
     @brief Apply flux single phase
     @param[in,out] a_singlePhaseVofs   Iterator for single-phase cut-cells
     @param[in,out] a_Lphi              Operator kappa*L(phi)

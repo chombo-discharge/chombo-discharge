@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2023 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_CoarseInterpQuadCF.H
   @brief  Supporting class for doing the coarse-side interpolation for multigrid
   @author Robert Marskar
 */
 
-#ifndef CD_CoarseInterpQuadCF_H
-#define CD_CoarseInterpQuadCF_H
+#ifndef CD_COARSEINTERPQUADCF_H
+#define CD_COARSEINTERPQUADCF_H
 
 // Chombo includes
 #include <IntVect.H>
@@ -22,7 +23,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for computing the required Taylor terms for doing the orthogonal extrapolation to the ghost cell position. This
   is used in conjunction with EBLeastSquaresMultigridInterpolator.H, and should be understood in that context only. 
 
@@ -33,17 +34,17 @@
 class CoarseInterpQuadCF
 {
 public:
-  /*!
+  /**
     @brief Default constructor. Must subsequently call the define function
   */
   CoarseInterpQuadCF() noexcept;
 
-  /*!
+  /**
     @brief Destructor.
   */
   virtual ~CoarseInterpQuadCF() noexcept;
 
-  /*!
+  /**
     @brief Define function. Puts object in usable state.
     @param[in] a_dblFine Fine grids
     @param[in] a_domainCoar Coarse domain
@@ -61,7 +62,7 @@ public:
          const int                a_refRat,
          const int                a_ignoreDir) noexcept;
 
-  /*!
+  /**
     @brief Compute first-derivative Taylor term in direction a_dir. 
     @param[in] a_coarPhi Coarse-side phi. 
     @param[in] a_ivCoar Cell where we compute.
@@ -74,7 +75,7 @@ public:
                     const int        a_dir,
                     const int        a_coarVar) const noexcept;
 
-  /*!
+  /**
     @brief Compute second-derivative Taylor term in direction a_dir. 
     @param[in] a_coarPhi Coarse-side phi. 
     @param[in] a_ivCoar Cell where we compute.
@@ -87,7 +88,7 @@ public:
                      const int        a_dir,
                      const int        a_coarVar) const noexcept;
 
-  /*!
+  /**
     @brief Compute mixed-derivative Taylor term in directions orthogonal m_ignoreDir.
     @param[in] a_coarPhi Coarse-side phi. 
     @param[in] a_ivCoar Cell where we compute.
@@ -96,7 +97,7 @@ public:
   virtual Real
   computeMixedDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, const int a_coarVar) const noexcept;
 
-  /*!
+  /**
     @brief Get the first derivative stencil for the input coarse vof.
     @details This will construct the stencil for representing the derivative on the coarse cell center
     and return it. Useful when explicit stencil storage is required. 
@@ -106,7 +107,7 @@ public:
   virtual DerivStencil
   getFirstDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
 
-  /*!
+  /**
     @brief Get the second derivative stencil for the input coarse vof.
     @details This will construct the stencil for representing the derivative on the coarse cell center
     and return it. Useful when explicit stencil storage is required.     
@@ -116,7 +117,7 @@ public:
   virtual DerivStencil
   getSecondDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
 
-  /*!
+  /**
     @brief Get the second derivative stencil for the input coarse vof.
     @details This will construct the stencil for representing the derivative on the coarse cell center
     and return it. Useful when explicit stencil storage is required.     
@@ -126,7 +127,7 @@ public:
   getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept;
 
 protected:
-  /*!
+  /**
     @brief Simple enum for holding stencil types for the first derivative
   */
   enum class FirstDerivStencil : unsigned short
@@ -138,7 +139,7 @@ protected:
     Forward1,
   };
 
-  /*!
+  /**
     @brief Simple enum for holding stencil types for the second derivative
   */
   enum class SecondDerivStencil : unsigned short
@@ -148,7 +149,7 @@ protected:
     Forward1
   };
 
-  /*!
+  /**
     @brief Simple enum for holding stencil types for the mixed derivative
   */
   enum class MixedDerivStencil : unsigned short
@@ -157,80 +158,80 @@ protected:
     Explicit
   };
 
-  /*!
+  /**
     @brief Is defined or not
   */
   bool m_isDefined;
 
-  /*!
+  /**
     @brief Fine grids
   */
   DisjointBoxLayout m_dblFine;
 
-  /*!
+  /**
     @brief Coarse domain
   */
   ProblemDomain m_domainCoar;
 
-  /*!
+  /**
     @brief Data index in the fine grid
   */
   DataIndex m_dit;
 
-  /*!
+  /**
     @brief Interpolation direction to ignore. 
   */
   int m_ignoreDir;
 
-  /*!
+  /**
     @brief One tangential direction
   */
   int m_tanDir1;
 
-  /*!
+  /**
     @brief One tangential direction
   */
   int m_tanDir2;
 
-  /*!
+  /**
     @brief Refinement factor to coarse. 
   */
   int m_refRat;
 
-  /*!
+  /**
     @brief Coarse-grid cells corresponding to the fine-grid ghost cells
     @note This is the coarsened box of the fine-grid ghost cell layer, and is where we've defined all our stencils. 
   */
   Box m_stencilBox;
 
-  /*!
+  /**
     @brief Stencil types for first derivative
   */
   BaseFab<FirstDerivStencil> m_firstDerivStencils[SpaceDim];
 
-  /*!
+  /**
     @brief Second-derivative stencils (in all directions except m_dir)
   */
   BaseFab<SecondDerivStencil> m_secondDerivStencils[SpaceDim];
 
-  /*!
+  /**
     @brief Identifier for whether or not we should use a standard or explicit mixed derivative stencil
   */
   BaseFab<MixedDerivStencil> m_mixedDerivStencils;
 
-  /*!
+  /**
     @brief Mixed-derivative stencil. Only defined in 3D.
   */
   BaseFab<DerivStencil> m_explicitMixedDerivStencils;
 
-  /*!
+  /**
     @brief Compute all first-derivative stencils in the coarse grid cells.
     @note Must be accurate to O(h^2).
   */
   virtual void
   defineStencils() noexcept;
 
-  /*!
+  /**
     @brief Compute all second-derivative stencils in the coarse grid cells. 
     @details This only needs to accurate to O(h).
   */

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_TimeStepper.H
-  @brief  Declaration of main (abstract) time stepper class. 
+  @brief  Declaration of main (abstract) time stepper class.
   @author Robert Marskar
 */
 
-#ifndef CD_TimeStepper_H
-#define CD_TimeStepper_H
+#ifndef CD_TIMESTEPPER_H
+#define CD_TIMESTEPPER_H
 
 // Chombo includes
 #include <CH_HDF5.H>
@@ -21,7 +22,7 @@
 #include <CD_AmrMesh.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Base class for advancing equations. 
   @details This class is used by Driver for advancing sets of equations. In short, this class should implement a time-stepping routine for a
   set of solvers. One should also implement routines for setting up the solvers, allocating necessary memory, regridding etc. 
@@ -29,73 +30,73 @@
 class TimeStepper
 {
 public:
-  /*!
+  /**
     @brief Default constructor (does nothing)
   */
   TimeStepper();
 
-  /*!
+  /**
     @brief Default destructor (does nothing)
   */
   virtual ~TimeStepper();
 
-  /*!
+  /**
     @brief Set AmrMesh
     @param[in] a_amr AmrMesh
   */
   void
   setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
-  /*!
+  /**
     @brief Set the computational geometry
     @param[in] a_computationalGeometry The computational geometry.
   */
   void
   setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
-  /*!
+  /**
     @brief Set up solvers
   */
   virtual void
   setupSolvers() = 0;
 
-  /*!
+  /**
     @brief Allocate data for the time stepper and solvers. 
   */
   virtual void
   allocate() = 0;
 
-  /*!
+  /**
     @brief Fill solvers with initial data
   */
   virtual void
   initialData() = 0;
 
-  /*!
+  /**
     @brief Post-initialize operations to be performed at end of setup stage. 
   */
   virtual void
   postInitialize() = 0;
 
-  /*!
+  /**
     @brief Post-initialize operations to be performed after filling solvers with data read from checkpoint files. 
   */
   virtual void
   postCheckpointSetup() = 0;
 
-  /*!
+  /**
     @brief Register realms to be used for the simulation.
   */
   virtual void
   registerRealms() = 0;
 
-  /*!
+  /**
     @brief Register operators to be used for the simulation
   */
   virtual void
   registerOperators() = 0;
 
-  /*!
+  /**
     @brief Parse runtime options
     @details Override this routine if your time stepper can use run-time configuration of the solvers that it advances. This can e.g.
     be the CFL condition.
@@ -104,7 +105,7 @@ public:
   parseRuntimeOptions();
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Read header data from checkpoint file.
     @param[in,out] a_header HDF5 header.
   */
@@ -113,7 +114,7 @@ public:
 #endif
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Write header data to checkpoint file.
     @param[in,out] a_header HDF5 header.
   */
@@ -122,7 +123,7 @@ public:
 #endif
 
 #ifdef CH_USE_HDF5
-  /*!  
+  /**
     @brief Write checkpoint data to file
     @param[in,out] a_handle HDF5 file
     @param[in]    a_lvl    Grid level
@@ -134,7 +135,7 @@ public:
 #endif
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Read checkpoint data from file
     @param[in,out] a_handle HDF5 file
     @param[in]    a_lvl    Grid level
@@ -144,7 +145,7 @@ public:
   readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
 #endif
 
-  /*!
+  /**
     @brief Get the number of plot variables for this time stepper. 
     @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
     @return Returns number of plot variables that will be written during writePlotData
@@ -152,14 +153,14 @@ public:
   virtual int
   getNumberOfPlotVariables() const = 0;
 
-  /*!
+  /**
     @brief Get plot variable names.
     @return Names of plot variables written by this time stepper.
   */
   virtual Vector<std::string>
   getPlotVariableNames() const = 0;
 
-  /*!
+  /**
     @brief Write plot data to output holder. 
     @param[in,out] a_output      Output data holder.
     @param[in,out] a_icomp       Starting component in a_output to begin at. 
@@ -172,21 +173,21 @@ public:
                 const std::string     a_outputRealm,
                 const int             a_level) const = 0;
 
-  /*!
+  /**
     @brief An option for calling special functions prior to plotting data. 
     Called by Driver in the IMMEDIATELY before writing the plot file. 
   */
   virtual void
   prePlot();
 
-  /*!
+  /**
     @brief An option for calling special functions prior to plotting data. 
     Called by Driver in the IMMEDIATELY after writing the plot file. 
   */
   virtual void
   postPlot();
 
-  /*!
+  /**
     @brief Get computational loads to be checkpointed. 
     @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
     disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
@@ -203,14 +204,14 @@ public:
   virtual Vector<long int>
   getCheckpointLoads(const std::string a_realm, const int a_level) const;
 
-  /*!
+  /**
     @brief Compute a time step to be used by Driver.
     @return Time step size.
   */
   virtual Real
   computeDt() = 0;
 
-  /*!
+  /**
     @brief Advancement method. The implementation of this method should advance all equations of motion
     @param[in] a_dt Time step to be used for advancement
     @return    Returns the time step that was used. 
@@ -219,7 +220,7 @@ public:
   virtual Real
   advance(const Real a_dt) = 0;
 
-  /*!
+  /**
     @brief Synchronzie solver times and time steps
     @param[in] a_step Time step
     @param[in] a_time Time (in seconds)
@@ -228,14 +229,14 @@ public:
   virtual void
   synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) = 0;
 
-  /*!
+  /**
     @brief Print a step report. 
     @details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. 
   */
   virtual void
   printStepReport() = 0;
 
-  /*!
+  /**
     @brief Perform pre-regrid operations.
     @details This should include all copying all data which should be interpolated to the new grids. It can also include deallocating memory in case the regrid
     operation takes a lot of memory. 
@@ -245,7 +246,7 @@ public:
   virtual void
   preRegrid(const int a_lmin, const int a_oldFinestLevel) = 0;
 
-  /*!
+  /**
     @brief Time stepper regrid method. 
     @param[in] a_lmin           The coarsest level that changed. 
     @param[in] a_oldFinestLevel The finest level before the regrid. 
@@ -254,14 +255,14 @@ public:
   virtual void
   regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
-  /*!
+  /**
     @brief Perform post-regrid operations. 
     @details This includes all operations to be done AFTER interpolating data to new grids. 
   */
   virtual void
   postRegrid() = 0;
 
-  /*!
+  /**
     @brief Function which can have Driver do regrids at arbitrary points in the simulation.
     @details This is called by Driver at every time step and if it returns true, Driver will regrid, regardless of whether or not it is
     on the regular "regrid intervals".
@@ -270,7 +271,7 @@ public:
   virtual bool
   needToRegrid();
 
-  /*!
+  /**
     @brief Query whether the time stepper wants to continue stepping.
     @details Returns m_keepGoing. Derived classes set m_keepGoing = false to signal
     that the simulation should stop after the current time step completes.
@@ -279,7 +280,7 @@ public:
   bool
   keepGoing() const;
 
-  /*!
+  /**
     @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids.
     @param[in] a_realm Realm name.
     @return True if the realm should be load-balanced during regrids.
@@ -287,7 +288,7 @@ public:
   virtual bool
   loadBalanceThisRealm(const std::string a_realm) const;
 
-  /*!
+  /**
     @brief Load balance grid boxes for a specified realm. 
     @param[out] a_procs       MPI ranks owning the various grid boxes. 
     @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
@@ -309,39 +310,39 @@ public:
                    const int                        a_finestLevel);
 
 protected:
-  /*!
+  /**
     @brief Class verbosity
   */
   int m_verbosity;
 
-  /*!
+  /**
     @brief Time step
   */
   int m_timeStep;
 
-  /*!
+  /**
     @brief TIme
   */
   Real m_time;
 
-  /*!
+  /**
     @brief Previous time step size
   */
   Real m_dt;
 
-  /*!
+  /**
     @brief If false, Driver will stop the time loop after the current step.
     @details Derived classes can set this to false to request a graceful simulation stop
     without triggering an error. Defaults to true.
   */
   bool m_keepGoing;
 
-  /*!
+  /**
     @brief AmrMesh.
   */
   RefCountedPtr<AmrMesh> m_amr;
 
-  /*!
+  /**
     @brief Computational geometry. 
   */
   RefCountedPtr<ComputationalGeometry> m_computationalGeometry;

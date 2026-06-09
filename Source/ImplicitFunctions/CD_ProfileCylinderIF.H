@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file    CD_ProfileCylinderIF.H
   @brief   Declaration of a cylinder with a surface profile
   @author  Robert Marskar
 */
 
-#ifndef CD_ProfileCylinderIF_H
-#define CD_ProfileCylinderIF_H
+#ifndef CD_PROFILECYLINDERIF_H
+#define CD_PROFILECYLINDERIF_H
 
 // Chombo includes
 #include <BaseIF.H>
@@ -18,7 +19,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Implicit function which takes the form of a cylinder with a surface profiles (grooves). 
   @details The grooves are torii that are cut out of the cylinder. Use the input parameters to adjust the height, distance, and width of the grooves. 
   @note This is a 3D object only!
@@ -26,12 +27,12 @@
 class ProfileCylinderIF : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief No weak construction, use the full constructor.
   */
   ProfileCylinderIF() = delete;
 
-  /*!
+  /**
     @brief Full constructor
     @param[in] a_endPoint1        Endpoint of cylinder
     @param[in] a_endPoint2        Other endpoint of cylinder
@@ -57,32 +58,32 @@ public:
                     const int      a_numRight,
                     const bool     a_fluidInside);
 
-  /*!
+  /**
     @brief Copy constructor
     @param[in] a_inputIF Other cylinder
   */
   ProfileCylinderIF(const ProfileCylinderIF& a_inputIF);
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~ProfileCylinderIF();
 
-  /*!
+  /**
     @brief Value function. Returns distance to object.
     @param[in] a_pos Position
   */
   virtual Real
   value(const RealVect& a_pos) const override;
 
-  /*!
+  /**
     @brief Factory method
   */
   virtual BaseIF*
   newImplicitFunction() const override;
 
 protected:
-  /*!
+  /**
     @brief Implicit function. This is an intersection between a cylinder and several torii. 
   */
   RefCountedPtr<BaseIF> m_baseIF;

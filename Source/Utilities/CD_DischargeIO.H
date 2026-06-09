@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DischargeIO.H
   @brief  Silly, but useful functions that override standard Chombo HDF5 IO.
   @author Robert Marskar
 */
 
-#ifndef CD_DischargeIO_H
-#define CD_DischargeIO_H
+#ifndef CD_DISCHARGEIO_H
+#define CD_DISCHARGEIO_H
 
 // Std includes
 #include <string>
@@ -32,11 +33,11 @@
 #include <CD_GenericParticle.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Namespace which encapsulates chombo-discharge IO functionality. 
 */
 namespace DischargeIO {
-  /*!
+  /**
     @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
     @param[in] a_number Number to format as string with separator
     @param[in] a_sep    Separator
@@ -44,7 +45,7 @@ namespace DischargeIO {
   std::string
   numberFmt(const long long a_number, char a_sep = ',') noexcept;
 
-  /*!
+  /**
     @brief Number formatting game. This just prints the number 123456 as 123,456
     @param[in] a_numbers Numbers to format as string with separator
     @param[in] a_sep     Separator
@@ -52,7 +53,7 @@ namespace DischargeIO {
   Vector<std::string>
   numberFmt(const Vector<long long> a_numbers, char a_sep = ',') noexcept;
 
-  /*!
+  /**
     @brief A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.
     @details User are not supported to call this. Driver will perform calls to writeEBHDF5Header and writeEBHDF5Level
     @param[in] a_filename         File name
@@ -85,7 +86,7 @@ namespace DischargeIO {
 #endif
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Write HDF5 header to the input handle
     @param[in,out] a_handleH5 Handle to HDF5 file
     @param[in] a_numLevels Number of levels to write
@@ -101,7 +102,7 @@ namespace DischargeIO {
 #endif
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Write data to output handle. Meant to be called on each level after calling writeEBHDF5 header.
     @param[in] a_handleH5 Handle to HDF5 data
     @param[in] a_outputData Data to write
@@ -126,7 +127,7 @@ namespace DischargeIO {
 #endif
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Debugging function for quickly writing EBAMRCellData to HDF5
     @param[in] a_data Cell-centered EB+AMR data
     @param[in] a_file File name
@@ -135,7 +136,7 @@ namespace DischargeIO {
   writeEBHDF5(const EBAMRCellData& a_data, const std::string& a_file);
 #endif
 
-  /*!
+  /**
     @brief Write a particle container to an H5Part file. Good for quick and dirty visualization of particles
     @details Use case is pretty straightforward but the user might need to cast particle types. E.g. call
 
@@ -161,7 +162,7 @@ namespace DischargeIO {
               const int                                       a_timeStep) noexcept;
 
 #ifdef CH_USE_HDF5
-  /*!
+  /**
     @brief Write checkpointed particles to HDF5
     @param[in, out] a_handle Handle to HDF5 files
     @param[in] a_particles Particles to checkpoint
@@ -172,7 +173,7 @@ namespace DischargeIO {
   void
   writeCheckParticlesToHDF(HDF5Handle& a_handle, const ParticleData<P>& a_particles, const std::string& a_dataType);
 
-  /*!
+  /**
     @brief Write checkpointed particles to HDF5
     @param[in, out] a_handle Handle to HDF5 files
     @param[in] a_particles Particles to checkpoint

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DataParser.H
   @brief  Declaration of various routines for simple parsing of input data. 
   @author Robert Marskar
 */
 
-#ifndef CD_DataParser_H
-#define CD_DataParser_H
+#ifndef CD_DATAPARSER_H
+#define CD_DATAPARSER_H
 
 // Chombo includes
 #include <List.H>
@@ -21,12 +22,12 @@
 #include <CD_Triangle.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for simple data parsing from IO files.
 */
 namespace DataParser {
 
-  /*!
+  /**
     @brief Simple file parser which reads a file and puts the data into two columns (a lookup table). 
     @details This will read ASCII row/column data into a LookupTable1D (which is a simple x-y data structure). The user can specify which columns
     to use as the x and y coordinates in the LookupTable1D. If the user ask for a column that does not exist in the input file, the data will not be read
@@ -43,7 +44,7 @@ namespace DataParser {
                       const int               a_yColumn     = 1,
                       const std::vector<char> a_ignoreChars = {'#', '/'});
 
-  /*!
+  /**
     @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)
     @details This version can read a partial file. It will ignore all lines until the a_startRead string is
     encountered. After that, it will read files as usual, skipping lines that begin with comments. Empty lines
@@ -64,7 +65,7 @@ namespace DataParser {
                           const int               a_yColumn     = 1,
                           const std::vector<char> a_ignoreChars = {'#', '/'});
 
-  /*!
+  /**
     @brief Simple file parser which will read particles (position/weight) from an ASCII file. 
     @details Particles should be arranged as rows, e.g. in the form
     x   y   z   w
@@ -84,7 +85,7 @@ namespace DataParser {
                           const unsigned int      a_wColumn     = 3,
                           const std::vector<char> a_ignoreChars = {'#', '/'});
 
-  /*!
+  /**
     @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.
     @details Reads vertex positions and face connectivity from the file. If a_vertexDataIdentifier
     matches a named per-vertex scalar property in the file (a PLY vertex property or a VTK

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_PolyUtils.H
   @brief  Agglomeration of some useful algebraic/polynomial routines
   @author Robert Marskar
 */
 
-#ifndef CD_PolyUtils_H
-#define CD_PolyUtils_H
+#ifndef CD_POLYUTILS_H
+#define CD_POLYUTILS_H
 
 // Chombo includes
 #include <RefCountedPtr.H>
@@ -19,12 +20,12 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Agglomeration class for various useful polynomial routines
 */
 namespace PolyUtils {
 
-  /*!
+  /**
     @brief Compute the root of a function between two points. This is a 1D problem along the line
     @param[in] a_impFunc Implicit function
     @param[in] a_point1  First end-point
@@ -34,7 +35,7 @@ namespace PolyUtils {
   RealVect
   brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
 
-  /*!
+  /**
     @brief Compute the root of a function between two points. This is a 1D problem.
     @param[in] a_lo Lower initial guess.
     @param[in] a_hi Higher initial guess.

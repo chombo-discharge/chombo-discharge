@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file  CD_ProfilePlaneIF.H
   @brief  Declaration of an implicit function which is a plane with "holes"
   @author Robert Marskar
 */
 
-#ifndef CD_ProfilePlaneIF_H
-#define CD_ProfilePlaneIF_H
+#ifndef CD_PROFILEPLANEIF_H
+#define CD_PROFILEPLANEIF_H
 
 // Chombo includes
 #include <BaseIF.H>
@@ -18,19 +19,19 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Implicit function which represents an infinite half-plane with "holes". 
   @note This is currently limited to 2D. 
 */
 class ProfilePlaneIF : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief Disallowed weak construction
   */
   ProfilePlaneIF() = delete;
 
-  /*!
+  /**
     @brief Full constructor.
     @param[in] a_point       Point on the plane
     @param[in] a_width       Box width
@@ -54,25 +55,25 @@ public:
                  const Real     a_curv,
                  const bool     a_fluidInside);
 
-  /*!
+  /**
     @brief Copy constructor
     @param[in] a_inputIF Other plane
   */
   ProfilePlaneIF(const ProfilePlaneIF& a_inputIF);
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~ProfilePlaneIF();
 
-  /*!
+  /**
     @brief Level-set function
     @param[in] a_pos Position
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
-  /*!
+  /**
     @brief Factory method
   */
   virtual BaseIF*

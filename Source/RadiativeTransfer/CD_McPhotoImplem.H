@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_McPhotoImplem.H
   @brief  Implementation of CD_McPhoto.H
   @author Robert Marskar
 */
 
-#ifndef CD_McPhotoImplem_H
-#define CD_McPhotoImplem_H
+#ifndef CD_MCPHOTOIMPLEM_H
+#define CD_MCPHOTOIMPLEM_H
 
 // Our includes
 #include <CD_McPhoto.H>

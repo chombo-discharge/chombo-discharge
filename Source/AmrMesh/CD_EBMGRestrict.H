@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBMGRestrict.H
   @brief  Declaration of a restriction operator for EB geometric multigrid
   @author Robert Marskar
 */
 
-#ifndef CD_EBMGRestrict_H
-#define CD_EBMGRestrict_H
+#ifndef CD_EBMGRESTRICT_H
+#define CD_EBMGRESTRICT_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -21,7 +22,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for restricting multigrid residual onto a coarser grid.
   @details This class defines an operator for setting phiC = 1/Nref^D * sum(phiFine). This assumes that the input data has already been
   scaled by the volume fraction (which is what the EB multigrid operators do anyways).
@@ -29,12 +30,12 @@
 class EBMGRestrict
 {
 public:
-  /*!
+  /**
     @brief Default constructor. User must subsequently call the define function
   */
   EBMGRestrict() noexcept;
 
-  /*!
+  /**
     @brief Full constructor. Calls the define function
     @param[in] a_eblgFine Fine level
     @param[in] a_eblgCoar Coarse level
@@ -42,12 +43,12 @@ public:
   */
   EBMGRestrict(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~EBMGRestrict() noexcept;
 
-  /*!
+  /**
     @brief Define function.
     @param[in] a_eblgFine Fine level
     @param[in] a_eblgCoar Coarse level
@@ -56,7 +57,7 @@ public:
   virtual void
   define(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept;
 
-  /*!
+  /**
     @brief Restrict residual onto the coarse grid.
     @details This replaces the coarse-grid residual by an average of the fine-grid residual. Only affects the invalid
     region of the coarse grid. 
@@ -70,47 +71,47 @@ public:
                    const Interval              a_variables) const noexcept;
 
 protected:
-  /*!
+  /**
     @brief Defined or not
   */
   bool m_isDefined;
 
-  /*!
+  /**
     @brief Refinement ratio
   */
   int m_refRat;
 
-  /*!
+  /**
     @brief Number of ghost cells in data holders
   */
   IntVect m_ghostPhi;
 
-  /*!
+  /**
     @brief Fine grid
   */
   EBLevelGrid m_eblgFine;
 
-  /*!
+  /**
     @brief Coarse grid
   */
   EBLevelGrid m_eblgCoar;
 
-  /*!
+  /**
     @brief Coarsened fine grids
   */
   EBLevelGrid m_eblgCoFi;
 
-  /*!
+  /**
     @brief Copier for making copying from the coarsened fine grids to the coarse grid go faster.
   */
   Copier m_copier;
 
-  /*!
+  /**
     @brief Iterator for iterating over cut-cells on the coarse level
   */
   mutable LayoutData<VoFIterator> m_vofitCoar;
 
-  /*!
+  /**
     @brief Restriction stencils near the EB.
     @details The stencils are defined on the coarse-grid, but reach into the fine grid.
   */

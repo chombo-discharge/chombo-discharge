@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzRobinDomainBCFactory_H
-#define CD_MFHelmholtzRobinDomainBCFactory_H
+#ifndef CD_MFHELMHOLTZROBINDOMAINBCFACTORY_H
+#define CD_MFHELMHOLTZROBINDOMAINBCFACTORY_H
 
 // Std includes
 #include <functional>
@@ -19,7 +20,7 @@
 #include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Base class for making Robin domain boundary conditions with MFHelmholtzOp. 
   @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated to the EB to first order. 
   @note The B-coefficient is not the same as in the Helmholtz equation...
@@ -28,12 +29,12 @@
 class MFHelmholtzRobinDomainBCFactory : public MFHelmholtzDomainBCFactory
 {
 public:
-  /*!
+  /**
     @brief Constructor. 
   */
   MFHelmholtzRobinDomainBCFactory();
 
-  /*!
+  /**
     @brief Full constructor which sets constant coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
@@ -41,7 +42,7 @@ public:
   */
   MFHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C);
 
-  /*!
+  /**
     @brief Full constructor which sets variable coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
@@ -51,12 +52,12 @@ public:
                                   const std::function<Real(const RealVect& a_pos)>& a_B,
                                   const std::function<Real(const RealVect& a_pos)>& a_C);
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~MFHelmholtzRobinDomainBCFactory();
 
-  /*!
+  /**
     @brief Set constant coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
@@ -65,7 +66,7 @@ public:
   void
   setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
-  /*!
+  /**
     @brief Set variable coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
@@ -76,7 +77,7 @@ public:
                   const std::function<Real(const RealVect& a_pos)>& a_B,
                   const std::function<Real(const RealVect& a_pos)>& a_C);
 
-  /*!
+  /**
     @brief Factory method
   */
   RefCountedPtr<EBHelmholtzDomainBC>
@@ -88,37 +89,37 @@ protected:
   */
   bool m_useConstant;
 
-  /*!
+  /**
     @brief Use function for BC value
   */
   bool m_useFunction;
 
-  /*!
+  /**
     @brief Constant A-coefficient
   */
   Real m_constantA;
 
-  /*!
+  /**
     @brief Constant B-coefficient
   */
   Real m_constantB;
 
-  /*!
+  /**
     @brief Constant C-coefficient
   */
   Real m_constantC;
 
-  /*!
+  /**
     @brief Function-based A-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionA;
 
-  /*!
+  /**
     @brief Function-based B-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionB;
 
-  /*!
+  /**
     @brief Function-based C-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionC;

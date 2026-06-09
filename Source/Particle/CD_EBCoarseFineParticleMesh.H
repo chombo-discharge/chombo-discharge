@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_EBCoarseFineParticleMesh.H
   @brief  Declaration of a class for handling particle deposition arithmetic near refinement boundaries.
   @author Robert Marskar
 */
 
-#ifndef CD_EBCoarseFineParticleMesh_H
-#define CD_EBCoarseFineParticleMesh_H
+#ifndef CD_EBCOARSEFINEPARTICLEMESH_H
+#define CD_EBCOARSEFINEPARTICLEMESH_H
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
@@ -22,7 +23,7 @@
 #include <CD_EBCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief A class for handling particle deposition clouds that hang over refinement boundaries. This class does not include any deposition functionality but provides
   buffers for moving mass between two levels. 
   @details To use this class, the user can directly some functions:
@@ -37,7 +38,7 @@
 class EBCoarseFineParticleMesh
 {
 public:
-  /*!
+  /**
     @brief Simple enum for switch between arithmetic and conservative averaging
   */
   enum Average
@@ -46,12 +47,12 @@ public:
     Conservative
   };
 
-  /*!
+  /**
     @brief Default constructor. Leaves object in undefined state and subsequently requires a call to define. 
   */
   EBCoarseFineParticleMesh() noexcept;
 
-  /*!
+  /**
     @brief Full constructor. Calls define. 
     @param[in] a_eblgCoar   Coarse grids
     @param[in] a_eblgFine   Fine grids
@@ -63,12 +64,12 @@ public:
                            const int          a_refRat,
                            const IntVect      a_ghost) noexcept;
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~EBCoarseFineParticleMesh() noexcept;
 
-  /*!
+  /**
     @brief Define function
     @param[in] a_eblgCoar   Coarse grids
     @param[in] a_eblgFine   Fine grids
@@ -81,7 +82,7 @@ public:
          const int          a_refRat,
          const IntVect      a_ghost) noexcept;
 
-  /*!
+  /**
     @brief Coarsen the fine-level ghost cells and add them to the coarse level. 
     @details On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine
     is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, i.e. over the refinement
@@ -92,7 +93,7 @@ public:
   virtual void
   addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const noexcept;
 
-  /*!
+  /**
     @brief Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.
     @details This routine is used when the user have deposited coarse-level particles into a_fiCoData (which is a refinement of the coarse level). This 
     routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -> valid, which is what we want.
@@ -102,7 +103,7 @@ public:
   virtual void
   addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const noexcept;
 
-  /*!
+  /**
     @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. 
     @details The data-motion plan is to use the valid+ghost cells on the coarse level and add it into the valid region on the fine level. However, the 
     buffers' ghost regions are set to zero so this should only add non-ghosted data between the levels.
@@ -112,13 +113,13 @@ public:
   virtual void
   addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const noexcept;
 
-  /*!
+  /**
     @brief Function which performs an exchange+add operation on the refined coarse data
   */
   virtual void
   exchangeAndAddFiCoData(LevelData<EBCellFAB>& a_fiCoData) const noexcept;
 
-  /*!
+  /**
     @brief Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout
     @param[in,out] a_coarData Coarse-grid data
     @param[in] a_fineData Data on the refined coarse grid
@@ -129,13 +130,13 @@ public:
                                const LevelData<EBCellFAB>&             a_fiCoData,
                                const EBCoarseFineParticleMesh::Average a_average) const noexcept;
 
-  /*!
+  /**
     @brief Get the refined version of the coarse eblevelgrid
   */
   const EBLevelGrid&
   getEblgFiCo() const;
 
-  /*!
+  /**
     @brief Get buffer storage on the refined coarse level
   */
   template <int NCOMP>
@@ -143,137 +144,137 @@ public:
   getBufferFiCo() const noexcept;
 
 protected:
-  /*!
+  /**
     @brief Default component
   */
   static constexpr int m_comp = 0;
 
-  /*!
+  /**
     @brief Maximum number of components
   */
   static constexpr int m_nComp = 1;
 
-  /*!
+  /**
     @brief Is defined or not
   */
   bool m_isDefined;
 
-  /*!
+  /**
     @brief Verbose or not. Useful for debugging
   */
   bool m_verbose;
 
-  /*!
+  /**
     @brief Coarse EBLevelGrid
   */
   EBLevelGrid m_eblgCoar;
 
-  /*!
+  /**
     @brief Fine EBLevelGrid
   */
   EBLevelGrid m_eblgFine;
 
-  /*!
+  /**
     @brief Refined coarse EBLevelGrid
   */
   EBLevelGrid m_eblgFiCo;
 
-  /*!
+  /**
     @brief Coarsening of m_eblgFine
   */
   EBLevelGrid m_eblgCoFi;
 
-  /*!
+  /**
     @brief Copier for copying data from the refined coarse level to the fine level.
     @note This copier moves from valid+ghost in the source to valid+ghost in the destination.
   */
   Copier m_copierFiCoToFineIncludeGhosts;
 
-  /*!
+  /**
     @brief Copier for copying data from the coarsened fine level to the coarse level.
     @note This copier moves from valid+ghost in the source to valid+ghost in the destination.
   */
   Copier m_copierCoFiToCoarIncludeGhosts;
 
-  /*!
+  /**
     @brief Copier for copying data from the refined coarse level to the fine level.
     @details This copier moves from valid+ghost in the source to valid in the destination (as opposed to m_copierCOFiToCoarIncludeGhosts which adds mass into the ghost cells).
   */
   Copier m_copierFiCoToFineNoGhosts;
 
-  /*!
+  /**
     @brief Copier for that moves data from valid+ghost -> valid on the refined coarse level.
     @details Needed for some of the deposition methods that deposit on the refined coarse level and then later needs to synchronize their data
   */
   Copier m_copierFiCoToFiCo;
 
-  /*!
+  /**
     @brief Buffer storage on the refined coarse level. One component only.
   */
   mutable LevelData<EBCellFAB> m_bufferFiCoReal;
 
-  /*!
+  /**
     @brief Buffer storage on the refined coarse level. One component only.
   */
   mutable LevelData<EBCellFAB> m_bufferFiCoRealVect;
 
-  /*!
+  /**
     @brief VoFIterator for fine-grid irregular ghost cells. 
   */
   mutable LayoutData<VoFIterator> m_vofIterFineGhosts;
 
-  /*!
+  /**
     @brief VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells.
     @details Essentially a coarsening of m_vofIterFineGhosts.
   */
   mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;
 
-  /*!
+  /**
     @brief VoFIterator for coarse cells
   */
   mutable LayoutData<VoFIterator> m_vofIterCoar;
 
-  /*!
+  /**
     @brief Stencils for arithmetic coarsening of volume data.
     @details This is defined on the coarse grid, and indexes into the refined coarse grid. 
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_cellArithmeticStencils;
 
-  /*!
+  /**
     @brief Stencils for conservative coarsening of volume data
     @details This is defined on the coarse grid, and indexes into the refined coarse grid.     
   */
   LayoutData<BaseIVFAB<VoFStencil>> m_cellConservativeStencils;
 
-  /*!
+  /**
     @brief Refinement ratio between the two levels
   */
   int m_refRat;
 
-  /*!
+  /**
     @brief Number of ghost cells in data holders.
   */
   IntVect m_ghost;
 
-  /*!
+  /**
     @brief Define the vof iterators
   */
   void
   defineVoFIterators() noexcept;
 
-  /*!
+  /**
     @brief Define the vof iterators
   */
   void
   defineStencils() noexcept;
 
-  /*!
+  /**
     @brief Define the buffer storages.
   */
   void
   defineBufferFiCo() noexcept;
 
-  /*!
+  /**
     @brief Conservatively average and add data from the refined coarse data to the coarse data
     @param[in,out] a_coarData Coarse-grid data
     @param[in] a_fineData Fine-grid data (must be on a refined layout of the coarse grid)
@@ -282,7 +283,7 @@ protected:
   void
   conservativeAverageAndAdd(EBCellFAB& a_coarData, const EBCellFAB& a_fineData, const DataIndex& a_din) const noexcept;
 
-  /*!
+  /**
     @brief Arithmetically average and add data from the refined coarse data to the coarse data
     @param[in,out] a_coarData Coarse-grid data
     @param[in] a_fineData Fine-grid data (must be on a refined layout of the coarse grid)

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ParticleMap.H
   @brief  Implementation of CD_ParticleOps.H
   @author Robert Marskar
 */
 
-#ifndef CD_ParticleMap_H
-#define CD_ParticleMap_H
+#ifndef CD_PARTICLEMAP_H
+#define CD_PARTICLEMAP_H
 
 // Std includes
 #include <cstdint>
@@ -26,7 +27,7 @@ static_assert(sizeof(uint32_t) == 4, "uint32_t must be 32 bits");
 static_assert(sizeof(uint64_t) == 8, "uint64_t must be 64 bits");
 static_assert(sizeof(size_t) == 8, "size_t must be 64 bits");
 
-/*!
+/**
   @brief Function for encoding a pair of integers onto a 64-bit integer.
   @param[in] a_level Level index
   @param[in] a_gridIndex Grid index
@@ -38,7 +39,7 @@ encodePair(uint32_t a_level, uint32_t a_gridIndex) noexcept
   return (std::uint64_t(a_level) << 32) | std::uint64_t(a_gridIndex);
 }
 
-/*!
+/**
   @brief Function for decoding a 64-bit integer into two integers.
   @details Used for reversing hash maps.
   @param[in] key Hash key as 64-bit integer. 
@@ -49,7 +50,7 @@ decodePair(uint64_t key) noexcept
   return {uint32_t(key >> 32), uint32_t(key)};
 }
 
-/*!
+/**
   @brief Simple pair-hashing struct for interfacing into unordered_map
 */
 struct PairHash
@@ -61,7 +62,7 @@ struct PairHash
   }
 };
 
-/*!
+/**
   @brief Underlying particle map when gathering/scattering particles.
   @details This is a map that maps a list of particles to a specific grid level and grid patch.
 */

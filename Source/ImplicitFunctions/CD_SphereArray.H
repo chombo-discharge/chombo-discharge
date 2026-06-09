@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_SphereArray.H
   @brief  Declaration of a sphere array implicit function
   @author Robert Marskar
 */
 
-#ifndef CD_SphereArray_H
-#define CD_SphereArray_H
+#ifndef CD_SPHEREARRAY_H
+#define CD_SPHEREARRAY_H
 
 // Chombo includes
 #include <BaseIF.H>
@@ -24,18 +25,18 @@ using Vec3   = EBGeometry::Vec3T<Real>;
 using SDF    = EBGeometry::SignedDistanceFunction<Real>;
 using Sphere = EBGeometry::SphereSDF<Real>;
 
-/*!
+/**
   @brief A Cartesian array of spheres. 
 */
 class SphereArray : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief Disallowed (for now)
   */
   SphereArray() = delete;
 
-  /*!
+  /**
     @brief SphereArray full constructor. Constructs an array of spheres
     @param[in] a_radius     Sphere radius
     @param[in] a_lowerLeft  Lower-left sphere center     
@@ -53,51 +54,51 @@ public:
               const bool     a_flipInside,
               const Real     a_zCoord = 0.0);
 
-  /*!
+  /**
     @brief Copy constructor. Sends the pointers to the object. 
   */
   SphereArray(const SphereArray& a_inputIF);
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~SphereArray();
 
-  /*!
+  /**
     @brief Value function
     @param[in] a_point Coordinate
   */
   virtual Real
   value(const RealVect& a_point) const override;
 
-  /*!
+  /**
     @brief Factory method -- calls the copy constructor
   */
   virtual BaseIF*
   newImplicitFunction() const override;
 
 protected:
-  /*!
+  /**
     @brief Tree degree for BVH accelerator
   */
   static constexpr size_t K = 4;
 
-  /*!
+  /**
     @brief Switch for using fast or slow union
   */
   bool m_useFast;
 
-  /*!
+  /**
     @brief Make inside to outside
   */
   bool m_flipInside;
 
-  /*!
+  /**
     @brief Standard union ala Chombo
   */
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> m_slowUnion;
 
-  /*!
+  /**
     @brief Union that uses bounding volume hierarchy acceleration
   */
   std::shared_ptr<EBGeometry::ImplicitFunction<Real>> m_fastUnion;

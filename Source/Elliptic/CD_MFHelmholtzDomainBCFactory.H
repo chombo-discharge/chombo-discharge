@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzDomainBCFactory_H
-#define CD_MFHelmholtzDomainBCFactory_H
+#ifndef CD_MFHELMHOLTZDOMAINBCFACTORY_H
+#define CD_MFHELMHOLTZDOMAINBCFACTORY_H
 
 // Chombo includes
 #include <RefCountedPtr.H>
@@ -19,34 +20,34 @@
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Base class for creating domain boundary condition objects in MFHelmholtzOp. 
 */
 class MFHelmholtzDomainBCFactory
 {
 public:
-  /*!
+  /**
     @brief Constructor. 
   */
   MFHelmholtzDomainBCFactory();
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~MFHelmholtzDomainBCFactory();
 
-  /*!
+  /**
     @brief Disallowed -- don't see why you would need it.
   */
   MFHelmholtzDomainBCFactory(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
-  /*!
+  /**
     @brief Disallowed - don't see why you would need it.
   */
   MFHelmholtzDomainBCFactory&
   operator=(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
-  /*!
+  /**
     @brief Factory method
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>

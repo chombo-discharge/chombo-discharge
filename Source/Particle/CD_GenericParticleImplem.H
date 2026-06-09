@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_GenericParticleImplem.H
   @brief  Implementation of CD_GenericParticle.H
   @author Robert Marskar
 */
 
-#ifndef CD_GenericParticleImplem_H
-#define CD_GenericParticleImplem_H
+#ifndef CD_GENERICPARTICLEIMPLEM_H
+#define CD_GENERICPARTICLEIMPLEM_H
 
 // Our includes
 #include <CD_GenericParticle.H>

@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2024 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DischargeIOImplem.H
   @brief  Implementation of CD_DischargeIO.H
   @author Robert Marskar
 */
 
-#ifndef CD_DischargeIOImplem_H
-#define CD_DischargeIOImplem_H
+#ifndef CD_DISCHARGEIOIMPLEM_H
+#define CD_DISCHARGEIOIMPLEM_H
 
 // Std includes
 #ifdef CH_USE_HDF5

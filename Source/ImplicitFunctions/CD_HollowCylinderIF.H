@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file  CD_HollowCylinderIF.H
   @brief Declaration of a hollow cylinder implicit function.  
   @author Robert Marskar
 */
 
-#ifndef CD_HollowCylinderIF_H
-#define CD_HollowCylinderIF_H
+#ifndef CD_HOLLOWCYLINDERIF_H
+#define CD_HOLLOWCYLINDERIF_H
 
 // Chombo includes
 #include <RealVect.H>
@@ -21,18 +22,18 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief This class is used to generate a hollow cylinder with rounded edges. 
 */
 class HollowCylinderIF : public BaseIF
 {
 public:
-  /*!
+  /**
     @brief Disallowed weak construction. 
   */
   HollowCylinderIF() = delete;
 
-  /*!
+  /**
     @brief Full constructor
     @param[in] a_center1        One cylinder end
     @param[in] a_center2        Other cylinder end
@@ -50,27 +51,27 @@ public:
                    const Real     a_innerCurvature,
                    const bool     a_fluidInside);
 
-  /*!
+  /**
     @brief Copy constructor
     @param[in] a_inputIF Input hollow cylinder
   */
   HollowCylinderIF(const HollowCylinderIF& a_inputIF);
 
-  /*!
+  /**
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
   */
   virtual Real
   value(const RealVect& a_point) const override;
 
-  /*!
+  /**
     @brief IF factory method
   */
   virtual BaseIF*
   newImplicitFunction() const override;
 
 protected:
-  /*!
+  /**
     @brief 3D object rotated and translated to its specified position
   */
   RefCountedPtr<BaseIF> m_baseIF;

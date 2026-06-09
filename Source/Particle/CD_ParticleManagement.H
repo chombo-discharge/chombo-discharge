@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2022 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_ParticleManagement.H
   @brief  Namespace containing various particle management utilities.
   @author Robert Marskar
 */
 
-#ifndef CD_ParticleManagement_H
-#define CD_ParticleManagement_H
+#ifndef CD_PARTICLEMANAGEMENT_H
+#define CD_PARTICLEMANAGEMENT_H
 
 // Std includes
 #include <memory>
@@ -25,12 +26,12 @@
 #include <CD_CellInfo.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Namespace for various particle management tools. 
 */
 namespace ParticleManagement {
 
-  /*!
+  /**
     @brief Concept for splitting/merging particles
     @param[in,out] a_particles Particles to be merged/split
     @param[in] a_cellInfo Cell info
@@ -40,7 +41,7 @@ namespace ParticleManagement {
   using ParticleMerger = std::function<
     void(List<P>& a_particles, const CellInfo& a_cellInfo, const int a_numTargetParticles)>;
 
-  /*!
+  /**
     @brief Declaration of a reconciliation function when splitting particles.
     @details This is, for example, passed into the KD-tree equal-weight partitioning structure, which may split a particle
     such that the weight of the two nodes differ by at most one physical particle. By default, that method will call the
@@ -50,7 +51,7 @@ namespace ParticleManagement {
   template <class P>
   using BinaryParticleReconcile = std::function<void(P& p1, P& p2, const P& p0)>;
 
-  /*!
+  /**
     @brief Partition and split a KD-node with particles so that the weights are approximately the same. 
 
     @param[in,out] a_node Node to split. This MUST be a leaf node and it MUST be possible to split it. 
@@ -77,7 +78,7 @@ namespace ParticleManagement {
     const BinaryParticleReconcile<P> a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
     }) noexcept;
 
-  /*!
+  /**
     @brief Recursively build a KD-tree following the "equal weight" principle when partitioning nodes.
     @param[in,out] a_inputParticles Input particles. These are destroyed on output.
     @param[in] a_maxLeaves Maximum number of leaves in the tree.
@@ -105,7 +106,7 @@ namespace ParticleManagement {
     const BinaryParticleReconcile<P>  a_particleReconcile = [](P& p1, P& p2, const P& p0) -> void {
     }) noexcept;
 
-  /*!
+  /**
     @brief Remove physical particles from the input particles.
     @param[in,out] a_particles           Input list of particles. Must have a weight function. 
     @param[in]    a_numPhysPartToRemove Number of physical particles to remove
@@ -115,7 +116,7 @@ namespace ParticleManagement {
   static inline void
   removePhysicalParticles(List<P>& a_particles, const T a_numPhysPartToRemove) noexcept;
 
-  /*!
+  /**
     @brief Remove particles if their weight is below the input weight
     @param[in,out] a_particles    Input list of particles. Must have a weight function. 
     @param[in]    a_weightThresh Weight threshold for removal
@@ -124,7 +125,7 @@ namespace ParticleManagement {
   static inline void
   deleteParticles(List<P>& a_particles, const Real a_weightThresh) noexcept;
 
-  /*!
+  /**
     @brief Partition particle weights among a number of computational particles
     @param[in] a_numPhysicalParticles Number of physical particles. 
     @param[in] a_maxCompParticles     Maximum number of computational particles
@@ -133,7 +134,7 @@ namespace ParticleManagement {
   static inline std::vector<T>
   partitionParticleWeights(const T a_numPhysicalParticles, const T a_maxCompParticles) noexcept;
 
-  /*!
+  /**
     @brief Partition particles so that all MPI rank draw a cumulative number of particles equal to a_numParticles
     @param[in] a_numParticles Total number of particles to be drawn. 
     @return Returns the number of particles drawn by each rank. 
@@ -142,7 +143,7 @@ namespace ParticleManagement {
   static inline T
   partitionParticles(const T a_numParticles);
 
-  /*!
+  /**
     @brief Draw a specified number of random particles distributed according to a predefined distribution. 
     @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
     P is the particle type (must derived from BinItem) and T is an integer type. 
@@ -154,7 +155,7 @@ namespace ParticleManagement {
   static inline void
   drawRandomParticles(List<P>& a_particles, const T a_numParticles, const std::function<RealVect()>& a_distribution);
 
-  /*!
+  /**
     @brief Draw particles in a sphere
     @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
     P is the particle type (must have a RealVect& position() function) and T is an integer type. 
@@ -170,7 +171,7 @@ namespace ParticleManagement {
                       const RealVect a_center,
                       const Real     a_radius) noexcept;
 
-  /*!
+  /**
     @brief Draw particles in a box
     @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
     P is the particle type (must have a RealVect& position() function) and T is an integer type. 
@@ -186,7 +187,7 @@ namespace ParticleManagement {
                    const RealVect a_loCorner,
                    const RealVect a_hiCorner) noexcept;
 
-  /*!
+  /**
     @brief Draw particles from a Gaussian distribution
     @details The implementation will partition a_numParticles among the ranks so the total number of particles drawn is a_numParticles.
     P is the particle type (must have a RealVect& position() function) and T is an integer type. 

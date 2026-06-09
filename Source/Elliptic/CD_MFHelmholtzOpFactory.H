@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_MFHelmholtzOpFactory.H
   @brief  Declaration of a factory class for making multifluid Helmholtz operators for multigrid. 
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzOpFactory_H
-#define CD_MFHelmholtzOpFactory_H
+#ifndef CD_MFHELMHOLTZOPFACTORY_H
+#define CD_MFHELMHOLTZOPFACTORY_H
 
 // Chombo includes
 #include <MFCellFAB.H>
@@ -30,7 +31,7 @@
 #include <CD_MFHelmholtzJumpBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Factory class for making MFHelmholtzOp. 
   @note This factory is designed for coupling EBHelmholtzOps across EBIS levels
   @note This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
@@ -59,17 +60,17 @@ public:
 
   using Smoother = MFHelmholtzOp::Smoother;
 
-  /*!
+  /**
     @brief Disallowed constructor
   */
   MFHelmholtzOpFactory() = delete;
 
-  /*!
+  /**
     @brief Disallowed constructor
   */
   MFHelmholtzOpFactory(const MFHelmholtzOpFactory& a_otherFactory) = delete;
 
-  /*!
+  /**
     @brief Full constructor
     @param[in] a_mfis             Multi-fluid index space
     @param[in] a_dataLocation     Assumed data centering
@@ -126,12 +127,12 @@ public:
                        const int&              a_blockingFactor,
                        const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
-  /*!
+  /**
     @brief Destructor. Does nothing. 
   */
   virtual ~MFHelmholtzOpFactory();
 
-  /*!
+  /**
     @brief Set jump condition. This is passed to the operators by reference. 
     @param[in] a_sigma Jump (must be defined on gas phase)
     @param[in] a_scale Scaling factor
@@ -139,26 +140,26 @@ public:
   void
   setJump(const EBAMRIVData& a_sigma, const Real& a_scale);
 
-  /*!
+  /**
     @param[in] a_sigma Jump
     @param[in] a_scale Scaling factor
   */
   void
   setJump(const Real& a_sigma, const Real& a_scale);
 
-  /*!
+  /**
     @brief Get the BC jump factor. 
   */
   const EBAMRIVData&
   getSigma() const;
 
-  /*!
+  /**
     @brief Go through all MG levels and coarsen the coefficients from the finer levels
   */
   void
   coarsenCoefficientsMG();
 
-  /*!
+  /**
     @brief Create multigrid operator
     @param[in] a_fineDomain      Domain
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);
@@ -167,14 +168,14 @@ public:
   MFHelmholtzOp*
   MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
 
-  /*!
+  /**
     @brief Create AMR operator for specified domain
     @param[in] a_domain Domain
   */
   MFHelmholtzOp*
   AMRnewOp(const ProblemDomain& a_domain) override final;
 
-  /*!
+  /**
     @brief Get refinement ratio to next finest level.
     @note Returns -1 when there are no finer levels. 
   */
@@ -182,219 +183,219 @@ public:
   refToFiner(const ProblemDomain& a_indexspace) const override final;
 
 protected:
-  /*!
+  /**
     @brief Component that this operator solves for
   */
   static constexpr int m_comp = 0;
 
-  /*!
+  /**
     @brief Number of components that this operator solves for.
   */
   static constexpr int m_nComp = 1;
 
-  /*!
+  /**
     @brief Main phase
   */
   static constexpr int m_mainPhase = 0;
 
-  /*!
+  /**
     @brief Index space
   */
   MFIS m_mfis;
 
-  /*!
+  /**
     @brief Data centering
   */
   Location::Cell m_dataLocation;
 
-  /*!
+  /**
     @brief Smoother
   */
   Smoother m_smoother;
 
-  /*!
+  /**
     @brief Number of AMR levels
   */
   int m_numAmrLevels;
 
-  /*!
+  /**
     @brief Number of smoothings in the preconditioner. Passed directly to the operators.
   */
   int m_numPreCondSmooth;
 
-  /*!
+  /**
     @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
   */
   IntVect m_ghostPhi;
 
-  /*!
+  /**
     @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
   */
   IntVect m_ghostRhs;
 
-  /*!
+  /**
     @brief Operator alpha
   */
   Real m_alpha;
 
-  /*!
+  /**
     @brief Operator beta
   */
   Real m_beta;
 
-  /*!
+  /**
     @brief Relaxation factor
   */
   Real m_relaxFactor;
 
-  /*!
+  /**
     @brief Lower-left corner of computational domain
   */
   RealVect m_probLo;
 
-  /*!
+  /**
     @brief AMR grids
   */
   AmrLevelGrids m_amrLevelGrids;
 
-  /*!
+  /**
     @brief Valid cells
   */
   AmrMask m_validCells;
 
-  /*!
+  /**
     @brief Multigrid interpolators
   */
   AmrInterpolators m_amrInterpolators;
 
-  /*!
+  /**
     @brief Flux registers
   */
   AmrFluxRegisters m_amrFluxRegisters;
 
-  /*!
+  /**
     @brief Data coarseners
   */
   AmrCoarseners m_amrCoarseners;
 
-  /*!
+  /**
     @brief Refinement ratios
   */
   AmrRefRatios m_amrRefRatios;
 
-  /*!
+  /**
     @brief Grid resolutions
   */
   AmrResolutions m_amrResolutions;
 
-  /*!
+  /**
     @brief Operator A-coefficient
   */
   AmrCellData m_amrAcoef;
 
-  /*!
+  /**
     @brief Operator B-coefficient
   */
   AmrFluxData m_amrBcoef;
 
-  /*!
+  /**
     @brief Operator B-coefficient
   */
   AmrIrreData m_amrBcoefIrreg;
 
-  /*!
+  /**
     @brief Domain BC factory
   */
   DomainBCFactory m_domainBcFactory;
 
-  /*!
+  /**
     @brief EB BC factory
   */
   EBBCFactory m_ebBcFactory;
 
-  /*!
+  /**
     @brief Jump BC factory
   */
   JumpBCFactory m_jumpBcFactory;
 
-  /*!
+  /**
     @brief Jump on multiphase cells. 
   */
   EBAMRIVData m_amrJump;
 
-  /*!
+  /**
     @brief Coarsest level where we run multigrid
   */
   ProblemDomain m_bottomDomain;
 
-  /*!
+  /**
     @brief Blocking factor for grid aggregration
   */
   int m_mgBlockingFactor;
 
-  /*!
+  /**
     @brief Stencil order in jump cells
   */
   int m_jumpOrder;
 
-  /*!
+  /**
     @brief Weighting for least squares reconstruction in jump cells
   */
   int m_jumpWeight;
 
-  /*!
+  /**
     @brief Deeper grids
   */
   AmrLevelGrids m_deeperLevelGrids;
 
-  /*!
+  /**
     @brief For checking if an AMR level has multigrid levels
   */
   std::vector<bool> m_hasMgLevels;
 
-  /*!
+  /**
     @brief Deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
   */
   Vector<AmrLevelGrids> m_mgLevelGrids;
 
-  /*!
+  /**
     @brief A-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
   */
   Vector<AmrCellData> m_mgAcoef;
 
-  /*!
+  /**
     @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
   */
   Vector<AmrFluxData> m_mgBcoef;
 
-  /*!
+  /**
     @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
   */
   Vector<AmrIrreData> m_mgBcoefIrreg;
 
-  /*!
+  /**
     @brief Jump coefficient on deeper grids
   */
   Vector<EBAMRIVData> m_mgJump;
 
-  /*!
+  /**
     @brief Coarsneing operator on deeper grids (used for coarsening jump)
   */
   Vector<Vector<RefCountedPtr<EBCoarAve>>> m_mgAveOp;
 
-  /*!
+  /**
     @brief Function which defines the multigrid levels for this operator factory
   */
   void
   defineMultigridLevels();
 
-  /*!
+  /**
     @brief Define jump data
   */
   void
   defineJump();
 
-  /*!
+  /**
     @brief Check if a domain is coarser than the other
     @param[in] a_domainOne The first domain
     @param[in] a_domainTwo The second domain
@@ -403,7 +404,7 @@ protected:
   bool
   isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
-  /*!
+  /**
     @brief Check if a domain is finer than the other
     @param[in] a_domainOne The first domain
     @param[in] a_domainTwo The second domain
@@ -412,7 +413,7 @@ protected:
   bool
   isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
-  /*!
+  /**
     @brief Construct coarsening of a grid level. 
     @param[out] a_coarseGrid     The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
     @param[in]  a_fineGrid       The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
@@ -427,7 +428,7 @@ protected:
                    const int          a_refRat,
                    const int          a_blockingFactor) const;
 
-  /*!
+  /**
     @brief Coarsen coefficients (conservatively)
     @param[out] a_coarAcoef      Coarse A-coefficient
     @param[out] a_coarBcoef      Coarse B-coefficient
@@ -450,7 +451,7 @@ protected:
                       const MFLevelGrid&            a_eblgFine,
                       const int                     a_refRat);
 
-  /*!
+  /**
     @brief Find level corresponding to amr level
     @param[in] a_domain Problem domain. 
     @return Depth in m_amrLevelGrids corresponding to a_domain. 

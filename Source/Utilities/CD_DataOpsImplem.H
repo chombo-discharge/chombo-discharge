@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DataOpsImplem.H
   @brief  Implementation of CD_DataOps.H
   @author Robert Marskar
 */
 
-#ifndef CD_DataOpsImplem_H
-#define CD_DataOpsImplem_H
+#ifndef CD_DATAOPSIMPLEM_H
+#define CD_DATAOPSIMPLEM_H
 
 // Chombo includes
 #include <CH_Timer.H>

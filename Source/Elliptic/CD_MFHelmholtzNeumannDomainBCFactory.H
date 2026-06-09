@@ -1,6 +1,7 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 /*
@@ -9,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzNeumannDomainBCFactory_H
-#define CD_MFHelmholtzNeumannDomainBCFactory_H
+#ifndef CD_MFHELMHOLTZNEUMANNDOMAINBCFACTORY_H
+#define CD_MFHELMHOLTZNEUMANNDOMAINBCFACTORY_H
 
 // Std includes
 #include <functional>
@@ -22,37 +23,37 @@
 #include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class for passing Neumann boundary domain boundary conditions into MFHelmholtzOp. 
 */
 class MFHelmholtzNeumannDomainBCFactory : public MFHelmholtzDomainBCFactory
 {
 public:
-  /*!
+  /**
     @brief Constructor. 
   */
   MFHelmholtzNeumannDomainBCFactory();
 
-  /*!
+  /**
     @brief Constructor. 
     @param[in] a_DphiDn Constant value of dphi/dn on all domain sides. 
     @note A positive values gives a flux INTO the domain. 
   */
   MFHelmholtzNeumannDomainBCFactory(const Real a_DphiDn);
 
-  /*!
+  /**
     @brief Full constructor. 
     @param[in] a_DphiDn Spatially dependent value of dphi/dn on all domain sides. 
     @note A positive values gives a flux INTO the domain. 
   */
   MFHelmholtzNeumannDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~MFHelmholtzNeumannDomainBCFactory();
 
-  /*!
+  /**
     @brief Set value of dphi/dn on the EB. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -60,7 +61,7 @@ public:
   void
   setDphiDn(const Real a_DphiDn);
 
-  /*!
+  /**
     @brief Set spatially dependent value of dphi/dn on the EB. 
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -68,7 +69,7 @@ public:
   void
   setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
-  /*!
+  /**
     @brief Set the value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -76,7 +77,7 @@ public:
   void
   setBxDphiDn(const Real a_BxDphiDn);
 
-  /*!
+  /**
     @brief Set the spatially dependent value of B*dphi/dn on the EB.
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
@@ -84,34 +85,34 @@ public:
   void
   setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 
-  /*!
+  /**
     @brief Factory method. 
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
   create(const int a_iphase) const override;
 
 protected:
-  /*!
+  /**
     @brief Multiply by b-coefficient or not
   */
   bool m_multByBco;
 
-  /*!
+  /**
     @brief Use constant for BC
   */
   bool m_useConstant;
 
-  /*!
+  /**
     @brief Use function for BC value
   */
   bool m_useFunction;
 
-  /*!
+  /**
     @brief Constant values on domain sides. 
   */
   Real m_constantDphiDn;
 
-  /*!
+  /**
     @brief Spatially dependent value on the domain sides. 
   */
   std::function<Real(const RealVect& a_pos)> m_functionDphiDn;

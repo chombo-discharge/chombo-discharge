@@ -17,40 +17,40 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Class that represents two random interface smooshed together
 */
 class RandomInterface : public ComputationalGeometry
 {
 public:
-  /*!
+  /**
     @brief Constructor.
   */
   RandomInterface() noexcept;
 
-  /*!
+  /**
     @brief Destructor (does nothing)
   */
   virtual ~RandomInterface() noexcept;
 
 protected:
-  /*!
+  /**
     @brief Alias for 3D vector type
   */
   using Vec3 = EBGeometry::Vec3T<Real>;
 
-  /*!
+  /**
     @brief Clamped noisy plane signed distance function. 
   */
   class ClampedNoisePlane : public EBGeometry::SignedDistanceFunction<Real>
   {
   public:
-    /*!
+    /**
       @brief Disallowed weak construction
     */
     ClampedNoisePlane() = delete;
 
-    /*!
+    /**
       @brief Full constructor
       @param[in] a_point Point on plane
       @param[in] a_normal Plane normal vector
@@ -72,12 +72,12 @@ protected:
                       const Real a_noisePersistence,
                       const int  a_noiseOctaves) noexcept;
 
-    /*!
+    /**
       @brief Destructor (does nothing)
     */
     ~ClampedNoisePlane() = default;
 
-    /*!
+    /**
       @brief Shuffle the permutation array.
       @param[in,out] a_rng Uniform random number generator.
     */
@@ -85,7 +85,7 @@ protected:
     void
     shuffle(URNG& a_rng) noexcept;
 
-    /*!
+    /**
       @brief Signed distance function.
       @param[in] a_point Input point.
       @return Signed distance to the noisy plane surface.
@@ -94,37 +94,37 @@ protected:
     signedDistance(const Vec3& a_point) const noexcept override;
 
   protected:
-    /*!
+    /**
       @brief Point on plane
     */
     Vec3 m_point;
 
-    /*!
+    /**
       @brief Plane normal vector
     */
     Vec3 m_normal;
 
-    /*!
+    /**
       @brief Low-end clamping
     */
     Vec3 m_clampLo;
 
-    /*!
+    /**
       @brief High-end clamping
     */
     Vec3 m_clampHi;
 
-    /*!
+    /**
       @brief Clamping length
     */
     Vec3 m_clampDx;
 
-    /*!
+    /**
       @brief Base implicit function
     */
     std::shared_ptr<EBGeometry::PlaneSDF<Real>> m_plane;
 
-    /*!
+    /**
       @brief Noise function
     */
     std::shared_ptr<EBGeometry::PerlinSDF<Real>> m_perlin;

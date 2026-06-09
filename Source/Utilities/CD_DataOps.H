@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_DataOps.H
   @brief  Agglomeration of useful data operations
   @author Robert Marskar
 */
 
-#ifndef CD_DataOps_H
-#define CD_DataOps_H
+#ifndef CD_DATAOPS_H
+#define CD_DATAOPS_H
 
 // Our includes
 #include <CD_Average.H>
@@ -19,7 +20,7 @@
 #include <CD_MFInterfaceFAB.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Agglomeration of useful data operations.
   @note All methods in this class assumes that data are allocated over the same realm. If you are trying to do something across realms, you need to copy
   the data onto realms that lie on the same data holders first!.
@@ -27,7 +28,7 @@
 class DataOps
 {
 public:
-  /*!
+  /**
     @brief Set value in an MFInterfaceFAB data holder
     @param[in] a_lhs   Data holder
     @param[in] a_value Value to set
@@ -36,7 +37,7 @@ public:
   static void
   setValue(LevelData<MFInterfaceFAB<T>>& a_lhs, const T& a_value);
 
-  /*!
+  /**
     @brief Sign function. Returns +/- if the value is > 0 or < 0
     @param[in] a_value Value to evaluate. 
   */
@@ -44,7 +45,7 @@ public:
   static int
   sgn(const T a_value);
 
-  /*!
+  /**
     @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
@@ -57,7 +58,7 @@ public:
                                     const Vector<ProblemDomain>& a_domains,
                                     const int                    a_tanGhosts);
 
-  /*!
+  /**
     @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
@@ -70,7 +71,7 @@ public:
                                     const ProblemDomain&        a_domain,
                                     const int                   a_tanGhosts);
 
-  /*!
+  /**
     @brief Average all components of the cell-centered data to faces.
     @details Calls the other version; uses arihtmetic averaging and does not fill ghost faces. 
     @param[out] a_faceData Face data. 
@@ -81,7 +82,7 @@ public:
   static void
   averageCellToFace(EBAMRFluxData& a_faceData, const EBAMRCellData& a_cellData, const Vector<ProblemDomain>& a_domains);
 
-  /*!
+  /**
     @brief Routine which averages a cell-centered component to faces. 
     @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
     faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
@@ -103,7 +104,7 @@ public:
                     const Interval&              a_cellVars,
                     const Average&               a_average);
 
-  /*!
+  /**
     @brief Routine which averages a cell-centered component to faces. 
     @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
     faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
@@ -125,7 +126,7 @@ public:
                     const Interval&             a_cellVars,
                     const Average&              a_average);
 
-  /*!
+  /**
     @brief Average all components of face centered data to cell centers.
     @param[out] a_cellData Cell data. 
     @param[int] a_faceData Face data. 
@@ -135,7 +136,7 @@ public:
   static void
   averageFaceToCell(EBAMRCellData& a_cellData, const EBAMRFluxData& a_fluxData, const Vector<ProblemDomain>& a_domains);
 
-  /*!
+  /**
     @brief Average all components of face centered data to cell centers.
     @param[out] a_cellData Cell data. 
     @param[int] a_faceData Face data. 
@@ -147,7 +148,7 @@ public:
                     const LevelData<EBFluxFAB>& a_fluxData,
                     const ProblemDomain&        a_domain);
 
-  /*!
+  /**
     @brief Compute lhs = a * x + b * y
     @param[out] a_lhs Result
     @param[in] a_x First FAB
@@ -162,7 +163,7 @@ public:
        const Real                  a_a,
        const Real                  a_b) noexcept;
 
-  /*!
+  /**
     @brief Compute a new value given the old cell value. 
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
     @param[in,out] a_data Input data
@@ -171,7 +172,7 @@ public:
   static void
   compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
 
-  /*!
+  /**
     @brief Compute a new value given the old cell value. 
     @details Useful for quickly calculating a cell value as e.g. exp(x) where the original data was only x
     @param[in,out] a_data Input data
@@ -180,7 +181,7 @@ public:
   static void
   compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept;
 
-  /*!
+  /**
     @brief Compote the cell-wise dot product between two data holders. 
     @param[out] a_result Result. Holds the dot product in each cell.
     @param[in]  a_data1 First data holder.
@@ -190,7 +191,7 @@ public:
   static void
   dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2);
 
-  /*!
+  /**
     @brief Compote the cell-wise dot product between two data holders. 
     @details This calls the single-phase dotProduct patch versions with EBCellFABs on each phase.
     @param[out] a_result Result. Holds the dot product in each cell.
@@ -201,7 +202,7 @@ public:
   static void
   dotProduct(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2);
 
-  /*!
+  /**
     @brief Compote the cell-wise dot product between two data holders. 
     @param[out] a_result Result. Holds the dot product in each cell.
     @param[in]  a_data1 First data holder.
@@ -211,7 +212,7 @@ public:
   static void
   dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
 
-  /*!
+  /**
     @brief Compote the cell-wise dot product between two data holders. 
     @param[out] a_result Result. Holds the dot product in each cell.
     @param[in]  a_data1 First data holder.
@@ -221,7 +222,7 @@ public:
   static void
   dotProduct(LevelData<EBCellFAB>& a_result, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
 
-  /*!
+  /**
     @brief Compote the cell-wise dot product between two data holders. 
     @param[out] a_result Result. Holds the dot product in each cell.
     @param[in]  a_data1 First data holder.
@@ -231,7 +232,7 @@ public:
   static void
   dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
 
-  /*!
+  /**
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
     @details Ghost cells and coarsening must be done before entering this routine
     @param[in,out] a_data   Data to be filtered.
@@ -244,7 +245,7 @@ public:
   static void
   filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
 
-  /*!
+  /**
     @brief Apply a convolved filter phi = alpha * phi_i + 0.5*(1-alpha) * [phi_(i+s) + phi_(i-s)] in each direction. 
     @details Ghost cells must be updated before entering this routine. 
     @param[in,out] a_data   Data to be filtered.
@@ -257,7 +258,7 @@ public:
   static void
   filterSmooth(LevelData<EBCellFAB>& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept;
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -266,7 +267,7 @@ public:
   static void
   incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale) noexcept;
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -275,7 +276,7 @@ public:
   static void
   incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale) noexcept;
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -284,7 +285,7 @@ public:
   static void
   incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale) noexcept;
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -293,7 +294,7 @@ public:
   static void
   incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale) noexcept;
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -302,7 +303,7 @@ public:
   static void
   incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -311,7 +312,7 @@ public:
   static void
   incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -320,7 +321,7 @@ public:
   static void
   incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -329,7 +330,7 @@ public:
   static void
   incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -338,7 +339,7 @@ public:
   static void
   incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -347,7 +348,7 @@ public:
   static void
   incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @param[in,out] a_lhs   Data to be incremented.
     @param[in]    a_rhs   Incrementation.
@@ -356,7 +357,7 @@ public:
   static void
   incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data from an EBAMRIVFAB. It ignores regular cells. 
     @param[in,out] a_lhs   Data to be incremented.
@@ -366,7 +367,7 @@ public:
   static void
   incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data from an EBAMRIVFAB. It ignores regular cells. 
     @param[in,out] a_lhs   Data to be incremented.
@@ -376,7 +377,7 @@ public:
   static void
   incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data form an EBCellFAB to an BaseIVFAB. It ignores regular cells. 
     @param[in,out] a_lhs   Data to be incremented.
@@ -386,7 +387,7 @@ public:
   static void
   incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale);
 
-  /*!
+  /**
     @brief Function which increments data in the form a_lhs = a_lhs + a_rhs*a_scale for all components. 
     @details This versions only adds irregular data form an EBCellFAB to an BaseIVFAB. It ignores regular cells. 
     @param[in,out] a_lhs   Data to be incremented.
@@ -396,7 +397,7 @@ public:
   static void
   incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale);
 
-  /*!
+  /**
     @brief Copy data from one data holder to another.
     @param[out] a_dst Destination data holder
     @param[in ] a_src Source data holder
@@ -404,7 +405,7 @@ public:
   static void
   copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src);
 
-  /*!
+  /**
     @brief Copy data from one data holder to another.
     @param[out] a_dst Destination data holder
     @param[in ] a_src Source data holder
@@ -412,7 +413,7 @@ public:
   static void
   copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src);
 
-  /*!
+  /**
     @brief Copy data from one data holder to another.
     @param[out] a_dst Destination data holder
     @param[in ] a_src Source data holder
@@ -420,7 +421,7 @@ public:
   static void
   copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src);
 
-  /*!
+  /**
     @brief Copy data from one data holder to another. Allows specification of components. 
     @param[out] a_dst       Destination data holder
     @param[in ] a_src       Source data holder
@@ -431,7 +432,7 @@ public:
   static void
   copy(EBAMRData<T>& a_dst, const EBAMRData<T>& a_src, const Interval a_dstInterv, const Interval a_srcInterv);
 
-  /*!
+  /**
     @brief Divide one data holder by another. Does specified components.
     @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
@@ -441,7 +442,7 @@ public:
   static void
   divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lhsComp, const int a_rhsComp);
 
-  /*!
+  /**
     @brief Divide one data holder by another. Does specified components.
     @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor.
@@ -451,7 +452,7 @@ public:
   static void
   divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lhsComp, const int a_rhsComp);
 
-  /*!
+  /**
     @brief Divide all components in a data holder by a scalar value
     @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor. Must have exactly one component. 
@@ -459,7 +460,7 @@ public:
   static void
   divideByScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  /*!
+  /**
     @brief Divide all components in a data holder by a scalar value
     @param[in,out] a_lhs Data to be divided
     @param[in]    a_rhs Divisor. Must have exactly one component. 
@@ -467,7 +468,7 @@ public:
   static void
   divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  /*!
+  /**
     @brief Divide data. If the denominator is zero, set the value to a fallback option
     @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
@@ -476,7 +477,7 @@ public:
   static void
   divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const Real a_fallback);
 
-  /*!
+  /**
     @brief Divide data. If the denominator is zero, set the value to a fallback option
     @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
@@ -486,7 +487,7 @@ public:
   static void
   divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const Real a_fallback);
 
-  /*!
+  /**
     @brief Divide data. If the denominator is zero, set the value to a fallback option
     @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
@@ -495,7 +496,7 @@ public:
   static void
   divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback);
 
-  /*!
+  /**
     @brief Divide data. If the denominator is zero, set the value to a fallback option
     @param[in,out] a_numerator   Dividend
     @param[in]    a_denominator Divisor
@@ -507,7 +508,7 @@ public:
                  const LevelData<EBCellFAB>& a_denominator,
                  const LevelData<EBCellFAB>& a_fallback);
 
-  /*!
+  /**
     @brief Floor values in data holder. This sets all values below a_value to a_value
     @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
@@ -516,7 +517,7 @@ public:
   static void
   floor(EBAMRCellData& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Floor values in data holder. This sets all values below a_value to a_value
     @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
@@ -525,7 +526,7 @@ public:
   static void
   floor(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Floor values in data holder. This sets all values below a_value to a_value
     @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
@@ -534,7 +535,7 @@ public:
   static void
   floor(EBAMRIVData& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Floor values in data holder. This sets all values below a_value to a_value
     @param[in,out] a_lhs Data to be floored.
     @param[in]    a_value Floor value
@@ -543,7 +544,7 @@ public:
   static void
   floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Roof values in data holder. This sets all values above a_value to a_value
     @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
@@ -552,7 +553,7 @@ public:
   static void
   roof(EBAMRCellData& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Roof values in data holder. This sets all values above a_value to a_value
     @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
@@ -561,7 +562,7 @@ public:
   static void
   roof(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Roof values in data holder. This sets all values above a_value to a_value
     @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
@@ -570,7 +571,7 @@ public:
   static void
   roof(EBAMRIVData& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Roof values in data holder. This sets all values above a_value to a_value
     @param[in,out] a_lhs Data to be roofed.
     @param[in]    a_value Roof value
@@ -579,7 +580,7 @@ public:
   static void
   roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Make a_data = max(a_data1, a_data2)
     @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
     @param[in]  a_data1 Input data holder
@@ -588,7 +589,7 @@ public:
   static void
   max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
 
-  /*!
+  /**
     @brief Make a_data = max(a_data1, a_data2)
     @param[out] a_data  Output data. Will be max(a_data1, a_data2) in every cell
     @param[in]  a_data1 Input data holder
@@ -597,7 +598,7 @@ public:
   static void
   max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -608,7 +609,7 @@ public:
   static void
   getMaxMin(Real& max, Real& min, EBAMRCellData& a_data, const int a_comp);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -618,7 +619,7 @@ public:
   static void
   getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const int a_comp);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -629,7 +630,7 @@ public:
   static void
   getMaxMin(Real& a_max, Real& a_min, EBAMRFluxData& a_data, const int a_comp) noexcept;
 
-  /*!
+  /**
     @brief Get maximum and minimum value of specified component
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -639,7 +640,7 @@ public:
   static void
   getMaxMin(Real& a_max, Real& a_min, LevelData<EBFluxFAB>& a_data, const int a_comp) noexcept;
 
-  /*!
+  /**
     @brief Get maximum and minimum value. Assumes single-component data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -649,7 +650,7 @@ public:
   static void
   getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -659,7 +660,7 @@ public:
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& data);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -668,7 +669,7 @@ public:
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -678,7 +679,7 @@ public:
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& data);
 
-  /*!
+  /**
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
@@ -687,7 +688,7 @@ public:
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& data);
 
-  /*!
+  /**
     @brief Invert data
     @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
@@ -695,7 +696,7 @@ public:
   static void
   invert(EBAMRFluxData& a_data);
 
-  /*!
+  /**
     @brief Invert data
     @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
@@ -703,7 +704,7 @@ public:
   static void
   invert(LevelData<EBFluxFAB>& a_data);
 
-  /*!
+  /**
     @brief Invert data
     @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
@@ -711,7 +712,7 @@ public:
   static void
   invert(EBFluxFAB& a_data);
 
-  /*!
+  /**
     @brief Compute the kappa-weighted sum of the input data. Assumes one component
     @param[out] a_mass Total mass, computed as kappa * lhs
     @param[in]  a_lhs  Cell data
@@ -720,42 +721,42 @@ public:
   static void
   kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp = 0);
 
-  /*!
+  /**
     @brief Scale data by volume fraction
     @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(EBAMRCellData& a_data) noexcept;
 
-  /*!
+  /**
     @brief Scale data by volume fraction
     @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(LevelData<EBCellFAB>& a_data) noexcept;
 
-  /*!
+  /**
     @brief Scale data by volume fraction
     @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(MFAMRCellData& a_data) noexcept;
 
-  /*!
+  /**
     @brief Scale data by volume fraction
     @param[in,out] a_data Data to be scaled. On output we have a_data = kappa * a_data
   */
   static void
   kappaScale(LevelData<MFCellFAB>& a_data) noexcept;
 
-  /*!
+  /**
     @brief Scale data by dx^SpaceDim
     @param[in,out] a_data Data to be scaled. On output we have a_data = dx^SpaceDim * a_data
   */
   static void
   volumeScale(EBAMRCellData& a_data, const Vector<Real>& a_dx);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -764,7 +765,7 @@ public:
   static void
   multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -773,7 +774,7 @@ public:
   static void
   multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -782,7 +783,7 @@ public:
   static void
   multiply(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -791,7 +792,7 @@ public:
   static void
   multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -800,7 +801,7 @@ public:
   static void
   multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -809,7 +810,7 @@ public:
   static void
   multiply(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -818,7 +819,7 @@ public:
   static void
   multiplyScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -827,7 +828,7 @@ public:
   static void
   multiplyScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -836,7 +837,7 @@ public:
   static void
   multiplyScalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
 
-  /*!
+  /**
     @brief Multiply data holder by another data holder
     @param[in,out] a_lhs Data to be multiplied
     @param[in]    a_rhs Multiplication factor
@@ -845,7 +846,7 @@ public:
   static void
   multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs);
 
-  /*!
+  /**
     @brief Compute specified norm of data. 
     @param[in]  a_data   Data to compute the norm of
     @param[in]  a_p      Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
@@ -855,7 +856,7 @@ public:
   static Real
   norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp = 0);
 
-  /*!
+  /**
     @brief General addition operator for adding together data. The user can choose which components to add. 
     @param[in,out] a_lhs     Output data component
     @param[in,out] a_rhs     Data to be added to a_lhs
@@ -867,7 +868,7 @@ public:
   static void
   plus(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp);
 
-  /*!
+  /**
     @brief General addition operator for adding together data. The user can choose which components to add. 
     @param[in,out] a_lhs     Output data component
     @param[in,out] a_rhs     Data to be added to a_lhs
@@ -883,7 +884,7 @@ public:
        const int                   a_dstComp,
        const int                   a_numComp);
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -891,7 +892,7 @@ public:
   static void
   scale(MFAMRCellData& a_lhs, const Real& a_scale) noexcept;
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -899,7 +900,7 @@ public:
   static void
   scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) noexcept;
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -907,7 +908,7 @@ public:
   static void
   scale(MFAMRFluxData& a_lhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -915,7 +916,7 @@ public:
   static void
   scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -923,7 +924,7 @@ public:
   static void
   scale(EBAMRIVData& a_lhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -931,7 +932,7 @@ public:
   static void
   scale(EBAMRCellData& a_lhs, const Real a_scale) noexcept;
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -939,7 +940,7 @@ public:
   static void
   scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale) noexcept;
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -947,7 +948,7 @@ public:
   static void
   scale(EBAMRFluxData& a_lhs, const Real a_scale);
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -955,7 +956,7 @@ public:
   static void
   scale(LevelData<EBFluxFAB>& a_lhs, const Real a_scale);
 
-  /*!
+  /**
     @brief Scale data by factor
     @param[in,out] a_lhs   Data to be scaled
     @param[in]    a_scale Scaling factor
@@ -963,7 +964,7 @@ public:
   static void
   scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale);
 
-  /*!
+  /**
     @brief Set value in covered cells. Does specified component
     @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
@@ -972,7 +973,7 @@ public:
   static void
   setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
 
-  /*!
+  /**
     @brief Set value in covered cells. Does specified component
     @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
@@ -981,7 +982,7 @@ public:
   static void
   setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
 
-  /*!
+  /**
     @brief Version of setCoveredValue which does all components
     @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
@@ -989,7 +990,7 @@ public:
   static void
   setCoveredValue(EBAMRCellData& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Version of setCoveredValue which does all component
     @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
@@ -997,7 +998,7 @@ public:
   static void
   setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Set value on covered faces.
     @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
@@ -1006,7 +1007,7 @@ public:
   static void
   setCoveredValue(EBAMRFluxData& a_lhs, const int a_comp, const Real a_value) noexcept;
 
-  /*!
+  /**
     @brief Set value on covered faces.
     @param[in,out] a_lhs   Input/output data. 
     @param[in]   a_comp  Component to set
@@ -1015,7 +1016,7 @@ public:
   static void
   setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const int a_comp, const Real a_value) noexcept;
 
-  /*!
+  /**
     @brief Set all covered face values.
     @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
@@ -1023,7 +1024,7 @@ public:
   static void
   setCoveredValue(EBAMRFluxData& a_lhs, const Real a_value) noexcept;
 
-  /*!
+  /**
     @brief Set all covered face values.
     @param[in,out] a_lhs   Data 
     @param[in]    a_value Value in covered grid cells. 
@@ -1031,7 +1032,7 @@ public:
   static void
   setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value) noexcept;
 
-  /*!
+  /**
     @brief Set value in cells that are covered by a finer grid.
     @param[in,out] a_lhs    AMR data
     @param[in]    a_refRat Refinement ratios between levels.
@@ -1040,7 +1041,7 @@ public:
   static void
   setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, const Real a_value);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1056,7 +1057,7 @@ public:
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1072,7 +1073,7 @@ public:
            const Real                                 a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1088,7 +1089,7 @@ public:
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1104,7 +1105,7 @@ public:
            const Real                                 a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1120,7 +1121,7 @@ public:
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1136,7 +1137,7 @@ public:
            const Real                                 a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1152,7 +1153,7 @@ public:
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1168,7 +1169,7 @@ public:
            const Real                                 a_dx,
            const int                                  a_comp);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Assumes that a_lhs has SpaceDim components and sets all those components from the input function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1183,7 +1184,7 @@ public:
            const RealVect                                 a_probLo,
            const Vector<Real>&                            a_dx);
 
-  /*!
+  /**
     @brief Polymorphic set value function. Assumes that a_lhs has SpaceDim components and sets all those components from the input function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 
@@ -1198,7 +1199,7 @@ public:
            const RealVect                                 a_probLo,
            const Real                                     a_dx);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1206,7 +1207,7 @@ public:
   static void
   setValue(EBAMRCellData& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data with specified component. 
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1214,7 +1215,7 @@ public:
   static void
   setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
 
-  /*!
+  /**
     @brief Set value in data with specified component. 
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1222,7 +1223,7 @@ public:
   static void
   setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1230,7 +1231,7 @@ public:
   static void
   setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1238,7 +1239,7 @@ public:
   static void
   setValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1246,7 +1247,7 @@ public:
   static void
   setValue(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1254,7 +1255,7 @@ public:
   static void
   setValue(EBAMRFluxData& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1262,7 +1263,7 @@ public:
   static void
   setValue(EBAMRIVData& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1270,7 +1271,7 @@ public:
   static void
   setValue(MFAMRCellData& a_lhs, const Real& a_value) noexcept;
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1278,7 +1279,7 @@ public:
   static void
   setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value) noexcept;
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1286,7 +1287,7 @@ public:
   static void
   setValue(MFAMRFluxData& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1294,7 +1295,7 @@ public:
   static void
   setValue(LevelData<MFFluxFAB>& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1302,7 +1303,7 @@ public:
   static void
   setValue(MFAMRIVData& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1310,7 +1311,7 @@ public:
   static void
   setValue(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1318,7 +1319,7 @@ public:
   static void
   setValue(EBAMRIFData& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Set value in data
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
@@ -1326,14 +1327,14 @@ public:
   static void
   setValue(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value);
 
-  /*!
+  /**
     @brief Compute the sum of the input value.
     @param[in,out] a_value On output, contains the sum of a_value over all MPI processes.
   */
   static void
   sum(Real& a_value);
 
-  /*!
+  /**
     @brief Compute the square root of the input data
     @param[in,out] a_lhs On output, contains sqrt(a_lhs)
     @note Does not do ghosted faces. 
@@ -1341,7 +1342,7 @@ public:
   static void
   squareRoot(EBAMRFluxData& a_lhs);
 
-  /*!
+  /**
     @brief Compute the square root of the input data
     @param[in,out] a_lhs On output, contains sqrt(a_lhs)
     @note Does not do ghosted faces. 
@@ -1349,21 +1350,21 @@ public:
   static void
   squareRoot(LevelData<EBFluxFAB>& a_lhs);
 
-  /*!
+  /**
     @brief Take the square root of the input data
     @param[in,out] a_data Input data
   */
   static void
   squareRoot(MFAMRCellData& a_data);
 
-  /*!
+  /**
     @brief Take the square root of the input data
     @param[in,out] a_data Input data
   */
   static void
   squareRoot(LevelData<MFCellFAB>& a_data);
 
-  /*!
+  /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector
@@ -1372,7 +1373,7 @@ public:
   static void
   vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  /*!
+  /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector
@@ -1381,7 +1382,7 @@ public:
   static void
   vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  /*!
+  /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length.
     @param[in]  a_rhs Input vector.
@@ -1391,7 +1392,7 @@ public:
   static void
   vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 
-  /*!
+  /**
     @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector
@@ -1400,7 +1401,7 @@ public:
   static void
   vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  /*!
+  /**
     @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector
@@ -1409,7 +1410,7 @@ public:
   static void
   vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  /*!
+  /**
     @brief Compute the squared vector length of a data holder. Sets a_lhs = |a_rhs|^2 where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector
@@ -1418,7 +1419,7 @@ public:
   static void
   vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 
-  /*!
+  /**
     @brief Compute the tightest possible valid box around a cut-cell volume
     @param[out] a_lo       Low corner
     @param[out] a_hi       High corner
@@ -1428,7 +1429,7 @@ public:
   static void
   computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
 
-  /*!
+  /**
     @brief Check if all corners/points are inside an EB
     @param[out] a_corner   Corners
     @param[in]  a_normal   EB face normal
@@ -1438,7 +1439,7 @@ public:
   static bool
   allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
 
-  /*!
+  /**
     @brief Shift points by a specified distance
     @details On output, every point in a_corners is shifted by a_distance. 
     @param[in,out] a_corners  Points to be shifted

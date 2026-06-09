@@ -21,24 +21,24 @@
 #include <CD_EBGeometryIF.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief This is a class that defines a wire-wire geometry
 */
 class WireWire : public ComputationalGeometry
 {
 public:
-  /*!
+  /**
     @brief Constructor
   */
   WireWire();
 
-  /*!
+  /**
     @brief Destructor
   */
   virtual ~WireWire();
 
 protected:
-  /*!
+  /**
     @brief Add another cylinder electrode.
     @param[in] a_pp Parameter parser object for the wire.
     @return Pair of implicit function and permittivity for the electrode.
@@ -46,7 +46,7 @@ protected:
   virtual std::pair<std::shared_ptr<EBGeometry::ImplicitFunction<Real>>, Real>
   addElectrode(ParmParse& a_pp);
 
-  /*!
+  /**
     @brief Add another cylinder dielectric.
     @param[in] a_pp Parameter parser object for the wire.
     @return Implicit function for the dielectric cylinder.

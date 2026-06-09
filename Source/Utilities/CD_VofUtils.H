@@ -1,16 +1,17 @@
-/* chombo-discharge
- * Copyright © 2021 SINTEF Energy Research.
- * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+/*
+ * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*!
+/**
   @file   CD_VofUtils.H
   @brief  Various functions for getting Vofs near cut-cells
   @author Robert Marskar
 */
 
-#ifndef CD_VofUtils_H
-#define CD_VofUtils_H
+#ifndef CD_VOFUTILS_H
+#define CD_VOFUTILS_H
 
 // Chombo includes
 #include <Stencils.H>
@@ -26,13 +27,13 @@
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
-/*!
+/**
   @brief Static class which contains some routines for fetching VoFs using various algorithms. Very useful in combination with least squares. 
 */
 class VofUtils
 {
 public:
-  /*!
+  /**
     @brief Class for specifying connectivity of Vofs. 
     @details MontonePath:     Vofs must be reachable with monotone path. 
     @details SimplyConnected: All vofs must be connected
@@ -45,7 +46,7 @@ public:
     All
   };
 
-  /*!
+  /**
     @brief Neighborhood type
     @param[in] Quadrant.   Only fetch vofs in a specified quadrant. 
     @param[in] Radius.     Fetch all vofs in a specified radius. 
@@ -58,12 +59,12 @@ public:
     SemiCircle
   };
 
-  /*!
+  /**
     @brief Disallowed
   */
   VofUtils() = delete;
 
-  /*!
+  /**
     @brief Fetch vofs in a specified radius and with a specified connectivitiy between them.
     @param[in] a_startVof     Starting Vof. 
     @param[in] a_ebisbox      EBISBox.
@@ -78,7 +79,7 @@ public:
                   const Connectivity a_connectivity,
                   const bool         a_addStartVof);
 
-  /*!
+  /**
     @brief Fetch vofs in a specified radius and with a specified connectivitiy between them.
     @param[in] a_startVof     Starting Vof. 
     @param[in] a_ebisbox      EBISBox.
@@ -95,7 +96,7 @@ public:
                   const Connectivity     a_connectivity,
                   const bool             a_addStartVof);
 
-  /*!
+  /**
     @brief Fetch vofs in a quadrant, using a specified radius and with a specified connectivitiy between them.
     @param[in] a_startVof     Starting Vof. 
     @param[in] a_ebisbox      EBISBox.
@@ -113,7 +114,7 @@ public:
                     const Connectivity a_connectivity,
                     const bool         a_addStartVof);
 
-  /*!
+  /**
     @brief Extract the subset of vofs that lie within the quadrant/octant defined by the normal vector
     @param[in] a_vofs Trial Vofs.
     @param[in] a_startVof Starting vof.
@@ -129,7 +130,7 @@ public:
                          const RealVect&         a_normal,
                          const int               a_radius);
 
-  /*!
+  /**
     @brief Get all vofs lying in a semi-circle (sphere in 3D) from the indicated position in the starting vof
     @param[in] a_startVof     Starting Vof. 
     @param[in] a_ebisbox      EBISBox.
@@ -154,7 +155,7 @@ public:
                       const Location::Cell a_cellLocation,
                       const bool           a_addStartVof);
 
-  /*!
+  /**
     @brief Extract the subset of VoFs that lie in a semi-circle ahead of the input vof (a_startVof)
     @note This routine will discard vofs that fall on the ''wrong'' side of the semi-circle (sphere in 3D). Here, the
     wrong side is defined as all points (x-x0)*n < a_deltaThresh    
@@ -176,7 +177,7 @@ public:
                            const Location::Cell    a_vofLocation,
                            const Location::Cell    a_cellLocation);
 
-  /*!
+  /**
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
     @param[in] a_vofs List of vofs to be modified
     @param[in] a_excludeBox Box to be excluded
@@ -185,7 +186,7 @@ public:
   static void
   excludeCells(Vector<VolIndex>& a_vofs, const Box& a_excludeBox);
 
-  /*!
+  /**
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
     @param[in] a_vofs List of vofs to be modified
     @param[in] a_excludeIVS List of cells to be excluded. 
@@ -194,7 +195,7 @@ public:
   static void
   excludeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_excludeIVS);
 
-  /*!
+  /**
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeBox List of cells to be excluded. 
@@ -203,7 +204,7 @@ public:
   static void
   includeCells(Vector<VolIndex>& a_vofs, const Box& a_includeBox);
 
-  /*!
+  /**
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeIVS List of cells to be included
@@ -212,7 +213,7 @@ public:
   static void
   includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
 
-  /*!
+  /**
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeIVS List of cells to be included
@@ -221,7 +222,7 @@ public:
   static void
   includeCells(Vector<VolIndex>& a_vofs, const DenseIntVectSet& a_includeIVS);
 
-  /*!
+  /**
     @brief Discard duplicates
     @param[in,out] a_vofs List of Vofs
     @return Returns the same vofs with discarded duplicates. 
@@ -230,7 +231,7 @@ public:
   onlyUnique(Vector<VolIndex>& a_vofs);
 
 protected:
-  /*!
+  /**
     @brief Check if a quadrant is well-defined for a direction in space.
     @param[in] a_normal The direction in space which defines the quadrant. 
     @return True if the quadrant is well defined and false otherwise. 
@@ -238,7 +239,7 @@ protected:
   static bool
   isQuadrantWellDefined(const RealVect a_normal);
 
-  /*!
+  /**
     @brief Returns the coordinate direction
     @param[in] Non-zero normal vector
     @param[in] Returns dirction where ||a_normal[dir]|| == 1. If a_normal[dir] == -1 then dir => -dir
@@ -246,7 +247,7 @@ protected:
   static std::pair<int, Side::LoHiSide>
   getCardinalDirection(const RealVect a_normal);
 
-  /*!
+  /**
     @brief Get all VoFs that can be found with a monotone path with specified radius
     @param[in] a_startVof    Starting Vof. 
     @param[in] a_ebisbox     EBISBox.
@@ -260,7 +261,7 @@ protected:
                         const int       a_radius,
                         const bool      a_addStartVof);
 
-  /*!
+  /**
     @brief Get all connected Vofs in radius which can be reached without crossing a covered face or reaching into a domain boundary. 
     @param[in] a_startVof    Starting Vof
     @param[in] a_ebisbox     EBISBox
@@ -274,7 +275,7 @@ protected:
                            const int       a_radius,
                            const bool      a_addStartVof);
 
-  /*!
+  /**
     @brief Get all Vofs in a radius from a starting Vof
     @param[in] a_startVof   Starting Vof
     @param[in] a_ebisbox    EBISBox
@@ -287,7 +288,7 @@ protected:
                      const int       a_radius,
                      const bool      a_addStartVof);
 
-  /*!
+  /**
     @brief Get all Vofs that are connected to a specific starting Vof. The connection does not have to be direct. 
     @param[in] a_startVof Starting Vof
     @param[in] a_allVofs  All Vofs. This can, but does not have to, include a_startVof.
@@ -297,7 +298,7 @@ protected:
   static Vector<VolIndex>
   connectedVofsOnly(const VolIndex& a_startVof, const Vector<VolIndex>& a_allVofs, const EBISBox& a_ebisbox);
 
-  /*!
+  /**
     @brief Get quadrant defined by direction in space. 
     @param[in] a_cardinal The direction in space which defines the quadrant. 
     @param[in] a_vof      Starting vof
@@ -308,7 +309,7 @@ protected:
   static Box
   getQuadrant(const RealVect& a_normal, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real a_radius);
 
-  /*!
+  /**
     @brief Get "symmetric" quadrant defined by direction in space. 
     @param[in] a_cardinal The direction in space which defines the quadrant. 
     @param[in] a_vof      Starting vof
@@ -321,7 +322,7 @@ protected:
                        const EBISBox&                        a_ebisbox,
                        const Real                            a_radius);
 
-  /*!
+  /**
     @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
     @param[in,out] a_vofList    List of vofs that were within the monotone path
     @param[in]    a_startVof   Starting vof. 
@@ -338,7 +339,7 @@ protected:
                         const IntVect&    a_timesMoved,
                         const IntVect&    a_pathSign);
 
-  /*!
+  /**
     @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
     @param[in,out] a_vofList    List of vofs that were within the monotone path
     @param[in]    a_startVof   Starting vof. 
