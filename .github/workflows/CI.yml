@@ -47,6 +47,40 @@ jobs:
           path: Source Docs Exec Physics Geometries
           ignore_words_file: .codespellignore
 
+  Clang-tidy:
+    if: github.event.pull_request.draft == false
+    needs: [Formatting, REUSE, Codespell]
+    name: Clang-tidy
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Submodules/Chombo-3.3/lib
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install g++ gfortran csh libblas-dev liblapack-dev bear clang-tidy
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Lib/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+
+      - name: Build with Bear
+        run: |
+          bear -- make -j2 DIM=2 discharge-lib
+
+      - name: Run clang-tidy
+        run: |
+          find Source Physics Geometries Exec -name "*.cpp" | \
+            xargs clang-tidy -p $DISCHARGE_HOME
+
   Linux-GNU:
     if: github.event.pull_request.draft == false
     needs: [Formatting, REUSE, Codespell]
@@ -329,7 +363,7 @@ jobs:
           rm -rf Sphinx/build
 
   CI-passed:
-    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell]
+    needs: [Linux-GNU, Linux-oneAPI, Build-documentation, REUSE, Codespell, Clang-tidy]
     runs-on: ubuntu-latest
     steps:
       - name: Do nothing

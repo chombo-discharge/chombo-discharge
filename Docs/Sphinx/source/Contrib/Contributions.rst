@@ -283,19 +283,60 @@ clang-tidy
 ..........
 
 Static analysis is performed with ``clang-tidy`` using the configuration in ``.clang-tidy``.
-The hook requires a ``compile_commands.json`` compilation database in the repository root.
-Generate one from a CMake or Bear build:
+The active check families are: ``bugprone-*``, ``clang-analyzer-*``, ``cppcoreguidelines-*``,
+``misc-*``, ``modernize-*``, ``performance-*``, ``portability-*``, and ``readability-*``,
+with a number of noisy or inapplicable checks disabled.
+Only files under ``Source/``, ``Physics/``, ``Exec/``, and ``Geometries/`` are analysed.
+
+Generating ``compile_commands.json``
+.....................................
+
+``clang-tidy`` requires a compilation database.
+``chombo-discharge`` uses a GNU Make build system, so the database must be generated
+with `Bear <https://github.com/rizsotto/Bear>`_, which intercepts the compiler invocations
+during a normal build:
 
 .. code-block:: bash
 
-   # With Bear (wraps the make invocation)
-   bear -- make -j$(nproc) DIM=2
+   sudo apt install bear        # install Bear
+   cd $DISCHARGE_HOME
+   bear -- make -j$(nproc) DIM=2 discharge-lib
 
-   # Then run clang-tidy on a single file
-   clang-tidy Source/MyModule/CD_MyClass.cpp
+This produces ``compile_commands.json`` in ``$DISCHARGE_HOME``.
+Regenerate it whenever you add or remove source files, or change compiler flags.
 
-The ``clang-tidy`` hook is skipped in CI because the CI build does not produce a
-``compile_commands.json``.  Run it locally before submitting a pull request.
+.. note::
+
+   The compilation database must cover the files you want to analyse.
+   If you are working on a single physics module, build that module explicitly:
+
+   .. code-block:: bash
+
+      bear -- make -j$(nproc) DIM=2 electrostatics
+
+Running clang-tidy
+..................
+
+**Via the pre-commit hook** (runs on staged files):
+
+.. code-block:: bash
+
+   pre-commit run clang-tidy
+
+**Manually on specific files**:
+
+.. code-block:: bash
+
+   clang-tidy -p $DISCHARGE_HOME Source/MyModule/CD_MyClass.cpp
+
+**Manually on all changed files** relative to ``main``:
+
+.. code-block:: bash
+
+   git diff --name-only main -- '*.cpp' '*.H' | \
+       xargs clang-tidy -p $DISCHARGE_HOME
+
+Run it locally before submitting a pull request.
 
 codespell
 .........
@@ -430,6 +471,9 @@ All jobs must pass before a pull request can be merged into ``main``.
    * - ``Codespell``
      - Ubuntu
      - ``codespell`` spelling check across source, docs, and physics files
+   * - ``Clang-tidy``
+     - Ubuntu
+     - Static analysis of ``Source/``, ``Physics/``, ``Geometries/``, and ``Exec/``; uses Bear to generate a compilation database then runs ``clang-tidy`` on all ``.cpp`` files
    * - ``Linux-GNU``
      - Ubuntu
      - Full 2-D debug build with GCC; depends on Formatting, REUSE, and Codespell
