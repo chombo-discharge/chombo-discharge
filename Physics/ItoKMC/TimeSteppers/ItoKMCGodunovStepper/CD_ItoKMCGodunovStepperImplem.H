@@ -1935,8 +1935,7 @@ ItoKMCGodunovStepper<I, C, R, F>::plotParticles() const noexcept
                                ItoParticle::s_realVariables,
                                ItoParticle::s_vectVariables,
                                this->m_amr->getProbLo(),
-                               this->m_time,
-                               this->m_timeStep);
+                               this->m_time);
     }
   }
 }

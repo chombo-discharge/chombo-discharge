@@ -32,8 +32,7 @@ DischargeIO::writeH5Part(const std::string                               a_filen
                          const std::vector<std::string>                  a_realVars,
                          const std::vector<std::string>                  a_vectVars,
                          const RealVect                                  a_shift,
-                         const Real                                      a_time,
-                         const int                                       a_timeStep) noexcept
+                         const Real                                      a_time) noexcept
 {
 #ifdef CH_USE_HDF5
   CH_TIME("DischargeIO::writeH5Part");
@@ -113,17 +112,10 @@ DischargeIO::writeH5Part(const std::string                               a_filen
 #endif
 
   // Define the top group necessary for the H5Part file format
-  const std::string groupName = "Step#" + std::to_string(a_timeStep);
-  hid_t             grp       = H5Gcreate2(fileID, groupName.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t grp = H5Gcreate2(fileID, "Step#0", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-  // Write the Timestep (integer, required by H5Part) and time (double) attributes
-  hid_t scal = H5Screate(H5S_SCALAR);
-
-  long long timestep = static_cast<long long>(a_timeStep);
-  hid_t     tsAttr   = H5Acreate(grp, "Timestep", H5T_NATIVE_LLONG, scal, H5P_DEFAULT, H5P_DEFAULT);
-  H5Awrite(tsAttr, H5T_NATIVE_LLONG, &timestep);
-  H5Aclose(tsAttr);
-
+  // Write the time attribute
+  hid_t scal     = H5Screate(H5S_SCALAR);
   hid_t timeAttr = H5Acreate(grp, "time", H5T_NATIVE_DOUBLE, scal, H5P_DEFAULT, H5P_DEFAULT);
   H5Awrite(timeAttr, H5T_NATIVE_DOUBLE, &a_time);
   H5Aclose(timeAttr);

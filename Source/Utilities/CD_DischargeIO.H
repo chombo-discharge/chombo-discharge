@@ -151,7 +151,6 @@ namespace DischargeIO {
     @param[in] a_vectVars  Variable names for the N vector variables
     @param[in] a_shift     Particle position shift
     @param[in] a_time      Physical time
-    @param[in] a_timeStep  Time step number
   */
   template <size_t M, size_t N>
   void
@@ -160,8 +159,7 @@ namespace DischargeIO {
               const std::vector<std::string>                  a_realVars,
               const std::vector<std::string>                  a_vectVars,
               const RealVect                                  a_shift,
-              const Real                                      a_time,
-              const int                                       a_timeStep) noexcept;
+              const Real                                      a_time) noexcept;
 
 #ifdef CH_USE_HDF5
   /**
