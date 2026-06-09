@@ -41,12 +41,14 @@ public:
 
   /**
     @brief Get number of solvers
+    @return Number of solvers
   */
   virtual int
   getNumberOfSolvers();
 
   /**
     @brief Get current solver number/index
+    @return Return value
   */
   virtual int
   index() const;
@@ -59,6 +61,7 @@ public:
 
   /**
     @brief Check if we can cycle further through the solvers. 
+    @return Return value
   */
   virtual bool
   ok();
@@ -71,12 +74,14 @@ public:
 
   /**
     @brief Get the solver pointed to by the iterator.
+    @return Return value
   */
   virtual RefCountedPtr<T>&
   operator()();
 
   /**
     @brief Get current species pointed to by the iterator.
+    @return Species
   */
   virtual RefCountedPtr<RtSpecies>&
   getSpecies();

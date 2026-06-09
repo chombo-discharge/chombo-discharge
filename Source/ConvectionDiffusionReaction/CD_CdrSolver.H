@@ -181,7 +181,6 @@ public:
     @param[in]  a_phi              Cell-centered state
     @param[in]  a_extrapDt         Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
     @param[in]  a_conservativeOnly If true, we compute div(F)=1/dx*sum(fluxes), which does not involve redistribution.
-    @param[in]  a_domainBc         How to set domain fluxes
     @param[in]  a_ebFlux           If true, the embedded boundary flux will injected be included in div(F)
     @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(F)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
@@ -196,13 +195,12 @@ public:
 
   /**
     @brief Compute div(D*grad(phi)) explicitly
-    @param[out] a_divF             Divergence term, i.e. finite volume approximation to Div(D*Grad(phi)). 
     @param[in]  a_phi              Cell-centered state
-    @param[in]  a_domainBc         Flag for setting domain boundary conditions
     @param[in]  a_conservativeOnly If true, we compute div(D) = 1/dx*sum(fluxes), which does not involve redistribution.
-    @param[in]  a_useEbFlux        If true, the embedded boundary flux will be injected and included in div(D)
     @param[in]  a_domainFlux       If true, the domain flux will injected and included in div(D)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
+    @param[in] a_divD Div d
+    @param[in] a_ebFlux Eb flux
   */
   virtual void
   computeDivD(EBAMRCellData& a_divD,
@@ -452,22 +450,22 @@ public:
                 const std::string     a_outputRealm,
                 const int             a_level) const noexcept;
 
-  /**
-    @brief Write checkpoint data into HDF5 file. 
-    @param[out] a_handle HDF5 file. 
-    @param[in]   a_level Grid level
-  */
 #ifdef CH_USE_HDF5
+  /**
+    @brief Write checkpoint data into HDF5 file.
+    @param[out] a_handle HDF5 file.
+    @param[in]  a_level  Grid level
+  */
   virtual void
   writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 #endif
 
-  /**
-    @brief Read checkpoint data from HDF5 file. 
-    @param[in] a_handle HDF5 handle.
-    @param[in] const int a_level Grid level
-  */
 #ifdef CH_USE_HDF5
+  /**
+    @brief Read checkpoint data from HDF5 file.
+    @param[in] a_handle HDF5 handle.
+    @param[in] a_level  Grid level
+  */
   virtual void
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
@@ -492,6 +490,7 @@ public:
   /**
     @brief Get solver name
     @note Not necessarily equal to class name (we can have many CdrSolvers instantiated). 
+    @return Name
   */
   virtual std::string
   getName() const;
@@ -514,6 +513,7 @@ public:
     @brief Compute the largest possible diffusive time step (for explicit methods)
     @details This computes dt = dx/sum(|vx| + |vy| + |vz|), minimized over all grid levels and patches.  
     @note This is the appropriate time step routine for explicit advection solvers. 
+    @return Computed advection dt
   */
   virtual Real
   computeAdvectionDt();
@@ -522,6 +522,7 @@ public:
     @brief Compute the largest possible diffusive time step (for explicit methods)
     @details This computes dt = (dx*dx)/(2*D*d) where D is the diffusion coefficient. The result is minimized over all grid levels and patches. 
     @note This is the appropriate time step routine for explicit diffusion solvers. 
+    @return Computed diffusion dt
   */
   virtual Real
   computeDiffusionDt();
@@ -541,6 +542,7 @@ public:
     @param[in] a_tolerance Tolerance
     @details This computes dt = phi/source, but only for cells where phi lies within a_tolerance*a_max (and source > 0)
     @todo An old routine which we could (probably) remove. 
+    @return Computed source dt
   */
   virtual Real
   computeSourceDt(const Real a_max, const Real a_tolerance);
@@ -558,6 +560,7 @@ public:
   /**
     @brief Compute the "physical mass" in m_phi
     @details This conservatively coarsens the solution and computes on the coarsest level only
+    @return Computed mass
   */
   virtual Real
   computeMass();
@@ -567,6 +570,7 @@ public:
     @details This conservatively coarsens the solution and computes on the coarsest level only
     @param[in] a_phi        Cell-centered data. 
     @param[in] a_kappaScale Multiply by kappa in irregular cells.
+    @return Computed mass
   */
   virtual Real
   computeMass(const EBAMRCellData& a_phi, const bool a_kappaScale = true);
@@ -574,6 +578,7 @@ public:
   /**
     @brief Compute the total charge in m_phi
     @details Calls computeMass and multiplies by charge
+    @return Computed charge
   */
   virtual Real
   computeCharge();
@@ -966,10 +971,9 @@ protected:
     @param[out] a_flux          Face-centered fluxes
     @param[in]  a_facePhi       Face-centered state
     @param[in]  a_faceVelocity  Face-centered velocities
-    @param[in]  a_domainFlux    Domain flux
-    @param[in]  a_level         Grid level
     @note This computes flux = v*phi on all face centers. If a_addDomainFlux is true, we enforce BC fluxes on the domain sides. Otherwise, the flux on the domain
     sides is set to zero. 
+    @param[in] a_lvl Lvl
   */
   virtual void
   computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
@@ -1112,10 +1116,10 @@ protected:
   /**
     @brief Compute conservative divergence on irregular cells (not kappa divided)
     @param[out] a_divG         Conservative divergence (not kappa divided)
-    @param[out] a_centroidFlux Face centroid centered fluxes
     @param[in]  a_ebFlux       EB flux
     @param[in]  a_lvl          Grid level
     @note This overwrites the result of divG in cut-cells, using the eb flux and face centroid fluxes to compute kappa*div(G) = sum(fluxes)/dx
+    @param[in] a_centroidFluxes Centroid fluxes
   */
   virtual void
   computeDivergenceIrregular(LevelData<EBCellFAB>&             a_divG,
@@ -1203,12 +1207,12 @@ protected:
   /**
     @brief Write data to output. Convenience function. 
     @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
     @param[in]    a_interpGhost If true, interpolate ghost cells
+    @param[in] a_comp Comp
   */
   virtual void
   writeData(LevelData<EBCellFAB>& a_output,

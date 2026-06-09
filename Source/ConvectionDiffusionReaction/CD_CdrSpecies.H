@@ -39,8 +39,8 @@ public:
     @brief Full constructor
     @param[in] a_name         Name of the species
     @param[in] a_chargeNumber Charge number
-    @param[in] a_isMbile      Mobile or not
     @param[in] a_isDiffusive  Diffusive or not
+    @param[in] a_isMobile Is mobile
   */
   CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive);
 
@@ -53,42 +53,49 @@ public:
     @brief Initial data. 
     @param[in] a_pos  Position.
     @param[in] a_time Time
+    @return Return value
   */
   virtual Real
   initialData(const RealVect a_pos, const Real a_time) const = 0;
 
   /**
     @brief Return name
+    @return Name
   */
   virtual std::string
   getName() const;
 
   /**
     @brief Return charge
+    @return Charge number
   */
   virtual int
   getChargeNumber() const;
 
   /**
     @brief Diffusive species or not
+    @return True if diffusive, false otherwise
   */
   virtual bool
   isDiffusive() const;
 
   /**
     @brief Mobile species or not
+    @return True if mobile, false otherwise
   */
   virtual bool
   isMobile() const;
 
   /**
     @brief Get initial particles
+    @return Initial particles
   */
   virtual const List<PointParticle>&
   getInitialParticles() const;
 
   /**
     @brief Get initial particles
+    @return Initial particles
   */
   List<PointParticle>&
   getInitialParticles();

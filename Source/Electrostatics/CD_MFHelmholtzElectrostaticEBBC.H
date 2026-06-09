@@ -76,7 +76,7 @@ public:
     @brief Set stencil order
     @details EBHelmholtzEBBC uses least-squares based stencils for gradient reconstruction. This routine sets the
     order of that reconstruction. 
-    @param[in] a_order. Must be > 0. 
+    @param[in] a_order Must be > 0. 
     @note The radius of the stencil is the same as the order -- do not use an order larger than the number of ghost cells that you will use. 
   */
   void
@@ -92,6 +92,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   void
   setDomainDropOrder(const int a_domainSize);
@@ -158,6 +159,7 @@ protected:
   /**
     @brief Get electrode potential
     @param[in] a_pos Position in space
+    @return Electrode potential
   */
   inline Real
   getElectrodePotential(const RealVect& a_pos) const;

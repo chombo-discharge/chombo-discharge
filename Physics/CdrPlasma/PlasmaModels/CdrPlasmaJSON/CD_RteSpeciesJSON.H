@@ -92,7 +92,7 @@ namespace Physics {
       /**
          @brief Initial data function. 
          @param[in] a_pos  Physical coordinates 
-         @param[in] a_time Time
+        @return Absorption coefficient
       */
       Real
       getAbsorptionCoefficient(const RealVect a_pos) const override final;

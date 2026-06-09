@@ -55,12 +55,15 @@ public:
 
   /**
     @brief Value function. Returns distance to object (ish).
+    @return Function value at the given point
+    @param[in,out] a_pos Description
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
     @brief Factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;

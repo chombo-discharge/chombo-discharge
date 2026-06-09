@@ -42,23 +42,36 @@ class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB>>
 {
 public:
   // Various alias for cutting down on typing.
+  /** @brief Smoother type alias. */
   using Smoother = EBHelmholtzOp::Smoother;
 
-  using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid>>;
-  using AmrMask          = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
+  /** @brief alias type alias. */
+  using AmrLevelGrids = Vector<RefCountedPtr<EBLevelGrid>>;
+  /** @brief alias type alias. */
+  using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
+  /** @brief alias type alias. */
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator>>;
+  /** @brief alias type alias. */
   using AmrFluxRegisters = Vector<RefCountedPtr<EBReflux>>;
-  using AmrCoarseners    = Vector<RefCountedPtr<EBCoarAve>>;
+  /** @brief alias type alias. */
+  using AmrCoarseners = Vector<RefCountedPtr<EBCoarAve>>;
 
+  /** @brief alias type alias. */
   using AmrCellData = Vector<RefCountedPtr<LevelData<EBCellFAB>>>;
+  /** @brief alias type alias. */
   using AmrFluxData = Vector<RefCountedPtr<LevelData<EBFluxFAB>>>;
+  /** @brief alias type alias. */
   using AmrIrreData = Vector<RefCountedPtr<LevelData<BaseIVFAB<Real>>>>;
 
+  /** @brief alias type alias. */
   using AmrResolutions = Vector<Real>;
-  using AmrRefRatios   = Vector<int>;
+  /** @brief alias type alias. */
+  using AmrRefRatios = Vector<int>;
 
+  /** @brief alias type alias. */
   using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
-  using EBBCFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>;
+  /** @brief alias type alias. */
+  using EBBCFactory = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /**
     @brief Disallowed constructor. Use the full constructor
@@ -88,10 +101,8 @@ public:
     @param[in] a_amrAcoef         A-coefficient in Helmholtz operator. 
     @param[in] a_amrBcoef         B-coefficient in Helmholtz operator. 
     @param[in] a_amrBcoefIrreg    B-coefficient in Helmholtz operator. This one is defined on EB faces. 
-    @param[in] a_domainBCFactory  Factory class for making domain BC objects. 
     @param[in] a_ebbcFactory      Factory class for making BC objects for EB boundary conditions. 
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
-    @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
     @param[in] a_relaxationMethod Relaxation method.
     @param[in] a_relaxFactor      Relaxation factor
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
@@ -100,6 +111,12 @@ public:
     However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids 
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
     @note This operator is for time-independent a- and b-coefficients. 
+    @param[in] a_amrLevelGrids Amr level grids
+    @param[in] a_validCells Valid cells
+    @param[in] a_amrRefRatios Amr ref ratios
+    @param[in] a_domainBcFactory Domain bc factory
+    @param[in] a_ghostRHS Ghost r h s
+    @param[in] a_mgBlockingFactor Mg blocking factor
   */
   EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
                        const Real&             a_alpha,
@@ -153,6 +170,7 @@ public:
     @param[in] a_fineDomain      Domain
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);
     @param[in] a_homogeneousOnly If true, only homogeneous boundary conditions will be needed. 
+    @return Return value
   */
   EBHelmholtzOp*
   MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
@@ -160,6 +178,7 @@ public:
   /**
     @brief Create AMR operator for specified domain
     @param[in] a_domain Domain
+    @return Return value
   */
   EBHelmholtzOp*
   AMRnewOp(const ProblemDomain& a_domain) override final;
@@ -167,6 +186,8 @@ public:
   /**
     @brief Get refinement ratio to next finest level.
     @note Returns -1 when there are no finer levels. 
+    @return Return value
+    @param[in,out] a_indexspace Description
   */
   int
   refToFiner(const ProblemDomain& a_indexspace) const override final;

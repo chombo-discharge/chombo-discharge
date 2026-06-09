@@ -96,13 +96,13 @@ public:
     @param[in] a_Acoef         Operator A-coefficient
     @param[in] a_Bcoef         Operator B-coefficient
     @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
-    @param[in] a_ghostCellsPhi Ghost cells in data holders
-    @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_jumpOrder     Stencil order to use on jump cells
-    @param[in] a_jumpWeights   Weights for least squares stencils on jump cells
-    @param[in] a_smoothPreCond Number of smoothings in the preconditioner
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_ghostPhi Description
+    @param[in] a_ghostRhs Description
+    @param[in] a_jumpWeight Description
+    @param[in] a_preCondSmooth Description
   */
   MFHelmholtzOp(const Location::Cell                             a_dataLocation,
                 const MFLevelGrid&                               a_mflgFine,
@@ -189,18 +189,22 @@ public:
 
   /**
     @brief Set the jump boundary condition
+    @param[in,out] a_jump Description
   */
   void
   setJump(RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_jump);
 
   /**
     @brief Get Helmholtz operator
+    @return Helm op
+    @param[in] a_phase Description
   */
   RefCountedPtr<EBHelmholtzOp>&
   getHelmOp(const int a_phase);
 
   /**
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
+    @return Return value
   */
   int
   refToCoarser() override final;
@@ -222,6 +226,8 @@ public:
 
   /**
     @brief Apply operator but turn off all BCs. 
+    @param[in,out] a_ans Description
+    @param[in,out] a_phi Description
   */
   void
   applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi) override final;
@@ -253,7 +259,7 @@ public:
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi
     @param[in]  a_rhs               Right-hand side of system
-    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in] a_homogeneousPhysBc Homogeneous phys bc
   */
   void
   residual(LevelData<MFCellFAB>&       a_residual,
@@ -363,6 +369,9 @@ public:
 
   /**
     @brief Dot product.
+    @return Return value
+    @param[in,out] a_lhs Description
+    @param[in,out] a_2 Description
   */
   Real
   dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) override final;
@@ -384,8 +393,8 @@ public:
 
   /**
     @brief Assignment function
-    @param[out] a_lhs. Equal to a_rhs on output
-    @param[in]  a_rhs. Data
+    @param[out] a_lhs Equal to a_rhs on output
+    @param[in] a_rhs Data
   */
   void
   assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
@@ -403,8 +412,8 @@ public:
 
   /**
     @brief Local assignment function
-    @param[out] a_lhs. Equal to a_rhs on output
-    @param[in]  a_rhs. Data
+    @param[out] a_lhs Equal to a_rhs on output
+    @param[in] a_rhs Data
   */
   void
   assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
@@ -422,6 +431,7 @@ public:
     @brief Compute solution norm. 
     @param[in] a_lhs   Data
     @param[in] a_order Norm order. Not used. 
+    @return Return value
   */
   Real
   norm(const LevelData<MFCellFAB>& a_lhs, int a_order) override final;
@@ -562,10 +572,11 @@ public:
   /**
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels. 
     @param[out] a_Lphi              L(phi)
-    @param[in]  a_phiFine           Phi on finer level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+    @param[in] a_phiCoar Phi coar
+    @param[in] a_finerOp Finer op
   */
   void
   AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,
@@ -773,13 +784,13 @@ protected:
 
   /**
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
-    @param[out] a_residual          Residual on this level
     @param[in]  a_phiFine           Phi on fine level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_phiCoar           Phi on coar level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @param[in]  a_finerOp           Finer operatator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+    @param[in] a_Lphi Lphi
   */
   void
   AMROperator(LevelData<MFCellFAB>&             a_Lphi,

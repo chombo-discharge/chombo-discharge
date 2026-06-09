@@ -30,6 +30,10 @@
 class DomainFluxIFFAB
 {
 public:
+  /**
+    @brief Pre allocatable.
+    @return Always 1 (symmetric messaging).
+  */
   static int
   preAllocatable()
   {
@@ -57,24 +61,28 @@ public:
 
   /**
     @brief Get the defining box
+    @return Return value
   */
   const Box&
   box() const;
 
   /**
     @brief Get number of components
+    @return Return value
   */
   int
   nComp() const;
 
   /**
     @brief Get the defining problem domain
+    @return Domain
   */
   const ProblemDomain&
   getDomain() const;
 
   /**
     @brief Get the defining ebis box
+    @return E b i s box
   */
   const EBISBox&
   getEBISBox() const;
@@ -100,6 +108,7 @@ public:
     @brief Get the BaseIFFAB on a particular domain side
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Side (lo/hi)
+    @return Return value
   */
   BaseIFFAB<Real>&
   operator()(const int a_dir, const Side::LoHiSide a_side);
@@ -108,6 +117,7 @@ public:
     @brief Get the BaseIFFAB on a particular domain side
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Side (lo/hi)
+    @return Return value
   */
   const BaseIFFAB<Real>&
   operator()(const int a_dir, const Side::LoHiSide a_side) const;
@@ -115,6 +125,8 @@ public:
   /**
     @brief Linearization function.
     @return Returns the sum of the BaseIFFAB sizes
+    @param[in,out] R Description
+    @param[in,out] comps Description
   */
   int
   size(const Box& R, const Interval& comps) const;
@@ -122,6 +134,9 @@ public:
   /**
     @brief Linearization function.
     @details This reuses BaseIFFAB linearization function
+    @param[in] buf Description
+    @param[in,out] R Description
+    @param[in,out] comps Description
   */
   void
   linearOut(void* buf, const Box& R, const Interval& comps) const;
@@ -129,6 +144,9 @@ public:
   /**
     @brief Linearization function.
     @details This reuses BaseIFFAB linearization function
+    @param[in] buf Description
+    @param[in,out] R Description
+    @param[in,out] comps Description
   */
   void
   linearIn(void* buf, const Box& R, const Interval& comps);
@@ -136,6 +154,11 @@ public:
   /** 
     @brief Copy functiopn
     @details Copies from a subsection of one box into another.
+    @param[in,out] Rfrom Description
+    @param[in,out] Cdest Description
+    @param[in,out] Rto Description
+    @param[in,out] src Description
+    @param[in,out] Csrc Description
     Assumes the boxes are both in the same index space, and that
     box R is completely contained in both the src and destination
     boxes.  This function equired by BoxLayoutData 

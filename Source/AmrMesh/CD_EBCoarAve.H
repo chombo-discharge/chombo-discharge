@@ -373,7 +373,7 @@ protected:
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
-    @param[in]    a_finevar Fine Variable
+    @param[in] a_fineVar Fine var
   */
   virtual void
   arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
@@ -388,7 +388,7 @@ protected:
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
-    @param[in]    a_finevar Fine Variable
+    @param[in] a_fineVar Fine var
   */
   virtual void
   harmonicAverage(BaseIVFAB<Real>&       a_coarData,
@@ -403,7 +403,7 @@ protected:
     @param[in]    a_fineData Fine data
     @param[in]    a_datInd Grid index
     @param[in]    a_coarVar Coarse variable
-    @param[in]    a_finevar Fine Variable
+    @param[in] a_fineVar Fine var
   */
   virtual void
   conservativeAverage(BaseIVFAB<Real>&       a_coarData,

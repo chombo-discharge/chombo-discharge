@@ -106,6 +106,7 @@ namespace Physics {
          @brief Initial data function. 
          @param[in] a_pos  Physical coordinates 
          @param[in] a_time Time
+        @return Return value
       */
       Real
       initialData(const RealVect a_pos, const Real a_time) const override final;

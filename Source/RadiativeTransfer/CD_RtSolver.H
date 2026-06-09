@@ -70,6 +70,7 @@ public:
     @brief Advance equation one time step
     @param[in] a_dt      Time step
     @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
+    @return Time step used
   */
   virtual bool
   advance(const Real a_dt, const bool a_zeroPhi = false);
@@ -79,6 +80,7 @@ public:
     @param[in] a_dt      Time step
     @param[in] a_phi     Mesh solution
     @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
+    @return Time step used
   */
   virtual bool
   advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zeroPhi = false);
@@ -89,6 +91,7 @@ public:
     @param[in] a_phi     Mesh solution
     @param[in] a_source  Source term
     @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
+    @return Time step used
   */
   virtual bool
   advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) = 0;
@@ -119,7 +122,6 @@ public:
     @param[out] a_loads Grid loads for this level. 
     @param[in] a_dbl Grids on input level
     @param[in] a_level Input level
-    @return Loads for each box on a grid level. 
     @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
     @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
   */
@@ -173,6 +175,7 @@ public:
 
   /**
     @brief Check if solver is stationary
+    @return True if stationary, false otherwise
   */
   virtual bool
   isStationary();
@@ -187,8 +190,8 @@ public:
 
   /**
     @brief Compute the domain flux given a state (a_phi will be different for different RTE approximations)
-    @param[in,out] a_domainFlux The flux on the domain wall
     @param[in]    a_phi        Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
+    @param[in] a_domainflux Domainflux
   */
   virtual void
   computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
@@ -290,6 +293,7 @@ public:
 
   /**
     @brief Get output plot names
+    @return Plot variable names
   */
   virtual Vector<std::string>
   getPlotVariableNames() const;
@@ -297,10 +301,10 @@ public:
   /**
     @brief Write output data to a_output
     @param[in,out] a_output      Output data holder.
-    @param[in,out] a_icomp       Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level       Grid level
     @note This routine writes m_phi on centroids (and not cell-centers). 
+    @param[in] a_comp Comp
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
@@ -372,6 +376,7 @@ public:
 
   /**
     @brief Get species
+    @return Species
   */
   virtual RefCountedPtr<RtSpecies>&
   getSpecies();
@@ -489,6 +494,7 @@ protected:
   /**
     @brief
   */
+  /** @brief Verbosity. */
   int m_verbosity;
 
   /**
@@ -498,6 +504,7 @@ protected:
 
   /**
     @brief Set ebis
+    @param[in,out] a_ebis Description
   */
   void
   setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
@@ -511,12 +518,12 @@ protected:
   /**
     @brief Write data to output. Convenience function. 
     @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_level  Grid level
     @param[in]    a_outputRealm Realm to which a_output belongs
     @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
     @param[in]    a_interpGhost If true, interpolate ghost cells
+    @param[in] a_comp Comp
   */
   virtual void
   writeData(LevelData<EBCellFAB>& a_output,

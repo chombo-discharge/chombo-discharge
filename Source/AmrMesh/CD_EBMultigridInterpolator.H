@@ -44,6 +44,7 @@ public:
 
   /**
     @brief Return number of ghost cells across CF interface.
+    @return Ghost c f
   */
   virtual int
   getGhostCF() const = 0;
@@ -66,6 +67,7 @@ public:
     @param[in] a_din Grid index
     @param[in] a_dir Coordinate direction
     @param[in] a_side Low or high side of the grid patch
+    @return Interpolation stencil regular
   */
   virtual std::pair<DerivStencil, DerivStencil>
   getInterpolationStencilRegular(const IntVect&       a_fineGhost,

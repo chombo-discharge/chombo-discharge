@@ -96,6 +96,7 @@ public:
     @brief Interpolation function. 
     @param[out] a_centroidData Centroid-centered data.
     @param[in] a_cellData Cell-centered data.
+    @param[in] a_din Description
   */
   void
   interpolate(BaseIVFAB<Real>& a_centroidData, const EBCellFAB& a_cellData, const DataIndex& a_din) const noexcept;
@@ -137,6 +138,7 @@ protected:
     @param[in] a_vof VolIndex for cut-cell
     @param[in] a_ebisBox EB grid box
     @param[in] a_domain Grid domain
+    @return Linear stencil
   */
   virtual bool
   getLinearStencil(VoFStencil&          a_stencil,
@@ -150,6 +152,7 @@ protected:
     @param[in] a_vof VolIndex for cut-cell
     @param[in] a_ebisBox EB grid box
     @param[in] a_domain Grid domain    
+    @return Taylor extrapolation stencil
   */
   virtual bool
   getTaylorExtrapolationStencil(VoFStencil&          a_stencil,
@@ -163,6 +166,7 @@ protected:
     @param[in] a_vof VolIndex for cut-cell
     @param[in] a_ebisBox EB grid box
     @param[in] a_domain Grid domain    
+    @return Least squares stencil
   */
   virtual bool
   getLeastSquaresStencil(VoFStencil&          a_stencil,
@@ -176,6 +180,7 @@ protected:
     @param[in] a_vof VolIndex for cut-cell
     @param[in] a_ebisBox EB grid box
     @param[in] a_domain Grid domain    
+    @return Piecewise linear stencil
   */
   virtual bool
   getPiecewiseLinearStencil(VoFStencil&          a_stencil,
@@ -187,6 +192,7 @@ protected:
     @brief Minmod slope function. 
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
+    @return Return value
   */
   inline Real
   MinMod(const Real& a_dwl, const Real& a_dwr) const noexcept;
@@ -195,6 +201,7 @@ protected:
     @brief Monotonized central difference slope limiter.
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
+    @return Return value
   */
   inline Real
   MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) const noexcept;
@@ -203,6 +210,7 @@ protected:
     @brief Superbee slope limiter. 
     @param[in] a_dwl Left slope
     @param[in] a_dwr Right slope
+    @return Return value
   */
   inline Real
   Superbee(const Real& a_dwl, const Real& a_dwr) const noexcept;

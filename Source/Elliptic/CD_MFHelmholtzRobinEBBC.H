@@ -31,6 +31,8 @@ class MFHelmholtzRobinEBBC : public MFHelmholtzEBBC
 public:
   /**
     @brief Full constructor. Must subsequently set the order and weight for stencils. 
+    @param[in] a_phase Description
+    @param[in,out] a_jumpBC Description
   */
   MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
@@ -55,6 +57,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
@@ -83,6 +86,7 @@ protected:
   /*
     @brief Use constant for BC
   */
+  /** @brief Use constant. */
   bool m_useConstant;
 
   /**
@@ -167,6 +171,7 @@ protected:
     @param[in] a_neighborhood Vof neighborhood (either quadrant-based or radius)
     @param[in] a_order        Stencil order
     @note This extrapolates from cell-centers to the EB using a first order expression. 
+    @return Interpolation stencil
   */
   VoFStencil
   getInterpolationStencil(const VolIndex&              a_vof,

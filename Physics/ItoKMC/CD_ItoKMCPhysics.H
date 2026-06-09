@@ -174,6 +174,7 @@ namespace Physics {
 	@param[in] a_gradPhi Density gradients for plasma species. 
 	@param[in] a_dx      Grid resolution
 	@param[in] a_kappa   Cut-cell volume fraction
+        @return Plot variables
       */
       virtual Vector<Real>
       getPlotVariables(const RealVect          a_E,
@@ -192,24 +193,28 @@ namespace Physics {
 
       /**
 	@brief Return number of Ito solvers.
+        @return Num ito species
       */
       inline int
       getNumItoSpecies() const;
 
       /**
 	@brief Return number of CDR solvers.
+        @return Num cdr species
       */
       inline int
       getNumCdrSpecies() const;
 
       /**
 	@brief Return total number of plasma species.
+        @return Num plasma species
       */
       inline int
       getNumPlasmaSpecies() const;
 
       /**
 	@brief Return number of RTE solvers.
+        @return Num photon species
       */
       inline int
       getNumPhotonSpecies() const;
@@ -238,6 +243,7 @@ namespace Physics {
 	@brief Set initial surface charge. Default is 0, override if you want.
 	@param[in] a_time Simulation time
 	@param[in] a_pos  Physical coordinate
+        @return Return value
       */
       inline virtual Real
       initialSigma(const Real a_time, const RealVect a_pos) const;
@@ -271,9 +277,6 @@ namespace Physics {
 	@param[in]  a_primaryParticles   Particles that left the computational domain through the EB.
 	@param[in]  a_cdrFluxesExtrap    Extrapolated CDR fluxes.
 	@param[in]  a_primaryPhotons     Photons that left the computational domain through the EB.
-	@param[in]  a_newNumParticles    Total number of particles in the cut-cell AFTER the transport step.
-	@param[in]  a_oldNumParticles    Total number of particles in the cut-cell BEFORE the transport step.
-	@param[in]  a_electricField      Electric field.                  
 	@param[in]  a_physicalCellCenter Physical position of the cell center. 
 	@param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx).
 	@param[in]  a_bndryCentroid      EB face centroid relative to the cell center (not multiplied by dx).
@@ -283,6 +286,7 @@ namespace Physics {
 	@param[in]  a_dt                 Time step.
 	@param[in]  a_isDielectric       Dielectric or electrode. 
 	@param[in]  a_matIndex           Material index (taken from computationalGeometry).
+        @param[in] a_E E
       */
       virtual void
       secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
@@ -336,13 +340,13 @@ namespace Physics {
 	@param[in]    a_electricField   Electric field in cell
 	@param[in]    a_cellPos         Cell center position
 	@param[in]    a_centroidPos     Cell centroid position
-	@param[in]    a_loCorner        Low corner of minimum box enclosing the cut-cell
-	@param[in]    a_hiCorner        High corner of minimum box enclosing the cut-cell
 	@param[in]    a_bndryCentroid   Cut-cell boundary centroid
 	@param[in]    a_bndryNormal     Cut-cell normal (pointing into the domain)
 	@param[in]    a_dx              Grid resolution
 	@param[in]    a_kappa           Cut-cell volume fraction. 
 	@note Public because this is called by ItoKMCStepper
+        @param[in] a_lo Lo
+        @param[in] a_hi Hi
       */
       inline void
       reconcileParticles(Vector<List<ItoParticle>*>& a_particles,
@@ -365,13 +369,13 @@ namespace Physics {
 	@param[in] a_numNewPhotons   Number of physical photons to be generated. 
 	@param[in] a_cellPos         Cell center position
 	@param[in] a_centroidPos     Cell centroid position
-	@param[in] a_loCorner        Low corner of minimum box enclosing the cut-cell
-	@param[in] a_hiCorner        High corner of minimum box enclosing the cut-cell
 	@param[in] a_bndryCentroid   Cut-cell boundary centroid
 	@param[in] a_bndryNormal     Cut-cell normal (pointing into the domain)
 	@param[in] a_dx              Grid resolution
 	@param[in] a_kappa           Cut-cell volume fraction. 
 	@note Public because this is called by ItoKMCStepper
+        @param[in] a_lo Lo
+        @param[in] a_hi Hi
       */
       inline void
       reconcilePhotons(Vector<List<Photon>*>& a_newPhotons,
@@ -387,10 +391,10 @@ namespace Physics {
 
       /**
 	@brief Reconcile photoionization reactions.
-	@param[in,out] a_itoPrticles       Particle products placed in Ito solvers. 
 	@param[in,out] a_cdrParticles      Particle products placed in CDR solvers. 
 	@param[in]    a_absorbedPhotons Photons absorbed on the mesh. 
 	@details This runs through the photo-reactions and associates photo-ionization products. 
+        @param[in] a_itoParticles Ito particles
       */
       inline void
       reconcilePhotoionization(Vector<List<ItoParticle>*>&   a_itoParticles,
@@ -661,6 +665,7 @@ namespace Physics {
 	@param[in] a_electricField Electric field vector
 	@param[in] a_cellPos Physical location of the cell center
 	@param[in] a_dx Grid resolution
+        @return Computed upstream position
       */
       inline bool
       computeUpstreamPosition(RealVect&                a_pos,

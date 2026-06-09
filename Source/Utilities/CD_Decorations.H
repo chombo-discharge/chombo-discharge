@@ -15,6 +15,7 @@
 
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 // SIMD instructions
 #ifndef NDEBUG
 #define CD_PRAGMA_SIMD
@@ -42,6 +43,7 @@
 #else
 #define ALWAYS_INLINE inline
 #endif
+/// @endcond
 
 #include <CD_NamespaceFooter.H>
 #endif

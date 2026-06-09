@@ -33,6 +33,7 @@ public:
 
   /**
     @brief Full constructor. Sets indices. Use as TileI(0,1,2,...)
+    @param[in] args Indices to assign.
   */
   template <typename... Args, typename std::enable_if<sizeof...(Args) == DIM, int>::type = 0>
   explicit TileI(Args... args) noexcept : m_indices{static_cast<T>(args)...}
@@ -46,6 +47,7 @@ public:
   /**
     @brief Get the index in specified coordinate direction
     @param[in] a_dir Coordinate direction
+    @return Return value
   */
   inline T&
   operator[](const size_t a_dir) noexcept;
@@ -53,6 +55,7 @@ public:
   /**
     @brief Get the index in specified coordinate direction
     @param[in] a_dir Coordinate direction
+    @return Return value
   */
   inline const T&
   operator[](const size_t a_dir) const noexcept;
@@ -74,6 +77,7 @@ public:
   /**
     @brief Comparison operator. Uses lexicographical comparison.
     @param[in] a_otherTile Other tile.
+    @return Return value
   */
   inline constexpr bool
   operator<(const TileI& a_otherTile) const noexcept;
@@ -81,6 +85,7 @@ public:
   /**
     @brief Comparison operator. Uses lexicographical comparison.
     @param[in] a_otherTile Other tile.
+    @return Return value
   */
   inline constexpr bool
   operator>(const TileI& a_otherTile) const noexcept;
@@ -88,6 +93,7 @@ public:
   /**
     @brief Comparison operator. Uses lexicographical comparison.
     @param[in] a_otherTile Other tile.
+    @return Return value
   */
   inline constexpr bool
   operator==(const TileI& a_otherTile) const noexcept;

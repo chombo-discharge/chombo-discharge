@@ -397,6 +397,7 @@ EBCoarseFineParticleMesh::getEblgFiCo() const
   return m_eblgFiCo;
 }
 
+/// @cond DOXYGEN_SKIP
 template <>
 LevelData<EBCellFAB>&
 EBCoarseFineParticleMesh::getBufferFiCo<1>() const noexcept
@@ -420,6 +421,7 @@ EBCoarseFineParticleMesh::getBufferFiCo<SpaceDim>() const noexcept
 
   return m_bufferFiCoRealVect;
 }
+/// @endcond
 
 void
 EBCoarseFineParticleMesh::addFiCoDataToFine(LevelData<EBCellFAB>&       a_fineData,

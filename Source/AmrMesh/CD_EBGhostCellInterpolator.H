@@ -58,7 +58,6 @@ public:
     @param[in] a_eblgFine     Fine grids
     @param[in] a_eblgCoFi     Coarsened fine grids
     @param[in] a_eblgCoar     Coarse grids
-    @param[in] a_dataLocation Interpration of data centering. Either on the cell center or the cell centroid. 
     @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
     @param[in] a_refRat       Refinement ratio between coarse and fine grids.
     @param[in] a_ghostCF      Width of the ghost region to be filled. Only relevant near the EBCF. 
@@ -80,7 +79,6 @@ public:
     @param[in] a_eblgFine     Fine grids
     @param[in] a_eblgCoFi     Coarsened fine grids
     @param[in] a_eblgCoar     Coarse grids
-    @param[in] a_dataLocation Interpration of data centering. Either on the cell center or the cell centroid. 
     @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
     @param[in] a_refRat       Refinement ratio between coarse and fine grids.
     @param[in] a_ghostCF      Width of the ghost region to be filled. Only relevant near the EBCF. 
@@ -98,7 +96,7 @@ public:
     @param[in,out] a_phiFine   Fine phi
     @param[in]    a_phiCoar   Coarse phi
     @param[in]    a_variables Variables to interpolate
-    @param[in]    a_type      Interpolation type
+    @param[in] a_interpType Interp type
   */
   virtual void
   interpolate(LevelData<EBCellFAB>&       a_phiFine,
@@ -195,7 +193,7 @@ protected:
     @param[in] a_dit Grid index on the fine grid
     @param[in] a_fineVar Fine-grid variable
     @param[in] a_coarVar Coarse-grid variable
-    @param[in] a_interType Slope type
+    @param[in] a_interpType Interp type
   */
   virtual void
   interpolateRegular(FArrayBox&       a_phiFine,
@@ -212,7 +210,7 @@ protected:
     @param[in] a_dit Grid index on the fine grid
     @param[in] a_fineVar Fine-grid variable
     @param[in] a_coarVar Coarse-grid variable
-    @param[in] a_interType Slope type
+    @param[in] a_interpType Interp type
   */
   virtual void
   interpolateIrregular(EBCellFAB&       a_phiFine,
@@ -226,6 +224,7 @@ protected:
     @brief minmod slope function. 
     @param[in] dwl Left slope
     @param[in] dwr Right slope
+    @return Return value
   */
   inline Real
   minmod(const Real& dwl, const Real& dwr) const noexcept;
@@ -234,6 +233,7 @@ protected:
     @brief Superbee slope limiter. 
     @param[in] dwl Left slope
     @param[in] dwr Right slope
+    @return Return value
   */
   inline Real
   superbee(const Real& dwl, const Real& dwr) const noexcept;
@@ -242,6 +242,7 @@ protected:
     @brief Monotonized central difference slope limiter.
     @param[in] dwl Left slope
     @param[in] dwr Right slope
+    @return Return value
   */
   inline Real
   monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;

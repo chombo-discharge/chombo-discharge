@@ -54,18 +54,21 @@ public:
 
   /**
     @brief Get low corner
+    @return Lo
   */
   RealVect
   getLo() const;
 
   /**
     @brief Get high corner
+    @return Hi
   */
   RealVect
   getHi() const;
 
   /**
     @brief Get all the corners of this box (4 in 2D, 8 in 3D);
+    @return Corners
   */
   Vector<RealVect>
   getCorners() const;
@@ -73,6 +76,7 @@ public:
   /**
     @brief Check if a_box intersects this box. This is done by checking if 
     @param[in] a_box Other box
+    @return True if intersection found, false otherwise
   */
   bool
   intersect(const RealBox& a_box) const;
@@ -80,6 +84,7 @@ public:
   /**
     @brief Check if a_point is inside this box
     @param[in] a_point Input point
+    @return True if point inside, false otherwise
   */
   bool
   isPointInside(const RealVect a_point) const;
@@ -88,6 +93,7 @@ public:
     @brief Check if a_box is completely inside this box. For this to be true, all the corners of a_box must be 
     completely inside this box
     @param[in] a_box Other box.
+    @return True if box inside, false otherwise
   */
   bool
   isBoxInside(const RealBox& a_box) const;

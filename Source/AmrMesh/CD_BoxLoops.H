@@ -75,7 +75,7 @@ namespace BoxLoops {
     @endcode
 
     @param[in]    a_computeBox Computation box
-    @param[in,out] a_kernel     Kernel to launch.
+    @param[in] kernel Kernel
   */
 #if CH_SPACEDIM == 2
   template <int Si, int Sj, typename Functor>
@@ -89,8 +89,8 @@ namespace BoxLoops {
 
   /**
     @brief Launch a C++ kernel over a subset of cells.
-    @param[in,out] a_cells   Grid cells where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
+    @param[in] a_ivs Ivs
   */
   template <typename Functor>
   ALWAYS_INLINE void
@@ -98,8 +98,8 @@ namespace BoxLoops {
 
   /**
     @brief Launch a C++ kernel over a subset of cells.
-    @param[in,out] a_cells   Grid cells where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
+    @param[in] a_ivs Ivs
   */
   template <typename Functor>
   ALWAYS_INLINE void
@@ -107,8 +107,8 @@ namespace BoxLoops {
 
   /**
     @brief Launch a C++ kernel over cut-cells.
-    @param[in,out] a_vofit   Grid cells where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
+    @param[in] a_iter Iter
   */
   template <typename Functor>
   ALWAYS_INLINE void
@@ -116,8 +116,8 @@ namespace BoxLoops {
 
   /**
     @brief Launch a C++ kernel over faces
-    @param[in,out] a_faceit  Grid faces where we launch the kernel.
     @param[in,out] a_kernel  Kernel to launch
+    @param[in] a_iter Iter
   */
   template <typename Functor>
   ALWAYS_INLINE void

@@ -137,6 +137,7 @@ namespace Physics {
       /**
 	@brief Compute time step
 	@details This is a static solver so it returns 0.0
+        @return Computed dt
       */
       Real
       computeDt() override
@@ -190,6 +191,7 @@ namespace Physics {
       /**
 	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
 	@param[in] a_realm Realm name
+        @return Return value
       */
       bool
       loadBalanceThisRealm(const std::string a_realm) const override;

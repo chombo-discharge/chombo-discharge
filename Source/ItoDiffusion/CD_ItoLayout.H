@@ -48,18 +48,21 @@ public:
 
   /**
     @brief Return phase where the solvers are defined. 
+    @return Phase
   */
   virtual phase::which_phase
   getPhase() const;
 
   /**
     @brief Return a fresh iterator. The iterator is a simple random access object that can iterate through the solvers. 
+    @return Return value
   */
   virtual ItoIterator<T>
   iterator();
 
   /**
     @brief Get the realm name where the solvers are defined. 
+    @return Realm
   */
   virtual const std::string
   getRealm() const;
@@ -108,7 +111,7 @@ public:
     @brief Utility function which caches states before regrid step.
     @details Calls the preRegrid function for each solver. 
     @param[in] a_lbase          Coarsest level that changed during regrid. 
-    @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
+    @param[in] a_finestLevel Finest level
   */
   virtual void
   preRegrid(const int a_lbase, const int a_finestLevel);
@@ -172,7 +175,7 @@ public:
 
   /**
     @brief Set AmrMesh object for each solver. 
-    @param[in] a_amrMesh AmrMesh object
+    @param[in] a_amr Amr
   */
   virtual void
   setAmr(const RefCountedPtr<AmrMesh>& a_amr);
@@ -240,6 +243,7 @@ public:
   /**
     @brief Compute smallest possible time step. 
     @details This calls computeDt() for each ItoSolver and minimizes the result over the solvers (i.e. it returns the smallest time step)
+    @return Computed dt
   */
   virtual Real
   computeDt();
@@ -248,6 +252,7 @@ public:
     @brief Compute the classical advection time step for all solvers. This returns dt = dx/max(v) where max(v) takes the largest component. 
     @details This calls computeAdvectionDt() for each ItoSolver and minimizes the result over the solvers (i.e. it returns the smallest time step)
     @note See ItoSolver::computeAdvectionDt() to see how the time step is computed. 
+    @return Computed advective dt
   */
   virtual Real
   computeAdvectiveDt();
@@ -257,6 +262,7 @@ public:
     @details This calls computeHopDt for all solvers -- that function uses the maximum permitted diffusion hop to restrict the time step (the user will have
     restricted the normal distribution to some value). So, the result of this value will depend strongly on the user input for the ItoSolvers. 
     @param[in] a_maxCellsToMove Maximum number of cells to move. 
+    @return Computed hop dt
   */
   virtual Real
   computeHopDt(const Real a_maxCellsToMove);
@@ -264,6 +270,7 @@ public:
   /**
     @brief Compute the classical diffusive time step dt = dx*dx/(2*D) where D is the diffusion coefficient (not dimensional dependence here)
     @details This calls computeDiffusiveDt for all solvers and minimizes the result over all solvers. 
+    @return Computed diffusive dt
   */
   virtual Real
   computeDiffusiveDt();
@@ -271,8 +278,9 @@ public:
   /**
     @brief Get total number of particles. 
     @details This returns the total number of particles in a specified container. The result is accumulated over all solvers.
-    @param[in] a_whichContainer Container type in ItoSolver
     @param[in] a_localOnly      If true, only count particles locally. If false, compute globally. 
+    @return Num particles
+    @param[in] a_ptype Ptype
   */
   virtual size_t
   getNumParticles(const ItoSolver::WhichContainer a_ptype, const bool a_localOnly);
@@ -294,6 +302,7 @@ public:
   /**
     @brief Get all velocity functions. 
     @details This accumulates a pointer to the velocity mesh data for each solver. 
+    @return Velocity functions
   */
   virtual Vector<EBAMRCellData*>
   getVelocityFunctions();
@@ -301,6 +310,7 @@ public:
   /**
     @brief Get all densities
     @details This accumulates a pointer to the density mesh data for each solver. 
+    @return Densities
   */
   virtual Vector<EBAMRCellData*>
   getDensities();
@@ -308,6 +318,7 @@ public:
   /**
     @brief Get all diffusion coefficients
     @details This accumulates a pointer to diffusion coefficient mesh data for each solver. 
+    @return Diffusion functions
   */
   virtual Vector<EBAMRCellData*>
   getDiffusionFunctions();
@@ -315,6 +326,7 @@ public:
   /**
     @brief Get all mobility mesh functions
     @details This accumulates a pointer to mobility coefficient mesh data for each solver. 
+    @return Mobility functions
   */
   virtual Vector<EBAMRCellData*>
   getMobilityFunctions();
@@ -322,6 +334,7 @@ public:
   /**
     @brief Get particle containers of a particular container type
     @param[in] a_whichContainer Which ItoSolver container
+    @return Particles
   */
   virtual Vector<ParticleContainer<ItoParticle>*>
   getParticles(const ItoSolver::WhichContainer a_whichContainer);
@@ -359,10 +372,10 @@ protected:
 };
 
 /**
-  @brief Factory class for making ItoLayout. 
+  @brief Factory class for making ItoLayout.
   @details This is used for generating a layout -- this class has no fundamental usefulness, it is basically a glorified casting machine. The template parameters T control
   the ItoLayout template parameter while the template parameter S controls the derived class. E.g. if one has a derived class S the factory can automatically create either
-  an ItoLayout<S>, or it can automatically cast to an ItoLayout<T>. 
+  an ItoLayout&lt;S&gt;, or it can automatically cast to an ItoLayout&lt;T&gt;.
 */
 template <class T, class S>
 class ItoFactory
@@ -382,6 +395,7 @@ public:
     @brief Factory method which creates a new layout from a set of species. This can do automated casting between the template parameters (in case there are classes
     that derive from ItoSolver).
     @param[in] a_species List of species which will be solved for.
+    @return Return value
   */
   RefCountedPtr<ItoLayout<T>>
   newLayout(const Vector<RefCountedPtr<ItoSpecies>>& a_species) const;

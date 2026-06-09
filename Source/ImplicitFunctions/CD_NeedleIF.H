@@ -32,7 +32,7 @@ public:
     @param[in] a_radius      Needle radius
     @param[in] a_tipRadius   Smoothing radius for tip and transition
     @param[in] a_angle       Needle tip (cone) opening angle
-    @param[in] flipInside    Flip inside to outside
+    @param[in] a_flipInside Flip inside
   */
   NeedleIF(const Real& a_length,
            const Real& a_radius,
@@ -49,12 +49,14 @@ public:
   /**
     @brief Value function. Returns distance to object.
     @param[in] a_point Physical position.
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_point) const override;
 
   /**
     @brief IF factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const override;

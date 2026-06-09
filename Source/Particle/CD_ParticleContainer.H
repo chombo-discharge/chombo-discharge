@@ -51,6 +51,7 @@ template <class P>
 class ParticleContainer
 {
 public:
+  /** @brief alias type alias. */
   using ValidMask = RefCountedPtr<LevelData<BaseFab<bool>>>;
 
   /**
@@ -217,18 +218,21 @@ public:
 
   /**
     @brief Is cell-sorted or not
+    @return True if organized by cell, false otherwise
   */
   bool
   isOrganizedByCell() const;
 
   /**
     @brief Get finest AMR level
+    @return Finest level
   */
   int
   getFinestLevel() const;
 
   /**
     @brief Get the realm where this ParticleContainer lives. 
+    @return Realm
   */
   const std::string
   getRealm() const;
@@ -277,6 +281,7 @@ public:
 
   /**
     @brief Get the AMR grids
+    @return Grids
   */
   const Vector<DisjointBoxLayout>&
   getGrids() const;
@@ -298,6 +303,7 @@ public:
   /**
     @brief Get particle data on a level
     @param[in] a_level AMR level
+    @return Return value
   */
   ParticleData<P>&
   operator[](const int a_level);
@@ -305,6 +311,7 @@ public:
   /**
     @brief Get data on a level. Const version. 
     @param[in] a_level AMR level
+    @return Return value
   */
   const ParticleData<P>&
   operator[](const int a_level) const;
@@ -312,6 +319,7 @@ public:
   /**
     @brief Get all cell particles. 
     @note This will issue an error if the particles are not sorted by cell. 
+    @return Cell particles
   */
   AMRCellParticles<P>&
   getCellParticles();
@@ -319,6 +327,7 @@ public:
   /**
     @brief Get cell particles, const version. 
     @note This will issue an error if the particles are not sorted by cell. 
+    @return Cell particles
   */
   const AMRCellParticles<P>&
   getCellParticles() const;
@@ -327,6 +336,7 @@ public:
     @brief Get cell particles
     @param[in] a_level Grid level
     @note This will issue an error if the particles are not sorted by cell. 
+    @return Cell particles
   */
   LayoutData<BinFab<P>>&
   getCellParticles(const int a_level);
@@ -335,6 +345,7 @@ public:
     @brief Get cell particles, const version. 
     @param[in] a_level Grid level
     @note This will issue an error if the particles are not sorted by cell. 
+    @return Cell particles
   */
   const LayoutData<BinFab<P>>&
   getCellParticles(const int a_level) const;
@@ -344,6 +355,7 @@ public:
     @param[in] a_level Grid level
     @param[in] a_dit   Grid index
     @note This will issue an error if the particles are not sorted by cell. 
+    @return Cell particles
   */
   BinFab<P>&
   getCellParticles(const int a_level, const DataIndex a_dit);
@@ -353,6 +365,7 @@ public:
     @param[in] a_level Grid level
     @param[in] a_dit   Grid index
     @note This will issue an error if the particles are not sorted by cell. 
+    @return Cell particles
   */
   const BinFab<P>&
   getCellParticles(const int a_level, const DataIndex a_dit) const;
@@ -360,9 +373,9 @@ public:
   /**
     @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. 
     @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
-    @param[in]  a_level Grid level
     @param[in]  a_dit   Grid index
     @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
+    @param[in] a_lvl Lvl
   */
   void
   getCellParticles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
@@ -370,9 +383,9 @@ public:
   /**
     @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. The original particles are destroyed. 
     @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
-    @param[in]  a_level Grid level
     @param[in]  a_dit   Grid index
     @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
+    @param[in] a_lvl Lvl
   */
   void
   getCellParticlesDestructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
@@ -469,7 +482,7 @@ public:
     @brief Evict particles if they move out of the valid region.
     @param[in,out] a_evictedParticles List that the particles are moved into.
     @param[in,out] a_particles        Particles.
-    @param[in]    a_level            Grid level.
+    @param[in] a_coarseLevel Coarse level
   */
   void
   admitValidParticles(List<P>& a_evictedParticles, ParticleData<P>& a_particles, const int a_coarseLevel);
@@ -498,36 +511,42 @@ public:
 
   /**
     @brief Get local number of particles
+    @return Number of valid particles local
   */
   unsigned long long
   getNumberOfValidParticlesLocal() const;
 
   /**
     @brief Get global number of particles
+    @return Number of valid particles global
   */
   unsigned long long
   getNumberOfValidParticlesGlobal() const;
 
   /**
     @brief Get local number of particles
+    @return Number of outcast particles local
   */
   unsigned long long
   getNumberOfOutcastParticlesLocal() const;
 
   /**
     @brief Get global number of particles
+    @return Number of outcast particles global
   */
   unsigned long long
   getNumberOfOutcastParticlesGlobal() const;
 
   /**
     @brief Get the number particles in the halo cells. 
+    @return Number of mask particles local
   */
   unsigned long long
   getNumberOfMaskParticlesLocal() const;
 
   /**
     @brief Get the number particles in the halo cells. 
+    @return Number of mask particles global
   */
   unsigned long long
   getNumberOfMaskParticlesGlobal() const;

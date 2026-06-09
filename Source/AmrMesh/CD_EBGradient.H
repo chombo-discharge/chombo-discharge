@@ -68,7 +68,7 @@ public:
     @param[in] a_refRat       Refinement ratio
     @param[in] a_order        Interpolation order for modified gradients. 
     @param[in] a_weighting    Weighting factor least squares. 
-    @param[in] a_ghostVect    Number of ghost cells in the input data
+    @param[in] a_ghostVector Ghost vector
   */
   EBGradient(const EBLevelGrid& a_eblg,
              const EBLevelGrid& a_eblgFine,
@@ -95,7 +95,7 @@ public:
     @param[in] a_refRat       Refinement ratio
     @param[in] a_order        Interpolation order for modified gradients. 
     @param[in] a_weighting    Weighting factor least squares. 
-    @param[in] a_ghostVect    Number of ghost cells in the input data
+    @param[in] a_ghostVector Ghost vector
   */
   virtual void
   define(const EBLevelGrid& a_eblg,
@@ -277,7 +277,7 @@ protected:
 
   /**
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
-    @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
+    @param[in] a_coarMaskInvalid Coar mask invalid
   */
   virtual void
   defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) noexcept;
@@ -295,6 +295,7 @@ protected:
     @param[in]  a_ebisBox       EBISBox
     @param[in]  a_invalidRegion Map of cells that can/can't be used. 
     @param[in]  a_dx            Grid resolution
+    @return Finite difference stencil
   */
   virtual bool
   getFiniteDifferenceStencil(VoFStencil&            a_stencil,
@@ -309,8 +310,6 @@ protected:
     @param[out] a_stencilFine       Fine-grid stencil
     @param[in]  a_vofCoar           VoF on the coarse level. 
     @param[in]  a_dataLocation      Data location
-    @param[in]  a_ebisBoxCoar       Coarse grid EBISBox
-    @param[in]  a_ebisBoxFine       Fine grid EBISBox
     @param[in]  a_validCellsCoar    Map of cells that are valid on the coarse domain. 
     @param[in]  a_validCellsFine    Map of cells that are valid on the coarse domain. 
     @param[in]  a_dxCoar            Grid resolution on the coarse level
@@ -318,6 +317,9 @@ protected:
     @param[in]  a_order             Interpolation order
     @param[in]  a_weight            Equation weighting for least squares reconstruction. 
     @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. 
+    @param[in] a_ebislCoar Ebisl coar
+    @param[in] a_ebislFine Ebisl fine
+    @param[in] a_dit Dit
   */
   virtual bool
   getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
@@ -340,6 +342,7 @@ protected:
     @param[in] a_ivCoar        Coarse grid cell. 
     @param[in] a_ebisBox       EBISBox
     @param[in] a_invalidRegion Map of cells that are covered by a finer cell. 
+    @return True if finite difference stencil valid, false otherwise
   */
   virtual bool
   isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,

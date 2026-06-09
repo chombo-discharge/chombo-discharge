@@ -38,13 +38,13 @@ public:
     @param[in] a_endPoint2        Other endpoint of cylinder
     @param[in] a_cylinderRadius   Cylinder radius
     @param[in] a_torusMajorRadius Major radius of torii
-    @param[in] a_torusMajorRadius Minor radius of torii
     @param[in] a_ccDistance       Distance between torii
     @param[in] a_shift            Shift groove pattern along the axis (relative to cylinder center)
     @param[in] a_roundingRadius   Rounding radius on geometry
     @param[in] a_numLeft          Number of torii to the left of the centerpoint
     @param[in] a_numRight         Number of torii to the right of the centerpoint
     @param[in] a_fluidInside      Fluid on inside or not
+    @param[in] a_torusMinorRadius Description
   */
   ProfileCylinderIF(const RealVect a_endPoint1,
                     const RealVect a_endPoint2,
@@ -72,12 +72,14 @@ public:
   /**
     @brief Value function. Returns distance to object.
     @param[in] a_pos Position
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_pos) const override;
 
   /**
     @brief Factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const override;

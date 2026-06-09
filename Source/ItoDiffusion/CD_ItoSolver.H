@@ -108,6 +108,7 @@ public:
 
   /**
     @brief Get the EB-particle intersection algorithm
+    @return Intersection algorithm
   */
   virtual EBIntersection
   getIntersectionAlgorithm() const noexcept;
@@ -149,7 +150,7 @@ public:
 
   /**
     @brief Clear a particle container -- this will delete all the particles in the input container. 
-    @param[in] a_whichContainer Particle container to be cleared.
+    @param[in] a_container Container
   */
   virtual void
   clear(const WhichContainer a_container);
@@ -324,9 +325,9 @@ public:
 
   /**
     @brief Remove particles that are inside the EB. 
-    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
     @details Calls the other version with m_particles.
+    @param[in] a_representation Representation
   */
   virtual void
   removeCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
@@ -334,9 +335,9 @@ public:
   /**
     @brief Remove particles that are inside the EB. 
     @param[in] a_container        Which particle container to remove particles from
-    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
     @note Calls the other version with ParticleContainer = m_particles.at(a_container)
+    @param[in] a_representation Representation
   */
   virtual void
   removeCoveredParticles(const WhichContainer a_container, const EBRepresentation a_representation, const Real a_tol);
@@ -344,8 +345,8 @@ public:
   /**
     @brief Remove particles that are inside the EB
     @param[in] a_particles        Particles to remove. 
-    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
+    @param[in] a_representation Representation
   */
   virtual void
   removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles,
@@ -355,8 +356,8 @@ public:
   /**
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
     @details Calls the other version with m_particles and m_coveredParticles
-    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
+    @param[in] a_representation Representation
   */
   virtual void
   transferCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
@@ -364,9 +365,9 @@ public:
   /**
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
     @param[in] a_containerFrom    Which particle container to transfer particles from
-    @param[in] a_containerFrom    Which particle container to move particles into
-    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
+    @param[in] a_containerTo Container to
+    @param[in] a_representation Representation
   */
   virtual void
   transferCoveredParticles(const WhichContainer   a_containerFrom,
@@ -378,8 +379,8 @@ public:
     @brief Transfer particles that are inside the EB to another container. 
     @param[in] a_particlesFrom    Which particle container to transfer particles from
     @param[in] a_particlesTo      Which particle container to move particles into
-    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
     @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
+    @param[in] a_representation Representation
   */
   virtual void
   transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
@@ -475,10 +476,10 @@ public:
   /**
     @brief Write plot data
     @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @note This will write the plot data in this solver to a_output, starting on a_comp
+    @param[in] a_comp Comp
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
@@ -488,8 +489,9 @@ public:
 
   /**
     @brief Get number of particles in a specified particle container
-    @param[in] a_whichContainer Which container to count particles in. 
     @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
+    @return Num particles
+    @param[in] a_container Container
   */
   virtual unsigned long long
   getNumParticles(const WhichContainer a_container, const bool a_localOnly) const;
@@ -609,6 +611,7 @@ public:
   /**
     @brief Get a general particle container
     @param[in] a_container Which container to fetch.
+    @return Particles
   */
   virtual ParticleContainer<ItoParticle>&
   getParticles(const WhichContainer a_container);
@@ -616,6 +619,7 @@ public:
   /**
     @brief Get a general particle container
     @param[in] a_container Which container to fetch.
+    @return Particles
   */
   virtual const ParticleContainer<ItoParticle>&
   getParticles(const WhichContainer a_container) const;
@@ -868,6 +872,7 @@ public:
   /**
     @brief Draw a random N-dimensional Gaussian number from a normal distribution with zero with and unit standard deviation.
     @note The distribution is truncated at m_normalDistributionTruncation -- values above that threshold will be replaced by m_normalDistributionTruncation.
+    @return Return value
   */
   inline RealVect
   randomGaussian() const;
@@ -875,6 +880,7 @@ public:
   /**
     @brief Draw a random direction in N-dimensional space. 
     @details We use the algorithm by Marsaglia (1972).
+    @return Return value
   */
   inline RealVect
   randomDirection() const;
@@ -886,6 +892,7 @@ public:
     If we only use advection advection the time step is computed as dt = dx/sum(|V_i|) = dtA.
     If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
+    @return Computed dt
   */
   virtual Real
   computeDt() const;
@@ -898,6 +905,7 @@ public:
     If only diffusion is active the time step is computed as dt = (dx*dx)/(2*SpaceDim*D) = dtD. 
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
+    @return Computed dt
   */
   virtual Real
   computeDt(const int a_lvl) const;
@@ -911,6 +919,7 @@ public:
     If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
+    @return Computed dt
   */
   virtual Real
   computeDt(const int a_lvl, const DataIndex& a_dit) const;
@@ -925,6 +934,7 @@ public:
     If both advectino and diffusion are active then we can move up to L_d = v_d*dt + sqrt(2*D*dt)*N0 in any one coordinate direction (this is the usual Ito kernel). This
     requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
     @param[in] a_maxCellsToMove
+    @return Computed hop dt
   */
   virtual Real
   computeHopDt(const Real a_maxCellsToMove) const;
@@ -940,6 +950,7 @@ public:
     requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
     @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
     @param[in] a_lvl            Grid level
+    @return Computed hop dt
   */
   virtual Real
   computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const;
@@ -956,12 +967,14 @@ public:
     @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
     @param[in] a_lvl            Grid level
     @param[in] a_dit            Grid index
+    @return Computed hop dt
   */
   virtual Real
   computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
 
   /**
     @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. 
+    @return Computed advective dt
   */
   virtual Real
   computeAdvectiveDt() const;
@@ -969,6 +982,7 @@ public:
   /**
     @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level. 
     @param[in] a_lvl Grid level
+    @return Computed advective dt
   */
   virtual Real
   computeAdvectiveDt(const int a_lvl) const;
@@ -977,12 +991,14 @@ public:
     @brief Compute the drift dt. This computes the minimum dt = dx/vMax on one level and one box. 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
+    @return Computed advective dt
   */
   virtual Real
   computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /**
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles
+    @return Computed diffusive dt
   */
   virtual Real
   computeDiffusiveDt() const;
@@ -990,6 +1006,7 @@ public:
   /**
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input level
     @param[in] a_lvl Grid level
+    @return Computed diffusive dt
   */
   virtual Real
   computeDiffusiveDt(const int a_lvl) const;
@@ -998,6 +1015,7 @@ public:
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input grid patch
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
+    @return Computed diffusive dt
   */
   virtual Real
   computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const;
@@ -1011,6 +1029,7 @@ public:
 
   /**
     @brief Get the coarse-fine deposition strategy
+    @return Coarse fine deposition
   */
   CoarseFineDeposition
   getCoarseFineDeposition() const;
@@ -1507,12 +1526,12 @@ protected:
   /**
     @brief Write data to output. Convenience function. 
     @param[in,out] a_output Output data holder.
-    @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
     @param[in]    a_data   Data to write. 
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level  Grid level
     @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
     @param[in]    a_interpGhost If true, interpolate ghost cells
+    @param[in] a_comp Comp
   */
   virtual void
   writeData(LevelData<EBCellFAB>& a_output,

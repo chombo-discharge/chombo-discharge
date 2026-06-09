@@ -35,7 +35,6 @@ public:
     @param[in] a_ccPoint     Center point on the slab side with surface noise
     @param[in] a_normal      Normal vector of slab side with surface noise
     @param[in] a_xyz         Width, depth, and height of slab
-    @param[in] a_curv        Corner curvatures
     @param[in] a_noiseFreq   Noise frequency
     @param[in] a_octaves     Number of octaves
     @param[in] a_noiseAmp    Noise amplitude
@@ -58,6 +57,7 @@ public:
 
   /**
     @brief Copy constructor. Copies over implicit function.
+    @param[in,out] a_inputIF Description
   */
   PerlinSlabSdf(const PerlinSlabSdf& a_inputIF);
 
@@ -69,12 +69,14 @@ public:
   /**
     @brief Value function. Returns distance to object. 
     @param[in] a_pos Position. 
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_pos) const override;
 
   /**
     @brief Factory function
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const override;

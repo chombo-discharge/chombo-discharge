@@ -41,6 +41,7 @@ namespace DischargeIO {
     @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
     @param[in] a_number Number to format as string with separator
     @param[in] a_sep    Separator
+    @return Return value
   */
   std::string
   numberFmt(const long long a_number, char a_sep = ',') noexcept;
@@ -49,10 +50,12 @@ namespace DischargeIO {
     @brief Number formatting game. This just prints the number 123456 as 123,456
     @param[in] a_numbers Numbers to format as string with separator
     @param[in] a_sep     Separator
+    @return Return value
   */
   Vector<std::string>
   numberFmt(const Vector<long long> a_numbers, char a_sep = ',') noexcept;
 
+#ifdef CH_USE_HDF5
   /**
     @brief A shameless copy of Chombo's writeEBHDF5 but including the lower-left corner of the physical domain as well.
     @details User are not supported to call this. Driver will perform calls to writeEBHDF5Header and writeEBHDF5Level
@@ -67,9 +70,8 @@ namespace DischargeIO {
     @param[in] a_time             Time
     @param[in] a_probLo           Lower-left physical corner
     @param[in] a_numLevels        Number of AMR levels
-    @param[in] a_numGhost         Number of ghost cells included in the output. 
-   */
-#ifdef CH_USE_HDF5
+    @param[in] a_numGhost         Number of ghost cells included in the output.
+  */
   void
   writeEBHDF5(const std::string&                   a_filename,
               const Vector<std::string>&           a_variableNames,

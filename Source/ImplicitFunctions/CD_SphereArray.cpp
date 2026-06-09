@@ -18,10 +18,11 @@
 #include <CD_SphereArray.H>
 #include <CD_NamespaceHeader.H>
 
-// EBGeometry aliases
+/// @cond DOXYGEN_SKIP
 using AABB   = EBGeometry::BoundingVolumes::AABBT<Real>;
 using Vec3   = EBGeometry::Vec3T<Real>;
 using Sphere = EBGeometry::SphereSDF<Real>;
+/// @endcond
 
 constexpr size_t SphereArray::K;
 

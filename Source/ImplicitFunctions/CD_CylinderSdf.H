@@ -30,7 +30,7 @@ public:
     @param[in] a_center1 Cylinder center
     @param[in] a_center2 Cylinder center
     @param[in] a_radius  Cylinder radius
-    @param[in] a_inside  Domain on inside or outside
+    @param[in] a_fluidInside Fluid inside
   */
   CylinderSdf(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
@@ -43,12 +43,14 @@ public:
   /**
     @brief Test whether inside or not
     @param[in] a_point Physical position. 
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_point) const;
 
   /**
     @brief IF factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;

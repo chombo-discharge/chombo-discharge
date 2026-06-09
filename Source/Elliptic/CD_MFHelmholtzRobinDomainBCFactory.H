@@ -79,6 +79,8 @@ public:
 
   /**
     @brief Factory method
+    @return Return value
+    @param[in] a_iphase Description
   */
   RefCountedPtr<EBHelmholtzDomainBC>
   create(const int a_iphase) const override;
@@ -87,6 +89,7 @@ protected:
   /*
     @brief Use constant for BC
   */
+  /** @brief Use constant. */
   bool m_useConstant;
 
   /**

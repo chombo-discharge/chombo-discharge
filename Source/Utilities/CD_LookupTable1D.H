@@ -52,7 +52,8 @@ public:
   /**
     @brief Slice this table, keeping only the user-specified columns.
     @details This returns a new table with a reduced number of columns.
-    @param[in] 
+    @param[in] a_columns Column indices to include in the sliced table
+    @return Sliced lookup table
   */
   template <size_t M, typename... Ts>
   LookupTable1D<T, M, I>
@@ -97,6 +98,7 @@ public:
     need to call prepareTable if the result should propagate into the resampled/structured data.
     @param[in] a_min Minimum value represented.
     @param[in] a_max Maximum value represented.
+    @param[in] a_column Description
   */
   inline void
   truncate(const T& a_min, const T& a_max, const size_t a_column) noexcept;
@@ -127,6 +129,7 @@ public:
   /**
     @brief Interpolation function for specific dependent variable K
     @param[in] a_x Independent variable x
+    @return Return value
   */
   template <size_t K>
   inline T
@@ -134,7 +137,8 @@ public:
 
   /**
     @brief Interpolate whole table.
-    @param[in] a_x Independent variable x
+    @return Return value
+    @param[in] x X
   */
   inline std::array<T, N + 1>
   interpolate(const T& x) const;
@@ -245,6 +249,7 @@ protected:
   /**
     @brief Get the lower index that brackets the input variable between two data points in the structured grid.
     @param[in] a_x Independent variable.
+    @return Index lo
   */
   inline size_t
   getIndexLo(const T& a_x) const;

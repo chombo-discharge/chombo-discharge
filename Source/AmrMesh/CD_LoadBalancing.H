@@ -57,7 +57,6 @@ public:
     @param[in,out] a_boxes Grid boxes
     @param[in,out] a_loads Computational loads
     @param[in]    a_whichSorting
-    @return Returns a_boxes and a_loads, sorting according to the argument a_whichSorting.
   */
   template <typename T>
   static void
@@ -67,8 +66,7 @@ public:
     @brief Sorting function for sorting boxes and loads
     @param[in,out] a_boxes Grid boxes
     @param[in,out] a_loads Computational loads
-    @param[in]    a_whichSorting
-    @return Returns a_boxes and a_loads, sorting according to the argument a_whichSorting.
+    @param[in] a_which Which
   */
   template <typename T>
   static void
@@ -77,6 +75,7 @@ public:
   /**
     @brief Sorts boxes (according to sorting argument)
     @param[in,out] a_boxes Grid boxes
+    @param[in] a_which Description
   */
   static void
   sort(Vector<Box>& a_boxes, const BoxSorting a_which);
@@ -84,7 +83,6 @@ public:
   /**
     @brief Gather boxes
     @param[in,out] a_boxes Local boxes
-    @return On output, a_boxes contains the global boxes. 
   */
   static void
   gatherBoxes(Vector<Box>& a_boxes);
@@ -92,7 +90,6 @@ public:
   /**
     @brief Gather computational loads
     @param[in,out] a_loads Computational loads
-    @return On output, a_loads contains the loads from all ranks. 
   */
   static void
   gatherLoads(Vector<Real>& a_loads);
@@ -100,7 +97,6 @@ public:
   /**
     @brief Gather compute loads
     @param[in,out] a_loads Computational loads
-    @return On output, a_loads contains the loads from all ranks. 
   */
   static void
   gatherLoads(Vector<int>& a_loads);
@@ -108,7 +104,6 @@ public:
   /**
     @brief Gather compute loads
     @param[in,out] a_loads Computational loads
-    @return On output, a_loads contains the loads from all ranks. 
   */
   static void
   gatherLoads(Vector<long>& a_loads);
@@ -117,7 +112,6 @@ public:
     @brief Gather boxes and loads
     @param[in,out] a_boxes Grid boxes
     @param[in,out] a_loads Computational loads
-    @return On output, a_boxes and a_loads have been globally gathered from all ranks. 
   */
   static void
   gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads);
@@ -127,6 +121,7 @@ protected:
     @brief Utility function which packs boxes and loads into a vector of pairs
     @param[in] a_boxes Grid boxes
     @param[in] a_loads Computational loads
+    @return Return value
   */
   template <class T>
   static std::vector<std::pair<Box, T>>
@@ -177,6 +172,7 @@ protected:
   /**
     @brief Helper function for computing a Morton code using 21 bits per direction. 
     @param[in] a_coords 
+    @return Return value
   */
   template <int DIM>
   static uint64_t
@@ -184,6 +180,8 @@ protected:
 
   /**
     @brief Helper function for computing a Hilbert index
+    @return Return value
+    @param[in,out] a_coords Description
   */
   template <int DIM>
   static uint64_t

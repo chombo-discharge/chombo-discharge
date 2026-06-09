@@ -71,6 +71,7 @@ public:
     @param[in] a_radius       Radius.
     @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
     @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
+    @return Vofs in radius
   */
   static Vector<VolIndex>
   getVofsInRadius(const VolIndex&    a_startVof,
@@ -87,6 +88,7 @@ public:
     @param[in] a_validCells   Valid cells to include
     @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
     @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
+    @return Vofs in radius
   */
   static Vector<VolIndex>
   getVofsInRadius(const VolIndex&        a_startVof,
@@ -105,6 +107,7 @@ public:
     @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
     @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
     @note This routine will fetch in a "symmetric" quadrant if the normal vector aligns with a coordinate direction
+    @return Vofs in quadrant
   */
   static Vector<VolIndex>
   getVofsInQuadrant(const VolIndex&    a_startVof,
@@ -143,6 +146,7 @@ public:
     @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
     @note This routine will fetch vofs within a_radius and discard the ones that fall on the ''wrong'' side of the semi-circle (sphere in 3D). Here, the
     wrong side is defined as all points (x-x0)*n < a_deltaThresh
+    @return Vofs in semi circle
   */
   static Vector<VolIndex>
   getVofsInSemiCircle(const VolIndex&      a_startVof,
@@ -181,7 +185,6 @@ public:
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
     @param[in] a_vofs List of vofs to be modified
     @param[in] a_excludeBox Box to be excluded
-    @return Modified list of vofs which do not include cell in a box
   */
   static void
   excludeCells(Vector<VolIndex>& a_vofs, const Box& a_excludeBox);
@@ -190,7 +193,6 @@ public:
     @brief Modifies a_vofs so it doesn't include cells in a_excludeIVS
     @param[in] a_vofs List of vofs to be modified
     @param[in] a_excludeIVS List of cells to be excluded. 
-    @return Modified list of vofs which do not include a_excludeIVS cells. 
   */
   static void
   excludeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_excludeIVS);
@@ -199,7 +201,6 @@ public:
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeBox List of cells to be excluded. 
-    @return Modified list of vofs which are guaranteed to lie in a_box
   */
   static void
   includeCells(Vector<VolIndex>& a_vofs, const Box& a_includeBox);
@@ -208,7 +209,6 @@ public:
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeIVS List of cells to be included
-    @return Modified list of vofs which are guaranteed to lie in specified grid cells
   */
   static void
   includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
@@ -217,7 +217,6 @@ public:
     @brief Modifies a_vofs so it only includes cells in a box
     @param[in] a_vofs       List of vofs to be modified
     @param[in] a_includeIVS List of cells to be included
-    @return Modified list of vofs which are guaranteed to lie in specified grid cells
   */
   static void
   includeCells(Vector<VolIndex>& a_vofs, const DenseIntVectSet& a_includeIVS);
@@ -225,7 +224,6 @@ public:
   /**
     @brief Discard duplicates
     @param[in,out] a_vofs List of Vofs
-    @return Returns the same vofs with discarded duplicates. 
   */
   static void
   onlyUnique(Vector<VolIndex>& a_vofs);
@@ -241,8 +239,8 @@ protected:
 
   /**
     @brief Returns the coordinate direction
-    @param[in] Non-zero normal vector
-    @param[in] Returns dirction where ||a_normal[dir]|| == 1. If a_normal[dir] == -1 then dir => -dir
+    @return Cardinal direction
+    @param[in] a_normal Normal
   */
   static std::pair<int, Side::LoHiSide>
   getCardinalDirection(const RealVect a_normal);
@@ -281,6 +279,7 @@ protected:
     @param[in] a_ebisbox    EBISBox
     @param[in] a_radius     Search radius
     @param[in] a_addStartVof If false, a_startVof will not be included in the list. 
+    @return All vofs in radius
   */
   static Vector<VolIndex>
   getAllVofsInRadius(const VolIndex& a_startVof,
@@ -300,11 +299,11 @@ protected:
 
   /**
     @brief Get quadrant defined by direction in space. 
-    @param[in] a_cardinal The direction in space which defines the quadrant. 
     @param[in] a_vof      Starting vof
     @param[in] a_ebisbox  EBISBox
     @param[in] a_radius   Quadrant radius
     @return Quadrant as a box, with one of the corners on a_vof. 
+    @param[in] a_normal Normal
   */
   static Box
   getQuadrant(const RealVect& a_normal, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real a_radius);
@@ -315,6 +314,7 @@ protected:
     @param[in] a_vof      Starting vof
     @param[in] a_radius   Quadrant radius
     @return Symmetric quadrant with a_vof on one of the sides. 
+    @param[in] a_ebisbox Description
   */
   static Box
   getSymmetricQuadrant(const std::pair<int, Side::LoHiSide>& a_cardinal,
@@ -347,6 +347,7 @@ protected:
     @param[in]    a_radius     Maximum radius. 
     @param[in]    a_timesMoved Number of times moved in any direction
     @param[in]    a_pathSign   Path sign. 
+    @param[in] a_validBox Description
   */
   static void
   getVofsInMonotonePath(std::set<VolIndex>& a_vofList,

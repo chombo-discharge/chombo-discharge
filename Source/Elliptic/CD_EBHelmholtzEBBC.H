@@ -97,6 +97,7 @@ public:
              can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
 	     B*wi*phi(i).
     @note    Multiplication by beta is done in the operator.
+    @return Grad phi stencils
   */
   const LayoutData<BaseIVFAB<VoFStencil>>&
   getGradPhiStencils() const;
@@ -158,18 +159,25 @@ protected:
     @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost cells that do not have valid data.
     @param[in] a_stencil Stencil
     @param[in] a_dit     Data index
+    @return True if stencil valid c f, false otherwise
   */
   inline bool
   isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /**
     @brief Returns physical position at the boundary
+    @return Boundary position
+    @param[in,out] a_vof Description
+    @param[in,out] a_dit Description
   */
   inline RealVect
   getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
 
   /**
     @brief Apply stencil to data holder and return result
+    @return Stencil weight
+    @param[in,out] a_stencil Description
+    @param[in,out] a_phi Description
   */
   inline Real
   applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;

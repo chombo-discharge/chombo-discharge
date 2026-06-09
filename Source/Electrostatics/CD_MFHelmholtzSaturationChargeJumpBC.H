@@ -40,6 +40,7 @@ public:
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
     @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
+    @param[in] a_phase Description
   */
   MFHelmholtzSaturationChargeJumpBC(const phase::which_phase a_phase,
                                     const Location::Cell     a_dataLocation,

@@ -55,6 +55,7 @@ public:
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
     @param[in] a_ghostPhi     Number of ghost cells in phi
+    @return Return value
   */
   virtual RefCountedPtr<MFHelmholtzJumpBC>
   create(const Location::Cell a_dataLocation,
@@ -70,12 +71,14 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
 
   /**
     @brief Drop to a first-order approximation if the cut-cell is a coarsened cell
+    @param[in] a_dropOrder Description
   */
   virtual void
   setCoarseGridDropOrder(const bool a_dropOrder);

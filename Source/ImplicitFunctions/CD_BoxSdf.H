@@ -29,7 +29,7 @@ public:
     @brief Base constructor
     @param[in] a_loCorner Lower left corner
     @param[in] a_hiCorner Upper right corner
-    @param[in] a_inside Object on inside or outside
+    @param[in] a_fluidInside Fluid inside
   */
   BoxSdf(const RealVect& a_loCorner, const RealVect& a_hiCorner, const bool& a_fluidInside);
 
@@ -46,12 +46,15 @@ public:
 
   /**
     @brief Test if object is on inside or outside
+    @return Function value at the given point
+    @param[in,out] a_pos Description
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
     @brief IF Factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;

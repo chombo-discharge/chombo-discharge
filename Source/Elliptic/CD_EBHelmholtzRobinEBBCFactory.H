@@ -99,6 +99,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
@@ -114,6 +115,7 @@ protected:
   /*
     @brief Use constant for BC
   */
+  /** @brief Use constant. */
   bool m_useConstant;
 
   /**

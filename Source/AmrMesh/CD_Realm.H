@@ -172,7 +172,7 @@ public:
   /**
     @brief Register a mask
     @param[in] a_mask Mask name
-    @param[in] a_phase Phase where mask is registered
+    @param[in] a_buffer Buffer
   */
   void
   registerMask(const std::string a_mask, const int a_buffer);
@@ -180,8 +180,8 @@ public:
   /**
     @brief Query if a mask has been registered
     @param[in] a_mask Mask name
-    @param[in] a_phase Phase where mask is registered
     @return true if mask has been registered
+    @param[in] a_buffer Buffer
   */
   bool
   queryMask(const std::string a_mask, const int a_buffer) const;
@@ -209,12 +209,14 @@ public:
 
   /**
     @brief Get problem domains
+    @return Domains
   */
   const Vector<ProblemDomain>&
   getDomains() const;
 
   /**
     @brief Get MFLevelGrids
+    @return M f level grid
   */
   Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGrid();
@@ -223,6 +225,7 @@ public:
     @brief Get the coarsened grids
     @details The returned vector contains the coarsened grids. Entry on level lvl=0 contains the coarsening of level lvl=1 and so on. The top
     level is undefined because there was no finer grid from which we can coarsen.
+    @return M f level grid co fi
   */
   Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGridCoFi();
@@ -231,6 +234,7 @@ public:
     @brief Get the refined grids
     @details The returned vector contains the refined grids. Entry on level lvl=1 contains the refinement of level lvl=0 and so on. The bottom
     level is undefined because there was no coarser grid from which we can refine.
+    @return M f level grid fi co
   */
   Vector<RefCountedPtr<MFLevelGrid>>&
   getMFLevelGridFiCo();
@@ -238,6 +242,7 @@ public:
   /**
     @brief Get EBIndexSpace for particular phase
     @param[in] a_phase Phase
+    @return E b index space
   */
   const RefCountedPtr<EBIndexSpace>&
   getEBIndexSpace(const phase::which_phase a_phase) const;
@@ -245,6 +250,7 @@ public:
   /**
     @brief Get EBISLayout for particular phase
     @param[in] a_phase Phase
+    @return E b i s layout
   */
   const Vector<EBISLayout>&
   getEBISLayout(const phase::which_phase a_phase) const;
@@ -252,6 +258,7 @@ public:
   /**
     @brief Get EBLevelGrid for particular phase
     @param[in] a_phase Phase
+    @return E b level grid
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGrid(const phase::which_phase a_phase) const;
@@ -259,6 +266,7 @@ public:
   /**
     @brief Get coarsened fine EBLevelGrid for particular phase
     @param[in] a_phase Phase
+    @return E b level grid co fi
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi(const phase::which_phase a_phase) const;
@@ -266,6 +274,7 @@ public:
   /**
     @brief Get VoFIterators for particular phase
     @param[in] a_phase Phase
+    @return Vof iterator
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
   getVofIterator(const phase::which_phase a_phase) const;
@@ -273,6 +282,7 @@ public:
   /**
     @brief Get objects for computing "non-conservative divergences"
     @param[in] a_phase Phase
+    @return Non conservative divergence
   */
   const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
   getNonConservativeDivergence(const phase::which_phase a_phase) const;
@@ -280,6 +290,7 @@ public:
   /**
     @brief Get objects for computing interpolation of cell-centered data to cell centroids.
     @param[in] a_phase Phase
+    @return Cell centroid interpolation
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
   getCellCentroidInterpolation(const phase::which_phase a_phase) const;
@@ -287,6 +298,7 @@ public:
   /**
     @brief Get objects for computing interpolation of cell-centered data to EB centroids
     @param[in] a_phase Phase
+    @return E b centroid interpolation
   */
   const Vector<RefCountedPtr<EBCentroidInterpolation>>&
   getEBCentroidInterpolation(const phase::which_phase a_phase) const;
@@ -294,6 +306,7 @@ public:
   /**
     @brief Get data coarsening utility
     @param[in] a_phase Phase
+    @return Coarse average
   */
   Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage(const phase::which_phase a_phase);
@@ -301,6 +314,7 @@ public:
   /**
     @brief Get the multigrid interpolator
     @param[in] a_phase Phase
+    @return Multigrid interpolator
   */
   Vector<RefCountedPtr<EBMultigridInterpolator>>&
   getMultigridInterpolator(const phase::which_phase a_phase);
@@ -308,6 +322,7 @@ public:
   /**
     @brief Get the particle mesh operator
     @param[in] a_phase Which phase
+    @return Particle mesh
   */
   EBAMRParticleMesh&
   getParticleMesh(const phase::which_phase a_phase);
@@ -315,6 +330,7 @@ public:
   /**
     @brief Get the particle mesh operator
     @param[in] a_phase Which phase
+    @return Surface deposition
   */
   EBAMRSurfaceDeposition&
   getSurfaceDeposition(const phase::which_phase a_phase);
@@ -322,6 +338,7 @@ public:
   /**
     @brief Get gradient operator
     @param[in] a_phase Phase
+    @return Gradient op
   */
   const Vector<RefCountedPtr<EBGradient>>&
   getGradientOp(const phase::which_phase a_phase) const;
@@ -329,6 +346,7 @@ public:
   /**
     @brief Get ghost cell interpolator
     @param[in] a_phase Phase
+    @return Ghost cell interpolator
   */
   Vector<RefCountedPtr<EBGhostCellInterpolator>>&
   getGhostCellInterpolator(const phase::which_phase a_phase);
@@ -336,6 +354,7 @@ public:
   /**
     @brief Get piecewise linear ghost cell interpolation utility
     @param[in] a_phase Phase
+    @return Fine interp
   */
   Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp(const phase::which_phase a_phase);
@@ -343,6 +362,7 @@ public:
   /**
     @brief Get flux register utility
     @param[in] a_phase Phase
+    @return Flux register
   */
   Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister(const phase::which_phase a_phase);
@@ -350,6 +370,7 @@ public:
   /**
     @brief Get the redistribution operators
     @param[in] a_phase Phase (gas or solid)
+    @return Redistribution op
   */
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp(const phase::which_phase a_phase);
@@ -357,25 +378,30 @@ public:
   /**
     @brief Get level-set function
     @param[in] a_phase Phase
+    @return Levelset
   */
   const EBAMRFAB&
   getLevelset(const phase::which_phase a_phase) const;
 
   /**
     @brief Get AMR mask
-    @param[in] a_phase Phase
+    @return Mask
+    @param[in] a_mask Mask
+    @param[in] a_buffer Buffer
   */
   const AMRMask&
   getMask(const std::string a_mask, const int a_buffer) const;
 
   /**
     @brief Get all valid cells
+    @return Valid cells
   */
   const AMRMask&
   getValidCells() const;
 
   /**
     @brief Get the tiled space
+    @return Level tiles
   */
   const Vector<RefCountedPtr<LevelTiles>>&
   getLevelTiles() const noexcept;
@@ -545,6 +571,7 @@ protected:
 
   /**
     @brief Define a mask which is true on the outside (i.e., coarse side) of the refinement boundary
+    @param[in] a_lmin Description
   */
   void
   defineOuterCFMask(const int a_lmin);
@@ -570,6 +597,7 @@ protected:
 
   /**
     @brief Define a mask which is true on the inside (i.e., fine side) of the refinement boundary
+    @param[in] a_lmin Description
   */
   void
   defineInnerCFMask(const int a_lmin);
@@ -577,6 +605,7 @@ protected:
   /**
     @brief Define the coarse-fine interface. 
     @details This is a mask which is true on the immediate outside of a refinement boundary.
+    @param[in] a_lmin Description
   */
   void
   defineCFIVS(const int a_lmin);
@@ -602,6 +631,7 @@ protected:
   /**
     @brief Get a particular realm
     @param[in] a_phase Phase
+    @return Realm
   */
   PhaseRealm&
   getRealm(const phase::which_phase a_phase);

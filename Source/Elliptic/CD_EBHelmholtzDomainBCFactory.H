@@ -50,6 +50,7 @@ public:
 
   /**
     @brief Factory method. Implementations must override this. 
+    @return Return value
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
   create() const = 0;

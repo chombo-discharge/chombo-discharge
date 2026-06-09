@@ -99,25 +99,25 @@ public:
 
   /**
     @brief Compute the cell-centered electric field. 
-    @param[out] a_electricField Cell-centered electric field
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const override;
 
   /**
     @brief Compute the face-centered electric field. 
-    @param[out] a_electricField Face-centered electric field
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(MFAMRFluxData& a_E, const MFAMRCellData& a_potential) const override;
 
   /**
     @brief Compute the cell-centered electric field on a specific phase. 
-    @param[out] a_electricField Cell-centered electric field
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(EBAMRCellData&           a_E,
@@ -126,9 +126,9 @@ public:
 
   /**
     @brief Compute the face-centered electric field on a specific phase. 
-    @param[out] a_electricField Face-centered electric field
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(EBAMRFluxData&           a_E,

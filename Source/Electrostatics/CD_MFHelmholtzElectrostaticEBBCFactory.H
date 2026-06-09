@@ -57,14 +57,12 @@ public:
 
   /**
     @brief No copy assignment
-    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticEBBCFactory&
   operator=(const MFHelmholtzElectrostaticEBBCFactory&) = delete;
 
   /**
     @brief No move assignment
-    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticEBBCFactory&
   operator=(const MFHelmholtzElectrostaticEBBCFactory&&) = delete;
@@ -92,6 +90,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
@@ -107,6 +106,7 @@ public:
     @brief Factory method
     @param[in] a_iphase Phase (0=gas and 1=solid). 
     @param[in] a_jumpBC Jump bc object. 
+    @return Return value
   */
   RefCountedPtr<EBHelmholtzEBBC>
   create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;

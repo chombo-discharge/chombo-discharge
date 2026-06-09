@@ -49,12 +49,14 @@ public:
   /**
     @brief Get distance to object
     @param[in] a_pos Position
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
     @brief Factory method.
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;

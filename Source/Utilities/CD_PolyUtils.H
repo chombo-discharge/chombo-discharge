@@ -31,15 +31,17 @@ namespace PolyUtils {
     @param[in] a_point1  First end-point
     @param[in] a_point2  Other end-point
     @note The root MUST be bracketed, i.e. f(x1)*f(x2) < 0.0. Anything else is an error.
+    @return Return value
   */
   RealVect
   brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
 
   /**
     @brief Compute the root of a function between two points. This is a 1D problem.
-    @param[in] a_lo Lower initial guess.
-    @param[in] a_hi Higher initial guess.
     @return Returns the root (if it could be found). Returns std::numeric_limits<Real>::max() otherwise.
+    @param[in] a_point1 Point1
+    @param[in] a_point2 Point2
+    @param[in] a_func Func
   */
   Real
   brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)> a_func) noexcept;

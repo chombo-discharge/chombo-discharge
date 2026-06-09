@@ -194,6 +194,7 @@ public:
 
   /**
     @brief Return the EB index space
+    @return E b index space
   */
   const RefCountedPtr<EBIndexSpace>&
   getEBIndexSpace() const;
@@ -235,18 +236,21 @@ public:
 
   /**
     @brief Get EBLevelGrids
+    @return E b level grid
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGrid() const;
 
   /**
     @brief Get coarsened fine grids
+    @return E b level grid co fi
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridCoFi() const;
 
   /**
     @brief Get refined grids
+    @return E b level grid fi co
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
   getEBLevelGridFiCo() const;
@@ -260,85 +264,98 @@ public:
 
   /**
     @brief Get objects for interpolation from cell centers to centroids. 
+    @return Cell centroid interpolation
   */
   const Vector<RefCountedPtr<CellCentroidInterpolation>>&
   getCellCentroidInterpolation() const;
 
   /**
     @brief Get objects for interpolation from cell centers to EB centroids
+    @return E b centroid interpolation
   */
   const Vector<RefCountedPtr<EBCentroidInterpolation>>&
   getEBCentroidInterpolation() const;
 
   /**
     @brief Get objects for computing non-conservative divergences.
+    @return Non conservative divergence
   */
   const Vector<RefCountedPtr<EBNonConservativeDivergence>>&
   getNonConservativeDivergence() const;
 
   /**
     @brief Get gradient object
+    @return Gradient op
   */
   const Vector<RefCountedPtr<EBGradient>>&
   getGradientOp() const;
 
   /**
     @brief Get particle-mesh operator
+    @return Particle mesh
   */
   EBAMRParticleMesh&
   getParticleMesh() const;
 
   /**
     @brief Get the surface deposition operator
+    @return Surface deposition
   */
   EBAMRSurfaceDeposition&
   getSurfaceDeposition() const;
 
   /**
     @brief Get coarsening operators
+    @return Coarse average
   */
   Vector<RefCountedPtr<EBCoarAve>>&
   getCoarseAverage() const;
 
   /**
     @brief Get deposition operator
+    @return E b coarse fine particle mesh
   */
   Vector<RefCountedPtr<EBCoarseFineParticleMesh>>&
   getEBCoarseFineParticleMesh() const;
 
   /**
     @brief Get multigrid interpolator
+    @return Multigrid interpolator
   */
   Vector<RefCountedPtr<EBMultigridInterpolator>>&
   getMultigridInterpolator() const;
 
   /**
     @brief Get ghost cell interpolation utility
+    @return Ghost cell interpolator
   */
   Vector<RefCountedPtr<EBGhostCellInterpolator>>&
   getGhostCellInterpolator() const;
 
   /**
     @brief Get piecewise linear ghost cell interpolation utility
+    @return Fine interp
   */
   Vector<RefCountedPtr<EBCoarseToFineInterp>>&
   getFineInterp() const;
 
   /**
     @brief Get flux register utility
+    @return Flux register
   */
   Vector<RefCountedPtr<EBReflux>>&
   getFluxRegister() const;
 
   /**
     @brief Get the redistribution operators
-    @param[in] a_phase Phase (gas or solid)
+    @return Redistribution operators on all levels
   */
   Vector<RefCountedPtr<EBFluxRedistribution>>&
   getRedistributionOp() const;
 
   /**
     @brief Get level-set function
+    @return Levelset
   */
   const EBAMRFAB&
   getLevelset() const;
@@ -598,6 +615,7 @@ protected:
   /**
     @brief Define flux register utility
     @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_regsize Description
   */
   void
   defineFluxReg(const int a_lmin, const int a_regsize);
@@ -605,6 +623,7 @@ protected:
   /**
     @brief Define operator redistribution utility
     @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_regsize Description
   */
   void
   defineRedistOper(const int a_lmin, const int a_regsize);
@@ -612,6 +631,7 @@ protected:
   /**
     @brief Define operator redistribution utility
     @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_regsize Description
   */
   void
   defineFineToCoarRedistOper(const int a_lmin, const int a_regsize);
@@ -619,6 +639,7 @@ protected:
   /**
     @brief Define operator redistribution utility
     @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_regsize Description
   */
   void
   defineCoarToFineRedistOper(const int a_lmin, const int a_regsize);
@@ -626,6 +647,7 @@ protected:
   /**
     @brief Define operator redistribution utility
     @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_regsize Description
   */
   void
   defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);
@@ -638,14 +660,13 @@ protected:
 
   /**
     @brief Define gradient stencils
-    @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_lmin Description
   */
   void
   defineGradSten(const int a_lmin);
 
   /**
     @brief Define data recentering stencils
-    @param[in] a_lmin Coarsest grid level that changes
   */
   void
   defineIrregSten();
@@ -660,6 +681,7 @@ protected:
   /**
     @brief Put the level-set on the mesh
     @param[in] a_lmin Coarsest grid level that changes
+    @param[in] a_numGhost Description
   */
   void
   defineLevelSet(const int a_lmin, const int a_numGhost);

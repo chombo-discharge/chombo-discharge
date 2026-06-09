@@ -113,18 +113,21 @@ public:
 
   /**
     @brief Return stencil order
+    @return Order
   */
   int
   getOrder() const;
 
   /**
     @brief Return stencil weight (for least squares)
+    @return Weight
   */
   int
   getWeight() const;
 
   /**
     @brief Return stencil radius (for least squares)
+    @return Radius
   */
   int
   getRadius() const;
@@ -169,24 +172,32 @@ public:
 
   /**
     @brief Return vof iterator which iterates over single-phase cells on a specific phase and box. 
+    @return Single phase vofs
+    @param[in] a_phase Description
+    @param[in,out] a_dit Description
   */
   virtual VoFIterator&
   getSinglePhaseVofs(const int a_phase, const DataIndex& a_dit) const;
 
   /**
     @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
+    @return Multi phase vofs
+    @param[in] a_phase Description
+    @param[in,out] a_dit Description
   */
   virtual VoFIterator&
   getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
 
   /**
     @brief Get stencils for computing dphi/dn at the boundary
+    @return Grad phi stencils
   */
   virtual const LayoutData<MFInterfaceFAB<VoFStencil>>&
   getGradPhiStencils() const noexcept;
 
   /**
     @brief Get constant weights involved when computing dphi/dn at the boundary
+    @return Grad phi weights
   */
   virtual const LayoutData<MFInterfaceFAB<Real>>&
   getGradPhiWeights() const noexcept;
@@ -368,6 +379,7 @@ protected:
     @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost cells that do not have valid data.
     @param[in] a_stencil Stencil
     @param[in] a_dit     Data index
+    @return True if stencil valid c f, false otherwise
   */
   inline bool
   isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;

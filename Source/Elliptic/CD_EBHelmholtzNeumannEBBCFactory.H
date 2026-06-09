@@ -30,11 +30,13 @@ public:
 
   /**
     @brief Full constructor which sets dphi/dn on the EB
+    @param[in] a_DphiDn Description
   */
   EBHelmholtzNeumannEBBCFactory(const Real a_DphiDn);
 
   /**
     @brief Full constructor which sets dphi/dn on the EB. 
+    @param[in] a_DphiDn Description
   */
   EBHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
@@ -77,6 +79,7 @@ public:
 
   /**
     @brief Factory method
+    @return Return value
   */
   RefCountedPtr<EBHelmholtzEBBC>
   create() override;

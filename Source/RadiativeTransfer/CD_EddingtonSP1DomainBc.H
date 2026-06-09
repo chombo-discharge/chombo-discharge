@@ -76,6 +76,7 @@ public:
   /**
     @brief Copy assignment
     @param[in] a_domainBc Other
+    @return Return value
   */
   EddingtonSP1DomainBc&
   operator=(const EddingtonSP1DomainBc& a_domainBc) = default;
@@ -105,6 +106,7 @@ public:
     @brief Returns the boundary condition for a side and direction
     @param[in] a_domainSide Coordinate direction and siden
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
+    @return Bc
   */
   Bc&
   getBc(const DomainSide a_domainSide);
@@ -113,6 +115,7 @@ public:
     @brief Returns the boundary condition for a side and direction
     @param[in] a_domainSide Coordinate direction and siden
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
+    @return Bc
   */
   const Bc&
   getBc(const DomainSide a_domainSide) const;

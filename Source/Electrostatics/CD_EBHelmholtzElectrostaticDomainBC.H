@@ -115,6 +115,7 @@ public:
     @param[in] a_side           High or low side
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
+    @return Face flux
   */
   Real
   getFaceFlux(const VolIndex&       a_vof,

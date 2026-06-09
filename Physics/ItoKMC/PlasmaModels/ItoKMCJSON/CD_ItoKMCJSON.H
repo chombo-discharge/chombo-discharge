@@ -157,6 +157,7 @@ namespace Physics {
 	@param[in] a_gradPhi Density gradients for plasma species. 
 	@param[in] a_dx      Grid resolution
 	@param[in] a_kappa   Cut-cell volume fraction
+        @return Plot variables
       */
       virtual Vector<Real>
       getPlotVariables(const RealVect          a_E,
@@ -209,9 +210,6 @@ namespace Physics {
 	@param[in]  a_primaryParticles   Particles that left the computational domain through the EB
 	@param[in]  a_primaryCDRFluxes   CDR fluxes leaving the computational domain through the EB
 	@param[in]  a_primaryPhotons     Photons that left the computational domain through the EB
-	@param[in]  a_newNumParticles    Total number of particles in the cut-cell AFTER the transport step
-	@param[in]  a_oldNumParticles    Total number of particles in the cut-cell BEFORE the transport step
-	@param[in]  a_electricField      Electric field                  
 	@param[in]  a_cellCenter         Physical position of the cell center. 
 	@param[in]  a_cellCentroid       Cell centroid relative to the cell center (not multiplied by dx)
 	@param[in]  a_bndryCentroid      EB face centroid relative to the cell center (not multiplied by dx)
@@ -221,6 +219,7 @@ namespace Physics {
 	@param[in]  a_dt                 Time step
 	@param[in]  a_isDielectric       Dielectric or electrode. 
 	@param[in]  a_matIndex           Material index (taken from computationalGeometry)
+        @param[in] a_E E
       */
       virtual void
       secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
@@ -453,6 +452,7 @@ namespace Physics {
       /**
 	@brief Trim a string. This removes whitespace before/after
 	@param[in] a_string String to be trimmed
+        @return Return value
       */
       virtual std::string
       trim(const std::string& a_string) const noexcept;
@@ -478,7 +478,7 @@ namespace Physics {
 
       /**
 	@brief Throw a parser wearning
-	@param[in] a_error Warning
+        @param[in] a_warning Warning
       */
       virtual void
       throwParserWarning(const std::string a_warning) const noexcept;
@@ -486,6 +486,7 @@ namespace Physics {
       /**
 	@brief Check if a file exists
 	@param[in] a_filename File name
+        @return Return value
       */
       virtual bool
       doesFileExist(const std::string a_filename) const noexcept;
@@ -493,6 +494,7 @@ namespace Physics {
       /**
 	@brief Return true if species is a background species
 	@param[in] a_name Species name
+        @return True if background species, false otherwise
       */
       virtual bool
       isBackgroundSpecies(const std::string& a_name) const noexcept;
@@ -500,6 +502,7 @@ namespace Physics {
       /**
 	@brief Return true if species is a plasma species
 	@param[in] a_name Species name
+        @return True if plasma species, false otherwise
       */
       virtual bool
       isPlasmaSpecies(const std::string& a_name) const noexcept;
@@ -507,6 +510,7 @@ namespace Physics {
       /**
 	@brief Return true if species is a photon species
 	@param[in] a_name Species name
+        @return True if photon species, false otherwise
       */
       virtual bool
       isPhotonSpecies(const std::string& a_name) const noexcept;
@@ -514,6 +518,7 @@ namespace Physics {
       /**
 	@brief Check if a string contains the wildcard @ and return true if it does
 	@param[in] a_str Input string
+        @return Return value
       */
       virtual bool
       containsWildcard(const std::string a_str) const noexcept;
@@ -521,6 +526,7 @@ namespace Physics {
       /**
 	@brief Check if a string contains standard brackets
 	@param[in] a_str Input string
+        @return Return value
       */
       virtual bool
       containsBracket(const std::string a_str) const noexcept;
@@ -528,6 +534,7 @@ namespace Physics {
       /**
 	@brief Check if a string contains starts with '(' and ends with ')'
 	@param[in] a_str Input string
+        @return True if bracketed, false otherwise
       */
       virtual bool
       isBracketed(const std::string a_str) const noexcept;
@@ -722,6 +729,7 @@ namespace Physics {
       /**
 	@brief Parse whether or not a reaction rate should be plotted
 	@param[in] a_reactionJSON Reaction entry in JSON file
+        @return Return value
       */
       virtual std::pair<bool, std::string>
       parsePlasmaReactionPlot(const nlohmann::json& a_reactionJSON) const;
@@ -729,12 +737,15 @@ namespace Physics {
       /**
 	@brief Parse whether or not a reaction uses a gradient correction for the rate. 
 	@param[in] a_reactionJSON Reaction entry in JSON file
+        @return Return value
       */
       virtual std::pair<bool, std::string>
       parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reactionJSON) const;
 
       /**
         @brief Parse whether or not a reaction should be a part of the time step calculation. Returns 1 if the reaction is a part of it.
+        @return Return value
+        @param[in,out] a_reactionJSON Description
       */
       virtual Real
       parsePlasmaReactionDt(const nlohmann::json& a_reactionJSON) const;
@@ -743,6 +754,7 @@ namespace Physics {
 	@brief Parse a table which is stored in E/N format
 	@param[in] a_tableEntry Table entry in JSON format. 
 	@param[in] a_dataID     Data identifier
+        @return Return value
       */
       virtual LookupTable1D<Real, 1>
       parseTableEByN(const nlohmann::json& a_tableEntry, const std::string& a_dataID) const;
@@ -782,8 +794,9 @@ namespace Physics {
 
       /**
 	@brief Sample a multinomial distribution with N samples 
-	@param[in] a_N Number of samples
 	@param[in] a_distribution Discrete distribution
+        @return Return value
+        @param[in] N N
       */
       std::vector<size_t>
       multinomial(const size_t N, const std::discrete_distribution<size_t>& a_distribution) const noexcept;

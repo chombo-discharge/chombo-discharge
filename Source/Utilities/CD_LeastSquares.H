@@ -41,9 +41,13 @@ public:
   */
   ~LeastSquares() = delete;
 
+  /** @brief Cell type alias. */
   using CellLocation = Location::Cell;
+  /** @brief Face type alias. */
   using FaceLocation = Location::Face;
+  /** @brief Connectivity type alias. */
   using Connectivity = VofUtils::Connectivity;
+  /** @brief Neighborhood type alias. */
   using Neighborhood = VofUtils::Neighborhood;
 
   /**
@@ -57,6 +61,8 @@ public:
     @param[in] a_radius         Stencil radius.
     @param[in] a_order          Interpolation order. 
     @param[in] a_addStartingVof Add starting vof or not (can't be used with a_p > 0) as it would lead to ill-conditioned systems. 
+    @return Interpolation stencil
+    @param[in] a_connectivity Description
   */
   static VoFStencil
   getInterpolationStencil(const CellLocation a_cellPos,
@@ -82,6 +88,7 @@ public:
     @param[in]  a_p            Weighting factor for least squares
     @param[in]  a_order        Truncation order.
     @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
+    @param[in] a_knownTerms Description
   */
   static VoFStencil
   getGradSten(const VolIndex&    a_vof,
@@ -106,6 +113,7 @@ public:
     @param[in]  a_p            Weighting factor for least squares
     @param[in]  a_order        Truncation order.
     @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
+    @param[in] a_knownTerms Description
   */
   static VoFStencil
   getGradSten(const FaceIndex&   a_face,
@@ -232,10 +240,11 @@ public:
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
     @param[in] a_from    From this position
     @param[in] a_to      To this position. 
-    @param[in] a_curVof  Origin vof
     @param[in] a_toVofs Vofs to compute the distance to/from
     @param[in] a_ebisbox EBISBox
     @param[in] a_dx      Grid resolution
+    @return Displacements
+    @param[in] a_fromVof From vof
   */
   static Vector<RealVect>
   getDisplacements(const CellLocation      a_from,
@@ -248,11 +257,12 @@ public:
   /**
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
     @param[in] a_fromLoc  Location on face
-    @param[in] a_toLoc    Location in Vofs
     @param[in] a_fromFace Origin face
     @param[in] a_toVofs   Vofs to compute the distance to/from
     @param[in] a_ebisbox  EBISBox
     @param[in] a_dx       Grid resolution
+    @return Displacements
+    @param[in] a_to To
   */
   static Vector<RealVect>
   getDisplacements(const FaceLocation      a_fromLoc,
@@ -266,7 +276,8 @@ public:
     @brief Create a list of weights. This routine returns a list of diagonal weights for a least squares system. The weights
     are given as 1/||x1-x0||^a where a is the power. 
     @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
-    @param[in] a_power Power factor for weights.
+    @return Return value
+    @param[in] a_pow Pow
   */
   inline static Vector<Real>
   makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
@@ -280,6 +291,7 @@ public:
     @param[in] a_order         Desired order. 
     @note This computes weights using makeDiagWeights(a_displacements, a_p) and then calls the other version. 
     @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
+    @param[in] a_knownTerms Description
   */
   static VoFStencil
   computeGradSten(const Vector<VolIndex>& a_allVofs,
@@ -297,6 +309,7 @@ public:
     @param[in] a_order         Interpolation order
     @return Stencil for obtaining the gradient in a point. Stencils for each direction are put in the VoFStencil.variable(i). 
     @note This routine will cause a run-time error if you have less than SpaceDim equations, which is the minimum number of equations needed for obtaining a gradient. 
+    @param[in] a_knownTerms Description
     However, the routine does *not* check if the inputs are degenerate. 
   */
   static VoFStencil
@@ -319,9 +332,9 @@ public:
     @param[in] a_allVofs Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
     @param[in] a_order         Order of the interpolation. 
-    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
     @return Stencil for the least squares solution to the interpolation problem. 
     @note This computes weights using makeDiagWeights(a_displacements, a_pow) and then calls the other version. 
+    @param[in] a_pow Pow
   */
   static VoFStencil
   computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
@@ -334,10 +347,10 @@ public:
     @param[in] a_allVofs Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
     @param[in] a_order         Order of the interpolation. 
-    @param[in] a_weightP       Weighting order for the least squares system. Must be > 0 to have an effect. 
     @return Stencil for the least squares solution to the interpolation problem. 
     @note This calls the more general version with a_derivs = IntVectSet(IntVect(0,0)). 
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @param[in] a_weights Weights
   */
   static VoFStencil
   computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,

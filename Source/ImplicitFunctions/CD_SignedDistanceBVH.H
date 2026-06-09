@@ -65,6 +65,7 @@ public:
 
   /**
     @brief Copy constructor
+    @param[in,out] a_object Description
   */
   SignedDistanceBVH(const SignedDistanceBVH& a_object);
 
@@ -76,12 +77,14 @@ public:
   /**
     @brief Value function
     @param[in] a_point Spatial point
+    @return Function value at the given point
   */
   Real
   value(const RealVect& a_point) const override;
 
   /**
     @brief Factory method. Sends pointers around. 
+    @return New copy of this implicit function
   */
   BaseIF*
   newImplicitFunction() const override;

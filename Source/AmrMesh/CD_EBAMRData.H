@@ -47,6 +47,7 @@ public:
 
   /**
     @brief Destructor. Sets m_data to size a_size but does not allocate anything. 
+    @param[in] a_size Description
   */
   EBAMRData(const int a_size) noexcept;
 
@@ -58,6 +59,7 @@ public:
   /**
     @brief Indexing operators. Returns m_data[a_level]
     @param[in] a_level Grid level
+    @return Return value
   */
   RefCountedPtr<LevelData<T>>&
   operator[](int a_level) noexcept;
@@ -65,6 +67,7 @@ public:
   /**
     @brief Indexing operators. Returns const m_data[a_level]
     @param[in] a_level Grid level
+    @return Return value
   */
   const RefCountedPtr<LevelData<T>>&
   operator[](int a_level) const noexcept;
@@ -85,6 +88,7 @@ public:
 
   /**
     @brief Get size of m_data
+    @return Return value
   */
   int
   size() const noexcept;
@@ -115,18 +119,21 @@ public:
 
   /**
     @brief Check if data is reserved
+    @return True if reserved, false otherwise
   */
   bool
   isReserved() const noexcept;
 
   /**
     @brief Get underlying data. Returns m_data. 
+    @return Data
   */
   Vector<RefCountedPtr<LevelData<T>>>&
   getData() noexcept;
 
   /**
     @brief Get underlying data. Returns const m_data.
+    @return Data
   */
   const Vector<RefCountedPtr<LevelData<T>>>&
   getData() const noexcept;
@@ -140,6 +147,7 @@ public:
 
   /**
     @brief Returns the string identifier for whatever realm this data is supposed to be allocated over. 
+    @return Realm
   */
   const std::string
   getRealm() const noexcept;

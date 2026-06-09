@@ -73,12 +73,12 @@ public:
     @details The template parameters indicate the particle type and a pointer to a particle function. The user can scale
     the particle width by changing a_widthScale. If this is set to one, the standard width for CIC becomes the grid cell size,
     and the standard width for TSC becomes twice the grid size. 
-    @param[in,out] a_rho            Mesh data
     @param[in]    a_particles      Particles to be deposited    
     @param[in]    a_depositionType Deposition method
     @param[in]    a_widthScale     Particle scale multiplier.  
     @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
+    @param[in] a_meshData Mesh data
   */
   template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
@@ -93,10 +93,9 @@ public:
     @details The template parameters indicate the particle type and a pointer to a particle function. 
     @param[in,out] a_particles      Particles to be deposited
     @param[in]    a_meshData       Mesh data    
-    @param[in]    a_depositionType Deposition method
-    @param[in]    a_widthScale     Particle scale multiplier.  
     @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
+    @param[in] a_interpType Interp type
   */
   template <class P, class Ret, Ret (P::*MemberFunc)()>
   void
@@ -179,8 +178,8 @@ protected:
     @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
     @param[in]    a_volumeFactor   Volume factor to multiply by
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
-    @param[in]    a_numCOmp        Number of components to deposit
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells or not
+    @param[in] a_numComp Num comp
   */
   inline void
   depositParticleCIC(EBCellFAB&      a_rho,
@@ -196,15 +195,15 @@ protected:
     @brief Function for depositing a single particle with a TSC scheme.
     @details The user can input a differerent particle width than the standard width byu adjusting a_particleWidth. The input
     box (a_particleBox) must be large enough to contain a particle. E.g., if a_particleWidth = 2, then the box must be at least
-    Box(-2*IntVect::Unit, 2*IntVect::Unit).
+    Box(-2*BASISV(0), 2*BASISV(0)) in each direction.
     @param[in,out] a_rho            Mesh data
     @param[in]    a_position       Particle position
     @param[in]    a_particleWidth  Particle width (relative to grid resolution)
     @param[in]    a_particleBox    Basic box that is guaranteed to contain the particle.
     @param[in]    a_volumeFactor   Volume factor to multiply by
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
-    @param[in]    a_numCOmp        Number of components to deposit
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells or not
+    @param[in] a_numComp Num comp
   */
   inline void
   depositParticleTSC(EBCellFAB&      a_rho,
@@ -233,11 +232,11 @@ protected:
     @brief Particle interpolation function using a CIC scheme. 
     @param[out] a_particleField  Particle quantity to interpolate into.
     @param[in]  a_meshData       Mesh data
-    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
     @param[in]  a_gatherBox      Box from which we gather the field.
     @param[in]  a_position       Particle position
     @param[in]  a_numComp        Number of components to interpolate.
     @param[in]  a_forceIrregNGP  Force NGP in cut-cells
+    @param[in] a_validBox Valid box
   */
   inline void
   interpolateParticleCIC(Real*            a_particleField,
@@ -252,11 +251,11 @@ protected:
     @brief Particle interpolation function using a TSC scheme. 
     @param[out] a_particleField  Particle quantity to interpolate into.
     @param[in]  a_meshData       Mesh data
-    @param[in]  a_validRegion    Region where particle can live without kernels reaching outside the domain.
     @param[in]  a_gatherBox      Box from which we gather the field.
     @param[in]  a_position       Particle position
     @param[in]  a_numComp        Number of components to interpolate.
     @param[in]  a_forceIrregNGP  Force NGP in cut-cells
+    @param[in] a_validBox Valid box
   */
   inline void
   interpolateParticleTSC(Real*            a_particleField,

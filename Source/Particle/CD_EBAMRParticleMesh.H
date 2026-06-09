@@ -65,6 +65,7 @@ public:
     @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
     @param[in] a_finestLevel      Finest grid level
+    @param[in] a_probLo Description
   */
   EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
                     const Vector<int>&                        a_refRat,
@@ -86,6 +87,7 @@ public:
     @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
     @param[in] a_finestLevel      Finest grid level
+    @param[in] a_probLo Description
   */
   void
   define(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,
@@ -105,6 +107,7 @@ public:
     @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
     @note When using certain types of coarseFineDeposition methods -- the user may need to fill the mask particles before calling this routine. 
+    @param[in] a_particles Description
   */
   template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
@@ -143,6 +146,7 @@ public:
     functions on a per-patch basis. I fail to see any other reason where this routine is useful. 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
+    @return E b particle mesh
   */
   const EBParticleMesh&
   getEBParticleMesh(const int a_lvl, const DataIndex& a_dit) const;
@@ -270,6 +274,7 @@ protected:
     @details Used when depositing with a transition zone.
     @param[in] a_depositionType Deposition type
     @param[in] a_refRat Refinement ratio between levels
+    @return Transition mask width
   */
   int
   getTransitionMaskWidth(const DepositionType a_depositionType, const int a_refRat) const;

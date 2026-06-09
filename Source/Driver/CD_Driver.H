@@ -662,16 +662,17 @@ protected:
   writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level);
 #endif
 
+#ifdef CH_USE_HDF5
   /**
     @brief Read checkpoint data from HDF5 file.
     @param[in,out] a_handle HDF5 file handle.
     @param[in]     a_level  Grid level.
   */
-#ifdef CH_USE_HDF5
   void
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
 
+#ifdef CH_USE_HDF5
   /**
     @brief Read realm loads from HDF5 file.
     @param[out] a_loads  Loaded computational loads.
@@ -679,7 +680,6 @@ protected:
     @param[in]  a_realm  Realm identifier.
     @param[in]  a_level  Grid level.
   */
-#ifdef CH_USE_HDF5
   void
   readCheckpointRealmLoads(Vector<long int>& a_loads,
                            HDF5Handle&       a_handle,

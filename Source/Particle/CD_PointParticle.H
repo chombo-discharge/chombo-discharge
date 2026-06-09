@@ -56,12 +56,14 @@ public:
 
   /**
     @brief Get weight
+    @return Return value
   */
   inline Real&
   weight();
 
   /** 
     @brief Const retrieve weight
+    @return Return value
   */
   inline const Real&
   weight() const;

@@ -20,10 +20,12 @@
 #include <EBGeometry.hpp>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using AABB   = EBGeometry::BoundingVolumes::AABBT<Real>;
 using Vec3   = EBGeometry::Vec3T<Real>;
 using SDF    = EBGeometry::SignedDistanceFunction<Real>;
 using Sphere = EBGeometry::SphereSDF<Real>;
+/// @endcond
 
 /**
   @brief A Cartesian array of spheres. 
@@ -39,12 +41,12 @@ public:
   /**
     @brief SphereArray full constructor. Constructs an array of spheres
     @param[in] a_radius     Sphere radius
-    @param[in] a_lowerLeft  Lower-left sphere center     
     @param[in] a_sphereGap  Distance between spheres
     @param[in] a_numSpheres Number of spheres in each coordinate direction
     @param[in] a_useFast    Use fast union or not
     @param[in] a_flipInside Make outside to inside
     @param[in] a_zCoord     If 2D, this sets the z-coordinate
+    @param[in] a_loCenter Lo center
   */
   SphereArray(const Real     a_radius,
               const RealVect a_loCenter,
@@ -56,6 +58,7 @@ public:
 
   /**
     @brief Copy constructor. Sends the pointers to the object. 
+    @param[in,out] a_inputIF Description
   */
   SphereArray(const SphereArray& a_inputIF);
 
@@ -67,12 +70,14 @@ public:
   /**
     @brief Value function
     @param[in] a_point Coordinate
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_point) const override;
 
   /**
     @brief Factory method -- calls the copy constructor
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const override;

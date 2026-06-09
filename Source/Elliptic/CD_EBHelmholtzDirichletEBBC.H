@@ -69,6 +69,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
@@ -187,7 +188,6 @@ protected:
     @param[out] a_stencil Weight and stencil
     @param[out] a_vof     Grid cell
     @param[in]  a_dit     Data index
-    @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
   virtual bool

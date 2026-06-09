@@ -36,6 +36,9 @@ public:
 
   /**
     @brief Factory method for 
+    @return Return value
+    @param[in] a_iphase Description
+    @param[in,out] a_jumpBC Description
   */
   virtual RefCountedPtr<EBHelmholtzEBBC>
   create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const = 0;

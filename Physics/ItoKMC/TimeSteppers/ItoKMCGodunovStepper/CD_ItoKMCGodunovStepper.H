@@ -382,6 +382,7 @@ namespace Physics {
 
       /**
 	@brief Set up the semi-implicit Poisson solver
+        @param[in] a_dt Description
       */
       virtual void
       setupSemiImplicitPoisson(const Real a_dt) noexcept;
@@ -424,6 +425,8 @@ namespace Physics {
       /**
 	@brief Perform the diffusive Ito advance in the Euler-Maruyama step.
 	@details This computes the diffusion hop onto run-time enabled storage on the ItoParticles. We also store the
+        @param[in,out] a_rhoDaggerParticles Description
+        @param[in] a_dt Description
 	"rho dagger" particles which correspond to the position of the charged particles after the diffusionhop. 
       */
       virtual void
@@ -434,6 +437,8 @@ namespace Physics {
 	@brief Compute the diffusion term for the CDR equations as well as the resulting CDR-contributions to 
 	the space charge density.
 	@details This does an explicit diffusion advance over a_dt for the diffusive CDR species. This also
+        @param[in,out] m_semiImplicitRhoCDR Description
+        @param[in] a_dt Description
 	stores the resultant space charge on m_semiImplicitRhoCDR.
       */
       virtual void

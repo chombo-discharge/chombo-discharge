@@ -67,6 +67,7 @@ public:
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
+    @param[in] a_dataLocation Description
   */
   virtual void
   define(const Location::Cell a_dataLocation, const EBLevelGrid& a_eblg, const RealVect& a_probLo, const Real a_dx);
@@ -100,6 +101,7 @@ public:
     @param[in] a_side           High or low side
     @param[in] a_dit            Data index
     @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
+    @return Face flux
   */
   virtual Real
   getFaceFlux(const VolIndex&       a_vof,
@@ -146,6 +148,7 @@ protected:
     @param[in] a_iv   Grid cell
     @param[in] a_dir  Face coordinate direction
     @param[in] a_side Lo/Hi side
+    @return Boundary position
   */
   inline RealVect
   getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;

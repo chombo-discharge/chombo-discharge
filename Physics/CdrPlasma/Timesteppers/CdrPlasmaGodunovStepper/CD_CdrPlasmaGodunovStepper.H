@@ -88,8 +88,8 @@ namespace Physics {
       /**
          @brief Pre-regrid method. Used for storing important variables for the solvers
          @details This is overridden because the semi-implicit scheme requires us to store some extra variables on the old grids. 
-         @param[in] a_lmin           The coarsest level that changes
          @param[in] a_oldFinestLevel The finest level before the regrid. 
+        @param[in] a_lbase Lbase
       */
       void
       preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
@@ -113,6 +113,7 @@ namespace Physics {
 
       /**
          @brief Compute the time step -- this will be different for the different supported algorithms. 
+        @return Computed dt
       */
       Real
       computeDt() override;
@@ -431,6 +432,7 @@ namespace Physics {
          embedded boundaries (which does not preserve non-negativeness). 
          @param[in] a_message Base message
          @param[in] a_solver  Which CDR solver to compute the mass for. 
+        @param[in] a_data Description
       */
       void
       floorMass(EBAMRCellData& a_data, const std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
@@ -522,6 +524,7 @@ namespace Physics {
          @brief Solve the semi-implicit Poisson equation
          @note This is just like the parent method for solving it, except that we use m_semiImplicitRho for the space charge density. Note that
          the user should first have set up the semi-implicit Poisson equation by computing the conductivities and calling CdrPlasma::setupSemiImplicitPoisson.
+        @return Return value
       */
       bool
       solveSemiImplicitPoisson();

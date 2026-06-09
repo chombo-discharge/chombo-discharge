@@ -36,19 +36,19 @@ public:
   ScanShop() = delete;
 
   /**
-    @brief Constructor. 
-    @param[in] a_geometry      The implicit function for the geometry
+    @brief Constructor.
+    @param[in] a_localGeom     The implicit function for the geometry
     @param[in] a_verbosity     Verbosity
-    @param[in] a_finestDx      Resolution on the finest level
+    @param[in] a_dx            Resolution on the finest level
     @param[in] a_probLo        Physical coordinates of the lower-left corner of simulation domain
     @param[in] a_finestDomain  Finest grid level
-    @param[in] a_scanLevel     Scan level, i.e. on which level to initiate the load balancing sequence. 
+    @param[in] a_scanLevel     Scan level, i.e. on which level to initiate the load balancing sequence.
     @param[in] a_ebGhost       Number of EB ghost cells
-    @param[in] a_thsdhVoF      Threshold for GeometryShop
+    @param[in] a_thrshdVoF     Threshold for GeometryShop
   */
-  ScanShop(const BaseIF&       a_geometry,
+  ScanShop(const BaseIF&       a_localGeom,
            const int           a_verbosity,
-           const Real          a_finestDx,
+           const Real          a_dx,
            const RealVect      a_probLo,
            const ProblemDomain a_finestDomain,
            const ProblemDomain a_scanLevel,
@@ -62,6 +62,7 @@ public:
 
   /**
     @brief If doing profiling, set the output name.
+    @param[in] a_fileName Description
   */
   void
   setProfileFileName(const std::string a_fileName);
@@ -89,6 +90,7 @@ public:
     @param[in] a_probLo Lower-left corner of physical domain
     @param[in] a_dx     Grid resolution on level
     @param[in] a_dit    Grid index
+    @return Return value
   */
   GeometryService::InOut
   InsideOutside(const Box&           a_region,
@@ -216,8 +218,8 @@ protected:
     @brief Build the "coarse level" where we initiate the recursion process.
     @details This level must be defined in order to recurse towards deeper levels. Which is why this is ALWAYS called exact ONCE before buildFinerLevels builds
     the finer levels.
-    @param[in] a_coarserLevel Coarser level
     @param[in] a_maxGridSize Maximum patch size
+    @param[in] a_finerLevel Finer level
   */
   void
   buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
@@ -236,6 +238,7 @@ protected:
     @param[in] a_box    Cell-centered box
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
+    @return True if covered, false otherwise
   */
   inline bool
   isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
@@ -243,12 +246,19 @@ protected:
   /**
     @brief Sort boxes lexicographically. 
     @details A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood
+    @return Sorted boxes and types
+    @param[in,out] a_boxes Description
+    @param[in,out] a_types Description
   */
   inline std::vector<std::pair<Box, int>>
   getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
 
   /**
     @brief Define the "box map" on a specified level
+    @param[in,out] coveredBoxes Description
+    @param[in,out] regularBoxes Description
+    @param[in,out] cutCellBoxes Description
+    @param[in] a_level Description
   */
   void
   defineLevel(Vector<Box>& coveredBoxes, Vector<Box>& regularBoxes, Vector<Box>& cutCellBoxes, const int a_level);

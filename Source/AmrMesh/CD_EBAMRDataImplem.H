@@ -157,7 +157,7 @@ template class EBAMRData<DomainFluxIFFAB>;
 template class EBAMRData<BaseFab<bool>>;
 template class EBAMRData<FArrayBox>;
 
-// Typedefs for simple typing.
+/// @cond DOXYGEN_SKIP
 typedef EBAMRData<MFCellFAB>       MFAMRCellData; // Cell-centered multifluid data
 typedef EBAMRData<MFFluxFAB>       MFAMRFluxData; // Face-centered multifluid data
 typedef EBAMRData<MFBaseIVFAB>     MFAMRIVData;   // Irregular face multifluid data
@@ -168,6 +168,7 @@ typedef EBAMRData<BaseIVFAB<Real>> EBAMRIVData;   // Data on irregular data cent
 typedef EBAMRData<DomainFluxIFFAB> EBAMRIFData;   // Data on domain phases
 typedef EBAMRData<BaseFab<bool>>   EBAMRBool;     // For holding bool at every cell
 typedef EBAMRData<FArrayBox>       EBAMRFAB;      // Just regular grid data.
+/// @endcond
 
 #include <CD_NamespaceFooter.H>
 

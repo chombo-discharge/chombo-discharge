@@ -35,7 +35,8 @@ public:
     @param[in]  a_pos      Relative position inside cell
     @param[in]  a_vof      Cut-cell
     @param[in]  a_domain   Domain
-    @param[in]  a_ebisBox  EBISBox
+    @return Linear interp stencil
+    @param[in] a_ebisbox Ebisbox
   */
   static bool
   getLinearInterpStencil(VoFStencil&          a_stencil,
@@ -58,8 +59,9 @@ protected:
     @param[in]  a_pos       Relative position inside cell
     @param[in]  a_vof       Cut-cell
     @param[in]  a_domain    Domain
-    @param[in]  a_ebisBox   EBISBox
     @param[in]  a_interpDir Interpolation coordinate
+    @return Computed interp stencil1 d
+    @param[in] a_ebisbox Ebisbox
   */
   static bool
   computeInterpStencil1D(VoFStencil&          a_stencil,
@@ -75,8 +77,9 @@ protected:
     @param[in]  a_pos  Relative position inside cell
     @param[in]  a_vof       Cut-cell
     @param[in]  a_domain    Domain
-    @param[in]  a_ebisBox   EBISBox
-    @param[in]  a_interpDir Interpolation coordinate
+    @return Computed interp stencil2 d
+    @param[in] a_ebisbox Ebisbox
+    @param[in] a_noInterpDir No interp dir
   */
   static bool
   computeInterpStencil2D(VoFStencil&          a_stencil,

@@ -92,6 +92,7 @@ public:
     @brief Comparison operator with other particle. 
     @param[in] a_other Other particle
     @note Does not compare the M and N Reals and RealVects. 
+    @return Return value
   */
   inline bool
   operator==(const NonCommParticle<M, N>& a_other) const;
@@ -100,6 +101,7 @@ public:
     @brief Comparison operator with other particle.
     @param[in] a_other Other particle
     @note Does not compare the M and N Reals and RealVects. 
+    @return Return value
   */
   inline bool
   operator!=(const NonCommParticle<M, N>& a_other) const;
@@ -118,8 +120,9 @@ protected:
 
 /**
   @brief Particle printing function
-  @param[in] ostr       Output stream
-  @param[in] a_particle Particle to output
+  @param[in] ostr Output stream
+  @param[in] p    Particle to output
+  @return Reference to the output stream
 */
 template <size_t M, size_t N>
 inline std::ostream&

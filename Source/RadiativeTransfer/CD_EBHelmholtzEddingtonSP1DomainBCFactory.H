@@ -82,6 +82,7 @@ public:
 
   /**
     @brief Factory method
+    @return Return value
   */
   RefCountedPtr<EBHelmholtzDomainBC>
   create() const override final;

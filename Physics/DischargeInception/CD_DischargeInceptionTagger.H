@@ -78,6 +78,7 @@ namespace Physics {
          @brief Tag cells for refinement. 
          @details This tags based on |grad(E)|*dx/E. 
          @param[in,out] a_tags Tags on grid levels.
+        @return Return value
       */
       virtual bool
       tagCells(EBAMRTags& a_tags) override final;

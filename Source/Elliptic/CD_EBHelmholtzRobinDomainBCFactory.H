@@ -79,6 +79,7 @@ public:
 
   /**
     @brief Factory method
+    @return Return value
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
   create() const override;
@@ -87,6 +88,7 @@ protected:
   /*
     @brief Use constant for BC
   */
+  /** @brief Use constant. */
   bool m_useConstant;
 
   /**

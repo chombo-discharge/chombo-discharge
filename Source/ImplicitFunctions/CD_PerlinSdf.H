@@ -53,7 +53,8 @@ public:
 
   /**
     @brief Simple random number generator
-    @param[in] seed
+    @return Return value
+    @param[in] i I
   */
   static int
   random(const int i);
@@ -66,12 +67,14 @@ public:
   /**
     @brief Level-set function
     @param[in] a_pos Position
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
     @brief Factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;
@@ -131,36 +134,52 @@ protected:
     @param[in] a_x Position
     @param[in] a_y Position
     @param[in] a_z Position
+    @return Return value
   */
   double
   noise(const double a_x, const double a_y, const double a_z) const;
 
   /**
     @brief Chombo interface to Perlin noise function
+    @return Return value
+    @param[in,out] a_pos Description
   */
   Real
   noise(const RealVect& a_pos) const;
 
   /**
     @brief Octave noise function. Returns noise over over several octaves. 
+    @return Return value
+    @param[in,out] a_pos Description
   */
   Real
   octaveNoise(const RealVect& a_pos) const;
 
   /**
     @brief Interpolation function
+    @return Return value
+    @param[in] t Description
+    @param[in] a Description
+    @param[in] b Description
   */
   Real
   lerp(const Real t, const Real a, const Real b) const;
 
   /**
     @brief Fade function
+    @return Return value
+    @param[in] t Description
   */
   Real
   fade(const Real t) const;
 
   /**
     @brief Gradient function using hash table lookup
+    @return Return value
+    @param[in] hash Description
+    @param[in] x Description
+    @param[in] y Description
+    @param[in] z Description
   */
   Real
   grad(const int hash, const double x, const double y, const double z) const;

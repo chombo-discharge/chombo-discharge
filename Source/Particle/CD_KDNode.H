@@ -80,42 +80,49 @@ public:
 
   /**
     @brief Get the node weight
+    @return Return value
   */
   inline const Real&
   weight() const noexcept;
 
   /**
     @brief Get the node weight
+    @return Return value
   */
   inline Real&
   weight() noexcept;
 
   /**
     @brief Get particles in this node. 
+    @return Particles
   */
   inline const ParticleList&
   getParticles() const noexcept;
 
   /**
     @brief Get particles in this node. 
+    @return Particles
   */
   inline ParticleList&
   getParticles() noexcept;
 
   /**
     @brief Is leaf node or not.
+    @return True if leaf node, false otherwise
   */
   inline bool
   isLeafNode() const noexcept;
 
   /**
     @brief Is leaf node or not.
+    @return True if interior node, false otherwise
   */
   inline bool
   isInteriorNode() const noexcept;
 
   /**
     @brief Gather particles further down in the subtree and return all particles (in the leaf nodes)
+    @return Return value
   */
   inline ParticleList
   gatherParticles() const noexcept;
@@ -124,18 +131,21 @@ public:
     @brief Move the particles list further down in the subtree into this vector.
     @note This clears the particles from the leaf nodes. Use gatherParticles if you do not
     want to change the tree contents. 
+    @return Return value
   */
   inline ParticleList
   moveParticles() noexcept;
 
   /**
     @brief Get the left node.
+    @return Left
   */
   inline std::shared_ptr<KDNode<P>>&
   getLeft() noexcept;
 
   /**
     @brief Get the right node.
+    @return Right
   */
   inline std::shared_ptr<KDNode<P>>&
   getRight() noexcept;

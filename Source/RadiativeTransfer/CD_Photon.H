@@ -60,36 +60,42 @@ public:
 
   /**
     @brief Get photon weight
+    @return Return value
   */
   inline Real&
   weight();
 
   /**
     @brief Get particle weight
+    @return Return value
   */
   inline const Real&
   weight() const;
 
   /**
     @brief Get photon absorption length
+    @return Return value
   */
   inline Real&
   kappa();
 
   /**
     @brief Get mean absorption length
+    @return Return value
   */
   inline const Real&
   kappa() const;
 
   /**
     @brief Get photon velocity
+    @return Return value
   */
   inline RealVect&
   velocity();
 
   /**
     @brief Get photon velocity
+    @return Return value
   */
   inline const RealVect&
   velocity() const;

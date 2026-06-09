@@ -126,6 +126,7 @@ namespace Physics {
 	@param[in] a_lvl Grid level 
 	@param[in] a_tagFields Cell tagging fields
 	@param[in] a_gradTagFields Gradient of cell tagging fields
+        @return Return value
       */
       virtual bool
       coarsenCell(const RealVect         a_pos,
@@ -143,6 +144,7 @@ namespace Physics {
 	@param[in] a_lvl Grid level 
 	@param[in] a_tagFields Cell tagging fields
 	@param[in] a_gradTagFields Gradient of cell tagging fields
+        @return Return value
       */
       virtual bool
       refineCell(const RealVect         a_pos,

@@ -115,6 +115,7 @@ public:
 
   /**
     @brief Function which performs an exchange+add operation on the refined coarse data
+    @param[in,out] a_fiCoData Description
   */
   virtual void
   exchangeAndAddFiCoData(LevelData<EBCellFAB>& a_fiCoData) const noexcept;
@@ -122,8 +123,8 @@ public:
   /**
     @brief Coarsen the data on the refined coarse grid to the coarse grid. The grids must be defined over the same layout
     @param[in,out] a_coarData Coarse-grid data
-    @param[in] a_fineData Data on the refined coarse grid
     @param[in] a_average Averaging method. Either arithmetic or conservative.
+    @param[in] a_fiCoData Fi co data
   */
   virtual void
   restrictAndAddFiCoDataToCoar(LevelData<EBCellFAB>&                   a_coarData,
@@ -132,12 +133,14 @@ public:
 
   /**
     @brief Get the refined version of the coarse eblevelgrid
+    @return Eblg fi co
   */
   const EBLevelGrid&
   getEblgFiCo() const;
 
   /**
     @brief Get buffer storage on the refined coarse level
+    @return Buffer fi co
   */
   template <int NCOMP>
   LevelData<EBCellFAB>&

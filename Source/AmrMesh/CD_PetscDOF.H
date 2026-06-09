@@ -20,10 +20,16 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
+/**
+  @brief Mapping between a PETSc local row index and an AMR grid cell.
+*/
 struct PetscDOF
 {
+  /** @brief Local PETSc row index. */
   PetscInt localRow;
-  IntVect  gridCell;
+
+  /** @brief AMR grid cell associated with this DOF. */
+  IntVect gridCell;
 };
 
 #include <CD_NamespaceFooter.H>

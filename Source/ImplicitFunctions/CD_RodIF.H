@@ -45,17 +45,20 @@ public:
   /**
     @brief Value function. Returns distance to objcet. 
     @param[in] a_point Physical position. 
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_point) const;
 
   /**
     @brief IF factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;
 
 protected:
+  /** @brief Baseif. */
   RefCountedPtr<BaseIF> m_baseif;
 };
 

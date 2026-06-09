@@ -5,7 +5,7 @@
  */
 
 /**
-  @brief  CD_ScanShop.cpp
+  @file   CD_ScanShop.cpp
   @brief  Implementation of CD_ScanShop.H
   @author Robert Marskar
 */

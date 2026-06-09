@@ -42,6 +42,7 @@ public:
 
   /**
     @brief Get species name.
+    @return Name
   */
   std::string
   getName() const;
@@ -49,6 +50,7 @@ public:
   /**
     @brief Get kappa (i.e. the inverse absorption length) at physical coordinates. 
     @param[in] a_pos Physical coordinates. 
+    @return Absorption coefficient
   */
   virtual Real
   getAbsorptionCoefficient(const RealVect a_pos) const = 0;
@@ -57,6 +59,7 @@ public:
     @brief Get scattering coefficient (i.e. the inverse scattering length) at physical coordinates. 
     @param[in] a_pos Physical coordinates. 
     @note This is not used anywhere (yet).
+    @return Scattering coefficient
   */
   virtual Real
   getScatteringCoefficient(const RealVect a_pos) const;

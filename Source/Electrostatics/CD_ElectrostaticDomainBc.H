@@ -79,6 +79,7 @@ public:
   /**
     @brief Copy assignment
     @param[in] a_other Other
+    @return Return value
   */
   ElectrostaticDomainBc&
   operator=(const ElectrostaticDomainBc& a_other) = default;
@@ -97,9 +98,9 @@ public:
 
   /**
     @brief Set the boundary condition on a domain side. You must set both the type, and the associated function. 
-    @param[in] a_domainSide Domain side
     @param[in] a_bc         BC type and function
     @note If the boundary condition had been set previously, this code will overwrite the previous setting.
+    @param[in] a_wall Wall
   */
   void
   setBc(const DomainSide a_wall, const Bc a_bc);
@@ -108,6 +109,7 @@ public:
     @brief Returns the boundary condition for a domain side
     @param[in] a_domainSide Domain side
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
+    @return Bc
   */
   Bc
   getBc(const DomainSide a_domainSide) const;

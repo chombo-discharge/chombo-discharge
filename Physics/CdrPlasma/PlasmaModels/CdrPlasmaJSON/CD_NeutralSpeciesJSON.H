@@ -66,6 +66,7 @@ namespace Physics {
       /**
          @brief Get (number) density at the physical coordinates.
          @param[in] a_pos Physical position
+        @return Return value
       */
       Real
       operator()(const RealVect a_pos) const;

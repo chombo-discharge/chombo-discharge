@@ -19,6 +19,7 @@
 
 /**
   @brief Iterator class for RtLayout
+  @param[in,out] a_layout Description
 */
 template <class T>
 RtIterator<T>::RtIterator(RtLayout<T>& a_layout)

@@ -68,6 +68,7 @@ public:
     @param[in] a_ivCoar Cell where we compute.
     @param[in] a_dir Direction of derivative. Must be different from m_ignoreDir
     @param[in] a_coarVar a_dir Direction of derivative. Must be different from m_ignoreDir
+    @return Computed first deriv
   */
   virtual Real
   computeFirstDeriv(const FArrayBox& a_coarPhi,
@@ -81,6 +82,7 @@ public:
     @param[in] a_ivCoar Cell where we compute.
     @param[in] a_dir Direction of derivative. Must be different from m_ignoreDir
     @param[in] a_coarVar a_dir Direction of derivative. Must be different from m_ignoreDir
+    @return Computed second deriv
   */
   virtual Real
   computeSecondDeriv(const FArrayBox& a_coarPhi,
@@ -93,6 +95,7 @@ public:
     @param[in] a_coarPhi Coarse-side phi. 
     @param[in] a_ivCoar Cell where we compute.
     @param[in] a_coarVar a_dir Direction of derivative. Must be different from m_ignoreDir
+    @return Computed mixed deriv
   */
   virtual Real
   computeMixedDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, const int a_coarVar) const noexcept;
@@ -103,6 +106,7 @@ public:
     and return it. Useful when explicit stencil storage is required. 
     @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
     @param[in] a_dir Direction of derivative. 
+    @return First deriv stencil
   */
   virtual DerivStencil
   getFirstDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
@@ -113,6 +117,7 @@ public:
     and return it. Useful when explicit stencil storage is required.     
     @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
     @param[in] a_dir Direction of derivative.     
+    @return Second deriv stencil
   */
   virtual DerivStencil
   getSecondDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
@@ -122,6 +127,7 @@ public:
     @details This will construct the stencil for representing the derivative on the coarse cell center
     and return it. Useful when explicit stencil storage is required.     
     @param[in] a_ivCoar Coarse-grid cell index (i.e., the one underneath the fine-grid ghost)
+    @return Mixed deriv stencil
   */
   virtual DerivStencil
   getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept;

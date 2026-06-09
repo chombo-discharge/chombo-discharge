@@ -145,6 +145,7 @@ namespace Physics {
 
       /**
          @brief Get plot variable names
+        @return Plot variable names
       */
       virtual Vector<std::string>
       getPlotVariableNames() const override;
@@ -165,6 +166,7 @@ namespace Physics {
       /**
          @brief Compute the time step.
          @details Subclasses must implement this one. 
+        @return Computed dt
       */
       virtual Real
       computeDt() override = 0;
@@ -251,9 +253,9 @@ namespace Physics {
 
       /**
          @brief Compute the cell-centered electric field on a specific phase
-         @param[out] a_electricFieldCell Cell-centered electric field
          @param[in]  a_phase             Phase
          @param[in]  a_potential         Electrostatic potential (cell-centered)
+        @param[in] a_E E
       */
       virtual void
       computeElectricField(EBAMRCellData&           a_E,
@@ -389,6 +391,7 @@ namespace Physics {
          @brief Solve the electrostatic Poisson equation. 
          @details This will first compute the centroid-centered space charge density (using the cell-centered data in the CDR solvers) and then
          ask the field solver to solve.
+        @return Return value
       */
       virtual bool
       solvePoisson();
@@ -400,6 +403,7 @@ namespace Physics {
          @param[out]   a_rho          Centroid-centered space charge density. 
          @param[in]    a_cdrDensities Plasma species densities. 
          @param[in]    a_sigma        Surface charge density on dielectric EBs.
+        @return Return value
       */
       virtual bool
       solvePoisson(MFAMRCellData&               a_potential,
@@ -547,9 +551,9 @@ namespace Physics {
          @param[in]  a_time           Time
          @param[in]  a_dt             Time step.
          @param[in]  a_dx             Grid resolution.
-         @param[in]  a_cellBox        Cell-centered computational region. 
          @param[in]  a_lvl            Grid level
          @param[in]  a_dit            Grid patch index
+        @param[in] a_box Box
       */
       virtual void
       advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_cdrSources,
@@ -580,9 +584,9 @@ namespace Physics {
          @param[in]  a_time           Time
          @param[in]  a_dt             Time step.
          @param[in]  a_dx             Grid resolution.
-         @param[in]  a_cellBox        Cell-centered computational region. 
          @param[in]  a_lvl            Grid level
          @param[in]  a_dit            Grid patch index
+        @param[in] a_box Box
       */
       virtual void
       advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&       a_cdrSources,
@@ -681,10 +685,10 @@ namespace Physics {
       /**
          @brief Compute diffusion coefficients on face centers. 
          @details This will first compute the diffusion coefficients on cell centers, and then interpolate the result to face centers.
-         @param[out] a_cdrDcoCell        CDR diffusion coefficients on cell centers. 
          @param[in]  a_cdrDensities      Cell-centered CDR densities
          @param[in]  a_electricFieldCell Cell-centered electric field
          @param[in]  a_time              Time
+        @param[in] a_cdrDcoFace Cdr dco face
       */
       virtual void
       computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_cdrDcoFace,
@@ -729,10 +733,10 @@ namespace Physics {
 
       /**
          @brief Compute the cell-centered CDR velocities. This will call the level version.
-         @param[out] a_cdrVelocities Cell-centered CDR drift velocities
          @param[out] a_cdrDensities  Cell-centered CDR densities
-         @param[in]  a_electricField The cell-centered electric field
          @param[in]  a_time          Time
+        @param[in] a_velocities Velocities
+        @param[in] a_E E
       */
       virtual void
       computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
@@ -777,13 +781,13 @@ namespace Physics {
       /**
          @brief Compute the cell-centered CDR velocities. 
          @details This is patch version for irregular grid cells. 
-         @param[out] a_cdrVelocities Cell-centered CDR drift velocities
          @param[out] a_cdrDensities  Cell-centered CDR densities
          @param[in]  a_electricField The cell-centered electric field
          @param[in]  a_time          Time
          @param[in]  a_dx            Grid resolution
          @param[in]  a_lvl           Grid level
          @param[in]  a_dit           Grid index
+        @param[in] a_velocities Velocities
       */
       virtual void
       computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
@@ -803,6 +807,7 @@ namespace Physics {
          @param[in]  a_extrapCdrGradients  CDR gradients on the EB, extrapolated from the inside. 
          @param[in]  a_electricField       Electric field on the EB. 
          @param[in]  a_time                Time. 
+        @param[in] a_extrapRteFluxes Description
       */
       virtual void
       computeCdrFluxes(Vector<EBAMRIVData*>&       a_cdrFluxesEB,
@@ -824,6 +829,7 @@ namespace Physics {
          @param[in]  a_electricField       Electric field on the EB. 
          @param[in]  a_time                Time. 
          @param[in]  a_lvl                 Grid level. 
+        @param[in] a_extrapRteFluxes Description
       */
       virtual void
       computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real>>*>&       a_cdrFluxesEB,
@@ -844,8 +850,8 @@ namespace Physics {
          @param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
          @param[in]  a_extrapCdrGradients  CDR gradients extrapolated to the domain faces. 
          @param[in]  a_extrapRteFluxes     RTE fluxes on the domain faces. 
-         @param[in]  a_electricField       Electric field on the domain faces. 
          @param[in]  a_time                Time.
+        @param[in] a_field Field
       */
       virtual void
       computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_cdrFluxes,
@@ -1023,7 +1029,7 @@ namespace Physics {
          @details This will extrapolate the velocities data to domain faces.
          @param[out] a_domainVelocities Domain-centered velocities. Must have SpaceDim components. 
          @param[in]  a_phase            Phase
-         @param[in]  a_cellData         Cell-centered velocities. Must have SpaceDim components. 
+        @param[in] a_cellVelocities Cell velocities
       */
       virtual void
       extrapolateVelocitiesToDomainFaces(Vector<EBAMRIFData*>&         a_domainVelocities,
@@ -1056,6 +1062,7 @@ namespace Physics {
          @brief Project a flux onto the EB normal. This is the level version. 
          @param[out] a_projectedFlux Projected flux -- must have one component. 
          @param[in]  a_flux          Vector flux -- must have SpaceDim components.
+        @param[in] a_lvl Description
       */
       virtual void
       projectFlux(LevelData<BaseIVFAB<Real>>&       a_projectedFlux,
@@ -1178,6 +1185,7 @@ namespace Physics {
          @brief Compute the ohmic current on electrodes.
          @details This will compute the total charge flux through electrode surfaces and return it. 
          @note In 2D this will yield the current per unit length into the domain. 
+        @return Computed electrode current
       */
       virtual Real
       computeElectrodeCurrent();
@@ -1185,6 +1193,7 @@ namespace Physics {
       /**
          @brief Compute the ohmic current on dielectrics
          @details This will compute the total charge flux through dielectric surfaces and return it. 
+        @return Computed dielectric current
       */
       virtual Real
       computeDielectricCurrent();
@@ -1192,6 +1201,7 @@ namespace Physics {
       /**
          @brief Compute the ohmic current through the domain faces
          @details This will compute the total current through domain faces and return it. 
+        @return Computed domain current
       */
       virtual Real
       computeDomainCurrent();
@@ -1199,18 +1209,21 @@ namespace Physics {
       /**
          @brief Compute induced current in external circuit due to ohmic conduction.
          @details This will return int(E*J dV) over the entire domain. 
+        @return Computed ohmic induction current
       */
       virtual Real
       computeOhmicInductionCurrent();
 
       /**
          @brief Compute the relaxation time as dt = eps0/conductivity. 
+        @return Computed relaxation time
       */
       virtual Real
       computeRelaxationTime();
 
       /**
          @brief Get dt
+        @return Dt
       */
       virtual Real
       getDt();
@@ -1427,15 +1440,16 @@ namespace Physics {
       /**
          @brief Compute and put the current density in output data holder
          @param[in,out] a_output Output data holder.
-         @param[in,out] a_icomp  Starting component in a_output to begin at. On output this is incremented by SpaceDim.
          @param[in]    a_outputRealm Realm where a_output lives    
          @param[in]    a_level  Grid level
+        @param[in] a_comp Comp
       */
       virtual void
       writeJ(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const;
 
       /**
          @brief Calculate the user-supplied plot variables
+        @param[in,out] a_physicsPlotVars Description
       */
       virtual void
       computePhysicsPlotVars(EBAMRCellData& a_physicsPlotVars) const noexcept;
@@ -1443,12 +1457,12 @@ namespace Physics {
       /**
          @brief Write data to output. Convenience function. 
          @param[in,out] a_output Output data holder.
-         @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
          @param[in]    a_data   Data to write. 
          @param[in]    a_outputRealm Realm where a_output lives
          @param[in]    a_level  Grid level
          @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
          @param[in]    a_interpGhost If true, interpolate ghost cells
+        @param[in] a_comp Comp
       */
       virtual void
       writeData(LevelData<EBCellFAB>& a_output,

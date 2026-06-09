@@ -94,11 +94,11 @@ public:
     @param[in] a_beta          Operator beta
     @param[in] a_Acoef         Operator A-coefficient
     @param[in] a_Bcoef         Operator B-coefficient
-    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
-    @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
+    @param[in] a_BcoIrreg Bco irreg
+    @param[in] a_ghostCellsRHS Ghost cells r h s
   */
   EBHelmholtzOp(const Location::Cell                             a_dataLocation,
                 const EBLevelGrid&                               a_eblgFine,
@@ -136,14 +136,14 @@ public:
 
   /**
     @brief No copy assignment allowed
-    @param[in] a_other Other operator
+    @param[in] a_oper Oper
   */
   EBHelmholtzOp&
   operator=(const EBHelmholtzOp& a_oper) = delete;
 
   /**
     @brief No move assignment allowed
-    @param[in] a_other Other operator
+    @param[in] a_oper Oper
   */
   EBHelmholtzOp&
   operator=(const EBHelmholtzOp&& a_oper) = delete;
@@ -312,7 +312,7 @@ public:
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi
     @param[in]  a_rhs               Right-hand side of system
-    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in] a_homogeneousPhysBc Homogeneous phys bc
   */
   void
   residual(LevelData<EBCellFAB>&       a_residual,
@@ -347,8 +347,8 @@ public:
 
   /**
     @brief Inhomogeneous coarse-fine interpolation
-    @param[in,out] a_phiFine Fine data. Ghost cells will be filled.
     @param[in,out] a_phiCoar Coarse data. 
+    @param[in] a_phi Phi
   */
   void
   inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
@@ -356,9 +356,9 @@ public:
   /**
     @brief Multi-colored Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use use. 
     @param[in] a_phi Correction
-    @param[in] a_phi Lphi L(corrcetion)
     @param[in] a_rhs Residual
     @param[in] a_color "Color":
+    @param[in] a_Lphi Description
   */
   void
   gauSaiMultiColor(LevelData<EBCellFAB>&       a_phi,
@@ -399,6 +399,9 @@ public:
     @param[in]  a_cellBox           Grid box
     @param[in]  a_dit               Data indxe
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+    @param[in] a_Acoef Description
+    @param[in] a_Bcoef Description
+    @param[in] a_BcoefIrreg Description
   */
   void
   applyOp(EBCellFAB&             a_Lphi,
@@ -417,6 +420,9 @@ public:
     @param[in]  a_cellBox           Grid box
     @param[in]  a_dit               Data indxe
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+    @param[in] a_Acoef Description
+    @param[in] a_Bcoef Description
+    @param[in] a_BcoefIrreg Description
   */
   void
   applyOpRegular(EBCellFAB&             a_Lphi,
@@ -434,9 +440,9 @@ public:
     @param[in]    a_Bcoef             Helmholtz B-coefficient
     @param[in]    a_cellBox           Computation box
     @param[in]    a_dit               Data index
-    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
     @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
     -bco*(phi(i) - phi(i-1))/dx = F. 
+    @param[in] a_homogeneousPhysBc Homogeneous phys bc
   */
   void
   applyDomainFlux(EBCellFAB&       a_phi,
@@ -463,6 +469,10 @@ public:
     @param[in]  a_cellBox           Cell box
     @param[in]  a_dit               Grid index
     @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+    @param[in] a_Acoef Description
+    @param[in] a_Bcoef Description
+    @param[in] a_BcoefIrreg Description
+    @param[in] a_alphaDiagWeight Description
   */
   void
   applyOpIrregular(EBCellFAB&             a_Lphi,
@@ -486,6 +496,8 @@ public:
   /**
     @brief Assign data.
     @details This does a copy from rhs to lhs
+    @param[in,out] a_lhs Description
+    @param[in,out] a_rhs Description
   */
   void
   assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
@@ -503,8 +515,8 @@ public:
 
   /**
     @brief Local assignment function
-    @param[out] a_lhs. Equal to a_rhs on output
-    @param[in]  a_rhs. Data
+    @param[out] a_lhs Equal to a_rhs on output
+    @param[in] a_rhs Data
   */
   void
   assignLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
@@ -520,6 +532,9 @@ public:
 
   /**
     @brief Compute the dot product??
+    @return Return value
+    @param[in,out] a_lhs Description
+    @param[in,out] a_rhs Description
   */
   Real
   dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
@@ -551,23 +566,25 @@ public:
   /**
     @brief Scale data. Returns a_lhs = a_lhs*a_scale
     @param[in,out] a_lhs   Data to be scaled
-    @param[i]     a_scale Scaling factor
+    @param[in]     a_scale Scaling factor
   */
   void
   scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) override final;
 
   /**
     @brief Local scaling function. Multiplies the left-hand side by the right-hand side.
-    @param[out] a_lhs. Equal to a_lhs*a_rhs on output
-    @param[in]  a_rhs. Scaling data
+    @param[out] a_lhs Equal to a_lhs*a_rhs on output
+    @param[in] a_rhs Scaling data
   */
   void
   scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) const noexcept;
 
   /**
     @brief Compute norm of data
-    @param[in]
-    @details a_order is currently ignored as we call a static routine in EBAMRPoissonOp for now. 
+    @param[in] a_rhs   Data to compute norm of
+    @param[in] a_order Norm order (currently ignored)
+    @details a_order is currently ignored as we call a static routine in EBAMRPoissonOp for now.
+    @return Norm value
   */
   Real
   norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) override final;
@@ -618,19 +635,20 @@ public:
 
   /**
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
+    @return Return value
   */
   int
   refToCoarser() override final;
 
   /**
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
-    @param[out] a_residual          Residual on this level
     @param[in]  a_phiFine           Phi on fine level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_phiCoar           Phi on coar level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @param[in]  a_finerOp           Finer operatator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+    @param[in] a_Lphi Lphi
   */
   void
   AMROperator(LevelData<EBCellFAB>&             a_Lphi,
@@ -643,13 +661,13 @@ public:
   /**
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
     @details This is the reflux-free version of AMROperator.
-    @param[out] a_residual          Residual on this level
     @param[in]  a_phiFine           Phi on fine level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_phiCoar           Phi on coar level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @param[in]  a_finerOp           Finer operatator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+    @param[in] a_Lphi Lphi
   */
   void
   refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
@@ -727,10 +745,11 @@ public:
   /**
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels. 
     @param[out] a_Lphi              L(phi)
-    @param[in]  a_phiFine           Phi on finer level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+    @param[in] a_phiCoar Phi coar
+    @param[in] a_finerOp Finer op
   */
   void
   AMROperatorNC(LevelData<EBCellFAB>&             a_Lphi,
@@ -807,6 +826,8 @@ public:
 
   /**
     @brief Apply operator but turn off all BCs. 
+    @param[in,out] a_ans Description
+    @param[in,out] a_phi Description
   */
   void
   applyOpNoBoundary(LevelData<EBCellFAB>& a_ans, const LevelData<EBCellFAB>& a_phi) override final;
@@ -847,12 +868,14 @@ public:
 
   /**
     @brief Returns m_flux. This is used in refluxing routines. 
+    @return Flux
   */
   LevelData<EBFluxFAB>&
   getFlux() const;
 
   /**
     @brief Returns m_relCoef. Used by MFHelmholtzOp
+    @return Relaxation coeff
   */
   const LevelData<EBCellFAB>&
   getRelaxationCoeff() const noexcept;
@@ -1242,11 +1265,12 @@ protected:
 
   /**
     @brief Compute centroid fluxes in a direction.
-    @param[out] a_fluxCentroid   Flux on face centroid
-    @param[in   a_phi          Cell-centered data
+    @param[out] a_fluxCentroid Flux on face centroid
+    @param[in]  a_phi          Cell-centered data
     @param[in]  a_cellBox      Cell-centered compute box.
     @param[in]  a_dit          Data index
-    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
+    @param[in]  a_dir          Coordinate direction
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces.
   */
   void
   computeFlux(EBFaceFAB&       a_fluxCentroid,
@@ -1257,11 +1281,12 @@ protected:
 
   /**
     @brief Compute face-centered fluxes
-    @param[out] a_fluxCenter   Flux on center
-    @param[in   a_phi          Cell-centered data
-    @param[in]  a_cellBox      Cell-centered compute box.
-    @param[in]  a_dit          Data index
-    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
+    @param[out] a_fluxCenter Flux on center
+    @param[in]  a_phi        Cell-centered data
+    @param[in]  a_cellBox    Cell-centered compute box.
+    @param[in]  a_dit        Data index
+    @param[in]  a_dir        Coordinate direction
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces.
   */
   void
   computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
@@ -1271,12 +1296,13 @@ protected:
                           const int        a_dir);
 
   /**
-    @brief Compute face-centered fluxes
-    @param[out] a_fluxCenter   Flux on center
-    @param[in   a_phi          Cell-centered data
-    @param[in]  a_cellBox      Cell-centered compute box.
-    @param[in]  a_dit          Data index
-    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
+    @brief Compute face-centroid fluxes
+    @param[out] a_flux    Flux on face centroid
+    @param[in]  a_phi     Cell-centered data
+    @param[in]  a_cellBox Cell-centered compute box.
+    @param[in]  a_dit     Data index
+    @param[in]  a_dir     Coordinate direction
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces.
   */
   void
   computeFaceCentroidFlux(EBFaceFAB&       a_flux,

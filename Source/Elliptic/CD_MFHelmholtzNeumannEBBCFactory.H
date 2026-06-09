@@ -38,7 +38,6 @@ public:
 
   /**
     @brief Full constructor which sets order and spatially varying value on EBs
-    @param[in] a_order Approximation order
     @param[in] a_value Spatially varying value on EBs
   */
   MFHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_value);
@@ -83,6 +82,8 @@ public:
   /**
     @brief Factory method
     @param[in] a_jumpBC Jump bc object. 
+    @return Return value
+    @param[in] a_iphase Description
   */
   RefCountedPtr<EBHelmholtzEBBC>
   create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;

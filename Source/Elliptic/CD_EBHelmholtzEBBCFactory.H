@@ -50,6 +50,7 @@ public:
   /**
     @brief Factory method which returns new BC object. 
     @note  Defines are done in EBHelmholtzOp so no need to worry about that here. 
+    @return Return value
   */
   virtual RefCountedPtr<EBHelmholtzEBBC>
   create() = 0;

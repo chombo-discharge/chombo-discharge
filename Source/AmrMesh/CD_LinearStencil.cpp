@@ -15,7 +15,9 @@
 #include <CD_LinearStencil.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 #define DEBUG_LINEARSTENCIL 1
+/// @endcond
 
 constexpr Real LinearStencil::tolerance;
 

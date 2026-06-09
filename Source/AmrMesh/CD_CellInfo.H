@@ -58,84 +58,98 @@ public:
 
   /**
     @brief Get the grid index
+    @return Grid index
   */
   IntVect&
   getGridIndex() noexcept;
 
   /**
     @brief Get the grid index
+    @return Grid index
   */
   const IntVect&
   getGridIndex() const noexcept;
 
   /**
     @brief Get the grid spacing
+    @return Dx
   */
   Real&
   getDx() noexcept;
 
   /**
     @brief Get the grid spacing
+    @return Dx
   */
   const Real&
   getDx() const noexcept;
 
   /**
     @brief Get the volume fraction
+    @return Vol frac
   */
   Real&
   getVolFrac() noexcept;
 
   /**
     @brief Get the volume fraction
+    @return Vol frac
   */
   const Real&
   getVolFrac() const noexcept;
 
   /**
     @brief Get the boundary centroid
+    @return Bndry centroid
   */
   RealVect&
   getBndryCentroid() noexcept;
 
   /**
     @brief Get the boundary centroid
+    @return Bndry centroid
   */
   const RealVect&
   getBndryCentroid() const noexcept;
 
   /**
     @brief Get the boundary normal
+    @return Bndry normal
   */
   RealVect&
   getBndryNormal() noexcept;
 
   /**
     @brief Get the boundary normal
+    @return Bndry normal
   */
   const RealVect&
   getBndryNormal() const noexcept;
 
   /**
     @brief Get the lower valid region
+    @return Valid lo
   */
   RealVect&
   getValidLo() noexcept;
 
   /**
     @brief Get the lower valid region
+    @return Valid lo
   */
   const RealVect&
   getValidLo() const noexcept;
 
   /**
     @brief Get the upper valid region
+    @return Valid hi
   */
   RealVect&
   getValidHi() noexcept;
 
   /**
     @brief Get the upper valid region
+    @return Valid hi
   */
   const RealVect&
   getValidHi() const noexcept;

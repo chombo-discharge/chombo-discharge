@@ -284,6 +284,7 @@ namespace Physics {
       /**
 	@brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids for the input realm. 
 	@param[in] a_realm Realm name
+        @return Return value
       */
       virtual bool
       loadBalanceThisRealm(const std::string a_realm) const override;
@@ -841,7 +842,6 @@ namespace Physics {
 	@details This calls the other version, intersecting the Ito bulk particles with the EB and placing the collided particles
 	in the appropriate particle containers (ItoSolver::WhichContainer::EB, for example). 
 	@param[in] a_speciesSubset       Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
-	@param[in] a_intersectionAlg     Representation of the EB -- basically an algorithmic selection. 
 	@param[in] a_delete              Delete original particles. If this is left to false, the particles are copied into the other containers. 
 	@param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
       */
@@ -859,7 +859,6 @@ namespace Physics {
 	@param[in] a_containerBulk       ItoSolver container for "bulk" particles, i.e. particles that will be intersected. 
 	@param[in] a_containerEB         ItoSolver container for EB particles. 
 	@param[in] a_containerDomain     ItoSolver container for domain particles. 
-	@param[in] a_intersectionAlg     EB intersection algorithm
 	@param[in] a_delete              Delete original particles. If this is left to false, the particles are copied into the other containers. 
 	@param[in] a_nonDeletionModifier Optional input argument for letting the user manipulate particles that were intersected but not deleted
       */
@@ -876,10 +875,10 @@ namespace Physics {
 
       /**
 	@brief Remove covered particles (i.e., particles inside the EB)
-	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_representation  Representation of the EB.
 	@param[in] a_tolerance       Tolerance for removal. Removes up to distance a_tolerance from the EB.
 	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+        @param[in] a_which Which
       */
       virtual void
       removeCoveredParticles(const SpeciesSubset    a_which,
@@ -888,11 +887,11 @@ namespace Physics {
 
       /**
 	@brief Remove covered particles (i.e., particles inside the EB)
-	@param[in] a_speciesSubset   Subset of particles to intersect. Can be charged, mobile, diffusive, etc. 
 	@param[in] a_container       Which of the containers in ItoSolver to remove from. 
 	@param[in] a_representation  Representation of the EB.
 	@param[in] a_tolerance       Tolerance for removal. Removes up to distance a_tolerance from the EB.
 	@note a_representation is basically an algorithmic selection that propagates into ItoSolver
+        @param[in] a_which Which
       */
       virtual void
       removeCoveredParticles(const SpeciesSubset             a_which,
@@ -931,12 +930,12 @@ namespace Physics {
       /**
 	@brief Write data to output. Convenience function. 
 	@param[in,out] a_output Output data holder.
-	@param[in,out] a_icomp  Starting component where this solver begins writing the output. 
 	@param[in]    a_data   Data to write. 
 	@param[in]    a_outputRealm Realm where a_output belogns
 	@param[in]    a_level  Grid level
 	@param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
 	@param[in]    a_interpGhost If true, interpolate ghost cells
+        @param[in] a_comp Comp
       */
       virtual void
       writeData(LevelData<EBCellFAB>& a_output,
@@ -1040,6 +1039,7 @@ namespace Physics {
       /**
 	@brief Get the solvers used for load balancing
 	@details This depends on m_loadBalanceIndex -- if it's < 0 we use ALL plasma species for load balancing.
+        @return Load balance solvers
       */
       virtual Vector<RefCountedPtr<ItoSolver>>
       getLoadBalanceSolvers() const noexcept;
@@ -1054,6 +1054,7 @@ namespace Physics {
       /**
 	@brief Compute the maximum electric field (norm)
 	@param[in] a_phase Phase where we compute the field. 
+        @return Computed max reduced electric field
       */
       virtual Real
       computeMaxReducedElectricField(const phase::which_phase a_phase) const noexcept;
@@ -1105,12 +1106,14 @@ namespace Physics {
       /**
 	@brief Compute the current density. 
 	@note This calls computeConductivityCell and uses m_electricFieldFluid. Make sure they're updated.
+        @param[in,out] a_J Description
       */
       virtual void
       computeCurrentDensity(EBAMRCellData& a_J) noexcept;
 
       /**
 	@brief Compute the dielectric relaxation time
+        @return Computed relaxation time
       */
       virtual Real
       computeRelaxationTime() noexcept;
@@ -1127,6 +1130,7 @@ namespace Physics {
       /**
 	@brief Deposit a subset of the ItoSolver particles on the mesh
 	@note Calls the other version with ItoSolver::WhichContainer::Bulk
+        @param[in] a_speciesSubset Description
       */
       virtual void
       depositParticles(const SpeciesSubset a_speciesSubset) noexcept;
@@ -1207,9 +1211,9 @@ namespace Physics {
 	@brief Level-routine when computing mesh-based mobilities for LFA coupling
 	@param[out] a_itoMobilities  Mesh-based mobilities for Ito solvers. Must be defined on the particle realm. 
 	@param[out] a_cdrMobilities  Mesh-based mobilities for CDR solvers. Must be defined on the fluid realm. 
-	@param[in]  a_electricField  Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level          Grid level
 	@param[in]  a_time           Time
+        @param[in] a_E E
       */
       virtual void
       computeMobilities(Vector<LevelData<EBCellFAB>*>& a_itoMobilities,
@@ -1276,13 +1280,11 @@ namespace Physics {
 	@brief Patch-routine when computing mesh-based diffusion coefficients in the LFA coupling
 	@param[out] a_itoDiffusionCoefficients Mesh-based diffusion coefficients for Ito solvers. Must be defined on the fluid realm. 
 	@param[out] a_cdrDiffusionCoefficients Mesh-based diffusion coefficients for CDR solvers. Must be defined on the fluid realm. 
-	@param[in]  a_electricField            Electric field. Must be defined on the fluid realm. 
 	@param[in]  a_level                    Grid level
 	@param[in]  a_time                     Time
-	@param[in]  a_level                    Grid level
 	@param[in]  a_din                      Grid index
-	@param[in]  a_cellBox                  Computation box
-	@param[in]  a_time                     Time      
+        @param[in] a_E E
+        @param[in] a_box Box
       */
       virtual void
       computeDiffusionCoefficients(Vector<EBCellFAB*>& a_itoDiffusionCoefficients,
@@ -1416,9 +1418,9 @@ namespace Physics {
 
       /**
 	@brief Chemistry advance over time a_dt. AMR version. 
-	@param[in] a_electricField Electric field. Must be defined on the fluid realm. 
 	@param[in] a_dt            Time step
 	@note This will call the level versions AND reconcileParticles. The kernel will only run over valid grid cells (not covered by a finer grid. 
+        @param[in] a_E E
       */
       virtual void
       advanceReactionNetwork(const EBAMRCellData& a_E, const Real a_dt) noexcept;
@@ -1654,24 +1656,28 @@ namespace Physics {
 
       /**
 	@brief Compute total charge
+        @return Computed total charge
       */
       virtual Real
       computeTotalCharge() const noexcept;
 
       /**
 	@brief Compute positive charge
+        @return Computed qplus
       */
       virtual Real
       computeQplus() const noexcept;
 
       /**
 	@brief Compute negative charge
+        @return Computed qminu
       */
       virtual Real
       computeQminu() const noexcept;
 
       /**
 	@brief Compute surface charge
+        @return Computed qsurf
       */
       virtual Real
       computeQsurf() const noexcept;

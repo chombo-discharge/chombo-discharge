@@ -70,12 +70,14 @@ public:
 
   /**
     @brief Return diffusive or not
+    @return True if diffusive, false otherwise
   */
   bool
   isDiffusive() const;
 
   /**
     @brief Mobile ItoSpecies or not
+    @return True if mobile, false otherwise
   */
   bool
   isMobile() const;
@@ -85,6 +87,7 @@ public:
     @details This is mostly used for the LEA-type models where the particle mobility has a parametric dependence on the energy. 
     @param[in] a_energy Particle energy
     @note Default implementation returns 0.0
+    @return Return value
   */
   virtual Real
   mobility(const Real a_energy) const;
@@ -94,6 +97,7 @@ public:
     @details This is mostly used for the LEA-type models where the particle diffusivity has a parametric dependence on the energy. 
     @param[in] a_energy Particle energy
     @note Default implementation returns 0.0
+    @return Return value
   */
   virtual Real
   diffusion(const Real a_energy) const;

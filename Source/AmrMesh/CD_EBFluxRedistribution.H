@@ -60,11 +60,11 @@ public:
     @param[in] a_eblgCoar             Coarser grid level
     @param[in] a_eblgCoarsened        Coarsened grid
     @param[in] a_eblg                 Grids on this level
-    @param[in] a_eblgRefinedd         Refined grid
     @param[in] a_eblgFine             Fine grid
     @param[in] a_refToCoar            Refinement factor between this level and the coarse level
     @param[in] a_refToFine            Refinement factor between this level and the fine level
     @param[in] a_redistributeOutside  Turn on/off redistribution outside domain. 
+    @param[in] a_eblgRefined Eblg refined
   */
   EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,
                        const EBLevelGrid& a_eblgCoarsened,
@@ -154,10 +154,10 @@ public:
 
   /**
     @brief Redistribute the input quantity to the coarse level.
-    @param[in,out] a_phiCoar   Data on fine level
     @param[in]    a_deltaM    Redistribution data on this level
     @param[in]    a_scaleFine Scaling factor for redistribution into the fine level
     @param[in]    a_variables Variables to redistribute
+    @param[in] a_phiFine Phi fine
   */
   virtual void
   redistributeFine(LevelData<EBCellFAB>&             a_phiFine,
@@ -285,7 +285,7 @@ protected:
 
   /**
     @brief Define the cells on the coarse side of the CF interface that we would redistribute to. 
-    @param[in,out] a_validCells Valid grid cells on this level. 
+    @param[in] a_interfaceCells Interface cells
   */
   virtual void
   defineInterfaceCells(LevelData<BaseFab<bool>>& a_interfaceCells) const noexcept;

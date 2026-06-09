@@ -75,6 +75,7 @@ namespace Physics {
 	@param[in] a_minGradElectricField Minimum value of |grad(|E|)| over the AMR hierarchy
 	@param[in] a_maxGradElectricField Maximum value of |grad(|E|)|
 	@return This should return a Vector of values whose length is equal to the number of tracer fields the subclasses uses. 
+        @param[in] a_dx Description
       */
       virtual Vector<Real>
       tracer(const RealVect a_pos,

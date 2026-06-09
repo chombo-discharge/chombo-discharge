@@ -94,24 +94,28 @@ public:
 
   /**
     @brief Get the particle ID
+    @return Unique particle identifier
   */
   inline const int32_t&
   particleID() const noexcept;
 
   /**
     @brief Get the particle ID
+    @return Unique particle identifier
   */
   inline int32_t&
   particleID() noexcept;
 
   /**
     @brief Get the MPI rank ID
+    @return Unique particle identifier
   */
   inline const int32_t&
   rankID() const noexcept;
 
   /**
     @brief Get the MPI rank ID
+    @return Unique particle identifier
   */
   inline int32_t&
   rankID() noexcept;
@@ -202,6 +206,7 @@ public:
     @brief Comparison operator with other particle. 
     @param[in] a_other Other particle
     @note Does not compare the M and N Reals and RealVects. 
+    @return Return value
   */
   inline bool
   operator==(const GenericParticle<M, N>& a_other) const;
@@ -210,18 +215,22 @@ public:
     @brief Comparison operator with other particle.
     @param[in] a_other Other particle
     @note Does not compare the M and N Reals and RealVects. 
+    @return Return value
   */
   inline bool
   operator!=(const GenericParticle<M, N>& a_other) const;
 
   /**
     @brief Particle comparison operator. Returns lexicographical ordering.
+    @return Return value
+    @param[in,out] a_other Description
   */
   inline bool
   operator<(const GenericParticle<M, N>& a_other) const noexcept;
 
   /**
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
+    @return Return value
   */
   inline virtual int
   size() const;
@@ -245,6 +254,7 @@ public:
     @brief Function that is used when writing particles to HDF5.
     @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
     @note Please do not try to output anything other than Real components. Chombo will expect only Reals. 
+    @return Return value
   */
   inline virtual int
   H5size() const;
@@ -296,8 +306,9 @@ protected:
 
 /**
   @brief Particle printing function
-  @param[in] ostr       Output stream
-  @param[in] a_particle Particle to output
+  @param[in] ostr Output stream
+  @param[in] p    Particle to output
+  @return Reference to the output stream
 */
 template <size_t M, size_t N>
 inline std::ostream&

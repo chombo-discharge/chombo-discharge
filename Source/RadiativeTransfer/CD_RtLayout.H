@@ -47,6 +47,7 @@ public:
 
   /**
     @brief Get realm where the solvers are allocated.
+    @return Realm
   */
   virtual const std::string
   getRealm() const;
@@ -200,36 +201,42 @@ public:
 
   /**
     @brief Check if solvers are stationary
+    @return True if stationary, false otherwise
   */
   virtual bool
   isStationary();
 
   /**
     @brief Get phase
+    @return Phase
   */
   virtual phase::which_phase
   getPhase();
 
   /**
     @brief Get solvers
+    @return Solvers
   */
   virtual Vector<RefCountedPtr<T>>&
   getSolvers();
 
   /**
     @brief Get species
+    @return Species
   */
   virtual Vector<RefCountedPtr<RtSpecies>>&
   getSpecies();
 
   /**
     @brief Get all source terms
+    @return Sources
   */
   virtual Vector<EBAMRCellData*>
   getSources();
 
   /**
     @brief Get all states
+    @return Phis
   */
   virtual Vector<EBAMRCellData*>
   getPhis();
@@ -283,6 +290,7 @@ public:
   /**
     @brief Get a new Layout. This will cast S to a specific class (T) 
     @param[in] a_species RTE species. 
+    @return Return value
   */
   RefCountedPtr<RtLayout<T>>
   newLayout(const Vector<RefCountedPtr<RtSpecies>>& a_species) const;

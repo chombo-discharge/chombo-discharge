@@ -60,6 +60,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage
+        @return Scratch
       */
       EBAMRCellData&
       getScratch() const
@@ -69,6 +70,7 @@ namespace Physics {
 
       /**
          @brief Get the other scratch storage. 
+        @return Scratch2
       */
       EBAMRCellData&
       getScratch2() const
@@ -78,6 +80,7 @@ namespace Physics {
 
       /**
          @brief Get the extrapolation storage. This is usually used for holding phi + 0.5*dt*S
+        @return Extrap
       */
       EBAMRCellData&
       getExtrap() const
@@ -87,6 +90,7 @@ namespace Physics {
 
       /**
          @brief Get storage for holding gradient. 
+        @return Gradient
       */
       EBAMRCellData&
       getGradient() const
@@ -96,6 +100,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage that holds the density on the EB
+        @return Eb state
       */
       EBAMRIVData&
       getEbState() const
@@ -105,6 +110,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the normal component of the velocity on the EB
+        @return Eb velo
       */
       EBAMRIVData&
       getEbVelo() const
@@ -114,6 +120,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the extrapolated flux on the EB
+        @return Eb flux
       */
       EBAMRIVData&
       getEbFlux() const
@@ -123,6 +130,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the extrapolated gradient on the EB
+        @return Eb grad
       */
       EBAMRIVData&
       getEbGrad() const
@@ -132,6 +140,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the extrapolated density on domain faces
+        @return Domain state
       */
       EBAMRIFData&
       getDomainState() const
@@ -141,6 +150,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the extrapolated velocity (normal component only) on domain faces
+        @return Domain velo
       */
       EBAMRIFData&
       getDomainVelo() const
@@ -150,6 +160,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the extrapolated flux on domain faces
+        @return Domain flux
       */
       EBAMRIFData&
       getDomainFlux() const
@@ -159,6 +170,7 @@ namespace Physics {
 
       /**
          @brief Get the scratch storage holding the extrapolated gradient (normal component only) on domain faces
+        @return Domain grad
       */
       EBAMRIFData&
       getDomainGrad() const
@@ -281,6 +293,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage that holds the electric field at the cell center
+        @return Electric field cell
       */
       EBAMRCellData&
       getElectricFieldCell() const
@@ -290,6 +303,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage that holds the electric field at the EB
+        @return Electric field e b
       */
       EBAMRIVData&
       getElectricFieldEB() const
@@ -299,6 +313,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage that holds the electric field at the domainf aces
+        @return Electric field domain
       */
       EBAMRIFData&
       getElectricFieldDomain() const
@@ -377,6 +392,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage that holds the EB flux
+        @return Eb flux
       */
       EBAMRIVData&
       getEbFlux() const
@@ -386,6 +402,7 @@ namespace Physics {
 
       /**
          @brief Get scratch storage that holds the domain
+        @return Domain flux
       */
       EBAMRIFData&
       getDomainFlux() const
@@ -459,6 +476,7 @@ namespace Physics {
 
       /**
          @brief Get scratch data
+        @return Scratch
       */
       EBAMRIVData&
       getScratch() const

@@ -80,6 +80,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
@@ -192,6 +193,7 @@ protected:
     @param[in] a_neighborhood Vof neighborhood (either quadrant-based or radius)
     @param[in] a_order        Stencil order
     @note This extrapolates from cell-centers to the EB using a first order expression. 
+    @return Interpolation stencil
   */
   VoFStencil
   getInterpolationStencil(const VolIndex&              a_vof,

@@ -35,7 +35,9 @@
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
+/// @cond DOXYGEN_SKIP
 using json = nlohmann::json;
+/// @endcond
 
 namespace Physics {
   namespace CdrPlasma {
@@ -127,12 +129,14 @@ namespace Physics {
          @brief Get number of plot variables for this physics class. 
          @details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. The current implementation 
          plots the gas pressure, temperature, and density
+        @return Number of plot variables
       */
       virtual int
       getNumberOfPlotVariables() const override;
 
       /**
          @brief Get plot variable names. The names and positions between this routine and getPlotVariables must be consistent!
+        @return Plot variable names
       */
       virtual Vector<std::string>
       getPlotVariableNames() const override;
@@ -144,11 +148,12 @@ namespace Physics {
          @param[in]  a_cdrGradients  Grid-based gradients for particle species.
          @param[in]  a_rteDensities  Grid-based densities for photons.
          @param[in]  a_E             Electric field.
-         @param[in]  a_pos           Position in space.
          @param[in]  a_dx            Grid resolution. 
          @param[in]  a_dt            Advanced time.
          @param[in]  a_time          Current time.
          @param[in]  a_kappa         Grid cell unit volume. 
+        @return Plot variables
+        @param[in] a_position Position
       */
       virtual Vector<Real>
       getPlotVariables(const Vector<Real>     a_cdrDensities,
@@ -164,7 +169,9 @@ namespace Physics {
       /**
          @brief Compute alpha. Should return Townsend ionization coefficient. 
          @details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
-         @param[in] a_E Electric field.
+        @return Computed alpha
+        @param[in] E E
+        @param[in] a_position Position
       */
       virtual Real
       computeAlpha(const Real E, const RealVect a_position) const override;
@@ -174,6 +181,7 @@ namespace Physics {
          @details This function is mostly used for the cell tagging classes, but can be used for reactions as well. 
          @param[in] a_E        Electric field.
          @param[in] a_position Position
+        @return Computed eta
       */
       virtual Real
       computeEta(const Real a_E, const RealVect a_position) const override;
@@ -295,6 +303,7 @@ namespace Physics {
          @param[in] a_cdrGradients    CDR gradients (normal component only)
          @param[in] a_rteFluxes     RTE fluxes (normal component only)
          @param[in] a_extrapCdrFluxes Extrapolated fluxes from the gas side. 
+        @return Computed cdr domain fluxes
       */
       virtual Vector<Real>
       computeCdrDomainFluxes(const Real           a_time,
@@ -312,6 +321,7 @@ namespace Physics {
          @brief Set the initial surface charge
          @param[in] a_time Time
          @param[in] a_pos Position
+        @return Return value
       */
       virtual Real
       initialSigma(const Real a_time, const RealVect a_pos) const override;
@@ -987,6 +997,7 @@ namespace Physics {
       /**
          @brief Generate an initial data function for a given plasma species
          @param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
+        @return Return value
       */
       virtual InitialDataFunction
       parsePlasmaSpeciesInitialData(const json& a_json) const;
@@ -994,6 +1005,7 @@ namespace Physics {
       /**
          @brief Generate initial particles for a given plasma species
          @param[in] a_json JSON field, usually (always?) describing one of the objects in the 'plasma species' field.
+        @return Return value
       */
       virtual List<PointParticle>
       parsePlasmaSpeciesInitialParticles(const json& a_json) const;
@@ -1081,6 +1093,7 @@ namespace Physics {
          @brief Parse plasma reaction descriptions. 
          @param[in] a_reactionIndex  Reaction index. 
          @param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+        @param[in] a_wildcard Description
       */
       virtual void
       parsePlasmaReactionDescription(const int         a_reactionIndex,
@@ -1251,6 +1264,7 @@ namespace Physics {
          @param[in] a_position     Physical coordinates
          @param[in] a_E            Electric field (SI units)
          @param[in] a_cdrDensities List of plasma species densities.
+        @return Computed plasma species temperatures
       */
       virtual std::vector<Real>
       computePlasmaSpeciesTemperatures(const RealVect&          a_position,
@@ -1265,6 +1279,7 @@ namespace Physics {
          @param[in] a_position     Physical coordinates
          @param[in] a_E            Electric field (SI units)
          @param[in] a_cdrDensities List of plasma species densities.
+        @return Computed plasma species energies
       */
       virtual std::vector<Real>
       computePlasmaSpeciesEnergies(const RealVect&          a_position,
@@ -1276,6 +1291,7 @@ namespace Physics {
          @param[in] a_position     Physical coordinates
          @param[in] a_E            Electric field (SI units)
          @param[in] a_cdrDensities List of plasma species densities.
+        @return Computed plasma species mobilities
       */
       virtual std::vector<Real>
       computePlasmaSpeciesMobilities(const RealVect&          a_position,
@@ -1313,6 +1329,7 @@ namespace Physics {
          @param[in] a_alpha                    Townsend ionization coefficient
          @param[in] a_eta                      Townsend attachment coefficient
          @param[in] a_time                     Time
+        @return Computed plasma reaction rate
       */
       virtual Real
       computePlasmaReactionRate(const int&                   a_reactionIndex,
@@ -1340,7 +1357,7 @@ namespace Physics {
 
       /**
          @brief Throw a parser wearning
-         @param[in] a_error Warning
+        @param[in] a_warning Warning
       */
       void
       throwParserWarning(const std::string a_warning) const;
@@ -1348,6 +1365,7 @@ namespace Physics {
       /**
          @brief Protect the @ character in a string
          @param[in] a_str Input string. If it contains the at character we throw an error. 
+        @return Return value
       */
       bool
       containsWildcard(const std::string a_str) const;
@@ -1355,6 +1373,7 @@ namespace Physics {
       /**
          @brief Protect all kinds of brackets in a string.
          @param[in] a_str Input string. If it contains any bracket we throw an error.
+        @return Return value
       */
       bool
       containsBracket(const std::string a_str) const;
@@ -1369,6 +1388,8 @@ namespace Physics {
 
       /**
          @brief Remove whitespace from string
+        @return Return value
+        @param[in,out] a_string Description
       */
       std::string
       trim(const std::string& a_string) const;
@@ -1376,6 +1397,7 @@ namespace Physics {
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Neutral species name
+        @return True if neutral species, false otherwise
       */
       bool
       isNeutralSpecies(const std::string& a_name) const;
@@ -1383,6 +1405,7 @@ namespace Physics {
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Cdr species name
+        @return True if plasma species, false otherwise
       */
       bool
       isPlasmaSpecies(const std::string& a_name) const;
@@ -1390,6 +1413,7 @@ namespace Physics {
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Rte species name
+        @return True if photon species, false otherwise
       */
       bool
       isPhotonSpecies(const std::string& a_name) const;
@@ -1397,6 +1421,7 @@ namespace Physics {
       /**
          @brief Check if file exists
          @param[in] a_filename File name
+        @return Return value
       */
       bool
       doesFileExist(const std::string a_filename) const;
@@ -1428,6 +1453,7 @@ namespace Physics {
          @param[in]    a_dx               Grid resolution
          @param[in]    a_dt               Time step
          @param[in]    a_kappa            Volume fraction 
+        @param[in] a_time Description
       */
       virtual void
       integrateReactions(std::vector<Real>&          a_cdrDensities,

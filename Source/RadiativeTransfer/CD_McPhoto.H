@@ -58,22 +58,28 @@ public:
 
   /**
     @brief Disallowed copy constructor
+    @param[in,out] a_other Description
   */
   McPhoto(const McPhoto& a_other);
 
   /**
     @brief Disallowed move constructor
+    @param[in] a_other Description
   */
   McPhoto(const McPhoto&& a_other);
 
   /**
     @brief Disallowed assignment operator
+    @return Return value
+    @param[in,out] a_other Description
   */
   McPhoto&
   operator=(const McPhoto& a_other);
 
   /**
     @brief Disallowed move assignment operator
+    @return Return value
+    @param[in] a_other Description
   */
   McPhoto&
   operator=(const McPhoto&& a_other);
@@ -94,12 +100,14 @@ public:
     @note This is the "fluid interface" to the radiative transfer solver in which the solver uses discrete photons for sampling the isotropic density. Particle codes
     will probably use advancePhotonsInstantaneous or advancePhotonsTransient .
     @details This routine switches between stationary and transient solvers depending on whether or not the solver is stationary. 
+    @return Time step used
   */
   virtual bool
   advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
 
   /**
     @brief Instantaneous solver or not. 
+    @return True if instantaneous, false otherwise
   */
   virtual bool
   isInstantaneous();
@@ -139,9 +147,9 @@ public:
   /**
     @brief Compute the number of physical photons in each grid cell.
     @param[out] a_numPhysPhotonsTotal Total number of physical photons to be generated in each grid cell.
-    @param[out] a_numPhysPhotonsPacket Number of physical photons to be generated in each packet. Must have a components = m_numSamplingPackets
     @param[in] a_source Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
     @param[in] a_dt Time step
+    @param[in] a_numPhysPhotonsPerPacket Num phys photons per packet
   */
   virtual void
   computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
@@ -200,8 +208,8 @@ public:
   /**
     @brief Deposit photons
     @param[out]   a_phi        Deposited mesh density
-    @param[in,out] a_photons    Computational photons to be deposited
     @param[in]    a_deposition Deposition method
+    @param[in] a_particles Particles
   */
   template <class P, class Ret, Ret (P::*MemberFunc)() const>
   void
@@ -259,9 +267,9 @@ public:
 
   /**
     @brief Regrid function for this class
-    @param[in] a_lmin Coarsest level that changed during regrid
-    @param[i]  a_oldFinestLevel Finest grid level before the regrid
-    @param[i]  a_newFinestLevel Finest grid level after the regrid
+    @param[in] a_lmin           Coarsest level that changed during regrid
+    @param[in] a_oldFinestLevel Finest grid level before the regrid
+    @param[in] a_newFinestLevel Finest grid level after the regrid
   */
   virtual void
   regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
@@ -344,10 +352,10 @@ public:
 
   /**
     @brief Write plot data
-    @param[in,out] a_ouput       Output data holder
     @param[in,out] a_icomp       Starting component where we begin to write data to a_output
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level       Grid level
+    @param[in] a_output Output
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
@@ -355,22 +363,22 @@ public:
                 const std::string     a_outputRealm,
                 const int             a_level) const noexcept override;
 
+#ifdef CH_USE_HDF5
   /**
     @brief Write checkpoint data into handle
     @param[in,out] a_handle HDF5 file
-    @param[in]    a_level Grid level
+    @param[in]     a_level  Grid level
   */
-#ifdef CH_USE_HDF5
   virtual void
   writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
 #endif
 
+#ifdef CH_USE_HDF5
   /**
     @brief Read checkpoint data from handle
     @param[in,out] a_handle HDF5 file
-    @param[in]    a_level Grid level
+    @param[in]     a_level  Grid level
   */
-#ifdef CH_USE_HDF5
   virtual void
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
 #endif
@@ -392,6 +400,7 @@ public:
   /**
     @brief Count number of photons in particle list
     @param[in] a_photons Particle list
+    @return Return value
   */
   virtual int
   countPhotons(const AMRParticles<Photon>& a_photons) const;
@@ -433,12 +442,14 @@ public:
 
   /**
     @brief Get maximum number of photons generated per cell
+    @return Max photons per cell
   */
   virtual int
   getMaxPhotonsPerCell() const noexcept;
 
   /**
     @brief Get maximum number of photons generated per cell
+    @return Num sampling packets
   */
   virtual int
   getNumSamplingPackets() const noexcept;
@@ -448,7 +459,6 @@ public:
     @param[out] a_loads Grid loads for this level. 
     @param[in] a_dbl Grids on input level
     @param[in] a_level Input level
-    @return Loads for each box on a grid level. 
     @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
     @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
   */
@@ -550,6 +560,7 @@ protected:
   /**
     @brief 
   */
+  /** @brief Num sampling packets. */
   int m_numSamplingPackets;
 
   /**
@@ -575,6 +586,7 @@ protected:
   /**
     @brief
   */
+  /** @brief Intersection e b. */
   IntersectionEB m_intersectionEB;
 
   /**
@@ -633,6 +645,7 @@ protected:
     @param[in] a_volume Grid cell volume
     @param[in] a_dt     Time step
     @details The return result of this function depends on the input parameters to this class. 
+    @return Return value
   */
   size_t
   drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) const noexcept;
@@ -641,6 +654,7 @@ protected:
     @brief Mapping function for domain boundary conditions
     @param[in] a_dir  Coordinate direction
     @param[in] a_side Coordinate side
+    @return Return value
   */
   int
   domainBcMap(const int a_dir, const Side::LoHiSide a_side);
@@ -648,6 +662,7 @@ protected:
   /**
     @brief Random exponential trial
     @param[in] a_rate Rate (lambda) of the exponential distribution. Mean free path = 1/a_rate.
+    @return Return value
   */
   Real
   randomExponential(const Real a_rate) const noexcept;
@@ -678,7 +693,7 @@ protected:
     @brief Make the hybrid deposition. Also compute the mass difference
     @param[in,out] a_depositionH    On input this should be the conservative deposition
     @param[out]   a_massDifference Mass difference between conservative and non-conservative
-    @param[in]    a_depositioNC    Non-conservative deposition
+    @param[in] a_depositionNC Deposition n c
   */
   void
   depositHybrid(EBAMRCellData&     a_depositionH,
@@ -751,8 +766,8 @@ protected:
   /**
     @brief Do an NGP deposit on a specific grid level. Used for IO.
     @param[out] a_output Contains NGP deposition of photons. Ignores cut-cells.
-    @param[in] a_photons photons
     @param[in] a_level Grid level
+    @param[in] a_particles Particles
   */
   virtual void
   depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,

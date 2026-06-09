@@ -208,24 +208,28 @@ public:
 
   /**
     @brief Return scratch scalar storage
+    @return Return value
   */
   inline Real&
   tmpReal();
 
   /** 
     @brief Return scratch scalar storage
+    @return Return value
   */
   inline const Real&
   tmpReal() const;
 
   /**
     @brief Return scratch RealVect storage
+    @return Return value
   */
   inline RealVect&
   tmpVect();
 
   /** 
     @brief Return scratch RealVect storage
+    @return Return value
   */
   inline const RealVect&
   tmpVect() const;
@@ -233,6 +237,7 @@ public:
   /**
     @brief Function that is used when writing particles to HDF5.
     @details This ignores the particleID and rankID, so we can directory plug into Chombo's HDF5 APIs.
+    @return Return value
   */
   inline virtual int
   H5size() const;

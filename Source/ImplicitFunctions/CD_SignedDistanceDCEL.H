@@ -66,12 +66,14 @@ public:
   /**
     @brief Value function
     @param[in] a_point 2D/3D point
+    @return Function value at the given point
   */
   Real
   value(const RealVect& a_point) const override;
 
   /**
     @brief Factory method
+    @return New copy of this implicit function
   */
   BaseIF*
   newImplicitFunction() const override;

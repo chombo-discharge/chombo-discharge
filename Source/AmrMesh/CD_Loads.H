@@ -113,6 +113,7 @@ public:
   /**
     @brief Get sorted loads. 
     @details This routine sorts the computational loads from smallest to largest, and returns the result as a vector of ranks (and loads). 
+    @return Sorted loads
   */
   virtual std::vector<std::pair<int, Real>>
   getSortedLoads() const noexcept;

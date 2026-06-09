@@ -148,6 +148,7 @@ namespace Physics {
       /**
         @brief Compute total charge on electrode
         @details This returns @f$\int \epsilon E \, dA@f$
+        @return Return value
       */
       [[nodiscard]]
       virtual Real
@@ -156,6 +157,7 @@ namespace Physics {
       /**
         @brief Compute the total ohmic current through the electrode.
         @details This returns the total charge that left the electrode in the last time step.
+        @return Return value
       */
       [[nodiscard]]
       virtual Real
@@ -164,6 +166,7 @@ namespace Physics {
       /**
         @brief Integrate the sum of the optical excitations.
         @details This returns the sum of the emissions, and the sum of the excitations.
+        @return Return value
       */
       [[nodiscard]]
       virtual std::pair<Real, Real>

@@ -37,12 +37,13 @@ public:
 
   /**
     @brief Copy constructor
+    @param[in,out] a_index Description
   */
   MultiIndex(const MultiIndex& a_index) = default;
 
   /**
     @brief Full constructor
-    @param[i] a_order
+    @param[in] a_order Multi-index order
   */
   MultiIndex(const int a_order);
 
@@ -53,48 +54,60 @@ public:
 
   /**
     @brief Define function
+    @param[in] a_order Description
   */
   void
   define(const int a_order);
 
   /**
     @brief Factorial function
+    @return Return value
   */
   int
   factorial() const;
 
   /**
     @brief Get index
+    @return Current index
   */
   IntVect
   getCurrentIndex() const;
 
   /**
     @brief Get highest order for this index
+    @return Order
   */
   int
   getOrder() const;
 
   /**
     @brief Get the linear index (i.e. column number) for a given multi-index. 
+    @return Linear index
+    @param[in] a_MultiIndex Description
   */
   int
   getLinearIndex(const IntVect a_MultiIndex) const;
 
   /**
     @brief Get a multi-index corresponding to the linear index (i.e. column number)
+    @return Multi index
+    @param[in] a_linearIndex Description
   */
   IntVect
   getMultiIndex(const int a_linearIndex) const;
 
   /**
     @brief Assignment operator
+    @return Return value
+    @param[in,out] a_other Description
   */
   MultiIndex&
   operator=(const MultiIndex& a_other) = default;
 
   /**
     @brief Get one index
+    @return Return value
+    @param[in] a_dir Description
   */
   int
   operator[](const int a_dir) const;
@@ -113,6 +126,7 @@ public:
 
   /**
     @brief Check that multi-index is ok
+    @return Return value
   */
   bool
   ok() const;
@@ -120,18 +134,22 @@ public:
   /**
     @brief Get norm of multi-index.
     @details Returns |alpha| + |alpha2| + ....
+    @return Return value
   */
   int
   norm() const;
 
   /**
     @brief Return number of indices in MultiIndex range
+    @return Num indices
   */
   int
   getNumIndices() const;
 
   /**
     @brief Power function for multi-indices
+    @return Return value
+    @param[in,out] a_vec Description
   */
   Real
   pow(const RealVect& a_vec);
@@ -169,6 +187,8 @@ protected:
 
   /**
     @brief Base factorial function
+    @return Return value
+    @param[in] a_n Description
   */
   int
   factorial(const int a_n) const;

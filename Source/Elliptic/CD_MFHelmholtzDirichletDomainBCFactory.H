@@ -67,6 +67,8 @@ public:
 
   /**
     @brief Factory method
+    @return Return value
+    @param[in] a_iphase Description
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
   create(const int a_iphase) const override;

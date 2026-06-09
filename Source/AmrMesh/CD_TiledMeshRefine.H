@@ -92,6 +92,12 @@ protected:
 
   /**
     @brief Make tiles on the current level from tags and tile coarsening from finer levels
+    @param[in,out] a_tiles Description
+    @param[in,out] a_fineTiles Description
+    @param[in,out] a_coarTags Description
+    @param[in,out] a_domain Description
+    @param[in] a_refToFine Description
+    @param[in] a_refToCoar Description
   */
   virtual void
   makeLevelTiles(TileSet&             a_tiles,
@@ -103,6 +109,9 @@ protected:
 
   /**
     @brief Turn tiles into boxes
+    @param[in,out] a_boxes Description
+    @param[in,out] a_tiles Description
+    @param[in,out] a_domain Description
   */
   virtual void
   makeBoxesFromTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept;

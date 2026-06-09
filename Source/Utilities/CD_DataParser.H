@@ -37,6 +37,7 @@ namespace DataParser {
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
+    @return Return value
   */
   LookupTable1D<Real, 1>
   simpleFileReadASCII(const std::string       a_fileName,
@@ -56,6 +57,7 @@ namespace DataParser {
     @param[in] a_xColumn     Which column to use as the x-column. 
     @param[in] a_yColumn     Which column to use as the y-column. 
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
+    @return Return value
   */
   LookupTable1D<Real, 1>
   fractionalFileReadASCII(const std::string       a_fileName,
@@ -76,6 +78,7 @@ namespace DataParser {
     @param[in] a_zColumn     Column containing the z-coordinate
     @param[in] a_wColumn     Column containing the particle weight
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
+    @return Return value
   */
   List<PointParticle>
   readPointParticlesASCII(const std::string       a_fileName,

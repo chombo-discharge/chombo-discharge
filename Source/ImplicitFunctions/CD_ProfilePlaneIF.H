@@ -69,19 +69,23 @@ public:
   /**
     @brief Level-set function
     @param[in] a_pos Position
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
     @brief Factory method
+    @return New implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;
 
 protected:
+  /** @brief Baseif. */
   RefCountedPtr<BaseIF> m_baseif;
 
+  /** @brief Fluid inside. */
   bool m_fluidInside;
 };
 

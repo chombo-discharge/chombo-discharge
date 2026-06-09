@@ -26,10 +26,12 @@
 
 using namespace Physics::CdrPlasma;
 
+/// @cond DOXYGEN_SKIP
 typedef CdrPlasmaGodunovStepper::CdrStorage   CdrStorage;
 typedef CdrPlasmaGodunovStepper::FieldStorage FieldStorage;
 typedef CdrPlasmaGodunovStepper::RtStorage    RtStorage;
 typedef CdrPlasmaGodunovStepper::SigmaStorage SigmaStorage;
+/// @endcond
 
 CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics)
 {

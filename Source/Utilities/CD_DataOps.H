@@ -40,6 +40,7 @@ public:
   /**
     @brief Sign function. Returns +/- if the value is > 0 or < 0
     @param[in] a_value Value to evaluate. 
+    @return Return value
   */
   template <typename T>
   static int
@@ -50,7 +51,7 @@ public:
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domains  AMR domains.
-    @param[in]  a_tanGhost Number of ghost faces to fill.
+    @param[in] a_tanGhosts Tan ghosts
   */
   static void
   averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceData,
@@ -63,7 +64,7 @@ public:
     @param[out] a_faceData Face data. Must have one component. 
     @param[in]  a_cellData Cell data. Must have SpaceDim components. 
     @param[in]  a_domain   Problem domain
-    @param[in]  a_tanGhost Number of ghost faces to fill
+    @param[in] a_tanGhosts Tan ghosts
   */
   static void
   averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceData,
@@ -89,11 +90,11 @@ public:
     directions.
     @param[out] a_faceData Face data. 
     @param[in]  a_cellData Cell data. 
-    @param[in]  a_domain   Problem domain
-    @param[in]  a_tanGhost Number of ghost faces to fill
     @param[in]  a_faceVars Face variables
     @param[in]  a_cellVars Cell variables
     @param[in]  a_average  Averaging method
+    @param[in] a_domains Domains
+    @param[in] a_tanGhosts Tan ghosts
   */
   static void
   averageCellToFace(EBAMRFluxData&               a_faceData,
@@ -112,10 +113,10 @@ public:
     @param[out] a_faceData Face data. 
     @param[in]  a_cellData Cell data. 
     @param[in]  a_domain   Problem domain
-    @param[in]  a_tanGhost Number of ghost faces to fill
     @param[in]  a_faceVars Face variables
     @param[in]  a_cellVars Cell variables
     @param[in]  a_average  Averaging method
+    @param[in] a_tanGhosts Tan ghosts
   */
   static void
   averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
@@ -128,8 +129,8 @@ public:
 
   /**
     @brief Average all components of face centered data to cell centers.
-    @param[out] a_cellData Cell data. 
-    @param[int] a_faceData Face data. 
+    @param[out] a_cellData Cell data.
+    @param[in]  a_fluxData Face data.
     @param[in]  a_domains  AMR domains.
     @note Only valid cells are filled (not ghost cells)
   */
@@ -138,9 +139,9 @@ public:
 
   /**
     @brief Average all components of face centered data to cell centers.
-    @param[out] a_cellData Cell data. 
-    @param[int] a_faceData Face data. 
-    @param[in]  a_domains  Domain
+    @param[out] a_cellData Cell data.
+    @param[in]  a_fluxData Face data.
+    @param[in]  a_domain   Problem domain.
     @note Only valid cells are filled (not ghost cells)
   */
   static void
@@ -228,6 +229,7 @@ public:
     @param[in]  a_data1 First data holder.
     @param[in]  a_data2 Other data holder.
     @note The input data data1 and data2 must have the same number of input components. Summation is done over all components (does not have to be SpaceDim).
+    @param[in] a_box Description
   */
   static void
   dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
@@ -600,11 +602,11 @@ public:
 
   /**
     @brief Get maximum and minimum value of specified component
-    @param[out] a_max  Maximum value
-    @param[out] a_min  Minimum value
     @param[in]  a_data Cell-centered data
     @param[in]  a_comp Component
     @note This does the calculation over all levels, including grids that is covered by other grids. 
+    @param[in] max Max
+    @param[in] min Min
   */
   static void
   getMaxMin(Real& max, Real& min, EBAMRCellData& a_data, const int a_comp);
@@ -654,8 +656,8 @@ public:
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
-    @param[in]  a_data Cell-centered data
     @note This does the calculation over all levels, including grids that is covered by other grids. 
+    @param[in] data Data
   */
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& data);
@@ -664,7 +666,7 @@ public:
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
-    @param[in]  a_data Cell-centered data
+    @param[in] data Data
   */
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
@@ -673,8 +675,8 @@ public:
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
-    @param[in]  a_data Cell-centered data
     @note This does the calculation over all levels, including grids that is covered by other grids. 
+    @param[in] data Data
   */
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& data);
@@ -683,31 +685,31 @@ public:
     @brief Get maximum and minimum value of normed data.
     @param[out] a_max  Maximum value
     @param[out] a_min  Minimum value
-    @param[in]  a_data Cell-centered data
+    @param[in] data Data
   */
   static void
   getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& data);
 
   /**
     @brief Invert data
-    @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
+    @param[in] a_data Data
   */
   static void
   invert(EBAMRFluxData& a_data);
 
   /**
     @brief Invert data
-    @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
+    @param[in] a_data Data
   */
   static void
   invert(LevelData<EBFluxFAB>& a_data);
 
   /**
     @brief Invert data
-    @param[in,out] Data to be inverted. On output we have a_data = 1/a_data.
     @note Does all components and does not guard against division by zero.
+    @param[in] a_data Data
   */
   static void
   invert(EBFluxFAB& a_data);
@@ -752,6 +754,7 @@ public:
   /**
     @brief Scale data by dx^SpaceDim
     @param[in,out] a_data Data to be scaled. On output we have a_data = dx^SpaceDim * a_data
+    @param[in] a_dx Description
   */
   static void
   volumeScale(EBAMRCellData& a_data, const Vector<Real>& a_dx);
@@ -852,6 +855,7 @@ public:
     @param[in]  a_p      Norm factor, e.g. a_p = 2 => squared norm. 0 => inf norm
     @param[in]  a_comp   Component
     @note Does not do kappa-weighting; if user needs
+    @return Return value
   */
   static Real
   norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp = 0);
@@ -1175,7 +1179,6 @@ public:
     @param[in]  a_function Function to use for setting the value. 
     @param[in]  a_probLo   Lower-left corner of physical domain. 
     @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
     @note Uses a VofIterator everywhere to this might be slow!
   */
   static void
@@ -1190,7 +1193,6 @@ public:
     @param[in]  a_function Function to use for setting the value. 
     @param[in]  a_probLo   Lower-left corner of physical domain. 
     @param[in]  a_dx       Grid resolutions
-    @param[in]  a_comp     Component to set
     @note Uses a VofIterator everywhere to this might be slow!
   */
   static void
@@ -1211,6 +1213,7 @@ public:
     @brief Set value in data with specified component. 
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
+    @param[in] a_comp Description
   */
   static void
   setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
@@ -1219,6 +1222,7 @@ public:
     @brief Set value in data with specified component. 
     @param[out] a_lhs   Input/output data
     @param[in]  a_value Value to set
+    @param[in] a_comp Description
   */
   static void
   setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp);
@@ -1386,8 +1390,8 @@ public:
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 
     @param[out] a_lhs Vector length.
     @param[in]  a_rhs Input vector.
-    @param[in]  a_box Computation box.
     @note a_lhs must have one component and a_rhs must have SpaceDim components. 
+    @param[in] box Box
   */
   static void
   vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
@@ -1415,6 +1419,7 @@ public:
     @param[out] a_lhs Vector length
     @param[in]  a_rhs Input vector
     @note a_lhs must have one component and a_rhs must have SpaceDim components. 
+    @param[in] box Description
   */
   static void
   vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
@@ -1431,10 +1436,10 @@ public:
 
   /**
     @brief Check if all corners/points are inside an EB
-    @param[out] a_corner   Corners
     @param[in]  a_normal   EB face normal
     @param[in]  a_centroid EB centroid
     @return Returns true if all points are inside the EB and false otherwise. 
+    @param[in] a_corners Corners
   */
   static bool
   allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);

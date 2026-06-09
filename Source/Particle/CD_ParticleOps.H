@@ -38,6 +38,7 @@ public:
     @param[in] a_particlePosition Particle position
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx Grid resolution
+    @return Particle cell index
   */
   static inline IntVect
   getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const Real& a_dx) noexcept;
@@ -47,6 +48,7 @@ public:
     @param[in] a_particlePosition Particle position
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx Grid resolution
+    @return Particle cell index
   */
   static inline IntVect
   getParticleCellIndex(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
@@ -78,6 +80,7 @@ public:
     @param[in] a_particlePosition Physical particle position
     @param[in] a_probLo           Lower-left physical corner of simulation domain 
     @param[in] a_dx               Grid resolution.
+    @return Particle grid cell
   */
   static inline IntVect
   getParticleGridCell(const RealVect& a_particlePosition, const RealVect& a_probLo, const RealVect& a_dx) noexcept;
@@ -128,9 +131,9 @@ public:
     @param[in]  a_impFunc    Implicit function. 
     @param[in]  a_oldPos     Particle starting position
     @param[in]  a_newPos     Particle end position
-    @param[in]  a_tolerace   Tolerance for intersectinon method. If the distance to the EB is less than this, the particle is absorbed. 
     @param[out] a_s          Relative length along the path 
     @return Returns true if the particle crossed into the EB.
+    @param[in] a_tolerance Tolerance
   */
   static inline bool
   ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
@@ -160,6 +163,7 @@ public:
   /**
     @brief Perform a sum of some particle quantity
     @param[in] a_particles Particles
+    @return Global sum
   */
   template <typename P, const Real& (P::*scalarQuantity)() const>
   static inline Real
@@ -169,6 +173,7 @@ public:
     @brief Perform a sum of some particle quantity
     @param[in] a_particles Particles
     @note Just like the other version, except that this one doesn't take a member function. 
+    @return Global sum
   */
   template <typename P, Real (P::*scalarQuantity)()>
   static inline Real
@@ -187,7 +192,7 @@ public:
     @brief Transfer particles if they fulfill a certain removal criterion. Takes particles from a_srcParticles and puts them in a_dstParticles
     @param[in,out] a_dstParticles    Destination particle data holder
     @param[in,out] a_srcParticles    Source particle data holder
-    @param[in]    a_removeCriterion Removal criterion.
+    @param[in] a_transferCrit Transfer crit
   */
   template <typename P>
   static inline void

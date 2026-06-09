@@ -44,7 +44,7 @@ public:
   /**
     @brief Full constructor. Allows iteration through all solvers in the layout and restriction to a specific subset of solvers.
     @param[in,out] a_layout        The layout to iterate through
-    @param[in]    a_iterationMode Iteration mode, e.g. all solvers, only charged species etc. 
+    @param[in] a_mode Mode
   */
   ItoIterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::All);
 
@@ -88,12 +88,14 @@ public:
 
   /**
     @brief Get current solver
+    @return Return value
   */
   virtual RefCountedPtr<T>&
   operator()();
 
   /**
     @brief Get current species.
+    @return Species
   */
   virtual RefCountedPtr<ItoSpecies>&
   getSpecies();

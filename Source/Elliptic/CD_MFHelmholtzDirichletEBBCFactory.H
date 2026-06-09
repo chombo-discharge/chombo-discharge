@@ -41,6 +41,7 @@ public:
     @brief Full constructor which sets order and spatially varying value on EBs
     @param[in] a_order Approximation order
     @param[in] a_value Spatially varying value on EBs
+    @param[in] a_weight Description
   */
   MFHelmholtzDirichletEBBCFactory(const int                                         a_order,
                                   const int                                         a_weight,
@@ -67,6 +68,7 @@ public:
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);
@@ -81,6 +83,8 @@ public:
   /**
     @brief Factory method
     @param[in] a_jumpBC Jump bc object. 
+    @return Return value
+    @param[in] a_iphase Description
   */
   RefCountedPtr<EBHelmholtzEBBC>
   create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;

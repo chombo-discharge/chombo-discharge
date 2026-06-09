@@ -48,6 +48,7 @@ public:
 
   /**
     @brief Static function which returns the time (in seconds) between now and an arbitrary time in the past
+    @return Return value
   */
   inline static Real
   wallClock();
@@ -59,6 +60,7 @@ public:
 
   /**
     @brief Default constructor. This creates a timer without any timer events and without a name. 
+    @param[in] a_process Description
   */
   inline Timer(const std::string a_process);
 
@@ -76,6 +78,7 @@ public:
   /**
     @brief Copy assignment
     @param[in] a_other Other Timer
+    @return Return value
   */
   Timer&
   operator=(const Timer& a_other) = default;
@@ -101,6 +104,7 @@ public:
     @details This routine prints a header, the timing report for the various event, and a tail. All events are included but unfinished ones
     are not counted towards the elapsed time. 
     @param[in] a_localReportOnly If true, no reduction over mpi
+    @param[in] a_outputStream Description
   */
   inline void
   eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
@@ -108,7 +112,7 @@ public:
   /**
     @brief Print all timed events to a file.
     @details This routine prints a header row consisting of the event names. The remaining rows are the timings for the various ranks.
-    @param[in] a_localReportOnly If true, no reduction over mpi
+    @param[in] a_fileName File name
   */
   inline void
   writeReportToFile(const std::string a_fileName) const noexcept;
@@ -143,12 +147,15 @@ protected:
 
   /**
     @brief Print report header
+    @param[in,out] a_outputStream Description
   */
   void
   printReportHeader(std::ostream& a_outputStream) const noexcept;
 
   /**
     @brief Print report tail
+    @param[in,out] a_outputStream Description
+    @param[in] a_elapsedTime Description
   */
   void
   printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept;
@@ -156,6 +163,7 @@ protected:
   /**
     @brief Compute the total time for all finished events. 
     @return First entry is the local time. Second entry is the global time. 
+    @param[in] a_localReportOnly Description
   */
   std::pair<Real, Real>
   computeTotalElapsedTime(const bool a_localReportOnly) const noexcept;

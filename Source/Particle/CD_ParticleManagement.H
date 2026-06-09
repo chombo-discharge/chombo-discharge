@@ -84,6 +84,7 @@ namespace ParticleManagement {
     @param[in] a_maxLeaves Maximum number of leaves in the tree.
     @return Returns leaf nodes containing the particles
     @details If the number of leaves is a factor of two, leaves exist on the same level and the weight in each node will differ by
+    @param[in] a_particleReconcile Description
     at most one physical particle. The template parameters are 
 
        P            -> Particle type
@@ -129,6 +130,7 @@ namespace ParticleManagement {
     @brief Partition particle weights among a number of computational particles
     @param[in] a_numPhysicalParticles Number of physical particles. 
     @param[in] a_maxCompParticles     Maximum number of computational particles
+    @return Return value
   */
   template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   static inline std::vector<T>

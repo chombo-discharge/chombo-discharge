@@ -39,6 +39,8 @@ public:
 
   /**
     @brief Full constructor
+    @param[in] a_phase Description
+    @param[in,out] a_jumpBC Description
   */
   MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 

@@ -30,10 +30,12 @@
 
 using namespace Physics::CdrPlasma;
 
+/// @cond DOXYGEN_SKIP
 typedef CdrPlasmaImExSdcStepper::CdrStorage   CdrStorage;
 typedef CdrPlasmaImExSdcStepper::FieldStorage FieldStorage;
 typedef CdrPlasmaImExSdcStepper::RtStorage    RtStorage;
 typedef CdrPlasmaImExSdcStepper::SigmaStorage SigmaStorage;
+/// @endcond
 
 CdrPlasmaImExSdcStepper::CdrPlasmaImExSdcStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics)
 {

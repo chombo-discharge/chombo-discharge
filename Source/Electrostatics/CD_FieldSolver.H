@@ -102,21 +102,21 @@ public:
   /**
     @brief Solve Poisson equation onto a_phi using m_rho, and m_sigma as right-hand sides. 
     @param[in,out] a_potential Potential
-    @param[in]    a_zeroPhi Set a_potential to zero before calling other function. 
     @return       True if we found a solution and false otherwise. 
     @note         This calls the other (pure) version.
+    @param[in] a_zerophi Zerophi
   */
   virtual bool
   solve(MFAMRCellData& a_potential, const bool a_zerophi = false);
 
   /**
     @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
-    @param[in,out] a_potential Potential
     @param[in]    a_rho Space charge density
     @param[in]    a_sigma Surface charge density. 
-    @param[in]    a_zeroPhi Set a_potential to zero first. 
     @return True if we found a solution and false otherwise. 
     @note a_sigma must be defined on the gas phase. 
+    @param[in] a_phi Phi
+    @param[in] a_zerophi Zerophi
   */
   virtual bool
   solve(MFAMRCellData& a_phi, const MFAMRCellData& a_rho, const EBAMRIVData& a_sigma, const bool a_zerophi = false) = 0;
@@ -130,25 +130,25 @@ public:
 
   /**
     @brief Compute the cell-centered electric field. 
-    @param[out] a_electricField Cell-centered electric field
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const = 0;
 
   /**
     @brief Compute the face-centered electric field. 
-    @param[out] a_electricField Face-centered electric field
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(MFAMRFluxData& a_E, const MFAMRCellData& a_potential) const = 0;
 
   /**
     @brief Compute the cell-centered electric field on a specific phase. 
-    @param[out] a_electricField Face-centered electric field
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(EBAMRCellData&           a_E,
@@ -157,9 +157,9 @@ public:
 
   /**
     @brief Compute the face-centered electric field on a specific phase. 
-    @param[out] a_electricField Face-centered electric field
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
+    @param[in] a_E E
   */
   virtual void
   computeElectricField(EBAMRFluxData&           a_E,
@@ -239,6 +239,7 @@ public:
 
   /**
     @brief Set surface charge to specified value
+    @param[in] a_sigma Description
   */
   void
   setSigma(const Real a_sigma);
@@ -278,24 +279,24 @@ public:
   virtual void
   writePlotFile();
 
+#ifdef CH_USE_HDF5
   /**
     @brief Write checkpoint data for a level
     @param[out] a_handle HDF5 handle.
-    @param[in]   a_level Grid level
-    @details This writes m_potential[a_level] to the checkpoint file. 
+    @param[in]  a_level  Grid level
+    @details This writes m_potential[a_level] to the checkpoint file.
   */
-#ifdef CH_USE_HDF5
   virtual void
   writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 #endif
 
+#ifdef CH_USE_HDF5
   /**
     @brief Read checkpoint data onto a level
     @param[in] a_handle HDF5 handle.
-    @param[in] const int a_level Grid level
-    @details This fills m_potential[a_level] with data from a_handle. 
+    @param[in] a_level  Grid level
+    @details This fills m_potential[a_level] with data from a_handle.
   */
-#ifdef CH_USE_HDF5
   virtual void
   readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
@@ -314,7 +315,6 @@ public:
     @param[in]    a_outputRealm Realm where a_output belongs
     @param[in]    a_level Grid level
     @param[in]    a_forceNoInterp Forces data to be written using native centering
-    @return On output, the solver will have written its plot variables to a_output and increment a_comp by the number of plotted variables. 
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
@@ -468,6 +468,8 @@ public:
     @return Loads for each box on a grid level. 
     @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
     @details The default implementation returns the number of cells in the grid patch as a proxy for the load. 
+    @param[in,out] a_dbl Description
+    @param[in] a_level Description
   */
   virtual Vector<long long>
   computeLoads(const DisjointBoxLayout& a_dbl, const int a_level);
@@ -489,12 +491,14 @@ public:
 
   /**
     @brief Get potential on both phases. 
+    @return Potential
   */
   MFAMRCellData&
   getPotential();
 
   /**
     @brief Get electric field on both phases. 
+    @return Electric field
   */
   MFAMRCellData&
   getElectricField();
@@ -502,42 +506,49 @@ public:
   /**
     @brief Get storage for the space charge density. 
     @details This lives in the FieldSolver so users don't need to allocate their own storage for the space charge. 
+    @return Rho
   */
   MFAMRCellData&
   getRho();
 
   /**
     @brief Get the residue
+    @return Residue
   */
   MFAMRCellData&
   getResidue();
 
   /**
     @brief Get cell-centered permittivity
+    @return Permittivity cell
   */
   MFAMRCellData&
   getPermittivityCell();
 
   /**
     @brief Get face-centered permittivity
+    @return Permittivity face
   */
   MFAMRFluxData&
   getPermittivityFace();
 
   /**
     @brief Get irregular b coefficient
+    @return Permittivity e b
   */
   MFAMRIVData&
   getPermittivityEB();
 
   /**
     @brief Get m_sigma
+    @return Sigma
   */
   EBAMRIVData&
   getSigma();
 
   /**
     @brief Get data location
+    @return Data location
   */
   Location::Cell
   getDataLocation() const;
@@ -762,8 +773,9 @@ protected:
 
   /**
     @brief Get relative permittivity at some point in space
-    @param[in] a_position Physical position
     @note This routine is used for computing the permittivity inside dielectrics. 
+    @return Dielectric permittivity
+    @param[in] a_pos Pos
   */
   inline Real
   getDielectricPermittivity(const RealVect& a_pos) const;
@@ -803,8 +815,8 @@ protected:
     @param[out] a_perm Permittivity (on face centroid or center)
     @param[in]  a_cellBox Computation box
     @param[in]  a_ebisbox EBIS box
-    @param[in]  a_probLo  Lower-left corner off comptuational domain
     @param[in]  a_dx       Resolution
+    @param[in] a_origin Origin
   */
   virtual void
   setEbPermittivities(BaseIVFAB<Real>& a_perm,

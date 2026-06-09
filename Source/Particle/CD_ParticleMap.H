@@ -55,6 +55,11 @@ decodePair(uint64_t key) noexcept
 */
 struct PairHash
 {
+  /**
+    @brief Hash operator.
+    @param[in] p Pair to hash.
+    @return Hash value.
+  */
   std::size_t
   operator()(const std::pair<uint32_t, uint32_t>& p) const noexcept
   {

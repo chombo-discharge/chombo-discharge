@@ -58,13 +58,14 @@ public:
 
   /**
     @brief Set stencil weight
-    @param[in] a_order Stencil weight. Must be >= 0
+    @param[in] a_weight Weight
   */
   void
   setWeight(const int a_weight);
 
   /**
     @brief Drop BC order if domain size is equal or below this.
+    @param[in] a_domainSize Description
   */
   virtual void
   setDomainDropOrder(const int a_domainSize);

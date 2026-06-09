@@ -28,9 +28,9 @@
 #include <CD_NamespaceHeader.H>
 
 /**
-  @brief Class for encapsulating random number generation. This class is MPI and OpenMP safe. 
-  @details The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Note that unless the user specifies 
-  Random.seed = <number> in the input script, the RNG will use a seed of '0 + procID()' for the various ranks. If the user specifies a <number> less than 0, 
+  @brief Class for encapsulating random number generation. This class is MPI and OpenMP safe.
+  @details The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Note that unless the user specifies
+  Random.seed = &lt;number&gt; in the input script, the RNG will use a seed of '0 + procID()' for the various ranks. If the user specifies a &lt;number&gt; less than 0,
   a random seed will be used.
 */
 class Random
@@ -70,6 +70,7 @@ public:
   /**
     @brief Get Poisson distributed number
     @param[in] a_mean Poisson mean value (inverse rate)
+    @return Poisson
   */
   template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   inline static T
@@ -79,6 +80,7 @@ public:
     @brief Get Poisson distributed number. 
     @param[in] a_N Number of trials
     @param[in] a_p The usual success probability in binomial distributions
+    @return Binomial
   */
   template <typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
   inline static T
@@ -86,18 +88,21 @@ public:
 
   /**
     @brief Get a uniform real number on the interval [0,1]
+    @return Uniform real01
   */
   inline static Real
   getUniformReal01();
 
   /**
     @brief Get a uniform real number on the interval [-1,1]
+    @return Uniform real11
   */
   inline static Real
   getUniformReal11();
 
   /**
     @brief Get a number from a normal distribution centered on zero and variance 1
+    @return Normal01
   */
   inline static Real
   getNormal01();
@@ -105,6 +110,7 @@ public:
   /**
     @brief Get a random direction in space.
     @details Uses Marsaglia algorithm. 
+    @return Direction
   */
   inline static RealVect
   getDirection();
@@ -112,6 +118,7 @@ public:
   /**
     @brief For getting a random number from a user-supplied distribution. T must be a distribution for which we can call T(s_rng)
     @param[in] a_distribution Distribution. Must have object of type
+    @return Return value
   */
   template <typename T>
   inline static Real
@@ -120,6 +127,7 @@ public:
   /**
     @brief For getting a random number from a user-supplied distribution. T must be a distribution for which we can call T(s_rng)
     @param[in] a_distribution Distribution. Must have object of type
+    @return Discrete
   */
   template <typename T>
   inline static size_t
@@ -149,6 +157,7 @@ public:
     @brief Return a random position in the cube (a_lo, a_hi);
     @param[in] a_lo Lower-left corner 
     @param[in] a_hi Upper-right corner 
+    @return Return value
   */
   inline static RealVect
   randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept;
@@ -164,6 +173,7 @@ public:
     @param[in] a_normal        EB normal (points into the fluid region)
     @param[in] a_dx            Grid resolution
     @param[in] a_kappa         Cell volume
+    @return Return value
   */
   inline static RealVect
   randomPosition(const RealVect a_cellPos,

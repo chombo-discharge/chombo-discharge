@@ -20,10 +20,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/**
-  @brief This is an interface to LAPACK for solving least squares problems using singular-value decomposition
-  @note Double precision version. 
-*/
+/// @cond DOXYGEN_SKIP
 extern "C" void
 dgelss_(int*    a_M,
         int*    a_N,
@@ -39,10 +36,6 @@ dgelss_(int*    a_M,
         int*    a_LWORK,
         int*    a_INFO);
 
-/**
-  @brief Interface to LaPack for computing the singular value decomposition of a matrix. 
-  @note This is the double-precision version. 
-*/
 extern "C" void
 dgesdd_(char*   a_JOBZ,
         int*    a_M,
@@ -59,10 +52,6 @@ dgesdd_(char*   a_JOBZ,
         int*    a_IWORK,
         int*    a_INFO);
 
-/**
-  @brief Interface to LaPack for computing the singular value decomposition of a matrix. 
-  @note This is the single-precision version. 
-*/
 extern "C" void
 sgesdd_(char*  a_JOBZ,
         int*   a_M,
@@ -79,9 +68,6 @@ sgesdd_(char*  a_JOBZ,
         int*   a_IWORK,
         int*   a_INFO);
 
-/**
-  @brief Interface to LaPack for matrix multiplication
-*/
 extern "C" void
 dgemm_(char*   a_TRANSA,
        char*   a_TRANSB,
@@ -97,10 +83,6 @@ dgemm_(char*   a_TRANSA,
        double* a_C,
        int*    a_LDC);
 
-/**
-  @brief Interface to LaPack for matrix multiplication
-  @note Single-precision version.
-*/
 extern "C" void
 sgemm_(char*  a_TRANSA,
        char*  a_TRANSB,
@@ -116,11 +98,9 @@ sgemm_(char*  a_TRANSA,
        float* a_C,
        int*   a_LDC);
 
-/**
-  @brief Interface to LaPack for computing solution to Ax=b
-*/
 extern "C" void
 dgesv_(int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+/// @endcond
 
 /**
   @brief Namespace containing various useful linear algebra routines using LaPACK. 
@@ -133,6 +113,7 @@ namespace LaPackUtils {
     @param[in] jcol The column number
     @param[in] M Number of rows
     @param[in] N Number columns
+    @return Return value
   */
   int
   linearIndex(const int irow, const int jcol, const int M, const int N);
@@ -150,6 +131,7 @@ namespace LaPackUtils {
     A = U\Sigma V^\intercal.
     \f]
     The input and output matrices are assumed to be stored column-major so that a_A[0] is the first column of \f$A\f$. 
+    @return Computed s v d
   */
   bool
   computeSVD(std::vector<double>&       a_linU,
@@ -172,6 +154,7 @@ namespace LaPackUtils {
     A = U\Sigma V^\intercal.
     \f]
     The input and output matrices are assumed to be stored column-major so that a_A[0] is the first column of \f$A\f$. 
+    @return Computed s v d
   */
   bool
   computeSVD(std::vector<float>&       a_linU,
@@ -187,6 +170,7 @@ namespace LaPackUtils {
     @param[in]  a_linA Input matrix in column major Fortran order
     @param[in]  a_M Number of rows in A
     @param[in]  a_N Number of columns in A
+    @return Computed pseudo inverse
   */
   bool
   computePseudoInverse(std::vector<double>&       a_linAplus,
@@ -200,6 +184,7 @@ namespace LaPackUtils {
     @param[in]  a_linA Input matrix in column major Fortran order
     @param[in]  a_M Number of rows in A
     @param[in]  a_N Number of columns in A
+    @return Computed pseudo inverse
   */
   bool
   computePseudoInverse(std::vector<float>&       a_linAplus,

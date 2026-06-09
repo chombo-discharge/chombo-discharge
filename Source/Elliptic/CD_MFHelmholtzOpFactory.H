@@ -41,23 +41,38 @@ class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB>>
 {
 public:
   // Various alias for cutting down on typing.
-  using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
-  using AmrLevelGrids    = Vector<MFLevelGrid>;
+  /** @brief alias type alias. */
+  using MFIS = RefCountedPtr<MultiFluidIndexSpace>;
+  /** @brief alias type alias. */
+  using AmrLevelGrids = Vector<MFLevelGrid>;
+  /** @brief alias type alias. */
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
+  /** @brief alias type alias. */
   using AmrFluxRegisters = Vector<MFReflux>;
-  using AmrCoarseners    = Vector<MFCoarAve>;
-  using AmrResolutions   = Vector<Real>;
-  using AmrRefRatios     = Vector<int>;
-  using AmrMask          = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
+  /** @brief alias type alias. */
+  using AmrCoarseners = Vector<MFCoarAve>;
+  /** @brief alias type alias. */
+  using AmrResolutions = Vector<Real>;
+  /** @brief alias type alias. */
+  using AmrRefRatios = Vector<int>;
+  /** @brief alias type alias. */
+  using AmrMask = Vector<RefCountedPtr<LevelData<BaseFab<bool>>>>;
 
+  /** @brief alias type alias. */
   using AmrCellData = Vector<RefCountedPtr<LevelData<MFCellFAB>>>;
+  /** @brief alias type alias. */
   using AmrFluxData = Vector<RefCountedPtr<LevelData<MFFluxFAB>>>;
+  /** @brief alias type alias. */
   using AmrIrreData = Vector<RefCountedPtr<LevelData<MFBaseIVFAB>>>;
 
+  /** @brief alias type alias. */
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
-  using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
-  using JumpBCFactory   = RefCountedPtr<MFHelmholtzJumpBCFactory>;
+  /** @brief alias type alias. */
+  using EBBCFactory = RefCountedPtr<MFHelmholtzEBBCFactory>;
+  /** @brief alias type alias. */
+  using JumpBCFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>;
 
+  /** @brief Smoother type alias. */
   using Smoother = MFHelmholtzOp::Smoother;
 
   /**
@@ -85,18 +100,21 @@ public:
     @param[in] a_amrAcoef         A-coefficient in Helmholtz operator. 
     @param[in] a_amrBcoef         B-coefficient in Helmholtz operator. 
     @param[in] a_amrBcoefIrreg    B-coefficient in Helmholtz operator. This one is defined on EB faces. 
-    @param[in] a_domainBCFactory  Factory class for making domain BC objects. 
-    @param[in] a_ebbcFactory      Factory class for making BC objects for EB boundary conditions. 
-    @param[in] a_jumpBCFactory    Factory class for making jump BC objects. 
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
     @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
     @param[in] a_jumpOrder        Stencil order in multiphase cells
     @param[in] a_jumpWeight       Equation weighting in multiphase cells
     @param[in] a_preCondSmooth    Number of smoothings in the preconditioner
-    @param[in] a_relaxationMethod Relaxation method.
     @param[in] a_relaxFactor      Relaxation factor
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
     @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
+    @param[in] a_amrLevelGrids Amr level grids
+    @param[in] a_amrRefRatios Amr ref ratios
+    @param[in] a_domainBcFactory Domain bc factory
+    @param[in] a_ebBcFactory Eb bc factory
+    @param[in] a_jumpBcFactory Jump bc factory
+    @param[in] a_smoother Smoother
+    @param[in] a_blockingFactor Blocking factor
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
                        const Location::Cell    a_dataLocation,
@@ -149,6 +167,7 @@ public:
 
   /**
     @brief Get the BC jump factor. 
+    @return Sigma
   */
   const EBAMRIVData&
   getSigma() const;
@@ -164,6 +183,7 @@ public:
     @param[in] a_fineDomain      Domain
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);
     @param[in] a_homogeneousOnly If true, only homogeneous boundary conditions will be needed. 
+    @return Return value
   */
   MFHelmholtzOp*
   MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
@@ -171,6 +191,7 @@ public:
   /**
     @brief Create AMR operator for specified domain
     @param[in] a_domain Domain
+    @return Return value
   */
   MFHelmholtzOp*
   AMRnewOp(const ProblemDomain& a_domain) override final;
@@ -178,6 +199,8 @@ public:
   /**
     @brief Get refinement ratio to next finest level.
     @note Returns -1 when there are no finer levels. 
+    @return Return value
+    @param[in,out] a_indexspace Description
   */
   int
   refToFiner(const ProblemDomain& a_indexspace) const override final;

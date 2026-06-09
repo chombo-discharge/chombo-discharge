@@ -59,8 +59,6 @@ public:
     @param[in] a_eblgCoFi Coarsened fine grid. 
     @param[in] a_eblgCoar The coarse grid. 
     @param[in] a_refRat   Refinement ratio between fine and coarse. 
-    @param[in] a_nComp    Number of components. 
-    @param[in] a_ebisPtr  EB index space. 
   */
   EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
                        const EBLevelGrid& a_eblgCoFi,
@@ -100,8 +98,6 @@ public:
     @param[in] a_eblgCoFi Coarsened fine grid. 
     @param[in] a_eblgCoar The coarse grid. 
     @param[in] a_refRat   Refinement ratio between fine and coarse. 
-    @param[in] a_nComp    Number of components. 
-    @param[in] a_ebisPtr  EB index space. 
   */
   virtual void
   define(const EBLevelGrid& a_eblgFine,

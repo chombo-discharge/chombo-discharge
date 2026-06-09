@@ -82,6 +82,7 @@ namespace Physics {
 	@param[in,out] a_output Output data holder
 	@param[in,out] a_icomp Starting variable in a_output where we begin appending data.
 	@param[in] a_level Grid level
+        @param[in] a_outputRealm Description
       */
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,
@@ -116,6 +117,7 @@ namespace Physics {
       /**
 	@brief Tag cells for refinement and coarsening
 	@param[in,out] a_tags Cell tags that become the new grids. 
+        @return Return value
       */
       virtual bool
       tagCells(EBAMRTags& a_tags) noexcept override;
@@ -220,6 +222,7 @@ namespace Physics {
 	@param[in] a_lvl Grid level 
 	@param[in] a_tagFields Cell tagging fields
 	@param[in] a_gradTagFields Gradient of cell tagging fields
+        @return Return value
       */
       virtual bool
       coarsenCell(const RealVect         a_pos,
@@ -237,6 +240,7 @@ namespace Physics {
 	@param[in] a_lvl Grid level 
 	@param[in] a_tagFields Cell tagging fields
 	@param[in] a_gradTagFields Gradient of cell tagging fields
+        @return Return value
       */
       virtual bool
       refineCell(const RealVect         a_pos,

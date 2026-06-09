@@ -33,15 +33,20 @@
 class LevelTiles
 {
 public:
+  /** @brief alias type alias. */
   using BoxIDs = std::pair<unsigned int, unsigned int>;
 
   /**
-    @brief For lexicographically comparing tiles
-    @param[in] a First tile
-    @param[in] b First tile
+    @brief For lexicographically comparing tiles.
   */
   struct TileComparator
   {
+    /**
+      @brief Comparator operator.
+      @param[in] a First tile
+      @param[in] b Second tile
+      @return True if a > b lexicographically
+    */
     bool
     operator()(const IntVect& a, const IntVect& b) const
     {
@@ -66,8 +71,8 @@ public:
 
   /**
     @brief Full constructor - puts object in usable state. 
-    @param[in] a_dbl Grids
     @param[in] a_blockingFactor Grid size. 
+    @param[in] a_grids Grids
   */
   LevelTiles(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
 
@@ -78,8 +83,8 @@ public:
 
   /**
     @brief Define function. Puts object in usable state. 
-    @param[in] a_dbl Grids
     @param[in] a_blockingFactor Grid size. 
+    @param[in] a_grids Grids
   */
   virtual void
   define(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;

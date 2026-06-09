@@ -85,6 +85,7 @@ public:
     @param[in]    a_source  Source term
     @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve
     @note If you're not doing a stationary solve, this does a backward Euler solve. 
+    @return Time step used
   */
   virtual bool
   advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
@@ -93,10 +94,10 @@ public:
     @brief Advance using the Euler rule
     @details This implementation assumes that the incoming previous solution has not been weighted by the volume fraction, and
     that the incoming source term a_source HAS been weighted by the volume fraction. 
-    @param[in,out] a_newPhi  On exit, contains solution at time t + dt. On entry, contains solution at tim et
     @param[in]    a_source  Source term. Should be weighted by the volume fraction. 
     @param[in]    a_dt      Time step.
     @param[in]    a_zeroPhi Set phi to zero before multigrid solving
+    @param[in] a_phi Phi
   */
   virtual void
   advanceEuler(EBAMRCellData& a_phi, const EBAMRCellData& a_source, const Real a_dt, const bool a_zeroPhi) noexcept;
@@ -170,8 +171,8 @@ public:
 
   /**
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
-    @param[out] a_domainFlux Flux on the domain sides
     @param[in]  a_phi        Isotropic part of the RTE solution
+    @param[in] a_domainflux Domainflux
   */
   virtual void
   computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
@@ -342,11 +343,13 @@ protected:
   /**
     @brief 
   */
+  /** @brief Multigrid exit tolerance. */
   Real m_multigridExitTolerance;
 
   /**
     @brief 
   */
+  /** @brief Multigrid exit hang. */
   Real m_multigridExitHang;
 
   /**
@@ -477,6 +480,7 @@ protected:
   /**
     @brief Returns BC type based on string.
     @param[in] a_str Boundary condition string. Must be "dirichlet <number>", "neumann <number>", "robin <number>", "dirichlet_custom", "neumann_custom", or "robin_custom".
+    @return Return value
   */
   virtual EddingtonSP1DomainBc::BcType
   parseBcString(const std::string a_str) const;

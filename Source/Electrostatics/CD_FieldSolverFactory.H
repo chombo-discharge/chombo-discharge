@@ -42,6 +42,7 @@ public:
   /**
     @brief Factory method. 
     @details This instantiates a bare pointer of type T and casts it to RefCountedPtr<FieldSolver>. 
+    @return Return value
   */
   RefCountedPtr<FieldSolver>
   newSolver() const;

@@ -88,10 +88,10 @@ public:
   /**
     @brief Copy function (see Chombo docs)
     @param[in] a_fromBox     Region in source
-    @param[in] a_dstInterval Destination interval
     @param[in] a_toBox       Region in destination
     @param[in] a_src         Source.
-    @param[in] a_srcInterval Source interval
+    @param[in] a_dst_interv Dst_interv
+    @param[in] a_srcInterv Src interv
   */
   virtual void
   copy(const Box&         a_fromBox,

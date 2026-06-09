@@ -38,12 +38,12 @@ namespace Physics {
       CdrPlasmaPhotoReactionJSON();
 
       /**
-         @brief Full constructor. 
+         @brief Full constructor.
          @param[in] a_plasmaReactants  Plasma species on the left-hand side of the reaction
          @param[in] a_neutralReactants Neutral species on the left-hand side of the reaction
          @param[in] a_photonReactants  Photon species on the left hand side of the reaction.
-         @param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
-         @param[in] a_photonProducts   Photons on the right-hand side of the reaction.
+         @param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction.
+         @param[in] a_neutralProducts  Neutral species on the right-hand side of the reaction.
       */
       CdrPlasmaPhotoReactionJSON(const std::list<int> a_plasmaReactants,
                                  const std::list<int> a_neutralReactants,

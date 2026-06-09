@@ -44,6 +44,7 @@ public:
     @πaram[in] a_probLo               Lower-left corner of physical domain.
     @param[in] a_finestLevel          Finest grid level.
     @param[in] a_radius               Deposition radius
+    @param[in] a_probLo Description
   */
   EBAMRSurfaceDeposition(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
                          const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGridsCoarsenedFine,
@@ -69,6 +70,7 @@ public:
     @πaram[in] a_probLo               Lower-left corner of physical domain.
     @param[in] a_finestLevel          Finest grid level.
     @param[in] a_radius               Deposition radius
+    @param[in] a_probLo Description
   */
   virtual void
   define(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,
@@ -234,9 +236,8 @@ protected:
   defineFineToCoarseStencils() noexcept;
 
   /**
-    @brief Add the invalid coarse data (i.e., underneath the fine grid) to the fine level. 
+    @brief Add the invalid coarse data (i.e., underneath the fine grid) to the fine level.
     @details This does conservative interpolation to the fine grid. This all takes place on our buffer storage.
-    @param[in,out] a_meshData EB surface data
   */
   virtual void
   addInvalidCoarseDataToFineData() const noexcept;

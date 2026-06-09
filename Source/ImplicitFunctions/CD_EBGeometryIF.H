@@ -42,9 +42,9 @@ public:
 
   /**
     @brief Full constructor
-    @param[in] a_impFunc    EBGeometry implicit function
     @param[in] a_flipInside Hook for making inside -> outside.
     @param[in] a_zCoord     z-coordinate through which the object is sliced. 
+    @param[in] a_sdf Sdf
   */
   EBGeometryIF(const std::shared_ptr<EBGeometry::ImplicitFunction<T>>& a_sdf,
                const bool                                              a_flipInside,
@@ -64,12 +64,14 @@ public:
   /**
     @brief Value function. Returns distance to object. 
     @param[in] a_point Physical position. 
+    @return Function value at the given point
   */
   virtual Real
   value(const RealVect& a_point) const override;
 
   /**
     @brief IF factory method
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const override;

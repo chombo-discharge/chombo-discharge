@@ -214,6 +214,7 @@ namespace Physics {
 
       /**
          @brief Get plot variable names
+        @return Plot variable names
       */
       virtual Vector<std::string>
       getPlotVariableNames() const override;
@@ -233,18 +234,21 @@ namespace Physics {
 
       /**
          @brief Get plot variable names for stationary mode
+        @return Stationary plot variable names
       */
       virtual Vector<std::string>
       getStationaryPlotVariableNames() const noexcept;
 
       /**
          @brief Get plot variable names for transient mode
+        @return Transient plot variable names
       */
       virtual Vector<std::string>
       getTransientPlotVariableNames() const noexcept;
 
       /**
          @brief Compute a time step to be used by Driver. 
+        @return Computed dt
       */
       virtual Real
       computeDt() override;
@@ -259,6 +263,7 @@ namespace Physics {
 
       /**
          @brief Advance negative ions
+        @param[in] a_dt Description
       */
       virtual void
       advanceIons(const Real a_dt) noexcept;
@@ -360,12 +365,14 @@ namespace Physics {
 
       /**
          @brief Get ionization coefficient
+        @return Alpha
       */
       virtual const std::function<Real(const Real& E, const RealVect& x)>&
       getAlpha() const noexcept;
 
       /**
          @brief Get attachment coefficient
+        @return Eta
       */
       virtual const std::function<Real(const Real& E, const RealVect& x)>&
       getEta() const noexcept;
@@ -387,7 +394,7 @@ namespace Physics {
 
       /**
          @brief Set the field emission current
-         @param[in] a_fieldEmission Field emission current density. 
+        @param[in] a_currentDensity Current density
       */
       virtual void
       setFieldEmission(const std::function<Real(const Real& E, const RealVect& x)>& a_currentDensity) noexcept;
@@ -401,12 +408,14 @@ namespace Physics {
 
       /**
          @brief Get the solver mode
+        @return Mode
       */
       virtual Mode
       getMode() const noexcept;
 
       /**
          @brief Get the electric field
+        @return Electric field
       */
       virtual const EBAMRCellData*
       getElectricField() const noexcept;
@@ -1019,6 +1028,7 @@ namespace Physics {
 
       /**
          @brief Integrate the inception integral using the Euler rule.
+        @param[in,out] a_voltage Description
       */
       virtual void
       inceptionIntegrateEuler(const Real& a_voltage) noexcept;
@@ -1069,6 +1079,7 @@ namespace Physics {
       /**
          @brief Compute integral_Vcr(done/dt * (1 - eta/alpha) dV)
          @param[in] a_voltage Voltage multiplier. 
+        @return Computed rdot
       */
       virtual Real
       computeRdot(const Real& a_voltage) const noexcept;
@@ -1150,6 +1161,7 @@ namespace Physics {
       /**
          @brief Compute the minimum inception voltage and the starting electron position.
          @param[in] a_Uinc Inception voltage for all starting positions. 
+        @return Computed minimum inception voltage
       */
       virtual std::pair<Real, RealVect>
       computeMinimumInceptionVoltage(const EBAMRCellData& a_Uinc) const noexcept;
@@ -1164,6 +1176,7 @@ namespace Physics {
       /**
          @brief Compute the critical volume of the K values for each voltage
          @note Transient approach. 
+        @return Computed critical volume transient
       */
       virtual Real
       computeCriticalVolumeTransient() const noexcept;
@@ -1178,6 +1191,7 @@ namespace Physics {
       /**
          @brief Compute the critical area of the K values for each voltage
          @note For the transient method
+        @return Computed critical area transient
       */
       virtual Real
       computeCriticalAreaTransient() const noexcept;
@@ -1192,6 +1206,8 @@ namespace Physics {
       /**
          @brief Compute the ionization volume for each voltage
          @note For the transient method
+        @return Computed ionization volume transient
+        @param[in,out] a_voltage Description
       */
       virtual Real
       computeIonizationVolumeTransient(const Real& a_voltage) const noexcept;
@@ -1226,9 +1242,9 @@ namespace Physics {
       /**
          @brief Write plot data for the 'transient' mode
          @param[in,out] a_output            Output data holder.
-         @param[in]    a_plotVariableNames Plot variable names.
          @param[in]    a_outputRealm Realm where a_output belongs
          @param[in,out] a_icomp             Starting component in a_output to begin at. 
+        @param[in] a_level Level
       */
       virtual void
       writePlotDataTransient(LevelData<EBCellFAB>& a_output,
@@ -1320,8 +1336,8 @@ namespace Physics {
          @brief Calculate the total electric field = inhomogeneous + V * homogeneous
          @param[in] a_sumField Sum of contributions
          @param[in] a_inhomogeneousField Inhomogeneous field contribution
-         @param[in] a_homogeneous Homogeneous field contribution
          @param[in] a_voltage Electrode voltage
+        @param[in] a_homogeneousField Homogeneous field
       */
       inline void
       superposition(EBAMRCellData&       a_sumField,
@@ -1340,12 +1356,12 @@ namespace Physics {
       /**
          @brief Write data to output. Convenience function used for IO.
          @param[in,out] a_output Output data holder.
-         @param[in,out] a_icomp  Starting component where this solver begins writing the output. 
          @param[in]    a_data   Data to write. 
          @param[in]    a_outputRealm Realm where a_output belongs
          @param[in]    a_level  Grid level
          @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
          @param[in]    a_interpGhost If true, interpolate ghost cells
+        @param[in] a_comp Comp
       */
       virtual void
       writeData(LevelData<EBCellFAB>& a_output,
@@ -1367,6 +1383,7 @@ namespace Physics {
 
       /**
          @brief Get the breakdown field.
+        @return Critical field
       */
       virtual Real
       getCriticalField() const noexcept;

@@ -47,6 +47,7 @@ public:
 
   /**
     @brief Copy constructor
+    @param[in,out] a_inputIF Description
   */
   GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF);
 
@@ -57,12 +58,15 @@ public:
 
   /**
     @brief Value function
+    @return Function value at the given point
+    @param[in,out] a_pos Description
   */
   virtual Real
   value(const RealVect& a_pos) const;
 
   /**
     @brief Factory function
+    @return New copy of this implicit function
   */
   virtual BaseIF*
   newImplicitFunction() const;
