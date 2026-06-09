@@ -476,10 +476,10 @@ All jobs must pass before a pull request can be merged into ``main``.
      - Static analysis of ``Source/``, ``Physics/``, ``Geometries/``, and ``Exec/``; uses Bear to generate a compilation database then runs ``clang-tidy`` on all ``.cpp`` files
    * - ``Linux-GNU``
      - Ubuntu
-     - Full 2-D debug build with GCC; depends on Formatting, REUSE, and Codespell
+     - Full 2D and 3D debug builds with GCC; depends on Formatting, REUSE, and Codespell
    * - ``Linux-oneAPI``
      - Ubuntu
-     - Full 2-D debug build with Intel oneAPI; same dependencies as Linux-GNU
+     - Full 2D and 3D debug builds with Intel oneAPI; same dependencies as Linux-GNU
    * - ``Build-documentation``
      - Ubuntu
      - Doxygen HTML + Sphinx HTML; validates all ``.. literalinclude::`` paths
