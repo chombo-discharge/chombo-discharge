@@ -216,6 +216,16 @@ Run all hooks manually across the entire repository:
 
    pre-commit run --all-files
 
+The ``sphinx-build`` hook is on a **manual stage** and must be invoked explicitly:
+
+.. code-block:: bash
+
+   pre-commit run sphinx-build --hook-stage manual
+
+It builds the HTML documentation with ``-W --keep-going``, which treats all Sphinx warnings
+as errors and collects every warning before reporting failure.  Run this before opening a
+pull request if you have made changes to RST files.
+
 The following hooks are active (see ``.pre-commit-config.yaml``):
 
 .. list-table::
@@ -246,6 +256,12 @@ The following hooks are active (see ``.pre-commit-config.yaml``):
    * - ``doxygen-check``
      - Runs ``doxygen Docs/doxygen.conf``
      - Fails on any warning (``WARN_AS_ERROR = FAIL_ON_WARNINGS``)
+   * - ``check-docs``
+     - Reports which documentation pages include changed source files via ``.. literalinclude::``
+     - Always passes; output is informational only
+   * - ``sphinx-build``
+     - Builds the HTML documentation; fails on any warning or error
+     - **Manual stage only** — not triggered on commit; invoke explicitly (see below)
 
 clang-format
 ............
@@ -296,6 +312,32 @@ line in ``.codespellignore``.  Entries must be lowercase.
 
 If ``codespell`` flags a word that is intentional, add it to ``.codespellignore`` in your
 pull request.
+
+CheckDocs.py
+............
+
+``CheckDocs.py`` (at the repository root) cross-references your local changes against the
+Sphinx documentation.  It compares the current branch against ``main``, collects every
+modified ``.H``, ``.cpp``, ``.options``, ``.inputs``, and ``.md`` file, and then scans all
+RST files for ``.. literalinclude::`` directives that point to any of those files.
+
+Run it manually at any time:
+
+.. code-block:: bash
+
+   python3 CheckDocs.py
+
+Example output when a changed file is included in the docs:
+
+.. code-block:: text
+
+   Found literalincludes referencing changed files:
+
+   Docs/Sphinx/source/Base/MyPage.rst:42 -> includes '../../Source/MyModule/CD_MyClass.H'
+
+The hook **always passes** — it never blocks a commit.  Its purpose is to remind you to
+review the listed documentation pages and check that the included code excerpts still render
+correctly after your changes.
 
 Options and inputs file format
 ..............................
