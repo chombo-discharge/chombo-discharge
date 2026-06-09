@@ -85,6 +85,58 @@ Files under `Source/` and `Geometries/` that still carry the old `/* chombo-disc
 block. Replace with the standard SPDX block. The `REUSE.toml` catch-all already makes `reuse lint`
 pass, but inline headers are the long-term goal so the catch-all can eventually be removed.
 
+### clang-tidy warnings — files to fix
+
+**Per-file checklist** — when addressing clang-tidy warnings in any file, also do ALL of the following:
+1. Ensure correct Doxygen formatting per the checklist in the "Doxygen warnings" section above.
+2. Check whether the file is referenced by a `.. literalinclude::` directive in any RST file
+   (run `grep -r "literalinclude" Docs/Sphinx/source/ | grep <filename>`).
+   If a reference exists, verify that the RST file still points to the same code block after your changes.
+
+- [ ] `Exec/Convergence/AdvectionDiffusion/C2/main.cpp`
+- [ ] `Exec/Convergence/KineticMonteCarlo/C1/main.cpp`
+- [ ] `Exec/Convergence/RadiativeTransfer/C2/main.cpp`
+- [ ] `Exec/Tests/Utilities/LookupTable/main.cpp`
+- [ ] `Geometries/NoisePlane/CD_NoisePlane.H`
+- [ ] `Geometries/SpherePlane/CD_SpherePlane.H`
+- [ ] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionTagger.cpp`
+- [ ] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.H`
+- [ ] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStorage.H`
+- [ ] `Physics/ItoKMC/CD_ItoKMCSurfaceReactionsImplem.H`
+- [ ] `Source/AmrMesh/CD_EBAMRData.H`
+- [ ] `Source/AmrMesh/CD_EBAMRDataImplem.H`
+- [ ] `Source/AmrMesh/CD_EBCentroidInterpolation.cpp`
+- [ ] `Source/AmrMesh/CD_LinearStencil.cpp`
+- [ ] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBC.H`
+- [ ] `Source/Electrostatics/CD_MFHelmholtzElectrostaticEBBCImplem.H`
+- [ ] `Source/Elliptic/CD_EBHelmholtzOpFactory.H`
+- [ ] `Source/Elliptic/CD_MFHelmholtzNeumannEBBC.cpp`
+- [ ] `Source/ImplicitFunctions/CD_HyperboloidIF.cpp`
+- [ ] `Source/ImplicitFunctions/CD_SphereArray.H`
+- [ ] `Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H`
+- [ ] `Source/KineticMonteCarlo/CD_KMCSingleStateReactionImplem.H`
+- [ ] `Source/KineticMonteCarlo/CD_KMCSolver.H`
+- [ ] `Source/KineticMonteCarlo/CD_KMCSolverImplem.H`
+- [ ] `Source/MeshODESolver/CD_MeshODESolver.H`
+- [ ] `Source/MeshODESolver/CD_MeshODESolverImplem.H`
+- [ ] `Source/Particle/CD_EBAMRParticleMesh.H`
+- [ ] `Source/Particle/CD_EBAMRParticleMeshImplem.H`
+- [ ] `Source/Particle/CD_GenericParticle.H`
+- [ ] `Source/Particle/CD_GenericParticleImplem.H`
+- [ ] `Source/Particle/CD_ParticleContainer.H`
+- [ ] `Source/Particle/CD_ParticleContainerImplem.H`
+- [ ] `Source/Particle/CD_PointParticle.H`
+- [ ] `Source/Particle/CD_PointParticleImplem.H`
+- [ ] `Source/Utilities/CD_DischargeIO.H`
+- [ ] `Source/Utilities/CD_DischargeIOImplem.H`
+- [ ] `Source/Utilities/CD_LeastSquares.H`
+- [ ] `Source/Utilities/CD_LeastSquaresImplem.H`
+- [ ] `Source/Utilities/CD_Location.H`
+- [ ] `Source/Utilities/CD_LocationImplem.H`
+- [ ] `Source/Utilities/CD_LookupTable.H`
+- [ ] `Source/Utilities/CD_LookupTable1D.H`
+- [ ] `Source/Utilities/CD_ParallelOps.H`
+
 ### clang-tidy CI
 
 The `cmake-generate-compile-commands` hook is listed in `ci: skip` but not yet defined.

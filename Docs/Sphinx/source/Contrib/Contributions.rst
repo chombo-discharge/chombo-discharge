@@ -135,6 +135,12 @@ block, containing ``@file``, ``@brief``, and ``@author``:
 
 For ``.cpp`` files the ``@brief`` must read ``"Implementation of CD_MyClass.H"``.
 
+.. important::
+
+   All Doxygen comment blocks **must** use the ``/**`` opening delimiter.
+   The ``/*!`` form is **never** permitted in this codebase.
+   The CI ``doxygen-check`` hook treats any ``/*!`` block as a style violation.
+
 Function documentation
 ......................
 
