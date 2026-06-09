@@ -425,7 +425,7 @@ The full API for the ``CdrPlasmaPhysics`` class is given below:
 .. literalinclude:: ../../../../Physics/CdrPlasma/CD_CdrPlasmaPhysics.H
    :language: c++
    :dedent: 4
-   :lines: 28-264
+   :lines: 48-290
 
 .. _Chap:CdrPlasmaJSON:
 

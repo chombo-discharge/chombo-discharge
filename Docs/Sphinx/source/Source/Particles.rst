@@ -23,7 +23,7 @@ GenericParticle
 The particle type is essentially a template
 
 .. literalinclude:: ../../../../Source/Particle/CD_GenericParticle.H
-   :lines: 74-75
+   :lines: 75-76
    :language: c++
 
 where ``M`` and ``N`` are the number of ``Real`` and ``RealVect`` variables for the particle.
@@ -328,7 +328,7 @@ Allocating particles
 ``AmrMesh`` has a very simple function for allocating a ``ParticleContainer<P>``:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 220-227
+   :lines: 221-228
    :language: c++
    :dedent: 2   
 
@@ -343,7 +343,7 @@ Particles that move off their original grid patch must be remapped in order to e
 The remapping function for ``ParticleContainer<P>`` is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 445-449
+   :lines: 459-463
    :language: c++
    :dedent: 2   		
 
@@ -373,7 +373,7 @@ This is relatively simple to achieve, and is done as follows:
 1. *Before* creating the new grids, each MPI rank collects *all* particles on a single ``List<P>`` by calling
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 134-140
+      :lines: 136-142
       :language: c++
       :dedent: 2   		   
       
@@ -384,7 +384,7 @@ This is relatively simple to achieve, and is done as follows:
    This is done by calling the ``ParticleContainer<P>`` regrid function:
 
    .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-      :lines: 114-133
+      :lines: 116-135
       :language: c++
       :dedent: 2
 
@@ -409,7 +409,7 @@ To fill the masked particles, ``ParticleContainer<P>`` has members functions for
 The function signatures for this is
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 148-154
+   :lines: 150-156
    :language: c++
    :dedent: 2
 
@@ -417,7 +417,7 @@ The argument ``a_mask`` holds a bool at each cell in the AMR hierarchy.
 Particles that live in cells where ``a_mask`` is true will be copied to an internal data holder in ``ParticleContainer<P>`` which can be retrieved through a call
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 263-268
+   :lines: 268-273
    :language: c++
    :dedent: 2
 
@@ -426,7 +426,7 @@ In the above functions the mask particles are *copied*, and the original particl
 After the user is done with the particles, they should be deleted through the function
 
 .. literalinclude:: ../../../../Source/Particle/CD_ParticleContainer.H
-   :lines: 198-202
+   :lines: 200-204
    :language: c++
    :dedent: 2
 
@@ -524,7 +524,7 @@ Conversely, if the particle is close to the EB a small step will be used.
 The algorithm that intersect the particles are a part of :ref:`Chap:AmrMesh`, and are called as follows:
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 1112-1170
+   :lines: 1115-1173
    :language: c++
    :dedent: 2   
 
@@ -562,7 +562,7 @@ ___________________
 To deposit particles on the mesh, the user can call the templated function ``AmrMesh::depositParticles`` which have a signatures
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 941-977
+   :lines: 945-981
    :language: c++
    :dedent: 2
 
@@ -656,7 +656,7 @@ ______________________
 To interpolate mesh data onto a particle property, the user can call the ``AmrMesh`` member functions
 
 .. literalinclude:: ../../../../Source/AmrMesh/CD_AmrMesh.H
-   :lines: 979-997
+   :lines: 983-1001
    :language: c++
    :dedent: 2
 
@@ -738,7 +738,7 @@ Simple particle visualization can be performed by writing ``H5Part`` compatible 
 This is done through the function ``writeH5Part`` in the ``DischargeIO`` namespace, with the following signature:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DischargeIO.H
-   :lines: 138-161
+   :lines: 141-163
    :language: c++
    :dedent: 2
 

@@ -48,7 +48,7 @@ These approximations are encapsulated by the following functions:
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of functions responsible for calculating approximations to divergence operators.
    :language: c++
-   :lines: 159-211
+   :lines: 160-210
    :dedent: 2
 
 These functions are not implemented in ``CdrSolver``, but in subclasses.
@@ -60,7 +60,7 @@ The implicit advance methods for ``CdrSolver`` are encapsulated by the following
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :caption: List of current implicit diffusion advance functions.
    :language: c++
-   :lines: 121-134,145-157
+   :lines: 122-135,146-158
    :dedent: 2
 
 .. _Chap:CdrDetails:   
@@ -146,7 +146,7 @@ The user will need to call the function
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 213-221
+   :lines: 212-220
    :dedent: 2
 
 where ``a_G`` is the numerical representation of :math:`\mathbf{G}` over the cut-cell AMR hierarchy and must be stored on cell-centered faces, and ``a_ebFlux`` is the flux through the embedded boundary.
@@ -279,7 +279,7 @@ It implements the pure functions required by :ref:`Chap:CdrSolver` but introduce
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrMultigrid.H
    :language: c++
-   :lines: 287-294
+   :lines: 289-296
    :dedent: 2
 
 The faces states defined by the above function are used when forming a finite-volume approximation to the divergence operators.
@@ -422,7 +422,7 @@ In order to obtain mesh data from the ``CdrSolver``, the user should use the fol
 
 .. literalinclude:: ../../../../Source/ConvectionDiffusionReaction/CD_CdrSolver.H
    :language: c++
-   :lines: 589-656
+   :lines: 600-668
    :dedent: 2
 
 To set the drift velocities, the user will fill the *cell-centered* velocities.
@@ -441,7 +441,7 @@ One can use ``DataOps`` functions to fill the data directly using a C++ lambda:
 
 .. literalinclude:: ../../../../Source/Utilities/CD_DataOps.H
    :language: c++
-   :lines: 1171-1184
+   :lines: 1176-1188
    :dedent: 2
 
 This would typically look something like this:

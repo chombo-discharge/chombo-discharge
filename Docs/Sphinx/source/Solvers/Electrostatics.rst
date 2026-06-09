@@ -67,7 +67,7 @@ The function signature for setting the voltage on various parts is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 385-391
+   :lines: 386-392
    :dedent: 2
 
 This allows setting a time-dependent voltage on electrodes and domain boundaries.
@@ -347,7 +347,7 @@ The member function that does this is
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 405-411
+   :lines: 406-412
    :dedent: 2
 
 Here, the type ``ElectrostaticEbBc::BcFunction`` is just an alias of ``std::function<Real(const RealVect a_position, const Real a_time)>``.
@@ -400,7 +400,7 @@ This is encapsulated by the pure member function
 
 .. literalinclude:: ../../../../Source/Electrostatics/CD_FieldSolver.H
    :language: c++
-   :lines: 111-121
+   :lines: 112-122
    :dedent: 2
 
 where ``a_phi`` is the resulting potential that was computing with the space charge density ``a_rho``, and surface charge density ``a_sigma``.
