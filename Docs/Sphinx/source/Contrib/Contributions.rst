@@ -250,15 +250,9 @@ The following hooks are active (see ``.pre-commit-config.yaml``):
    * - ``format-input-files``
      - Banner comment format in ``.options``/``.inputs`` files
      - Header must be a 100-character ``====`` rule followed by class name
-   * - ``check-literalincludes``
-     - Validates all ``.. literalinclude::`` paths in RST files
-     - Prevents broken doc builds caused by renamed source files
    * - ``doxygen-check``
      - Runs ``doxygen Docs/doxygen.conf``
      - Fails on any warning (``WARN_AS_ERROR = FAIL_ON_WARNINGS``)
-   * - ``check-docs``
-     - Reports which documentation pages include changed source files via ``.. literalinclude::``
-     - Always passes; output is informational only
    * - ``sphinx-build``
      - Builds the HTML documentation; fails on any warning or error
      - **Manual stage only** — not triggered on commit; invoke explicitly (see below)
