@@ -58,4 +58,4 @@ Checks: >
        -readability-simplify-boolean-expr,
     '
 
-HeaderFilterRegex: ^(Source|Geometries|Physics|Exec)/
+HeaderFilterRegex: '^(Source|Geometries|Physics|Exec)/'
