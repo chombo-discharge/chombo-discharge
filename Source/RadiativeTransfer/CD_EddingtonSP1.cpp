@@ -316,8 +316,7 @@ EddingtonSP1::parseStationary()
     pout() << m_name + "::parseStationary" << endl;
   }
 
-  ParmParse   pp(m_className.c_str());
-  std::string str;
+  ParmParse pp(m_className.c_str());
 
   pp.get("stationary", m_stationary);
 }

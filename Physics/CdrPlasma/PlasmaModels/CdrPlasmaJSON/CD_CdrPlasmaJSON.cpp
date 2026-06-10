@@ -2463,8 +2463,7 @@ CdrPlasmaJSON::parsePlasmaReactions()
                              "CdrPlasmaJSON::parsePlasmaReactions -- field 'lookup' is missing from one of the reactions");
 }
 
-    const std::string reaction  = trim(R["reaction"].get<std::string>());
-    const std::string baseError = "CdrPlasmaJSON::parsePlasmaReactions for reaction '" + reaction + "' ";
+    const std::string reaction = trim(R["reaction"].get<std::string>());
 
     // Parse the reaction string to figure out the species involved in the reaction. Note that this CAN involve the species
     // wildcard @, in which case we need need to build a superset of reaction strings that we parse. We do that below.
@@ -3731,7 +3730,6 @@ CdrPlasmaJSON::parseElectrodeReactions()
         if (!(electrodeReaction.contains("lookup"))) {
           ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
 }
-        const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(electrodeReaction["lookup"].get<std::string>());
 
         // Go through all the reactions now.
         for (const auto& curReaction : reactionSets) {
@@ -3972,7 +3970,6 @@ CdrPlasmaJSON::parseDielectricReactions()
         if (!(dielectricReaction.contains("lookup"))) {
           ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");
 }
-        const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(dielectricReaction["lookup"].get<std::string>());
 
         // Go through all the reactions now.
         for (const auto& curReaction : reactionSets) {
@@ -4182,7 +4179,6 @@ CdrPlasmaJSON::parseDomainReactions()
         if (!(domainReaction.contains("lookup"))) {
           ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified");
 }
-        const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(domainReaction["lookup"].get<std::string>());
 
         // Go through reaction sets.
         for (const auto& curReaction : reactionSets) {

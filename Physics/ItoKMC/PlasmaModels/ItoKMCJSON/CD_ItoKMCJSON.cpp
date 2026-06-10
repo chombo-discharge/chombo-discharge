@@ -1088,8 +1088,7 @@ ItoKMCJSON::initializeParticles()
   const std::string baseError = "ItoKMCJSON::initializeParticles";
 
   for (const auto& species : m_json["plasma species"]) {
-    const std::string speciesID   = species["id"].get<std::string>();
-    const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
+    const std::string speciesID = species["id"].get<std::string>();
 
     List<PointParticle> initialParticles;
 
@@ -1349,8 +1348,7 @@ ItoKMCJSON::initializeDensities()
   const std::string baseError = "ItoKMCJSON::initializeDensities";
 
   for (const auto& species : m_json["plasma species"]) {
-    const std::string speciesID   = species["id"].get<std::string>();
-    const std::string baseErrorID = baseError + " and found 'initial particles' for species '" + speciesID + "'";
+    const std::string speciesID = species["id"].get<std::string>();
 
     List<PointParticle> initialParticles;
 
@@ -1835,8 +1833,7 @@ ItoKMCJSON::initializePlasmaReactions()
       this->throwParserError(baseError + " but one of the reactions is missing the field 'type'");
     }
 
-    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
-    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+    const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
 
     // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species wildcard, in which
     // case we also build the reaction superset;
@@ -1849,7 +1846,6 @@ ItoKMCJSON::initializePlasmaReactions()
     const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
 
     for (const auto& curReaction : reactionSets) {
-      const std::string              wildcard     = std::get<0>(curReaction);
       const std::vector<std::string> curReactants = std::get<1>(curReaction);
       const std::vector<std::string> curProducts  = std::get<2>(curReaction);
 
@@ -1937,8 +1933,7 @@ ItoKMCJSON::initializePhotoReactions()
       photoiEfficiency = reactionJSON["efficiency"].get<Real>();
     }
 
-    const std::string reaction    = this->trim(reactionJSON["reaction"].get<std::string>());
-    const std::string baseErrorID = baseError + " for reaction '" + reaction + "'";
+    const std::string reaction = this->trim(reactionJSON["reaction"].get<std::string>());
 
     // Parse the reaction string to figure out the species involved in the reaction. This CAN involve the species wildcard, in which
     // case we also build the reaction superset;
@@ -1951,7 +1946,6 @@ ItoKMCJSON::initializePhotoReactions()
     const auto reactionSets = this->parseReactionWildcards(reactants, products, reactionJSON);
 
     for (const auto& curReaction : reactionSets) {
-      const std::string              wildcard     = std::get<0>(curReaction);
       const std::vector<std::string> curReactants = std::get<1>(curReaction);
       const std::vector<std::string> curProducts  = std::get<2>(curReaction);
 
@@ -2052,7 +2046,6 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
     for (int i = 0; i < reactionSets.size(); i++) {
       const auto& curReaction = reactionSets[i];
 
-      const std::string              wildcard     = std::get<0>(curReaction);
       const std::vector<std::string> curReactants = std::get<1>(curReaction);
       const std::vector<std::string> curProducts  = std::get<2>(curReaction);
 

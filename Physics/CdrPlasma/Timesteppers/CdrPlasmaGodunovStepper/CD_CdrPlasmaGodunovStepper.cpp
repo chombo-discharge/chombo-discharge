@@ -222,7 +222,6 @@ CdrPlasmaGodunovStepper::parseFloor()
 
   ParmParse pp(m_className.c_str());
 
-  std::string str;
   pp.get("floor_cdr", m_floor);
 }
 
