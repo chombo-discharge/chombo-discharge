@@ -87,6 +87,9 @@ pass, but inline headers are the long-term goal so the catch-all can eventually 
 
 ### clang-tidy warnings — files to fix
 
+All 46 per-file boxes below are ticked; the bulk-fix plan in the section that follows covers
+the remaining work (3a–3k).
+
 **Per-file checklist** — when addressing clang-tidy warnings in any file, also do ALL of the following:
 1. Ensure correct Doxygen formatting per the checklist in the "Doxygen warnings" section above.
 2. Check whether the file is referenced by a `.. literalinclude::` directive in any RST file
@@ -371,3 +374,68 @@ Run `./run_clang_tidy.sh 2>&1 | grep -E "clang-analyzer|clang-diagnostic-(someti
 
 - [ ] `bugprone-suspicious-include` (1 warning): an `#include` directive that looks like it may
   include a `.cpp` file by mistake.
+
+---
+
+## PR finalization checklist
+
+Complete every item below **before** merging. Run them in order — later steps depend on
+earlier ones passing. These gates must also be cleared before continuing with the remaining
+clang-tidy fixes (3a–3k).
+
+### 1. Remove non-PR files
+
+`compile_commands.json` is already gitignored. The files below are tracked and must be
+removed from the repository before the PR is opened.
+
+- [ ] `git rm TODO.md run_clang_tidy.sh` and commit the removal
+- [ ] Delete `clang-tidy.log` from the working tree (untracked; add to `.gitignore` if it
+  keeps reappearing)
+
+### 2. CI dry-run — mirrors each job in `.github/workflows/CI.yml`
+
+Run locally in the same order the CI jobs execute.
+
+**Formatting** (`clang-format` job)
+- [ ] `pre-commit run clang-format --all-files` — must produce an empty diff
+
+**REUSE** (`REUSE` job)
+- [ ] `reuse lint` — must exit 0
+
+**Codespell** (`Codespell` job)
+- [ ] `codespell Source/ Physics/ Exec/ Docs/ Geometries/` — must exit 0
+
+**Build** (`Linux-GNU` job — 2-D, no MPI, GCC)
+- [ ] `make -j$(nproc)` — must compile without errors
+
+### 3. Documentation (`Build-documentation` job)
+
+- [ ] **Doxygen**: `doxygen Docs/doxygen.conf` — must exit 0 (zero warnings; config has
+  `WARN_AS_ERROR = FAIL_ON_WARNINGS`)
+- [ ] **Sphinx**: `cd Docs/Sphinx && make html SPHINXOPTS="-W --keep-going"` — must exit 0
+- [ ] **literalinclude validator**: `python3 Docs/check_literalincludes.py` — all paths
+  resolve
+
+### 4. Test executables
+
+- [ ] Build at least one representative test:
+  ```bash
+  cd Exec/Tests/Electrostatics/RodSphere && make -j$(nproc) DIM=2
+  ```
+- [ ] Run with the regression inputs and confirm the simulation completes without assertion
+  failures or NaNs:
+  ```bash
+  ./main.*.ex regression2d.inputs
+  ```
+
+### 5. Benchmark / regression inputs
+
+- [ ] `git diff HEAD -- '*.inputs' '*.options'` — confirm no accidental modifications to
+  any `.inputs` or `.options` file; every change must be intentional and reviewed
+
+### 6. Full pre-commit sweep
+
+- [ ] `pre-commit run --all-files` — every hook must pass
+  - Note: the `clang-tidy` hook is tagged `ci: skip` and requires `compile_commands.json`;
+    run `./run_clang_tidy.sh 2>&1 | grep -c "warning:"` manually to verify the warning
+    count is zero in `Source/`, `Geometries/`, `Physics/`, `Exec/`
