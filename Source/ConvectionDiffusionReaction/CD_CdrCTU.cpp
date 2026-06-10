@@ -770,7 +770,7 @@ CdrCTU::minmod(const Real& dwl, const Real& dwr) noexcept
 }
 
 Real
-CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::superbee(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

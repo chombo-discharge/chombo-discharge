@@ -235,8 +235,8 @@ protected:
     @param[in] dwr Right slope
     @return Return value
   */
-  inline Real
-  superbee(const Real& dwl, const Real& dwr) const noexcept;
+  static Real
+  superbee(const Real& dwl, const Real& dwr) noexcept;
 
   /**
     @brief Monotonized central difference slope limiter.

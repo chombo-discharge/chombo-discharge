@@ -576,7 +576,7 @@ public:
     @param[out] a_lhs Equal to a_lhs*a_rhs on output
     @param[in] a_rhs Scaling data
   */
-  void
+  static void
   scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) noexcept;
 
   /**

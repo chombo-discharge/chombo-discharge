@@ -1367,7 +1367,7 @@ namespace Physics {
          @param[in] a_str Input string. If it contains the at character we throw an error. 
         @return Return value
       */
-      bool
+      static bool
       containsWildcard(const std::string& a_str);
 
       /**
@@ -1375,7 +1375,7 @@ namespace Physics {
          @param[in] a_str Input string. If it contains any bracket we throw an error.
         @return Return value
       */
-      bool
+      static bool
       containsBracket(const std::string& a_str);
 
       /**
@@ -1383,7 +1383,7 @@ namespace Physics {
          @param[in] a_str Input string. 
          @return True if the first character in the string is ( and the last character is )
       */
-      bool
+      static bool
       isBracketed(const std::string& a_str);
 
       /**

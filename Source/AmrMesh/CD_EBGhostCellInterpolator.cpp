@@ -491,7 +491,7 @@ EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) noexcept
 }
 
 Real
-EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

@@ -424,7 +424,7 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has fewer grid points than a_domainTwo
   */
-  bool
+  static bool
   isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
