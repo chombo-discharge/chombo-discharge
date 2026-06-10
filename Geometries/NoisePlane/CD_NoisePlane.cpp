@@ -51,7 +51,7 @@ NoisePlane::NoisePlane()
     bool live;
     bool reseed;
 
-    auto get = [&](const std::string id) -> RealVect {
+    auto get = [&](const std::string& id) -> RealVect {
       Vector<Real> v;
       pp.getarr(id.c_str(), v, 0, SpaceDim);
 

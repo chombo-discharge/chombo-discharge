@@ -91,15 +91,15 @@ public:
     @param[in] a_knownTerms Description
   */
   static VoFStencil
-  getGradSten(const VolIndex& a_vof,
-              CellLocation    a_gradLocation,
-              CellLocation    a_cellLocation,
-              const EBISBox&  a_ebisbox,
-              Real            a_dx,
-              int             a_radius,
-              int             a_p,
-              int             a_order,
-              IntVectSet      a_knownTerms = IntVectSet());
+  getGradSten(const VolIndex&   a_vof,
+              CellLocation      a_gradLocation,
+              CellLocation      a_cellLocation,
+              const EBISBox&    a_ebisbox,
+              Real              a_dx,
+              int               a_radius,
+              int               a_p,
+              int               a_order,
+              const IntVectSet& a_knownTerms = IntVectSet());
 
   /**
     @brief Compute a least squares gradient stencil on a grid face. 
@@ -116,15 +116,15 @@ public:
     @param[in] a_knownTerms Description
   */
   static VoFStencil
-  getGradSten(const FaceIndex& a_face,
-              FaceLocation     a_gradLocation,
-              CellLocation     a_cellLocation,
-              const EBISBox&   a_ebisbox,
-              Real             a_dx,
-              int              a_radius,
-              int              a_p,
-              int              a_order,
-              IntVectSet       a_knownTerms = IntVectSet());
+  getGradSten(const FaceIndex&  a_face,
+              FaceLocation      a_gradLocation,
+              CellLocation      a_cellLocation,
+              const EBISBox&    a_ebisbox,
+              Real              a_dx,
+              int               a_radius,
+              int               a_p,
+              int               a_order,
+              const IntVectSet& a_knownTerms = IntVectSet());
 
   /**
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
@@ -298,7 +298,7 @@ public:
                   const Vector<RealVect>& a_displacements,
                   int                     a_p,
                   int                     a_order,
-                  IntVectSet              a_knownTerms);
+                  const IntVectSet&       a_knownTerms);
 
   /**
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
@@ -317,7 +317,7 @@ public:
                   const Vector<RealVect>& a_displacements,
                   const Vector<Real>&     a_weights,
                   int                     a_order,
-                  IntVectSet              a_knownTerms);
+                  const IntVectSet&       a_knownTerms);
 
   /**
     @brief Get the size of a Taylor expansion for a given order

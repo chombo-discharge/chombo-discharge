@@ -21,13 +21,13 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
-MushroomIF::MushroomIF(const RealVect a_center,
-                       const Real     a_R,
-                       const Real     a_r,
-                       const Real     a_L,
-                       const Real     a_d,
-                       const Real     a_curv,
-                       const bool     a_fluidInside)
+MushroomIF::MushroomIF(const RealVect& a_center,
+                       const Real      a_R,
+                       const Real      a_r,
+                       const Real      a_L,
+                       const Real      a_d,
+                       const Real      a_curv,
+                       const bool      a_fluidInside)
   : m_fluidInside(a_fluidInside)
 {
   const RealVect up = BASISREALV(SpaceDim - 1);

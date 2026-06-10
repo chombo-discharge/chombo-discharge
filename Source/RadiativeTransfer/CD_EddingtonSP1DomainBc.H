@@ -100,7 +100,7 @@ public:
     @note If the boundary condition had been set previously, this code will overwrite the previous setting.
   */
   void
-  setBc(const DomainSide a_domainSide, const Bc a_bc);
+  setBc(const DomainSide a_domainSide, const Bc& a_bc);
 
   /**
     @brief Returns the boundary condition for a side and direction

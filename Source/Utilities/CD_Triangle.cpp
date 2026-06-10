@@ -71,7 +71,7 @@ Triangle::isInside(const Vec3& a_point) const noexcept
 }
 
 Real
-Triangle::computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3) noexcept
+Triangle::computeTriangleArea(const Vec3& a_x1, const Vec3& a_x2, const Vec3& a_x3) noexcept
 {
   const Vec3 a = a_x2 - a_x1;
   const Vec3 b = a_x3 - a_x1;

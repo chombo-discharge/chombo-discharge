@@ -14,10 +14,10 @@
 #include <CD_TorusSdf.H>
 #include <CD_NamespaceHeader.H>
 
-TorusSdf::TorusSdf(const RealVect a_center,
-                   const Real     a_majorRadius,
-                   const Real     a_minorRadius,
-                   const bool     a_fluidInside)
+TorusSdf::TorusSdf(const RealVect& a_center,
+                   const Real      a_majorRadius,
+                   const Real      a_minorRadius,
+                   const bool      a_fluidInside)
   : m_center(a_center), m_fluidInside(a_fluidInside), m_majorRadius(a_majorRadius), m_minorRadius(a_minorRadius)
 {}
 

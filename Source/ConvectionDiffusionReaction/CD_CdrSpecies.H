@@ -42,7 +42,7 @@ public:
     @param[in] a_isDiffusive  Diffusive or not
     @param[in] a_isMobile Is mobile
   */
-  CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive);
+  CdrSpecies(const std::string& a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive);
 
   /**
     @brief Destructor (does nothing)

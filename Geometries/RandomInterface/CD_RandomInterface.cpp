@@ -23,15 +23,15 @@
 #include <CD_BoundedNoisePlane.H>
 #include <CD_NamespaceHeader.H>
 
-RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3 a_point,
-                                                      const Vec3 a_normal,
-                                                      const Vec3 a_clampLo,
-                                                      const Vec3 a_clampHi,
-                                                      const Vec3 a_clampDx,
-                                                      const Vec3 a_noiseFrequency,
-                                                      const Real a_noiseAmplitude,
-                                                      const Real a_noisePersistence,
-                                                      const int  a_noiseOctaves) noexcept
+RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3& a_point,
+                                                      const Vec3& a_normal,
+                                                      const Vec3& a_clampLo,
+                                                      const Vec3& a_clampHi,
+                                                      const Vec3& a_clampDx,
+                                                      const Vec3& a_noiseFrequency,
+                                                      const Real  a_noiseAmplitude,
+                                                      const Real  a_noisePersistence,
+                                                      const int   a_noiseOctaves) noexcept
   : m_point(a_point), m_clampDx(a_clampDx), m_normal(a_normal)
 {
 
@@ -57,9 +57,9 @@ RandomInterface::ClampedNoisePlane::shuffle(URNG& a_rng) noexcept
 Real
 RandomInterface::ClampedNoisePlane::signedDistance(const Vec3& a_point) const noexcept
 {
-  const Vec3 x0 = m_point;
-  const Vec3 x1 = a_point;
-  const Vec3 xp = x1 - dot((x1 - x0), m_normal) * m_normal;
+  const Vec3  x0 = m_point;
+  const Vec3& x1 = a_point;
+  const Vec3  xp = x1 - dot((x1 - x0), m_normal) * m_normal;
 
   // Clamping function.
   Real clamp = 1.0;
@@ -79,7 +79,7 @@ RandomInterface::RandomInterface() noexcept
 {
   ParmParse pp("RandomInterface");
 
-  auto getVec = [&](const std::string id) -> Vec3 {
+  auto getVec = [&](const std::string& id) -> Vec3 {
     Vector<Real> v;
     pp.getarr(id.c_str(), v, 0, SpaceDim);
 #if CH_SPACEDIM == 2

@@ -37,14 +37,14 @@ public:
     @param[in] a_reseed      If true, reseed the RNG. Otherwise, the the original Perlin hash table. 
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
-  PerlinPlaneSdf(const RealVect a_normal,
-                 const RealVect a_point,
-                 const bool     a_inside,
-                 const Real     a_noiseAmp,
-                 const RealVect a_noiseFreq,
-                 const Real     a_persistence,
-                 const int      a_octaves,
-                 const bool     a_reseed = false);
+  PerlinPlaneSdf(const RealVect& a_normal,
+                 const RealVect& a_point,
+                 const bool      a_inside,
+                 const Real      a_noiseAmp,
+                 const RealVect& a_noiseFreq,
+                 const Real      a_persistence,
+                 const int       a_octaves,
+                 const bool      a_reseed = false);
   /**
     @brief Copy constructor
     @param[in] a_inputIF Other plane

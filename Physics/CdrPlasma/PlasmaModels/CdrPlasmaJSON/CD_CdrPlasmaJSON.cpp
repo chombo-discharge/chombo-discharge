@@ -118,7 +118,8 @@ CdrPlasmaJSON::parseIntegrator()
   pp.get("chemistry_dt", m_chemistryDt);
 
   if (m_chemistryDt <= 0.0) {
-    this->throwParserError("CdrPlasmaJSON::parseIntegrator -- substeps must be >= 1");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      "CdrPlasmaJSON::parseIntegrator -- substeps must be >= 1");
   }
 
   if (str == "none") {
@@ -137,7 +138,8 @@ CdrPlasmaJSON::parseIntegrator()
     m_reactionIntegrator = ReactionIntegrator::ExplicitRK4;
   }
   else {
-    this->throwParserError("CdrPlasmaJSON::parseIntegrator -- I do not know the integrator '" + str + "'");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+      "CdrPlasmaJSON::parseIntegrator -- I do not know the integrator '" + str + "'");
   }
 }
 
@@ -149,8 +151,9 @@ CdrPlasmaJSON::parseJSON()
     pout() << "CdrPlasmaJSON::parseJSON()" << endl;
   }
 
-  if (!(this->doesFileExist(m_jsonFile))) {
-    this->throwParserError("CdrPlasmaJSON::parseJSON -- file '" + m_jsonFile + "' does not exist");
+  if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(m_jsonFile))) {
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError("CdrPlasmaJSON::parseJSON -- file '" +
+                                                                         m_jsonFile + "' does not exist");
   }
 
   // Parse the JSON file
@@ -159,7 +162,7 @@ CdrPlasmaJSON::parseJSON()
 }
 
 void
-CdrPlasmaJSON::throwParserError(const std::string a_error)
+CdrPlasmaJSON::throwParserError(const std::string& a_error)
 {
   pout() << a_error << endl;
 
@@ -167,7 +170,7 @@ CdrPlasmaJSON::throwParserError(const std::string a_error)
 }
 
 void
-CdrPlasmaJSON::throwParserWarning(const std::string a_warning)
+CdrPlasmaJSON::throwParserWarning(const std::string& a_warning)
 {
   pout() << a_warning << endl;
 
@@ -175,13 +178,13 @@ CdrPlasmaJSON::throwParserWarning(const std::string a_warning)
 }
 
 bool
-CdrPlasmaJSON::containsWildcard(const std::string a_str)
+CdrPlasmaJSON::containsWildcard(const std::string& a_str)
 {
   return (a_str.find('@') != std::string::npos);
 }
 
 bool
-CdrPlasmaJSON::containsBracket(const std::string a_str)
+CdrPlasmaJSON::containsBracket(const std::string& a_str)
 {
   const std::list<char> bracketList{'(', ')', '[', ']', '{', '}'};
 
@@ -199,7 +202,7 @@ CdrPlasmaJSON::containsBracket(const std::string a_str)
 }
 
 bool
-CdrPlasmaJSON::isBracketed(const std::string a_str)
+CdrPlasmaJSON::isBracketed(const std::string& a_str)
 {
   return (a_str.front() == '(' && a_str.back() == ')');
 }
@@ -233,8 +236,9 @@ CdrPlasmaJSON::sanityCheckSpecies() const
   std::sort(allSpecies.begin(), allSpecies.end());
   for (int i = 0; i < allSpecies.size() - 1; i++) {
     if (allSpecies[i] == allSpecies[i + 1]) {
-      this->throwParserError(baseError + " -- species '" + allSpecies[i] +
-                             "' was defined more than once. Double-check your neutral, plasma, and photon species");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " -- species '" + allSpecies[i] +
+        "' was defined more than once. Double-check your neutral, plasma, and photon species");
     }
   }
 }
@@ -242,14 +246,14 @@ CdrPlasmaJSON::sanityCheckSpecies() const
 std::string
 CdrPlasmaJSON::trim(const std::string& a_string)
 {
-  auto ltrim = [](const std::string a_s) -> std::string {
+  auto ltrim = [](const std::string& a_s) -> std::string {
     std::string s = a_s;
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
   };
 
   auto rtrim = [](std::string a_s) -> std::string {
-    std::string s = a_s;
+    std::string s = std::move(a_s);
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
   };
@@ -287,7 +291,8 @@ CdrPlasmaJSON::parseReactionString(std::vector<std::string>& a_reactants,
 
   // Make sure that -> is in the reaction string.
   if (it == segments.end()) {
-    this->throwParserError(baseError + " -- Reaction '" + a_reaction + "' does not contain '->");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- Reaction '" + a_reaction +
+                                                                         "' does not contain '->");
   }
 
   // Left of "->" are reactants and right of "->" are products
@@ -338,7 +343,7 @@ CdrPlasmaJSON::getReactionSpecies(std::list<int>&                 a_plasmaReacta
       a_photonReactants.emplace_back(m_rteSpeciesMap.at(r));
     }
     else {
-      this->throwParserError(baseError + "-- logic bust 1");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "-- logic bust 1");
     }
   }
 
@@ -360,7 +365,7 @@ CdrPlasmaJSON::getReactionSpecies(std::list<int>&                 a_plasmaReacta
       a_photonProducts.emplace_back(m_rteSpeciesMap.at(p));
     }
     else {
-      this->throwParserError(baseError + "-- logic bust 2");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "-- logic bust 2");
     }
   }
 }
@@ -377,10 +382,11 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
   // These fields are ALWAYS required
   if (!(m_json["gas"].contains("law"))) {
-    this->throwParserError(baseError + " but field 'law' is missing");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " but field 'law' is missing");
   }
   if (!(m_json["gas"].contains("neutral species"))) {
-    this->throwParserError(baseError + " but field 'neutral species' is missing");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
+                                                                         " but field 'neutral species' is missing");
   }
 
   // JSON entry
@@ -397,10 +403,12 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // These fields are required
     if (!(gasJSON.contains("temperature"))) {
-      this->throwParserError(baseError + " and got ideal gas law but field 'temperature' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got ideal gas law but field 'temperature' is missing");
     }
     if (!(gasJSON.contains("pressure"))) {
-      this->throwParserError(baseError + " and got ideal gas law but field 'pressure' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got ideal gas law but field 'pressure' is missing");
     }
 
     // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either.
@@ -409,13 +417,13 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real P    = P0 * Units::atm2pascal;
     const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
 
-    m_gasTemperature = [T0](const RealVect /*a_position*/) -> Real {
+    m_gasTemperature = [T0](const RealVect& /*a_position*/) -> Real {
       return T0;
     };
-    m_gasPressure = [P](const RealVect /*a_position*/) -> Real {
+    m_gasPressure = [P](const RealVect& /*a_position*/) -> Real {
       return P;
     };
-    m_gasDensity = [Rho0](const RealVect /*a_position*/) -> Real {
+    m_gasDensity = [Rho0](const RealVect& /*a_position*/) -> Real {
       return Rho0;
     };
   }
@@ -423,19 +431,24 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // These fields are required.
     if (!(gasJSON.contains("temperature"))) {
-      this->throwParserError(baseError + " and got troposphere gas law but field 'temperature' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got troposphere gas law but field 'temperature' is missing");
     }
     if (!(gasJSON.contains("pressure"))) {
-      this->throwParserError(baseError + " and got troposphere gas law but field 'pressure' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got troposphere gas law but field 'pressure' is missing");
     }
     if (!(gasJSON.contains("molar mass"))) {
-      this->throwParserError(baseError + " and got troposphere gas law but field 'molar mass' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got troposphere gas law but field 'molar mass' is missing");
     }
     if (!(gasJSON.contains("gravity"))) {
-      this->throwParserError(baseError + " and got troposphere gas law but field 'gravity' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got troposphere gas law but field 'gravity' is missing");
     }
     if (!(gasJSON.contains("lapse rate"))) {
-      this->throwParserError(baseError + " and got troposphere gas law but field 'lapse rate' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got troposphere gas law but field 'lapse rate' is missing");
     }
 
     const Real T0   = gasJSON["temperature"].get<Real>();
@@ -447,17 +460,17 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real P    = P0 * Units::atm2pascal;
 
     // Temperature is T = T0 - L*(z-h0)
-    m_gasTemperature = [T0, L](const RealVect a_position) -> Real {
+    m_gasTemperature = [T0, L](const RealVect& a_position) -> Real {
       return T0 - L * a_position[SpaceDim - 1];
     };
 
     // Pressure is p = p0 * (1 - L*h/T0)^(g*M/(R*L)
-    m_gasPressure = [T0, P, L, gMRL](const RealVect a_position) -> Real {
+    m_gasPressure = [T0, P, L, gMRL](const RealVect& a_position) -> Real {
       return P * std::pow((1 - L * a_position[SpaceDim - 1] / T0), gMRL);
     };
 
     // Density is rho = P*Na/(T*R)
-    m_gasDensity = [&p = this->m_gasPressure, &T = this->m_gasTemperature](const RealVect a_position) -> Real {
+    m_gasDensity = [&p = this->m_gasPressure, &T = this->m_gasTemperature](const RealVect& a_position) -> Real {
       return (p(a_position) * Units::atm2pascal * Units::Na) / (T(a_position) * Units::R);
     };
   }
@@ -465,31 +478,40 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     // These fields are required
 
     if (!gasJSON.contains("file")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'file' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'file' is not specified");
     }
     if (!gasJSON.contains("height")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'height' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'height' is not specified");
     }
     if (!gasJSON.contains("temperature")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'temperature' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'temperature' is not specified");
     }
     if (!gasJSON.contains("pressure")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'pressure' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'pressure' is not specified");
     }
     if (!gasJSON.contains("density")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'density' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'density' is not specified");
     }
     if (!gasJSON.contains("molar mass")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'molar mass' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'molar mass' is not specified");
     }
     if (!gasJSON.contains("min height")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'min height' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'min height' is not specified");
     }
     if (!gasJSON.contains("max height")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'max height' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'max height' is not specified");
     }
     if (!gasJSON.contains("res height")) {
-      this->throwParserError(baseError + " and got 'table' gas law but field 'res height' is not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got 'table' gas law but field 'res height' is not specified");
     }
 
     // Get the file name
@@ -511,12 +533,14 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // It's an error if max height < min height
     if (maxHeight < minHeight) {
-      this->throwParserError(baseError + " and got tabulated gas law but can't have 'max height' < 'min height'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got tabulated gas law but can't have 'max height' < 'min height'");
     }
 
     // Throw an error if the file does not exist.
-    if (!(this->doesFileExist(filename))) {
-      this->throwParserError(baseError + " and got tabulated gas law but file = '" + filename + "' was not found");
+    if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " and got tabulated gas law but file = '" + filename + "' was not found");
     }
 
     // Let the data parser read the input.
@@ -540,20 +564,20 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     densityTable.prepareTable(0, numPoints, LookupTable::Spacing::Uniform);
 
     // Now create the temperature, pressure, and density functions.
-    m_gasTemperature = [table = temperatureTable](const RealVect a_position) -> Real {
+    m_gasTemperature = [table = temperatureTable](const RealVect& a_position) -> Real {
       return table.interpolate<1>(a_position[SpaceDim - 1]);
     };
 
-    m_gasPressure = [table = pressureTable](const RealVect a_position) -> Real {
+    m_gasPressure = [table = pressureTable](const RealVect& a_position) -> Real {
       return table.interpolate<1>(a_position[SpaceDim - 1]);
     };
 
-    m_gasDensity = [table = densityTable](const RealVect a_position) -> Real {
+    m_gasDensity = [table = densityTable](const RealVect& a_position) -> Real {
       return table.interpolate<1>(a_position[SpaceDim - 1]);
     };
   }
   else {
-    this->throwParserError(baseError + " -- logic bust");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
   }
 
   // Instantiate the species densities. Note that we need to go through this twice because we need to normalize the molar fractions in case users
@@ -561,10 +585,12 @@ CdrPlasmaJSON::initializeNeutralSpecies()
   Real molarSum = 0.0;
   for (const auto& species : gasJSON["neutral species"]) {
     if (!(species.contains("name"))) {
-      this->throwParserError(baseError + " in the array 'neutral species' the field 'name' is also required");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " in the array 'neutral species' the field 'name' is also required");
     }
     if (!(species.contains("molar fraction"))) {
-      this->throwParserError(baseError + " in the array 'neutral species' the field 'molar fraction' is also required");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " in the array 'neutral species' the field 'molar fraction' is also required");
     }
 
     molarSum += species["molar fraction"].get<Real>();
@@ -577,22 +603,25 @@ CdrPlasmaJSON::initializeNeutralSpecies()
 
     // Names can not contain the at letter.
     if (this->containsWildcard(speciesName)) {
-      this->throwParserError(baseError + " -- species name must not contain '@' letter");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " -- species name must not contain '@' letter");
     }
 
     // Names can not contain parenthesis either
     if (this->containsBracket(speciesName)) {
-      this->throwParserError(baseError + "but species '" + speciesName + "' can not contain brackets");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName +
+                                                                           "' can not contain brackets");
     }
 
     // It's an error if a species was defined twice.
     if (isNeutralSpecies(speciesName)) {
-      this->throwParserError(baseError + " -- Neutral species '" + speciesName + "' was defined more than once");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + " -- Neutral species '" + speciesName + "' was defined more than once");
     }
 
     // Set the species density function.
     const std::function<Real(const RealVect)> speciesDensity = [f  = speciesFraction,
-                                                                &N = this->m_gasDensity](const RealVect a_position) {
+                                                                &N = this->m_gasDensity](const RealVect& a_position) {
       return f * N(a_position);
     };
 
@@ -626,22 +655,27 @@ CdrPlasmaJSON::initializePlasmaSpecies()
   const std::string baseError = "CdrPlasmaJSON::initializePlasmaSpecies ";
 
   if (!(m_json.contains("plasma species"))) {
-    this->throwParserWarning(baseError + " -- did not find any plasma species");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserWarning(baseError +
+                                                                           " -- did not find any plasma species");
   }
 
   // Iterate through all species defined in the JSON file.
   for (const auto& species : m_json["plasma species"]) {
     if (!(species.contains("name"))) {
-      this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'name'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "-- all entries in the  'plasma species' array must have field 'name'");
     }
     if (!(species.contains("Z"))) {
-      this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'Z'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "-- all entries in the  'plasma species' array must have field 'Z'");
     }
     if (!(species.contains("mobile"))) {
-      this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'mobile'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "-- all entries in the  'plasma species' array must have field 'mobile'");
     }
     if (!(species.contains("diffusive"))) {
-      this->throwParserError(baseError + "-- all entries in the  'plasma species' array must have field 'diffusive'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+        baseError + "-- all entries in the  'plasma species' array must have field 'diffusive'");
     }
 
     const auto name      = trim(species["name"].get<std::string>());
@@ -651,13 +685,16 @@ CdrPlasmaJSON::initializePlasmaSpecies()
 
     // Names do not get to contain wildcards, brackets, or replicate former species names.
     if (this->containsWildcard(name)) {
-      this->throwParserError(baseError + "but species '" + name + "' can not contain the '@' letter");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + name +
+                                                                           "' can not contain the '@' letter");
     }
     if (this->containsBracket(name)) {
-      this->throwParserError(baseError + "but species '" + name + "' can not contain brackets");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + name +
+                                                                           "' can not contain brackets");
     }
     if (this->isPlasmaSpecies(name)) {
-      this->throwParserError(baseError + "but plasma species '" + name + "' was defined more than once");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but plasma species '" + name +
+                                                                           "' was defined more than once");
     }
 
     // Get the initial data.
@@ -682,14 +719,14 @@ CdrPlasmaJSON::initializePlasmaSpecies()
       const json& m = species["mass"];
 
       if (m.type() == json::value_t::string) {
-        const std::string str = this->trim(m.get<std::string>());
+        const std::string str = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(m.get<std::string>());
 
         if (str == "electron") {
           m_cdrMasses.emplace(transportIdx, Units::me);
         }
         else {
-          this->throwParserError(baseError + "and got field 'mass' but species mass '" + str +
-                                 "' is not implemented (yet)");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got field 'mass' but species mass '" + str + "' is not implemented (yet)");
         }
       }
       else {
@@ -707,13 +744,16 @@ CdrPlasmaJSON::initializePlasmaSpecies()
 
       if (energyTransport) {
         if (!(species.contains("initial energy"))) {
-          this->throwParserError(baseError + "and got energy transport but 'initial energy' is not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got energy transport but 'initial energy' is not specified");
         }
         if (!(species.contains("mass"))) {
-          this->throwParserError(baseError + "and got energy transport but 'mass' is not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got energy transport but 'mass' is not specified");
         }
         if (!(species.contains("energy params"))) {
-          this->throwParserError(baseError + "and got energy transport but 'energy params' is not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got energy transport but 'energy params' is not specified");
         }
 
         // Set the initial energy function. I could easily think of more complex ways of doing this, but for now we just
@@ -723,20 +763,23 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         const json& energyParams = species["energy params"];
 
         if (!(energyParams.contains("min"))) {
-          this->throwParserError(baseError + "and got 'energy params' but 'min' is not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got 'energy params' but 'min' is not specified");
         }
         if (!(energyParams.contains("max"))) {
-          this->throwParserError(baseError + "and got 'energy params' but 'max' is not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got 'energy params' but 'max' is not specified");
         }
         if (!(energyParams.contains("safety"))) {
-          this->throwParserError(baseError + "and got 'energy params' but 'safety' is not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and got 'energy params' but 'safety' is not specified");
         }
 
         const Real minEnergy = energyParams["min"].get<Real>();
         const Real maxEnergy = energyParams["max"].get<Real>();
         const Real safety    = energyParams["safety"].get<Real>();
 
-        auto initEnergy = [E = initialEnergy, f = initFunc](const RealVect a_point, const Real a_time) -> Real {
+        auto initEnergy = [E = initialEnergy, f = initFunc](const RealVect& a_point, const Real a_time) -> Real {
           return E * f(a_point, a_time);
         };
 
@@ -789,7 +832,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
   const std::string baseError = "CdrPlasmaJSON::parsePlasmaSpeciesInitialData for species '" + species + "' ";
 
   // This is the returned data function.
-  InitialDataFunction initFunc = [](const RealVect /*a_position*/, const Real /*a_time*/) {
+  InitialDataFunction initFunc = [](const RealVect& /*a_position*/, const Real /*a_time*/) {
     return 0.0;
   };
 
@@ -821,15 +864,16 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
         // These fields are required
         if (!(gauss2.contains("radius"))) {
-          this->throwParserError(baseError + "and found 'gauss2' array in initial data but 'radius' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and found 'gauss2' array in initial data but 'radius' was not specified");
         }
         if (!(gauss2.contains("amplitude"))) {
-          this->throwParserError(baseError +
-                                 "and found 'gauss2' array in initial data but 'amplitude' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and found 'gauss2' array in initial data but 'amplitude' was not specified");
         }
         if (!(gauss2.contains("position"))) {
-          this->throwParserError(baseError +
-                                 "and found 'gauss2' array in initial data but 'position' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and found 'gauss2' array in initial data but 'position' was not specified");
         }
 
         // Get the parameters
@@ -842,7 +886,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
         // Add a Gaussian seed function
         const Real radius2 = 2 * radius * radius;
 
-        auto gaussianFunction = [radius2, amplitude, center](const RealVect a_position) -> Real {
+        auto gaussianFunction = [radius2, amplitude, center](const RealVect& a_position) -> Real {
           const RealVect delta = center - a_position;
 
           return amplitude * exp(-delta.dotProduct(delta) / radius2);
@@ -860,15 +904,16 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
         // These fields are required
         if (!(gauss4.contains("radius"))) {
-          this->throwParserError(baseError + "and found 'gauss4' array in initial data but 'radius' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and found 'gauss4' array in initial data but 'radius' was not specified");
         }
         if (!(gauss4.contains("amplitude"))) {
-          this->throwParserError(baseError +
-                                 "and found 'gauss4' array in initial data but 'amplitude' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and found 'gauss4' array in initial data but 'amplitude' was not specified");
         }
         if (!(gauss4.contains("position"))) {
-          this->throwParserError(baseError +
-                                 "and found 'gauss4' array in initial data but 'position' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+            baseError + "and found 'gauss4' array in initial data but 'position' was not specified");
         }
 
         // Get the parameters
@@ -881,7 +926,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
         // Add a Gaussian seed function
         const Real radius4 = 2 * std::pow(radius, 4);
 
-        auto gaussianFunction = [radius4, amplitude, center](const RealVect a_position) -> Real {
+        auto gaussianFunction = [radius4, amplitude, center](const RealVect& a_position) -> Real {
           const RealVect delta  = center - a_position;
           const Real     delta2 = delta.dotProduct(delta);
 
@@ -897,26 +942,28 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
       // These fields are required
       if (!(heightProfileJSON.contains("file"))) {
-        this->throwParserError(baseError + "and found 'height profile' in initial data but 'file' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "and found 'height profile' in initial data but 'file' was not specified");
       }
       if (!(heightProfileJSON.contains("height"))) {
-        this->throwParserError(baseError + "and found 'height profile' in initial data but 'height' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "and found 'height profile' in initial data but 'height' was not specified");
       }
       if (!(heightProfileJSON.contains("density"))) {
-        this->throwParserError(baseError +
-                               "and found 'height profile' in initial data but 'density' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "and found 'height profile' in initial data but 'density' was not specified");
       }
       if (!(heightProfileJSON.contains("min height"))) {
-        this->throwParserError(baseError +
-                               "and found 'height profile' in initial data but 'min height' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "and found 'height profile' in initial data but 'min height' was not specified");
       }
       if (!(heightProfileJSON.contains("max height"))) {
-        this->throwParserError(baseError +
-                               "and found 'height profile' in initial data but 'max height' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "and found 'height profile' in initial data but 'max height' was not specified");
       }
       if (!(heightProfileJSON.contains("res height"))) {
-        this->throwParserError(baseError +
-                               "and found 'height profile' in initial data but 'res height' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + "and found 'height profile' in initial data but 'res height' was not specified");
       }
 
       // Get the file name
@@ -942,14 +989,14 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
       // Can't have max height < min height.
       if (maxHeight < minHeight) {
-        this->throwParserError(
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
           baseError + " and found 'height profile' in initial data but can't have 'max height' < 'min height'");
       }
 
       // Throw a warning if the input file does not exist.
-      if (!(this->doesFileExist(filename))) {
-        this->throwParserError(baseError + " and found 'height profile' in initial data but file = '" + filename +
-                               "' was not found");
+      if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
+          baseError + " and found 'height profile' in initial data but file = '" + filename + "' was not found");
       }
 
       // Compute the number of points for the table
@@ -970,7 +1017,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
     }
 
     // Set the friggin function.
-    initFunc = [uniformDensity, gauss2Functions, gauss4Functions, heightProfile](const RealVect a_position,
+    initFunc = [uniformDensity, gauss2Functions, gauss4Functions, heightProfile](const RealVect& a_position,
                                                                                  const Real /*a_time*/) {
       Real retVal = uniformDensity;
 
@@ -1024,7 +1071,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
 	const std::string err = ":Found 'copy' but species '" + copySpecies + "' not defined in JSON file (or defined below)";
 	// clang-format on	
 	
-	this->throwParserError(baseError + err);
+	ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + err);
       }
 
       initParticles.join(m_cdrSpecies[m_cdrSpeciesMap.at(copySpecies)]->getInitialParticles());
@@ -1035,16 +1082,16 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
       const json& uniformArray = initData["uniform"];
 
       if (!(uniformArray.contains("lo corner"))) {
-        this->throwParserError(baseError + ": Found 'uniform' in initial particles but 'lo corner' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'uniform' in initial particles but 'lo corner' was not specified");
       }
       if (!(uniformArray.contains("hi corner"))) {
-        this->throwParserError(baseError + ": Found 'uniform' in initial particles but 'hi corner' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'uniform' in initial particles but 'hi corner' was not specified");
       }
       if (!(uniformArray.contains("number"))) {
-        this->throwParserError(baseError + ": Found 'uniform' in initial particles but 'number' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'uniform' in initial particles but 'number' was not specified");
       }
       if (!(uniformArray.contains("weight"))) {
-        this->throwParserError(baseError + ": Found 'uniform' in initial particles but 'weight' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'uniform' in initial particles but 'weight' was not specified");
       }
 
       const RealVect loCorner = RealVect(D_DECL(uniformArray["lo corner"][0].get<Real>(),
@@ -1074,16 +1121,16 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialParticles(const json& a_json) const
       const json& uniformArray = initData["sphere"];
 
       if (!(uniformArray.contains("center"))) {
-        this->throwParserError(baseError + ": Found 'sphere' in initial particles but 'center' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'sphere' in initial particles but 'center' was not specified");
       }
       if (!(uniformArray.contains("radius"))) {
-        this->throwParserError(baseError + ": Found 'sphere' in initial particles but 'radius' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'sphere' in initial particles but 'radius' was not specified");
       }
       if (!(uniformArray.contains("number"))) {
-        this->throwParserError(baseError + ": Found 'sphere' in initial particles but 'number' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'sphere' in initial particles but 'number' was not specified");
       }
       if (!(uniformArray.contains("weight"))) {
-        this->throwParserError(baseError + ": Found 'sphere' in initial particles but 'weight' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + ": Found 'sphere' in initial particles but 'weight' was not specified");
       }
 
       const RealVect center = RealVect(D_DECL(uniformArray["center"][0].get<Real>(),
@@ -1121,15 +1168,15 @@ CdrPlasmaJSON::initializePhotonSpecies()
   const std::string baseError = "CdrPlasmaJSON::initializePhotonSpecies ";
 
   if (!(m_json.contains("photon species"))) {
-    this->throwParserWarning(baseError + " -- did not find any photon species");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserWarning(baseError + " -- did not find any photon species");
 }
 
   for (const auto& species : m_json["photon species"]) {
     if (!(species.contains("name"))) {
-      this->throwParserError(baseError + "-- every entry in 'photon species' must have field 'name'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "-- every entry in 'photon species' must have field 'name'");
 }
     if (!(species.contains("kappa"))) {
-      this->throwParserError(baseError + "-- every entry in 'photon species' must have field 'kappa'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "-- every entry in 'photon species' must have field 'kappa'");
 }
 
     const auto name  = trim(species["name"].get<std::string>());
@@ -1137,32 +1184,32 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
     // Does not get to contain at letter.
     if (this->containsWildcard(name)) {
-      this->throwParserError(baseError + "but photon species '" + name + "' cannot contain '@'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but photon species '" + name + "' cannot contain '@'");
 }
 
     // Names can not contain parenthesis either
     if (this->containsBracket(name)) {
-      this->throwParserError(baseError + "but photon species '" + name + "' can not contain brackets");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but photon species '" + name + "' can not contain brackets");
 }
 
     // It's an error if the species is already defined.
     if (this->isPhotonSpecies(name)) {
-      this->throwParserError(baseError + "photon species '" + name + "' was defined more than once");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "photon species '" + name + "' was defined more than once");
 }
 
     // Set the kappa-function needed by RteSpeciesJSON.
-    std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect  /*a_position*/) -> Real {
+    std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect&  /*a_position*/) -> Real {
       return 1.0;
     };
 
     if (kappa == "constant") {
       if (!(species.contains("value"))) {
-        this->throwParserError(baseError + " -- got 'constant' kappa but field 'value' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'constant' kappa but field 'value' is missing");
 }
 
       const Real value = species["value"].get<Real>();
 
-      kappaFunction = [value](const RealVect  /*a_position*/) {
+      kappaFunction = [value](const RealVect&  /*a_position*/) {
         return value;
       };
     }
@@ -1176,10 +1223,10 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       // Make sure that 'lambda' is found in the photon species and that O2 is found in the neutral species.
       if (!(species.contains("lambda"))) {
-        this->throwParserError(baseError + " -- got 'helmholtz' kappa but field 'lambda' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'helmholtz' kappa but field 'lambda' is missing");
 }
       if (!(species.contains("neutral"))) {
-        this->throwParserError(baseError + " -- got 'helmholtz' kappa but field 'neutral' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'helmholtz' kappa but field 'neutral' is missing");
 }
 
       // Get lambda and the neutral species that we base the partial pressure upon.
@@ -1188,14 +1235,14 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       // Make sure that the neutral is in the list of species.
       if (m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
-        this->throwParserError(baseError + " -- got 'helmholtz' kappa but '" + neutral +
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'helmholtz' kappa but '" + neutral +
                                "' is not in the list of neutral species");
       }
 
       // Get the molar fraction for this specific neutral
       const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
 
-      kappaFunction = [lambda, P = this->m_gasPressure, m = molarFraction](const RealVect a_position) -> Real {
+      kappaFunction = [lambda, P = this->m_gasPressure, m = molarFraction](const RealVect& a_position) -> Real {
         return m * P(a_position) * lambda / sqrt(3.0);
       };
     }
@@ -1213,19 +1260,19 @@ CdrPlasmaJSON::initializePhotonSpecies()
       // easy to reconstruct.
 
       if (!(species.contains("f1"))) {
-        this->throwParserError(baseError + " -- got 'stochastic A' but field 'f1' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'stochastic A' but field 'f1' is missing");
 }
       if (!(species.contains("f2"))) {
-        this->throwParserError(baseError + " -- got 'stochastic A' but field 'f2' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'stochastic A' but field 'f2' is missing");
 }
       if (!(species.contains("chi min"))) {
-        this->throwParserError(baseError + " -- got 'stochastic A' but field 'chi max' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'stochastic A' but field 'chi max' is missing");
 }
       if (!(species.contains("chi min"))) {
-        this->throwParserError(baseError + " -- got 'stochastic A' but field 'chi min' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'stochastic A' but field 'chi min' is missing");
 }
       if (!(species.contains("neutral"))) {
-        this->throwParserError(baseError + " -- got 'stochastic A' but field 'neutral' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'stochastic A' but field 'neutral' is missing");
 }
 
       const auto f1      = species["f1"].get<Real>();
@@ -1236,7 +1283,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       // Make sure that the neutral is in the list of species.
       if (m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
-        this->throwParserError(baseError + " -- got 'bourdon' but '" + neutral +
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- got 'bourdon' but '" + neutral +
                                "' is not in the list of neutral species");
       }
 
@@ -1247,7 +1294,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       // Create the absorption function.
       kappaFunction = [f1, f2, udist, x1 = chi_min, x2 = chi_max, m = molarFraction, &P = this->m_gasPressure](
-                                                                                                               const RealVect a_position) mutable -> Real {
+                                                                                                               const RealVect& a_position) mutable -> Real {
         // Create a uniform distribution on the range [f1,f2]
         const Real f = Random::get(udist);
         const Real a = (f - f1) / (f2 - f1);
@@ -1260,7 +1307,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
       };
     }
     else {
-      this->throwParserError(baseError + " -- logic bust");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
     }
 
     // Initialize the species.
@@ -1284,7 +1331,7 @@ CdrPlasmaJSON::initializeSigma()
     pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
   }
 
-  m_initialSigma = [](const RealVect  /*a_pos*/, const Real  /*a_time*/) -> Real {
+  m_initialSigma = [](const RealVect&  /*a_pos*/, const Real  /*a_time*/) -> Real {
     return 0.0;
   };
 
@@ -1292,7 +1339,7 @@ CdrPlasmaJSON::initializeSigma()
     if (m_json["sigma"].contains("initial density")) {
       const Real sigma = m_json["sigma"]["initial density"].get<Real>();
 
-      m_initialSigma = [sigma](const RealVect  /*a_position*/, const Real  /*a_time*/) -> Real {
+      m_initialSigma = [sigma](const RealVect&  /*a_position*/, const Real  /*a_time*/) -> Real {
         return sigma;
       };
     }
@@ -1311,13 +1358,13 @@ CdrPlasmaJSON::parseAlpha()
 
   // We must have a field 'alpha'
   if (!(m_json.contains("alpha"))) {
-    this->throwParserError(baseError + " - input file does not contain field 'alpha'");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - input file does not contain field 'alpha'");
   }
 
   const json& alpha = m_json["alpha"];
 
   if (!alpha.contains("lookup")) {
-    this->throwParserError(baseError + " field 'lookup' not specified");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " field 'lookup' not specified");
   }
 
   const std::string lookup = alpha["lookup"].get<std::string>();
@@ -1325,33 +1372,33 @@ CdrPlasmaJSON::parseAlpha()
   // If we made it here we're good.
   if (lookup == "table E/N") {
     if (!(alpha.contains("file"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'file' is missing");
 }
     if (!(alpha.contains("header"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'header' is missing");
 }
     if (!(alpha.contains("E/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing");
 }
     if (!(alpha.contains("alpha/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing");
 }
     if (!(alpha.contains("min E/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
 }
     if (!(alpha.contains("max E/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
 }
     if (!(alpha.contains("points"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'points' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'points' is missing");
 }
     if (!(alpha.contains("spacing"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");
 }
 
-    const std::string filename  = this->trim(alpha["file"].get<std::string>());
-    const std::string spacing   = this->trim(alpha["spacing"].get<std::string>());
-    const std::string startRead = this->trim(alpha["header"].get<std::string>());
+    const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(alpha["file"].get<std::string>());
+    const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(alpha["spacing"].get<std::string>());
+    const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(alpha["header"].get<std::string>());
     const std::string stopRead;
 
     const int  xColumn   = alpha["E/N"].get<int>();
@@ -1362,12 +1409,12 @@ CdrPlasmaJSON::parseAlpha()
 
     // I can't have maxEN < minEN. Throw an error.
     if (maxEN < minEN) {
-      this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 }
 
     // Throw an error if the file does not exist.
-    if (!(this->doesFileExist(filename))) {
-      this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
+    if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
 }
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
@@ -1377,7 +1424,7 @@ CdrPlasmaJSON::parseAlpha()
 
     // If the table is empty then it's an error.
     if (m_alphaTableEN.getRawData().size() <= 1) {
-      this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
@@ -1389,7 +1436,7 @@ CdrPlasmaJSON::parseAlpha()
       tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
-      this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
                              "' which is not supported");
     }
 
@@ -1433,7 +1480,7 @@ CdrPlasmaJSON::parseAlpha()
     m_alphaLookup = LookupMethod::FunctionEN;
   }
   else {
-    this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
   }
 
   // Check if we should plot alpha.
@@ -1455,13 +1502,13 @@ CdrPlasmaJSON::parseEta()
 
   // We must have a field 'eta'
   if (!(m_json.contains("eta"))) {
-    this->throwParserError(baseError + " - input file does not contain field 'eta'");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - input file does not contain field 'eta'");
   }
 
   const json& eta = m_json["eta"];
 
   if (!eta.contains("lookup")) {
-    this->throwParserError(baseError + " field 'lookup' not specified");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " field 'lookup' not specified");
   }
 
   // Get the lookup method.
@@ -1470,7 +1517,7 @@ CdrPlasmaJSON::parseEta()
   // If we made it here we're good.
   if(lookup == "constant") {
     if(!(eta.contains("value"))) {
-      this->throwParserError(baseError + " and got 'constant' but field 'value' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' but field 'value' is missing");
     }
 
     m_etaConstant = eta["value"].get<Real>();
@@ -1479,33 +1526,33 @@ CdrPlasmaJSON::parseEta()
   }
   else if (lookup == "table E/N") {
     if (!(eta.contains("file"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'file' is missing");
     }
     if (!(eta.contains("header"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'header' is missing");
     }
     if (!(eta.contains("E/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing");
     }
     if (!(eta.contains("eta/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'eta/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'eta/N' is missing");
     }
     if (!(eta.contains("min E/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
     }
     if (!(eta.contains("max E/N"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
     }
     if (!(eta.contains("points"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'points' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'points' is missing");
     }
     if (!(eta.contains("spacing"))) {
-      this->throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");
     }
 
-    const std::string filename  = this->trim(eta["file"].get<std::string>());
-    const std::string spacing   = this->trim(eta["spacing"].get<std::string>());
-    const std::string startRead = this->trim(eta["header"].get<std::string>());
+    const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(eta["file"].get<std::string>());
+    const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(eta["spacing"].get<std::string>());
+    const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(eta["header"].get<std::string>());
     const std::string stopRead;
 
     const int  xColumn   = eta["E/N"].get<int>();
@@ -1516,12 +1563,12 @@ CdrPlasmaJSON::parseEta()
 
     // Can't have maxEN < min EN
     if (maxEN < minEN) {
-      this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 }
 
     // Throw an error if the file does not exist.
-    if (!(this->doesFileExist(filename))) {
-      this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
+    if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
 }
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
@@ -1531,7 +1578,7 @@ CdrPlasmaJSON::parseEta()
 
     // If the table is empty then it's an error.
     if (m_etaTableEN.getRawData().empty()) {
-      this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
@@ -1543,7 +1590,7 @@ CdrPlasmaJSON::parseEta()
       tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
-      this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
                              "' which is not supported");
     }
 
@@ -1596,7 +1643,7 @@ CdrPlasmaJSON::parseEta()
     m_etaLookup = LookupMethod::FunctionEN;
   }
   else {
-    this->throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " but lookup specification '" + lookup + "' is not supported.");
   }
 
   // Check if we should plot eta.
@@ -1625,7 +1672,7 @@ CdrPlasmaJSON::parseMobilities()
 
       // This is a required field. We use it for specifying the mobility.
       if (!(species.contains("mobility"))) {
-        this->throwParserError(baseError + " and species '" + name +
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and species '" + name +
                                "' is mobile but JSON file does not contain field 'mobility'");
 }
       const json& mobilityJSON = species["mobility"];
@@ -1637,7 +1684,7 @@ CdrPlasmaJSON::parseMobilities()
         // User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
         // field does not exist then it's an error.
         if (!(mobilityJSON.contains("value"))) {
-          this->throwParserError(baseError + "and got constant mobility but field 'value' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got constant mobility but field 'value' was not specified");
 }
 
         const Real value = mobilityJSON["value"].get<Real>();
@@ -1647,33 +1694,33 @@ CdrPlasmaJSON::parseMobilities()
       }
       else if (lookup == "table E/N") {
         if (!(mobilityJSON.contains("file"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'file' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'file' was not specified");
 }
         if (!(mobilityJSON.contains("header"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'header' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'header' was not specified");
 }
         if (!(mobilityJSON.contains("E/N"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'E/N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'E/N' was not specified");
 }
         if (!(mobilityJSON.contains("mu*N"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'mu*N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'mu*N' was not specified");
 }
         if (!(mobilityJSON.contains("min E/N"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'min E/N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'min E/N' was not specified");
 }
         if (!(mobilityJSON.contains("max E/N"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'max E/N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'max E/N' was not specified");
 }
         if (!(mobilityJSON.contains("points"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'points' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'points' was not specified");
 }
         if (!(mobilityJSON.contains("spacing"))) {
-          this->throwParserError(baseError + "and got tabulated mobility but field 'spacing' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but field 'spacing' was not specified");
 }
 
-        const std::string filename  = this->trim(mobilityJSON["file"].get<std::string>());
-        const std::string startRead = this->trim(mobilityJSON["header"].get<std::string>());
-        const std::string spacing   = this->trim(mobilityJSON["spacing"].get<std::string>());
+        const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(mobilityJSON["file"].get<std::string>());
+        const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(mobilityJSON["header"].get<std::string>());
+        const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(mobilityJSON["spacing"].get<std::string>());
         const std::string stopRead;
 
         const int  xColumn   = mobilityJSON["E/N"].get<int>();
@@ -1690,12 +1737,12 @@ CdrPlasmaJSON::parseMobilities()
 
         // Can't have maxEN < minEN
         if (maxEN < minEN) {
-          this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 }
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename))) {
-          this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
+        if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
                                  "' but file was not found");
 }
 
@@ -1707,7 +1754,7 @@ CdrPlasmaJSON::parseMobilities()
 
         // If the table is empty then it's an error.
         if (mobilityTable.getRawData().empty()) {
-          this->throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
 
@@ -1720,7 +1767,7 @@ CdrPlasmaJSON::parseMobilities()
           tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
-          this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
                                  "' which is not supported");
         }
 
@@ -1741,35 +1788,35 @@ CdrPlasmaJSON::parseMobilities()
       }
       else if (lookup == "table energy") {
         if (!(mobilityJSON.contains("file"))) {
-          this->throwParserError(baseError + "and got 'table energy' mobility but field 'file' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' mobility but field 'file' was not specified");
 }
         if (!(mobilityJSON.contains("header"))) {
-          this->throwParserError(baseError + "and got 'table energy' mobility but field 'header' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' mobility but field 'header' was not specified");
 }
         if (!(mobilityJSON.contains("eV"))) {
-          this->throwParserError(baseError + "and got 'table energy' mobility but field 'eV' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' mobility but field 'eV' was not specified");
 }
         if (!(mobilityJSON.contains("mu*N"))) {
-          this->throwParserError(baseError + "and got 'table energy' mobility but field 'mu*N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' mobility but field 'mu*N' was not specified");
 }
         if (!(mobilityJSON.contains("min energy"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' mobility but field 'min energy' was not specified");
 }
         if (!(mobilityJSON.contains("max energy"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' mobility but field 'max energy' was not specified");
 }
         if (!(mobilityJSON.contains("points"))) {
-          this->throwParserError(baseError + "and got 'table energy' mobility but field 'points' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' mobility but field 'points' was not specified");
 }
         if (!(mobilityJSON.contains("spacing"))) {
-          this->throwParserError(baseError + "and got 'table energy' mobility but field 'spacing' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' mobility but field 'spacing' was not specified");
 }
 
-        const std::string filename  = this->trim(mobilityJSON["file"].get<std::string>());
-        const std::string startRead = this->trim(mobilityJSON["header"].get<std::string>());
-        const std::string spacing   = this->trim(mobilityJSON["spacing"].get<std::string>());
+        const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(mobilityJSON["file"].get<std::string>());
+        const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(mobilityJSON["header"].get<std::string>());
+        const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(mobilityJSON["spacing"].get<std::string>());
         const std::string stopRead;
 
         const int  xColumn   = mobilityJSON["eV"].get<int>();
@@ -1786,12 +1833,12 @@ CdrPlasmaJSON::parseMobilities()
 
         // Can't have maximum energy < minimum energy
         if (maxEnergy < minEnergy) {
-          this->throwParserError(baseError + "and got 'table energy' but can't have 'max eV' < 'min eV'");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but can't have 'max eV' < 'min eV'");
 }
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename))) {
-          this->throwParserError(baseError + "and got 'table energy' with file = '" + filename +
+        if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' with file = '" + filename +
                                  "' but file was not found");
 }
 
@@ -1803,7 +1850,7 @@ CdrPlasmaJSON::parseMobilities()
 
         // If the table is empty then it's an error.
         if (mobilityTable.getRawData().empty()) {
-          this->throwParserError(baseError + " and got 'table energy' but mobility table '" + startRead +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table energy' but mobility table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
 
@@ -1816,7 +1863,7 @@ CdrPlasmaJSON::parseMobilities()
           tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
-          this->throwParserError(baseError + "and got 'table energy' but 'spacing' field = '" + spacing +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but 'spacing' field = '" + spacing +
                                  "' which is not supported");
         }
 
@@ -1839,15 +1886,15 @@ CdrPlasmaJSON::parseMobilities()
         FunctionEN func;
 
         if (!(mobilityJSON.contains("c1"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  " and got 'functionEN A' for the mobility but field 'c1' was not specified");
 }
         if (!(mobilityJSON.contains("c2"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  " and got 'functionEN A' for the mobility but field 'c2' was not specified");
 }
         if (!(mobilityJSON.contains("c3"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  " and got 'functionEN A' for the mobility but field 'c3' was not specified");
 }
 
@@ -1903,7 +1950,7 @@ CdrPlasmaJSON::parseMobilities()
         // This is a hook for fetching the positive ion from the Morrow-Lowke model. The expression
         // is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
 
-        auto func = [&P = this->m_gasPressure](const Real  /*E*/, const RealVect x) -> Real {
+        auto func = [&P = this->m_gasPressure](const Real  /*E*/, const RealVect& x) -> Real {
           constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.
 
           return 2.34E-4 * P0 / P(x);
@@ -1916,7 +1963,7 @@ CdrPlasmaJSON::parseMobilities()
         // This is a hook for fetching the negative ion from the Morrow-Lowke model. The expression
         // is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
 
-        auto func = [&N = this->m_gasDensity, &P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+        auto func = [&N = this->m_gasDensity, &P = this->m_gasPressure](const Real E, const RealVect& x) -> Real {
           const Real EN = E / N(x) * 1E4;
 
           constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.
@@ -1938,7 +1985,7 @@ CdrPlasmaJSON::parseMobilities()
         m_mobilityFunctionsEX.emplace(idx, func);
       }
       else {
-        this->throwParserError(baseError + " -- logic bust");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
       }
     }
   }
@@ -1963,7 +2010,7 @@ CdrPlasmaJSON::parseDiffusion()
 
       // This is a required field. We use it for specifying the mobility.
       if (!(species.contains("diffusion"))) {
-        this->throwParserError(baseError + "and species '" + name +
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and species '" + name +
                                "' is diffusive but JSON file does not contain field 'diffusion'");
 }
       const json& diffusionJSON = species["diffusion"];
@@ -1975,7 +2022,7 @@ CdrPlasmaJSON::parseDiffusion()
         // User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
         // field does not exist then it's an error.
         if (!(diffusionJSON.contains("value"))) {
-          this->throwParserError(baseError + "and got constant diffusion but field 'value' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got constant diffusion but field 'value' was not specified");
 }
 
         const Real value = diffusionJSON["value"].get<Real>();
@@ -1985,33 +2032,33 @@ CdrPlasmaJSON::parseDiffusion()
       }
       else if (lookup == "table E/N") {
         if (!(diffusionJSON.contains("file"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified");
 }
         if (!(diffusionJSON.contains("header"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified");
 }
         if (!(diffusionJSON.contains("E/N"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified");
 }
         if (!(diffusionJSON.contains("D*N"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified");
 }
         if (!(diffusionJSON.contains("min E/N"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified");
 }
         if (!(diffusionJSON.contains("max E/N"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified");
 }
         if (!(diffusionJSON.contains("points"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'points' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'points' was not specified");
 }
         if (!(diffusionJSON.contains("spacing"))) {
-          this->throwParserError(baseError + "and got tabulated diffusion but field 'spacing' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated diffusion but field 'spacing' was not specified");
 }
 
-        const std::string filename  = this->trim(diffusionJSON["file"].get<std::string>());
-        const std::string startRead = this->trim(diffusionJSON["header"].get<std::string>());
-        const std::string spacing   = this->trim(diffusionJSON["spacing"].get<std::string>());
+        const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(diffusionJSON["file"].get<std::string>());
+        const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(diffusionJSON["header"].get<std::string>());
+        const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(diffusionJSON["spacing"].get<std::string>());
         const std::string stopRead;
 
         const int  xColumn   = diffusionJSON["E/N"].get<int>();
@@ -2022,12 +2069,12 @@ CdrPlasmaJSON::parseDiffusion()
 
         // Can't have maxEN < minEN
         if (maxEN < minEN) {
-          this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 }
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename))) {
-          this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
+        if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
                                  "' but file was not found");
 }
 
@@ -2039,7 +2086,7 @@ CdrPlasmaJSON::parseDiffusion()
 
         // If the table is empty then it's an error.
         if (diffusionTable.getRawData().empty()) {
-          this->throwParserError(baseError + " and got tabulated diffusion but diffusion table '" + startRead +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got tabulated diffusion but diffusion table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
 
@@ -2058,7 +2105,7 @@ CdrPlasmaJSON::parseDiffusion()
           tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
-          this->throwParserError(baseError + " and got tabulated diffusion but 'spacing' field = '" + spacing +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got tabulated diffusion but 'spacing' field = '" + spacing +
                                  "' which is not supported");
         }
 
@@ -2078,38 +2125,38 @@ CdrPlasmaJSON::parseDiffusion()
       }
       else if (lookup == "table energy") {
         if (!(diffusionJSON.contains("file"))) {
-          this->throwParserError(baseError + "and got 'table energy' for diffusion but field 'file' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' for diffusion but field 'file' was not specified");
 }
         if (!(diffusionJSON.contains("header"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'header' was not specified");
 }
         if (!(diffusionJSON.contains("eV"))) {
-          this->throwParserError(baseError + "and got 'table energy' for diffusion but field 'eV' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' for diffusion but field 'eV' was not specified");
 }
         if (!(diffusionJSON.contains("D*N"))) {
-          this->throwParserError(baseError + "and got 'table energy' for diffusion but field 'D*N' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' for diffusion but field 'D*N' was not specified");
 }
         if (!(diffusionJSON.contains("min energy"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'min energy' was not specified");
 }
         if (!(diffusionJSON.contains("max energy"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'max energy' was not specified");
 }
         if (!(diffusionJSON.contains("points"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'points' was not specified");
 }
         if (!(diffusionJSON.contains("spacing"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'spacing' was not specified");
 }
 
-        const std::string filename  = this->trim(diffusionJSON["file"].get<std::string>());
-        const std::string startRead = this->trim(diffusionJSON["header"].get<std::string>());
-        const std::string spacing   = this->trim(diffusionJSON["spacing"].get<std::string>());
+        const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(diffusionJSON["file"].get<std::string>());
+        const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(diffusionJSON["header"].get<std::string>());
+        const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(diffusionJSON["spacing"].get<std::string>());
         const std::string stopRead;
 
         const int  xColumn   = diffusionJSON["eV"].get<int>();
@@ -2120,12 +2167,12 @@ CdrPlasmaJSON::parseDiffusion()
 
         // Can't have maximum energy < minimum energy
         if (maxEnergy < minEnergy) {
-          this->throwParserError(baseError + "and got 'table energy' for diffusion but can't have 'max eV' < 'min eV'");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' for diffusion but can't have 'max eV' < 'min eV'");
 }
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename))) {
-          this->throwParserError(baseError + "and got 'table energy' for diffusion with file = '" + filename +
+        if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' for diffusion with file = '" + filename +
                                  "' but file was not found");
 }
 
@@ -2137,7 +2184,7 @@ CdrPlasmaJSON::parseDiffusion()
 
         // If the table is empty then it's an error.
         if (diffusionTable.getRawData().empty()) {
-          this->throwParserError(baseError + " and got 'table energy' for diffusion but diffusion table '" + startRead +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table energy' for diffusion but diffusion table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
 
@@ -2156,7 +2203,7 @@ CdrPlasmaJSON::parseDiffusion()
           tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
-          this->throwParserError(baseError + " and got 'table energy' for diffusion but 'spacing' field = '" + spacing +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'table energy' for diffusion but 'spacing' field = '" + spacing +
                                  "' which is not supported");
         }
 
@@ -2178,15 +2225,15 @@ CdrPlasmaJSON::parseDiffusion()
         FunctionEN func;
 
         if (!(diffusionJSON.contains("c1"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  " and got 'functionEN A' for the diffusion but field 'c1' was not specified");
 }
         if (!(diffusionJSON.contains("c2"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  " and got 'functionEN A' for the diffusion but field 'c2' was not specified");
 }
         if (!(diffusionJSON.contains("c3"))) {
-          this->throwParserError(baseError +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError +
                                  " and got 'functionEN A' for the diffusion but field 'c3' was not specified");
 }
 
@@ -2246,7 +2293,7 @@ CdrPlasmaJSON::parseDiffusion()
         m_diffusionFunctionsEN.emplace(idx, electronDiffusion);
       }
       else {
-        this->throwParserError(baseError + " -- logic bust");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
       }
     }
   }
@@ -2277,53 +2324,53 @@ CdrPlasmaJSON::parseTemperatures()
 
       // We MUST have a lookup field in order to determine how we compute the temperature for a species.
       if (!(S.contains("lookup"))) {
-        this->throwParserError(baseError + "was specified but field 'lookup' is missing");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified but field 'lookup' is missing");
 }
 
       // Figure out the lookup method.
       const std::string lookup = trim(S["lookup"].get<std::string>());
       if (lookup == "constant") {
         if (!(S.contains("value"))) {
-          this->throwParserError(baseError + "was specified as 'constant' but field 'value' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'constant' but field 'value' is missing");
 }
 
         const Real value = S["value"].get<Real>();
 
         // Create a function which returns a constant value everywhere.
         m_temperatureLookup.emplace(idx, LookupMethod::FunctionX);
-        m_temperatureConstants.emplace(idx, [value](const RealVect  /*a_psition*/) -> Real {
+        m_temperatureConstants.emplace(idx, [value](const RealVect&  /*a_psition*/) -> Real {
           return value;
         });
       }
       else if (lookup == "table E/N") {
         if (!(S.contains("file"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'file' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'file' is missing");
 }
         if (!(S.contains("header"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'header' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'header' is missing");
 }
         if (!(S.contains("E/N"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'E/N' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'E/N' is missing");
 }
         if (!(S.contains("eV"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing");
 }
         if (!(S.contains("min E/N"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing");
 }
         if (!(S.contains("max E/N"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing");
 }
         if (!(S.contains("points"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'points' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'points' is missing");
 }
         if (!(S.contains("spacing"))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but field 'spacing' is missing");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but field 'spacing' is missing");
 }
 
-        const std::string filename  = this->trim(S["file"].get<std::string>());
-        const std::string startRead = this->trim(S["header"].get<std::string>());
-        const std::string spacing   = this->trim(S["spacing"].get<std::string>());
+        const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(S["file"].get<std::string>());
+        const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(S["header"].get<std::string>());
+        const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(S["spacing"].get<std::string>());
         const std::string stopRead;
 
         const int  xColumn   = S["E/N"].get<int>();
@@ -2334,12 +2381,12 @@ CdrPlasmaJSON::parseTemperatures()
 
         // Can't have maxEN < minEN
         if (maxEN < minEN) {
-          this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 }
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename))) {
-          this->throwParserError(baseError + "was specified as 'table E/N' but got file = '" + filename +
+        if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "was specified as 'table E/N' but got file = '" + filename +
                                  "' was not found");
 }
 
@@ -2357,7 +2404,7 @@ CdrPlasmaJSON::parseTemperatures()
 
         // If the table is empty then it's an error.
         if (temperatureTable.getRawData().empty()) {
-          this->throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename +
                                  "'is empty. This is probably an error");
         }
 
@@ -2370,7 +2417,7 @@ CdrPlasmaJSON::parseTemperatures()
           tableSpacing = LookupTable::Spacing::Exponential;
         }
         else {
-          this->throwParserError(baseError + "and got tabulated mobility but 'spacing' field = '" + spacing +
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got tabulated mobility but 'spacing' field = '" + spacing +
                                  "' which is not supported");
         }
 
@@ -2392,7 +2439,7 @@ CdrPlasmaJSON::parseTemperatures()
         m_temperatureTablesEN.emplace(idx, temperatureTable);
       }
       else {
-        this->throwParserError(baseError + " -- logic bust");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " -- logic bust");
       }
     }
   }
@@ -2408,11 +2455,11 @@ CdrPlasmaJSON::parsePlasmaReactions()
 
   for (const auto& R : m_json["plasma reactions"]) {
     if (!(R.contains("reaction"))) {
-      this->throwParserError(
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
                              "CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing from one of the reactions");
 }
     if (!(R.contains("lookup"))) {
-      this->throwParserError(
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
                              "CdrPlasmaJSON::parsePlasmaReactions -- field 'lookup' is missing from one of the reactions");
 }
 
@@ -2506,7 +2553,7 @@ CdrPlasmaJSON::parseReactionWildcards(const std::vector<std::string>& a_reactant
 
   if (containsWildcard) {
     if (!(a_R.contains("@"))) {
-      this->throwParserError(baseError + "got reaction wildcard '@' but array '@:' was not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got reaction wildcard '@' but array '@:' was not specified");
     }
 
     // Get the wildcards array.
@@ -2562,7 +2609,7 @@ CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactant
   // All reactants must be in the list of neutral species or in the list of plasma species
   for (const auto& r : a_reactants) {
     if (!isPlasmaSpecies(r) && !isNeutralSpecies(r)) {
-      this->throwParserError(baseError + "but I do not know reacting species '" + r + "' for reaction '" + a_reaction +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but I do not know reacting species '" + r + "' for reaction '" + a_reaction +
                              "'");
 }
   }
@@ -2570,7 +2617,7 @@ CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactant
   // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
   for (const auto& p : a_products) {
     if (!isPlasmaSpecies(p) && !isPhotonSpecies(p) && !isNeutralSpecies(p)) {
-      this->throwParserError(baseError + "but I do not know product species '" + p + "' for reaction '" + a_reaction +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but I do not know product species '" + p + "' for reaction '" + a_reaction +
                              "'.");
     }
   }
@@ -2589,7 +2636,7 @@ CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactant
   }
 
   if (sumCharge != 0) {
-    this->throwParserWarning("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" +
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserWarning("CdrPlasmaJSON::sanctifyPlasmaReaction -- charge not conserved for reaction '" +
                              a_reaction + "'.");
   }
 }
@@ -2614,13 +2661,13 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
     const bool isPhoton  = this->isPhotonSpecies(r);
 
     if (isNeutral) {
-      this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
 }
     if (isPlasma) {
-      this->throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
 }
     if (!isPhoton) {
-      this->throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
 }
     if (isPhoton) {
       numPhotonSpecies++;
@@ -2629,7 +2676,7 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
 
   // There can only be one photon species on the left-hand side of the reaction.
   if (numPhotonSpecies != 1) {
-    this->throwParserError(
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
                            "CdrPlasmaJSON::sanctifyPhotoReaction -- only one photon species allowed on left-hand side of photo-reaction '" +
                            a_reaction + "'");
   }
@@ -2641,10 +2688,10 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
     const bool isPhoton  = this->isPhotonSpecies(p);
 
     if (isPhoton) {
-      this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
 }
     if (!isPlasma && !isNeutral) {
-      this->throwParserError(baseError + "I do not know species '" + p + "' on right hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "I do not know species '" + p + "' on right hand side");
 }
   }
 
@@ -2662,7 +2709,7 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
   }
 
   if (sumCharge != 0) {
-    this->throwParserError(baseError + "charge is not conserved!");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "charge is not conserved!");
   }
 }
 
@@ -2686,12 +2733,12 @@ CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactan
 
     // No neutrals allowed.
     if (isNeutral) {
-      this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
     }
 
     // Unknown species not allowed either.
     if (!isPlasma && !isNeutral && !isPhoton) {
-      this->throwParserError(baseError + "but I do not know species '" + r + "' on left hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but I do not know species '" + r + "' on left hand side");
     }
   }
 
@@ -2702,15 +2749,15 @@ CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactan
     const bool isPhoton  = this->isPhotonSpecies(p);
 
     if (isPhoton) {
-      this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
 }
     if (isNeutral) {
-      this->throwParserError(baseError + "neutral species '" + p + "' not allowed on right hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "neutral species '" + p + "' not allowed on right hand side");
 }
 
     // Unknown species not allowed either.
     if (!isPlasma && !isNeutral && !isPhoton) {
-      this->throwParserError(baseError + "but I do not know species '" + p + "' on right hand side");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but I do not know species '" + p + "' on right hand side");
     }
   }
 }
@@ -2733,7 +2780,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
 
     // Constant reaction rates are easy, just fetch it and put it where it belongs.
     if (!(a_R.contains("rate"))) {
-      this->throwParserError(baseError + " and got 'constant' but did not get 'rate'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' but did not get 'rate'");
     }
 
     const Real k = a_R["rate"].get<Real>();
@@ -2744,13 +2791,13 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if (lookup == "alpha*v") { 
     if (!(a_R.contains("species"))) {
-      this->throwParserError(baseError + "and got 'alpha*v' but field 'species' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'alpha*v' but field 'species' was not found");
     }
 
     const std::string species = trim(a_R["species"].get<std::string>());
 
     if (!(this->isPlasmaSpecies(species))) {
-      this->throwParserError(baseError + "and got 'alpha*v' but species '" + species + "' is not a plasma species");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'alpha*v' but species '" + species + "' is not a plasma species");
     }
 
     m_plasmaReactionAlphaV.emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
@@ -2758,13 +2805,13 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if (lookup == "eta*v") {
     if (!(a_R.contains("species"))) {
-      this->throwParserError(baseError + "and got 'eta*v' but field 'species' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'eta*v' but field 'species' was not found");
 }
 
     const std::string species = trim(a_R["species"].get<std::string>());
 
     if (!(this->isPlasmaSpecies(species))) {
-      this->throwParserError(baseError + "and got 'eta*v' but species '" + species + "' is not a plasma species");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'eta*v' but species '" + species + "' is not a plasma species");
     }
 
     m_plasmaReactionEtaV.emplace(a_reactionIndex, m_cdrSpeciesMap.at(species));
@@ -2772,22 +2819,22 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if(lookup == "functionT A") {
     if(!(a_R.contains("T"))) {
-      this->throwParserError(baseError + "and got 'functionT A' but field 'T' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT A' but field 'T' was not found");
     }
     if(!(a_R.contains("c1"))) {
-      this->throwParserError(baseError + "and got 'functionT A' but field 'c2' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT A' but field 'c2' was not found");
     }
     if(!(a_R.contains("c2"))) {
-      this->throwParserError(baseError + "and got 'functionT A' but field 'c2' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT A' but field 'c2' was not found");
     }        
 
-    const std::string speciesT = this->trim(a_R["T"].get<std::string>());
+    const std::string speciesT = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["T"].get<std::string>());
 
     const bool isPlasmaT = this->isPlasmaSpecies(speciesT);
     const bool isNeutralT = this->isNeutralSpecies(speciesT);
 
     if(!(isPlasmaT || isNeutralT)) {
-      this->throwParserError(baseError + "and got ''functionT' but do not know species '" + speciesT);
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got ''functionT' but do not know species '" + speciesT);
     }
 
     const Real c1 = a_R["c1"].get<Real>();
@@ -2808,16 +2855,16 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if (lookup == "functionT1T2 A") {
     if (!(a_R.contains("T1"))) {
-      this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'T1' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT1T2 A' but field 'T1' was not found");
     }
     if (!(a_R.contains("T2"))) {
-      this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'T2' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT1T2 A' but field 'T2' was not found");
     }
     if (!(a_R.contains("c1"))) {
-      this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'c1' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT1T2 A' but field 'c1' was not found");
     }
     if (!(a_R.contains("c2"))) {
-      this->throwParserError(baseError + "and got 'functionT1T2 A' but field 'c2' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionT1T2 A' but field 'c2' was not found");
     }
 
     const std::string speciesT1 = trim(a_R["T1"].get<std::string>());
@@ -2831,11 +2878,11 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
 
     // Make sure that the specified species exist.
     if (!isPlasmaT1 && !isNeutralT1) {
-      this->throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT1 +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT1 +
                              "'");
 }
     if (!isPlasmaT2 && !isNeutralT2) {
-      this->throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT2 +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT2 +
                              "'");
 }
 
@@ -2865,33 +2912,33 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if (lookup == "table E/N") {
     if (!(a_R.contains("file"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'file' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'file' was not found");
     }
     if (!(a_R.contains("header"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'header' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'header' was not found");
     }
     if (!(a_R.contains("E/N"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'E/N' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'E/N' was not found");
     }
     if (!(a_R.contains("rate"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'rate' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'rate' was not found");
     }
     if (!(a_R.contains("min E/N"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'min E/N' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'min E/N' was not found");
     }
     if (!(a_R.contains("max E/N"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'max E/N' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'max E/N' was not found");
     }
     if (!(a_R.contains("points"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'points' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'points' was not found");
     }
     if (!(a_R.contains("spacing"))) {
-      this->throwParserError(baseError + "and got 'table E/N' but field 'spacing' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but field 'spacing' was not found");
     }
 
-    const std::string filename  = this->trim(a_R["file"].get<std::string>());
-    const std::string spacing   = this->trim(a_R["spacing"].get<std::string>());
-    const std::string startRead = this->trim(a_R["header"].get<std::string>());
+    const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["file"].get<std::string>());
+    const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["spacing"].get<std::string>());
+    const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["header"].get<std::string>());
     const std::string stopRead;
 
     const int  xColumn   = a_R["E/N"].get<int>();
@@ -2902,12 +2949,12 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
 
     // It's an error if max E/N < min E/N
     if (maxEN < minEN) {
-      this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
 }
 
     // Throw an error if the input file does not exist.
-    if (!(this->doesFileExist(filename))) {
-      this->throwParserError(baseError + "and got 'table E/N' but file '" + filename + "' does not exist");
+    if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but file '" + filename + "' does not exist");
 }
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
@@ -2918,7 +2965,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
 
     // If the table is empty then it's an error.
     if (reactionTable.getRawData().empty()) {
-      this->throwParserError(baseError + "and got 'table E/N' but table is empty. This is probably an error");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
@@ -2930,7 +2977,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
-      this->throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table E/N' but 'spacing' field = '" + spacing +
                              "' which is not supported");
     }
 
@@ -2950,37 +2997,37 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if (lookup == "table energy") {
     if (!(a_R.contains("file"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'file' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'file' was not found");
 }
     if (!(a_R.contains("header"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'header' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'header' was not found");
 }
     if (!(a_R.contains("eV"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'eV' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'eV' was not found");
 }
     if (!(a_R.contains("rate"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'rate' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'rate' was not found");
 }
     if (!(a_R.contains("min energy"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'min energy' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'min energy' was not found");
 }
     if (!(a_R.contains("max energy"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'max energy' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'max energy' was not found");
 }
     if (!(a_R.contains("points"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'points' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'points' was not found");
 }
     if (!(a_R.contains("spacing"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'spacing' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'spacing' was not found");
 }
     if (!(a_R.contains("species"))) {
-      this->throwParserError(baseError + "and got 'table energy' but field 'species' was not found");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but field 'species' was not found");
 }
 
-    const std::string species   = this->trim(a_R["species"].get<std::string>());
-    const std::string filename  = this->trim(a_R["file"].get<std::string>());
-    const std::string spacing   = this->trim(a_R["spacing"].get<std::string>());
-    const std::string startRead = this->trim(a_R["header"].get<std::string>());
+    const std::string species   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["species"].get<std::string>());
+    const std::string filename  = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["file"].get<std::string>());
+    const std::string spacing   = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["spacing"].get<std::string>());
+    const std::string startRead = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_R["header"].get<std::string>());
     const std::string stopRead;
 
     const int  xColumn   = a_R["eV"].get<int>();
@@ -2991,12 +3038,12 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
 
     // It's an error if max energy < min energy
     if (maxEnergy < minEnergy) {
-      this->throwParserError(baseError + "and got 'table energy' but can't have 'max energy' < 'min energy'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but can't have 'max energy' < 'min energy'");
 }
 
     // Throw an error if the input file does not exist.
-    if (!(this->doesFileExist(filename))) {
-      this->throwParserError(baseError + "and got 'table energy' but file '" + filename + "' does not exist");
+    if (!(ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::doesFileExist(filename))) {
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but file '" + filename + "' does not exist");
 }
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
@@ -3007,7 +3054,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
 
     // If the table is empty then it's an error.
     if (reactionTable.getRawData().empty()) {
-      this->throwParserError(baseError + "and got 'table energy' but table is empty. This is probably an error");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but table is empty. This is probably an error");
     }
 
     // Figure out the table spacing
@@ -3019,7 +3066,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       tableSpacing = LookupTable::Spacing::Exponential;
     }
     else {
-      this->throwParserError(baseError + "and got 'table energy' but 'spacing' field = '" + spacing +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' but 'spacing' field = '" + spacing +
                              "' which is not supported");
     }
 
@@ -3036,7 +3083,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     // Now figure out the species whose energy determines the reaction rate. This MUST be a transport solver
     const bool isPlasma = this->isPlasmaSpecies(species);
     if (!isPlasma) {
-      this->throwParserError(baseError + "and got 'table energy' for reaction rate but species '" + species +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'table energy' for reaction rate but species '" + species +
                              "' is not a plasma species");
     }
 
@@ -3048,19 +3095,19 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
   }
   else if (lookup == "functionEN expA") {
     if (!(a_R.contains("c1"))) {
-      this->throwParserError(baseError + "and got 'functionEN expA' but field 'c1' is required but not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionEN expA' but field 'c1' is required but not specified");
 }
     if (!(a_R.contains("c2"))) {
-      this->throwParserError(baseError + "and got 'functionEN expA' but field 'c2' is required but not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionEN expA' but field 'c2' is required but not specified");
 }
     if (!(a_R.contains("c3"))) {
-      this->throwParserError(baseError + "and got 'functionEN expA' but field 'c3' is required but not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionEN expA' but field 'c3' is required but not specified");
 }
     if (!(a_R.contains("c4"))) {
-      this->throwParserError(baseError + "and got 'functionEN expA' but field 'c4' is required but not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionEN expA' but field 'c4' is required but not specified");
 }
     if (!(a_R.contains("c5"))) {
-      this->throwParserError(baseError + "and got 'functionEN expA' but field 'c5' is required but not specified");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'functionEN expA' but field 'c5' is required but not specified");
 }
 
     // Get the constants
@@ -3079,7 +3126,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     m_plasmaReactionFunctionsEN.emplace(a_reactionIndex, func);
   }
   else {
-    this->throwParserError(baseError + "but lookup = '" + lookup + "' is not recognized");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but lookup = '" + lookup + "' is not recognized");
   }
 }
 
@@ -3149,19 +3196,19 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
 
     // These fields are required.
     if (!(photoi.contains("kr"))) {
-      this->throwParserError(baseError + "got 'photoionization' but field 'kr' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'kr' is missing");
 }
     if (!(photoi.contains("kp"))) {
-      this->throwParserError(baseError + "got 'photoionization' but field 'kp' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'kp' is missing");
 }
     if (!(photoi.contains("kq/N"))) {
-      this->throwParserError(baseError + "got 'photoionization' but field 'kq/N' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'kq/N' is missing");
 }
     if (!(photoi.contains("photoi eff"))) {
-      this->throwParserError(baseError + "got 'photoionization' but field 'photoi eff' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'photoi eff' is missing");
 }
     if (!(photoi.contains("excite eff"))) {
-      this->throwParserError(baseError + "got 'photoionization' but field 'excite eff' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "got 'photoionization' but field 'excite eff' is missing");
 }
 
     kr        = photoi["kr"].get<Real>();
@@ -3178,22 +3225,22 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
 
   // Now make ourselves a lambda that we can use for scaling the reactions.
   if (doPhotoIonization && doPressureQuenching) {
-    this->throwParserError(baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
   }
   else if (doPressureQuenching && !doPhotoIonization) {
-    func = [scale, pq, p = this->m_gasPressure](const Real  /*E*/, const RealVect x) {
+    func = [scale, pq, p = this->m_gasPressure](const Real  /*E*/, const RealVect& x) {
       return scale * pq / (pq + p(x));
     };
   }
   else if (!doPressureQuenching && doPhotoIonization) {
-    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real  /*E*/, const RealVect x) -> Real {
+    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real  /*E*/, const RealVect& x) -> Real {
       const Real kq = kqN * N(x);
 
       return scale * kr / (kr + kp + kq) * photoiEff * exciteEff;
     };
   }
   else {
-    func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
+    func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
       return scale;
     };
   }
@@ -3264,10 +3311,10 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
     const json& solo = a_R["soloviev"];
 
     if (!solo.contains("correction")) {
-      this->throwParserError(baseError + "but did not find field 'correction'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'correction'");
 }
     if (!solo.contains("species")) {
-      this->throwParserError(baseError + "but did not find field 'species'");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
 }
 
     const auto correct = solo["correction"].get<bool>();
@@ -3275,7 +3322,7 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
 
     if (correct) {
       if (!isPlasmaSpecies(species)) {
-        this->throwParserError(baseError + "but '" + species + "' is not a plasma species");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but '" + species + "' is not a plasma species");
 }
 
       const int plasmaSpecies = m_cdrSpeciesMap.at(species);
@@ -3284,10 +3331,10 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
       const bool isDiffusive = m_cdrSpecies[plasmaSpecies]->isDiffusive();
 
       if (!isMobile) {
-        this->throwParserError(baseError + "but species  + '" + species + "' isn't mobile.");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species  + '" + species + "' isn't mobile.");
 }
       if (!isDiffusive) {
-        this->throwParserError(baseError + "but species  + '" + species + "' isn't diffusive.");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species  + '" + species + "' isn't diffusive.");
 }
 
       m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(true, plasmaSpecies));
@@ -3322,27 +3369,27 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        this->throwParserError(baseError + "but did not find field 'species'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
 }
       if (!energyLoss.contains("eV")) {
-        this->throwParserError(baseError + "but did not find field 'eV'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
 }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
 
       // It's an error if the species name is not in the list of plasma species, or if the user has specified an energy solver as a plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
 }
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
 }
 
       // It's also an error to specify the reactive energy loss twice. Make sure the species is not already in the list of losses.
       if (reactionEnergyLosses.find(speciesIndex) != reactionEnergyLosses.end()) {
-        this->throwParserError(baseError + "but it's an error to specify a loss more than once (for species '" +
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but it's an error to specify a loss more than once (for species '" +
                                speciesName + "')");
       }
 
@@ -3353,7 +3400,7 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
 
       const auto& j = energyLoss["eV"];
       if (j.type() == json::value_t::string) {
-        const std::string str = this->trim(energyLoss["eV"].get<std::string>());
+        const std::string str = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["eV"].get<std::string>());
 
         if (str == "+mean" || str == "+avg") {
           lossMethod = ReactiveEnergyLoss::AddMean;
@@ -3368,7 +3415,7 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
           lossMethod = ReactiveEnergyLoss::SubtractDirect;
         }
         else {
-          this->throwParserError(baseError + "and got 'eV' = '" + str + "', which is not supported");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "and got 'eV' = '" + str + "', which is not supported");
         }
 
         // In the reaction routines we will compute the loss/gain using the mean energy. I'm leaving the number as a back door in case we ever want
@@ -3415,7 +3462,7 @@ CdrPlasmaJSON::parsePhotoReactions()
 
   for (const auto& R : m_json["photo reactions"]) {
     if (!(R.contains("reaction"))) {
-      this->throwParserError(
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
                              "CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
 }
 
@@ -3508,13 +3555,13 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
     const json& helm = a_R["helmholtz"];
 
     if (!(helm.contains("A"))) {
-      this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'A' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but field 'A' is missing");
 }
     if (!(helm.contains("lambda"))) {
-      this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'lambda' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but field 'lambda' is missing");
 }
     if (!(helm.contains("species"))) {
-      this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'neutral' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but field 'neutral' is missing");
 }
 
     const auto A       = helm["A"].get<Real>();
@@ -3524,7 +3571,7 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
     // Get the specified species and it's molar fraction.
     // Make sure that it's a neutral species.
     if (!(this->isNeutralSpecies(neutral))) {
-      this->throwParserError(baseError + " and got 'helmholtz' kappa but species '" + neutral +
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'helmholtz' kappa but species '" + neutral +
                              "' is not a neutral species");
     }
 
@@ -3540,12 +3587,12 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
   FunctionEX func;
 
   if (doHelmholtz) {
-    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real  /*E*/, const RealVect x) {
+    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real  /*E*/, const RealVect& x) {
       return scale * helmholtzFactor * p(x);
     };
   }
   else {
-    func = [scale](const Real  /*E*/, const RealVect  /*x*/) {
+    func = [scale](const Real  /*E*/, const RealVect&  /*x*/) {
       return scale;
     };
   }
@@ -3573,25 +3620,25 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        this->throwParserError(baseError + "but did not find field 'species'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
 }
       if (!energyLoss.contains("eV")) {
-        this->throwParserError(baseError + "but did not find field 'eV'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
 }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
       const Real        loss        = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
 }
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
 }
 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
@@ -3644,9 +3691,9 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
       // Get the reaction string
       if (!(electrodeReaction.contains("reaction"))) {
-        this->throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
 }
-      const std::string reaction = this->trim(electrodeReaction["reaction"].get<std::string>());
+      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(electrodeReaction["reaction"].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3660,7 +3707,7 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
       // Define special case. If the right-hand side is just 'extrap', we enable m_electrodeExtrapBC for
       // the specified species.
-      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
+      const bool specialCase1 = products.size() == 1 && ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
 
       // Go through cases.
       if (specialCase1) { // Enable m_electrodeExtrapBC for the specified species.
@@ -3682,9 +3729,9 @@ CdrPlasmaJSON::parseElectrodeReactions()
 
         // Get the lookup string
         if (!(electrodeReaction.contains("lookup"))) {
-          this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
 }
-        const std::string lookup = this->trim(electrodeReaction["lookup"].get<std::string>());
+        const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(electrodeReaction["lookup"].get<std::string>());
 
         // Go through all the reactions now.
         for (const auto& curReaction : reactionSets) {
@@ -3746,11 +3793,11 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
   if (!(a_reactionJSON.contains("lookup"))) {
-    this->throwParserError(baseError + "but field 'lookup' was not specified");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but field 'lookup' was not specified");
 }
 
   // Get the lookup method
-  const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
+  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_reactionJSON["lookup"].get<std::string>());
 
   // Now go through the various rate-computation methods and populated the
   // relevant data holders.
@@ -3758,7 +3805,7 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
     // If using a constant emission rate, we must get the field 'value'.
 
     if (!(a_reactionJSON.contains("value"))) {
-      this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
 }
 
     const Real rate = a_reactionJSON["value"].get<Real>();
@@ -3768,7 +3815,7 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
     m_electrodeReactionConstants.emplace(a_reactionIndex, rate);
   }
   else {
-    this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
   }
 }
 
@@ -3787,7 +3834,7 @@ CdrPlasmaJSON::parseElectrodeReactionScaling(const int a_reactionIndex, const js
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
+  auto func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
     return scale;
   };
 
@@ -3814,25 +3861,25 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        this->throwParserError(baseError + "but did not find field 'species'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
 }
       if (!energyLoss.contains("eV")) {
-        this->throwParserError(baseError + "but did not find field 'eV'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
 }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
       const Real        loss        = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
 }
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
 }
 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
@@ -3885,9 +3932,9 @@ CdrPlasmaJSON::parseDielectricReactions()
 
       // Get the reaction string
       if (!(dielectricReaction.contains("reaction"))) {
-        this->throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
 }
-      const std::string reaction = this->trim(dielectricReaction["reaction"].get<std::string>());
+      const std::string reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(dielectricReaction["reaction"].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
       std::vector<std::string> reactants;
@@ -3901,7 +3948,7 @@ CdrPlasmaJSON::parseDielectricReactions()
 
       // Define special case. If the right-hand side just 'extrap', we enable m_dielectricExtrapBC for
       // the specified species.
-      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
+      const bool specialCase1 = products.size() == 1 && ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
 
       // Go through cases.
       if (specialCase1) {
@@ -3923,9 +3970,9 @@ CdrPlasmaJSON::parseDielectricReactions()
 
         // Get the lookup string
         if (!(dielectricReaction.contains("lookup"))) {
-          this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");
 }
-        const std::string lookup = this->trim(dielectricReaction["lookup"].get<std::string>());
+        const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(dielectricReaction["lookup"].get<std::string>());
 
         // Go through all the reactions now.
         for (const auto& curReaction : reactionSets) {
@@ -3987,11 +4034,11 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
   if (!(a_reactionJSON.contains("lookup"))) {
-    this->throwParserError(baseError + "but field 'lookup' was not specified");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but field 'lookup' was not specified");
 }
 
   // Get the lookup method
-  const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
+  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_reactionJSON["lookup"].get<std::string>());
 
   // Now go through the various rate-computation methods and populated the
   // relevant data holders.
@@ -3999,7 +4046,7 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
     // If using a constant emission rate, we must get the field 'value'.
 
     if (!(a_reactionJSON.contains("value"))) {
-      this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
 }
 
     const Real rate = a_reactionJSON["value"].get<Real>();
@@ -4009,7 +4056,7 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
     m_dielectricReactionConstants.emplace(a_reactionIndex, rate);
   }
   else {
-    this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
   }
 }
 
@@ -4028,7 +4075,7 @@ CdrPlasmaJSON::parseDielectricReactionScaling(const int a_reactionIndex, const j
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
+  auto func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
     return scale;
   };
 
@@ -4077,14 +4124,14 @@ CdrPlasmaJSON::parseDomainReactions()
 
       // These fields are required
       if (!(domainReaction.contains("reaction"))) {
-        this->throwParserError(baseError + " - found 'domain reactions' but field 'reaction' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'reaction' was not specified");
 }
       if (!(domainReaction.contains("side"))) {
-        this->throwParserError(baseError + " - found 'domain reactions' but field 'side' was not specified");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'side' was not specified");
 }
 
       // Get the reaction string and sides
-      const std::string              reaction = this->trim(domainReaction["reaction"].get<std::string>());
+      const std::string              reaction = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(domainReaction["reaction"].get<std::string>());
       const std::vector<std::string> sides    = domainReaction["side"].get<std::vector<std::string>>();
 
       // Parse the reaction string so we get a list of reactants and products
@@ -4098,7 +4145,7 @@ CdrPlasmaJSON::parseDomainReactions()
 
       // Define special case. If the right-hand side is just "extrap" then the specified species influx will
       // be extrapolated from the interior.
-      const bool specialCase1 = products.size() == 1 && this->trim(products.front()) == "extrap";
+      const bool specialCase1 = products.size() == 1 && ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(products.front()) == "extrap";
 
       // Go through cases.
       if (specialCase1) { // Enable m_domainExtrapBC for the specified species and sides.
@@ -4115,7 +4162,7 @@ CdrPlasmaJSON::parseDomainReactions()
           for (const auto& reactant : curReactants) {
             for (std::string dirSide : sides) {
 
-              dirSide = this->trim(dirSide);
+              dirSide = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(dirSide);
 
               const int            dir     = m_dirCharToInt.at(dirSide.at(0));
               const Side::LoHiSide side    = m_sideStringToSide.at(dirSide.substr(2, 2));
@@ -4133,9 +4180,9 @@ CdrPlasmaJSON::parseDomainReactions()
 
         // Get reaction lookup string
         if (!(domainReaction.contains("lookup"))) {
-          this->throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified");
+          ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified");
 }
-        const std::string lookup = this->trim(domainReaction["lookup"].get<std::string>());
+        const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(domainReaction["lookup"].get<std::string>());
 
         // Go through reaction sets.
         for (const auto& curReaction : reactionSets) {
@@ -4178,7 +4225,7 @@ CdrPlasmaJSON::parseDomainReactions()
         // Add this reaction to all the specified sides.
         for (std::string curSide : sides) {
           // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactions-map
-          curSide                                = this->trim(curSide);
+          curSide                                = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(curSide);
           std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
                                                                   m_sideStringToSide.at(curSide.substr(2, 2)));
 
@@ -4208,24 +4255,24 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions
   if (!(a_reactionJSON.contains("lookup"))) {
-    this->throwParserError(baseError + "but field 'lookup' was not specified");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but field 'lookup' was not specified");
 }
 
   // Get the lookup method
-  const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
+  const std::string lookup = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(a_reactionJSON["lookup"].get<std::string>());
 
   // Now go through the various rate-computation methods and fill the relevant containers
   if (lookup == "constant") {
     // If using a constant emission rate, we must get the field 'value'
     if (!(a_reactionJSON.contains("value"))) {
-      this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+      ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
 }
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
     for (std::string curSide : a_sides) {
       // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
-      curSide                                = this->trim(curSide);
+      curSide                                = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(curSide);
       std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
                                                               m_sideStringToSide.at(curSide.substr(2, 2)));
 
@@ -4236,7 +4283,7 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
     }
   }
   else {
-    this->throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
+    ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but lookup specification '" + lookup + "' is not supported");
   }
 }
 
@@ -4257,13 +4304,13 @@ CdrPlasmaJSON::parseDomainReactionScaling(const int                       a_reac
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
+  auto func = [scale](const Real  /*E*/, const RealVect&  /*x*/) -> Real {
     return scale;
   };
 
   for (std::string curSide : a_sides) {
     // Create an int, Side::LoHiSide pair of dir, side for the m_domainReactionLookup- and m_domainReactionConstants-map
-    curSide                                = this->trim(curSide);
+    curSide                                = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(curSide);
     std::pair<int, Side::LoHiSide> curPair = std::make_pair(m_dirCharToInt.at(curSide.at(0)),
                                                             m_sideStringToSide.at(curSide.substr(2, 2)));
 
@@ -4318,25 +4365,25 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
     for (const auto& energyLoss : a_R["energy losses"]) {
 
       if (!energyLoss.contains("species")) {
-        this->throwParserError(baseError + "but did not find field 'species'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'species'");
 }
       if (!energyLoss.contains("eV")) {
-        this->throwParserError(baseError + "but did not find field 'eV'");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but did not find field 'eV'");
 }
 
       // Get the species name (string) and associated energy loss.
-      const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
+      const std::string speciesName = ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::trim(energyLoss["species"].get<std::string>());
       const Real        loss        = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
       if (!(this->isPlasmaSpecies(speciesName))) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
 }
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
       if (m_cdrIsEnergySolver.at(speciesIndex)) {
-        this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+        ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
 }
 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
@@ -4537,7 +4584,7 @@ CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::doesFileExist(const std::string a_filename) 
+CdrPlasmaJSON::doesFileExist(const std::string& a_filename) 
 {
   std::ifstream istream(a_filename);
 
@@ -5744,10 +5791,10 @@ CdrPlasmaJSON::integrateReactions(std::vector<Real>&          a_cdrDensities,
 void
 CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
                                std::vector<Real>&          a_rteSources,
-                               const std::vector<Real>     a_cdrDensities,
-                               const std::vector<RealVect> a_cdrGradients,
-                               const RealVect              a_E,
-                               const RealVect              a_pos,
+                               const std::vector<Real>&     a_cdrDensities,
+                               const std::vector<RealVect>& a_cdrGradients,
+                               const RealVect&              a_E,
+                               const RealVect&              a_pos,
                                const Real                   /*a_dx*/,
                                const Real                  a_time,
                                const Real                   /*a_kappa*/) const
@@ -5873,7 +5920,7 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
     const Real     mu    = cdrMobilities[transportIdx];
     const Real     D     = cdrDiffusionCoefficients[transportIdx];
     const Real     n     = a_cdrDensities[transportIdx];
-    const RealVect gradn = a_cdrGradients[transportIdx];
+    const RealVect& gradn = a_cdrGradients[transportIdx];
 
     const int Z = m_cdrSpecies[transportIdx]->getChargeNumber();
 
@@ -5895,9 +5942,9 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
 void
 CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
                                                std::vector<Real>&          a_photonProduction,
-                                               const std::vector<RealVect> a_cdrGradients,
-                                               const RealVect              a_E,
-                                               const RealVect              a_pos,
+                                               const std::vector<RealVect>& a_cdrGradients,
+                                               const RealVect&              a_E,
+                                               const RealVect&              a_pos,
                                                const Real                  a_dx,
                                                const Real                  a_dt,
                                                const Real                  a_time,
@@ -5925,9 +5972,9 @@ CdrPlasmaJSON::integrateReactionsExplicitEuler(std::vector<Real>&          a_cdr
 void
 CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
                                              std::vector<Real>&          a_photonProduction,
-                                             const std::vector<RealVect> a_cdrGradients,
-                                             const RealVect              a_E,
-                                             const RealVect              a_pos,
+                                             const std::vector<RealVect>& a_cdrGradients,
+                                             const RealVect&              a_E,
+                                             const RealVect&              a_pos,
                                              const Real                  a_dx,
                                              const Real                  a_dt,
                                              const Real                  a_time,
@@ -5970,9 +6017,9 @@ CdrPlasmaJSON::integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDe
 void
 CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
                                              std::vector<Real>&          a_photonProduction,
-                                             const std::vector<RealVect> a_cdrGradients,
-                                             const RealVect              a_E,
-                                             const RealVect              a_pos,
+                                             const std::vector<RealVect>& a_cdrGradients,
+                                             const RealVect&              a_E,
+                                             const RealVect&              a_pos,
                                              const Real                  a_dx,
                                              const Real                  a_dt,
                                              const Real                  a_time,
@@ -6035,3 +6082,4 @@ CdrPlasmaJSON::integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDe
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

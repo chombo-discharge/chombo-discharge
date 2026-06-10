@@ -131,7 +131,7 @@ public:
          const Vector<ProblemDomain>&          a_domains,
          const Vector<int>&                    a_refRat,
          const Vector<Real>&                   a_dx,
-         const RealVect                        a_probLo,
+         const RealVect&                       a_probLo,
          const int                             a_finestLevel,
          const int                             a_ebGhost,
          const int                             a_numGhost,
@@ -182,7 +182,7 @@ public:
     @details Issues run-time error if a_operator can't be recognized
   */
   void
-  registerOperator(const std::string a_operator);
+  registerOperator(const std::string& a_operator);
 
   /**
     @brief Query if an AMR operator has been registered
@@ -190,7 +190,7 @@ public:
     @return True if operator has been registered and false otherwise
   */
   bool
-  queryOperator(const std::string a_operator) const;
+  queryOperator(const std::string& a_operator) const;
 
   /**
     @brief Return the EB index space

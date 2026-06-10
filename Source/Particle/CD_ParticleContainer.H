@@ -118,7 +118,7 @@ public:
          const RealVect&                          a_probLo,
          int                                      a_blockingFactor,
          int                                      a_finestLevel,
-         std::string                              a_realm);
+         const std::string&                       a_realm);
 
   /**
     @brief Regrid function. a_base is the coarsest grid level which did not change
@@ -432,7 +432,7 @@ public:
     @param[in] a_dit       Grid index
   */
   void
-  addParticles(const BinFab<P>& a_particles, int a_lvl, DataIndex a_dit);
+  addParticles(const BinFab<P>& a_particles, int a_lvl, const DataIndex& a_dit);
 
   /**
     @brief Add particles to a certain level and patch. The input particles are cell-sorted (and destroyed on output). 
@@ -441,7 +441,7 @@ public:
     @param[in]    a_dit       Grid index
   */
   void
-  addParticlesDestructive(BinFab<P>& a_particles, int a_lvl, DataIndex a_dit);
+  addParticlesDestructive(BinFab<P>& a_particles, int a_lvl, const DataIndex& a_dit);
 
   /**
     @brief Add particles from other container to this one

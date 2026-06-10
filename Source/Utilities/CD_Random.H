@@ -162,7 +162,7 @@ public:
     @return Return value
   */
   inline static RealVect
-  randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept;
+  randomPosition(const RealVect& a_lo, const RealVect& a_hi) noexcept;
 
   /**
     @brief Draw a random position physical somewhere in a grid cell.
@@ -178,13 +178,13 @@ public:
     @return Return value
   */
   inline static RealVect
-  randomPosition(const RealVect a_cellPos,
-                 const RealVect a_lo,
-                 const RealVect a_hi,
-                 const RealVect a_bndryCentroid,
-                 const RealVect a_bndryNormal,
-                 const Real     a_dx,
-                 const Real     a_kappa) noexcept;
+  randomPosition(const RealVect& a_cellPos,
+                 const RealVect& a_lo,
+                 const RealVect& a_hi,
+                 const RealVect& a_bndryCentroid,
+                 const RealVect& a_bndryNormal,
+                 const Real      a_dx,
+                 const Real      a_kappa) noexcept;
 
   /**
     @brief Draw a random position somewhere in a cut-cell
@@ -195,10 +195,10 @@ public:
     @return Returns a position inside the cut-cell and on the correct side of the EB. 
   */
   inline static RealVect
-  randomPosition(const RealVect a_lo,
-                 const RealVect a_hi,
-                 const RealVect a_bndryCentroid,
-                 const RealVect a_bndryNormal) noexcept;
+  randomPosition(const RealVect& a_lo,
+                 const RealVect& a_hi,
+                 const RealVect& a_bndryCentroid,
+                 const RealVect& a_bndryNormal) noexcept;
 
 private:
   /**

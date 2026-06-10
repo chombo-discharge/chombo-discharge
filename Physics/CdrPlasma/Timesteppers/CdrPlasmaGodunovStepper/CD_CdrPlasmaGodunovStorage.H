@@ -39,7 +39,7 @@ namespace Physics {
          @param[in] a_realm Realm where storage lives
          @param[in] a_phase Phase where storage lives (only single-phased data in here)
       */
-      CdrStorage(const RefCountedPtr<AmrMesh>& a_amr, std::string a_realm, phase::which_phase a_phase);
+      CdrStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
       /**
          @brief Destructor
@@ -279,7 +279,7 @@ namespace Physics {
          @param[in] a_realm Realm where storage lives
          @param[in] a_phase Phase where storage lives (only single-phased data in here)
       */
-      FieldStorage(const RefCountedPtr<AmrMesh>& a_amr, std::string a_realm, phase::which_phase a_phase);
+      FieldStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
       /**
          @brief Destructor
@@ -385,7 +385,7 @@ namespace Physics {
          @param[in] a_realm Realm where storage lives
          @param[in] a_phase Phase where storage lives (only single-phased data in here)
       */
-      RtStorage(const RefCountedPtr<AmrMesh>& a_amr, std::string a_realm, phase::which_phase a_phase);
+      RtStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
       /**
          @brief Destructor
@@ -476,7 +476,7 @@ namespace Physics {
          @param[in] a_realm Realm where storage lives
          @param[in] a_phase Phase where storage lives (only single-phased data in here)
       */
-      SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr, std::string a_realm, phase::which_phase a_phase);
+      SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr, const std::string& a_realm, phase::which_phase a_phase);
 
       /**
          @brief Destructor

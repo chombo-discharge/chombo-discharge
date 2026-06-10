@@ -107,7 +107,7 @@ public:
     @note This only associates a function with a domain side -- to use it one must also call setDomainBcType(a_domainSide, BcType::Function)
   */
   void
-  setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction);
+  setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction& a_fluxFunction);
 
   /**
     @brief Implicit diffusion Euler advance without source term.

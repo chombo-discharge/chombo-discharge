@@ -1660,7 +1660,7 @@ CdrPlasmaGodunovStepper::computeDt()
 
 void
 CdrPlasmaGodunovStepper::floorMass(EBAMRCellData&                  a_data,
-                                   const std::string               a_message,
+                                   const std::string&              a_message,
                                    const RefCountedPtr<CdrSolver>& a_solver) const
 {
   CH_TIME("CdrPlasmaGodunovStepper::floorMass(EBAMRCellData, std::string, RefCountedPtr<CdrSolver>)");

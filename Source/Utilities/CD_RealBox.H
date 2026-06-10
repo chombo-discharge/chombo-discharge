@@ -36,7 +36,7 @@ public:
     @param[in] a_lo Low corner
     @param[in] a_hi High corners
   */
-  RealBox(const RealVect a_lo, const RealVect a_hi);
+  RealBox(const RealVect& a_lo, const RealVect& a_hi);
 
   /**
     @brief Full constructor. Sets corners from input box
@@ -45,7 +45,7 @@ public:
     @param[in] a_dx     Grid resolution.
     @details This sets the low corner as a_probLo + a_box.lowEnd()*a_dx
   */
-  RealBox(const Box a_box, const RealVect a_origin, const Real a_dx);
+  RealBox(const Box a_box, const RealVect& a_origin, const Real a_dx);
 
   /**
     @brief Destructor (does nothing)
@@ -87,7 +87,7 @@ public:
     @return True if point inside, false otherwise
   */
   bool
-  isPointInside(const RealVect a_point) const;
+  isPointInside(const RealVect& a_point) const;
 
   /**
     @brief Check if a_box is completely inside this box. For this to be true, all the corners of a_box must be 

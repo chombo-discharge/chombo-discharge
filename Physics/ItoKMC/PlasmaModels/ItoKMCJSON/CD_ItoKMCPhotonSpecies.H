@@ -31,7 +31,7 @@ namespace Physics {
 	@param[in] a_name          Name of the species
 	@param[in] a_kappaFunction Absorption function
       */
-      ItoKMCPhotonSpecies(const std::string a_name, const std::function<Real(const RealVect& a_pos)>& a_kappaFunction)
+      ItoKMCPhotonSpecies(const std::string& a_name, const std::function<Real(const RealVect& a_pos)>& a_kappaFunction)
         : m_kappa(a_kappaFunction)
       {
         m_name = a_name;

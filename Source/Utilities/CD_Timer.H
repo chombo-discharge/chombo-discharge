@@ -62,7 +62,7 @@ public:
     @brief Default constructor. This creates a timer without any timer events and without a name. 
     @param[in] a_process Description
   */
-  inline Timer(const std::string a_process);
+  inline Timer(const std::string& a_process);
 
   /**
     @brief Destructor
@@ -89,7 +89,7 @@ public:
     @note This will give a run-time error if the event has already been started (i.e. startEvent(a_event) has not been called prior). 
   */
   inline void
-  startEvent(const std::string a_event) noexcept;
+  startEvent(const std::string& a_event) noexcept;
 
   /**
     @brief Stop an event
@@ -97,7 +97,7 @@ public:
     @note This will give a run-time error if the event has not already been started (i.e. startEvent(a_event) has not been called prior). 
   */
   inline void
-  stopEvent(const std::string a_event) noexcept;
+  stopEvent(const std::string& a_event) noexcept;
 
   /**
     @brief Print all timed events to cout.
@@ -115,7 +115,7 @@ public:
     @param[in] a_fileName File name
   */
   inline void
-  writeReportToFile(const std::string a_fileName) const noexcept;
+  writeReportToFile(const std::string& a_fileName) const noexcept;
 
   /**
     @brief Clear all events

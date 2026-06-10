@@ -33,7 +33,7 @@ public:
     @param[in] a_point  Center of circle used for curvature
     @param[in] a_inside Fluid on inside or not
   */
-  WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect a_point, const bool a_inside);
+  WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect& a_point, const bool a_inside);
 
   /**
     @brief Copy constructor

@@ -67,7 +67,7 @@ namespace Physics {
 	@return Molar fraction of this background species at a_pos.
       */
       Real
-      molarFraction(const RealVect a_pos) const noexcept;
+      molarFraction(const RealVect& a_pos) const noexcept;
 
       /**
 	@brief Get the species name

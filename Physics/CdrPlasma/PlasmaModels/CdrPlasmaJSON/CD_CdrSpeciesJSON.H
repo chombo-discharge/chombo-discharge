@@ -50,11 +50,11 @@ namespace Physics {
          @param[in] a_diffusive   Diffusive species or not
          @param[in] a_initialData Initial data function
       */
-      CdrSpeciesJSON(const std::string  a_name,
-                     const int          a_Z,
-                     const bool         a_diffusive,
-                     const bool         a_mobile,
-                     const InitFunction a_initialData);
+      CdrSpeciesJSON(const std::string&  a_name,
+                     const int           a_Z,
+                     const bool          a_diffusive,
+                     const bool          a_mobile,
+                     const InitFunction& a_initialData);
 
       /**
          @brief Disallowed constructor.
@@ -96,11 +96,11 @@ namespace Physics {
          @param[in] a_initialData Initial data function
       */
       void
-      define(const std::string  a_name,
-             const int          a_Z,
-             const bool         a_diffusive,
-             const bool         a_mobile,
-             const InitFunction a_initialData);
+      define(const std::string&  a_name,
+             const int           a_Z,
+             const bool          a_diffusive,
+             const bool          a_mobile,
+             const InitFunction& a_initialData);
 
       /**
          @brief Initial data function. 

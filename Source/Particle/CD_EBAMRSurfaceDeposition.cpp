@@ -333,8 +333,8 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
       const EBGraph&    ebgraph = stencils.getEBGraph();
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit) {
-        const VolIndex curVoF = vofit();
-        const IntVect  curIV  = curVoF.gridIndex();
+        const VolIndex& curVoF = vofit();
+        const IntVect   curIV  = curVoF.gridIndex();
 
         VoFStencil& stencil = stencils(curVoF, 0);
         stencil.clear();

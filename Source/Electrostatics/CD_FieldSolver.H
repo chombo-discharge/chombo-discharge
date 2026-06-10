@@ -364,7 +364,7 @@ public:
     @param[in] a_realm Realm identifier. 
   */
   void
-  setRealm(const std::string a_realm);
+  setRealm(const std::string& a_realm);
 
   /**
     @brief Set time for this solver.

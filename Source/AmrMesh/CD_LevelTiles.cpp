@@ -48,7 +48,7 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
   m_myGrids.clear();
 
   for (LayoutIterator lit = a_dbl.layoutIterator(); lit.ok(); ++lit) {
-    const LayoutIndex  lidx   = lit();
+    const LayoutIndex& lidx   = lit();
     const IntVect      tile   = coarsen(a_dbl[lidx], a_blockingFactor).smallEnd();
     const unsigned int rankID = a_dbl.procID(lidx);
     const unsigned int tileID = a_dbl.index(lidx);

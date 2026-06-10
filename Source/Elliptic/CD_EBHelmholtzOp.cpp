@@ -968,8 +968,8 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
           const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
           for (int iface = 0; iface < faces.size(); iface++) {
-            const FaceIndex face     = faces[iface];
-            const Real      faceArea = ebisbox.areaFrac(face);
+            const FaceIndex& face     = faces[iface];
+            const Real       faceArea = ebisbox.areaFrac(face);
 
             // Distinguish between domain and internal faces; the domain bc object does not multiply the
             // flux by beta.

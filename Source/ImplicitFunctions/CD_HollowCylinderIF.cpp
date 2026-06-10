@@ -21,13 +21,13 @@
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
 
-HollowCylinderIF::HollowCylinderIF(const RealVect a_center1,
-                                   const RealVect a_center2,
-                                   const Real     a_majorRadius,
-                                   const Real     a_minorRadius,
-                                   const Real     a_outerCurvature,
-                                   const Real     a_innerCurvature,
-                                   const bool     a_fluidInside)
+HollowCylinderIF::HollowCylinderIF(const RealVect& a_center1,
+                                   const RealVect& a_center2,
+                                   const Real      a_majorRadius,
+                                   const Real      a_minorRadius,
+                                   const Real      a_outerCurvature,
+                                   const Real      a_innerCurvature,
+                                   const bool      a_fluidInside)
 {
 
   // Make the SmoothUnion of this stuff.
@@ -35,9 +35,6 @@ HollowCylinderIF::HollowCylinderIF(const RealVect a_center1,
 
   RealVect axis = (a_center2 - a_center1);
   axis          = axis / axis.vectorLength();
-
-  const RealVect c2 = a_center2; // + a_curv*axis;
-  const RealVect c1 = a_center1; // - a_curv*axis;
 
   auto*   bigCylinder   = (BaseIF*)(new RoundedCylinderIF(a_center1,
                                                       a_center2,

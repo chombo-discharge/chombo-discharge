@@ -20,16 +20,16 @@
 #include <CD_PerlinPlaneSdf.H>
 #include <CD_NamespaceHeader.H>
 
-PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
-                             const RealVect a_normal,
-                             const RealVect a_xyz,
-                             const RealVect a_noiseFreq,
-                             const int      a_octaves,
-                             const Real     a_noiseAmp,
-                             const Real     a_persistence,
-                             const Real     a_cornerCurv,
-                             const bool     a_reseed,
-                             const bool     a_fluidInside)
+PerlinSlabSdf::PerlinSlabSdf(const RealVect& a_ccPoint,
+                             const RealVect& a_normal,
+                             const RealVect& a_xyz,
+                             const RealVect& a_noiseFreq,
+                             const int       a_octaves,
+                             const Real      a_noiseAmp,
+                             const Real      a_persistence,
+                             const Real      a_cornerCurv,
+                             const bool      a_reseed,
+                             const bool      a_fluidInside)
   : m_fluidInside(a_fluidInside)
 {
 

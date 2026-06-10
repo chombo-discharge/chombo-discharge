@@ -21,7 +21,7 @@
 EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
                                                      const Real                      a_r1,
                                                      const Real                      a_r2,
-                                                     const SourceFunction            a_source)
+                                                     const SourceFunction&           a_source)
   : m_species(a_species), m_r1(a_r1), m_r2(a_r2), m_source(a_source)
 {
   CH_TIME("EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC");

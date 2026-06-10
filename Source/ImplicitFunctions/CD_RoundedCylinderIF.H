@@ -33,11 +33,11 @@ public:
     @param[in] a_curv        Radius of curvature
     @param[in] a_fluidInside Domain on inside or outside
   */
-  RoundedCylinderIF(const RealVect a_center1,
-                    const RealVect a_center2,
-                    const Real     a_radius,
-                    const Real     a_curv,
-                    const bool     a_fluidInside);
+  RoundedCylinderIF(const RealVect& a_center1,
+                    const RealVect& a_center2,
+                    const Real      a_radius,
+                    const Real      a_curv,
+                    const bool      a_fluidInside);
 
   /**
     @brief Copy constructor

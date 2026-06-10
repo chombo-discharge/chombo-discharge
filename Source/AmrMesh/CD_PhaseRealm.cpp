@@ -48,7 +48,7 @@ PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
                    const Vector<ProblemDomain>&          a_domains,
                    const Vector<int>&                    a_refRat,
                    const Vector<Real>&                   a_dx,
-                   const RealVect                        a_probLo,
+                   const RealVect&                       a_probLo,
                    const int                             a_finestLevel,
                    const int                             a_ebGhost,
                    const int                             a_numGhost,
@@ -327,7 +327,7 @@ PhaseRealm::regridOperators(const int a_lmin)
 }
 
 void
-PhaseRealm::registerOperator(const std::string a_operator)
+PhaseRealm::registerOperator(const std::string& a_operator)
 {
   CH_TIME("PhaseRealm::registerOperator");
   if (m_verbose) {
@@ -350,7 +350,7 @@ PhaseRealm::registerOperator(const std::string a_operator)
 }
 
 bool
-PhaseRealm::queryOperator(const std::string a_operator) const
+PhaseRealm::queryOperator(const std::string& a_operator) const
 {
   CH_TIME("PhaseRealm::queryOperator");
   if (m_verbose) {

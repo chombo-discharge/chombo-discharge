@@ -72,7 +72,7 @@ public:
     @param[in] a_startDomain Coarse domain where ScanShop begins the load balancing recursion process.
   */
   void
-  useScanShop(const ProblemDomain a_beginDomain);
+  useScanShop(const ProblemDomain& a_beginDomain);
 
   /**
     @brief Calls for ComputationalGeometry to use Chombo's geometry generation tool
@@ -208,10 +208,10 @@ protected:
     @param[in]    a_finestDx      Finest resolution which will be used.
   */
   void
-  buildGasGeometry(GeometryService*&   a_geoserver,
-                   const ProblemDomain a_finestDomain,
-                   const RealVect      a_probLo,
-                   const Real          a_finestDx);
+  buildGasGeometry(GeometryService*&    a_geoserver,
+                   const ProblemDomain& a_finestDomain,
+                   const RealVect&      a_probLo,
+                   const Real           a_finestDx);
 
   /**
     @brief Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics. 
@@ -221,10 +221,10 @@ protected:
     @param[in]    a_finestDx      Finest resolution which will be used.
   */
   void
-  buildSolidGeometry(GeometryService*&   a_geoserver,
-                     const ProblemDomain a_finestDomain,
-                     const RealVect      a_probLo,
-                     const Real          a_finestDx);
+  buildSolidGeometry(GeometryService*&    a_geoserver,
+                     const ProblemDomain& a_finestDomain,
+                     const RealVect&      a_probLo,
+                     const Real           a_finestDx);
 };
 
 #include <CD_NamespaceFooter.H>

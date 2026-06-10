@@ -62,15 +62,15 @@ protected:
       @param[in] a_noisePersistence Noise persistence
       @param[in] a_noiseOctaves Number of noise octaves
     */
-    ClampedNoisePlane(const Vec3 a_point,
-                      const Vec3 a_normal,
-                      const Vec3 a_clampLo,
-                      const Vec3 a_clampHi,
-                      const Vec3 a_clampDx,
-                      const Vec3 a_noiseFrequency,
-                      const Real a_noiseAmplitude,
-                      const Real a_noisePersistence,
-                      const int  a_noiseOctaves) noexcept;
+    ClampedNoisePlane(const Vec3& a_point,
+                      const Vec3& a_normal,
+                      const Vec3& a_clampLo,
+                      const Vec3& a_clampHi,
+                      const Vec3& a_clampDx,
+                      const Vec3& a_noiseFrequency,
+                      const Real  a_noiseAmplitude,
+                      const Real  a_noisePersistence,
+                      const int   a_noiseOctaves) noexcept;
 
     /**
       @brief Destructor (does nothing)

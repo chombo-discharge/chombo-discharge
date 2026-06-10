@@ -27,16 +27,16 @@
 #include <CD_RoundedBoxIF.H>
 #include <CD_NamespaceHeader.H>
 
-ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
-                               const Real     a_width,
-                               const BaseIF*  a_impFunc,
-                               const int      a_num_left,
-                               const int      a_num_right,
-                               const Real     a_ccDist,
-                               const Real     a_xShift,
-                               const Real     a_yShift,
-                               const Real     a_curv,
-                               const bool     a_fluidInside)
+ProfilePlaneIF::ProfilePlaneIF(const RealVect& a_point,
+                               const Real      a_width,
+                               const BaseIF*   a_impFunc,
+                               const int       a_num_left,
+                               const int       a_num_right,
+                               const Real      a_ccDist,
+                               const Real      a_xShift,
+                               const Real      a_yShift,
+                               const Real      a_curv,
+                               const bool      a_fluidInside)
 {
   if (SpaceDim == 3) {
     MayDay::Error("ProfilePlaneIF(...) - only 2D is currently supported");

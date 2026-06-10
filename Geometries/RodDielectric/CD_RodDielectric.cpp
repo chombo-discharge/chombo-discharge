@@ -84,16 +84,16 @@ RodDielectric::defineInsulator()
 
   RefCountedPtr<BaseIF> bif;
   if (str == "plane") {
-    bif = this->getPlane();
+    bif = ChomboDischarge::RodDielectric::getPlane();
   }
   else if (str == "box") {
-    bif = this->getBox();
+    bif = ChomboDischarge::RodDielectric::getBox();
   }
   else if (str == "perlin_box") {
-    bif = this->getPerlinBox();
+    bif = ChomboDischarge::RodDielectric::getPerlinBox();
   }
   else if (str == "sphere") {
-    bif = this->getSphere();
+    bif = ChomboDischarge::RodDielectric::getSphere();
   }
   else {
     MayDay::Abort("RodDielectric.:defineInsulator - unsupported shape");

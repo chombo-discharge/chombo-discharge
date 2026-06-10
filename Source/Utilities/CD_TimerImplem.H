@@ -39,7 +39,7 @@ Timer::wallClock()
   return durationInSeconds.count();
 }
 
-inline Timer::Timer(const std::string a_processName)
+inline Timer::Timer(const std::string& a_processName)
 {
   m_processName = a_processName;
   m_events.clear();
@@ -57,7 +57,7 @@ Timer::clear() noexcept
 }
 
 inline void
-Timer::startEvent(const std::string a_event) noexcept
+Timer::startEvent(const std::string& a_event) noexcept
 {
 #ifdef _OPENMP
   if (omp_get_thread_num() == 0) {
@@ -86,7 +86,7 @@ Timer::startEvent(const std::string a_event) noexcept
 }
 
 inline void
-Timer::stopEvent(const std::string a_event) noexcept
+Timer::stopEvent(const std::string& a_event) noexcept
 {
 #ifdef _OPENMP
   if (omp_get_thread_num() == 0) {
@@ -337,7 +337,7 @@ Timer::computeTotalElapsedTime(const bool a_localReportOnly) const noexcept
 }
 
 inline void
-Timer::writeReportToFile(const std::string a_fileName) const noexcept
+Timer::writeReportToFile(const std::string& a_fileName) const noexcept
 {
 
   // First, go through all events and gather the times on the master rank.

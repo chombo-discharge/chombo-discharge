@@ -26,13 +26,13 @@ using Sphere = EBGeometry::SphereSDF<Real>;
 
 constexpr size_t SphereArray::K;
 
-SphereArray::SphereArray(const Real     a_radius,
-                         const RealVect a_loCenter,
-                         const RealVect a_sphereGap,
-                         const IntVect  a_numSpheres,
-                         const bool     a_useFast,
-                         const bool     a_flipInside,
-                         const Real     a_zCoord)
+SphereArray::SphereArray(const Real      a_radius,
+                         const RealVect& a_loCenter,
+                         const RealVect& a_sphereGap,
+                         const IntVect   a_numSpheres,
+                         const bool      a_useFast,
+                         const bool      a_flipInside,
+                         const Real      a_zCoord)
 {
   CH_TIME("SphereArray::SphereArray(full)");
 

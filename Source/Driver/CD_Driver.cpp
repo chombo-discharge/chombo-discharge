@@ -1347,10 +1347,10 @@ Driver::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh)
 }
 
 void
-Driver::setup(const std::string a_inputFile,
-              const int         a_initialRegrids,
-              const bool        a_restart,
-              const std::string a_restartFile)
+Driver::setup(const std::string& a_inputFile,
+              const int          a_initialRegrids,
+              const bool         a_restart,
+              const std::string& a_restartFile)
 {
   CH_TIME("Driver::setup(string, int, bool, string)");
   if (m_verbosity > 5) {
@@ -1633,7 +1633,7 @@ Driver::setupFresh(const int a_initialRegrids)
 
 #ifdef CH_USE_HDF5
 void
-Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartFile)
+Driver::setupForRestart(const int a_initialRegrids, const std::string& a_restartFile)
 {
   CH_TIME("Driver::setupForRestart");
   if (m_verbosity > 5) {
@@ -1721,7 +1721,7 @@ Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartF
 #endif
 
 void
-Driver::checkRestartFile(const std::string a_restartFile) const
+Driver::checkRestartFile(const std::string& a_restartFile) const
 {
   CH_TIME("Driver::checkRestartFile");
   if (m_verbosity > 4) {
@@ -2242,7 +2242,7 @@ Driver::writeCrashFile()
 }
 
 void
-Driver::writePlotFile(const std::string a_filename)
+Driver::writePlotFile(const std::string& a_filename)
 {
   CH_TIMERS("Driver::writePlotFile(string)");
   CH_TIMER("Driver::writePlotFile::allocate", t1);
@@ -2900,10 +2900,10 @@ Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
 
 #ifdef CH_USE_HDF5
 void
-Driver::readCheckpointRealmLoads(Vector<long int>& a_loads,
-                                 HDF5Handle&       a_handle,
-                                 const std::string a_realm,
-                                 const int         a_level)
+Driver::readCheckpointRealmLoads(Vector<long int>&  a_loads,
+                                 HDF5Handle&        a_handle,
+                                 const std::string& a_realm,
+                                 const int          a_level)
 {
   CH_TIME("Driver::readCheckpointRealmLoads(Vector<long int>, HDF5Handle, string, int)");
   if (m_verbosity > 5) {

@@ -40,7 +40,7 @@ public:
     @param[in] a_mobile       Mobile species or not
     @param[in] a_diffusive    Diffusive species or not
   */
-  ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive);
+  ItoSpecies(const std::string& a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive);
 
   /**
     @brief Destructor (does nothing):

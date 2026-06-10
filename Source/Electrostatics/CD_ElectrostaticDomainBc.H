@@ -103,7 +103,7 @@ public:
     @param[in] a_wall Wall
   */
   void
-  setBc(const DomainSide a_domainSide, const Bc a_bc);
+  setBc(const DomainSide a_domainSide, const Bc& a_bc);
 
   /**
     @brief Returns the boundary condition for a domain side

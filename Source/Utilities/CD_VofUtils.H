@@ -235,7 +235,7 @@ protected:
     @return True if the quadrant is well defined and false otherwise. 
   */
   static bool
-  isQuadrantWellDefined(const RealVect a_normal);
+  isQuadrantWellDefined(const RealVect& a_normal);
 
   /**
     @brief Returns the coordinate direction
@@ -243,7 +243,7 @@ protected:
     @param[in] a_normal Normal
   */
   static std::pair<int, Side::LoHiSide>
-  getCardinalDirection(const RealVect a_normal);
+  getCardinalDirection(const RealVect& a_normal);
 
   /**
     @brief Get all VoFs that can be found with a monotone path with specified radius

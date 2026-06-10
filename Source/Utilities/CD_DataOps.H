@@ -1057,7 +1057,7 @@ public:
   static void
   setValue(MFAMRCellData&                             a_lhs,
            const std::function<Real(const RealVect)>& a_function,
-           const RealVect                             a_probLo,
+           const RealVect&                            a_probLo,
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
@@ -1089,7 +1089,7 @@ public:
   static void
   setValue(EBAMRCellData&                             a_lhs,
            const std::function<Real(const RealVect)>& a_function,
-           const RealVect                             a_probLo,
+           const RealVect&                            a_probLo,
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
@@ -1121,7 +1121,7 @@ public:
   static void
   setValue(EBAMRFluxData&                             a_lhs,
            const std::function<Real(const RealVect)>& a_function,
-           const RealVect                             a_probLo,
+           const RealVect&                            a_probLo,
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
@@ -1153,7 +1153,7 @@ public:
   static void
   setValue(EBAMRIVData&                               a_lhs,
            const std::function<Real(const RealVect)>& a_function,
-           const RealVect                             a_probLo,
+           const RealVect&                            a_probLo,
            const Vector<Real>&                        a_dx,
            const int                                  a_comp);
 
@@ -1184,7 +1184,7 @@ public:
   static void
   setValue(EBAMRCellData&                                 a_lhs,
            const std::function<RealVect(const RealVect)>& a_function,
-           const RealVect                                 a_probLo,
+           const RealVect&                                a_probLo,
            const Vector<Real>&                            a_dx);
 
   /**
@@ -1432,7 +1432,7 @@ public:
     @param[in]  a_centroid EB centroid
   */
   static void
-  computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
+  computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect& a_normal, const RealVect& a_centroid);
 
   /**
     @brief Check if all corners/points are inside an EB
@@ -1442,7 +1442,7 @@ public:
     @param[in] a_corners Corners
   */
   static bool
-  allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
+  allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect& a_normal, const RealVect& a_centroid);
 
   /**
     @brief Shift points by a specified distance

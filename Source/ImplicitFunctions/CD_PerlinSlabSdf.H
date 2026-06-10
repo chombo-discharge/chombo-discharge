@@ -44,16 +44,16 @@ public:
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
     @param[in] a_fluidInside Fluid on inside or not
   */
-  PerlinSlabSdf(const RealVect a_ccPoint,
-                const RealVect a_normal,
-                const RealVect a_xyz,
-                const RealVect a_noiseFreq,
-                const int      a_octaves,
-                const Real     a_noiseAmp,
-                const Real     a_persistence,
-                const Real     a_cornerCurv,
-                const bool     a_reseed,
-                const bool     a_fluidInside);
+  PerlinSlabSdf(const RealVect& a_ccPoint,
+                const RealVect& a_normal,
+                const RealVect& a_xyz,
+                const RealVect& a_noiseFreq,
+                const int       a_octaves,
+                const Real      a_noiseAmp,
+                const Real      a_persistence,
+                const Real      a_cornerCurv,
+                const bool      a_reseed,
+                const bool      a_fluidInside);
 
   /**
     @brief Copy constructor. Copies over implicit function.

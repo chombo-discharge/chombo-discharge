@@ -77,7 +77,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>&         a_grids,
                              const RealVect&                          a_probLo,
                              const int                                a_blockingFactor,
                              const int                                a_finestLevel,
-                             const std::string                        a_realm)
+                             const std::string&                       a_realm)
 {
   CH_TIME("ParticleContainer::~ParticleContainer");
 
@@ -674,7 +674,7 @@ ParticleContainer<P>::addParticlesDestructive(List<P>& a_particles)
 
 template <class P>
 void
-ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit)
+ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::addParticles(BinFab)");
   if (m_verbose) {
@@ -704,7 +704,7 @@ ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int a_lvl
 
 template <class P>
 void
-ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit)
+ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex& a_dit)
 {
   CH_TIME("ParticleContainer::addParticlesDestructive(BinFab)");
   if (m_verbose) {

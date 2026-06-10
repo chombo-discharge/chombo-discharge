@@ -63,7 +63,7 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
                           const int          a_radius,
                           const int          a_p,
                           const int          a_order,
-                          const IntVectSet   a_knownTerms)
+                          const IntVectSet&  a_knownTerms)
 {
 
   VoFStencil gradSten;
@@ -102,7 +102,7 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
                           const int          a_radius,
                           const int          a_p,
                           const int          a_order,
-                          const IntVectSet   a_knownTerms)
+                          const IntVectSet&  a_knownTerms)
 {
   VoFStencil gradSten;
 
@@ -322,7 +322,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const int               a_p,
                               const int               a_order,
-                              const IntVectSet        a_knownTerms)
+                              const IntVectSet&       a_knownTerms)
 {
   Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
@@ -334,7 +334,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const Vector<Real>&     a_weights,
                               const int               a_order,
-                              const IntVectSet        a_knownTerms)
+                              const IntVectSet&       a_knownTerms)
 {
 
   // TLDR: This routine

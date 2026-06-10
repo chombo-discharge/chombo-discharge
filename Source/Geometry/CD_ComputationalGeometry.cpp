@@ -47,7 +47,7 @@ ComputationalGeometry::~ComputationalGeometry()
 }
 
 void
-ComputationalGeometry::useScanShop(const ProblemDomain a_beginDomain)
+ComputationalGeometry::useScanShop(const ProblemDomain& a_beginDomain)
 {
   CH_TIME("ComputationalGeometry::useScanShop(ProblemDomain)");
 
@@ -188,10 +188,10 @@ ComputationalGeometry::buildGeometries(const ProblemDomain a_finestDomain,
 }
 
 void
-ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
-                                        const ProblemDomain a_finestDomain,
-                                        const RealVect      a_probLo,
-                                        const Real          a_finestDx)
+ComputationalGeometry::buildGasGeometry(GeometryService*&    a_geoserver,
+                                        const ProblemDomain& a_finestDomain,
+                                        const RealVect&      a_probLo,
+                                        const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 
@@ -229,10 +229,10 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 }
 
 void
-ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
-                                          const ProblemDomain a_finestDomain,
-                                          const RealVect      a_probLo,
-                                          const Real          a_finestDx)
+ComputationalGeometry::buildSolidGeometry(GeometryService*&    a_geoserver,
+                                          const ProblemDomain& a_finestDomain,
+                                          const RealVect&      a_probLo,
+                                          const Real           a_finestDx)
 {
   CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");
 

@@ -71,7 +71,7 @@ CdrSolver::setDefaultDomainBC()
   // TLDR: This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass).
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
-  auto zero = [](const RealVect /*a_position*/, const Real /*a_time*/) -> Real {
+  auto zero = [](const RealVect& /*a_position*/, const Real /*a_time*/) -> Real {
     return 0.0;
   };
 
@@ -97,8 +97,8 @@ CdrSolver::setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const Cdr
 }
 
 void
-CdrSolver::setDomainBcFunction(const CdrDomainBC::DomainSide   a_domainSide,
-                               const CdrDomainBC::FluxFunction a_fluxFunction)
+CdrSolver::setDomainBcFunction(const CdrDomainBC::DomainSide    a_domainSide,
+                               const CdrDomainBC::FluxFunction& a_fluxFunction)
 {
   CH_TIME("CdrSolver::setDomainBcFunction(CdrDomainBC::DomainSide, CdrDomainBC::FluxFunction)");
   if (m_verbosity > 5) {
@@ -1056,8 +1056,8 @@ CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&             a_divG,
           const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
           for (int iface = 0; iface < faces.size(); iface++) {
-            const FaceIndex face     = faces[iface];
-            const Real      faceArea = ebisbox.areaFrac(face);
+            const FaceIndex& face     = faces[iface];
+            const Real       faceArea = ebisbox.areaFrac(face);
 
             divG(vof, m_comp) += isign * faceArea * flux(face, m_comp);
           }

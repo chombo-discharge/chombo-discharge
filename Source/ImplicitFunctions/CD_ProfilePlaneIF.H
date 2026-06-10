@@ -44,16 +44,16 @@ public:
     @param[in] a_curv        Corner curvatures
     @param[in] a_fluidInside Fluid on inside or not
   */
-  ProfilePlaneIF(const RealVect a_point,
-                 const Real     a_width,
-                 const BaseIF*  a_impFunc,
-                 const int      a_num_left,
-                 const int      a_num_right,
-                 const Real     a_ccDist,
-                 const Real     a_xShift,
-                 const Real     a_yShift,
-                 const Real     a_curv,
-                 const bool     a_fluidInside);
+  ProfilePlaneIF(const RealVect& a_point,
+                 const Real      a_width,
+                 const BaseIF*   a_impFunc,
+                 const int       a_num_left,
+                 const int       a_num_right,
+                 const Real      a_ccDist,
+                 const Real      a_xShift,
+                 const Real      a_yShift,
+                 const Real      a_curv,
+                 const bool      a_fluidInside);
 
   /**
     @brief Copy constructor

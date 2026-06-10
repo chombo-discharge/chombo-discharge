@@ -551,7 +551,7 @@ FieldSolver::setVoltage(std::function<Real(const Real a_time)> a_voltage)
     pout() << "FieldSolver::setVoltage(std::function<Real(const Real a_time)>)" << endl;
   }
 
-  m_voltage      = a_voltage;
+  m_voltage      = std::move(a_voltage);
   m_isVoltageSet = true;
 }
 
@@ -591,7 +591,7 @@ FieldSolver::setTime(const int a_timeStep, const Real a_time, const Real a_dt)
 }
 
 void
-FieldSolver::setRealm(const std::string a_realm)
+FieldSolver::setRealm(const std::string& a_realm)
 {
   CH_TIME("FieldSolver::setRealm(std::string)");
   if (m_verbosity > 5) {
@@ -752,7 +752,7 @@ FieldSolver::setDefaultDomainBcFunctions()
   }
 
   // Default space/time dependency of domain BCs.
-  auto defaultDomainBcFunction = [](const RealVect /*a_position*/, const Real /*a_time*/) -> Real {
+  auto defaultDomainBcFunction = [](const RealVect& /*a_position*/, const Real /*a_time*/) -> Real {
     return 1.0;
   };
 
@@ -787,7 +787,7 @@ FieldSolver::setDefaultEbBcFunctions()
     const Real frac = elec.getFraction();
 
     ElectrostaticEbBc::BcFunction curFunc =
-      [&, &time = this->m_time, &voltage = this->m_voltage, val, frac](const RealVect /*a_position*/,
+      [&, &time = this->m_time, &voltage = this->m_voltage, val, frac](const RealVect& /*a_position*/,
                                                                        const Real /*a_time*/) {
         return voltage(time) * val * frac;
       };
@@ -875,7 +875,7 @@ FieldSolver::parseDomainBc()
 
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
-          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, tangDir](const RealVect a_pos,
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, tangDir](const RealVect& a_pos,
                                                                                             const Real /*a_time*/) {
             return table->interpolate<0>(a_pos[tangDir]) * voltage(time) * val;
           };
@@ -883,7 +883,7 @@ FieldSolver::parseDomainBc()
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [table, val, tangDir](const RealVect a_pos, const Real /*a_time*/) {
+          curFunc = [table, val, tangDir](const RealVect& a_pos, const Real /*a_time*/) {
             return table->interpolate<0>(a_pos[tangDir]) * val;
           };
 
@@ -959,7 +959,7 @@ FieldSolver::parseDomainBc()
 
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
-          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect a_pos,
+          curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect& a_pos,
                                                                                         const Real /*a_time*/) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
@@ -973,7 +973,7 @@ FieldSolver::parseDomainBc()
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [table, val, dir](const RealVect a_pos, const Real /*a_time*/) {
+          curFunc = [table, val, dir](const RealVect& a_pos, const Real /*a_time*/) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
               if (d != dir) {
@@ -997,7 +997,7 @@ FieldSolver::parseDomainBc()
           MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann_custom takes exactly 1 argument");
         }
 
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real /*a_time*/) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -1017,7 +1017,7 @@ FieldSolver::parseDomainBc()
 
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
-          curFunc = [&bcFunc, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect a_pos,
+          curFunc = [&bcFunc, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect& a_pos,
                                                                                      const Real /*a_time*/) {
             return bcFunc(a_pos, time) * voltage(time) * val;
           };
@@ -1025,7 +1025,7 @@ FieldSolver::parseDomainBc()
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real /*a_time*/) {
+          curFunc = [&bcFunc, &time = this->m_time, val](const RealVect& a_pos, const Real /*a_time*/) {
             return bcFunc(a_pos, time) * val;
           };
 
@@ -1986,3 +1986,4 @@ FieldSolver::fillCoveredPotential(MFAMRCellData& a_phi) const noexcept
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

@@ -44,7 +44,7 @@ namespace PolyUtils {
     @param[in] a_func Func
   */
   Real
-  brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)> a_func) noexcept;
+  brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)>& a_func) noexcept;
 } // namespace PolyUtils
 
 #include <CD_NamespaceFooter.H>

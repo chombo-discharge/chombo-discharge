@@ -43,10 +43,10 @@ namespace Physics {
 	@param[in] a_isMobile     Mobile or not.
 	@param[in] a_isDiffusive  Diffusive or not.
       */
-      ItoKMCCDRSpecies(const std::string a_name,
-                       const int         a_chargeNumber,
-                       const bool        a_isMobile,
-                       const bool        a_isDiffusive)
+      ItoKMCCDRSpecies(const std::string& a_name,
+                       const int          a_chargeNumber,
+                       const bool         a_isMobile,
+                       const bool         a_isDiffusive)
       {
         m_name         = a_name;
         m_chargeNumber = a_chargeNumber;
@@ -55,7 +55,7 @@ namespace Physics {
 
         m_initialParticles.clear();
 
-        m_initialData = [&](const RealVect a_pos, const Real a_time) -> Real {
+        m_initialData = [&](const RealVect& a_pos, const Real a_time) -> Real {
           return 0.0;
         };
       }

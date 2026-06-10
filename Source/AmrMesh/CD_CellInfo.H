@@ -45,11 +45,11 @@ public:
     @param[in] a_bndryCentroid Boundary centroid
     @param[in] a_bndryNormal   Boundary normal
   */
-  CellInfo(const IntVect  a_gridIndex,
-           const Real     a_dx,
-           const Real     a_volFrac,
-           const RealVect a_bndryCentroid,
-           const RealVect a_bndryNormal) noexcept;
+  CellInfo(const IntVect   a_gridIndex,
+           const Real      a_dx,
+           const Real      a_volFrac,
+           const RealVect& a_bndryCentroid,
+           const RealVect& a_bndryNormal) noexcept;
 
   /**
     @brief Destructor

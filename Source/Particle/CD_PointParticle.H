@@ -39,7 +39,7 @@ public:
     @param[in] a_position Position (in physical space)
     @param[in] a_weight     Particle weight
   */
-  inline PointParticle(RealVect a_position, Real a_weight);
+  inline PointParticle(const RealVect& a_position, Real a_weight);
 
   /**
     @brief Dtor - does nothing.
@@ -59,7 +59,7 @@ public:
     @param[in] a_weight     Particle weight
   */
   inline void
-  define(RealVect a_position, Real a_weight);
+  define(const RealVect& a_position, Real a_weight);
 
   /**
     @brief Get weight

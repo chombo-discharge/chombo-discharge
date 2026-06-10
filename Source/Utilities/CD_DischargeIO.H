@@ -53,7 +53,7 @@ namespace DischargeIO {
     @return Return value
   */
   Vector<std::string>
-  numberFmt(Vector<long long> a_numbers, char a_sep = ',') noexcept;
+  numberFmt(const Vector<long long>& a_numbers, char a_sep = ',') noexcept;
 
 #ifdef CH_USE_HDF5
   /**
@@ -78,11 +78,11 @@ namespace DischargeIO {
               const Vector<DisjointBoxLayout>&     a_grids,
               const Vector<LevelData<EBCellFAB>*>& a_data,
               const Vector<ProblemDomain>&         a_domains,
-              Vector<Real>                         a_dx,
-              Vector<int>                          a_refinementRatios,
+              const Vector<Real>&                  a_dx,
+              const Vector<int>&                   a_refinementRatios,
               Real                                 a_dt,
               Real                                 a_time,
-              RealVect                             a_probLo,
+              const RealVect&                      a_probLo,
               int                                  a_numLevels,
               int                                  a_numGhost) noexcept;
 #endif
@@ -119,7 +119,7 @@ namespace DischargeIO {
   void
   writeEBHDF5Level(HDF5Handle&                 a_handleH5,
                    const LevelData<EBCellFAB>& a_outputData,
-                   ProblemDomain               a_domain,
+                   const ProblemDomain&        a_domain,
                    Real                        a_dx,
                    Real                        a_dt,
                    Real                        a_time,

@@ -90,7 +90,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_numAmrLevels = m_amrLevelGrids.size();
 
   // Asking multigrid to do the bottom solve at a refined AMR level is classified as bad input.
-  if (this->isFiner(m_bottomDomain, m_amrLevelGrids[0].getDomain())) {
+  if (ChomboDischarge::MFHelmholtzOpFactory::isFiner(m_bottomDomain, m_amrLevelGrids[0].getDomain())) {
     MayDay::Abort("MFHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
 
@@ -409,15 +409,15 @@ MFHelmholtzOpFactory::coarsenCoefficientsMG()
         const LevelData<MFFluxFAB>&   fineBcoef      = *mgBco[mgLevel];
         const LevelData<MFBaseIVFAB>& fineBcoefIrreg = *mgBcoIrreg[mgLevel];
 
-        this->coarsenCoefficients(coarAcoef,
-                                  coarBcoef,
-                                  coarBcoefIrreg,
-                                  fineAcoef,
-                                  fineBcoef,
-                                  fineBcoefIrreg,
-                                  mflgCoar,
-                                  mflgFine,
-                                  mgRefRat);
+        ChomboDischarge::MFHelmholtzOpFactory::coarsenCoefficients(coarAcoef,
+                                                                   coarBcoef,
+                                                                   coarBcoefIrreg,
+                                                                   fineAcoef,
+                                                                   fineBcoef,
+                                                                   fineBcoefIrreg,
+                                                                   mflgCoar,
+                                                                   mflgFine,
+                                                                   mgRefRat);
       }
     }
   }
@@ -518,7 +518,7 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
   const DisjointBoxLayout& fineDbl    = a_fineMflg.getGrids();
   DisjointBoxLayout        coarDbl;
 
-  ProblemDomain test = fineDomain;
+  const ProblemDomain& test = fineDomain;
   if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
     const Box domainBox = fineDomain.domainBox();
 

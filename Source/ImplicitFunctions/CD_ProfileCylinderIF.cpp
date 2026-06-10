@@ -21,17 +21,17 @@
 #include <CD_TorusSdf.H>
 #include <CD_NamespaceHeader.H>
 
-ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
-                                     const RealVect a_endPoint2,
-                                     const Real     a_cylinderRadius,
-                                     const Real     a_torusMajorRadius,
-                                     const Real     a_torusMinorRadius,
-                                     const Real     a_ccDistance,
-                                     const Real     a_shift,
-                                     const Real     a_roundingRadius,
-                                     const int      a_numLeft,
-                                     const int      a_numRight,
-                                     const bool     a_fluidInside)
+ProfileCylinderIF::ProfileCylinderIF(const RealVect& a_endPoint1,
+                                     const RealVect& a_endPoint2,
+                                     const Real      a_cylinderRadius,
+                                     const Real      a_torusMajorRadius,
+                                     const Real      a_torusMinorRadius,
+                                     const Real      a_ccDistance,
+                                     const Real      a_shift,
+                                     const Real      a_roundingRadius,
+                                     const int       a_numLeft,
+                                     const int       a_numRight,
+                                     const bool      a_fluidInside)
 {
   if (SpaceDim != 3) {
     MayDay::Abort("ProfileCylinderIF::ProfileCylinderIF - this is a 3D object!");

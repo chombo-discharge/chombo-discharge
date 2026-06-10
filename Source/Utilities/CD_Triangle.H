@@ -131,7 +131,7 @@ protected:
     (collinear or coincident) vertices.
   */
   static inline Real
-  computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3) noexcept;
+  computeTriangleArea(const Vec3& a_x1, const Vec3& a_x2, const Vec3& a_x3) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

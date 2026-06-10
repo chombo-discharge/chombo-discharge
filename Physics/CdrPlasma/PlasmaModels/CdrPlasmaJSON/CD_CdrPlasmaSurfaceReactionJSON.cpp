@@ -16,9 +16,9 @@
 
 using namespace Physics::CdrPlasma;
 
-CdrPlasmaSurfaceReactionJSON::CdrPlasmaSurfaceReactionJSON(const std::list<int> a_plasmaReactants,
-                                                           const std::list<int> a_photonReactants,
-                                                           const std::list<int> a_plasmaProducts)
+CdrPlasmaSurfaceReactionJSON::CdrPlasmaSurfaceReactionJSON(const std::list<int>& a_plasmaReactants,
+                                                           const std::list<int>& a_photonReactants,
+                                                           const std::list<int>& a_plasmaProducts)
   : m_plasmaReactants(a_plasmaReactants), m_photonReactants(a_photonReactants), m_plasmaProducts(a_plasmaProducts)
 {}
 

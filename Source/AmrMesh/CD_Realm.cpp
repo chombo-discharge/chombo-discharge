@@ -39,24 +39,24 @@ Realm::Realm() : m_isDefined(false), m_verbosity(-1)
 Realm::~Realm() = default;
 
 void
-Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
-              const Vector<ProblemDomain>&                              a_domains,
-              const Vector<int>&                                        a_refRat,
-              const Vector<Real>&                                       a_dx,
-              const RealVect                                            a_probLo,
-              const int                                                 a_finestLevel,
-              const int                                                 a_blockingFactor,
-              const int                                                 a_ebGhost,
-              const int                                                 a_numGhost,
-              const int                                                 a_lsfGhost,
-              const int                                                 a_redistRad,
-              const int                                                 a_mgInterpOrder,
-              const int                                                 a_mgInterpRadius,
-              const int                                                 a_mgInterpWeight,
-              const CellCentroidInterpolation::Type                     a_centroidInterpType,
-              const EBCentroidInterpolation::Type                       a_ebInterpType,
-              const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
-              const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis)
+Realm::define(const Vector<DisjointBoxLayout>&                           a_grids,
+              const Vector<ProblemDomain>&                               a_domains,
+              const Vector<int>&                                         a_refRat,
+              const Vector<Real>&                                        a_dx,
+              const RealVect&                                            a_probLo,
+              const int                                                  a_finestLevel,
+              const int                                                  a_blockingFactor,
+              const int                                                  a_ebGhost,
+              const int                                                  a_numGhost,
+              const int                                                  a_lsfGhost,
+              const int                                                  a_redistRad,
+              const int                                                  a_mgInterpOrder,
+              const int                                                  a_mgInterpRadius,
+              const int                                                  a_mgInterpWeight,
+              const CellCentroidInterpolation::Type                      a_centroidInterpType,
+              const EBCentroidInterpolation::Type                        a_ebInterpType,
+              const std::map<phase::which_phase, RefCountedPtr<BaseIF>>& a_baseif,
+              const RefCountedPtr<MultiFluidIndexSpace>&                 a_mfis)
 {
   CH_TIME("Realm::define");
   if (m_verbosity > 5) {
@@ -1086,7 +1086,7 @@ Realm::definePetscGrid() noexcept
 }
 
 void
-Realm::registerOperator(const std::string a_operator, const phase::which_phase a_phase)
+Realm::registerOperator(const std::string& a_operator, const phase::which_phase a_phase)
 {
   CH_TIME("Realm::registerOperator(operator, phase)");
   if (m_verbosity > 5) {
@@ -1097,7 +1097,7 @@ Realm::registerOperator(const std::string a_operator, const phase::which_phase a
 }
 
 bool
-Realm::queryOperator(const std::string a_operator, const phase::which_phase a_phase) const
+Realm::queryOperator(const std::string& a_operator, const phase::which_phase a_phase) const
 {
   CH_TIME("Realm::queryOperator");
   if (m_verbosity > 5) {
@@ -1108,7 +1108,7 @@ Realm::queryOperator(const std::string a_operator, const phase::which_phase a_ph
 }
 
 void
-Realm::registerMask(const std::string a_mask, const int a_buffer)
+Realm::registerMask(const std::string& a_mask, const int a_buffer)
 {
   CH_TIME("Realm::registerMask(mask, buffer)");
   if (m_verbosity > 5) {
@@ -1119,7 +1119,7 @@ Realm::registerMask(const std::string a_mask, const int a_buffer)
 }
 
 bool
-Realm::queryMask(const std::string a_mask, const int a_buffer) const
+Realm::queryMask(const std::string& a_mask, const int a_buffer) const
 {
   CH_TIME("Realm::queryMask(mask, buffer)");
   if (m_verbosity > 5) {
@@ -1295,7 +1295,7 @@ Realm::getLevelset(const phase::which_phase a_phase) const
 }
 
 const AMRMask&
-Realm::getMask(const std::string a_mask, const int a_buffer) const
+Realm::getMask(const std::string& a_mask, const int a_buffer) const
 {
   if (!this->queryMask(a_mask, a_buffer)) {
     std::string str = "Realm::getMask - could not find mask '" + a_mask + "'";

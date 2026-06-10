@@ -43,16 +43,16 @@ public:
     @param[in] a_reseed      If true, reseed the RNG. Otherwise, the the original Perlin hash table. 
     @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
-  BoundedNoisePlane(const std::string a_orientation,
-                    const RealVect    a_point,
-                    const RealVect    a_clampLo,
-                    const RealVect    a_clampHi,
-                    const Real        a_clampK,
-                    const Real        a_noiseAmp,
-                    const RealVect    a_noiseFreq,
-                    const Real        a_persistence,
-                    const int         a_octaves,
-                    const bool        a_reseed = false);
+  BoundedNoisePlane(const std::string& a_orientation,
+                    const RealVect&    a_point,
+                    const RealVect&    a_clampLo,
+                    const RealVect&    a_clampHi,
+                    const Real         a_clampK,
+                    const Real         a_noiseAmp,
+                    const RealVect&    a_noiseFreq,
+                    const Real         a_persistence,
+                    const int          a_octaves,
+                    const bool         a_reseed = false);
   /**
     @brief Copy constructor
     @param[in] a_inputIF Other plane

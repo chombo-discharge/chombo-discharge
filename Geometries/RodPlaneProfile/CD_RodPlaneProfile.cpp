@@ -105,10 +105,10 @@ RodPlaneProfile::getBaseIF()
 
   switch (m_profile) {
   case profile::circle:
-    ret = this->getBaseIFCircle();
+    ret = ChomboDischarge::RodPlaneProfile::getBaseIFCircle();
     break;
   case profile::square:
-    ret = this->getBaseIFSquare();
+    ret = ChomboDischarge::RodPlaneProfile::getBaseIFSquare();
     break;
   default:
     MayDay::Abort("RodPlaneProfile::getBaseIF - logic bust, unknown profile requested");

@@ -306,7 +306,7 @@ public:
     @note Run-time errors will occur if the operator or realm do not exist. 
   */
   void
-  registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase);
+  registerOperator(const std::string& a_operator, const std::string& a_realm, const phase::which_phase a_phase);
 
   /**
     @brief Register a boolean mask over a realm. 
@@ -317,7 +317,7 @@ public:
     @param[in] a_realm Realm
   */
   void
-  registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm);
+  registerMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm);
 
   /**
     @brief Build domains
@@ -346,7 +346,7 @@ public:
     @return True if the realm exists and false otherwise. 
   */
   bool
-  queryRealm(const std::string a_realm) const;
+  queryRealm(const std::string& a_realm) const;
 
   /**
     @brief Check if mesh has an EBCF
@@ -362,7 +362,7 @@ public:
     @note It is safe to re-register a realm. 
   */
   void
-  registerRealm(const std::string a_realm);
+  registerRealm(const std::string& a_realm);
 
   /**
     @brief Alias multifluid data up to a specified level. 
@@ -456,7 +456,7 @@ public:
   void
   computeGradient(EBAMRCellData&           a_gradient,
                   const EBAMRCellData&     a_phi,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase) const;
 
   /**
@@ -471,7 +471,7 @@ public:
   void
   computeGradient(EBAMRFluxData&           a_gradient,
                   const EBAMRCellData&     a_phi,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase) const;
 
   /**
@@ -483,7 +483,7 @@ public:
     ghost cells are updated before using this routine. 
   */
   void
-  computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;
+  computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string& a_realm) const;
 
   /**
     @brief Compute face-centered gradient over an AMR hierarchy. 
@@ -494,7 +494,7 @@ public:
     ghost cells are updated before using this routine. 
   */
   void
-  computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;
+  computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string& a_realm) const;
 
   /**
     @brief Allocate a data holder over a specific realm
@@ -507,7 +507,7 @@ public:
   */
   void
   allocate(EBAMRCellData&           a_data,
-           const std::string        a_realm,
+           const std::string&       a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
            const int                a_ghost = -1) const;
@@ -524,7 +524,7 @@ public:
   */
   void
   allocate(LevelData<EBCellFAB>&    a_data,
-           const std::string        a_realm,
+           const std::string&       a_realm,
            const phase::which_phase a_phase,
            const int                a_level,
            const int                a_nComp,
@@ -541,7 +541,7 @@ public:
   */
   void
   allocate(EBAMRFluxData&           a_data,
-           const std::string        a_realm,
+           const std::string&       a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
            const int                a_ghost = -1) const;
@@ -557,7 +557,7 @@ public:
   */
   void
   allocate(EBAMRIVData&             a_data,
-           const std::string        a_realm,
+           const std::string&       a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
            const int                a_ghost = -1) const;
@@ -573,7 +573,7 @@ public:
   */
   void
   allocate(EBAMRIFData&             a_data,
-           const std::string        a_realm,
+           const std::string&       a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
            const int                a_ghost = -1) const;
@@ -587,7 +587,7 @@ public:
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void
-  allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
+  allocate(EBAMRBool& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm.
@@ -598,7 +598,7 @@ public:
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void
-  allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
+  allocate(MFAMRCellData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm.
@@ -609,7 +609,7 @@ public:
     @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
-  allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
+  allocate(MFAMRFluxData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm
@@ -620,7 +620,7 @@ public:
     @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
-  allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = 0) const;
+  allocate(MFAMRIVData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = 0) const;
 
   /**
     @brief Reallocate data. 
@@ -705,7 +705,7 @@ public:
     @param[in]    a_average Averaging method
   */
   void
-  average(MFAMRCellData& a_data, const std::string a_realm, const Average& a_average) const;
+  average(MFAMRCellData& a_data, const std::string& a_realm, const Average& a_average) const;
 
   /**
     @brief Arithmetic coarsening of multifluid data.
@@ -713,7 +713,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  arithmeticAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+  arithmeticAverage(MFAMRCellData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Harmonic coarsening of multifluid data.
@@ -721,7 +721,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  harmonicAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+  harmonicAverage(MFAMRCellData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Conservative coarsening of multifluid data.
@@ -729,7 +729,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  conservativeAverage(MFAMRCellData& a_data, const std::string a_realm) const;
+  conservativeAverage(MFAMRCellData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Average multifluid data over a specified realm
@@ -738,7 +738,7 @@ public:
     @param[in]    a_average Averaging method
   */
   void
-  average(MFAMRFluxData& a_data, const std::string a_realm, const Average& a_average) const;
+  average(MFAMRFluxData& a_data, const std::string& a_realm, const Average& a_average) const;
 
   /**
     @brief Average multifluid data over a realm. 
@@ -747,7 +747,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  arithmeticAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
+  arithmeticAverage(MFAMRFluxData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Average multifluid data over a realm. 
@@ -756,7 +756,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  harmonicAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
+  harmonicAverage(MFAMRFluxData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Average down multifluid data over a realm. 
@@ -764,7 +764,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  conservativeAverage(MFAMRFluxData& a_data, const std::string a_realm) const;
+  conservativeAverage(MFAMRFluxData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Average down on specific realm and phase. 
@@ -775,7 +775,7 @@ public:
   */
   void
   average(EBAMRCellData&           a_data,
-          const std::string        a_realm,
+          const std::string&       a_realm,
           const phase::which_phase a_phase,
           const Average&           a_average) const;
 
@@ -789,7 +789,7 @@ public:
   */
   void
   average(EBAMRCellData&           a_data,
-          const std::string        a_realm,
+          const std::string&       a_realm,
           const phase::which_phase a_phase,
           const Average&           a_average,
           const Interval&          a_variables) const;
@@ -801,7 +801,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  arithmeticAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  arithmeticAverage(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Arithmetic average of data. 
@@ -812,7 +812,7 @@ public:
   */
   void
   arithmeticAverage(EBAMRCellData&           a_data,
-                    const std::string        a_realm,
+                    const std::string&       a_realm,
                     const phase::which_phase a_phase,
                     const Interval&          a_variables) const;
 
@@ -823,7 +823,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  harmonicAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  harmonicAverage(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Harmonic average of data. Does all components. 
@@ -834,7 +834,7 @@ public:
   */
   void
   harmonicAverage(EBAMRCellData&           a_data,
-                  const std::string        a_realm,
+                  const std::string&       a_realm,
                   const phase::which_phase a_phase,
                   const Interval&          a_variables) const;
 
@@ -845,7 +845,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  conservativeAverage(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Conseratively average data. Does all components. 
@@ -856,7 +856,7 @@ public:
   */
   void
   conservativeAverage(EBAMRCellData&           a_data,
-                      const std::string        a_realm,
+                      const std::string&       a_realm,
                       const phase::which_phase a_phase,
                       const Interval&          a_variables) const;
 
@@ -869,7 +869,7 @@ public:
   */
   void
   average(EBAMRFluxData&           a_data,
-          const std::string        a_realm,
+          const std::string&       a_realm,
           const phase::which_phase a_phase,
           const Average&           a_average) const;
 
@@ -881,7 +881,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  arithmeticAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  arithmeticAverage(EBAMRFluxData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Average down on specific realm and phase. 
@@ -891,7 +891,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  harmonicAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  harmonicAverage(EBAMRFluxData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Average down on specific realm and phase. 
@@ -900,7 +900,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  conservativeAverage(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRFluxData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Average down on specific realm and phase. 
@@ -911,7 +911,7 @@ public:
   */
   void
   average(EBAMRIVData&             a_data,
-          const std::string        a_realm,
+          const std::string&       a_realm,
           const phase::which_phase a_phase,
           const Average&           a_average) const;
 
@@ -922,7 +922,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  arithmeticAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  arithmeticAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Harmonic average on specific realm and phase. 
@@ -931,7 +931,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  harmonicAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  harmonicAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Conservative averaging on specific realm and phase.
@@ -940,7 +940,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  conservativeAverage(EBAMRIVData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  conservativeAverage(EBAMRIVData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Deposit scalar particle quantities on the mesh.
@@ -1179,7 +1179,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  interpGhost(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  interpGhost(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level. 
@@ -1193,7 +1193,7 @@ public:
   interpGhost(LevelData<EBCellFAB>&       a_fineData,
               const LevelData<EBCellFAB>& a_coarData,
               const int                   a_fineLevel,
-              const std::string           a_realm,
+              const std::string&          a_realm,
               const phase::which_phase    a_phase) const;
 
   /**
@@ -1202,7 +1202,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  interpGhost(MFAMRCellData& a_data, const std::string a_realm) const;
+  interpGhost(MFAMRCellData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
@@ -1210,7 +1210,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const;
+  interpGhostPwl(MFAMRCellData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
@@ -1219,7 +1219,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  interpGhostPwl(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Interpolate ghost cells over a realm and phase. 
@@ -1229,7 +1229,7 @@ public:
     @param[in]    a_realm Realm name
   */
   void
-  interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const;
+  interpGhostMG(MFAMRCellData& a_data, const std::string& a_realm) const;
 
   /**
     @brief Interpolate ghost cells over a realm and phase. 
@@ -1240,7 +1240,7 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void
-  interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+  interpGhostMG(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Interpolate data to new grids
@@ -1322,7 +1322,7 @@ public:
     @details This leaves regular data intact, while the values in irregular are replaced by the corresponding interpolation to centroids. 
   */
   void
-  interpToCentroids(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const noexcept;
+  interpToCentroids(EBAMRCellData& a_data, const std::string& a_realm, const phase::which_phase a_phase) const noexcept;
 
   /**
     @brief Interpolate data to centroids
@@ -1333,7 +1333,7 @@ public:
   */
   void
   interpToCentroids(LevelData<EBCellFAB>&    a_data,
-                    const std::string        a_realm,
+                    const std::string&       a_realm,
                     const phase::which_phase a_phase,
                     const int                a_level) const noexcept;
 
@@ -1349,7 +1349,7 @@ public:
   void
   interpToCentroids(EBCellFAB&               a_centroidData,
                     const EBCellFAB&         a_cellData,
-                    const std::string        a_realm,
+                    const std::string&       a_realm,
                     const phase::which_phase a_phase,
                     const int                a_level,
                     const DataIndex&         a_din) const noexcept;
@@ -1365,7 +1365,7 @@ public:
   void
   interpToCentroids(EBAMRIVData&             a_centroidData,
                     const EBAMRCellData&     a_cellData,
-                    const std::string        a_realm,
+                    const std::string&       a_realm,
                     const phase::which_phase a_phase) const noexcept;
 
   /**
@@ -1379,7 +1379,7 @@ public:
   void
   interpToCentroids(LevelData<BaseIVFAB<Real>>& a_centroidData,
                     const LevelData<EBCellFAB>& a_cellData,
-                    const std::string           a_realm,
+                    const std::string&          a_realm,
                     const phase::which_phase    a_phase,
                     const int                   a_level) const noexcept;
 
@@ -1393,7 +1393,7 @@ public:
   void
   interpToEB(EBAMRIVData&             a_centroidData,
              const EBAMRCellData&     a_cellData,
-             const std::string        a_realm,
+             const std::string&       a_realm,
              const phase::which_phase a_phase) const noexcept;
 
   /**
@@ -1407,7 +1407,7 @@ public:
   void
   interpToEB(LevelData<BaseIVFAB<Real>>& a_centroidData,
              const LevelData<EBCellFAB>& a_cellData,
-             const std::string           a_realm,
+             const std::string&          a_realm,
              const phase::which_phase    a_phase,
              const int                   a_level) const noexcept;
 
@@ -1423,7 +1423,7 @@ public:
   void
   interpToEB(BaseIVFAB<Real>&         a_centroidData,
              const EBCellFAB&         a_cellData,
-             const std::string        a_realm,
+             const std::string&       a_realm,
              const phase::which_phase a_phase,
              const int                a_level,
              const DataIndex&         a_din) const noexcept;
@@ -1498,7 +1498,7 @@ public:
     @param[in] a_lmin  Coarsest level that changes. 
   */
   void
-  regridRealm(const std::string          a_realm,
+  regridRealm(const std::string&         a_realm,
               const Vector<Vector<int>>& a_procs,
               const Vector<Vector<Box>>& a_boxes,
               const int                  a_lmin);
@@ -1531,7 +1531,7 @@ public:
     @param[in] a_lmin  Coarsest grid level that changes. 
   */
   void
-  regridOperators(const std::string a_realm, const int a_lmin);
+  regridOperators(const std::string& a_realm, const int a_lmin);
 
   /**
     @brief Do a sanity check to make sure everything is set up correctly
@@ -1683,7 +1683,7 @@ public:
     @return Grids for the specified realm
   */
   const Vector<DisjointBoxLayout>&
-  getGrids(const std::string a_realm) const;
+  getGrids(const std::string& a_realm) const;
 
   /**
     @brief Get domains
@@ -1700,7 +1700,7 @@ public:
     @return Mask
   */
   const AMRMask&
-  getMask(const std::string a_mask, const int a_buffer, const std::string a_realm) const;
+  getMask(const std::string& a_mask, const int a_buffer, const std::string& a_realm) const;
 
   /**
     @brief Get a map of all valid cells on a specified realm
@@ -1708,7 +1708,7 @@ public:
     @return Valid cells
   */
   const AMRMask&
-  getValidCells(const std::string a_realm) const;
+  getValidCells(const std::string& a_realm) const;
 
   /**
     @brief Get the tiled space representation
@@ -1716,7 +1716,7 @@ public:
     @return Level tiles
   */
   const Vector<RefCountedPtr<LevelTiles>>&
-  getLevelTiles(const std::string a_realm) const;
+  getLevelTiles(const std::string& a_realm) const;
 
   /**
     @brief Get the EBLevelGrid for a Realm and phase
@@ -1725,7 +1725,7 @@ public:
     @return EBLevelGrids on all AMR levels
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
-  getEBLevelGrid(const std::string a_realm, const phase::which_phase a_phase) const;
+  getEBLevelGrid(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get the coarsened fine EBLevelGrid for a Realm and phase
@@ -1734,7 +1734,7 @@ public:
     @return Coarsened-fine EBLevelGrids on all AMR levels
   */
   const Vector<RefCountedPtr<EBLevelGrid>>&
-  getEBLevelGridCoFi(const std::string a_realm, const phase::which_phase a_phase) const;
+  getEBLevelGridCoFi(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get EBISLayouts for a Realm and phase
@@ -1743,7 +1743,7 @@ public:
     @return EBISLayouts on all AMR levels
   */
   const Vector<EBISLayout>&
-  getEBISLayout(const std::string a_realm, const phase::which_phase a_phase) const;
+  getEBISLayout(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get EBISLayouts for a Realm
@@ -1751,7 +1751,7 @@ public:
     @return M f level grid
   */
   const Vector<RefCountedPtr<MFLevelGrid>>&
-  getMFLevelGrid(const std::string a_realm) const;
+  getMFLevelGrid(const std::string& a_realm) const;
 
   /**
     @brief Get vof iterators for a Realm and phase. This has the capability of iterating through cut-cells. 
@@ -1761,7 +1761,7 @@ public:
     @param[in] a_phase Description
   */
   Vector<RefCountedPtr<LayoutData<VoFIterator>>>&
-  getVofIterator(const std::string a_realm, const phase::which_phase a_phase) const;
+  getVofIterator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get levelset function, allocated over a grid for a Realm and phase
@@ -1770,7 +1770,7 @@ public:
     @return Levelset
   */
   const EBAMRFAB&
-  getLevelset(const std::string a_realm, const phase::which_phase a_phase) const;
+  getLevelset(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get EBAMRParticleMesh operator
@@ -1779,7 +1779,7 @@ public:
     @return Particle mesh
   */
   EBAMRParticleMesh&
-  getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
+  getParticleMesh(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get EBAMRSurfaceDeposition surface deposition operator
@@ -1788,7 +1788,7 @@ public:
     @return Surface deposition
   */
   EBAMRSurfaceDeposition&
-  getSurfaceDeposition(const std::string a_realm, const phase::which_phase a_phase) const;
+  getSurfaceDeposition(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get the coarsening utility
@@ -1797,7 +1797,7 @@ public:
     @return Coarse-averaging operators on all levels
   */
   Vector<RefCountedPtr<EBCoarAve>>&
-  getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
+  getCoarseAverage(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get multigrid interpolation utility
@@ -1806,7 +1806,7 @@ public:
     @return Multigrid interpolator
   */
   Vector<RefCountedPtr<EBMultigridInterpolator>>&
-  getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
+  getMultigridInterpolator(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get interpolator
@@ -1815,7 +1815,7 @@ public:
     @return Coarse-to-fine interpolation operators on all levels
   */
   Vector<RefCountedPtr<EBCoarseToFineInterp>>&
-  getFineInterp(const std::string a_realm, const phase::which_phase a_phase) const;
+  getFineInterp(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get flux register
@@ -1824,7 +1824,7 @@ public:
     @return Flux registers on all AMR levels
   */
   Vector<RefCountedPtr<EBReflux>>&
-  getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
+  getFluxRegister(const std::string& a_realm, const phase::which_phase a_phase) const;
 
   /**
     @brief Get the redistribution operators
@@ -1833,7 +1833,7 @@ public:
     @return Redistribution op
   */
   Vector<RefCountedPtr<EBFluxRedistribution>>&
-  getRedistributionOp(const std::string a_realm, const phase::which_phase a_phase) const;
+  getRedistributionOp(const std::string& a_realm, const phase::which_phase a_phase) const;
 
 #ifdef CH_USE_PETSC
   /**
@@ -2235,7 +2235,7 @@ protected:
   void
   computeGradient(LevelData<EBCellFAB>&       a_gradient,
                   const LevelData<EBCellFAB>& a_phi,
-                  const std::string           a_realm,
+                  const std::string&          a_realm,
                   const phase::which_phase    a_phase,
                   const int                   a_lvl) const;
 };

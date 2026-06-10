@@ -77,7 +77,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
   m_numAmrLevels = m_amrLevelGrids.size();
 
   // Asking multigrid to do the bottom solve at a refined AMR level is classified as bad input.
-  if (this->isFiner(m_bottomDomain, m_amrLevelGrids[0]->getDomain())) {
+  if (ChomboDischarge::EBHelmholtzOpFactory::isFiner(m_bottomDomain, m_amrLevelGrids[0]->getDomain())) {
     MayDay::Error("EBHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
 
@@ -114,7 +114,8 @@ EBHelmholtzOpFactory::defineMultigridLevels()
 
     // If we are at the coarsest AMR level then we can generate even coarser grids to accelerate multigrid convergence. But don't
     // do this if the user has specified that the coarsest AMR level is also the bottom level in multigrid.
-    if (amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())) {
+    if (amrLevel == 0 &&
+        ChomboDischarge::EBHelmholtzOpFactory::isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())) {
       m_hasMgLevels[amrLevel] = true;
     }
 
@@ -167,7 +168,7 @@ EBHelmholtzOpFactory::defineMultigridLevels()
         // Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
         // we will terminate the coarsening and let AMRMultiGrid do the bottom solve.
         if (hasCoarser) {
-          if (this->isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)) {
+          if (ChomboDischarge::EBHelmholtzOpFactory::isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)) {
             hasCoarser = false;
           }
           else {
@@ -277,15 +278,15 @@ EBHelmholtzOpFactory::coarsenCoefficientsMG()
         const LevelData<EBFluxFAB>&       fineBcoef      = *mgBco[mgLevel];
         const LevelData<BaseIVFAB<Real>>& fineBcoefIrreg = *mgBcoIrreg[mgLevel];
 
-        this->coarsenCoefficients(coarAcoef,
-                                  coarBcoef,
-                                  coarBcoefIrreg,
-                                  fineAcoef,
-                                  fineBcoef,
-                                  fineBcoefIrreg,
-                                  mflgCoar,
-                                  mflgFine,
-                                  mgRefRat);
+        ChomboDischarge::EBHelmholtzOpFactory::coarsenCoefficients(coarAcoef,
+                                                                   coarBcoef,
+                                                                   coarBcoefIrreg,
+                                                                   fineAcoef,
+                                                                   fineBcoef,
+                                                                   fineBcoefIrreg,
+                                                                   mflgCoar,
+                                                                   mflgFine,
+                                                                   mgRefRat);
       }
     }
   }
@@ -370,13 +371,13 @@ EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
     return (numPtsLeft == 0);
   };
 
-  const ProblemDomain      fineDomain = a_fineEblg.getDomain();
+  const ProblemDomain&     fineDomain = a_fineEblg.getDomain();
   const ProblemDomain      coarDomain = coarsen(fineDomain, a_refRat);
   const DisjointBoxLayout& fineDbl    = a_fineEblg.getDBL();
   DisjointBoxLayout        coarDbl;
 
   // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here.
-  ProblemDomain test = fineDomain;
+  const ProblemDomain& test = fineDomain;
   if (refine(coarsen(test, a_refRat), a_refRat) == fineDomain) {
     const Box domainBox = fineDomain.domainBox();
 

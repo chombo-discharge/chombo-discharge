@@ -22,14 +22,14 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-ScanShop::ScanShop(const BaseIF& a_localGeom,
-                   int           a_verbosity,
-                   Real          a_dx,
-                   RealVect      a_probLo,
-                   ProblemDomain a_finestDomain,
-                   ProblemDomain a_scanLevel,
-                   int           a_ebGhost,
-                   Real          a_thrshdVoF)
+ScanShop::ScanShop(const BaseIF&        a_localGeom,
+                   int                  a_verbosity,
+                   Real                 a_dx,
+                   const RealVect&      a_probLo,
+                   const ProblemDomain& a_finestDomain,
+                   const ProblemDomain& a_scanLevel,
+                   int                  a_ebGhost,
+                   Real                 a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF),
     m_baseIF(&a_localGeom),
     m_boxSorting(BoxSorting::Morton),
@@ -84,13 +84,16 @@ ScanShop::~ScanShop()
 void
 ScanShop::setProfileFileName(std::string a_fileName)
 {
-  m_fileName = a_fileName;
+  m_fileName = std::move(a_fileName);
 
   m_timer = Timer(m_fileName);
 }
 
 void
-ScanShop::makeDomains(Real a_dx, RealVect a_probLo, ProblemDomain a_finestDomain, ProblemDomain a_scanLevel)
+ScanShop::makeDomains(Real                 a_dx,
+                      const RealVect&      a_probLo,
+                      const ProblemDomain& a_finestDomain,
+                      const ProblemDomain& a_scanLevel)
 {
   CH_TIME("ScanShop::makeDomains(Real, RealVect, ProblemDomain, ProblemDomain)");
 
@@ -551,3 +554,4 @@ ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

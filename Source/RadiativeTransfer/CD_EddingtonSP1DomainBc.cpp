@@ -18,7 +18,7 @@ EddingtonSP1DomainBc::EddingtonSP1DomainBc()
 {
   m_bcFunctions.clear();
 
-  auto zero = [](const RealVect /*a_pos*/, const Real /*a_time*/) {
+  auto zero = [](const RealVect& /*a_pos*/, const Real /*a_time*/) {
     return 0.0;
   };
 
@@ -37,7 +37,7 @@ EddingtonSP1DomainBc::~EddingtonSP1DomainBc()
 }
 
 void
-EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc)
+EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc& a_bc)
 {
   m_bcFunctions.at(a_domainSide) = a_bc;
 }

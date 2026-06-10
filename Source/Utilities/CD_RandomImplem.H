@@ -231,13 +231,13 @@ Random::getDiscrete(T& a_distribution)
 }
 
 inline RealVect
-Random::randomPosition(const RealVect a_cellPos,
-                       const RealVect a_lo,
-                       const RealVect a_hi,
-                       const RealVect a_bndryCentroid,
-                       const RealVect a_bndryNormal,
-                       const Real     a_dx,
-                       const Real     a_kappa) noexcept
+Random::randomPosition(const RealVect& a_cellPos,
+                       const RealVect& a_lo,
+                       const RealVect& a_hi,
+                       const RealVect& a_bndryCentroid,
+                       const RealVect& a_bndryNormal,
+                       const Real      a_dx,
+                       const Real      a_kappa) noexcept
 {
 
   RealVect pos;
@@ -256,10 +256,10 @@ Random::randomPosition(const RealVect a_cellPos,
 }
 
 inline RealVect
-Random::randomPosition(const RealVect a_lo,
-                       const RealVect a_hi,
-                       const RealVect a_bndryCentroid,
-                       const RealVect a_bndryNormal) noexcept
+Random::randomPosition(const RealVect& a_lo,
+                       const RealVect& a_hi,
+                       const RealVect& a_bndryCentroid,
+                       const RealVect& a_bndryNormal) noexcept
 {
   constexpr int maxIter = 100;
 
@@ -281,7 +281,7 @@ Random::randomPosition(const RealVect a_lo,
 }
 
 inline RealVect
-Random::randomPosition(const RealVect a_lo, const RealVect a_hi) noexcept
+Random::randomPosition(const RealVect& a_lo, const RealVect& a_hi) noexcept
 {
 
   RealVect pos = RealVect::Zero;

@@ -23,7 +23,7 @@
 #include <CD_SphereSdf.H>
 #include <CD_NamespaceHeader.H>
 
-WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect a_point, const bool a_inside)
+WedgeIF::WedgeIF(const int a_dir, const Real a_angle, const Real a_curv, const RealVect& a_point, const bool a_inside)
 {
 
   // By default, constructed with infinite extent along the z-axis

@@ -34,7 +34,7 @@ constexpr Real EddingtonSP1::m_alpha;
 constexpr Real EddingtonSP1::m_beta;
 
 Real
-EddingtonSP1::s_defaultDomainBcFunction(const RealVect /*a_position*/, const Real /*a_time*/)
+EddingtonSP1::s_defaultDomainBcFunction(const RealVect& /*a_position*/, const Real /*a_time*/)
 {
   return 1.0;
 }
@@ -220,7 +220,7 @@ EddingtonSP1::parseDomainBC()
         pp.get(bcString.c_str(), str, 0);
 
         // Set the function. Capture solver time by reference.
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real /*a_time*/) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -249,7 +249,7 @@ EddingtonSP1::parseDomainBC()
 
         bcType = this->parseBcString(str);
 
-        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real /*a_time*/) {
+        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect& a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time) * val;
         };
 

@@ -45,7 +45,7 @@ public:
   EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
                                    const Real                      a_r1,
                                    const Real                      a_r2,
-                                   const SourceFunction            a_source);
+                                   const SourceFunction&           a_source);
 
   /**
     @brief Constructor. Source term is set to zero. 

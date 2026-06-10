@@ -2728,7 +2728,7 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
 void
 DataOps::setValue(MFAMRCellData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2795,7 +2795,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
 void
 DataOps::setValue(EBAMRCellData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2857,7 +2857,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
 void
 DataOps::setValue(EBAMRFluxData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2920,7 +2920,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
 void
 DataOps::setValue(EBAMRIVData&                               a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
-                  const RealVect                             a_probLo,
+                  const RealVect&                            a_probLo,
                   const Vector<Real>&                        a_dx,
                   const int                                  a_comp)
 {
@@ -2971,7 +2971,7 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
 void
 DataOps::setValue(EBAMRCellData&                                 a_lhs,
                   const std::function<RealVect(const RealVect)>& a_function,
-                  const RealVect                                 a_probLo,
+                  const RealVect&                                a_probLo,
                   const Vector<Real>&                            a_dx)
 {
   CH_TIME("DataOps::setValue(EBAMRCellData, std::function<RealVect>)");
@@ -3569,7 +3569,7 @@ DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_bo
 }
 
 void
-DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid)
+DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect& a_normal, const RealVect& a_centroid)
 {
   CH_TIME("DataOps::computeMinValidBox");
 
@@ -3636,7 +3636,7 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
 }
 
 bool
-DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid)
+DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect& a_normal, const RealVect& a_centroid)
 {
   CH_TIME("DataOps::allCornersInsideEb");
 

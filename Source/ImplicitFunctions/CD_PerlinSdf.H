@@ -39,11 +39,11 @@ public:
     @param[in] a_persistence Reduction factor for each octave
     @param[in] a_reseed Reseed permutation vector (true) or use Ken Perlin's original one (false)
   */
-  PerlinSdf(const Real     a_noiseAmp,
-            const RealVect a_noiseFreq,
-            const Real     a_persistence,
-            const int      a_octaves,
-            const bool     a_reseed = false);
+  PerlinSdf(const Real      a_noiseAmp,
+            const RealVect& a_noiseFreq,
+            const Real      a_persistence,
+            const int       a_octaves,
+            const bool      a_reseed = false);
 
   /**
     @brief Copy constructor

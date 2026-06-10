@@ -110,14 +110,14 @@ ItoKMCJSON::trim(const std::string& a_string) const noexcept
     pout() << m_className + "::trim" << endl;
   }
 
-  auto ltrim = [](const std::string a_s) -> std::string {
+  auto ltrim = [](const std::string& a_s) -> std::string {
     std::string s = a_s;
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
   };
 
   auto rtrim = [](std::string a_s) -> std::string {
-    std::string s = a_s;
+    std::string s = std::move(a_s);
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
   };
@@ -340,13 +340,13 @@ ItoKMCJSON::initializeGasLaw()
     const Real P0   = m_json["gas"]["law"][curLaw]["pressure"].get<Real>();
     const Real Rho0 = (P0 * Units::Na) / (T0 * Units::R);
 
-    m_gasTemperature = [T0](const RealVect /*a_position*/) -> Real {
+    m_gasTemperature = [T0](const RealVect& /*a_position*/) -> Real {
       return T0;
     };
-    m_gasPressure = [P0](const RealVect /*a_position*/) -> Real {
+    m_gasPressure = [P0](const RealVect& /*a_position*/) -> Real {
       return P0;
     };
-    m_gasNumberDensity = [Rho0](const RealVect /*a_position*/) -> Real {
+    m_gasNumberDensity = [Rho0](const RealVect& /*a_position*/) -> Real {
       return Rho0;
     };
   }
@@ -413,7 +413,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
         const Real m = species["molar fraction"]["value"].get<Real>();
 
-        molarFraction = [m](const RealVect /*x*/) -> Real {
+        molarFraction = [m](const RealVect& /*x*/) -> Real {
           return m;
         };
       }
@@ -523,7 +523,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
         table.truncate(minHeight, maxHeight, 0);
         table.prepareTable(0, numPoints, spacing);
 
-        molarFraction = [table, axis](const RealVect a_position) -> Real {
+        molarFraction = [table, axis](const RealVect& a_position) -> Real {
           return table.interpolate<1>(a_position[axis]);
         };
 
@@ -715,7 +715,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
       this->throwParserError(baseError + " and got 'constant' but can't have negative coefficient");
     }
 
-    func = [value](const Real /*E*/, const RealVect /*x*/) -> Real {
+    func = [value](const Real /*E*/, const RealVect& /*x*/) -> Real {
       return value;
     };
   }
@@ -730,7 +730,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
 
     LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(jsonTable, a_coeff + "/N");
 
-    func = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+    func = [this, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
       const Real N   = m_gasNumberDensity(x);
       const Real Etd = E / (N * Units::Td);
 
@@ -883,7 +883,7 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
                     stateChange,
                     &bgReactants,
                     &bgSpecies = this->m_backgroundSpecies,
-                    &N         = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
+                    &N         = this->m_gasNumberDensity](const Real E, const RealVect& x) -> Real {
             Real k = fluidRate(E, x) * std::abs(stateChange);
 
             const Real n = N(x);
@@ -899,7 +899,7 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
       }
     }
 
-    auto townsendCoeff = [rates, &mu](const Real E, const RealVect x) -> Real {
+    auto townsendCoeff = [rates, &mu](const Real E, const RealVect& x) -> Real {
       Real k = 0.0;
 
       for (const auto& r : rates) {
@@ -1364,7 +1364,7 @@ ItoKMCJSON::initializeDensities()
       }
 
       // Make the initial density function.
-      auto initFunc = [density](const RealVect /*x*/, const Real /*t*/) -> Real {
+      auto initFunc = [density](const RealVect& /*x*/, const Real /*t*/) -> Real {
         return density;
       };
 
@@ -1398,7 +1398,7 @@ ItoKMCJSON::initializeMobilities()
 
   // Read in mobilities
   for (const auto& species : m_json["plasma species"]) {
-    FunctionEX mobilityFunction = [](const Real /*E*/, const RealVect /*x*/) -> Real {
+    FunctionEX mobilityFunction = [](const Real /*E*/, const RealVect& /*x*/) -> Real {
       return 0.0;
     };
 
@@ -1431,7 +1431,7 @@ ItoKMCJSON::initializeMobilities()
           this->throwParserError(baseErrorID + " and got constant mobility but mobility should not be negative");
         }
 
-        mobilityFunction = [mu](const Real /*E*/, const RealVect /*x*/) -> Real {
+        mobilityFunction = [mu](const Real /*E*/, const RealVect& /*x*/) -> Real {
           return mu;
         };
       }
@@ -1446,7 +1446,7 @@ ItoKMCJSON::initializeMobilities()
           this->throwParserError(baseErrorID + " and got 'constant mu*N' but 'value' can't be negative");
         }
 
-        mobilityFunction = [this, mu](const Real /*E*/, const RealVect x) -> Real {
+        mobilityFunction = [this, mu](const Real /*E*/, const RealVect& x) -> Real {
           const Real N = m_gasNumberDensity(x);
 
           return mu / (std::numeric_limits<Real>::epsilon() + N);
@@ -1461,7 +1461,7 @@ ItoKMCJSON::initializeMobilities()
 
         LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(mobilityJSON, "mu*N");
 
-        mobilityFunction = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+        mobilityFunction = [this, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
@@ -1493,7 +1493,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
   m_diffusionCoefficients.resize(m_numPlasmaSpecies);
 
   for (const auto& species : m_json["plasma species"]) {
-    FunctionEX diffusionCoefficient = [](const Real /*E*/, const RealVect /*x*/) -> Real {
+    FunctionEX diffusionCoefficient = [](const Real /*E*/, const RealVect& /*x*/) -> Real {
       return 0.0;
     };
 
@@ -1526,7 +1526,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           this->throwParserError(baseErrorID + " and got constant diffusion but coefficient should not be negative");
         }
 
-        diffusionCoefficient = [D](const Real /*E*/, const RealVect /*x*/) -> Real {
+        diffusionCoefficient = [D](const Real /*E*/, const RealVect& /*x*/) -> Real {
           return D;
         };
       }
@@ -1541,7 +1541,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           this->throwParserError(baseErrorID + " and got 'constant D*N' but 'value' can't be negative");
         }
 
-        diffusionCoefficient = [this, D](const Real /*E*/, const RealVect x) -> Real {
+        diffusionCoefficient = [this, D](const Real /*E*/, const RealVect& x) -> Real {
           const Real N = m_gasNumberDensity(x);
 
           return D / (std::numeric_limits<Real>::epsilon() + N);
@@ -1556,7 +1556,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
 
         LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(diffusionJSON, "D*N");
 
-        diffusionCoefficient = [this, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+        diffusionCoefficient = [this, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
@@ -1588,7 +1588,7 @@ ItoKMCJSON::initializeTemperatures()
   m_plasmaTemperatures.resize(m_numPlasmaSpecies);
 
   for (const auto& species : m_json["plasma species"]) {
-    FunctionEX temperature = [](const Real /*E*/, const RealVect /*x*/) -> Real {
+    FunctionEX temperature = [](const Real /*E*/, const RealVect& /*x*/) -> Real {
       return 0.0;
     };
 
@@ -1605,7 +1605,7 @@ ItoKMCJSON::initializeTemperatures()
       const std::string type = temperatureJSON["type"].get<std::string>();
 
       if (type == "gas") {
-        temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect x) -> Real {
+        temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect& x) -> Real {
           return T(x);
         };
       }
@@ -1620,7 +1620,7 @@ ItoKMCJSON::initializeTemperatures()
           this->throwParserError(baseErrorID + " and got constant temperature but 'T' should not be negative");
         }
 
-        temperature = [T](const Real /*E*/, const RealVect /*x*/) -> Real {
+        temperature = [T](const Real /*E*/, const RealVect& /*x*/) -> Real {
           return T;
         };
       }
@@ -1635,7 +1635,7 @@ ItoKMCJSON::initializeTemperatures()
 
         constexpr Real eVToKelvin = 2.0 * Units::Qe / (3.0 * Units::kb);
 
-        temperature = [this, eVToKelvin, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+        temperature = [this, eVToKelvin, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
@@ -1647,7 +1647,7 @@ ItoKMCJSON::initializeTemperatures()
       }
     }
     else {
-      temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect x) -> Real {
+      temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect& x) -> Real {
         return T(x);
       };
     }
@@ -1677,7 +1677,7 @@ ItoKMCJSON::initializePhotonSpecies()
     const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
 
-    FunctionX kappaFunction = [](const RealVect /*a_pos*/) -> Real {
+    FunctionX kappaFunction = [](const RealVect& /*a_pos*/) -> Real {
       return 0.0;
     };
 
@@ -1708,7 +1708,7 @@ ItoKMCJSON::initializePhotonSpecies()
         this->throwParserError(baseErrorID + " and got constant kappa but 'value' field can not be negative");
       }
 
-      kappaFunction = [value](const RealVect /*a_pos*/) -> Real {
+      kappaFunction = [value](const RealVect& /*a_pos*/) -> Real {
         return value;
       };
     }
@@ -1754,7 +1754,7 @@ ItoKMCJSON::initializePhotonSpecies()
                        x2              = chiMax,
                        &gasPressure    = this->m_gasPressure,
                        &neutralSpecies = this->m_backgroundSpecies[m_backgroundSpeciesMap.at(neutral)]](
-                        const RealVect a_position) mutable -> Real {
+                        const RealVect& a_position) mutable -> Real {
         const Real m = neutralSpecies.molarFraction(a_position);
         const Real P = gasPressure(a_position);
         const Real p = m * P;
@@ -1793,7 +1793,7 @@ ItoKMCJSON::initializePhotonSpecies()
                        x2              = chiMax,
                        &gasPressure    = this->m_gasPressure,
                        &neutralSpecies = this->m_backgroundSpecies[m_backgroundSpeciesMap.at(neutral)]](
-                        const RealVect a_position) mutable -> Real {
+                        const RealVect& a_position) mutable -> Real {
         const Real m = neutralSpecies.molarFraction(a_position);
         const Real P = gasPressure(a_position);
         const Real p = m * P;
@@ -2050,7 +2050,7 @@ ItoKMCJSON::initializeSurfaceEmission(const std::string a_surface)
     }
 
     for (int i = 0; i < reactionSets.size(); i++) {
-      const auto curReaction = reactionSets[i];
+      const auto& curReaction = reactionSets[i];
 
       const std::string              wildcard     = std::get<0>(curReaction);
       const std::vector<std::string> curReactants = std::get<1>(curReaction);
@@ -2616,7 +2616,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
   //       hand side because the rates are simply absorbed into the rate itself.
 
-  FunctionEX fluidRate = [](const Real /*E*/, const RealVect /*x*/) -> Real {
+  FunctionEX fluidRate = [](const Real /*E*/, const RealVect& /*x*/) -> Real {
     return 0.0;
   };
 
@@ -2661,7 +2661,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       this->throwParserError(baseError + " and got constant rate but 'value' cannot be negative");
     }
 
-    fluidRate = [value](const Real /*E*/, const RealVect /*x*/) -> Real {
+    fluidRate = [value](const Real /*E*/, const RealVect& /*x*/) -> Real {
       return value;
     };
   }
@@ -2681,7 +2681,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     const int idx = m_plasmaIndexMap.at(species);
 
-    fluidRate = [&mu = m_mobilityFunctions[idx], &alpha = m_alpha](const Real E, const RealVect x) -> Real {
+    fluidRate = [&mu = m_mobilityFunctions[idx], &alpha = m_alpha](const Real E, const RealVect& x) -> Real {
       return alpha(E, x) * mu(E, x) * E;
     };
   }
@@ -2701,7 +2701,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     const int idx = m_plasmaIndexMap.at(species);
 
-    fluidRate = [&mu = m_mobilityFunctions[idx], &eta = m_eta](const Real E, const RealVect x) -> Real {
+    fluidRate = [&mu = m_mobilityFunctions[idx], &eta = m_eta](const Real E, const RealVect& x) -> Real {
       return eta(E, x) * mu(E, x) * E;
     };
   }
@@ -2715,7 +2715,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     LookupTable1D<Real, 1> tabulatedCoeff = this->parseTableEByN(a_reactionJSON, "rate/N");
 
-    fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect x) -> Real {
+    fluidRate = [&N = this->m_gasNumberDensity, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
       const Real Etd = E / (N(x) * Units::Td);
 
       return tabulatedCoeff.interpolate<1>(Etd);
@@ -2746,7 +2746,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     FunctionEX speciesTemperature;
     if (isBackground) {
       speciesTemperature = [&backgroundTemperature = this->m_gasTemperature](const Real /*E*/,
-                                                                             const RealVect x) -> Real {
+                                                                             const RealVect& x) -> Real {
         return backgroundTemperature(x);
       };
     }
@@ -2754,7 +2754,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       speciesTemperature = m_plasmaTemperatures[m_plasmaIndexMap.at(species)];
     }
 
-    fluidRate = [c1, c2, T = speciesTemperature](const Real E, const RealVect x) -> Real {
+    fluidRate = [c1, c2, T = speciesTemperature](const Real E, const RealVect& x) -> Real {
       return c1 * std::pow(T(E, x), c2);
     };
   }
@@ -2795,7 +2795,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     if (isBackgroundT1) {
       speciesTemperature1 = [&backgroundTemperature = this->m_gasTemperature](const Real /*E*/,
-                                                                              const RealVect x) -> Real {
+                                                                              const RealVect& x) -> Real {
         return backgroundTemperature(x);
       };
     }
@@ -2805,7 +2805,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     if (isBackgroundT2) {
       speciesTemperature2 = [&backgroundTemperature = this->m_gasTemperature](const Real /*E*/,
-                                                                              const RealVect x) -> Real {
+                                                                              const RealVect& x) -> Real {
         return backgroundTemperature(x);
       };
     }
@@ -2816,7 +2816,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const Real c1 = a_reactionJSON["c1"].get<Real>();
     const Real c2 = a_reactionJSON["c2"].get<Real>();
 
-    fluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2](const Real E, const RealVect x) -> Real {
+    fluidRate = [c1, c2, T1 = speciesTemperature1, T2 = speciesTemperature2](const Real E, const RealVect& x) -> Real {
       return c1 * std::pow(T1(E, x) / T2(E, x), c2);
     };
   }
@@ -2847,7 +2847,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const Real c4 = a_reactionJSON["c4"].get<Real>();
     const Real c5 = a_reactionJSON["c5"].get<Real>();
 
-    fluidRate = [c1, c2, c3, c4, c5, &N = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
+    fluidRate = [c1, c2, c3, c4, c5, &N = this->m_gasNumberDensity](const Real E, const RealVect& x) -> Real {
       const Real ETd = E / (N(x) * Units::Td);
 
       return c1 * exp(-std::pow(c2 / (c3 + c4 * ETd), c5));
@@ -2861,14 +2861,14 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   if (a_reactionJSON.contains("scale")) {
     const Real scale = a_reactionJSON["scale"].get<Real>();
 
-    fluidRate = [fluidRate, scale](const Real E, const RealVect x) {
+    fluidRate = [fluidRate, scale](const Real E, const RealVect& x) {
       return fluidRate(E, x) * scale;
     };
   }
   if (a_reactionJSON.contains("efficiency")) {
     const Real efficiency = a_reactionJSON["efficiency"].get<Real>();
 
-    fluidRate = [fluidRate, efficiency](const Real E, const RealVect x) {
+    fluidRate = [fluidRate, efficiency](const Real E, const RealVect& x) {
       return fluidRate(E, x) * efficiency;
     };
   }
@@ -2879,7 +2879,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     tabulatedEfficiency.prepareTable(0, 500, LookupTable::Spacing::Uniform);
 
-    fluidRate = [fluidRate, tabulatedEfficiency, &N = this->m_gasNumberDensity](const Real E, const RealVect x) {
+    fluidRate = [fluidRate, tabulatedEfficiency, &N = this->m_gasNumberDensity](const Real E, const RealVect& x) {
       const Real ETd = E / (N(x) * Units::Td);
 
       const Real eff = tabulatedEfficiency.interpolate<1>(ETd);
@@ -2894,7 +2894,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     tabulatedEfficiency.prepareTable(0, 500, LookupTable::Spacing::Uniform);
 
-    fluidRate = [fluidRate, tabulatedEfficiency](const Real E, const RealVect x) {
+    fluidRate = [fluidRate, tabulatedEfficiency](const Real E, const RealVect& x) {
       const Real eff = tabulatedEfficiency.interpolate<1>(E);
 
       return eff * fluidRate(E, x);
@@ -2903,7 +2903,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   if (a_reactionJSON.contains("quenching pressure")) {
     const Real pq = a_reactionJSON["quenching pressure"].get<Real>();
 
-    fluidRate = [fluidRate, pq, &p = this->m_gasPressure](const Real E, const RealVect x) {
+    fluidRate = [fluidRate, pq, &p = this->m_gasPressure](const Real E, const RealVect& x) {
       return fluidRate(E, x) * pq / (pq + p(x));
     };
   }
@@ -2924,7 +2924,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const Real kp    = a_reactionJSON["quenching rates"]["kp"].get<Real>();
     const Real kqByN = a_reactionJSON["quenching rates"]["kq/N"].get<Real>();
 
-    fluidRate = [fluidRate, kr, kp, kqByN, &N = this->m_gasNumberDensity](const Real E, const RealVect x) -> Real {
+    fluidRate = [fluidRate, kr, kp, kqByN, &N = this->m_gasNumberDensity](const Real E, const RealVect& x) -> Real {
       const Real kq = kqByN * N(x);
 
       return fluidRate(E, x) * (kr / (kr + kp + kq));
@@ -3010,7 +3010,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
                                                           const Real          V,
                                                           const Real          dx,
                                                           const Real          dt,
-                                                          const RealVect      x,
+                                                          const RealVect&     x,
                                                           const Vector<Real>& phi) -> Real {
     Real k = fluidRate(E, x);
 
@@ -3413,10 +3413,10 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
     if (std::get<0>(gradientCorrection)) {
       const int idx = m_plasmaIndexMap.at(std::get<1>(gradientCorrection));
 
-      const Real     n  = a_phi[idx];
-      const Real     mu = m_mobilityFunctions[idx](E, a_pos);
-      const Real     D  = m_diffusionCoefficients[idx](E, a_pos);
-      const RealVect g  = a_gradPhi[idx];
+      const Real      n  = a_phi[idx];
+      const Real      mu = m_mobilityFunctions[idx](E, a_pos);
+      const Real      D  = m_diffusionCoefficients[idx](E, a_pos);
+      const RealVect& g  = a_gradPhi[idx];
 
       constexpr Real safety = std::numeric_limits<Real>::epsilon();
 
@@ -3741,3 +3741,4 @@ ItoKMCJSON::multinomial(const size_t N, const std::discrete_distribution<size_t>
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

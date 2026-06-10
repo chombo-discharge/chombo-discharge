@@ -36,7 +36,7 @@ ItoKMCBackgroundSpecies::define(const std::string& a_name, const MolarFraction& 
 }
 
 Real
-ItoKMCBackgroundSpecies::molarFraction(const RealVect a_pos) const noexcept
+ItoKMCBackgroundSpecies::molarFraction(const RealVect& a_pos) const noexcept
 {
   CH_assert(m_isDefined);
 

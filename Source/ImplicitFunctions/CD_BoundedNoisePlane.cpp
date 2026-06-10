@@ -17,16 +17,16 @@
 #include <CD_BoundedNoisePlane.H>
 #include <CD_NamespaceHeader.H>
 
-BoundedNoisePlane::BoundedNoisePlane(const std::string a_orientation,
-                                     const RealVect    a_point,
-                                     const RealVect    a_clampLo,
-                                     const RealVect    a_clampHi,
-                                     const Real        a_clampK,
-                                     const Real        a_noiseAmp,
-                                     const RealVect    a_noiseFreq,
-                                     const Real        a_persistence,
-                                     const int         a_octaves,
-                                     const bool        a_reseed)
+BoundedNoisePlane::BoundedNoisePlane(const std::string& a_orientation,
+                                     const RealVect&    a_point,
+                                     const RealVect&    a_clampLo,
+                                     const RealVect&    a_clampHi,
+                                     const Real         a_clampK,
+                                     const Real         a_noiseAmp,
+                                     const RealVect&    a_noiseFreq,
+                                     const Real         a_persistence,
+                                     const int          a_octaves,
+                                     const bool         a_reseed)
   : m_maxAmp(0.0)
 {
 
@@ -93,10 +93,10 @@ BoundedNoisePlane::value(const RealVect& a_pos) const
   // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function),
   //       clamped with a boxcar function.
 
-  const RealVect n  = m_normal.second * BASISREALV(m_normal.first);
-  const RealVect x0 = m_point;
-  const RealVect x1 = a_pos;
-  const RealVect xp = x1 - PolyGeom::dot((x1 - x0), n) * n;
+  const RealVect  n  = m_normal.second * BASISREALV(m_normal.first);
+  const RealVect  x0 = m_point;
+  const RealVect& x1 = a_pos;
+  const RealVect  xp = x1 - PolyGeom::dot((x1 - x0), n) * n;
 
   auto h = [k = m_clampK](const Real x) {
     return 1.0 / (1.0 + exp(-2 * k * x));

@@ -360,10 +360,10 @@ protected:
     @param[in] a_restartFile    Name of restart file (if restarting from a previous time step)
   */
   void
-  setup(const std::string a_inputFile,
-        const int         a_initialRegrids,
-        const bool        a_restart,
-        const std::string a_restartFile);
+  setup(const std::string& a_inputFile,
+        const int          a_initialRegrids,
+        const bool         a_restart,
+        const std::string& a_restartFile);
 
   /**
     @brief Set amr
@@ -547,7 +547,7 @@ protected:
   */
 #ifdef CH_USE_HDF5
   void
-  setupForRestart(const int a_initialRegrids, const std::string a_restartFile);
+  setupForRestart(const int a_initialRegrids, const std::string& a_restartFile);
 #endif
 
   /**
@@ -561,7 +561,7 @@ protected:
     @param[in] a_restartFile Path to the restart file.
   */
   void
-  checkRestartFile(const std::string a_restartFile) const;
+  checkRestartFile(const std::string& a_restartFile) const;
 
   /**
     @brief Write a time step report to stdout.
@@ -577,7 +577,7 @@ protected:
     @param[in] a_filename File name including path. E.g. /crash/abc.hdf5.
   */
   void
-  writePlotFile(const std::string a_filename);
+  writePlotFile(const std::string& a_filename);
 
   /**
     @brief Write a plot file. This writes to plt/
@@ -681,10 +681,10 @@ protected:
     @param[in]  a_level  Grid level.
   */
   void
-  readCheckpointRealmLoads(Vector<long int>& a_loads,
-                           HDF5Handle&       a_handle,
-                           const std::string a_realm,
-                           const int         a_level);
+  readCheckpointRealmLoads(Vector<long int>&  a_loads,
+                           HDF5Handle&        a_handle,
+                           const std::string& a_realm,
+                           const int          a_level);
 #endif
 
   /**

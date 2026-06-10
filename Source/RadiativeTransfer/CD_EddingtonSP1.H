@@ -44,7 +44,7 @@ public:
     @return Returns 1.0
   */
   static Real
-  s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
+  s_defaultDomainBcFunction(const RealVect& a_position, const Real a_time);
 
   /**
     @brief Weak constructor

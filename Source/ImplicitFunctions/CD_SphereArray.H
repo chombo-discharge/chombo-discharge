@@ -48,13 +48,13 @@ public:
     @param[in] a_zCoord     If 2D, this sets the z-coordinate
     @param[in] a_loCenter Lo center
   */
-  SphereArray(Real     a_radius,
-              RealVect a_loCenter,
-              RealVect a_sphereGap,
-              IntVect  a_numSpheres,
-              bool     a_useFast,
-              bool     a_flipInside,
-              Real     a_zCoord = 0.0);
+  SphereArray(Real            a_radius,
+              const RealVect& a_loCenter,
+              const RealVect& a_sphereGap,
+              IntVect         a_numSpheres,
+              bool            a_useFast,
+              bool            a_flipInside,
+              Real            a_zCoord = 0.0);
 
   /**
     @brief Copy constructor. Sends the pointers to the object. 

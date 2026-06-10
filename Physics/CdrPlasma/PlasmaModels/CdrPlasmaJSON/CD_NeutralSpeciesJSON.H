@@ -47,7 +47,9 @@ namespace Physics {
          @param[in] a_molarFraction Molar fraction
          @param[in] a_function      Number density function
       */
-      NeutralSpeciesJSON(const std::string a_name, const Real a_molarFraction, const NumberDensityFunction a_function);
+      NeutralSpeciesJSON(const std::string&           a_name,
+                         const Real                   a_molarFraction,
+                         const NumberDensityFunction& a_function);
 
       /**
          @brief Destructor
@@ -61,7 +63,7 @@ namespace Physics {
          @param[in] a_function      Number density function
       */
       void
-      define(const std::string a_name, const Real a_molarFraction, const NumberDensityFunction a_function);
+      define(const std::string& a_name, const Real a_molarFraction, const NumberDensityFunction& a_function);
 
       /**
          @brief Get (number) density at the physical coordinates.
@@ -69,7 +71,7 @@ namespace Physics {
         @return Return value
       */
       Real
-      operator()(const RealVect a_pos) const;
+      operator()(const RealVect& a_pos) const;
 
       /**
          @brief Get the molar fraction

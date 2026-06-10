@@ -166,7 +166,9 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
 }
 
 Real
-PolyUtils::brentSolve(const Real a_point1, const Real a_point2, const std::function<Real(const Real x)> a_func) noexcept
+PolyUtils::brentSolve(const Real                               a_point1,
+                      const Real                               a_point2,
+                      const std::function<Real(const Real x)>& a_func) noexcept
 {
   CH_TIME("PolyUtils::bretSolve");
 

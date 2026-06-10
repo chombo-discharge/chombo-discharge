@@ -247,7 +247,7 @@ CellTagger::parseVerbosity()
 }
 
 bool
-CellTagger::insideTagBox(const RealVect a_pos) const
+CellTagger::insideTagBox(const RealVect& a_pos) const
 {
   CH_TIME("CellTagger::insideTagBox(RealVect)");
   if (m_verbosity > 5) {
@@ -270,7 +270,7 @@ CellTagger::insideTagBox(const RealVect a_pos) const
 }
 
 int
-CellTagger::getManualRefinementLevel(const RealVect a_pos) const
+CellTagger::getManualRefinementLevel(const RealVect& a_pos) const
 {
   CH_TIME("CellTagger::getManualRefinementLevel(RealVect)");
   if (m_verbosity > 5) {

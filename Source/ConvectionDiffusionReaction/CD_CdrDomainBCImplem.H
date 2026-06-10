@@ -23,7 +23,7 @@ CdrDomainBC::CdrDomainBC()
   //       can later override these.
 
   // Flux function which returns zero everywhere.
-  auto wallBc = [](const RealVect a_position, const Real a_time) -> Real {
+  auto wallBc = [](const RealVect& a_position, const Real a_time) -> Real {
     return 0.0;
   };
 

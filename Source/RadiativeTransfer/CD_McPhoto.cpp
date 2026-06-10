@@ -1183,7 +1183,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               const RealVect pos            = Random::randomPosition(lo, hi);
               const RealVect direction      = Random::getDirection();
               const Real     kappa          = m_rtSpecies->getAbsorptionCoefficient(pos);
-              const Real     travelDistance = this->randomExponential(kappa);
+              const Real     travelDistance = ChomboDischarge::McPhoto::randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
               photons.add(PointParticle(finalPos, (Real)photonWeight));
@@ -1225,7 +1225,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               const RealVect direction      = Random::getDirection();
               const Real     weight         = (Real)photonWeight;
               const Real     kappa          = m_rtSpecies->getAbsorptionCoefficient(pos);
-              const Real     travelDistance = this->randomExponential(kappa);
+              const Real     travelDistance = ChomboDischarge::McPhoto::randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
               photons.add(PointParticle(finalPos, weight));
@@ -1467,7 +1467,7 @@ McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
 
         const RealVect& oldPos    = p.position();
         const RealVect& direction = p.velocity() / (p.velocity().vectorLength());
-        const RealVect  newPos    = oldPos + direction * this->randomExponential(p.kappa());
+        const RealVect  newPos    = oldPos + direction * ChomboDischarge::McPhoto::randomExponential(p.kappa());
 
         // Check if we should check of different types of boundary intersections. These are cheap initial tests that allow
         // us to skip intersection tests for some photons.
@@ -1663,7 +1663,7 @@ McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
         // Check absorption in the bulk. We draw a propagation distance, if the photon propagates longer
         // than this distance the photon is absorbed.
-        const Real travelLen = this->randomExponential(p.kappa());
+        const Real travelLen = ChomboDischarge::McPhoto::randomExponential(p.kappa());
         if (travelLen < pathLen) {
           absorbedBulk = true;
           sBulk        = travelLen / pathLen;

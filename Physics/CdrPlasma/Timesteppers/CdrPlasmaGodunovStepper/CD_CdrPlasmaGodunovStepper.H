@@ -442,7 +442,7 @@ namespace Physics {
         @param[in] a_data Description
       */
       void
-      floorMass(EBAMRCellData& a_data, std::string a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
+      floorMass(EBAMRCellData& a_data, const std::string& a_message, const RefCountedPtr<CdrSolver>& a_solver) const;
 
       /**
          @brief Perform post-step operations

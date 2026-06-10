@@ -315,7 +315,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->minmod(dwl, dwr);
+          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -348,7 +348,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->monotonizedCentral(dwl, dwr);
+          slopesReg(iv, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -427,7 +427,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         break;
       }
       case Limiter::MinMod: {
-        a_normalSlopes(vof, dir) = this->minmod(dwl, dwr);
+        a_normalSlopes(vof, dir) = ChomboDischarge::CdrCTU::minmod(dwl, dwr);
 
         break;
       }
@@ -437,7 +437,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         break;
       }
       case Limiter::MonotonizedCentral: {
-        a_normalSlopes(vof, dir) = this->monotonizedCentral(dwl, dwr);
+        a_normalSlopes(vof, dir) = ChomboDischarge::CdrCTU::monotonizedCentral(dwl, dwr);
 
         break;
       }
@@ -775,8 +775,8 @@ CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
   Real slope = 0.0;
 
   if (dwl * dwr > 0.0) {
-    const Real s1 = this->minmod(dwl, 2 * dwr);
-    const Real s2 = this->minmod(dwr, 2 * dwl);
+    const Real s1 = ChomboDischarge::CdrCTU::minmod(dwl, 2 * dwr);
+    const Real s2 = ChomboDischarge::CdrCTU::minmod(dwr, 2 * dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;

@@ -26,10 +26,10 @@ CdrSpecies::CdrSpecies() : m_name("CdrSpecies"), m_chargeNumber(0), m_isDiffusiv
   m_initialParticles.clear();
 }
 
-CdrSpecies::CdrSpecies(const std::string a_name,
-                       const int         a_chargeNumber,
-                       const bool        a_isMobile,
-                       const bool        a_isDiffusive)
+CdrSpecies::CdrSpecies(const std::string& a_name,
+                       const int          a_chargeNumber,
+                       const bool         a_isMobile,
+                       const bool         a_isDiffusive)
   : m_name(a_name), m_chargeNumber(a_chargeNumber), m_isDiffusive(a_isDiffusive), m_isMobile(a_isMobile)
 {
   CH_TIME("CdrSpecies::CdrSpecies(string, int, bool, bool)");

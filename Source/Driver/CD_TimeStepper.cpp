@@ -82,7 +82,7 @@ TimeStepper::getCheckpointLoads(std::string a_realm, int a_level) const
     pout() << "TimeStepper::getCheckpointLoads(string, int)" << endl;
   }
 
-  const DisjointBoxLayout& dbl      = m_amr->getGrids(a_realm)[a_level];
+  const DisjointBoxLayout& dbl      = m_amr->getGrids(std::move(a_realm))[a_level];
   const Vector<Box>&       boxArray = dbl.boxArray();
 
   Vector<long int> loads(boxArray.size(), 0L);
@@ -157,3 +157,4 @@ TimeStepper::postPlot()
 {}
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

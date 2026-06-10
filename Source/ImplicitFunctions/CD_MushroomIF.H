@@ -37,13 +37,13 @@ public:
     @param[in] a_curv        Corner curvature
     @param[in] a_fluidInside Fluid on inside or not
   */
-  MushroomIF(const RealVect a_center,
-             const Real     a_R,
-             const Real     a_r,
-             const Real     a_L,
-             const Real     a_d,
-             const Real     a_curv,
-             const bool     a_fluidInside);
+  MushroomIF(const RealVect& a_center,
+             const Real      a_R,
+             const Real      a_r,
+             const Real      a_L,
+             const Real      a_d,
+             const Real      a_curv,
+             const bool      a_fluidInside);
 
   /**
     @brief Copy constructor

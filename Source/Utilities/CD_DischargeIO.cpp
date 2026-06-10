@@ -42,7 +42,7 @@ DischargeIO::numberFmt(const long long n, char sep) noexcept
 }
 
 Vector<std::string>
-DischargeIO::numberFmt(const Vector<long long> a_numbers, char a_sep) noexcept
+DischargeIO::numberFmt(const Vector<long long>& a_numbers, char a_sep) noexcept
 {
   CH_TIME("DischargeIO::numberFmt(Vector<long long>, char)");
 
@@ -146,7 +146,7 @@ DischargeIO::writeEBHDF5Header(HDF5Handle&                a_handleH5,
 void
 DischargeIO::writeEBHDF5Level(HDF5Handle&                 a_handleH5,
                               const LevelData<EBCellFAB>& a_outputData,
-                              const ProblemDomain         a_domain,
+                              const ProblemDomain&        a_domain,
                               const Real                  a_dx,
                               const Real                  a_dt,
                               const Real                  a_time,
@@ -365,11 +365,11 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
                          const Vector<DisjointBoxLayout>&     a_grids,
                          const Vector<LevelData<EBCellFAB>*>& a_data,
                          const Vector<ProblemDomain>&         a_domains,
-                         const Vector<Real>                   a_dx,
-                         const Vector<int>                    a_refinementRatios,
+                         const Vector<Real>&                  a_dx,
+                         const Vector<int>&                   a_refinementRatios,
                          const Real                           a_dt,
                          const Real                           a_time,
-                         const RealVect                       a_probLo,
+                         const RealVect&                      a_probLo,
                          const int                            a_numLevels,
                          const int                            a_numGhost) noexcept
 {

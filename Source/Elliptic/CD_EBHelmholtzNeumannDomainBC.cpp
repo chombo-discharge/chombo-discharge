@@ -130,7 +130,7 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the input value
     // is already multiplied by the B-coefficient.
     if (m_multByBco) {
-      this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+      ChomboDischarge::EBHelmholtzNeumannDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
     }
   }
 }

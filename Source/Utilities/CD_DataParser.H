@@ -40,10 +40,10 @@ namespace DataParser {
     @return Return value
   */
   LookupTable1D<Real, 1>
-  simpleFileReadASCII(const std::string       a_fileName,
-                      const int               a_xColumn     = 0,
-                      const int               a_yColumn     = 1,
-                      const std::vector<char> a_ignoreChars = {'#', '/'});
+  simpleFileReadASCII(const std::string&       a_fileName,
+                      const int                a_xColumn     = 0,
+                      const int                a_yColumn     = 1,
+                      const std::vector<char>& a_ignoreChars = {'#', '/'});
 
   /**
     @brief Simple ASCII file parser which reads a file and puts the data into two columns (a lookup table)
@@ -60,12 +60,12 @@ namespace DataParser {
     @return Return value
   */
   LookupTable1D<Real, 1>
-  fractionalFileReadASCII(const std::string       a_fileName,
-                          const std::string       a_startRead,
-                          const std::string       a_stopRead,
-                          const int               a_xColumn     = 0,
-                          const int               a_yColumn     = 1,
-                          const std::vector<char> a_ignoreChars = {'#', '/'});
+  fractionalFileReadASCII(const std::string&       a_fileName,
+                          const std::string&       a_startRead,
+                          const std::string&       a_stopRead,
+                          const int                a_xColumn     = 0,
+                          const int                a_yColumn     = 1,
+                          const std::vector<char>& a_ignoreChars = {'#', '/'});
 
   /**
     @brief Simple file parser which will read particles (position/weight) from an ASCII file. 
@@ -81,12 +81,12 @@ namespace DataParser {
     @return Return value
   */
   List<PointParticle>
-  readPointParticlesASCII(const std::string       a_fileName,
-                          const unsigned int      a_xColumn     = 0,
-                          const unsigned int      a_yColumn     = 1,
-                          const unsigned int      a_zColumn     = 2,
-                          const unsigned int      a_wColumn     = 3,
-                          const std::vector<char> a_ignoreChars = {'#', '/'});
+  readPointParticlesASCII(const std::string&       a_fileName,
+                          const unsigned int       a_xColumn     = 0,
+                          const unsigned int       a_yColumn     = 1,
+                          const unsigned int       a_zColumn     = 2,
+                          const unsigned int       a_wColumn     = 3,
+                          const std::vector<char>& a_ignoreChars = {'#', '/'});
 
   /**
     @brief Read a PLY or VTK triangle mesh file and return a list of Triangle objects.
@@ -105,7 +105,7 @@ namespace DataParser {
     @return Vector of fully initialised Triangle objects, sorted in file order.
   */
   std::vector<std::shared_ptr<Triangle>>
-  readTriangles(const std::string a_filename, const std::string a_vertexDataIdentifier);
+  readTriangles(const std::string& a_filename, const std::string& a_vertexDataIdentifier);
 
 } // namespace DataParser
 

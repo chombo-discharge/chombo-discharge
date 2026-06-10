@@ -160,7 +160,7 @@ BrownianWalkerStepper::setVelocity()
   EBAMRCellData& vel = m_solver->getVelocityFunction();
 
   // Nifty lambda describing the advective field
-  auto veloFunc = [omega = this->m_omega](const RealVect pos) -> RealVect {
+  auto veloFunc = [omega = this->m_omega](const RealVect& pos) -> RealVect {
     const Real r     = pos.vectorLength();
     const Real theta = atan2(pos[1], pos[0]);
 
@@ -580,7 +580,7 @@ BrownianWalkerStepper::makeSuperParticles()
 void
 BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_procs,
                                             Vector<Vector<Box>>&             a_boxes,
-                                            const std::string                a_realm,
+                                            const std::string&               a_realm,
                                             const Vector<DisjointBoxLayout>& a_grids,
                                             const int                        a_lmin,
                                             const int                        a_finestLevel)
@@ -716,7 +716,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
 void
 BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int>>&             a_procs,
                                                  Vector<Vector<Box>>&             a_boxes,
-                                                 const std::string                a_realm,
+                                                 const std::string&               a_realm,
                                                  const Vector<DisjointBoxLayout>& a_grids,
                                                  const int                        a_lmin,
                                                  const int                        a_finestLevel)

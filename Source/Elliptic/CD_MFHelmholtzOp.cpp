@@ -121,12 +121,12 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++) {
-    EBLevelGrid eblg = a_mflg.getEBLevelGrid(iphase);
-    EBLevelGrid dummy;
-    EBLevelGrid eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
-    EBLevelGrid eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
+    const EBLevelGrid& eblg = a_mflg.getEBLevelGrid(iphase);
+    EBLevelGrid        dummy;
+    EBLevelGrid        eblgFine   = a_hasFine ? a_mflgFine.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoFi   = a_hasCoar ? a_mflgCoFi.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoar   = a_hasCoar ? a_mflgCoar.getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid        eblgCoarMG = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator>(nullptr);
     RefCountedPtr<EBReflux>                fluxRegister = RefCountedPtr<EBReflux>(nullptr);

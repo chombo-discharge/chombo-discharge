@@ -22,7 +22,7 @@ ItoSpecies::ItoSpecies() : m_name("ItoSpecies"), m_chargeNumber(0), m_isDiffusiv
   };
 }
 
-ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive)
+ItoSpecies::ItoSpecies(const std::string& a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive)
   : m_name(a_name), m_chargeNumber(a_chargeNumber), m_isDiffusive(a_diffusive), m_isMobile(a_mobile)
 {
 

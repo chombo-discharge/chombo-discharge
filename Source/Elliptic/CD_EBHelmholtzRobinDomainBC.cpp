@@ -124,7 +124,7 @@ EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient.
-  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+  ChomboDischarge::EBHelmholtzRobinDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real

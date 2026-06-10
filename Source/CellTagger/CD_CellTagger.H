@@ -151,7 +151,7 @@ protected:
     @return Returns true if a_pos is inside any of the boxes in m_tagBoxes. Otherwise it returns false. 
   */
   bool
-  insideTagBox(const RealVect a_pos) const;
+  insideTagBox(const RealVect& a_pos) const;
 
   /**
     @brief Get the specified level for this position when doing manual refinement.
@@ -159,7 +159,7 @@ protected:
     @return Refinement level assigned to a_pos by the manual refinement boxes. Returns -1 if not in any box.
   */
   int
-  getManualRefinementLevel(const RealVect a_pos) const;
+  getManualRefinementLevel(const RealVect& a_pos) const;
 
   /**
     @brief Parse boxes.

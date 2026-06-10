@@ -569,7 +569,7 @@ ItoSolver::initialData()
   bulkParticles.remap();
 
   // Generate particles from the initial density distribution.
-  auto initialDensity = [&](const RealVect x) -> Real {
+  auto initialDensity = [&](const RealVect& x) -> Real {
     const auto& initialDensityFunc = m_species->getInitialDensity();
 
     return initialDensityFunc(x, m_time);
@@ -3383,14 +3383,14 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
                                                                                       (long long)a_ppc);
 
   // randomPosition wants the physical corners.
-  const Real     dx            = a_cellInfo.getDx();
-  const Real     kappa         = a_cellInfo.getVolFrac();
-  const RealVect probLo        = m_amr->getProbLo();
-  const RealVect cellPos       = probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
-  const RealVect validLo       = a_cellInfo.getValidLo();
-  const RealVect validHi       = a_cellInfo.getValidHi();
-  const RealVect bndryCentroid = a_cellInfo.getBndryCentroid();
-  const RealVect bndryNormal   = a_cellInfo.getBndryNormal();
+  const Real      dx            = a_cellInfo.getDx();
+  const Real      kappa         = a_cellInfo.getVolFrac();
+  const RealVect  probLo        = m_amr->getProbLo();
+  const RealVect  cellPos       = probLo + dx * (a_cellInfo.getGridIndex() + 0.5 * RealVect::Unit);
+  const RealVect& validLo       = a_cellInfo.getValidLo();
+  const RealVect& validHi       = a_cellInfo.getValidHi();
+  const RealVect& bndryCentroid = a_cellInfo.getBndryCentroid();
+  const RealVect& bndryNormal   = a_cellInfo.getBndryNormal();
 
   a_particles.clear();
 

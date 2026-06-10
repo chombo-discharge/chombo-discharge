@@ -23,11 +23,11 @@ CellInfo::CellInfo(const IntVect a_gridIndex, const Real a_dx) noexcept
   m_validHi = 0.5 * RealVect::Unit;
 }
 
-CellInfo::CellInfo(const IntVect  a_gridIndex,
-                   const Real     a_dx,
-                   const Real     a_volFrac,
-                   const RealVect a_bndryCentroid,
-                   const RealVect a_bndryNormal) noexcept
+CellInfo::CellInfo(const IntVect   a_gridIndex,
+                   const Real      a_dx,
+                   const Real      a_volFrac,
+                   const RealVect& a_bndryCentroid,
+                   const RealVect& a_bndryNormal) noexcept
   : m_gridIndex(a_gridIndex),
     m_bndryCentroid(a_bndryCentroid),
     m_bndryNormal(a_bndryNormal),

@@ -3613,7 +3613,7 @@ CdrPlasmaStepper::setVoltage(std::function<Real(const Real a_time)> a_voltage)
     pout() << "CdrPlasmaStepper::setVoltage(std::function<Real(Real)>)" << endl;
   }
 
-  m_voltage = a_voltage;
+  m_voltage = std::move(a_voltage);
 }
 
 void
@@ -4805,3 +4805,4 @@ CdrPlasmaStepper::printStepReport()
 }
 
 #include <CD_NamespaceFooter.H>
+#include <utility>

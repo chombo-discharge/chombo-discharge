@@ -333,11 +333,9 @@ VofUtils::onlyUnique(Vector<VolIndex>& a_vofs)
 }
 
 bool
-VofUtils::isQuadrantWellDefined(const RealVect a_normal)
+VofUtils::isQuadrantWellDefined(const RealVect& a_normal)
 {
   bool ret = true;
-
-  const RealVect v = a_normal; ///a_normal.vectorLength(); // Idiot guard.
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     if (std::abs(a_normal[dir]) == 1.0 || std::abs(a_normal[dir]) == 0.0) {
@@ -349,7 +347,7 @@ VofUtils::isQuadrantWellDefined(const RealVect a_normal)
 }
 
 std::pair<int, Side::LoHiSide>
-VofUtils::getCardinalDirection(const RealVect a_normal)
+VofUtils::getCardinalDirection(const RealVect& a_normal)
 {
   std::pair<int, Side::LoHiSide> ret;
 

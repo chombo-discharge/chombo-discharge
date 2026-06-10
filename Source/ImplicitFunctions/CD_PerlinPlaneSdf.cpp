@@ -19,14 +19,14 @@
 #include <CD_PerlinPlaneSdf.H>
 #include <CD_NamespaceHeader.H>
 
-PerlinPlaneSdf::PerlinPlaneSdf(const RealVect a_normal,
-                               const RealVect a_point,
-                               const bool     a_inside,
-                               const Real     a_noiseAmp,
-                               const RealVect a_noiseFreq,
-                               const Real     a_persistence,
-                               const int      a_octaves,
-                               const bool     a_reseed)
+PerlinPlaneSdf::PerlinPlaneSdf(const RealVect& a_normal,
+                               const RealVect& a_point,
+                               const bool      a_inside,
+                               const Real      a_noiseAmp,
+                               const RealVect& a_noiseFreq,
+                               const Real      a_persistence,
+                               const int       a_octaves,
+                               const bool      a_reseed)
 {
   // This is the maximum noise the Perlin will spit out.
   Real amp = 0.0;
@@ -53,9 +53,9 @@ PerlinPlaneSdf::value(const RealVect& a_pos) const
 {
   // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function).
 
-  const RealVect x0 = m_point;
-  const RealVect x1 = a_pos;
-  const RealVect xp = x1 - PolyGeom::dot((x1 - x0), m_normal) * m_normal;
+  const RealVect  x0 = m_point;
+  const RealVect& x1 = a_pos;
+  const RealVect  xp = x1 - PolyGeom::dot((x1 - x0), m_normal) * m_normal;
 
   return m_plane->value(a_pos) + m_perlin->value(xp);
 }

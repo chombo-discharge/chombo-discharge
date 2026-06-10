@@ -24,10 +24,10 @@
 #include <CD_NamespaceHeader.H>
 
 LookupTable1D<Real, 1>
-DataParser::simpleFileReadASCII(const std::string       a_fileName,
-                                const int               a_xColumn,
-                                const int               a_yColumn,
-                                const std::vector<char> a_ignoreChars)
+DataParser::simpleFileReadASCII(const std::string&       a_fileName,
+                                const int                a_xColumn,
+                                const int                a_yColumn,
+                                const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::simpleFileReadASCII");
 
@@ -80,12 +80,12 @@ DataParser::simpleFileReadASCII(const std::string       a_fileName,
 }
 
 LookupTable1D<Real, 1>
-DataParser::fractionalFileReadASCII(const std::string       a_fileName,
-                                    const std::string       a_startRead,
-                                    const std::string       a_stopRead,
-                                    const int               a_xColumn,
-                                    const int               a_yColumn,
-                                    const std::vector<char> a_ignoreChars)
+DataParser::fractionalFileReadASCII(const std::string&       a_fileName,
+                                    const std::string&       a_startRead,
+                                    const std::string&       a_stopRead,
+                                    const int                a_xColumn,
+                                    const int                a_yColumn,
+                                    const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::fractionalFileReadASCII");
 
@@ -146,12 +146,12 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
 }
 
 List<PointParticle>
-DataParser::readPointParticlesASCII(const std::string  a_fileName,
+DataParser::readPointParticlesASCII(const std::string& a_fileName,
                                     const unsigned int a_xColumn,
                                     const unsigned int a_yColumn,
                                     const unsigned int /*a_zColumn*/,
-                                    const unsigned int      a_wColumn,
-                                    const std::vector<char> a_ignoreChars)
+                                    const unsigned int       a_wColumn,
+                                    const std::vector<char>& a_ignoreChars)
 {
   CH_TIME("DataParser::readPointParticlesASCII");
 
@@ -218,7 +218,7 @@ DataParser::readPointParticlesASCII(const std::string  a_fileName,
 }
 
 std::vector<std::shared_ptr<Triangle>>
-DataParser::readTriangles(const std::string a_filename, const std::string a_vertexDataIdentifier)
+DataParser::readTriangles(const std::string& a_filename, const std::string& a_vertexDataIdentifier)
 {
   CH_TIME("DataParser::readTriangles");
 

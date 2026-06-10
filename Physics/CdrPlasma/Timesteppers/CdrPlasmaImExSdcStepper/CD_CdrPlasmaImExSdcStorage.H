@@ -45,7 +45,7 @@ namespace Physics {
          @param[in] m_ncomp Number of components (1 for scalar CDR species).
       */
       CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
-                 const std::string             a_realm,
+                 const std::string&            a_realm,
                  const phase::which_phase      a_phase,
                  const int                     a_ncomp);
 
@@ -439,7 +439,7 @@ namespace Physics {
          @param[in] a_ncomp  Number of components (SpaceDim for the electric field).
       */
       FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
-                   const std::string             a_realm,
+                   const std::string&            a_realm,
                    const phase::which_phase      a_phase,
                    const int                     a_ncomp);
 
@@ -584,7 +584,7 @@ namespace Physics {
          @param[in] a_ncomp  Number of components (1 for scalar RTE species).
       */
       RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
-                const std::string             a_realm,
+                const std::string&            a_realm,
                 const phase::which_phase      a_phase,
                 const int                     a_ncomp);
 
@@ -699,7 +699,7 @@ namespace Physics {
          @param[in] a_ncomp  Number of components (1 for scalar surface charge).
       */
       SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
-                   const std::string             a_realm,
+                   const std::string&            a_realm,
                    const phase::which_phase      a_phase,
                    const int                     a_ncomp);
 

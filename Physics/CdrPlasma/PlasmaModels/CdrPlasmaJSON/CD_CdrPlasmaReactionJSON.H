@@ -44,10 +44,10 @@ namespace Physics {
          @param[in] a_plasmaProducts   Plasma species on the right-hand side of the reaction. 
          @param[in] a_photonProducts   Photons on the right-hand side of the reaction.
       */
-      CdrPlasmaReactionJSON(const std::list<int> a_plasmaReactants,
-                            const std::list<int> a_neutralReactants,
-                            const std::list<int> a_plasmaProducts,
-                            const std::list<int> a_photonProducts);
+      CdrPlasmaReactionJSON(const std::list<int>& a_plasmaReactants,
+                            const std::list<int>& a_neutralReactants,
+                            const std::list<int>& a_plasmaProducts,
+                            const std::list<int>& a_photonProducts);
 
       /**
          @brief Destructor

@@ -101,24 +101,24 @@ public:
     @param[in] a_mfis             EBIndexSpace discrete information
   */
   void
-  define(const Vector<DisjointBoxLayout>&                          a_grids,
-         const Vector<ProblemDomain>&                              a_domains,
-         const Vector<int>&                                        a_refRat,
-         const Vector<Real>&                                       a_dx,
-         const RealVect                                            a_probLo,
-         const int                                                 a_finestLevel,
-         const int                                                 a_blockingFactor,
-         const int                                                 a_ebGhost,
-         const int                                                 a_numGhost,
-         const int                                                 a_lsfGhost,
-         const int                                                 a_redistRad,
-         const int                                                 a_mgInterpOrder,
-         const int                                                 a_mgInterpRadius,
-         const int                                                 a_mgInterpWeight,
-         const CellCentroidInterpolation::Type                     a_centroidInterpType,
-         const EBCentroidInterpolation::Type                       a_ebInterpType,
-         const std::map<phase::which_phase, RefCountedPtr<BaseIF>> a_baseif,
-         const RefCountedPtr<MultiFluidIndexSpace>&                a_mfis);
+  define(const Vector<DisjointBoxLayout>&                           a_grids,
+         const Vector<ProblemDomain>&                               a_domains,
+         const Vector<int>&                                         a_refRat,
+         const Vector<Real>&                                        a_dx,
+         const RealVect&                                            a_probLo,
+         const int                                                  a_finestLevel,
+         const int                                                  a_blockingFactor,
+         const int                                                  a_ebGhost,
+         const int                                                  a_numGhost,
+         const int                                                  a_lsfGhost,
+         const int                                                  a_redistRad,
+         const int                                                  a_mgInterpOrder,
+         const int                                                  a_mgInterpRadius,
+         const int                                                  a_mgInterpWeight,
+         const CellCentroidInterpolation::Type                      a_centroidInterpType,
+         const EBCentroidInterpolation::Type                        a_ebInterpType,
+         const std::map<phase::which_phase, RefCountedPtr<BaseIF>>& a_baseif,
+         const RefCountedPtr<MultiFluidIndexSpace>&                 a_mfis);
 
   /**
     @brief Set grid method
@@ -158,7 +158,7 @@ public:
     @details Issues run-time error if a_operator can't be recognized
   */
   void
-  registerOperator(const std::string a_operator, const phase::which_phase a_phase);
+  registerOperator(const std::string& a_operator, const phase::which_phase a_phase);
 
   /**
     @brief Query if an AMR operator has been registered
@@ -167,7 +167,7 @@ public:
     @return True if operator has been registered and false otherwise
   */
   bool
-  queryOperator(const std::string a_operator, const phase::which_phase a_phase) const;
+  queryOperator(const std::string& a_operator, const phase::which_phase a_phase) const;
 
   /**
     @brief Register a mask
@@ -175,7 +175,7 @@ public:
     @param[in] a_buffer Buffer
   */
   void
-  registerMask(const std::string a_mask, const int a_buffer);
+  registerMask(const std::string& a_mask, const int a_buffer);
 
   /**
     @brief Query if a mask has been registered
@@ -184,7 +184,7 @@ public:
     @param[in] a_buffer Buffer
   */
   bool
-  queryMask(const std::string a_mask, const int a_buffer) const;
+  queryMask(const std::string& a_mask, const int a_buffer) const;
 
   /**
     @brief Get refinement ratios
@@ -390,7 +390,7 @@ public:
     @param[in] a_buffer Buffer
   */
   const AMRMask&
-  getMask(const std::string a_mask, const int a_buffer) const;
+  getMask(const std::string& a_mask, const int a_buffer) const;
 
   /**
     @brief Get all valid cells

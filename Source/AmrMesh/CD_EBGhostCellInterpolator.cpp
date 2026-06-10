@@ -267,7 +267,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
               const bool hasHi = domainCoar.contains(iv + s);
 
               if (hasLo && hasHi) {
-                slopes(iv, 0) = this->minmod(dwl, dwr);
+                slopes(iv, 0) = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, dwr);
               }
               else if (hasLo && !hasHi) {
                 slopes(iv, 0) = dwl;
@@ -291,7 +291,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
               const bool hasHi = domainCoar.contains(iv + s);
 
               if (hasLo && hasHi) {
-                slopes(iv, 0) = this->monotonizedCentral(dwl, dwr);
+                slopes(iv, 0) = ChomboDischarge::EBGhostCellInterpolator::monotonizedCentral(dwl, dwr);
               }
               else if (hasLo && !hasHi) {
                 slopes(iv, 0) = dwl;
@@ -439,12 +439,12 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
         break;
       }
       case EBGhostCellInterpolator::Type::MinMod: {
-        slopes(coarVoF, dir) = this->minmod(dwl, dwr);
+        slopes(coarVoF, dir) = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, dwr);
 
         break;
       }
       case EBGhostCellInterpolator::Type::MonotonizedCentral: {
-        slopes(coarVoF, dir) = this->monotonizedCentral(dwl, dwr);
+        slopes(coarVoF, dir) = ChomboDischarge::EBGhostCellInterpolator::monotonizedCentral(dwl, dwr);
 
         break;
       }
@@ -498,8 +498,8 @@ EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexce
   Real slope = 0.0;
 
   if (dwl * dwr > 0.0) {
-    const Real s1 = this->minmod(dwl, 2 * dwr);
-    const Real s2 = this->minmod(dwr, 2 * dwl);
+    const Real s1 = ChomboDischarge::EBGhostCellInterpolator::minmod(dwl, 2 * dwr);
+    const Real s2 = ChomboDischarge::EBGhostCellInterpolator::minmod(dwr, 2 * dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;

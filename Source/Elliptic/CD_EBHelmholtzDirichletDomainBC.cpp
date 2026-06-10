@@ -120,7 +120,7 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   BoxLoops::loop<D_DECL(1, 1, 1)>(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient so that a_faceFlux = B*dphi/dn.
-  this->multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
+  ChomboDischarge::EBHelmholtzDirichletDomainBC::multiplyByBcoef(a_faceFlux, a_Bcoef, a_dir, a_side);
 }
 
 Real

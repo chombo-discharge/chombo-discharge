@@ -19,7 +19,7 @@
 
 PointParticle::PointParticle() = default;
 
-inline PointParticle::PointParticle(const RealVect a_position, const Real a_weight)
+inline PointParticle::PointParticle(const RealVect& a_position, const Real a_weight)
 {
   this->define(a_position, a_weight);
 }
@@ -27,7 +27,7 @@ inline PointParticle::PointParticle(const RealVect a_position, const Real a_weig
 PointParticle::~PointParticle() = default;
 
 inline void
-PointParticle::define(const RealVect a_position, const Real a_weight)
+PointParticle::define(const RealVect& a_position, const Real a_weight)
 {
   this->position() = a_position;
   this->weight()   = a_weight;

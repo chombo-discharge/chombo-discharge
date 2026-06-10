@@ -140,7 +140,7 @@ EBAMRData<T>::getRealm() const noexcept
 
 template <typename T>
 void
-EBAMRData<T>::setRealm(const std::string a_realm) noexcept
+EBAMRData<T>::setRealm(const std::string& a_realm) noexcept
 {
   m_realm = a_realm;
 }

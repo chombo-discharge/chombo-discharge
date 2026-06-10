@@ -37,7 +37,7 @@ public:
     @param[in] a_minorRadius Minor radius
     @param[in] a_fluidInside Fluid on inside of or not
   */
-  TorusSdf(const RealVect a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside);
+  TorusSdf(const RealVect& a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside);
 
   /**
     @brief Copy constructor

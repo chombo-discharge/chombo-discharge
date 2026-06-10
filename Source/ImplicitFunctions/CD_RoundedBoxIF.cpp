@@ -19,10 +19,10 @@
 #include <CD_RoundedBoxIF.H>
 #include <CD_NamespaceHeader.H>
 
-RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
-                           const RealVect a_hiCorner,
-                           const Real     a_curv,
-                           const bool     a_fluidInside)
+RoundedBoxIF::RoundedBoxIF(const RealVect& a_loCorner,
+                           const RealVect& a_hiCorner,
+                           const Real      a_curv,
+                           const bool      a_fluidInside)
   : m_fluidInside(a_fluidInside)
 {
 

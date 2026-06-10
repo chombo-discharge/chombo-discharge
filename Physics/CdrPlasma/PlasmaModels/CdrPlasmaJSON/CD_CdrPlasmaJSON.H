@@ -1353,14 +1353,14 @@ namespace Physics {
          @param[in] a_error Error code.
       */
       static void
-      throwParserError(const std::string a_error);
+      throwParserError(const std::string& a_error);
 
       /**
          @brief Throw a parser wearning
         @param[in] a_warning Warning
       */
       static void
-      throwParserWarning(const std::string a_warning);
+      throwParserWarning(const std::string& a_warning);
 
       /**
          @brief Protect the @ character in a string
@@ -1368,7 +1368,7 @@ namespace Physics {
         @return Return value
       */
       bool
-      containsWildcard(const std::string a_str);
+      containsWildcard(const std::string& a_str);
 
       /**
          @brief Protect all kinds of brackets in a string.
@@ -1376,7 +1376,7 @@ namespace Physics {
         @return Return value
       */
       bool
-      containsBracket(const std::string a_str);
+      containsBracket(const std::string& a_str);
 
       /**
          @brief Return true if string starts and ends with a parenthesis.
@@ -1384,7 +1384,7 @@ namespace Physics {
          @return True if the first character in the string is ( and the last character is )
       */
       bool
-      isBracketed(const std::string a_str);
+      isBracketed(const std::string& a_str);
 
       /**
          @brief Remove whitespace from string
@@ -1424,7 +1424,7 @@ namespace Physics {
         @return Return value
       */
       static bool
-      doesFileExist(const std::string a_filename);
+      doesFileExist(const std::string& a_filename);
 
       /**
          @brief Add photoionization products to transport equations source terms.
@@ -1479,15 +1479,15 @@ namespace Physics {
          @param[in]    a_kappa            Volume fraction 
       */
       void
-      fillSourceTerms(std::vector<Real>&          a_cdrSources,
-                      std::vector<Real>&          a_rteSources,
-                      const std::vector<Real>     a_cdrDensities,
-                      const std::vector<RealVect> a_cdrGradients,
-                      const RealVect              a_E,
-                      const RealVect              a_pos,
-                      const Real                  a_dx,
-                      const Real                  a_time,
-                      const Real                  a_kappa) const;
+      fillSourceTerms(std::vector<Real>&           a_cdrSources,
+                      std::vector<Real>&           a_rteSources,
+                      const std::vector<Real>&     a_cdrDensities,
+                      const std::vector<RealVect>& a_cdrGradients,
+                      const RealVect&              a_E,
+                      const RealVect&              a_pos,
+                      const Real                   a_dx,
+                      const Real                   a_time,
+                      const Real                   a_kappa) const;
 
       /**
          @brief Routine for integrating the reactive-only problem using the explicit Euler rule. 
@@ -1502,15 +1502,15 @@ namespace Physics {
          @param[in]    a_kappa            Volume fraction 
       */
       void
-      integrateReactionsExplicitEuler(std::vector<Real>&          a_cdrDensities,
-                                      std::vector<Real>&          a_photonProduction,
-                                      const std::vector<RealVect> a_cdrGradients,
-                                      const RealVect              a_E,
-                                      const RealVect              a_pos,
-                                      const Real                  a_dx,
-                                      const Real                  a_dt,
-                                      const Real                  a_time,
-                                      const Real                  a_kappa) const;
+      integrateReactionsExplicitEuler(std::vector<Real>&           a_cdrDensities,
+                                      std::vector<Real>&           a_photonProduction,
+                                      const std::vector<RealVect>& a_cdrGradients,
+                                      const RealVect&              a_E,
+                                      const RealVect&              a_pos,
+                                      const Real                   a_dx,
+                                      const Real                   a_dt,
+                                      const Real                   a_time,
+                                      const Real                   a_kappa) const;
 
       /**
          @brief Routine for integrating the reactive-only problem using the implicit Euler rule. 
@@ -1550,16 +1550,16 @@ namespace Physics {
          @param[in]    a_tableuAlpha      RK2 tableu alpha. Use 0.5 for midpoint and 1.0 for trapezoidal (Heun's method)
       */
       void
-      integrateReactionsExplicitRK2(std::vector<Real>&          a_cdrDensities,
-                                    std::vector<Real>&          a_photonProduction,
-                                    const std::vector<RealVect> a_cdrGradients,
-                                    const RealVect              a_E,
-                                    const RealVect              a_pos,
-                                    const Real                  a_dx,
-                                    const Real                  a_dt,
-                                    const Real                  a_time,
-                                    const Real                  a_kappa,
-                                    const Real                  a_tableuAlpha) const;
+      integrateReactionsExplicitRK2(std::vector<Real>&           a_cdrDensities,
+                                    std::vector<Real>&           a_photonProduction,
+                                    const std::vector<RealVect>& a_cdrGradients,
+                                    const RealVect&              a_E,
+                                    const RealVect&              a_pos,
+                                    const Real                   a_dx,
+                                    const Real                   a_dt,
+                                    const Real                   a_time,
+                                    const Real                   a_kappa,
+                                    const Real                   a_tableuAlpha) const;
 
       /**
          @brief Routine for integrating the reactive-only problem using the foruth order Runge-Kutta method. 
@@ -1574,15 +1574,15 @@ namespace Physics {
          @param[in]    a_kappa            Volume fraction 
       */
       void
-      integrateReactionsExplicitRK4(std::vector<Real>&          a_cdrDensities,
-                                    std::vector<Real>&          a_photonProduction,
-                                    const std::vector<RealVect> a_cdrGradients,
-                                    const RealVect              a_E,
-                                    const RealVect              a_pos,
-                                    const Real                  a_dx,
-                                    const Real                  a_dt,
-                                    const Real                  a_time,
-                                    const Real                  a_kappa) const;
+      integrateReactionsExplicitRK4(std::vector<Real>&           a_cdrDensities,
+                                    std::vector<Real>&           a_photonProduction,
+                                    const std::vector<RealVect>& a_cdrGradients,
+                                    const RealVect&              a_E,
+                                    const RealVect&              a_pos,
+                                    const Real                   a_dx,
+                                    const Real                   a_dt,
+                                    const Real                   a_time,
+                                    const Real                   a_kappa) const;
     };
   } // namespace CdrPlasma
 } // namespace Physics

@@ -84,7 +84,7 @@ public:
     @param[in] a_realm Realm name
   */
   void
-  setRealm(std::string a_realm) noexcept;
+  setRealm(const std::string& a_realm) noexcept;
 
   /**
     @brief Get size of m_data
