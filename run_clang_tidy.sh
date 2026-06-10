@@ -12,9 +12,9 @@ set -euo pipefail
 JOBS=$(nproc 2>/dev/null || echo 4)
 BUILD_DIR=build
 DIR_FILTER='^(Source|Exec|Physics|Geometries)/.*\.cpp$'
-
 if [ $# -eq 0 ]; then
     exec run-clang-tidy -p "$BUILD_DIR" -j"$JOBS" \
+        -header-filter='.*(Source|Geometries|Physics|Exec)/.*' \
         'Source/|Exec/|Physics/|Geometries/'
 fi
 
