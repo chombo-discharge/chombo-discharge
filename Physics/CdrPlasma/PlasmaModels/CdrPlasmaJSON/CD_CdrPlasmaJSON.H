@@ -1399,24 +1399,24 @@ namespace Physics {
          @param[in] a_name Neutral species name
         @return True if neutral species, false otherwise
       */
-      bool
-      isNeutralSpecies(const std::string& a_name) const;
+      static bool
+      isNeutralSpecies(const std::string& a_name) ;
 
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Cdr species name
         @return True if plasma species, false otherwise
       */
-      bool
-      isPlasmaSpecies(const std::string& a_name) const;
+      static bool
+      isPlasmaSpecies(const std::string& a_name) ;
 
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Rte species name
         @return True if photon species, false otherwise
       */
-      bool
-      isPhotonSpecies(const std::string& a_name) const;
+      static bool
+      isPhotonSpecies(const std::string& a_name) ;
 
       /**
          @brief Check if file exists

@@ -164,7 +164,7 @@ MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale)
 #endif
 }
 
-void
+static void
 MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale)
 {
   CH_TIME("MFHelmholtzOpFactory::setJump(Real, Real)");
@@ -423,7 +423,7 @@ MFHelmholtzOpFactory::coarsenCoefficientsMG()
   }
 }
 
-void
+static void
 MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAcoef,
                                           LevelData<MFFluxFAB>&         a_coarBcoef,
                                           LevelData<MFBaseIVFAB>&       a_coarBcoefIrreg,
@@ -491,7 +491,7 @@ bool
 MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
                                        const MFLevelGrid& a_fineMflg,
                                        const int          a_refRat,
-                                       const int          a_blockingFactor) const
+                                       const int          a_blockingFactor) 
 {
   CH_TIME("MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid, MFLevelGrid, int, int)");
 
@@ -794,7 +794,7 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
   return op;
 }
 
-bool
+static bool
 MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("MFHelmholtzOpFactory::isCoarser(ProblemDomain, ProblemDomain)");
@@ -802,7 +802,7 @@ MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
   return A.domainBox().numPts() < B.domainBox().numPts();
 }
 
-bool
+static bool
 MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("MFHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
@@ -810,8 +810,8 @@ MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
-int
-MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const
+static int
+MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) 
 {
   CH_TIME("MFHelmholtzOpFactory::refToFiner(ProblemDomain)");
 
@@ -826,8 +826,8 @@ MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const
   return ref;
 }
 
-int
-MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const
+static int
+MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) 
 {
   CH_TIME("MFHelmholtzOpFactory::findAmrLevel(ProblemDomain)");
 

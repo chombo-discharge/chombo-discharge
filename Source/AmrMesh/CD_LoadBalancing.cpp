@@ -17,7 +17,7 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-void
+static void
 LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which)
 {
   CH_TIME("LoadBalancing::sort");
@@ -28,7 +28,7 @@ LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which)
   LoadBalancing::sort(a_boxes, dummy, a_which);
 }
 
-void
+static void
 LoadBalancing::gatherBoxes(Vector<Box>& a_boxes)
 {
   CH_TIME("LoadBalancing::gatherBoxes");
@@ -106,7 +106,7 @@ LoadBalancing::gatherBoxes(Vector<Box>& a_boxes)
 #endif
 }
 
-void
+static void
 LoadBalancing::gatherLoads(Vector<Real>& a_loads)
 {
   CH_TIME("LoadBalancing::gatherLoads");
@@ -164,7 +164,7 @@ LoadBalancing::gatherLoads(Vector<Real>& a_loads)
 #endif
 }
 
-void
+static void
 LoadBalancing::gatherLoads(Vector<long>& a_loads)
 {
   CH_TIME("LoadBalancing::gatherLoads");
@@ -215,7 +215,7 @@ LoadBalancing::gatherLoads(Vector<long>& a_loads)
 #endif
 }
 
-void
+static void
 LoadBalancing::gatherLoads(Vector<int>& a_loads)
 {
   CH_TIME("LoadBalancing::gatherLoads");
@@ -266,7 +266,7 @@ LoadBalancing::gatherLoads(Vector<int>& a_loads)
 #endif
 }
 
-void
+static void
 LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads)
 {
   CH_TIME("LoadBalancing::gatherBoxesAndLoads");

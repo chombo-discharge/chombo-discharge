@@ -45,7 +45,7 @@ ElectrostaticDomainBc::~ElectrostaticDomainBc()
   m_bcFunctions.clear();
 }
 
-void
+static void
 ElectrostaticDomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc)
 {
   CH_TIME("ElectrostaticDomainBc::setBc(DomainSide, Bc)");
@@ -53,8 +53,8 @@ ElectrostaticDomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc)
   m_bcFunctions.at(a_domainSide) = a_bc;
 }
 
-ElectrostaticDomainBc::Bc
-ElectrostaticDomainBc::getBc(const DomainSide a_domainSide) const
+static ElectrostaticDomainBc::Bc
+ElectrostaticDomainBc::getBc(const DomainSide a_domainSide) 
 {
   CH_TIME("ElectrostaticDomainBc::getBc(DomainSide)");
 

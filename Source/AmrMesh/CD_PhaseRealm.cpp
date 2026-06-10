@@ -453,7 +453,7 @@ PhaseRealm::defineVofIterator(const int a_lmin)
 }
 
 void
-PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost)
+PhaseRealm::defineLevelSet(const int a_lmin, const int /*a_numGhost*/)
 {
   CH_TIME("PhaseRealm::defineLevelSet");
   if (m_verbose) {
@@ -630,7 +630,7 @@ PhaseRealm::defineEBCoarseToFineInterp(const int a_lmin)
 }
 
 void
-PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
+PhaseRealm::defineFluxReg(const int a_lmin, const int /*a_regsize*/)
 {
   CH_TIME("PhaseRealm::defineFluxReg");
   if (m_verbose) {

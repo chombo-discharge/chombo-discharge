@@ -267,7 +267,7 @@ MFHelmholtzOp::getBcoefIrreg()
   return m_BcoefIrreg;
 }
 
-void
+static void
 MFHelmholtzOp::setJump(RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_jump)
 {
   CH_TIME("MFHelmholtzOp::setJump");
@@ -283,7 +283,7 @@ MFHelmholtzOp::refToCoarser()
   return m_refToCoar;
 }
 
-void
+static void
 MFHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
 {
   CH_TIME("MFHelmholtzOp::setAlphaAndBeta");
@@ -293,7 +293,7 @@ MFHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta)
   }
 }
 
-void
+static void
 MFHelmholtzOp::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs)
 {
   CH_TIME("MFHelmholtzOp::divideByIdentityCoef");
@@ -307,7 +307,7 @@ MFHelmholtzOp::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs)
   }
 }
 
-void
+static void
 MFHelmholtzOp::applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi)
 {
   CH_TIME("MFHelmholtzOp::applyOpNoBoundary");
@@ -323,7 +323,7 @@ MFHelmholtzOp::applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MF
   }
 }
 
-void
+static void
 MFHelmholtzOp::fillGrad(const LevelData<MFCellFAB>& a_phi)
 {
   CH_TIME("MFHelmholtzOp::fillGrad(LD<MFCellFAB>)");
@@ -347,7 +347,7 @@ MFHelmholtzOp::getFlux(MFFluxFAB& /*a_flux*/,
   MayDay::Warning("MFHelmholtzOp::getFlux - not implemented (yet)");
 }
 
-void
+static void
 MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale)
 {
   CH_TIME("MFHelmholtzOp::incr");
@@ -355,7 +355,7 @@ MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_r
   DataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
-void
+static void
 MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("MFHelmholtzOp::scale");
@@ -363,7 +363,7 @@ MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale)
   DataOps::scale(a_lhs, a_scale);
 }
 
-void
+static void
 MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs)
 {
   CH_TIME("MFHelmholtzOp::setToZero)");
@@ -371,7 +371,7 @@ MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs)
   DataOps::setValue(a_lhs, 0.0);
 }
 
-void
+static void
 MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
   CH_TIME("MFHelmholtzOp::assign");
@@ -379,7 +379,7 @@ MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
   a_rhs.copyTo(a_lhs);
 }
 
-void
+static void
 MFHelmholtzOp::assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Copier& a_copier)
 {
   CH_TIME("MFHelmholtzOp::assignCopier");
@@ -387,7 +387,7 @@ MFHelmholtzOp::assignCopier(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellF
   a_rhs.copyTo(a_lhs, a_copier);
 }
 
-void
+static void
 MFHelmholtzOp::assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
   CH_TIME("MFHelmholtzOp::assignLocal");
@@ -395,7 +395,7 @@ MFHelmholtzOp::assignLocal(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
   a_rhs.localCopyTo(a_lhs);
 }
 
-void
+static void
 MFHelmholtzOp::buildCopier(Copier& a_copier, const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
   CH_TIME("MFHelmholtzOp::buildCopier");
@@ -403,7 +403,7 @@ MFHelmholtzOp::buildCopier(Copier& a_copier, const LevelData<MFCellFAB>& a_lhs, 
   a_copier.define(a_rhs.disjointBoxLayout(), a_lhs.disjointBoxLayout(), a_lhs.ghostVect());
 }
 
-Real
+static Real
 MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order)
 {
   CH_TIME("MFHelmholtzOp::norm");
@@ -422,7 +422,7 @@ MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order)
   return norm;
 }
 
-Real
+static Real
 MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs)
 {
   CH_TIME("MFHelmholtzOp::dotProduct)");
@@ -674,7 +674,7 @@ MFHelmholtzOp::residual(LevelData<MFCellFAB>&       a_residual,
   this->incr(a_residual, a_rhs, 1.0);
 }
 
-void
+static void
 MFHelmholtzOp::axby(LevelData<MFCellFAB>&       a_lhs,
                     const LevelData<MFCellFAB>& a_x,
                     const LevelData<MFCellFAB>& a_y,
@@ -696,7 +696,7 @@ MFHelmholtzOp::axby(LevelData<MFCellFAB>&       a_lhs,
   }
 }
 
-void
+static void
 MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC)
 {
   CH_TIME("MFHelmholtzOp::updateJumpBC");
@@ -704,8 +704,8 @@ MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homo
   m_jumpBC->matchBC(*m_jump, a_phi, a_homogeneousPhysBC);
 }
 
-void
-MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const
+static void
+MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) 
 {
   CH_TIME("MFHelmholtzOp::exchangeGhost");
 
@@ -941,7 +941,7 @@ MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoar,
   }
 }
 
-void
+static void
 MFHelmholtzOp::prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_correctCoarse)
 {
   CH_TIME("MFHelmholtzOp::prolongIncrement");
@@ -1034,7 +1034,7 @@ MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
   }
 }
 
-void
+static void
 MFHelmholtzOp::AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_coarseCorrection)
 {
   CH_TIME("MFHelmholtzOp::AMRProlong");

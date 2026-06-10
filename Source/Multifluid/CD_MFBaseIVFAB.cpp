@@ -70,7 +70,7 @@ MFBaseIVFAB::numPhases()
   return m_phase.size();
 }
 
-void
+static void
 MFBaseIVFAB::setVal(Real a_value)
 {
   for (int i = 0; i < m_phase.size(); i++) {
@@ -78,7 +78,7 @@ MFBaseIVFAB::setVal(Real a_value)
   }
 }
 
-void
+static void
 MFBaseIVFAB::copy(const Box&         a_fromBox,
                   const Interval&    a_dst_interv,
                   const Box&         a_toBox,
@@ -96,8 +96,8 @@ MFBaseIVFAB::preAllocatable()
   return 1;
 }
 
-int
-MFBaseIVFAB::size(const Box& R, const Interval& comps) const
+static int
+MFBaseIVFAB::size(const Box& R, const Interval& comps) 
 {
   int size = m_phase.size() * sizeof(int);
   for (int i = 0; i < m_phase.size(); ++i) {
@@ -107,8 +107,8 @@ MFBaseIVFAB::size(const Box& R, const Interval& comps) const
   return size;
 }
 
-void
-MFBaseIVFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
+static void
+MFBaseIVFAB::linearOut(void* buf, const Box& R, const Interval& comps) 
 {
   int* buffer = (int*)buf;
   for (int i = 0; i < m_phase.size(); ++i) {
@@ -123,7 +123,7 @@ MFBaseIVFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
   }
 }
 
-void
+static void
 MFBaseIVFAB::linearIn(void* buf, const Box& R, const Interval& comps)
 {
   int* size = (int*)buf;
@@ -150,7 +150,7 @@ MFBaseIVFABFactory::~MFBaseIVFABFactory()
   CH_TIME("MFBaseIVFABFactory::~MFBaseIVFABFactory");
 }
 
-void
+static void
 MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nComp)
 {
   CH_TIME("MFBaseIVFABFactory::define");
@@ -159,8 +159,8 @@ MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nCo
   m_nComp = a_nComp;
 }
 
-MFBaseIVFAB*
-MFBaseIVFABFactory::create(const Box& a_box, int /*a_ignored_argument*/, const DataIndex& a_dit) const
+static MFBaseIVFAB*
+MFBaseIVFABFactory::create(const Box& a_box, int /*a_ignored_argument*/, const DataIndex& a_dit) 
 {
   CH_TIME("MFBaseIVFABFactory::create");
 

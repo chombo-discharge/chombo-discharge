@@ -445,11 +445,11 @@ protected:
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
     the blocking factor. Otherwise we try to coarsen directly. 
   */
-  bool
+  static bool
   getCoarserLayout(MFLevelGrid&       a_coarMflg,
                    const MFLevelGrid& a_fineMflg,
                    const int          a_refRat,
-                   const int          a_blockingFactor) const;
+                   const int          a_blockingFactor) ;
 
   /**
     @brief Coarsen coefficients (conservatively)

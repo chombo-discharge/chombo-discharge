@@ -38,13 +38,13 @@ protected:
   /**
     @brief Define the rod+needle electrode
   */
-  void
+  static void
   defineRodNeedle() noexcept;
 
   /**
     @brief Defines a Plane electrode
   */
-  void
+  static void
   defineDisk();
 };
 

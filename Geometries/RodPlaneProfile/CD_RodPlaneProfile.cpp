@@ -41,8 +41,6 @@ RodPlaneProfile::RodPlaneProfile()
   Real        eps, rod_rad, xshift, curv, dist, yshift, width;
   int         numl, numr;
   RealVect    center1, center2, point, normal;
-  std::string profile;
-
   ParmParse pp("RodPlaneProfile");
 
   pp.get("turn_on_rod", has_rod);
@@ -120,7 +118,7 @@ RodPlaneProfile::getBaseIF()
   return ret;
 }
 
-BaseIF*
+static BaseIF*
 RodPlaneProfile::getBaseIFCircle()
 {
   ParmParse pp("RodPlaneProfile");
@@ -137,7 +135,7 @@ RodPlaneProfile::getBaseIFCircle()
   return new SphereSdf(point, rad, true);
 }
 
-BaseIF*
+static BaseIF*
 RodPlaneProfile::getBaseIFSquare()
 {
   ParmParse pp("RodPlaneProfile");

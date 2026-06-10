@@ -4492,7 +4492,7 @@ CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
 }
 
 bool
-CdrPlasmaJSON::isNeutralSpecies(const std::string& a_name) const
+CdrPlasmaJSON::isNeutralSpecies(const std::string& a_name) 
 {
   bool found = false;
 
@@ -4507,7 +4507,7 @@ CdrPlasmaJSON::isNeutralSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::isPlasmaSpecies(const std::string& a_name) const
+CdrPlasmaJSON::isPlasmaSpecies(const std::string& a_name) 
 {
   bool found = false;
 
@@ -4522,7 +4522,7 @@ CdrPlasmaJSON::isPlasmaSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) const
+CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) 
 {
   bool found = false;
 
@@ -4813,7 +4813,7 @@ CdrPlasmaJSON::computePlasmaSpeciesEnergies(const RealVect&          a_position,
   return energies;
 }
 
-Real
+static Real
 CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reactionIndex,
                                          const std::vector<Real>&     a_cdrDensities,
                                          const std::vector<Real>&     a_cdrMobilities,
@@ -4828,7 +4828,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
                                          const Real&                  a_N,
                                          const Real&                  a_alpha,
                                          const Real&                  a_eta,
-                                         const Real&                   /*a_time*/) const
+                                         const Real&                   /*a_time*/) 
 {
   const LookupMethod&          method   = m_plasmaReactionLookup.at(a_reactionIndex);
   const CdrPlasmaReactionJSON& reaction = m_plasmaReactions[a_reactionIndex];
@@ -5608,13 +5608,13 @@ CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const
   return m_initialSigma(a_pos, a_time);
 }
 
-void
+static void
 CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
                                   const std::vector<Real>& a_rteDensities,
                                   const RealVect           a_position,
                                   const Real               a_E,
                                   const Real               a_dt,
-                                  const Real                /*a_dx*/) const
+                                  const Real                /*a_dx*/) 
 {
   // Add photo-ionization.
   for (int i = 0; i < m_photoReactions.size(); i++) {

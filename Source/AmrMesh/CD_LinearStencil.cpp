@@ -21,7 +21,7 @@
 
 constexpr Real LinearStencil::tolerance;
 
-bool
+static bool
 LinearStencil::getLinearInterpStencil(VoFStencil&          a_stencil,
                                       const RealVect&      a_pos,
                                       const VolIndex&      a_vof,
@@ -52,7 +52,7 @@ LinearStencil::getLinearInterpStencil(VoFStencil&          a_stencil,
   return foundStencil;
 }
 
-bool
+static bool
 LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
                                       const RealVect& a_pos,
                                       const VolIndex& a_vof,
@@ -134,7 +134,7 @@ LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
   return foundStencil;
 }
 
-bool
+static bool
 LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
                                       const RealVect&      a_pos,
                                       const VolIndex&      a_vof,

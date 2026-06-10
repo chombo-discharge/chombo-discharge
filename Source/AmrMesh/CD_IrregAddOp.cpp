@@ -28,8 +28,8 @@ IrregAddOp::~IrregAddOp() noexcept
   CH_TIME("IrregAddOp::~IrregAddOp");
 }
 
-void
-IrregAddOp::linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) const
+static void
+IrregAddOp::linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) 
 {
   CH_TIME("IrregAddOp::linearIn");
 
@@ -53,13 +53,13 @@ IrregAddOp::linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_regio
   }
 }
 
-void
+static void
 IrregAddOp::op(BaseIVFAB<Real>& a_dst,
                const Box& /*a_regionFrom*/,
                const Interval&        a_dstVars,
                const Box&             a_regionTo,
                const BaseIVFAB<Real>& a_src,
-               const Interval&        a_srcVars) const
+               const Interval&        a_srcVars) 
 {
   CH_TIME("IrregAddOp::op");
 

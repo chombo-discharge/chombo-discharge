@@ -99,7 +99,7 @@ protected:
   /**
     @brief Make the implicit function
   */
-  void
+  static void
   makeBaseIF();
 
   /**

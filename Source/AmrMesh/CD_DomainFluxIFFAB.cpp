@@ -81,8 +81,8 @@ DomainFluxIFFAB::define(const DomainFluxIFFAB& a_copy)
   this->define(a_copy.getDomain(), a_copy.getEBISBox(), a_copy.box(), a_copy.nComp());
 }
 
-int
-DomainFluxIFFAB::size(const Box& R, const Interval& comps) const
+static int
+DomainFluxIFFAB::size(const Box& R, const Interval& comps) 
 {
   CH_TIME("DomainFluxIFFAB::size");
 
@@ -95,8 +95,8 @@ DomainFluxIFFAB::size(const Box& R, const Interval& comps) const
   return retval;
 }
 
-void
-DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
+static void
+DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps) 
 {
   CH_TIME("DomainFluxIFFAB::linearOut");
 
@@ -115,7 +115,7 @@ DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
   }
 }
 
-void
+static void
 DomainFluxIFFAB::linearIn(void* buf, const Box& R, const Interval& comps)
 {
   CH_TIME("DomainFluxIFFAB::linearIn");
@@ -243,7 +243,7 @@ DomainFluxIFFAB::clear()
   this->setDefaultValues();
 }
 
-void
+static void
 DomainFluxIFFAB::copy(const Box&             Rfrom,
                       const Interval&        Cdest,
                       const Box&             Rto,

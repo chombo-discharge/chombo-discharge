@@ -81,14 +81,14 @@ ItoSpecies::getInitialParticles() const
   return m_initialParticles;
 }
 
-Real
-ItoSpecies::mobility(const Real /*a_energy*/) const
+static Real
+ItoSpecies::mobility(const Real /*a_energy*/) 
 {
   return 0.0;
 }
 
-Real
-ItoSpecies::diffusion(const Real /*a_energy*/) const
+static Real
+ItoSpecies::diffusion(const Real /*a_energy*/) 
 {
   return 0.0;
 }

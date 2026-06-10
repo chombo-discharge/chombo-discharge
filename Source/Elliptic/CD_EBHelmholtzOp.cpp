@@ -247,7 +247,7 @@ EBHelmholtzOp::turnOnCoarsening()
 }
 
 void
-EBHelmholtzOp::allocateFlux() const noexcept
+EBHelmholtzOp::allocateFlux() noexcept
 {
   CH_TIME("EBHelmholtzOp::allocateFlux");
 
@@ -255,23 +255,23 @@ EBHelmholtzOp::allocateFlux() const noexcept
 }
 
 void
-EBHelmholtzOp::deallocateFlux() const noexcept
+EBHelmholtzOp::deallocateFlux() noexcept
 {
   CH_TIME("EBHelmholtzOp::deallocateFlux");
 
   delete m_flux;
 }
 
-LevelData<EBFluxFAB>&
-EBHelmholtzOp::getFlux() const
+static LevelData<EBFluxFAB>&
+EBHelmholtzOp::getFlux() 
 {
   CH_TIME("EBHelmholtzOp::getFlux()");
 
   return *m_flux;
 }
 
-const LevelData<EBCellFAB>&
-EBHelmholtzOp::getRelaxationCoeff() const noexcept
+static const LevelData<EBCellFAB>&
+EBHelmholtzOp::getRelaxationCoeff() noexcept
 {
   CH_TIME("EBHelmholtzOp::getRelaxationCoeff");
 
@@ -530,7 +530,7 @@ EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>&
   this->relax(a_corr, a_residual, m_numSmoothPreCond);
 }
 
-void
+static void
 EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::create");
@@ -538,7 +538,7 @@ EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a
   a_lhs.define(m_eblg.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), EBCellFactory(m_eblg.getEBISL()));
 }
 
-void
+static void
 EBHelmholtzOp::assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::assign");
@@ -546,7 +546,7 @@ EBHelmholtzOp::assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a
   a_rhs.copyTo(a_lhs);
 }
 
-void
+static void
 EBHelmholtzOp::assignCopier(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Copier& a_copier)
 {
   CH_TIME("EBHelmholtzOp::assignCopier");
@@ -554,7 +554,7 @@ EBHelmholtzOp::assignCopier(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellF
   a_rhs.copyTo(a_lhs, a_copier);
 }
 
-void
+static void
 EBHelmholtzOp::assignLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::assignLocal");
@@ -562,7 +562,7 @@ EBHelmholtzOp::assignLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFA
   a_rhs.localCopyTo(a_lhs);
 }
 
-Real
+static Real
 EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::dotProduct");
@@ -629,7 +629,7 @@ EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBC
   return dotProd;
 }
 
-void
+static void
 EBHelmholtzOp::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale)
 {
   CH_TIME("EBHelmholtzOp::incr");
@@ -637,7 +637,7 @@ EBHelmholtzOp::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_r
   DataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
-void
+static void
 EBHelmholtzOp::axby(LevelData<EBCellFAB>&       a_lhs,
                     const LevelData<EBCellFAB>& a_x,
                     const LevelData<EBCellFAB>& a_y,
@@ -649,7 +649,7 @@ EBHelmholtzOp::axby(LevelData<EBCellFAB>&       a_lhs,
   DataOps::axby(a_lhs, a_x, a_y, a_a, a_b);
 }
 
-void
+static void
 EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("EBHelmholtzOp::scale");
@@ -657,7 +657,7 @@ EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale)
   DataOps::scale(a_lhs, a_scale);
 }
 
-void
+static void
 EBHelmholtzOp::scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) noexcept
 {
   CH_TIME("EBHelmholtzOp::scaleLocal");
@@ -678,7 +678,7 @@ EBHelmholtzOp::scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB
   }
 }
 
-Real
+static Real
 EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int /*a_order*/)
 {
   CH_TIMERS("EBHelmholtzOp::norm");
@@ -732,7 +732,7 @@ EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int /*a_order*/)
   return maxNorm;
 }
 
-void
+static void
 EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs)
 {
   CH_TIME("EBHelmholtzOp::setToZero(LD<EBCellFAB>)");
@@ -740,7 +740,7 @@ EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs)
   DataOps::setValue(a_lhs, 0.0);
 }
 
-void
+static void
 EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBCellFAB>& a_fine, bool /*a_ghosted*/)
 {
   CH_TIME("EBHelmholtzOp::createCoarser(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
@@ -779,7 +779,7 @@ EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
   m_restrictOpMG.restrictResidual(a_resCoar, res, m_interval);
 }
 
-void
+static void
 EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse)
 {
   CH_TIME("EBHelmholtzOp::prolongIncrement(LD<EBCellFAB>, LD<EBCellFAB>)");
@@ -1108,7 +1108,7 @@ EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   m_restrictOp.restrictResidual(a_residualCoarse, resThisLevel, m_interval);
 }
 
-void
+static void
 EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection)
 {
   CH_TIME("EBHelmholtzOp::AMRProlong(LD<EBCellFAB>, LD<EBCellFAB>)");
@@ -1272,12 +1272,12 @@ EBHelmholtzOp::applyOpRegular(EBCellFAB&       a_Lphi,
   CH_STOP(t2);
 }
 
-void
+static void
 EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
                                const EBFluxFAB& a_Bcoef,
                                const Box&       a_cellBox,
                                const DataIndex& a_dit,
-                               const bool       a_homogeneousPhysBC) const noexcept
+                               const bool       a_homogeneousPhysBC) noexcept
 {
   CH_TIME("EBHelmholtzOp::applyDomainFlux(EBCellFAB, Box, DataIndex, bool)");
 
@@ -1359,7 +1359,7 @@ EBHelmholtzOp::applyDomainFlux(EBCellFAB&       a_phi,
   }
 }
 
-void
+static void
 EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit)
 {
   CH_TIME("EBHelmholtzOp::fillDomainFlux(EBFluxFAB, EBCellFAB, Box, DataIndex)");
@@ -1411,7 +1411,7 @@ EBHelmholtzOp::fillDomainFlux(EBFluxFAB& a_flux, const EBCellFAB& a_phi, const B
   }
 }
 
-void
+static void
 EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
                                 const EBCellFAB& a_phi,
                                 const EBCellFAB& /*a_Acoef*/,
@@ -1420,7 +1420,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
                                 const BaseIVFAB<Real>& a_alphaDiagWeight,
                                 const Box& /*a_cellBox*/,
                                 const DataIndex& a_dit,
-                                const bool       a_homogeneousPhysBC) const noexcept
+                                const bool       a_homogeneousPhysBC) noexcept
 {
   CH_TIMERS("EBHelmholtzOp::applyOpIrregular");
   CH_TIMER("AggStencil", t1);
@@ -1493,7 +1493,7 @@ EBHelmholtzOp::applyOpIrregular(EBCellFAB&       a_Lphi,
   CH_STOP(t3);
 }
 
-void
+static void
 EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted)
 {
   CH_TIME("EBHelmholtzOp::diagonalScale(LD<EBCellFAB>, bool)");
@@ -1515,7 +1515,7 @@ EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB>& a_rhs, bool a_kappaWeighted)
   }
 }
 
-void
+static void
 EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::divideByIdentityCoef(LD<EBCellFAB>)");
@@ -1541,7 +1541,7 @@ EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<E
   m_doInterpCF = true;
 }
 
-void
+static void
 EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& /*a_phi*/)
 {
   CH_TIME("EBHelmholtzOp::fillGrad(LD<EBCellFAB>, LD)");
@@ -1549,7 +1549,7 @@ EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& /*a_phi*/)
   MayDay::Warning("EBHelmholtzOp::fillGrad - not implemented (yet)");
 }
 
-void
+static void
 EBHelmholtzOp::getFlux(EBFluxFAB& /*a_flux*/,
                        const LevelData<EBCellFAB>& /*a_data*/,
                        const Box& /*a_grid*/,
@@ -2106,8 +2106,8 @@ EBHelmholtzOp::makeAggStencil()
   CH_STOP(t2);
 }
 
-VoFStencil
-EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const
+static VoFStencil
+EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) 
 {
   CH_TIME("EBHelmholtzOp::getFaceCenterFluxStencil(FaceIndex, DataIndex)");
 
@@ -2220,7 +2220,7 @@ EBHelmholtzOp::computeFlux(EBFaceFAB&       a_fluxCentroid,
   a_fluxCentroid *= m_beta;
 }
 
-void
+static void
 EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
                                        const EBCellFAB& a_phi,
                                        const Box&       a_cellBox,
@@ -2248,7 +2248,7 @@ EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   BoxLoops::loop<D_DECL(1, 1, 1)>(faceBox, regularKernel);
 }
 
-void
+static void
 EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
                                        const EBCellFAB& a_phi,
                                        const Box&       a_cellBox,
@@ -2283,7 +2283,7 @@ EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
   BoxLoops::loop(faceIt, kernel);
 }
 
-void
+static void
 EBHelmholtzOp::computeFlux(const LevelData<EBCellFAB>& a_phi)
 {
   CH_TIME("EBHelmholtzOp::computeFlux(LD<EBCellFAB>)");
@@ -2340,7 +2340,7 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
   this->deallocateFlux();
 }
 
-void
+static void
 EBHelmholtzOp::coarsenCell(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine)
 {
   CH_TIME("EBHelmholtzOp::coarsenCell");
@@ -2348,7 +2348,7 @@ EBHelmholtzOp::coarsenCell(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFA
   m_coarAve->averageData(a_phi, a_phiFine, m_interval, Average::Conservative);
 }
 
-void
+static void
 EBHelmholtzOp::coarsenFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxFAB>& a_fineFlux)
 {
   CH_TIME("EBHelmholtzOp::coarsenFlux");
@@ -2356,7 +2356,7 @@ EBHelmholtzOp::coarsenFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBFluxF
   m_coarAve->averageData(a_flux, a_fineFlux, m_interval, Average::Conservative);
 }
 
-void
+static void
 EBHelmholtzOp::buildCopier(Copier& a_copier, const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBHelmholtzOp::buildCopier");

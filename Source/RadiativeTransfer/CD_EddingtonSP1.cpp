@@ -33,7 +33,7 @@
 constexpr Real EddingtonSP1::m_alpha;
 constexpr Real EddingtonSP1::m_beta;
 
-Real
+static Real
 EddingtonSP1::s_defaultDomainBcFunction(const RealVect /*a_position*/, const Real /*a_time*/)
 {
   return 1.0;

@@ -156,11 +156,11 @@ CellCentroidInterpolation::define(const EBLevelGrid& a_eblg, const Real& a_dx, c
   m_isDefined = true;
 }
 
-bool
+static bool
 CellCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
                                             const VolIndex&      a_vof,
                                             const EBISBox&       a_ebisBox,
-                                            const ProblemDomain& a_domain) const noexcept
+                                            const ProblemDomain& a_domain) noexcept
 {
   CH_TIME("CellCentroidInterpolation::getLinearStencil");
 
@@ -173,11 +173,11 @@ CellCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
   return foundStencil;
 }
 
-bool
+static bool
 CellCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil,
                                                          const VolIndex& a_vof,
                                                          const EBISBox&  a_ebisBox,
-                                                         const ProblemDomain& /*a_domain*/) const noexcept
+                                                         const ProblemDomain& /*a_domain*/) noexcept
 {
   CH_TIME("CellCentroidInterpolation::getTaylorExtrapolationStencil");
 
@@ -193,11 +193,11 @@ CellCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stenc
   return (order > 0);
 }
 
-bool
+static bool
 CellCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
                                                   const VolIndex& a_vof,
                                                   const EBISBox&  a_ebisBox,
-                                                  const ProblemDomain& /*a_domain*/) const noexcept
+                                                  const ProblemDomain& /*a_domain*/) noexcept
 {
   CH_TIME("CellCentroidInterpolation::getLeastSquaresStencil");
 
@@ -221,11 +221,11 @@ CellCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
   return (a_stencil.size() > 0);
 }
 
-bool
+static bool
 CellCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
                                                      const VolIndex& a_vof,
                                                      const EBISBox&  a_ebisBox,
-                                                     const ProblemDomain& /*a_domain*/) const noexcept
+                                                     const ProblemDomain& /*a_domain*/) noexcept
 {
   CH_TIME("CellCentroidInterpolation::getPiecewiseLinearStencil");
 

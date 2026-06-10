@@ -102,7 +102,7 @@ RodDielectric::defineInsulator()
   m_dielectrics.push_back(Dielectric(bif, eps));
 }
 
-RefCountedPtr<BaseIF>
+static RefCountedPtr<BaseIF>
 RodDielectric::getBox()
 {
   ParmParse pp("RodDielectric.box");
@@ -120,7 +120,7 @@ RodDielectric::getBox()
   return RefCountedPtr<BaseIF>(new RoundedBoxIF(lo, hi, curv, false));
 }
 
-RefCountedPtr<BaseIF>
+static RefCountedPtr<BaseIF>
 RodDielectric::getPlane()
 {
   ParmParse pp("RodDielectric.plane");
@@ -136,7 +136,7 @@ RodDielectric::getPlane()
   return RefCountedPtr<BaseIF>(new PlaneIF(n, p, true));
 }
 
-RefCountedPtr<BaseIF>
+static RefCountedPtr<BaseIF>
 RodDielectric::getSphere()
 {
   ParmParse pp("RodDielectric.sphere");
@@ -152,7 +152,7 @@ RodDielectric::getSphere()
   return RefCountedPtr<BaseIF>(new SphereSdf(p, r, false));
 }
 
-RefCountedPtr<BaseIF>
+static RefCountedPtr<BaseIF>
 RodDielectric::getPerlinBox()
 {
   ParmParse pp("RodDielectric.perlin_box");

@@ -63,8 +63,8 @@ public:
     @brief Factorial function
     @return Return value
   */
-  int
-  factorial() const;
+  static int
+  factorial() ;
 
   /**
     @brief Get index
@@ -202,7 +202,7 @@ protected:
   /**
     @brief Fill maps
   */
-  void
+  static void
   makeMaps();
 
 private:

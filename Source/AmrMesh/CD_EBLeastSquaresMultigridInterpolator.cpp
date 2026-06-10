@@ -95,11 +95,11 @@ EBLeastSquaresMultigridInterpolator::getGhostCF() const noexcept
   return m_ghostCF;
 }
 
-std::pair<DerivStencil, DerivStencil>
+static std::pair<DerivStencil, DerivStencil>
 EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular(const IntVect&       a_fineGhost,
                                                                     const DataIndex&     a_din,
                                                                     const int            a_dir,
-                                                                    const Side::LoHiSide a_side) const noexcept
+                                                                    const Side::LoHiSide a_side) noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular");
 
@@ -165,9 +165,9 @@ EBLeastSquaresMultigridInterpolator::getInterpolationStencilRegular(const IntVec
   return std::make_pair(fineStencil, coarStencil);
 }
 
-std::pair<VoFStencil, VoFStencil>
+static std::pair<VoFStencil, VoFStencil>
 EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  a_fineGhost,
-                                                               const DataIndex& a_din) const noexcept
+                                                               const DataIndex& a_din) noexcept
 {
   CH_TIME("EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB");
 
@@ -185,10 +185,10 @@ EBLeastSquaresMultigridInterpolator::getInterpolationStencilEB(const VolIndex&  
   return std::make_pair(fineStencil, coarStencil);
 }
 
-void
+static void
 EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
                                                       const LevelData<EBCellFAB>& a_phiCoar,
-                                                      const Interval              a_variables) const noexcept
+                                                      const Interval              a_variables) noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
   CH_TIMER("EBLeastSquaresMultigridInterpolator::coarseFineInterp::coar_irreg", t1);
@@ -267,10 +267,10 @@ EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_p
   }
 }
 
-void
+static void
 EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB&       a_phi,
                                                        const Interval   a_variables,
-                                                       const DataIndex& a_din) const noexcept
+                                                       const DataIndex& a_din) noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>)");
   CH_TIMER("EBLeastSquaresMultigridInterpolator::regular_interp", t1);
@@ -606,7 +606,7 @@ EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencil
                                                 const Real&            a_dxFine,
                                                 const Real&            a_dxCoar,
                                                 const int&             a_order,
-                                                const int&             a_weight) const noexcept
+                                                const int& /*a_weight*/) const noexcept
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::getStencil");
   CH_TIMER("get_vofs", t1);
@@ -796,11 +796,11 @@ EBLeastSquaresMultigridInterpolator::makeAggStencils() noexcept
   }
 }
 
-void
+static void
 EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB>&       a_finePhi,
                                                              const LevelData<EBCellFAB>& a_coarPhi,
                                                              const int                   a_fineVar,
-                                                             const int                   a_coarVar) const noexcept
+                                                             const int                   a_coarVar) noexcept
 
 {
   CH_TIMERS("EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp");

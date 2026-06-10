@@ -67,63 +67,63 @@ ComputationalGeometry::useChomboShop()
   m_scanDomain  = ProblemDomain();
 }
 
-const Vector<Dielectric>&
-ComputationalGeometry::getDielectrics() const
+static const Vector<Dielectric>&
+ComputationalGeometry::getDielectrics() 
 {
   CH_TIME("ComputationalGeometry::getDielectrics()");
 
   return (m_dielectrics);
 }
 
-const Vector<Electrode>&
-ComputationalGeometry::getElectrodes() const
+static const Vector<Electrode>&
+ComputationalGeometry::getElectrodes() 
 {
   CH_TIME("ComputationalGeometry::getElectrodes()");
 
   return (m_electrodes);
 }
 
-const RefCountedPtr<BaseIF>&
-ComputationalGeometry::getGasImplicitFunction() const
+static const RefCountedPtr<BaseIF>&
+ComputationalGeometry::getGasImplicitFunction() 
 {
   CH_TIME("ComputationalGeometry::getGasImplicitFunction()");
 
   return (m_implicitFunctionGas);
 }
 
-const RefCountedPtr<BaseIF>&
-ComputationalGeometry::getSolidImplicitFunction() const
+static const RefCountedPtr<BaseIF>&
+ComputationalGeometry::getSolidImplicitFunction() 
 {
   CH_TIME("ComputationalGeometry::getSolidImplicitFunction()");
 
   return (m_implicitFunctionSolid);
 }
 
-const RefCountedPtr<BaseIF>&
-ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const
+static const RefCountedPtr<BaseIF>&
+ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) 
 {
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
 
   return (a_phase == phase::gas) ? m_implicitFunctionGas : m_implicitFunctionSolid;
 }
 
-Real
-ComputationalGeometry::getGasPermittivity() const
+static Real
+ComputationalGeometry::getGasPermittivity() 
 {
   CH_TIME("ComputationalGeometry::getGasPermittivity()");
 
   return (m_eps0);
 }
 
-const RefCountedPtr<MultiFluidIndexSpace>&
-ComputationalGeometry::getMfIndexSpace() const
+static const RefCountedPtr<MultiFluidIndexSpace>&
+ComputationalGeometry::getMfIndexSpace() 
 {
   CH_TIME("ComputationalGeometry::getMfIndexSpace()");
 
   return (m_multifluidIndexSpace);
 }
 
-void
+static void
 ComputationalGeometry::setDielectrics(const Vector<Dielectric>& a_dielectrics)
 {
   CH_TIME("ComputationalGeometry::setDielectrics(Vector<Dielectric>)");
@@ -131,7 +131,7 @@ ComputationalGeometry::setDielectrics(const Vector<Dielectric>& a_dielectrics)
   m_dielectrics = a_dielectrics;
 }
 
-void
+static void
 ComputationalGeometry::setElectrodes(const Vector<Electrode>& a_electrodes)
 {
   CH_TIME("ComputationalGeometry::setElectrodes(Vector<Electrode>)");
@@ -139,7 +139,7 @@ ComputationalGeometry::setElectrodes(const Vector<Electrode>& a_electrodes)
   m_electrodes = a_electrodes;
 }
 
-void
+static void
 ComputationalGeometry::setGasPermittivity(const Real a_eps0)
 {
   CH_TIME("ComputationalGeometry::setGasPermittivity(Real)");

@@ -48,8 +48,8 @@ TiledMeshRefine::~TiledMeshRefine() noexcept
   CH_TIME("TiledMeshRefine::~TiledMeshRefine");
 }
 
-int
-TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) const noexcept
+static int
+TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) noexcept
 {
   CH_TIME("TiledMeshRefine::regrid");
 
@@ -97,13 +97,13 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
   return newFinestLevel;
 }
 
-void
+static void
 TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
                                 const TileSet&       a_fineTiles,
                                 const IntVectSet&    a_coarTags,
                                 const ProblemDomain& a_domain,
                                 const int            a_refToFine,
-                                const int            a_refToCoar) const noexcept
+                                const int            a_refToCoar) noexcept
 {
   CH_TIMERS("TiledMeshRefine::makeLevelTiles");
   CH_TIMER("TiledMeshRefine::makeLevelTiles::tag_tiles", t1);
@@ -166,8 +166,9 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   MPI_Allgatherv(mySendBuffer, mySendCount, MPI_INT, recvBuffer, sendCounts, offsets, MPI_INT, Chombo_MPI::comm);
 
   // de-linearize the received data back into tiles
-  for (int i = 0; i < recvCount; i += SpaceDim) {
+  for (int i = 0; i < recvCount;) {
     a_tiles.emplace(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2]));
+    i += SpaceDim;
   }
 
   delete[] recvBuffer;
@@ -202,10 +203,10 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   CH_STOP(t3);
 }
 
-void
+static void
 TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
                                     const TileSet&       a_tileSet,
-                                    const ProblemDomain& a_domain) const noexcept
+                                    const ProblemDomain& a_domain) noexcept
 {
   CH_TIME("TiledMeshRefine::makeBoxesFromTiles");
 

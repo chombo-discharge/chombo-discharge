@@ -84,7 +84,7 @@ ItoSolver::setRealm(const std::string a_realm)
   m_realm = a_realm;
 }
 
-void
+static void
 ItoSolver::setParticleMerger(const ParticleManagement::ParticleMerger<ItoParticle>& a_particleMerger) noexcept
 {
   CH_TIME("ItoSolver::setParticleMerger");
@@ -3157,18 +3157,18 @@ ItoSolver::makeSuperparticles(const WhichContainer a_container,
   BoxLoops::loop(vofit, irregularKernel);
 }
 
-void
-ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) const noexcept
+static void
+ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) noexcept
 {
   CH_TIMERS("ItoSolver::mergeParticles");
 
   m_particleMerger(a_particles, a_cellInfo, a_ppc);
 }
 
-void
+static void
 ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
                                            const CellInfo& /*a_cellInfo*/,
-                                           const int a_ppc) const noexcept
+                                           const int a_ppc) noexcept
 {
   CH_TIMERS("ItoSolver::makeSuperparticlesEqualWeightKD");
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::populate_list", t1);
@@ -3243,10 +3243,10 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   CH_STOP(t3);
 }
 
-void
+static void
 ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
                                              const CellInfo&    a_cellInfo,
-                                             const int          a_ppc) const noexcept
+                                             const int          a_ppc) noexcept
 {
   CH_TIMERS("ItoSolver::makeSuperparticlesBVHReinitialize");
   CH_TIMER("ItoSolver::makeSuperparticlesBVHReinitialize::populate_list", t1);
@@ -3355,10 +3355,10 @@ ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
   CH_STOP(t3);
 }
 
-void
+static void
 ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
                                  const CellInfo&    a_cellInfo,
-                                 const int          a_ppc) const noexcept
+                                 const int          a_ppc) noexcept
 {
   CH_TIME("ItoSolver::reinitializeParticles");
 

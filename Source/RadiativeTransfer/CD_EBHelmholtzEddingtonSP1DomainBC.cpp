@@ -84,7 +84,7 @@ EBHelmholtzEddingtonSP1DomainBC::~EBHelmholtzEddingtonSP1DomainBC()
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::~EBHelmholtzEddingtonSP1DomainBC");
 }
 
-void
+static void
 EBHelmholtzEddingtonSP1DomainBC::define(const Location::Cell a_dataLocation,
                                         const EBLevelGrid&   a_eblg,
                                         const RealVect&      a_probLo,
@@ -101,14 +101,14 @@ EBHelmholtzEddingtonSP1DomainBC::define(const Location::Cell a_dataLocation,
   }
 }
 
-void
+static void
 EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                              const BaseFab<Real>&  a_phi,
                                              const BaseFab<Real>&  a_Bcoef,
                                              const int&            a_dir,
                                              const Side::LoHiSide& a_side,
                                              const DataIndex&      a_dit,
-                                             const bool            a_useHomogeneous) const
+                                             const bool            a_useHomogeneous) 
 {
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(regular)");
 
@@ -117,14 +117,14 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   bcPtr->getFaceFlux(a_faceFlux, a_phi, a_Bcoef, a_dir, a_side, a_dit, a_useHomogeneous);
 }
 
-Real
+static Real
 EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
                                              const EBCellFAB&      a_phi,
                                              const EBFaceFAB&      a_Bcoef,
                                              const int&            a_dir,
                                              const Side::LoHiSide& a_side,
                                              const DataIndex&      a_dit,
-                                             const bool            a_useHomogeneous) const
+                                             const bool            a_useHomogeneous) 
 {
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(irreg)");
 

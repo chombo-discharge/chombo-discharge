@@ -28,7 +28,7 @@ MultiFluidIndexSpace::MultiFluidIndexSpace()
 
 MultiFluidIndexSpace::~MultiFluidIndexSpace() = default;
 
-void
+static void
 MultiFluidIndexSpace::define(const Box&                      a_domain,
                              const RealVect&                 a_origin,
                              const Real&                     a_dx,
@@ -86,7 +86,7 @@ MultiFluidIndexSpace::getEBIndexSpace(const int a_phase)
 }
 
 int
-MultiFluidIndexSpace::numPhases() const
+MultiFluidIndexSpace::numPhases() 
 {
   int phases = 0;
   for (int i = 0; i < m_ebis.size(); i++) {
@@ -98,8 +98,8 @@ MultiFluidIndexSpace::numPhases() const
   return phases;
 }
 
-IntVectSet
-MultiFluidIndexSpace::interfaceRegion(const ProblemDomain& a_domain) const
+static IntVectSet
+MultiFluidIndexSpace::interfaceRegion(const ProblemDomain& a_domain) 
 {
   CH_TIME("MultiFluidIndexSpace::interfaceRegion");
 

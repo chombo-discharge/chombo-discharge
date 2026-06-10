@@ -62,7 +62,7 @@ namespace Physics {
       /**
          @brief Draw the initial particle positions from a Gaussian distribution and assign unit weights.
       */
-      void
+      static void
       drawInitParticles();
     };
   } // namespace BrownianWalker

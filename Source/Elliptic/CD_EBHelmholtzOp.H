@@ -857,14 +857,14 @@ public:
   /**
     @brief Allocate m_flux
   */
-  void
-  allocateFlux() const noexcept;
+  static void
+  allocateFlux() noexcept;
 
   /**
     @brief Deallocate m_flux
   */
-  void
-  deallocateFlux() const noexcept;
+  static void
+  deallocateFlux() noexcept;
 
   /**
     @brief Returns m_flux. This is used in refluxing routines. 
@@ -1222,19 +1222,19 @@ protected:
   /**
     @brief Calculate the weight of the diagonal term
   */
-  void
+  static void
   computeDiagWeight();
 
   /**
     @brief Calculate relaxation coefficient
   */
-  void
+  static void
   computeRelaxationCoefficient();
 
   /**
     @brief Compute aggregated stencils
   */
-  void
+  static void
   makeAggStencil();
 
   /**

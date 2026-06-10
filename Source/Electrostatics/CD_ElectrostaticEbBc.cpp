@@ -32,7 +32,7 @@ ElectrostaticEbBc::clear()
   m_bcFunctions.resize(0);
 }
 
-void
+static void
 ElectrostaticEbBc::addEbBc(const Electrode& a_electrode, const BcFunction& a_bcFunction)
 {
   CH_TIME("ElectrostaticEbBc::addEbBc(Electrode, BcFunction)");
@@ -40,7 +40,7 @@ ElectrostaticEbBc::addEbBc(const Electrode& a_electrode, const BcFunction& a_bcF
   m_bcFunctions.emplace_back(a_electrode, a_bcFunction);
 }
 
-void
+static void
 ElectrostaticEbBc::setEbBc(const int a_electrode, const BcFunction& a_bcFunction)
 {
   CH_TIME("ElectrostaticEbBc::setEbBc(int, BcFunction)");
@@ -52,7 +52,7 @@ ElectrostaticEbBc::setEbBc(const int a_electrode, const BcFunction& a_bcFunction
   m_bcFunctions[a_electrode].second = a_bcFunction;
 }
 
-ElectrostaticEbBc::BcFunction&
+static ElectrostaticEbBc::BcFunction&
 ElectrostaticEbBc::getBc(const int a_electrode)
 {
   CH_TIME("ElectrostaticEbBc::getBc(int)");
@@ -64,8 +64,8 @@ ElectrostaticEbBc::getBc(const int a_electrode)
   return m_bcFunctions[a_electrode].second;
 }
 
-const ElectrostaticEbBc::BcFunction&
-ElectrostaticEbBc::getBc(const int a_electrode) const
+static const ElectrostaticEbBc::BcFunction&
+ElectrostaticEbBc::getBc(const int a_electrode) 
 {
   CH_TIME("ElectrostaticEbBc::getBc(int)");
 
@@ -76,7 +76,7 @@ ElectrostaticEbBc::getBc(const int a_electrode) const
   return m_bcFunctions[a_electrode].second;
 }
 
-std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
+static std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
 ElectrostaticEbBc::getBcs()
 {
   CH_TIME("ElectrostaticEbBc::getBcs()");
@@ -84,8 +84,8 @@ ElectrostaticEbBc::getBcs()
   return m_bcFunctions;
 }
 
-const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
-ElectrostaticEbBc::getBcs() const
+static const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
+ElectrostaticEbBc::getBcs() 
 {
   CH_TIME("ElectrostaticEbBc::getBcs()");
 

@@ -244,8 +244,8 @@ MechanicalShaft::defineDielectric() noexcept
   m_dielectrics[0].define(diel, eps);
 }
 
-std::shared_ptr<ImpFunc>
-MechanicalShaft::getSimpleCylinder() const noexcept
+static std::shared_ptr<ImpFunc>
+MechanicalShaft::getSimpleCylinder() noexcept
 {
   CH_TIME("MechanicalShaft::getSimpleCylinder");
 
@@ -260,8 +260,8 @@ MechanicalShaft::getSimpleCylinder() const noexcept
   return std::make_shared<EBGeometry::InfiniteCylinderSDF<Real>>(Vec3::zero(), radius, 2);
 }
 
-std::shared_ptr<ImpFunc>
-MechanicalShaft::getPolygon() const noexcept
+static std::shared_ptr<ImpFunc>
+MechanicalShaft::getPolygon() noexcept
 {
   ParmParse pp("MechanicalShaft");
 

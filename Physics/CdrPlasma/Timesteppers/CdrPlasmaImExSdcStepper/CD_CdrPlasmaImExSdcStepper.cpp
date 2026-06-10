@@ -166,8 +166,6 @@ CdrPlasmaImExSdcStepper::parseDiffusionCoupling()
 
   ParmParse pp(m_className.c_str());
 
-  std::string str;
-
   pp.get("use_tga", m_useTGA);
 }
 
@@ -179,8 +177,7 @@ CdrPlasmaImExSdcStepper::parseAdaptiveOptions()
     pout() << "CdrPlasmaImExSdcStepper::parseAdaptiveOptions" << endl;
   }
 
-  ParmParse   pp(m_className.c_str());
-  std::string str;
+  ParmParse pp(m_className.c_str());
 
   pp.get("error_norm", m_errorNorm);
   pp.get("min_corr", m_minCorr);

@@ -374,10 +374,10 @@ EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>& a_sten
   return foundStencil;
 }
 
-bool
+static bool
 EBHelmholtzDirichletEBBC::getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil,
                                               const VolIndex&              a_vof,
-                                              const DataIndex&             a_dit) const
+                                              const DataIndex&             a_dit) 
 {
   VoFStencil sten;
   Real       bndryWeight;

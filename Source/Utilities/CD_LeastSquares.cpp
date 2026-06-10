@@ -16,7 +16,7 @@
 #include <CD_MultiIndex.H>
 #include <CD_NamespaceHeader.H>
 
-VoFStencil
+static VoFStencil
 LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
                                       const CellLocation a_otherCellsPos,
                                       const Connectivity a_connectivity,
@@ -54,7 +54,7 @@ LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
   return ret;
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::getGradSten(const VolIndex&    a_vof,
                           const CellLocation a_gradLocation,
                           const CellLocation a_cellLocation,
@@ -93,7 +93,7 @@ LeastSquares::getGradSten(const VolIndex&    a_vof,
   return gradSten;
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::getGradSten(const FaceIndex&   a_face,
                           const FaceLocation a_gradLocation,
                           const CellLocation a_cellLocation,
@@ -153,7 +153,7 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
   return gradSten;
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
                                const Neighborhood a_neighborhood,
                                const CellLocation a_cellPositions,
@@ -232,7 +232,7 @@ LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
   return bndrySten;
 }
 
-RealVect
+static RealVect
 LeastSquares::displacement(const CellLocation a_from,
                            const CellLocation a_to,
                            const VolIndex&    a_fromVof,
@@ -247,7 +247,7 @@ LeastSquares::displacement(const CellLocation a_from,
   return (b - a);
 }
 
-RealVect
+static RealVect
 LeastSquares::displacement(const FaceLocation a_fromLoc,
                            const CellLocation a_toLoc,
                            const FaceIndex&   a_fromFace,
@@ -261,7 +261,7 @@ LeastSquares::displacement(const FaceLocation a_fromLoc,
   return (b - a);
 }
 
-RealVect
+static RealVect
 LeastSquares::displacement(const CellLocation a_from,
                            const CellLocation a_to,
                            const VolIndex&    a_fromVof,
@@ -278,7 +278,7 @@ LeastSquares::displacement(const CellLocation a_from,
   return (b - a);
 }
 
-Vector<RealVect>
+static Vector<RealVect>
 LeastSquares::getDisplacements(const CellLocation      a_from,
                                const CellLocation      a_to,
                                const VolIndex&         a_fromVof,
@@ -298,7 +298,7 @@ LeastSquares::getDisplacements(const CellLocation      a_from,
   return ret;
 }
 
-Vector<RealVect>
+static Vector<RealVect>
 LeastSquares::getDisplacements(const FaceLocation      a_fromLoc,
                                const CellLocation      a_toLoc,
                                const FaceIndex&        a_fromFace,
@@ -317,7 +317,7 @@ LeastSquares::getDisplacements(const FaceLocation      a_fromLoc,
   return ret;
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const int               a_p,
@@ -329,7 +329,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
   return LeastSquares::computeGradSten(a_allVofs, a_displacements, weights, a_order, a_knownTerms);
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
                               const Vector<RealVect>& a_displacements,
                               const Vector<Real>&     a_weights,
@@ -370,7 +370,7 @@ LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
   return sten;
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection)
 {
   VoFStencil sten;
@@ -388,7 +388,7 @@ LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_pro
   return sten;
 }
 
-Real
+static Real
 LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable)
 {
 
@@ -404,7 +404,7 @@ LeastSquares::sumWeights(const VoFStencil& a_stencil, const int a_variable)
   return ret;
 }
 
-Real
+static Real
 LeastSquares::sumAllWeights(const VoFStencil& a_stencil)
 {
   Real ret = 0.0;
@@ -425,7 +425,7 @@ LeastSquares::getTaylorExpansionSize(const int a_order)
   return mi.getNumIndices();
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
                                           const Vector<RealVect>& a_displacements,
                                           const int               a_pow,
@@ -437,7 +437,7 @@ LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
   return LeastSquares::computeInterpolationStencil(a_allVofs, a_displacements, weights, a_order);
 }
 
-VoFStencil
+static VoFStencil
 LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
                                           const Vector<RealVect>& a_displacements,
                                           const Vector<Real>&     a_weights,
@@ -463,7 +463,7 @@ LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_allVofs,
   return ret;
 }
 
-std::map<IntVect, VoFStencil>
+static std::map<IntVect, VoFStencil>
 LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
                                          const IntVectSet&       a_knownTerms,
                                          const Vector<VolIndex>& a_allVofs,
@@ -477,7 +477,7 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
   return LeastSquares::computeSingleLevelStencils(a_derivs, a_knownTerms, a_allVofs, a_displacements, weights, a_order);
 }
 
-std::map<IntVect, VoFStencil>
+static std::map<IntVect, VoFStencil>
 LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
                                          const IntVectSet&       a_knownTerms,
                                          const Vector<VolIndex>& a_allVofs,

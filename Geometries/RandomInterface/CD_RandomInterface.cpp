@@ -54,8 +54,8 @@ RandomInterface::ClampedNoisePlane::shuffle(URNG& a_rng) noexcept
   m_perlin->shuffle(a_rng);
 }
 
-Real
-RandomInterface::ClampedNoisePlane::signedDistance(const Vec3& a_point) const noexcept
+static Real
+RandomInterface::ClampedNoisePlane::signedDistance(const Vec3& a_point) noexcept
 {
   const Vec3 x0 = m_point;
   const Vec3 x1 = a_point;

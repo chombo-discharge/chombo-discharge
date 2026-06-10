@@ -47,7 +47,7 @@ EBHelmholtzDomainBC::define(const Location::Cell a_dataLocation,
   m_dx           = a_dx;
 }
 
-void
+static void
 EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
                                      const BaseFab<Real>& a_bco,
                                      const int            a_dir,
