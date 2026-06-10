@@ -153,5 +153,3 @@ via `bear` or an equivalent wrapper. This is a separate task.
 ### Cleanup
 After completing the above checklists, warn the user about various stubs that are still present in this branch.
 *  TODO.md should not be a part of the PR, and clang-tidy must be integrated into the CI pipeline.
-* Check if ANY /*! block appears in the code, and fix the files that contain such blocks.
-* We must reset the H5 files to not use the cycle -- this causes a bug int he VisIt reader
