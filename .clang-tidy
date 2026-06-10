@@ -31,14 +31,13 @@ Checks: >
        -misc-include-cleaner,
        -misc-non-private-member-variables-in-classes,
        -misc-no-recursion,
-     modernize-*,
-       -modernize-avoid-c-arrays,
-       -modernize-macro-to-enum,
-       -modernize-return-braced-init-list,
-       -modernize-use-trailing-return-type,
-       -modernize-use-nodiscard
+     modernize-loop-convert,
+     modernize-make-unique,
+     modernize-use-auto,
+     modernize-use-default-member-init,
+     modernize-use-nullptr,
+     modernize-use-override,
      performance-*,
-     portability-*,
      readability-*,
        -readability-avoid-unconditional-preprocessor-if,
        -readability-else-after-return,
@@ -53,5 +52,4 @@ Checks: >
        -readability-simplify-boolean-expr,
     '
 
-# Only available in clang-tidy >= 17
-HeaderFilterRegex: ^(EBGeometry\.hpp|Source/.*)
+HeaderFilterRegex: ^(Source|Geometries|Physics|Exec)/

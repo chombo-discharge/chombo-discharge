@@ -78,8 +78,13 @@ jobs:
 
       - name: Run clang-tidy
         run: |
-          find Source Physics Geometries Exec -name "*.cpp" | \
-            xargs clang-tidy -p $DISCHARGE_HOME
+          changed=$(git diff --name-only origin/${{ github.base_ref }} HEAD \
+            | grep -E '^(Source|Exec|Physics|Geometries)/.*\.cpp$' || true)
+          if [ -z "$changed" ]; then
+            echo "No changed .cpp files - skipping"
+            exit 0
+          fi
+          echo "$changed" | xargs -P$(nproc) -n1 clang-tidy -p $DISCHARGE_HOME
 
   Linux-GNU:
     if: github.event.pull_request.draft == false

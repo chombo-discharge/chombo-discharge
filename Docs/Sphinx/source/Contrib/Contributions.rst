@@ -243,8 +243,8 @@ The following hooks are active (see ``.pre-commit-config.yaml``):
      - C++ source formatting
      - Enforces ``.clang-format`` style; fails if any diff is produced
    * - ``clang-tidy``
-     - Static analysis
-     - Requires ``compile_commands.json``; skipped in CI
+     - Static analysis of staged ``.cpp`` files
+     - Requires ``compile_commands.json``; runs ``run_clang_tidy.sh`` in parallel
    * - ``reuse``
      - REUSE/SPDX licence compliance
      - Runs ``reuse lint`` on the whole repo
@@ -287,10 +287,13 @@ clang-tidy
 ..........
 
 Static analysis is performed with ``clang-tidy`` using the configuration in ``.clang-tidy``.
-The active check families are: ``bugprone-*``, ``clang-analyzer-*``, ``cppcoreguidelines-*``,
-``misc-*``, ``modernize-*``, ``performance-*``, ``portability-*``, and ``readability-*``,
-with a number of noisy or inapplicable checks disabled.
-Only files under ``Source/``, ``Physics/``, ``Exec/``, and ``Geometries/`` are analysed.
+The active check families target C++14: ``bugprone-*``, ``clang-analyzer-*``,
+``cppcoreguidelines-*``, ``misc-*``, a curated subset of ``modernize-*``
+(``loop-convert``, ``make-unique``, ``use-auto``, ``use-default-member-init``,
+``use-nullptr``, ``use-override``), ``performance-*``, and ``readability-*``,
+with noisy or inapplicable checks disabled.
+Only ``.cpp`` files under ``Source/``, ``Physics/``, ``Exec/``, and ``Geometries/``
+are analysed directly; headers are checked transitively.
 
 Generating ``compile_commands.json``
 .....................................
@@ -321,26 +324,38 @@ Regenerate it whenever you add or remove source files, or change compiler flags.
 Running clang-tidy
 ..................
 
-**Via the pre-commit hook** (runs on staged files):
+``chombo-discharge`` provides ``run_clang_tidy.sh`` at the repository root as a
+convenience wrapper around ``run-clang-tidy``.
+
+**Full local run** (all project ``.cpp`` files, all cores):
+
+.. code-block:: bash
+
+   ./run_clang_tidy.sh
+
+This invokes ``run-clang-tidy -j$(nproc)`` and analyses every ``.cpp`` file under
+``Source/``, ``Exec/``, ``Physics/``, and ``Geometries/`` in parallel.
+
+**Via the pre-commit hook** (staged ``.cpp`` files only):
 
 .. code-block:: bash
 
    pre-commit run clang-tidy
 
-**Manually on specific files**:
+The hook runs automatically on ``git commit``.  It passes only the staged ``.cpp``
+files in the four project directories to ``clang-tidy``, running them in parallel
+via the same script.  Headers are analysed transitively.  No action is taken if no
+``.cpp`` files are staged.
 
-.. code-block:: bash
+**In the CI pipeline** (changed files in the pull request):
 
-   clang-tidy -p $DISCHARGE_HOME Source/MyModule/CD_MyClass.cpp
+The ``Clang-tidy`` GitHub Actions job builds a compilation database with Bear, then
+runs ``clang-tidy`` on only the ``.cpp`` files that differ between the PR branch and
+``main``.  This keeps CI fast regardless of repository size.  If a pull request
+touches no ``.cpp`` files the job exits immediately with success.
 
-**Manually on all changed files** relative to ``main``:
-
-.. code-block:: bash
-
-   git diff --name-only main -- '*.cpp' '*.H' | \
-       xargs clang-tidy -p $DISCHARGE_HOME
-
-Run it locally before submitting a pull request.
+Run ``./run_clang_tidy.sh`` locally and resolve any warnings before opening a pull
+request.
 
 codespell
 .........
@@ -477,7 +492,7 @@ All jobs must pass before a pull request can be merged into ``main``.
      - ``codespell`` spelling check across source, docs, and physics files
    * - ``Clang-tidy``
      - Ubuntu
-     - Static analysis of ``Source/``, ``Physics/``, ``Geometries/``, and ``Exec/``; uses Bear to generate a compilation database then runs ``clang-tidy`` on all ``.cpp`` files
+     - Builds a compilation database with Bear, then runs ``clang-tidy`` in parallel on only the ``.cpp`` files changed in the pull request; skipped if no ``.cpp`` files changed
    * - ``Linux-GNU``
      - Ubuntu
      - Full 2D and 3D debug builds with GCC; depends on Formatting, REUSE, and Codespell
