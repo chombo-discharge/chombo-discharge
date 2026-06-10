@@ -21,7 +21,7 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrGodunov::CdrGodunov() :
+CdrGodunov::CdrGodunov()
 {
   CH_TIME("CdrGodunov::CdrGodunov()");
 

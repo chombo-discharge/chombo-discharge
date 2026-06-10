@@ -51,7 +51,6 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
     m_profile(false),
     m_realm(Realm::Primal),
     m_time(0.0),
-    m_time(m_startTime),
     m_timeStep(0)
 {
   CH_TIME("Driver::Driver");
@@ -65,18 +64,17 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_amr->sanityCheck();  // Sanity check, make sure everything is set up correctly
   m_amr->buildDomains(); // Build domains and resolutions, nothing else
 
-  // Reset time steps.
-
   // Parse some class options and create the output directories for the simulation.
   this->parseOptions();
 
   // Always register this Realm and these operators.
-
   m_amr->registerRealm(m_realm);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, phase::gas);
 
   // Seed the RNG.
   Random::seed();
+
+  m_time = m_startTime;
 }
 
 Driver::~Driver()
