@@ -88,7 +88,7 @@ BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane& a_inputIF)
 BoundedNoisePlane::~BoundedNoisePlane() = default;
 
 static Real
-BoundedNoisePlane::value(const RealVect& a_pos) 
+BoundedNoisePlane::value(const RealVect& a_pos)
 {
   // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function),
   //       clamped with a boxcar function.

@@ -64,7 +64,7 @@ public:
     @return Return value
   */
   static int
-  factorial() ;
+  factorial();
 
   /**
     @brief Get index

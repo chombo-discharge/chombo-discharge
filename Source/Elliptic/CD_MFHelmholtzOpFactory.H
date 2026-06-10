@@ -449,7 +449,7 @@ protected:
   getCoarserLayout(MFLevelGrid&       a_coarMflg,
                    const MFLevelGrid& a_fineMflg,
                    const int          a_refRat,
-                   const int          a_blockingFactor) ;
+                   const int          a_blockingFactor);
 
   /**
     @brief Coarsen coefficients (conservatively)

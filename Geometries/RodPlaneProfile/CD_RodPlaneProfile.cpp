@@ -37,10 +37,10 @@ RodPlaneProfile::RodPlaneProfile()
   std::string  str;
   Vector<Real> vec(SpaceDim);
 
-  bool        rod_live, has_rod, has_plane;
-  Real        eps, rod_rad, xshift, curv, dist, yshift, width;
-  int         numl, numr;
-  RealVect    center1, center2, point, normal;
+  bool      rod_live, has_rod, has_plane;
+  Real      eps, rod_rad, xshift, curv, dist, yshift, width;
+  int       numl, numr;
+  RealVect  center1, center2, point, normal;
   ParmParse pp("RodPlaneProfile");
 
   pp.get("turn_on_rod", has_rod);

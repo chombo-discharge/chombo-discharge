@@ -61,7 +61,7 @@ NeedleIF::NeedleIF(const NeedleIF& a_inputIF)
 }
 
 static Real
-NeedleIF::value(const RealVect& a_point) 
+NeedleIF::value(const RealVect& a_point)
 {
   CH_TIME("NeedleIF::value");
 

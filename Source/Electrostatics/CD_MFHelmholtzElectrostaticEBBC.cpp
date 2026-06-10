@@ -206,7 +206,7 @@ MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseV
                                                      const BaseIVFAB<Real>& a_Bcoef,
                                                      const DataIndex&       a_dit,
                                                      const Real&            a_beta,
-                                                     const bool&            a_homogeneousPhysBC) 
+                                                     const bool&            a_homogeneousPhysBC)
 {
   CH_TIME(
     "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");

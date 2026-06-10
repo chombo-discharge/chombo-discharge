@@ -113,7 +113,7 @@ SphereArray::value(const RealVect& a_point) const
 }
 
 static BaseIF*
-SphereArray::newImplicitFunction() 
+SphereArray::newImplicitFunction()
 {
   CH_TIME("SphereArray::newImplicitFunction");
 

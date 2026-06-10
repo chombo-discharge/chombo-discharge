@@ -68,7 +68,7 @@ ComputationalGeometry::useChomboShop()
 }
 
 static const Vector<Dielectric>&
-ComputationalGeometry::getDielectrics() 
+ComputationalGeometry::getDielectrics()
 {
   CH_TIME("ComputationalGeometry::getDielectrics()");
 
@@ -76,7 +76,7 @@ ComputationalGeometry::getDielectrics()
 }
 
 static const Vector<Electrode>&
-ComputationalGeometry::getElectrodes() 
+ComputationalGeometry::getElectrodes()
 {
   CH_TIME("ComputationalGeometry::getElectrodes()");
 
@@ -84,7 +84,7 @@ ComputationalGeometry::getElectrodes()
 }
 
 static const RefCountedPtr<BaseIF>&
-ComputationalGeometry::getGasImplicitFunction() 
+ComputationalGeometry::getGasImplicitFunction()
 {
   CH_TIME("ComputationalGeometry::getGasImplicitFunction()");
 
@@ -92,7 +92,7 @@ ComputationalGeometry::getGasImplicitFunction()
 }
 
 static const RefCountedPtr<BaseIF>&
-ComputationalGeometry::getSolidImplicitFunction() 
+ComputationalGeometry::getSolidImplicitFunction()
 {
   CH_TIME("ComputationalGeometry::getSolidImplicitFunction()");
 
@@ -100,7 +100,7 @@ ComputationalGeometry::getSolidImplicitFunction()
 }
 
 static const RefCountedPtr<BaseIF>&
-ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) 
+ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase)
 {
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
 
@@ -108,7 +108,7 @@ ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase)
 }
 
 static Real
-ComputationalGeometry::getGasPermittivity() 
+ComputationalGeometry::getGasPermittivity()
 {
   CH_TIME("ComputationalGeometry::getGasPermittivity()");
 
@@ -116,7 +116,7 @@ ComputationalGeometry::getGasPermittivity()
 }
 
 static const RefCountedPtr<MultiFluidIndexSpace>&
-ComputationalGeometry::getMfIndexSpace() 
+ComputationalGeometry::getMfIndexSpace()
 {
   CH_TIME("ComputationalGeometry::getMfIndexSpace()");
 

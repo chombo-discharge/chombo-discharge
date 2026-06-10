@@ -108,7 +108,7 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                              const int&            a_dir,
                                              const Side::LoHiSide& a_side,
                                              const DataIndex&      a_dit,
-                                             const bool            a_useHomogeneous) 
+                                             const bool            a_useHomogeneous)
 {
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(regular)");
 
@@ -124,7 +124,7 @@ EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
                                              const int&            a_dir,
                                              const Side::LoHiSide& a_side,
                                              const DataIndex&      a_dit,
-                                             const bool            a_useHomogeneous) 
+                                             const bool            a_useHomogeneous)
 {
   CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(irreg)");
 

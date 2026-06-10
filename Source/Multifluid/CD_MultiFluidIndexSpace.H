@@ -125,7 +125,7 @@ public:
     @return Number of phases.
   */
   static int
-  numPhases() ;
+  numPhases();
 
 protected:
   /**

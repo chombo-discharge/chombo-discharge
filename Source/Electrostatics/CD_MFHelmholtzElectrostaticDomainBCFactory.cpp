@@ -28,7 +28,7 @@ MFHelmholtzElectrostaticDomainBCFactory::~MFHelmholtzElectrostaticDomainBCFactor
 }
 
 static RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzElectrostaticDomainBCFactory::create(const int /*a_iphase*/) 
+MFHelmholtzElectrostaticDomainBCFactory::create(const int /*a_iphase*/)
 {
   CH_TIME("MFHelmholtzElectrostaticDomainBCFactory::create(int)");
 

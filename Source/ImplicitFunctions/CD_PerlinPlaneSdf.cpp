@@ -49,7 +49,7 @@ PerlinPlaneSdf::PerlinPlaneSdf(const PerlinPlaneSdf& a_inputIF)
 PerlinPlaneSdf::~PerlinPlaneSdf() = default;
 
 static Real
-PerlinPlaneSdf::value(const RealVect& a_pos) 
+PerlinPlaneSdf::value(const RealVect& a_pos)
 {
   // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function).
 

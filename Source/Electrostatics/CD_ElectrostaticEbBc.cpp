@@ -65,7 +65,7 @@ ElectrostaticEbBc::getBc(const int a_electrode)
 }
 
 static const ElectrostaticEbBc::BcFunction&
-ElectrostaticEbBc::getBc(const int a_electrode) 
+ElectrostaticEbBc::getBc(const int a_electrode)
 {
   CH_TIME("ElectrostaticEbBc::getBc(int)");
 
@@ -85,7 +85,7 @@ ElectrostaticEbBc::getBcs()
 }
 
 static const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction>>&
-ElectrostaticEbBc::getBcs() 
+ElectrostaticEbBc::getBcs()
 {
   CH_TIME("ElectrostaticEbBc::getBcs()");
 

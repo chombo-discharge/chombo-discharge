@@ -86,7 +86,7 @@ MultiFluidIndexSpace::getEBIndexSpace(const int a_phase)
 }
 
 int
-MultiFluidIndexSpace::numPhases() 
+MultiFluidIndexSpace::numPhases()
 {
   int phases = 0;
   for (int i = 0; i < m_ebis.size(); i++) {
@@ -99,7 +99,7 @@ MultiFluidIndexSpace::numPhases()
 }
 
 static IntVectSet
-MultiFluidIndexSpace::interfaceRegion(const ProblemDomain& a_domain) 
+MultiFluidIndexSpace::interfaceRegion(const ProblemDomain& a_domain)
 {
   CH_TIME("MultiFluidIndexSpace::interfaceRegion");
 

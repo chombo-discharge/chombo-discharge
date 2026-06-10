@@ -73,7 +73,7 @@ GeometryStepper::getNumberOfPlotVariables() const
 }
 
 static Vector<std::string>
-GeometryStepper::getPlotVariableNames() 
+GeometryStepper::getPlotVariableNames()
 {
   return Vector<std::string>();
 }

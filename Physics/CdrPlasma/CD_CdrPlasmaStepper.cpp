@@ -2921,9 +2921,9 @@ CdrPlasmaStepper::computeElectricField(EBAMRCellData&           a_E,
 }
 
 void
-CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldFace,
+CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_electricFieldFace,
                                        const phase::which_phase /*a_phase*/,
-                                       const EBAMRCellData&     a_electricFieldCell) const
+                                       const EBAMRCellData& a_electricFieldCell) const
 {
   CH_TIME("CdrPlasmaStepper::computeElectricField(EBAMRFluxData, phase, EBAMRCellData)");
   if (m_verbosity > 5) {

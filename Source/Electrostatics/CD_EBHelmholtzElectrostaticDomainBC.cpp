@@ -101,7 +101,7 @@ EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                               const int&            a_dir,
                                               const Side::LoHiSide& a_side,
                                               const DataIndex&      a_dit,
-                                              const bool            a_useHomogeneous) 
+                                              const bool            a_useHomogeneous)
 {
   CH_TIME(
     "EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
@@ -121,7 +121,7 @@ EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
                                               const int&            a_dir,
                                               const Side::LoHiSide& a_side,
                                               const DataIndex&      a_dit,
-                                              const bool            a_useHomogeneous) 
+                                              const bool            a_useHomogeneous)
 {
 
   // We know that we've defined one BC object that is either Dirichlet or Neumann on the each domain side. We just fetch

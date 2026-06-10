@@ -82,7 +82,7 @@ DomainFluxIFFAB::define(const DomainFluxIFFAB& a_copy)
 }
 
 static int
-DomainFluxIFFAB::size(const Box& R, const Interval& comps) 
+DomainFluxIFFAB::size(const Box& R, const Interval& comps)
 {
   CH_TIME("DomainFluxIFFAB::size");
 
@@ -96,7 +96,7 @@ DomainFluxIFFAB::size(const Box& R, const Interval& comps)
 }
 
 static void
-DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps) 
+DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps)
 {
   CH_TIME("DomainFluxIFFAB::linearOut");
 

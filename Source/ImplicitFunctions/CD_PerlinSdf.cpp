@@ -146,7 +146,7 @@ PerlinSdf::noise(const double a_x, const double a_y, const double a_z) const
 }
 
 static Real
-PerlinSdf::noise(const RealVect& a_pos) 
+PerlinSdf::noise(const RealVect& a_pos)
 {
 
   Real x, y, z;

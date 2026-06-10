@@ -52,7 +52,7 @@ HyperboloidIF::value(const RealVect& a_point) const
 }
 
 static BaseIF*
-HyperboloidIF::newImplicitFunction() 
+HyperboloidIF::newImplicitFunction()
 {
   auto* hyperboloidPtr = new HyperboloidIF(m_radii, m_center, m_inside);
 

@@ -491,7 +491,7 @@ bool
 MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
                                        const MFLevelGrid& a_fineMflg,
                                        const int          a_refRat,
-                                       const int          a_blockingFactor) 
+                                       const int          a_blockingFactor)
 {
   CH_TIME("MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid, MFLevelGrid, int, int)");
 
@@ -811,7 +811,7 @@ MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
 }
 
 static int
-MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) 
+MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain)
 {
   CH_TIME("MFHelmholtzOpFactory::refToFiner(ProblemDomain)");
 
@@ -827,7 +827,7 @@ MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain)
 }
 
 static int
-MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) 
+MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain)
 {
   CH_TIME("MFHelmholtzOpFactory::findAmrLevel(ProblemDomain)");
 

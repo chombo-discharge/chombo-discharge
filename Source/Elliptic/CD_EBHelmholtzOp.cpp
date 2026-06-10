@@ -263,7 +263,7 @@ EBHelmholtzOp::deallocateFlux() noexcept
 }
 
 static LevelData<EBFluxFAB>&
-EBHelmholtzOp::getFlux() 
+EBHelmholtzOp::getFlux()
 {
   CH_TIME("EBHelmholtzOp::getFlux()");
 
@@ -2107,7 +2107,7 @@ EBHelmholtzOp::makeAggStencil()
 }
 
 static VoFStencil
-EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) 
+EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit)
 {
   CH_TIME("EBHelmholtzOp::getFaceCenterFluxStencil(FaceIndex, DataIndex)");
 

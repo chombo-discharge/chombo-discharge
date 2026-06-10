@@ -352,7 +352,7 @@ static bool
 EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
                                        const EBLevelGrid& a_fineEblg,
                                        const int          a_refRat,
-                                       const int          a_blockingFactor) 
+                                       const int          a_blockingFactor)
 {
   CH_TIME("EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid, EBLevelGrid, int, int)");
 
@@ -639,7 +639,7 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 }
 
 static int
-EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) 
+EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain)
 {
   CH_TIME("EBHelmholtzOpFactory::refToFiner(ProblemDomain)");
 
@@ -662,7 +662,7 @@ EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain)
 }
 
 static int
-EBHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) 
+EBHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain)
 {
   CH_TIME("EBHelmholtzOpFactory::findAmrLevel(ProblemDomain)");
 

@@ -79,7 +79,7 @@ public:
     @return True if intersection found, false otherwise
   */
   static bool
-  intersect(const RealBox& a_box) ;
+  intersect(const RealBox& a_box);
 
   /**
     @brief Check if a_point is inside this box

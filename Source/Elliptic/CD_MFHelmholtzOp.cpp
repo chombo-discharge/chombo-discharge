@@ -705,7 +705,7 @@ MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homo
 }
 
 static void
-MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) 
+MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi)
 {
   CH_TIME("MFHelmholtzOp::exchangeGhost");
 

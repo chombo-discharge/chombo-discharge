@@ -28,7 +28,7 @@ EBAddOp::~EBAddOp()
 }
 
 static void
-EBAddOp::linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps) 
+EBAddOp::linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const Interval& a_comps)
 {
   CH_TIME("EBAddOp::linearIn");
 
@@ -52,7 +52,7 @@ EBAddOp::op(EBCellFAB& a_dst,
             const Interval&  a_dstVars,
             const Box&       a_regionTo,
             const EBCellFAB& a_src,
-            const Interval&  a_srcVars) 
+            const Interval&  a_srcVars)
 {
   CH_TIME("EBAddOp::op");
 

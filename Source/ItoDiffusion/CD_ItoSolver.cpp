@@ -3356,9 +3356,7 @@ ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
 }
 
 static void
-ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
-                                 const CellInfo&    a_cellInfo,
-                                 const int          a_ppc) noexcept
+ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) noexcept
 {
   CH_TIME("ItoSolver::reinitializeParticles");
 

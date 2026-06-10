@@ -1400,7 +1400,7 @@ namespace Physics {
         @return True if neutral species, false otherwise
       */
       static bool
-      isNeutralSpecies(const std::string& a_name) ;
+      isNeutralSpecies(const std::string& a_name);
 
       /**
          @brief Return true if species exists in map and false otherwise
@@ -1408,7 +1408,7 @@ namespace Physics {
         @return True if plasma species, false otherwise
       */
       static bool
-      isPlasmaSpecies(const std::string& a_name) ;
+      isPlasmaSpecies(const std::string& a_name);
 
       /**
          @brief Return true if species exists in map and false otherwise
@@ -1416,7 +1416,7 @@ namespace Physics {
         @return True if photon species, false otherwise
       */
       static bool
-      isPhotonSpecies(const std::string& a_name) ;
+      isPhotonSpecies(const std::string& a_name);
 
       /**
          @brief Check if file exists
