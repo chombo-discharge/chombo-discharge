@@ -21,11 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBReflux::EBReflux() noexcept
+EBReflux::EBReflux() noexcept : m_isDefined(false)
 {
   CH_TIME("EBReflux::EBReflux(weak)");
-
-  m_isDefined = false;
 }
 
 EBReflux::EBReflux(const EBLevelGrid& a_eblg,

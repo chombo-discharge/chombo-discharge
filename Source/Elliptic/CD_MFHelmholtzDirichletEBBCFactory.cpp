@@ -101,7 +101,7 @@ MFHelmholtzDirichletEBBCFactory::create(const int a_iphase, const RefCountedPtr<
   CH_assert(m_weight >= 0);
   CH_assert(m_useFunction || m_useConstant);
 
-  auto bc = new MFHelmholtzDirichletEBBC(a_iphase, a_jumpBC);
+  auto* bc = new MFHelmholtzDirichletEBBC(a_iphase, a_jumpBC);
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

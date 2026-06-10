@@ -175,7 +175,7 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
         }
 
         // Apply stencil. Note that the stencil "variable" is the gradient component (i.e., direction)
-        auto& sten = m_levelStencils[din](vof, m_comp);
+        const auto& sten = m_levelStencils[din](vof, m_comp);
         for (int i = 0; i < sten.size(); i++) {
           const VolIndex& ivof    = sten.vof(i);
           const Real&     iweight = sten.weight(i);
@@ -1098,8 +1098,8 @@ EBGradient::makeAggStencils() noexcept
   CH_STOP(t1);
 
   CH_START(t2);
-  for (int dir = 0; dir < SpaceDim; dir++) {
-    m_aggLevelStencils[dir].define(dbl);
+  for (auto& m_aggLevelStencil : m_aggLevelStencils) {
+    m_aggLevelStencil.define(dbl);
   }
   CH_STOP(t2);
 

@@ -19,12 +19,9 @@
 #include <CD_EBHelmholtzRobinDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()
+EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzRobinDomainBC::~EBHelmholtzRobinDomainBC()

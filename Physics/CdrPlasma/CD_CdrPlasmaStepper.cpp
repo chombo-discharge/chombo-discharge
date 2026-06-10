@@ -28,15 +28,13 @@
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaStepper::CdrPlasmaStepper()
+  : m_className("CdrPlasmaStepper"), m_phase(phase::gas), m_realm(Realm::Primal), m_solverVerbosity(-1)
 {
   CH_TIME("CdrPlasmaStepper::CdrPlasmaStepper()");
 
   // Default settings
-  m_className       = "CdrPlasmaStepper";
-  m_verbosity       = -1;
-  m_solverVerbosity = -1;
-  m_phase           = phase::gas;
-  m_realm           = Realm::Primal;
+
+  m_verbosity = -1;
 }
 
 CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper()

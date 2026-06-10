@@ -157,7 +157,7 @@ RodNeedleDisk::defineRodNeedle() noexcept
   }
 
   // Combine the rod and the needle using a CSG union. Then orient and translate them into the user-specified position.
-  if (implicitFunctions.size() > 0) {
+  if (!implicitFunctions.empty()) {
     auto rodNeedleUnion = EBGeometry::SmoothUnion<Real>(implicitFunctions, rodNeedleSmooth);
 
     // Rotate into user-specified orientation.

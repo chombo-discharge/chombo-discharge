@@ -24,10 +24,8 @@
 const std::string Realm::Primal = "primal";
 const std::string Realm::primal = "primal";
 
-Realm::Realm()
+Realm::Realm() : m_isDefined(false), m_verbosity(-1)
 {
-  m_isDefined = false;
-  m_verbosity = -1;
 
   ParmParse pp("Realm");
 
@@ -38,8 +36,7 @@ Realm::Realm()
   m_realms.emplace(phase::solid, RefCountedPtr<PhaseRealm>(new PhaseRealm()));
 }
 
-Realm::~Realm()
-{}
+Realm::~Realm() = default;
 
 void
 Realm::define(const Vector<DisjointBoxLayout>&                          a_grids,
@@ -299,8 +296,9 @@ Realm::defineOuterHaloMask(const int a_lmin)
     const int         buffer     = m.first.second;
 
     if (which_mask == s_outer_particle_halo) {
-      if (buffer <= 0)
+      if (buffer <= 0) {
         MayDay::Abort("Realm::defineOuterHaloMask -- cannot have buffer <= 0!");
+      }
 
       AMRMask& mask = m.second;
 
@@ -638,8 +636,9 @@ Realm::defineOuterCFMask(const int a_lmin)
     const int         buffer     = m.first.second;
 
     if (which_mask == s_outer_cf_region) {
-      if (buffer <= 0)
+      if (buffer <= 0) {
         MayDay::Abort("Realm::defineOuterCFMask -- cannot have buffer <= 0!");
+      }
 
       AMRMask& mask = m.second;
 

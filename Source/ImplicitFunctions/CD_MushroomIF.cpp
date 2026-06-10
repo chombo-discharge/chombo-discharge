@@ -28,6 +28,7 @@ MushroomIF::MushroomIF(const RealVect a_center,
                        const Real     a_d,
                        const Real     a_curv,
                        const bool     a_fluidInside)
+  : m_fluidInside(a_fluidInside)
 {
   const RealVect up = BASISREALV(SpaceDim - 1);
 
@@ -40,21 +41,17 @@ MushroomIF::MushroomIF(const RealVect a_center,
   parts.push_back(stem);
   parts.push_back(head);
 
-  m_baseIF      = RefCountedPtr<BaseIF>(new SmoothIntersection(parts, a_curv));
-  m_fluidInside = a_fluidInside;
+  m_baseIF = RefCountedPtr<BaseIF>(new SmoothIntersection(parts, a_curv));
 
   delete parts[0];
   delete parts[1];
 }
 
 MushroomIF::MushroomIF(const MushroomIF& a_inputIF)
-{
-  m_baseIF      = a_inputIF.m_baseIF;
-  m_fluidInside = a_inputIF.m_fluidInside;
-}
-
-MushroomIF::~MushroomIF()
+  : m_baseIF(a_inputIF.m_baseIF), m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+MushroomIF::~MushroomIF() = default;
 
 Real
 MushroomIF::value(const RealVect& a_pos) const

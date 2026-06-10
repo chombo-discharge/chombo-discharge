@@ -22,18 +22,16 @@
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-CdrMultigrid::CdrMultigrid() : CdrSolver()
+CdrMultigrid::CdrMultigrid() : m_hasMultigridSolver(false)
 {
   CH_TIME("CdrMultigrid::CdrMultigrid()");
 
   // Default settings
-  m_name               = "CdrMultigrid";
-  m_className          = "CdrMultigrid";
-  m_hasMultigridSolver = false;
+  m_name      = "CdrMultigrid";
+  m_className = "CdrMultigrid";
 }
 
-CdrMultigrid::~CdrMultigrid()
-{}
+CdrMultigrid::~CdrMultigrid() = default;
 
 void
 CdrMultigrid::registerOperators()
@@ -86,7 +84,7 @@ CdrMultigrid::resetAlphaAndBeta(const Real a_alpha, const Real a_beta)
     Vector<MGLevelOp<LevelData<EBCellFAB>>*> multigridOperators = m_multigridSolver->getAllOperators();
 
     for (int i = 0; i < multigridOperators.size(); i++) {
-      TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)multigridOperators[i];
+      auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)multigridOperators[i];
 
       helmholtzOperator->setAlphaAndBeta(a_alpha, a_beta);
     }
@@ -114,7 +112,7 @@ CdrMultigrid::setMultigridSolverCoefficients()
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     CH_assert(!(operatorsAMR[lvl] == nullptr));
 
-    EBHelmholtzOp& op = static_cast<EBHelmholtzOp&>(*operatorsAMR[lvl]);
+    auto& op = static_cast<EBHelmholtzOp&>(*operatorsAMR[lvl]);
 
     op.setAcoAndBco(m_helmAcoef[lvl], m_faceCenteredDiffusionCoefficient[lvl], m_ebCenteredDiffusionCoefficient[lvl]);
   }
@@ -131,7 +129,7 @@ CdrMultigrid::setMultigridSolverCoefficients()
     for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
       CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
 
-      EBHelmholtzOp& op = static_cast<EBHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+      auto& op = static_cast<EBHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
 
       op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
     }
@@ -443,7 +441,7 @@ CdrMultigrid::setupMultigrid()
   }
 
   // Select the bottom solver
-  LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
+  LinearSolver<LevelData<EBCellFAB>>* botsolver = nullptr;
   switch (m_bottomSolverType) {
   case BottomSolverType::Simple: {
     botsolver = &m_simpleSolver;
@@ -587,8 +585,6 @@ CdrMultigrid::computeDivJ(EBAMRCellData& a_divJ,
   else {
     DataOps::setValue(a_divJ, 0.0);
   }
-
-  return;
 }
 
 void

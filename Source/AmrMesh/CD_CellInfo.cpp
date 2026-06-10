@@ -16,14 +16,11 @@
 #include <CD_NamespaceHeader.H>
 
 CellInfo::CellInfo(const IntVect a_gridIndex, const Real a_dx) noexcept
+  : m_gridIndex(a_gridIndex), m_bndryCentroid(RealVect::Zero), m_bndryNormal(RealVect::Zero), m_dx(a_dx), m_volFrac(1.0)
 {
-  m_gridIndex     = a_gridIndex;
-  m_dx            = a_dx;
-  m_volFrac       = 1.0;
-  m_bndryCentroid = RealVect::Zero;
-  m_bndryNormal   = RealVect::Zero;
-  m_validLo       = -0.5 * RealVect::Unit;
-  m_validHi       = 0.5 * RealVect::Unit;
+
+  m_validLo = -0.5 * RealVect::Unit;
+  m_validHi = 0.5 * RealVect::Unit;
 }
 
 CellInfo::CellInfo(const IntVect  a_gridIndex,
@@ -31,22 +28,22 @@ CellInfo::CellInfo(const IntVect  a_gridIndex,
                    const Real     a_volFrac,
                    const RealVect a_bndryCentroid,
                    const RealVect a_bndryNormal) noexcept
+  : m_gridIndex(a_gridIndex),
+    m_bndryCentroid(a_bndryCentroid),
+    m_bndryNormal(a_bndryNormal),
+    m_dx(a_dx),
+    m_volFrac(a_volFrac)
 {
-  m_gridIndex     = a_gridIndex;
-  m_dx            = a_dx;
-  m_volFrac       = a_volFrac;
-  m_bndryCentroid = a_bndryCentroid;
-  m_bndryNormal   = a_bndryNormal;
-  m_validLo       = -0.5 * RealVect::Unit;
-  m_validHi       = 0.5 * RealVect::Unit;
+
+  m_validLo = -0.5 * RealVect::Unit;
+  m_validHi = 0.5 * RealVect::Unit;
 
   if (a_volFrac < 1.0) {
     DataOps::computeMinValidBox(m_validLo, m_validHi, m_bndryNormal, m_bndryCentroid);
   }
 }
 
-CellInfo::~CellInfo() noexcept
-{}
+CellInfo::~CellInfo() noexcept = default;
 
 IntVect&
 CellInfo::getGridIndex() noexcept

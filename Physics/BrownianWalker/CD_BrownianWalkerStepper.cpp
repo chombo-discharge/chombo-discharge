@@ -24,13 +24,11 @@
 
 using namespace Physics::BrownianWalker;
 
-BrownianWalkerStepper::BrownianWalkerStepper()
+BrownianWalkerStepper::BrownianWalkerStepper() : m_phase(phase::gas)
 {
   CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper");
 
   ParmParse pp("BrownianWalker");
-
-  m_phase = phase::gas;
 
   std::string str;
   pp.get("realm", m_realm);

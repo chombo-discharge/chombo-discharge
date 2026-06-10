@@ -26,11 +26,9 @@
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain,
                                  const Vector<int>&   a_refRatios,
                                  const IntVect&       a_tileSize) noexcept
+  : m_refRatios(a_refRatios), m_tileSize(a_tileSize)
 {
   CH_TIME("TiledMeshRefine::TiledMeshRefine");
-
-  m_refRatios = a_refRatios;
-  m_tileSize  = a_tileSize;
 
   m_amrDomains.resize(0);
 
@@ -131,7 +129,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
                                       (tag[2] - coarProbLo[2]) / (m_tileSize[2] / a_refToCoar)));
 
     if (tileBox.contains(iv)) {
-      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
+      a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
     }
   }
   CH_STOP(t1);
@@ -169,7 +167,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
 
   // de-linearize the received data back into tiles
   for (int i = 0; i < recvCount; i += SpaceDim) {
-    a_tiles.emplace(Tile(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2])));
+    a_tiles.emplace(D_DECL(recvBuffer[i], recvBuffer[i + 1], recvBuffer[i + 2]));
   }
 
   delete[] recvBuffer;
@@ -197,7 +195,7 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
     for (BoxIterator bit(box); bit.ok(); ++bit) {
       const IntVect iv = bit();
 
-      a_tiles.emplace(Tile(D_DECL(iv[0], iv[1], iv[2])));
+      a_tiles.emplace(D_DECL(iv[0], iv[1], iv[2]));
     }
   }
 

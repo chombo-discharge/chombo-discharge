@@ -17,16 +17,14 @@
 #include <CD_NewIntersectionIF.H>
 #include <CD_NamespaceHeader.H>
 
-NewIntersectionIF::NewIntersectionIF()
+NewIntersectionIF::NewIntersectionIF() : m_numFuncs(0)
 {
-  m_numFuncs = 0;
+
   m_impFuncs.resize(0);
 }
 
-NewIntersectionIF::NewIntersectionIF(const Vector<BaseIF*>& a_impFuncs)
+NewIntersectionIF::NewIntersectionIF(const Vector<BaseIF*>& a_impFuncs) : m_numFuncs(a_impFuncs.size())
 {
-
-  m_numFuncs = a_impFuncs.size();
 
   m_impFuncs.resize(m_numFuncs);
 

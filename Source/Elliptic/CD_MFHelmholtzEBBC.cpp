@@ -148,8 +148,6 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
   };
 
   BoxLoops::loop(a_multiPhaseVofs, kernel);
-
-  return;
 }
 
 bool

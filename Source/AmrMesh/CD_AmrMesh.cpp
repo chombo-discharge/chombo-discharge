@@ -29,23 +29,18 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
-AmrMesh::AmrMesh()
+AmrMesh::AmrMesh() : m_finestLevel(0), m_hasGrids(false), m_oldFinestLevel(-1)
 {
 
   // Default things
   this->parseOptions();
-
-  m_finestLevel    = 0;
-  m_oldFinestLevel = -1;
-  m_hasGrids       = false;
 
   // Some things might require a vector which is just a tiny bit longer.
   m_refinementRatios.resize(m_maxAmrDepth);
   m_refinementRatios.push_back(2);
 }
 
-AmrMesh::~AmrMesh()
-{}
+AmrMesh::~AmrMesh() = default;
 
 EBAMRCellData
 AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noexcept
@@ -68,7 +63,7 @@ AmrMesh::slice(EBAMRCellData& a_original, const Interval a_variables) const noex
   return ret;
 }
 
-const EBAMRCellData
+EBAMRCellData
 AmrMesh::slice(const EBAMRCellData& a_original, const Interval a_variables) const noexcept
 {
   CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRCellData)");
@@ -479,10 +474,12 @@ AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_nComp);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFCellFactory factory(ebisl, comps);
 
@@ -523,10 +520,12 @@ AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_nComp);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFFluxFactory factory(ebisl, comps);
 
@@ -567,10 +566,12 @@ AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_nC
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_nComp);
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFBaseIVFABFactory factory(ebisl, comps);
 
@@ -788,10 +789,12 @@ AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFCellFactory factory(ebisl, comps);
 
@@ -832,10 +835,12 @@ AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin) const
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFFluxFactory factory(ebisl, comps);
 
@@ -876,10 +881,12 @@ AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       ebisl[phase::gas] = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    }
 
     MFBaseIVFABFactory factory(ebisl, comps);
 
@@ -1974,10 +1981,12 @@ AmrMesh::interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const
     aliasGas[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
     aliasSol[lvl] = RefCountedPtr<LevelData<EBCellFAB>>(new LevelData<EBCellFAB>());
 
-    if (!ebisGas.isNull())
+    if (!ebisGas.isNull()) {
       MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas, *a_data[lvl]);
-    if (!ebisSol.isNull())
+    }
+    if (!ebisSol.isNull()) {
       MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
+    }
   }
 
   if (!ebisGas.isNull()) {
@@ -2726,8 +2735,9 @@ AmrMesh::parseEbGhostCells()
 
   pp.get("eb_ghost", m_numEbGhostsCells);
 
-  if (m_numEbGhostsCells < 0)
+  if (m_numEbGhostsCells < 0) {
     MayDay::Error("AmrMesh::parseEbGhostCells -- you have specified a negative number of ghost cells");
+  }
 }
 
 void
@@ -2743,11 +2753,13 @@ AmrMesh::parseNumGhostCells()
   pp.get("num_ghost", m_numGhostCells);
   pp.get("lsf_ghost", m_numLsfGhostCells);
 
-  if (m_numGhostCells < 0)
+  if (m_numGhostCells < 0) {
     MayDay::Error("AmrMesh::parseNumGhostCells -- you have specified a negative number of ghost cells for mesh data");
-  if (m_numLsfGhostCells < 0)
+  }
+  if (m_numLsfGhostCells < 0) {
     MayDay::Error(
       "AmrMesh::parseNumGhostCells -- you have specified a negative number of ghost cells for level-set mesh data");
+  }
 }
 
 void
@@ -2764,12 +2776,15 @@ AmrMesh::parseMultigridInterpolator()
   pp.get("mg_interp_radius", m_multigridInterpRadius);
   pp.get("mg_interp_weight", m_multigridInterpWeight);
 
-  if (m_multigridInterpOrder < 0)
+  if (m_multigridInterpOrder < 0) {
     MayDay::Error("AmrMesh::parseMultigridInterpolator -- you have specified negative order!");
-  if (m_multigridInterpRadius <= 0)
+  }
+  if (m_multigridInterpRadius <= 0) {
     MayDay::Error("AmrMesh::parseMultigridInterpolator -- you have specified a non-positive radius!");
-  if (m_multigridInterpWeight < 0)
+  }
+  if (m_multigridInterpWeight < 0) {
     MayDay::Error("AmrMesh::parseMultigridInterpolator -- you have specified negative weighting");
+  }
 }
 
 void
@@ -2784,8 +2799,9 @@ AmrMesh::parseRedistributionRadius()
 
   pp.get("redist_radius", m_redistributionRadius);
 
-  if (m_redistributionRadius <= 0)
+  if (m_redistributionRadius <= 0) {
     MayDay::Error("AmrMesh::parseRedistributionRadius -- you have specified non-positive redistribution radius");
+  }
 }
 
 void
@@ -3674,6 +3690,7 @@ AmrMesh::getRealms() const
 
   std::vector<std::string> Realms;
 
+  Realms.reserve(m_realms.size());
   for (const auto& r : m_realms) {
     Realms.push_back(r.first);
   }

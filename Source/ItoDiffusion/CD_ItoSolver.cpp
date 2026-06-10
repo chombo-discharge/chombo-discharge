@@ -28,27 +28,26 @@
 #include <CD_DischargeIO.H>
 #include <CD_ParticleManagement.H>
 #include <CD_BoxLoops.H>
-#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int ItoSolver::m_comp;
 constexpr int ItoSolver::m_nComp;
 
 ItoSolver::ItoSolver()
+  : m_verbosity(-1),
+    m_checkpointing(WhichCheckpoint::Particles),
+    m_className("ItoSolver"),
+    m_coarseFineDeposition(CoarseFineDeposition::Transition),
+    m_deposition(DepositionType::CIC),
+    m_mobilityInterp(WhichMobilityInterpolation::Direct),
+    m_name("ItoSolver"),
+    m_phase(phase::gas),
+    m_plotDeposition(DepositionType::CIC),
+    m_realm(Realm::primal)
 {
   CH_TIME("ItoSolver::ItoSolver");
 
   // Default settings
-  m_verbosity            = -1;
-  m_name                 = "ItoSolver";
-  m_className            = "ItoSolver";
-  m_realm                = Realm::primal;
-  m_phase                = phase::gas;
-  m_coarseFineDeposition = CoarseFineDeposition::Transition;
-  m_deposition           = DepositionType::CIC;
-  m_plotDeposition       = DepositionType::CIC;
-  m_checkpointing        = WhichCheckpoint::Particles;
-  m_mobilityInterp       = WhichMobilityInterpolation::Direct;
 
   // Default is to not merge particles
   m_particleMerger = [](List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, const int a_ppc) {
@@ -1318,7 +1317,7 @@ ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, cons
       const RealVect pos   = probLo + dx * (RealVect(iv) + 0.5 * RealVect::Unit);
       const Real     kappa = ebisbox.volFrac(vof);
 
-      const unsigned long long numPhysicalParticles = (unsigned long long)llround(ppc(iv));
+      const auto numPhysicalParticles = (unsigned long long)llround(ppc(iv));
 
       if (numPhysicalParticles > 0ULL) {
 
@@ -3404,8 +3403,7 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
 
   a_particles.clear();
 
-  for (int i = 0; i < weights.size(); i++) {
-    const Real     w = weights[i];
+  for (double w : weights) {
     const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, averageEnergy));

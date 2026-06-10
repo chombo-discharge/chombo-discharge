@@ -28,8 +28,7 @@ CdrSpeciesJSON::CdrSpeciesJSON(const std::string                  a_name,
   this->define(a_name, a_Z, a_diffusive, a_mobile, a_initialData);
 }
 
-CdrSpeciesJSON::~CdrSpeciesJSON()
-{}
+CdrSpeciesJSON::~CdrSpeciesJSON() = default;
 
 void
 CdrSpeciesJSON::define(const std::string                  a_name,

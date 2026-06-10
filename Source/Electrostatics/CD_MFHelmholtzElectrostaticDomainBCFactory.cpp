@@ -17,10 +17,9 @@
 
 MFHelmholtzElectrostaticDomainBCFactory::MFHelmholtzElectrostaticDomainBCFactory(
   const ElectrostaticDomainBc& a_electrostaticBCs)
+  : m_electrostaticBCs(a_electrostaticBCs)
 {
   CH_TIME("MFHelmholtzElectrostaticDomainBCFactory::MFHelmholtzElectrostaticDomainBCFactory()");
-
-  m_electrostaticBCs = a_electrostaticBCs;
 }
 
 MFHelmholtzElectrostaticDomainBCFactory::~MFHelmholtzElectrostaticDomainBCFactory()

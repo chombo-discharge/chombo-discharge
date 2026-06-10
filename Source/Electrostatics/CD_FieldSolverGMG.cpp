@@ -29,13 +29,13 @@
 constexpr Real FieldSolverGMG::m_alpha;
 constexpr Real FieldSolverGMG::m_beta;
 
-FieldSolverGMG::FieldSolverGMG() : FieldSolver()
+FieldSolverGMG::FieldSolverGMG() : m_isSolverSetup(false)
 {
   CH_TIME("FieldSolverGMG::FieldSolverGMG()");
 
   // Default settings
-  m_isSolverSetup = false;
-  m_className     = "FieldSolverGMG";
+
+  m_className = "FieldSolverGMG";
 }
 
 FieldSolverGMG::~FieldSolverGMG()
@@ -468,7 +468,7 @@ FieldSolverGMG::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     CH_assert(!(operatorsAMR[lvl] == nullptr));
 
-    MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
+    auto& op = static_cast<MFHelmholtzOp&>(*operatorsAMR[lvl]);
 
     op.setAcoAndBco(a_permittivityCell[lvl], a_permittivityFace[lvl], a_permittivityEB[lvl]);
   }
@@ -485,7 +485,7 @@ FieldSolverGMG::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
     for (int mgLevel = 0; mgLevel < operatorsMG[amrLevel].size(); mgLevel++) {
       CH_assert(!(operatorsMG[amrLevel][mgLevel] == nullptr));
 
-      MFHelmholtzOp& op = static_cast<MFHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
+      auto& op = static_cast<MFHelmholtzOp&>(*operatorsMG[amrLevel][mgLevel]);
 
       op.setAcoAndBco(op.getAcoef(), op.getBcoef(), op.getBcoefIrreg());
     }
@@ -852,7 +852,7 @@ FieldSolverGMG::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
   m_amr->allocate(dummy, m_realm, m_nComp);
 
   // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing kernels.
-  auto oper = (MFHelmholtzOp*)m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
+  auto* oper = m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
 
   const Vector<long long> loads = oper->computeOperatorLoads(*dummy[a_level], numApply);
 

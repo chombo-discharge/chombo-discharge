@@ -27,21 +27,16 @@
 constexpr int CdrSolver::m_comp;
 constexpr int CdrSolver::m_nComp;
 
-CdrSolver::CdrSolver()
+CdrSolver::CdrSolver() : m_verbosity(-1), m_className("CdrSolver"), m_name("CdrSolver"), m_regridSlopes(true)
 {
 
   // Default options.
-  m_verbosity    = -1;
-  m_name         = "CdrSolver";
-  m_className    = "CdrSolver";
-  m_regridSlopes = true;
 
   this->setRealm(Realm::Primal);
   this->setDefaultDomainBC(); // Set default domain BCs (wall)
 }
 
-CdrSolver::~CdrSolver()
-{}
+CdrSolver::~CdrSolver() = default;
 
 RefCountedPtr<CdrSpecies>&
 CdrSolver::getSpecies() noexcept
@@ -938,7 +933,7 @@ CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level)
 
             const std::vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit())).stdVector();
 
-            if (neighborFaces.size() > 0) {
+            if (!neighborFaces.empty()) {
               Real sumArea = 0.0;
 
               for (const auto& f : neighborFaces) {
@@ -1252,7 +1247,7 @@ CdrSolver::initialDataParticles()
 
   const List<PointParticle>& initialParticles = m_species->getInitialParticles();
 
-  const long long numParticles = (long long)initialParticles.length();
+  const auto numParticles = (long long)initialParticles.length();
 
   if (ParallelOps::sum(numParticles) > 0LL) {
 

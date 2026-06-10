@@ -50,7 +50,7 @@ public:
   /**
     @brief Destructor (does nothing)
   */
-  ~RealBox();
+  ~RealBox() = default;
 
   /**
     @brief Get low corner

@@ -23,11 +23,9 @@
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-EBFluxRedistribution::EBFluxRedistribution() noexcept
+EBFluxRedistribution::EBFluxRedistribution() noexcept : m_isDefined(false)
 {
   CH_TIME("EBFluxRedistribution::EBFluxRedistribution(weak)");
-
-  m_isDefined = false;
 }
 
 EBFluxRedistribution::EBFluxRedistribution(const EBLevelGrid& a_eblgCoar,

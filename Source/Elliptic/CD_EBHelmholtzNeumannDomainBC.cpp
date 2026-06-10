@@ -19,14 +19,9 @@
 #include <CD_EBHelmholtzNeumannDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC()
+EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC() : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC()");
-
-  m_multByBco = true;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(const Real a_DphiDn)

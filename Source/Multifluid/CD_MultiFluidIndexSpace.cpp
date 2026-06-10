@@ -26,8 +26,7 @@ MultiFluidIndexSpace::MultiFluidIndexSpace()
   }
 }
 
-MultiFluidIndexSpace::~MultiFluidIndexSpace()
-{}
+MultiFluidIndexSpace::~MultiFluidIndexSpace() = default;
 
 void
 MultiFluidIndexSpace::define(const Box&                      a_domain,
@@ -50,7 +49,7 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
 
   // Define the solid state geoserver. This EBIS might not exist.
   if (a_geoservers[phase::solid] == NULL) {
-    m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace>(NULL);
+    m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace>(nullptr);
   }
   else {
     if (a_distributedData) {

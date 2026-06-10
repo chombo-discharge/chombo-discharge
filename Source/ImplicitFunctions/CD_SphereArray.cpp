@@ -57,7 +57,7 @@ SphereArray::SphereArray(const Real     a_radius,
         const Vec3 center(x, y, z);
 
         spheres.emplace_back(std::make_shared<Sphere>(center, a_radius));
-        boundingVolumes.emplace_back(AABB(center - a_radius * Vec3::one(), center + a_radius * Vec3::one()));
+        boundingVolumes.emplace_back(center - a_radius * Vec3::one(), center + a_radius * Vec3::one());
 #if CH_SPACEDIM == 3
       }
 #endif
@@ -72,13 +72,12 @@ SphereArray::SphereArray(const Real     a_radius,
 }
 
 SphereArray::SphereArray(const SphereArray& a_input)
+  : m_slowUnion(a_input.m_slowUnion),
+    m_fastUnion(a_input.m_fastUnion),
+    m_flipInside(a_input.m_flipInside),
+    m_useFast(a_input.m_useFast)
 {
   CH_TIME("SphereArray::SphereArray(other)");
-
-  m_slowUnion  = a_input.m_slowUnion;
-  m_fastUnion  = a_input.m_fastUnion;
-  m_useFast    = a_input.m_useFast;
-  m_flipInside = a_input.m_flipInside;
 }
 
 SphereArray::~SphereArray()

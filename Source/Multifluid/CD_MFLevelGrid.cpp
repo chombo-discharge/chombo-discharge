@@ -15,8 +15,7 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
 
-MFLevelGrid::MFLevelGrid()
-{}
+MFLevelGrid::MFLevelGrid() = default;
 
 void
 MFLevelGrid::setMaxRefinementRatio(const int a_refRat)
@@ -32,8 +31,9 @@ MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&                   a_dbl,
                          const ProblemDomain&                       a_domain,
                          const int                                  a_ebghost,
                          const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace)
+  : m_multifluidIndexSpace(a_multiFluidIndexSpace)
 {
-  m_multifluidIndexSpace = a_multiFluidIndexSpace;
+
   m_eblg.resize(0);
   for (int i = 0; i < a_multiFluidIndexSpace->numPhases(); i++) {
     m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_multiFluidIndexSpace->getEBIndexSpace(i)));
@@ -46,8 +46,7 @@ MFLevelGrid::MFLevelGrid(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluid
   this->define(a_multiFluidIndexSpace, a_eblg);
 }
 
-MFLevelGrid::~MFLevelGrid()
-{}
+MFLevelGrid::~MFLevelGrid() = default;
 
 int
 MFLevelGrid::numPhases() const

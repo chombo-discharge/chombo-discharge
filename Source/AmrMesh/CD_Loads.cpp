@@ -188,6 +188,7 @@ Loads::getSortedLoads() const noexcept
   std::vector<std::pair<int, Real>> sortedLoads;
 
   // Insert loads into a vector so we can sort
+  sortedLoads.reserve(m_loads.size());
   for (const auto& curLoad : m_loads) {
     sortedLoads.emplace_back(curLoad.first, curLoad.second);
   }

@@ -15,6 +15,7 @@
 // Std includees
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <algorithm>
 
@@ -148,8 +149,9 @@ CdrPlasmaJSON::parseJSON()
     pout() << "CdrPlasmaJSON::parseJSON()" << endl;
   }
 
-  if (!(this->doesFileExist(m_jsonFile)))
+  if (!(this->doesFileExist(m_jsonFile))) {
     this->throwParserError("CdrPlasmaJSON::parseJSON -- file '" + m_jsonFile + "' does not exist");
+  }
 
   // Parse the JSON file
   std::ifstream f(m_jsonFile);
@@ -175,7 +177,7 @@ CdrPlasmaJSON::throwParserWarning(const std::string a_warning) const
 bool
 CdrPlasmaJSON::containsWildcard(const std::string a_str) const
 {
-  return (a_str.find("@") != std::string::npos);
+  return (a_str.find('@') != std::string::npos);
 }
 
 bool
@@ -214,6 +216,7 @@ CdrPlasmaJSON::sanityCheckSpecies() const
 
   std::vector<std::string> allSpecies;
 
+  allSpecies.reserve(m_neutralSpeciesMap.size());
   for (const auto& s : m_neutralSpeciesMap) {
     allSpecies.emplace_back(s.first);
   }
@@ -283,8 +286,9 @@ CdrPlasmaJSON::parseReactionString(std::vector<std::string>& a_reactants,
   const auto& it = std::find(segments.begin(), segments.end(), "->");
 
   // Make sure that -> is in the reaction string.
-  if (it == segments.end())
+  if (it == segments.end()) {
     this->throwParserError(baseError + " -- Reaction '" + a_reaction + "' does not contain '->");
+  }
 
   // Left of "->" are reactants and right of "->" are products
   a_reactants = std::vector<std::string>(segments.begin(), it);
@@ -372,10 +376,12 @@ CdrPlasmaJSON::initializeNeutralSpecies()
   const std::string baseError = "CdrPlasmaJSON::initializeNeutralSpecies";
 
   // These fields are ALWAYS required
-  if (!(m_json["gas"].contains("law")))
+  if (!(m_json["gas"].contains("law"))) {
     this->throwParserError(baseError + " but field 'law' is missing");
-  if (!(m_json["gas"].contains("neutral species")))
+  }
+  if (!(m_json["gas"].contains("neutral species"))) {
     this->throwParserError(baseError + " but field 'neutral species' is missing");
+  }
 
   // JSON entry
   const auto gasJSON = m_json["gas"];
@@ -390,10 +396,12 @@ CdrPlasmaJSON::initializeNeutralSpecies()
   if (gasLaw == "ideal") {
 
     // These fields are required
-    if (!(gasJSON.contains("temperature")))
+    if (!(gasJSON.contains("temperature"))) {
       this->throwParserError(baseError + " and got ideal gas law but field 'temperature' is missing");
-    if (!(gasJSON.contains("pressure")))
+    }
+    if (!(gasJSON.contains("pressure"))) {
       this->throwParserError(baseError + " and got ideal gas law but field 'pressure' is missing");
+    }
 
     // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either.
     const Real T0   = gasJSON["temperature"].get<Real>();
@@ -414,16 +422,21 @@ CdrPlasmaJSON::initializeNeutralSpecies()
   else if (gasLaw == "troposphere") {
 
     // These fields are required.
-    if (!(gasJSON.contains("temperature")))
+    if (!(gasJSON.contains("temperature"))) {
       this->throwParserError(baseError + " and got troposphere gas law but field 'temperature' is missing");
-    if (!(gasJSON.contains("pressure")))
+    }
+    if (!(gasJSON.contains("pressure"))) {
       this->throwParserError(baseError + " and got troposphere gas law but field 'pressure' is missing");
-    if (!(gasJSON.contains("molar mass")))
+    }
+    if (!(gasJSON.contains("molar mass"))) {
       this->throwParserError(baseError + " and got troposphere gas law but field 'molar mass' is missing");
-    if (!(gasJSON.contains("gravity")))
+    }
+    if (!(gasJSON.contains("gravity"))) {
       this->throwParserError(baseError + " and got troposphere gas law but field 'gravity' is missing");
-    if (!(gasJSON.contains("lapse rate")))
+    }
+    if (!(gasJSON.contains("lapse rate"))) {
       this->throwParserError(baseError + " and got troposphere gas law but field 'lapse rate' is missing");
+    }
 
     const Real T0   = gasJSON["temperature"].get<Real>();
     const Real P0   = gasJSON["pressure"].get<Real>();
@@ -451,24 +464,33 @@ CdrPlasmaJSON::initializeNeutralSpecies()
   else if (gasLaw == "table") {
     // These fields are required
 
-    if (!gasJSON.contains("file"))
+    if (!gasJSON.contains("file")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'file' is not specified");
-    if (!gasJSON.contains("height"))
+    }
+    if (!gasJSON.contains("height")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'height' is not specified");
-    if (!gasJSON.contains("temperature"))
+    }
+    if (!gasJSON.contains("temperature")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'temperature' is not specified");
-    if (!gasJSON.contains("pressure"))
+    }
+    if (!gasJSON.contains("pressure")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'pressure' is not specified");
-    if (!gasJSON.contains("density"))
+    }
+    if (!gasJSON.contains("density")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'density' is not specified");
-    if (!gasJSON.contains("molar mass"))
+    }
+    if (!gasJSON.contains("molar mass")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'molar mass' is not specified");
-    if (!gasJSON.contains("min height"))
+    }
+    if (!gasJSON.contains("min height")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'min height' is not specified");
-    if (!gasJSON.contains("max height"))
+    }
+    if (!gasJSON.contains("max height")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'max height' is not specified");
-    if (!gasJSON.contains("res height"))
+    }
+    if (!gasJSON.contains("res height")) {
       this->throwParserError(baseError + " and got 'table' gas law but field 'res height' is not specified");
+    }
 
     // Get the file name
     const auto filename = trim(gasJSON["file"].get<std::string>());
@@ -488,12 +510,14 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const auto resHeight = gasJSON["res height"].get<Real>();
 
     // It's an error if max height < min height
-    if (maxHeight < minHeight)
+    if (maxHeight < minHeight) {
       this->throwParserError(baseError + " and got tabulated gas law but can't have 'max height' < 'min height'");
+    }
 
     // Throw an error if the file does not exist.
-    if (!(this->doesFileExist(filename)))
+    if (!(this->doesFileExist(filename))) {
       this->throwParserError(baseError + " and got tabulated gas law but file = '" + filename + "' was not found");
+    }
 
     // Let the data parser read the input.
     LookupTable1D<Real, 1> temperatureTable = DataParser::simpleFileReadASCII(filename, height, T);
@@ -536,10 +560,12 @@ CdrPlasmaJSON::initializeNeutralSpecies()
   // were a bit inconsiderate when setting them.
   Real molarSum = 0.0;
   for (const auto& species : gasJSON["neutral species"]) {
-    if (!(species.contains("name")))
+    if (!(species.contains("name"))) {
       this->throwParserError(baseError + " in the array 'neutral species' the field 'name' is also required");
-    if (!(species.contains("molar fraction")))
+    }
+    if (!(species.contains("molar fraction"))) {
       this->throwParserError(baseError + " in the array 'neutral species' the field 'molar fraction' is also required");
+    }
 
     molarSum += species["molar fraction"].get<Real>();
   }
@@ -550,16 +576,19 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real        speciesFraction = species["molar fraction"].get<Real>() / molarSum;
 
     // Names can not contain the at letter.
-    if (this->containsWildcard(speciesName))
+    if (this->containsWildcard(speciesName)) {
       this->throwParserError(baseError + " -- species name must not contain '@' letter");
+    }
 
     // Names can not contain parenthesis either
-    if (this->containsBracket(speciesName))
+    if (this->containsBracket(speciesName)) {
       this->throwParserError(baseError + "but species '" + speciesName + "' can not contain brackets");
+    }
 
     // It's an error if a species was defined twice.
-    if (isNeutralSpecies(speciesName))
+    if (isNeutralSpecies(speciesName)) {
       this->throwParserError(baseError + " -- Neutral species '" + speciesName + "' was defined more than once");
+    }
 
     // Set the species density function.
     const std::function<Real(const RealVect)> speciesDensity = [f  = speciesFraction,
@@ -571,8 +600,7 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const int idx = m_neutralSpecies.size();
 
     // Create the neutral species (and the mapped background density).
-    m_neutralSpecies.push_back(
-      std::shared_ptr<NeutralSpeciesJSON>((new NeutralSpeciesJSON(speciesName, speciesFraction, speciesDensity))));
+    m_neutralSpecies.push_back(std::make_shared<NeutralSpeciesJSON>(speciesName, speciesFraction, speciesDensity));
     m_neutralSpeciesDensities.push_back(speciesDensity);
 
     // Create the string-int maps
@@ -597,8 +625,9 @@ CdrPlasmaJSON::initializePlasmaSpecies()
 
   const std::string baseError = "CdrPlasmaJSON::initializePlasmaSpecies ";
 
-  if (!(m_json.contains("plasma species")))
+  if (!(m_json.contains("plasma species"))) {
     this->throwParserWarning(baseError + " -- did not find any plasma species");
+  }
 
   // Iterate through all species defined in the JSON file.
   for (const auto& species : m_json["plasma species"]) {
@@ -639,9 +668,9 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     const int transportIdx = m_cdrSpecies.size();
 
     // Make the string-int map encodings.
-    m_cdrSpeciesMap.emplace(std::make_pair(name, transportIdx));
-    m_cdrSpeciesInverseMap.emplace(std::make_pair(transportIdx, name));
-    m_cdrIsEnergySolver.emplace(std::make_pair(transportIdx, false));
+    m_cdrSpeciesMap.emplace(name, transportIdx);
+    m_cdrSpeciesInverseMap.emplace(transportIdx, name);
+    m_cdrIsEnergySolver.emplace(transportIdx, false);
 
     // Push the JSON entry and the new CdrSpecies to corresponding vectors.
     m_cdrSpecies.push_back(RefCountedPtr<CdrSpecies>(new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
@@ -656,7 +685,7 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         const std::string str = this->trim(m.get<std::string>());
 
         if (str == "electron") {
-          m_cdrMasses.emplace(std::make_pair(transportIdx, Units::me));
+          m_cdrMasses.emplace(transportIdx, Units::me);
         }
         else {
           this->throwParserError(baseError + "and got field 'mass' but species mass '" + str +
@@ -664,11 +693,11 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         }
       }
       else {
-        m_cdrMasses.emplace(std::make_pair(transportIdx, m.get<Real>()));
+        m_cdrMasses.emplace(transportIdx, m.get<Real>());
       }
     }
     else {
-      m_cdrMasses.emplace(std::make_pair(transportIdx, std::numeric_limits<Real>::infinity()));
+      m_cdrMasses.emplace(transportIdx, std::numeric_limits<Real>::infinity());
     }
 
     // Now check if we should augment this species with an energy transport model.
@@ -714,9 +743,9 @@ CdrPlasmaJSON::initializePlasmaSpecies()
         const std::string energyName = name + " energy_density";
         const int         energyIdx  = m_cdrSpecies.size();
 
-        m_cdrSpeciesMap.emplace(std::make_pair(energyName, energyIdx));
-        m_cdrSpeciesInverseMap.emplace(std::make_pair(energyIdx, energyName));
-        m_cdrIsEnergySolver.emplace(std::make_pair(energyIdx, true));
+        m_cdrSpeciesMap.emplace(energyName, energyIdx);
+        m_cdrSpeciesInverseMap.emplace(energyIdx, energyName);
+        m_cdrIsEnergySolver.emplace(energyIdx, true);
         m_cdrEnergyComputation.emplace(transportIdx, std::make_tuple(minEnergy, maxEnergy, safety));
 
         // Push the new CdrSpecies to our the list of species.
@@ -956,7 +985,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
       }
 
       // Add contribution from height profile.
-      if (heightProfile.getStructuredData().size() > 0) {
+      if (!heightProfile.getStructuredData().empty()) {
         retVal += heightProfile.interpolate<1>(a_position[SpaceDim - 1]);
       }
 
@@ -1091,29 +1120,35 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
   const std::string baseError = "CdrPlasmaJSON::initializePhotonSpecies ";
 
-  if (!(m_json.contains("photon species")))
+  if (!(m_json.contains("photon species"))) {
     this->throwParserWarning(baseError + " -- did not find any photon species");
+}
 
   for (const auto& species : m_json["photon species"]) {
-    if (!(species.contains("name")))
+    if (!(species.contains("name"))) {
       this->throwParserError(baseError + "-- every entry in 'photon species' must have field 'name'");
-    if (!(species.contains("kappa")))
+}
+    if (!(species.contains("kappa"))) {
       this->throwParserError(baseError + "-- every entry in 'photon species' must have field 'kappa'");
+}
 
     const auto name  = trim(species["name"].get<std::string>());
     const auto kappa = trim(species["kappa"].get<std::string>());
 
     // Does not get to contain at letter.
-    if (this->containsWildcard(name))
+    if (this->containsWildcard(name)) {
       this->throwParserError(baseError + "but photon species '" + name + "' cannot contain '@'");
+}
 
     // Names can not contain parenthesis either
-    if (this->containsBracket(name))
+    if (this->containsBracket(name)) {
       this->throwParserError(baseError + "but photon species '" + name + "' can not contain brackets");
+}
 
     // It's an error if the species is already defined.
-    if (this->isPhotonSpecies(name))
+    if (this->isPhotonSpecies(name)) {
       this->throwParserError(baseError + "photon species '" + name + "' was defined more than once");
+}
 
     // Set the kappa-function needed by RteSpeciesJSON.
     std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect a_position) -> Real {
@@ -1121,8 +1156,9 @@ CdrPlasmaJSON::initializePhotonSpecies()
     };
 
     if (kappa == "constant") {
-      if (!(species.contains("value")))
+      if (!(species.contains("value"))) {
         this->throwParserError(baseError + " -- got 'constant' kappa but field 'value' is missing");
+}
 
       const Real value = species["value"].get<Real>();
 
@@ -1139,10 +1175,12 @@ CdrPlasmaJSON::initializePhotonSpecies()
       // which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively easy to reconstruct.
 
       // Make sure that 'lambda' is found in the photon species and that O2 is found in the neutral species.
-      if (!(species.contains("lambda")))
+      if (!(species.contains("lambda"))) {
         this->throwParserError(baseError + " -- got 'helmholtz' kappa but field 'lambda' is missing");
-      if (!(species.contains("neutral")))
+}
+      if (!(species.contains("neutral"))) {
         this->throwParserError(baseError + " -- got 'helmholtz' kappa but field 'neutral' is missing");
+}
 
       // Get lambda and the neutral species that we base the partial pressure upon.
       const auto neutral = trim(species["neutral"].get<std::string>());
@@ -1174,16 +1212,21 @@ CdrPlasmaJSON::initializePhotonSpecies()
       // Fortunately, we have m_gasPressure which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively
       // easy to reconstruct.
 
-      if (!(species.contains("f1")))
+      if (!(species.contains("f1"))) {
         this->throwParserError(baseError + " -- got 'stochastic A' but field 'f1' is missing");
-      if (!(species.contains("f2")))
+}
+      if (!(species.contains("f2"))) {
         this->throwParserError(baseError + " -- got 'stochastic A' but field 'f2' is missing");
-      if (!(species.contains("chi min")))
+}
+      if (!(species.contains("chi min"))) {
         this->throwParserError(baseError + " -- got 'stochastic A' but field 'chi max' is missing");
-      if (!(species.contains("chi min")))
+}
+      if (!(species.contains("chi min"))) {
         this->throwParserError(baseError + " -- got 'stochastic A' but field 'chi min' is missing");
-      if (!(species.contains("neutral")))
+}
+      if (!(species.contains("neutral"))) {
         this->throwParserError(baseError + " -- got 'stochastic A' but field 'neutral' is missing");
+}
 
       const auto f1      = species["f1"].get<Real>();
       const auto f2      = species["f2"].get<Real>();
@@ -1224,8 +1267,8 @@ CdrPlasmaJSON::initializePhotonSpecies()
     const int num = m_rtSpecies.size();
 
     // Make the string-int map encodings.
-    m_rteSpeciesMap.emplace(std::make_pair(name, num));
-    m_rteSpeciesInverseMap.emplace(std::make_pair(num, name));
+    m_rteSpeciesMap.emplace(name, num);
+    m_rteSpeciesInverseMap.emplace(num, name);
 
     // Push the JSON entry and the new CdrSpecies to corresponding vectors.
     m_rtSpecies.push_back(RefCountedPtr<RtSpecies>(new RteSpeciesJSON(name, kappaFunction)));
@@ -1281,27 +1324,35 @@ CdrPlasmaJSON::parseAlpha()
 
   // If we made it here we're good.
   if (lookup == "table E/N") {
-    if (!(alpha.contains("file")))
+    if (!(alpha.contains("file"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'file' is missing");
-    if (!(alpha.contains("header")))
+}
+    if (!(alpha.contains("header"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'header' is missing");
-    if (!(alpha.contains("E/N")))
+}
+    if (!(alpha.contains("E/N"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'E/N' is missing");
-    if (!(alpha.contains("alpha/N")))
+}
+    if (!(alpha.contains("alpha/N"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'alpha/N' is missing");
-    if (!(alpha.contains("min E/N")))
+}
+    if (!(alpha.contains("min E/N"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'min E/N' is missing");
-    if (!(alpha.contains("max E/N")))
+}
+    if (!(alpha.contains("max E/N"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'max E/N' is missing");
-    if (!(alpha.contains("points")))
+}
+    if (!(alpha.contains("points"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'points' is missing");
-    if (!(alpha.contains("spacing")))
+}
+    if (!(alpha.contains("spacing"))) {
       this->throwParserError(baseError + " and got 'table E/N' but field 'spacing' is missing");
+}
 
     const std::string filename  = this->trim(alpha["file"].get<std::string>());
     const std::string spacing   = this->trim(alpha["spacing"].get<std::string>());
     const std::string startRead = this->trim(alpha["header"].get<std::string>());
-    const std::string stopRead  = "";
+    const std::string stopRead;
 
     const int  xColumn   = alpha["E/N"].get<int>();
     const int  yColumn   = alpha["alpha/N"].get<int>();
@@ -1310,12 +1361,14 @@ CdrPlasmaJSON::parseAlpha()
     const Real maxEN     = alpha["max E/N"].get<Real>();
 
     // I can't have maxEN < minEN. Throw an error.
-    if (maxEN < minEN)
+    if (maxEN < minEN) {
       this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+}
 
     // Throw an error if the file does not exist.
-    if (!(this->doesFileExist(filename)))
+    if (!(this->doesFileExist(filename))) {
       this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
+}
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
@@ -1453,7 +1506,7 @@ CdrPlasmaJSON::parseEta()
     const std::string filename  = this->trim(eta["file"].get<std::string>());
     const std::string spacing   = this->trim(eta["spacing"].get<std::string>());
     const std::string startRead = this->trim(eta["header"].get<std::string>());
-    const std::string stopRead  = "";
+    const std::string stopRead;
 
     const int  xColumn   = eta["E/N"].get<int>();
     const int  yColumn   = eta["eta/N"].get<int>();
@@ -1462,12 +1515,14 @@ CdrPlasmaJSON::parseEta()
     const Real maxEN     = eta["max E/N"].get<Real>();
 
     // Can't have maxEN < min EN
-    if (maxEN < minEN)
+    if (maxEN < minEN) {
       this->throwParserError(baseError + " and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+}
 
     // Throw an error if the file does not exist.
-    if (!(this->doesFileExist(filename)))
+    if (!(this->doesFileExist(filename))) {
       this->throwParserError(baseError + " and got 'table E/N' but file '" + filename + "' does not exist");
+}
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
@@ -1475,7 +1530,7 @@ CdrPlasmaJSON::parseEta()
     m_etaTableEN = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (m_etaTableEN.getRawData().size() == 0) {
+    if (m_etaTableEN.getRawData().empty()) {
       this->throwParserError(baseError + " and got 'table E/N' but table is empty. This is probably an error");
     }
 
@@ -1569,9 +1624,10 @@ CdrPlasmaJSON::parseMobilities()
     if (m_cdrSpecies[idx]->isMobile()) {
 
       // This is a required field. We use it for specifying the mobility.
-      if (!(species.contains("mobility")))
+      if (!(species.contains("mobility"))) {
         this->throwParserError(baseError + " and species '" + name +
                                "' is mobile but JSON file does not contain field 'mobility'");
+}
       const json& mobilityJSON = species["mobility"];
 
       // Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
@@ -1580,36 +1636,45 @@ CdrPlasmaJSON::parseMobilities()
       if (lookup == "constant") {
         // User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
         // field does not exist then it's an error.
-        if (!(mobilityJSON.contains("value")))
+        if (!(mobilityJSON.contains("value"))) {
           this->throwParserError(baseError + "and got constant mobility but field 'value' was not specified");
+}
 
         const Real value = mobilityJSON["value"].get<Real>();
 
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::Constant));
-        m_mobilityConstants.emplace(std::make_pair(idx, value));
+        m_mobilityLookup.emplace(idx, LookupMethod::Constant);
+        m_mobilityConstants.emplace(idx, value);
       }
       else if (lookup == "table E/N") {
-        if (!(mobilityJSON.contains("file")))
+        if (!(mobilityJSON.contains("file"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'file' was not specified");
-        if (!(mobilityJSON.contains("header")))
+}
+        if (!(mobilityJSON.contains("header"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'header' was not specified");
-        if (!(mobilityJSON.contains("E/N")))
+}
+        if (!(mobilityJSON.contains("E/N"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'E/N' was not specified");
-        if (!(mobilityJSON.contains("mu*N")))
+}
+        if (!(mobilityJSON.contains("mu*N"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'mu*N' was not specified");
-        if (!(mobilityJSON.contains("min E/N")))
+}
+        if (!(mobilityJSON.contains("min E/N"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'min E/N' was not specified");
-        if (!(mobilityJSON.contains("max E/N")))
+}
+        if (!(mobilityJSON.contains("max E/N"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'max E/N' was not specified");
-        if (!(mobilityJSON.contains("points")))
+}
+        if (!(mobilityJSON.contains("points"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'points' was not specified");
-        if (!(mobilityJSON.contains("spacing")))
+}
+        if (!(mobilityJSON.contains("spacing"))) {
           this->throwParserError(baseError + "and got tabulated mobility but field 'spacing' was not specified");
+}
 
         const std::string filename  = this->trim(mobilityJSON["file"].get<std::string>());
         const std::string startRead = this->trim(mobilityJSON["header"].get<std::string>());
         const std::string spacing   = this->trim(mobilityJSON["spacing"].get<std::string>());
-        const std::string stopRead  = "";
+        const std::string stopRead;
 
         const int  xColumn   = mobilityJSON["E/N"].get<int>();
         const int  yColumn   = mobilityJSON["mu*N"].get<int>();
@@ -1624,13 +1689,15 @@ CdrPlasmaJSON::parseMobilities()
         }
 
         // Can't have maxEN < minEN
-        if (maxEN < minEN)
+        if (maxEN < minEN) {
           this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+}
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename)))
+        if (!(this->doesFileExist(filename))) {
           this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
                                  "' but file was not found");
+}
 
         // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
@@ -1639,7 +1706,7 @@ CdrPlasmaJSON::parseMobilities()
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (mobilityTable.getRawData().size() == 0) {
+        if (mobilityTable.getRawData().empty()) {
           this->throwParserError(baseError + " and got tabulated mobility but mobility table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
@@ -1669,33 +1736,41 @@ CdrPlasmaJSON::parseMobilities()
         }
 
         // Ok, put the table where it belongs.
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
-        m_mobilityTablesEN.emplace(std::make_pair(idx, mobilityTable));
+        m_mobilityLookup.emplace(idx, LookupMethod::TableEN);
+        m_mobilityTablesEN.emplace(idx, mobilityTable);
       }
       else if (lookup == "table energy") {
-        if (!(mobilityJSON.contains("file")))
+        if (!(mobilityJSON.contains("file"))) {
           this->throwParserError(baseError + "and got 'table energy' mobility but field 'file' was not specified");
-        if (!(mobilityJSON.contains("header")))
+}
+        if (!(mobilityJSON.contains("header"))) {
           this->throwParserError(baseError + "and got 'table energy' mobility but field 'header' was not specified");
-        if (!(mobilityJSON.contains("eV")))
+}
+        if (!(mobilityJSON.contains("eV"))) {
           this->throwParserError(baseError + "and got 'table energy' mobility but field 'eV' was not specified");
-        if (!(mobilityJSON.contains("mu*N")))
+}
+        if (!(mobilityJSON.contains("mu*N"))) {
           this->throwParserError(baseError + "and got 'table energy' mobility but field 'mu*N' was not specified");
-        if (!(mobilityJSON.contains("min energy")))
+}
+        if (!(mobilityJSON.contains("min energy"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' mobility but field 'min energy' was not specified");
-        if (!(mobilityJSON.contains("max energy")))
+}
+        if (!(mobilityJSON.contains("max energy"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' mobility but field 'max energy' was not specified");
-        if (!(mobilityJSON.contains("points")))
+}
+        if (!(mobilityJSON.contains("points"))) {
           this->throwParserError(baseError + "and got 'table energy' mobility but field 'points' was not specified");
-        if (!(mobilityJSON.contains("spacing")))
+}
+        if (!(mobilityJSON.contains("spacing"))) {
           this->throwParserError(baseError + "and got 'table energy' mobility but field 'spacing' was not specified");
+}
 
         const std::string filename  = this->trim(mobilityJSON["file"].get<std::string>());
         const std::string startRead = this->trim(mobilityJSON["header"].get<std::string>());
         const std::string spacing   = this->trim(mobilityJSON["spacing"].get<std::string>());
-        const std::string stopRead  = "";
+        const std::string stopRead;
 
         const int  xColumn   = mobilityJSON["eV"].get<int>();
         const int  yColumn   = mobilityJSON["mu*N"].get<int>();
@@ -1710,13 +1785,15 @@ CdrPlasmaJSON::parseMobilities()
         }
 
         // Can't have maximum energy < minimum energy
-        if (maxEnergy < minEnergy)
+        if (maxEnergy < minEnergy) {
           this->throwParserError(baseError + "and got 'table energy' but can't have 'max eV' < 'min eV'");
+}
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename)))
+        if (!(this->doesFileExist(filename))) {
           this->throwParserError(baseError + "and got 'table energy' with file = '" + filename +
                                  "' but file was not found");
+}
 
         // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct eV column then that data will be put in the first column. The data for mu*N will be in the
@@ -1725,7 +1802,7 @@ CdrPlasmaJSON::parseMobilities()
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (mobilityTable.getRawData().size() == 0) {
+        if (mobilityTable.getRawData().empty()) {
           this->throwParserError(baseError + " and got 'table energy' but mobility table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
@@ -1755,21 +1832,24 @@ CdrPlasmaJSON::parseMobilities()
         }
 
         // Ok, put the table where it belongs.
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableEnergy));
-        m_mobilityTablesEnergy.emplace(std::make_pair(idx, mobilityTable));
+        m_mobilityLookup.emplace(idx, LookupMethod::TableEnergy);
+        m_mobilityTablesEnergy.emplace(idx, mobilityTable);
       }
       else if (lookup == "functionEN A") {
         FunctionEN func;
 
-        if (!(mobilityJSON.contains("c1")))
+        if (!(mobilityJSON.contains("c1"))) {
           this->throwParserError(baseError +
                                  " and got 'functionEN A' for the mobility but field 'c1' was not specified");
-        if (!(mobilityJSON.contains("c2")))
+}
+        if (!(mobilityJSON.contains("c2"))) {
           this->throwParserError(baseError +
                                  " and got 'functionEN A' for the mobility but field 'c2' was not specified");
-        if (!(mobilityJSON.contains("c3")))
+}
+        if (!(mobilityJSON.contains("c3"))) {
           this->throwParserError(baseError +
                                  " and got 'functionEN A' for the mobility but field 'c3' was not specified");
+}
 
         const Real A = mobilityJSON["c1"].get<Real>();
         const Real B = mobilityJSON["c2"].get<Real>();
@@ -1779,8 +1859,8 @@ CdrPlasmaJSON::parseMobilities()
           return A * std::pow(a_E, B) / std::pow(a_N, C);
         };
 
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));
-        m_mobilityFunctionsEN.emplace(std::make_pair(idx, func));
+        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEN);
+        m_mobilityFunctionsEN.emplace(idx, func);
       }
       else if (lookup == "morrow-lowke e") {
         // This is a hook for fetching the electron mobility from the Morrow-Lowke model. The expression
@@ -1816,8 +1896,8 @@ CdrPlasmaJSON::parseMobilities()
           return mu;
         };
 
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));
-        m_mobilityFunctionsEN.emplace(std::make_pair(idx, func));
+        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEN);
+        m_mobilityFunctionsEN.emplace(idx, func);
       }
       else if (lookup == "morrow-lowke +") {
         // This is a hook for fetching the positive ion from the Morrow-Lowke model. The expression
@@ -1829,8 +1909,8 @@ CdrPlasmaJSON::parseMobilities()
           return 2.34E-4 * P0 / P(x);
         };
 
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEX));
-        m_mobilityFunctionsEX.emplace(std::make_pair(idx, func));
+        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEX);
+        m_mobilityFunctionsEX.emplace(idx, func);
       }
       else if (lookup == "morrow-lowke -") {
         // This is a hook for fetching the negative ion from the Morrow-Lowke model. The expression
@@ -1854,8 +1934,8 @@ CdrPlasmaJSON::parseMobilities()
           return mu;
         };
 
-        m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEX));
-        m_mobilityFunctionsEX.emplace(std::make_pair(idx, func));
+        m_mobilityLookup.emplace(idx, LookupMethod::FunctionEX);
+        m_mobilityFunctionsEX.emplace(idx, func);
       }
       else {
         this->throwParserError(baseError + " -- logic bust");
@@ -1882,9 +1962,10 @@ CdrPlasmaJSON::parseDiffusion()
     if (m_cdrSpecies[idx]->isDiffusive()) {
 
       // This is a required field. We use it for specifying the mobility.
-      if (!(species.contains("diffusion")))
+      if (!(species.contains("diffusion"))) {
         this->throwParserError(baseError + "and species '" + name +
                                "' is diffusive but JSON file does not contain field 'diffusion'");
+}
       const json& diffusionJSON = species["diffusion"];
 
       // Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
@@ -1893,36 +1974,45 @@ CdrPlasmaJSON::parseDiffusion()
       if (lookup == "constant") {
         // User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
         // field does not exist then it's an error.
-        if (!(diffusionJSON.contains("value")))
+        if (!(diffusionJSON.contains("value"))) {
           this->throwParserError(baseError + "and got constant diffusion but field 'value' was not specified");
+}
 
         const Real value = diffusionJSON["value"].get<Real>();
 
-        m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::Constant));
-        m_diffusionConstants.emplace(std::make_pair(idx, value));
+        m_diffusionLookup.emplace(idx, LookupMethod::Constant);
+        m_diffusionConstants.emplace(idx, value);
       }
       else if (lookup == "table E/N") {
-        if (!(diffusionJSON.contains("file")))
+        if (!(diffusionJSON.contains("file"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'file' was not specified");
-        if (!(diffusionJSON.contains("header")))
+}
+        if (!(diffusionJSON.contains("header"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'header' was not specified");
-        if (!(diffusionJSON.contains("E/N")))
+}
+        if (!(diffusionJSON.contains("E/N"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'E/N' was not specified");
-        if (!(diffusionJSON.contains("D*N")))
+}
+        if (!(diffusionJSON.contains("D*N"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'D*N' was not specified");
-        if (!(diffusionJSON.contains("min E/N")))
+}
+        if (!(diffusionJSON.contains("min E/N"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'min E/N' was not specified");
-        if (!(diffusionJSON.contains("max E/N")))
+}
+        if (!(diffusionJSON.contains("max E/N"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'max E/N' was not specified");
-        if (!(diffusionJSON.contains("points")))
+}
+        if (!(diffusionJSON.contains("points"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'points' was not specified");
-        if (!(diffusionJSON.contains("spacing")))
+}
+        if (!(diffusionJSON.contains("spacing"))) {
           this->throwParserError(baseError + "and got tabulated diffusion but field 'spacing' was not specified");
+}
 
         const std::string filename  = this->trim(diffusionJSON["file"].get<std::string>());
         const std::string startRead = this->trim(diffusionJSON["header"].get<std::string>());
         const std::string spacing   = this->trim(diffusionJSON["spacing"].get<std::string>());
-        const std::string stopRead  = "";
+        const std::string stopRead;
 
         const int  xColumn   = diffusionJSON["E/N"].get<int>();
         const int  yColumn   = diffusionJSON["D*N"].get<int>();
@@ -1931,13 +2021,15 @@ CdrPlasmaJSON::parseDiffusion()
         const Real maxEN     = diffusionJSON["max E/N"].get<Real>();
 
         // Can't have maxEN < minEN
-        if (maxEN < minEN)
+        if (maxEN < minEN) {
           this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+}
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename)))
+        if (!(this->doesFileExist(filename))) {
           this->throwParserError(baseError + "and got 'table E/N' with file = '" + filename +
                                  "' but file was not found");
+}
 
         // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -1946,7 +2038,7 @@ CdrPlasmaJSON::parseDiffusion()
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (diffusionTable.getRawData().size() == 0) {
+        if (diffusionTable.getRawData().empty()) {
           this->throwParserError(baseError + " and got tabulated diffusion but diffusion table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
@@ -1981,36 +2073,44 @@ CdrPlasmaJSON::parseDiffusion()
           diffusionTable.writeStructuredData(dumpFile);
         }
 
-        m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
-        m_diffusionTablesEN.emplace(std::make_pair(idx, diffusionTable));
+        m_diffusionLookup.emplace(idx, LookupMethod::TableEN);
+        m_diffusionTablesEN.emplace(idx, diffusionTable);
       }
       else if (lookup == "table energy") {
-        if (!(diffusionJSON.contains("file")))
+        if (!(diffusionJSON.contains("file"))) {
           this->throwParserError(baseError + "and got 'table energy' for diffusion but field 'file' was not specified");
-        if (!(diffusionJSON.contains("header")))
+}
+        if (!(diffusionJSON.contains("header"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'header' was not specified");
-        if (!(diffusionJSON.contains("eV")))
+}
+        if (!(diffusionJSON.contains("eV"))) {
           this->throwParserError(baseError + "and got 'table energy' for diffusion but field 'eV' was not specified");
-        if (!(diffusionJSON.contains("D*N")))
+}
+        if (!(diffusionJSON.contains("D*N"))) {
           this->throwParserError(baseError + "and got 'table energy' for diffusion but field 'D*N' was not specified");
-        if (!(diffusionJSON.contains("min energy")))
+}
+        if (!(diffusionJSON.contains("min energy"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'min energy' was not specified");
-        if (!(diffusionJSON.contains("max energy")))
+}
+        if (!(diffusionJSON.contains("max energy"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'max energy' was not specified");
-        if (!(diffusionJSON.contains("points")))
+}
+        if (!(diffusionJSON.contains("points"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'points' was not specified");
-        if (!(diffusionJSON.contains("spacing")))
+}
+        if (!(diffusionJSON.contains("spacing"))) {
           this->throwParserError(baseError +
                                  "and got 'table energy' for diffusion but field 'spacing' was not specified");
+}
 
         const std::string filename  = this->trim(diffusionJSON["file"].get<std::string>());
         const std::string startRead = this->trim(diffusionJSON["header"].get<std::string>());
         const std::string spacing   = this->trim(diffusionJSON["spacing"].get<std::string>());
-        const std::string stopRead  = "";
+        const std::string stopRead;
 
         const int  xColumn   = diffusionJSON["eV"].get<int>();
         const int  yColumn   = diffusionJSON["D*N"].get<int>();
@@ -2019,13 +2119,15 @@ CdrPlasmaJSON::parseDiffusion()
         const Real maxEnergy = diffusionJSON["max energy"].get<Real>();
 
         // Can't have maximum energy < minimum energy
-        if (maxEnergy < minEnergy)
+        if (maxEnergy < minEnergy) {
           this->throwParserError(baseError + "and got 'table energy' for diffusion but can't have 'max eV' < 'min eV'");
+}
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename)))
+        if (!(this->doesFileExist(filename))) {
           this->throwParserError(baseError + "and got 'table energy' for diffusion with file = '" + filename +
                                  "' but file was not found");
+}
 
         // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
         // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -2034,7 +2136,7 @@ CdrPlasmaJSON::parseDiffusion()
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (diffusionTable.getRawData().size() == 0) {
+        if (diffusionTable.getRawData().empty()) {
           this->throwParserError(baseError + " and got 'table energy' for diffusion but diffusion table '" + startRead +
                                  "' in file '" + filename + "'is empty");
         }
@@ -2069,21 +2171,24 @@ CdrPlasmaJSON::parseDiffusion()
           diffusionTable.writeStructuredData(dumpFile);
         }
 
-        m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::TableEnergy));
-        m_diffusionTablesEnergy.emplace(std::make_pair(idx, diffusionTable));
+        m_diffusionLookup.emplace(idx, LookupMethod::TableEnergy);
+        m_diffusionTablesEnergy.emplace(idx, diffusionTable);
       }
       else if (lookup == "functionEN A") {
         FunctionEN func;
 
-        if (!(diffusionJSON.contains("c1")))
+        if (!(diffusionJSON.contains("c1"))) {
           this->throwParserError(baseError +
                                  " and got 'functionEN A' for the diffusion but field 'c1' was not specified");
-        if (!(diffusionJSON.contains("c2")))
+}
+        if (!(diffusionJSON.contains("c2"))) {
           this->throwParserError(baseError +
                                  " and got 'functionEN A' for the diffusion but field 'c2' was not specified");
-        if (!(diffusionJSON.contains("c3")))
+}
+        if (!(diffusionJSON.contains("c3"))) {
           this->throwParserError(baseError +
                                  " and got 'functionEN A' for the diffusion but field 'c3' was not specified");
+}
 
         const Real A = diffusionJSON["c1"].get<Real>();
         const Real B = diffusionJSON["c2"].get<Real>();
@@ -2093,8 +2198,8 @@ CdrPlasmaJSON::parseDiffusion()
           return A * std::pow(a_E, B) / std::pow(a_N, C);
         };
 
-        m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));
-        m_diffusionFunctionsEN.emplace(std::make_pair(idx, func));
+        m_diffusionLookup.emplace(idx, LookupMethod::FunctionEN);
+        m_diffusionFunctionsEN.emplace(idx, func);
       }
       else if (lookup == "morrow-lowke e") {
         // This is a hook for fetching the electron diffusion from the Morrow-Lowke model. The expression
@@ -2137,8 +2242,8 @@ CdrPlasmaJSON::parseDiffusion()
           return 0.3341E9 * std::pow(EN, 0.54069) * mu;
         };
 
-        m_diffusionLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));
-        m_diffusionFunctionsEN.emplace(std::make_pair(idx, electronDiffusion));
+        m_diffusionLookup.emplace(idx, LookupMethod::FunctionEN);
+        m_diffusionFunctionsEN.emplace(idx, electronDiffusion);
       }
       else {
         this->throwParserError(baseError + " -- logic bust");
@@ -2171,14 +2276,16 @@ CdrPlasmaJSON::parseTemperatures()
       const std::string baseError = "CdrPlasmaJSON::parseTemperatures -- temperature for species '" + name + "' ";
 
       // We MUST have a lookup field in order to determine how we compute the temperature for a species.
-      if (!(S.contains("lookup")))
+      if (!(S.contains("lookup"))) {
         this->throwParserError(baseError + "was specified but field 'lookup' is missing");
+}
 
       // Figure out the lookup method.
       const std::string lookup = trim(S["lookup"].get<std::string>());
       if (lookup == "constant") {
-        if (!(S.contains("value")))
+        if (!(S.contains("value"))) {
           this->throwParserError(baseError + "was specified as 'constant' but field 'value' is missing");
+}
 
         const Real value = S["value"].get<Real>();
 
@@ -2189,27 +2296,35 @@ CdrPlasmaJSON::parseTemperatures()
         });
       }
       else if (lookup == "table E/N") {
-        if (!(S.contains("file")))
+        if (!(S.contains("file"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'file' is missing");
-        if (!(S.contains("header")))
+}
+        if (!(S.contains("header"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'header' is missing");
-        if (!(S.contains("E/N")))
+}
+        if (!(S.contains("E/N"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'E/N' is missing");
-        if (!(S.contains("eV")))
+}
+        if (!(S.contains("eV"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'eV' is missing");
-        if (!(S.contains("min E/N")))
+}
+        if (!(S.contains("min E/N"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'min E/N' is missing");
-        if (!(S.contains("max E/N")))
+}
+        if (!(S.contains("max E/N"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'max E/N' is missing");
-        if (!(S.contains("points")))
+}
+        if (!(S.contains("points"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'points' is missing");
-        if (!(S.contains("spacing")))
+}
+        if (!(S.contains("spacing"))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but field 'spacing' is missing");
+}
 
         const std::string filename  = this->trim(S["file"].get<std::string>());
         const std::string startRead = this->trim(S["header"].get<std::string>());
         const std::string spacing   = this->trim(S["spacing"].get<std::string>());
-        const std::string stopRead  = "";
+        const std::string stopRead;
 
         const int  xColumn   = S["E/N"].get<int>();
         const int  yColumn   = S["eV"].get<int>();
@@ -2218,13 +2333,15 @@ CdrPlasmaJSON::parseTemperatures()
         const Real maxEN     = S["max E/N"].get<Real>();
 
         // Can't have maxEN < minEN
-        if (maxEN < minEN)
+        if (maxEN < minEN) {
           this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+}
 
         // Issue an error if the file does not exist at all!
-        if (!(this->doesFileExist(filename)))
+        if (!(this->doesFileExist(filename))) {
           this->throwParserError(baseError + "was specified as 'table E/N' but got file = '" + filename +
                                  "' was not found");
+}
 
         // Check if we should scale the table.
         Real scale = 1.0;
@@ -2239,7 +2356,7 @@ CdrPlasmaJSON::parseTemperatures()
           DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
         // If the table is empty then it's an error.
-        if (temperatureTable.getRawData().size() == 0) {
+        if (temperatureTable.getRawData().empty()) {
           this->throwParserError(baseError + " but temperature table '" + startRead + "' in file '" + filename +
                                  "'is empty. This is probably an error");
         }
@@ -2271,8 +2388,8 @@ CdrPlasmaJSON::parseTemperatures()
           temperatureTable.writeStructuredData(dumpFile);
         }
 
-        m_temperatureLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
-        m_temperatureTablesEN.emplace(std::make_pair(idx, temperatureTable));
+        m_temperatureLookup.emplace(idx, LookupMethod::TableEN);
+        m_temperatureTablesEN.emplace(idx, temperatureTable);
       }
       else {
         this->throwParserError(baseError + " -- logic bust");
@@ -2290,12 +2407,14 @@ CdrPlasmaJSON::parsePlasmaReactions()
   }
 
   for (const auto& R : m_json["plasma reactions"]) {
-    if (!(R.contains("reaction")))
+    if (!(R.contains("reaction"))) {
       this->throwParserError(
                              "CdrPlasmaJSON::parsePlasmaReactions -- field 'reaction' is missing from one of the reactions");
-    if (!(R.contains("lookup")))
+}
+    if (!(R.contains("lookup"))) {
       this->throwParserError(
                              "CdrPlasmaJSON::parsePlasmaReactions -- field 'lookup' is missing from one of the reactions");
+}
 
     const std::string reaction  = trim(R["reaction"].get<std::string>());
     const std::string baseError = "CdrPlasmaJSON::parsePlasmaReactions for reaction '" + reaction + "' ";
@@ -2442,9 +2561,10 @@ CdrPlasmaJSON::sanctifyPlasmaReaction(const std::vector<std::string>& a_reactant
 
   // All reactants must be in the list of neutral species or in the list of plasma species
   for (const auto& r : a_reactants) {
-    if (!isPlasmaSpecies(r) && !isNeutralSpecies(r))
+    if (!isPlasmaSpecies(r) && !isNeutralSpecies(r)) {
       this->throwParserError(baseError + "but I do not know reacting species '" + r + "' for reaction '" + a_reaction +
                              "'");
+}
   }
 
   // All products should be in the list of plasma or photon species. It's ok if users include a neutral species -- we will ignore it (but tell the user about it).
@@ -2493,14 +2613,18 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
     const bool isNeutral = this->isNeutralSpecies(r);
     const bool isPhoton  = this->isPhotonSpecies(r);
 
-    if (isNeutral)
+    if (isNeutral) {
       this->throwParserError(baseError + "neutral species (" + r + ") not allowed on left-hand side");
-    if (isPlasma)
+}
+    if (isPlasma) {
       this->throwParserError(baseError + "plasma species (" + r + ") not allowed on left-hand side");
-    if (!isPhoton)
+}
+    if (!isPhoton) {
       this->throwParserError(baseError + "I do not know species species '" + r + "' on left hand side");
-    if (isPhoton)
+}
+    if (isPhoton) {
       numPhotonSpecies++;
+}
   }
 
   // There can only be one photon species on the left-hand side of the reaction.
@@ -2516,21 +2640,25 @@ CdrPlasmaJSON::sanctifyPhotoReaction(const std::vector<std::string>& a_reactants
     const bool isNeutral = this->isNeutralSpecies(p);
     const bool isPhoton  = this->isPhotonSpecies(p);
 
-    if (isPhoton)
+    if (isPhoton) {
       this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
-    if (!isPlasma && !isNeutral)
+}
+    if (!isPlasma && !isNeutral) {
       this->throwParserError(baseError + "I do not know species '" + p + "' on right hand side");
+}
   }
 
   // Check for charge conservation
   int sumCharge = 0;
   for (const auto& r : a_reactants) {
-    if (this->isPlasmaSpecies(r))
+    if (this->isPlasmaSpecies(r)) {
       sumCharge -= m_cdrSpecies[m_cdrSpeciesMap.at(r)]->getChargeNumber();
+}
   }
   for (const auto& p : a_products) {
-    if (this->isPlasmaSpecies(p))
+    if (this->isPlasmaSpecies(p)) {
       sumCharge += m_cdrSpecies[m_cdrSpeciesMap.at(p)]->getChargeNumber();
+}
   }
 
   if (sumCharge != 0) {
@@ -2573,10 +2701,12 @@ CdrPlasmaJSON::sanctifySurfaceReaction(const std::vector<std::string>& a_reactan
     const bool isNeutral = this->isNeutralSpecies(p);
     const bool isPhoton  = this->isPhotonSpecies(p);
 
-    if (isPhoton)
+    if (isPhoton) {
       this->throwParserError(baseError + "photon species '" + p + "' not allowed on right hand side");
-    if (isNeutral)
+}
+    if (isNeutral) {
       this->throwParserError(baseError + "neutral species '" + p + "' not allowed on right hand side");
+}
 
     // Unknown species not allowed either.
     if (!isPlasma && !isNeutral && !isPhoton) {
@@ -2609,8 +2739,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real k = a_R["rate"].get<Real>();
 
     /// Add the rate and lookup method.
-    m_plasmaReactionLookup.emplace(std::make_pair(a_reactionIndex, LookupMethod::Constant));
-    m_plasmaReactionConstants.emplace(std::make_pair(a_reactionIndex, k));
+    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::Constant);
+    m_plasmaReactionConstants.emplace(a_reactionIndex, k);
   }
   else if (lookup == "alpha*v") { 
     if (!(a_R.contains("species"))) {
@@ -2627,8 +2757,9 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::AlphaV);
   }
   else if (lookup == "eta*v") {
-    if (!(a_R.contains("species")))
+    if (!(a_R.contains("species"))) {
       this->throwParserError(baseError + "and got 'eta*v' but field 'species' was not found");
+}
 
     const std::string species = trim(a_R["species"].get<std::string>());
 
@@ -2699,12 +2830,14 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const bool isNeutralT2 = this->isNeutralSpecies(speciesT2);
 
     // Make sure that the specified species exist.
-    if (!isPlasmaT1 && !isNeutralT1)
+    if (!isPlasmaT1 && !isNeutralT1) {
       this->throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT1 +
                              "'");
-    if (!isPlasmaT2 && !isNeutralT2)
+}
+    if (!isPlasmaT2 && !isNeutralT2) {
       this->throwParserError(baseError + "and got function 'functionT1T2 A' but do not know species '" + speciesT2 +
                              "'");
+}
 
     // This syntax may look weird, but we need to know precisely which temperatures are involved in the reaction. In general the reaction rate
     // is just a function k = f(T1, T2) but T1 and T2 could be the temperatures for either a plasma or a neutral species. So, the plasmaReactionFunctionsT1T2 map
@@ -2759,7 +2892,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const std::string filename  = this->trim(a_R["file"].get<std::string>());
     const std::string spacing   = this->trim(a_R["spacing"].get<std::string>());
     const std::string startRead = this->trim(a_R["header"].get<std::string>());
-    const std::string stopRead  = "";
+    const std::string stopRead;
 
     const int  xColumn   = a_R["E/N"].get<int>();
     const int  yColumn   = a_R["rate"].get<int>();
@@ -2768,12 +2901,14 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real maxEN     = a_R["max E/N"].get<Real>();
 
     // It's an error if max E/N < min E/N
-    if (maxEN < minEN)
+    if (maxEN < minEN) {
       this->throwParserError(baseError + "and got 'table E/N' but can't have 'max E/N' < 'min E/N'");
+}
 
     // Throw an error if the input file does not exist.
-    if (!(this->doesFileExist(filename)))
+    if (!(this->doesFileExist(filename))) {
       this->throwParserError(baseError + "and got 'table E/N' but file '" + filename + "' does not exist");
+}
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -2782,7 +2917,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (reactionTable.getRawData().size() == 0) {
+    if (reactionTable.getRawData().empty()) {
       this->throwParserError(baseError + "and got 'table E/N' but table is empty. This is probably an error");
     }
 
@@ -2810,34 +2945,43 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     }
 
     // Add the tabulated rate and identifier.
-    m_plasmaReactionLookup.emplace(std::make_pair(a_reactionIndex, LookupMethod::TableEN));
-    m_plasmaReactionTablesEN.emplace(std::make_pair(a_reactionIndex, reactionTable));
+    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::TableEN);
+    m_plasmaReactionTablesEN.emplace(a_reactionIndex, reactionTable);
   }
   else if (lookup == "table energy") {
-    if (!(a_R.contains("file")))
+    if (!(a_R.contains("file"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'file' was not found");
-    if (!(a_R.contains("header")))
+}
+    if (!(a_R.contains("header"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'header' was not found");
-    if (!(a_R.contains("eV")))
+}
+    if (!(a_R.contains("eV"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'eV' was not found");
-    if (!(a_R.contains("rate")))
+}
+    if (!(a_R.contains("rate"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'rate' was not found");
-    if (!(a_R.contains("min energy")))
+}
+    if (!(a_R.contains("min energy"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'min energy' was not found");
-    if (!(a_R.contains("max energy")))
+}
+    if (!(a_R.contains("max energy"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'max energy' was not found");
-    if (!(a_R.contains("points")))
+}
+    if (!(a_R.contains("points"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'points' was not found");
-    if (!(a_R.contains("spacing")))
+}
+    if (!(a_R.contains("spacing"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'spacing' was not found");
-    if (!(a_R.contains("species")))
+}
+    if (!(a_R.contains("species"))) {
       this->throwParserError(baseError + "and got 'table energy' but field 'species' was not found");
+}
 
     const std::string species   = this->trim(a_R["species"].get<std::string>());
     const std::string filename  = this->trim(a_R["file"].get<std::string>());
     const std::string spacing   = this->trim(a_R["spacing"].get<std::string>());
     const std::string startRead = this->trim(a_R["header"].get<std::string>());
-    const std::string stopRead  = "";
+    const std::string stopRead;
 
     const int  xColumn   = a_R["eV"].get<int>();
     const int  yColumn   = a_R["rate"].get<int>();
@@ -2846,12 +2990,14 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const Real maxEnergy = a_R["max energy"].get<Real>();
 
     // It's an error if max energy < min energy
-    if (maxEnergy < minEnergy)
+    if (maxEnergy < minEnergy) {
       this->throwParserError(baseError + "and got 'table energy' but can't have 'max energy' < 'min energy'");
+}
 
     // Throw an error if the input file does not exist.
-    if (!(this->doesFileExist(filename)))
+    if (!(this->doesFileExist(filename))) {
       this->throwParserError(baseError + "and got 'table energy' but file '" + filename + "' does not exist");
+}
 
     // Read the table and format it. We happen to know that this function reads data into the appropriate columns. So if
     // the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
@@ -2860,7 +3006,7 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
       DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
     // If the table is empty then it's an error.
-    if (reactionTable.getRawData().size() == 0) {
+    if (reactionTable.getRawData().empty()) {
       this->throwParserError(baseError + "and got 'table energy' but table is empty. This is probably an error");
     }
 
@@ -2897,20 +3043,25 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     const int speciesIdx = m_cdrSpeciesMap.at(species);
 
     // Add the tabulated rate and identifier.
-    m_plasmaReactionLookup.emplace(std::make_pair(a_reactionIndex, LookupMethod::TableEnergy));
-    m_plasmaReactionTablesEnergy.emplace(std::make_pair(a_reactionIndex, std::make_pair(speciesIdx, reactionTable)));
+    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::TableEnergy);
+    m_plasmaReactionTablesEnergy.emplace(a_reactionIndex, std::make_pair(speciesIdx, reactionTable));
   }
   else if (lookup == "functionEN expA") {
-    if (!(a_R.contains("c1")))
+    if (!(a_R.contains("c1"))) {
       this->throwParserError(baseError + "and got 'functionEN expA' but field 'c1' is required but not specified");
-    if (!(a_R.contains("c2")))
+}
+    if (!(a_R.contains("c2"))) {
       this->throwParserError(baseError + "and got 'functionEN expA' but field 'c2' is required but not specified");
-    if (!(a_R.contains("c3")))
+}
+    if (!(a_R.contains("c3"))) {
       this->throwParserError(baseError + "and got 'functionEN expA' but field 'c3' is required but not specified");
-    if (!(a_R.contains("c4")))
+}
+    if (!(a_R.contains("c4"))) {
       this->throwParserError(baseError + "and got 'functionEN expA' but field 'c4' is required but not specified");
-    if (!(a_R.contains("c5")))
+}
+    if (!(a_R.contains("c5"))) {
       this->throwParserError(baseError + "and got 'functionEN expA' but field 'c5' is required but not specified");
+}
 
     // Get the constants
     const Real c1 = a_R["c1"].get<Real>();
@@ -2924,8 +3075,8 @@ CdrPlasmaJSON::parsePlasmaReactionRate(const int a_reactionIndex, const json& a_
     };
 
     // Add the function and identifier.
-    m_plasmaReactionLookup.emplace(std::make_pair(a_reactionIndex, LookupMethod::FunctionEN));
-    m_plasmaReactionFunctionsEN.emplace(std::make_pair(a_reactionIndex, func));
+    m_plasmaReactionLookup.emplace(a_reactionIndex, LookupMethod::FunctionEN);
+    m_plasmaReactionFunctionsEN.emplace(a_reactionIndex, func);
   }
   else {
     this->throwParserError(baseError + "but lookup = '" + lookup + "' is not recognized");
@@ -2997,16 +3148,21 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
     const json& photoi = a_R["photoionization"];
 
     // These fields are required.
-    if (!(photoi.contains("kr")))
+    if (!(photoi.contains("kr"))) {
       this->throwParserError(baseError + "got 'photoionization' but field 'kr' is missing");
-    if (!(photoi.contains("kp")))
+}
+    if (!(photoi.contains("kp"))) {
       this->throwParserError(baseError + "got 'photoionization' but field 'kp' is missing");
-    if (!(photoi.contains("kq/N")))
+}
+    if (!(photoi.contains("kq/N"))) {
       this->throwParserError(baseError + "got 'photoionization' but field 'kq/N' is missing");
-    if (!(photoi.contains("photoi eff")))
+}
+    if (!(photoi.contains("photoi eff"))) {
       this->throwParserError(baseError + "got 'photoionization' but field 'photoi eff' is missing");
-    if (!(photoi.contains("excite eff")))
+}
+    if (!(photoi.contains("excite eff"))) {
       this->throwParserError(baseError + "got 'photoionization' but field 'excite eff' is missing");
+}
 
     kr        = photoi["kr"].get<Real>();
     kp        = photoi["kp"].get<Real>();
@@ -3107,27 +3263,32 @@ CdrPlasmaJSON::parsePlasmaReactionSoloviev(const int a_reactionIndex, const json
 
     const json& solo = a_R["soloviev"];
 
-    if (!solo.contains("correction"))
+    if (!solo.contains("correction")) {
       this->throwParserError(baseError + "but did not find field 'correction'");
-    if (!solo.contains("species"))
+}
+    if (!solo.contains("species")) {
       this->throwParserError(baseError + "but did not find field 'species'");
+}
 
     const auto correct = solo["correction"].get<bool>();
     const auto species = solo["species"].get<std::string>();
 
     if (correct) {
-      if (!isPlasmaSpecies(species))
+      if (!isPlasmaSpecies(species)) {
         this->throwParserError(baseError + "but '" + species + "' is not a plasma species");
+}
 
       const int plasmaSpecies = m_cdrSpeciesMap.at(species);
 
       const bool isMobile    = m_cdrSpecies[plasmaSpecies]->isMobile();
       const bool isDiffusive = m_cdrSpecies[plasmaSpecies]->isDiffusive();
 
-      if (!isMobile)
+      if (!isMobile) {
         this->throwParserError(baseError + "but species  + '" + species + "' isn't mobile.");
-      if (!isDiffusive)
+}
+      if (!isDiffusive) {
         this->throwParserError(baseError + "but species  + '" + species + "' isn't diffusive.");
+}
 
       m_plasmaReactionSolovievCorrection.emplace(a_reactionIndex, std::make_pair(true, plasmaSpecies));
     }
@@ -3160,20 +3321,24 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
 
     for (const auto& energyLoss : a_R["energy losses"]) {
 
-      if (!energyLoss.contains("species"))
+      if (!energyLoss.contains("species")) {
         this->throwParserError(baseError + "but did not find field 'species'");
-      if (!energyLoss.contains("eV"))
+}
+      if (!energyLoss.contains("eV")) {
         this->throwParserError(baseError + "but did not find field 'eV'");
+}
 
       // Get the species name (string) and associated energy loss.
       const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
 
       // It's an error if the species name is not in the list of plasma species, or if the user has specified an energy solver as a plasma species.
-      if (!(this->isPlasmaSpecies(speciesName)))
+      if (!(this->isPlasmaSpecies(speciesName))) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+}
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex))
+      if (m_cdrIsEnergySolver.at(speciesIndex)) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+}
 
       // It's also an error to specify the reactive energy loss twice. Make sure the species is not already in the list of losses.
       if (reactionEnergyLosses.find(speciesIndex) != reactionEnergyLosses.end()) {
@@ -3226,8 +3391,9 @@ CdrPlasmaJSON::parsePlasmaReactionEnergyLosses(const int a_reactionIndex, const 
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first))
+      if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
+}
     }
 
     m_plasmaReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -3248,9 +3414,10 @@ CdrPlasmaJSON::parsePhotoReactions()
   }
 
   for (const auto& R : m_json["photo reactions"]) {
-    if (!(R.contains("reaction")))
+    if (!(R.contains("reaction"))) {
       this->throwParserError(
                              "CdrPlasmaJSON::parsePhotoReactions -- field 'reaction' is missing from one of the reactions");
+}
 
     const std::string reaction = trim(R["reaction"].get<std::string>());
 
@@ -3340,12 +3507,15 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
   if (a_R.contains("helmholtz")) {
     const json& helm = a_R["helmholtz"];
 
-    if (!(helm.contains("A")))
+    if (!(helm.contains("A"))) {
       this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'A' is missing");
-    if (!(helm.contains("lambda")))
+}
+    if (!(helm.contains("lambda"))) {
       this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'lambda' is missing");
-    if (!(helm.contains("species")))
+}
+    if (!(helm.contains("species"))) {
       this->throwParserError(baseError + " and got 'helmholtz' kappa but field 'neutral' is missing");
+}
 
     const auto A       = helm["A"].get<Real>();
     const auto lambda  = helm["lambda"].get<Real>();
@@ -3402,23 +3572,27 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
 
     for (const auto& energyLoss : a_R["energy losses"]) {
 
-      if (!energyLoss.contains("species"))
+      if (!energyLoss.contains("species")) {
         this->throwParserError(baseError + "but did not find field 'species'");
-      if (!energyLoss.contains("eV"))
+}
+      if (!energyLoss.contains("eV")) {
         this->throwParserError(baseError + "but did not find field 'eV'");
+}
 
       // Get the species name (string) and associated energy loss.
       const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
       const Real        loss        = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
-      if (!(this->isPlasmaSpecies(speciesName)))
+      if (!(this->isPlasmaSpecies(speciesName))) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+}
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex))
+      if (m_cdrIsEnergySolver.at(speciesIndex)) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+}
 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
       // us to ignore all energy losses for a species by just turning off energy transport in the input script.
@@ -3430,8 +3604,9 @@ CdrPlasmaJSON::parsePhotoReactionEnergyLosses(const int a_reactionIndex, const j
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first))
+      if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
+}
     }
 
     m_photoReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -3468,8 +3643,9 @@ CdrPlasmaJSON::parseElectrodeReactions()
     for (const auto& electrodeReaction : electrodeReactions) {
 
       // Get the reaction string
-      if (!(electrodeReaction.contains("reaction")))
+      if (!(electrodeReaction.contains("reaction"))) {
         this->throwParserError(baseError + "- found 'electrode reactions' but field 'reaction' was not specified");
+}
       const std::string reaction = this->trim(electrodeReaction["reaction"].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
@@ -3505,8 +3681,9 @@ CdrPlasmaJSON::parseElectrodeReactions()
       else { // Normal code.
 
         // Get the lookup string
-        if (!(electrodeReaction.contains("lookup")))
+        if (!(electrodeReaction.contains("lookup"))) {
           this->throwParserError(baseError + "- found 'electrode reactions' but field 'lookup' was not specified");
+}
         const std::string lookup = this->trim(electrodeReaction["lookup"].get<std::string>());
 
         // Go through all the reactions now.
@@ -3568,8 +3745,9 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
   const std::string baseError = "CdrPlasmaJSON::parseElectrodeReactionRate for reaction '" + reaction + "' ";
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
-  if (!(a_reactionJSON.contains("lookup")))
+  if (!(a_reactionJSON.contains("lookup"))) {
     this->throwParserError(baseError + "but field 'lookup' was not specified");
+}
 
   // Get the lookup method
   const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
@@ -3579,8 +3757,9 @@ CdrPlasmaJSON::parseElectrodeReactionRate(const int a_reactionIndex, const json&
   if (lookup == "constant") {
     // If using a constant emission rate, we must get the field 'value'.
 
-    if (!(a_reactionJSON.contains("value")))
+    if (!(a_reactionJSON.contains("value"))) {
       this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+}
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
@@ -3634,23 +3813,27 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
 
     for (const auto& energyLoss : a_R["energy losses"]) {
 
-      if (!energyLoss.contains("species"))
+      if (!energyLoss.contains("species")) {
         this->throwParserError(baseError + "but did not find field 'species'");
-      if (!energyLoss.contains("eV"))
+}
+      if (!energyLoss.contains("eV")) {
         this->throwParserError(baseError + "but did not find field 'eV'");
+}
 
       // Get the species name (string) and associated energy loss.
       const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
       const Real        loss        = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
-      if (!(this->isPlasmaSpecies(speciesName)))
+      if (!(this->isPlasmaSpecies(speciesName))) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+}
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex))
+      if (m_cdrIsEnergySolver.at(speciesIndex)) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+}
 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
       // us to ignore all energy losses for a species by just turning off energy transport in the input script.
@@ -3662,8 +3845,9 @@ CdrPlasmaJSON::parseElectrodeReactionEnergyLosses(const int a_reactionIndex, con
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first))
+      if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
+}
     }
 
     m_electrodeReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -3700,8 +3884,9 @@ CdrPlasmaJSON::parseDielectricReactions()
     for (const auto& dielectricReaction : dielectricReactions) {
 
       // Get the reaction string
-      if (!(dielectricReaction.contains("reaction")))
+      if (!(dielectricReaction.contains("reaction"))) {
         this->throwParserError(baseError + "- found 'dielectric reactions' but field 'reaction' was not specified");
+}
       const std::string reaction = this->trim(dielectricReaction["reaction"].get<std::string>());
 
       // Parse the reaction string so we get a list of reactants and products
@@ -3737,8 +3922,9 @@ CdrPlasmaJSON::parseDielectricReactions()
       else { // Normal code
 
         // Get the lookup string
-        if (!(dielectricReaction.contains("lookup")))
+        if (!(dielectricReaction.contains("lookup"))) {
           this->throwParserError(baseError + "- found 'dielectric reactions' but field 'lookup' was not specified");
+}
         const std::string lookup = this->trim(dielectricReaction["lookup"].get<std::string>());
 
         // Go through all the reactions now.
@@ -3800,8 +3986,9 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
   const std::string baseError = "CdrPlasmaJSON::parseDielectricReactionRate for reaction '" + reaction + "' ";
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions.
-  if (!(a_reactionJSON.contains("lookup")))
+  if (!(a_reactionJSON.contains("lookup"))) {
     this->throwParserError(baseError + "but field 'lookup' was not specified");
+}
 
   // Get the lookup method
   const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
@@ -3811,8 +3998,9 @@ CdrPlasmaJSON::parseDielectricReactionRate(const int a_reactionIndex, const json
   if (lookup == "constant") {
     // If using a constant emission rate, we must get the field 'value'.
 
-    if (!(a_reactionJSON.contains("value")))
+    if (!(a_reactionJSON.contains("value"))) {
       this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+}
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
@@ -3888,10 +4076,12 @@ CdrPlasmaJSON::parseDomainReactions()
     for (const auto& domainReaction : domainReactions) {
 
       // These fields are required
-      if (!(domainReaction.contains("reaction")))
+      if (!(domainReaction.contains("reaction"))) {
         this->throwParserError(baseError + " - found 'domain reactions' but field 'reaction' was not specified");
-      if (!(domainReaction.contains("side")))
+}
+      if (!(domainReaction.contains("side"))) {
         this->throwParserError(baseError + " - found 'domain reactions' but field 'side' was not specified");
+}
 
       // Get the reaction string and sides
       const std::string              reaction = this->trim(domainReaction["reaction"].get<std::string>());
@@ -3942,8 +4132,9 @@ CdrPlasmaJSON::parseDomainReactions()
         std::vector<CdrPlasmaSurfaceReactionJSON> domainReactionsVec;
 
         // Get reaction lookup string
-        if (!(domainReaction.contains("lookup")))
+        if (!(domainReaction.contains("lookup"))) {
           this->throwParserError(baseError + " - found 'domain reactions' but field 'lookup' was not specified");
+}
         const std::string lookup = this->trim(domainReaction["lookup"].get<std::string>());
 
         // Go through reaction sets.
@@ -4016,8 +4207,9 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
   const std::string baseError = "CdrPlasmaJSON::parseDomainReactionRate for reaction '" + reaction + "' ";
 
   // We MUST have a field lookup because it determines how we compute the efficiencies for surface reactions
-  if (!(a_reactionJSON.contains("lookup")))
+  if (!(a_reactionJSON.contains("lookup"))) {
     this->throwParserError(baseError + "but field 'lookup' was not specified");
+}
 
   // Get the lookup method
   const std::string lookup = this->trim(a_reactionJSON["lookup"].get<std::string>());
@@ -4025,8 +4217,9 @@ CdrPlasmaJSON::parseDomainReactionRate(const int                       a_reactio
   // Now go through the various rate-computation methods and fill the relevant containers
   if (lookup == "constant") {
     // If using a constant emission rate, we must get the field 'value'
-    if (!(a_reactionJSON.contains("value")))
+    if (!(a_reactionJSON.contains("value"))) {
       this->throwParserError(baseError + " and got 'constant' lookup but field 'value' is missing");
+}
 
     const Real rate = a_reactionJSON["value"].get<Real>();
 
@@ -4090,8 +4283,9 @@ CdrPlasmaJSON::getNumberOfPlotVariables() const
   }
 
   for (const auto& m : m_plasmaReactionPlot) {
-    if (m.second)
+    if (m.second) {
       ret++;
+}
   }
 
   if (m_plotAlpha) {
@@ -4123,23 +4317,27 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
 
     for (const auto& energyLoss : a_R["energy losses"]) {
 
-      if (!energyLoss.contains("species"))
+      if (!energyLoss.contains("species")) {
         this->throwParserError(baseError + "but did not find field 'species'");
-      if (!energyLoss.contains("eV"))
+}
+      if (!energyLoss.contains("eV")) {
         this->throwParserError(baseError + "but did not find field 'eV'");
+}
 
       // Get the species name (string) and associated energy loss.
       const std::string speciesName = this->trim(energyLoss["species"].get<std::string>());
       const Real        loss        = energyLoss["eV"].get<Real>();
 
       // It's an error if the species name is not in the list of plasma species.
-      if (!(this->isPlasmaSpecies(speciesName)))
+      if (!(this->isPlasmaSpecies(speciesName))) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is not a plasma species");
+}
 
       // Get the species index, and make sure the specified species is not an energy solver.
       const int speciesIndex = m_cdrSpeciesMap.at(speciesName);
-      if (m_cdrIsEnergySolver.at(speciesIndex))
+      if (m_cdrIsEnergySolver.at(speciesIndex)) {
         this->throwParserError(baseError + "but species '" + speciesName + "' is an energy solver");
+}
 
       // Append energy losses to the list of losses, but ONLY if there is a corresponding energy solver for the specified species. This allows
       // us to ignore all energy losses for a species by just turning off energy transport in the input script.
@@ -4151,8 +4349,9 @@ CdrPlasmaJSON::parseDielectricReactionEnergyLosses(const int a_reactionIndex, co
     // If none if the species are associated with an energy solver, just ignore the entire thing.
     bool hasEnergySolver = false;
     for (const auto& p : reactionEnergyLosses) {
-      if (m_cdrHasEnergySolver.at(p.first))
+      if (m_cdrHasEnergySolver.at(p.first)) {
         hasEnergySolver = true;
+}
     }
 
     m_dielectricReactionEnergyLosses.emplace(a_reactionIndex, reactionEnergyLosses);
@@ -4928,8 +5127,7 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
     }
   }
 
-  return;
-}
+  }
 
 Vector<RealVect>
 CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
@@ -5037,10 +5235,12 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes.
-    if (Z < 0 && isAnode)
+    if (Z < 0 && isAnode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-    if (Z > 0 && isCathode)
+}
+    if (Z > 0 && isCathode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
+}
   }
 
   // Go through our list of electrode reactions and compute the inflow fluxes from secondary emission from plasma species
@@ -5173,10 +5373,12 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes.
-    if (Z < 0 && isAnode)
+    if (Z < 0 && isAnode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-    if (Z > 0 && isCathode)
+}
+    if (Z > 0 && isCathode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
+}
   }
 
   // Compute temperatures
@@ -5320,10 +5522,12 @@ CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
     const int Z = m_cdrSpecies[i]->getChargeNumber();
 
     // Outflow on of negative species on anodes.
-    if (Z < 0 && isAnode)
+    if (Z < 0 && isAnode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
-    if (Z > 0 && isCathode)
+}
+    if (Z > 0 && isCathode) {
       outflowFluxes[i] = std::max((Real)0.0, a_extrapCdrFluxes[i]);
+}
   }
 
   // Go through our list of dielectric reactions and compute the inflow fluxes from secondary emission from plasma species

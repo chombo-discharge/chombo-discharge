@@ -11,7 +11,7 @@
 */
 
 // Std includes
-#include <math.h>
+#include <cmath>
 
 // Our include
 #include <CD_GradedPerlinSphereSdf.H>
@@ -28,11 +28,9 @@ GradedPerlinSphereSdf::GradedPerlinSphereSdf(const Real&     a_rad,
   : PerlinSphereSdf(a_rad, a_center, a_inside, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed)
 {}
 
-GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) : PerlinSphereSdf(a_inputIF)
-{}
+GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) = default;
 
-GradedPerlinSphereSdf::~GradedPerlinSphereSdf()
-{}
+GradedPerlinSphereSdf::~GradedPerlinSphereSdf() = default;
 
 Real
 GradedPerlinSphereSdf::value(const RealVect& a_pos) const

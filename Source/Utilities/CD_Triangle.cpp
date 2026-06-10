@@ -26,8 +26,7 @@ Triangle::Triangle(const std::array<Vec3, 3>& a_vertexPositions) noexcept
   this->computeArea();
 }
 
-Triangle::~Triangle() noexcept
-{}
+Triangle::~Triangle() noexcept = default;
 
 void
 Triangle::setVertexPositions(const std::array<Vec3, 3>& a_vertexPositions) noexcept

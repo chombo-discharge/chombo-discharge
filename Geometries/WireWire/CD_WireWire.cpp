@@ -55,14 +55,14 @@ WireWire::WireWire()
   }
 
   // Create electrodes
-  for (int i = 0; i < electrodes.size(); i++) {
-    const auto baseif = RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(electrodes[i].first, true));
-    m_electrodes.push_back(Electrode(baseif, true, electrodes[i].second));
+  for (auto& electrode : electrodes) {
+    const auto baseif = RefCountedPtr<BaseIF>(new EBGeometryIF<Real>(electrode.first, true));
+    m_electrodes.push_back(Electrode(baseif, true, electrode.second));
   }
 
   // Create the insulation object
   std::shared_ptr<ImpFunc> insulation;
-  if (dielectrics.size() > 0 && insulationPermittivity > 0.0) {
+  if (!dielectrics.empty() && insulationPermittivity > 0.0) {
     if (smoothLen > 0.0) {
       insulation = EBGeometry::SmoothUnion<Real>(dielectrics, smoothLen);
     }

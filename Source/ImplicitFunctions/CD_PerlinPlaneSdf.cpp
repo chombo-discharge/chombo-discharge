@@ -43,15 +43,10 @@ PerlinPlaneSdf::PerlinPlaneSdf(const RealVect a_normal,
 }
 
 PerlinPlaneSdf::PerlinPlaneSdf(const PerlinPlaneSdf& a_inputIF)
-{
-  m_normal = a_inputIF.m_normal;
-  m_point  = a_inputIF.m_point;
-  m_plane  = a_inputIF.m_plane;
-  m_perlin = a_inputIF.m_perlin;
-}
-
-PerlinPlaneSdf::~PerlinPlaneSdf()
+  : m_normal(a_inputIF.m_normal), m_perlin(a_inputIF.m_perlin), m_plane(a_inputIF.m_plane), m_point(a_inputIF.m_point)
 {}
+
+PerlinPlaneSdf::~PerlinPlaneSdf() = default;
 
 Real
 PerlinPlaneSdf::value(const RealVect& a_pos) const

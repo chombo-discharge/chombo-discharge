@@ -14,11 +14,9 @@
 #include <CD_MFCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
-MFCoarAve::MFCoarAve()
-{}
+MFCoarAve::MFCoarAve() = default;
 
-MFCoarAve::~MFCoarAve()
-{}
+MFCoarAve::~MFCoarAve() = default;
 
 MFCoarAve::MFCoarAve(const Vector<RefCountedPtr<EBCoarAve>>& a_aveOps)
 {

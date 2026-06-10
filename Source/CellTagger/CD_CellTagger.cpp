@@ -20,14 +20,11 @@
 #include <CD_CellTagger.H>
 #include <CD_NamespaceHeader.H>
 
-CellTagger::CellTagger()
+CellTagger::CellTagger() : m_verbosity(-1), m_buffer(0), m_name("CellTagger")
 {
   CH_TIME("CellTagger::CellTagger()");
 
   // Defaeult settings
-  m_verbosity = -1;
-  m_buffer    = 0;
-  m_name      = "CellTagger";
 }
 
 CellTagger::~CellTagger()
@@ -282,9 +279,9 @@ CellTagger::getManualRefinementLevel(const RealVect a_pos) const
 
   int refToThisLevel = -1;
 
-  for (int i = 0; i < m_refBoxes.size(); i++) {
-    const RealBox& refBox = m_refBoxes[i].first;
-    const int&     refLvl = m_refBoxes[i].second;
+  for (const auto& m_refBoxe : m_refBoxes) {
+    const RealBox& refBox = m_refBoxe.first;
+    const int&     refLvl = m_refBoxe.second;
 
     const RealVect lo = refBox.getLo();
     const RealVect hi = refBox.getHi();

@@ -32,22 +32,17 @@ constexpr int FieldSolver::m_comp;
 constexpr int FieldSolver::m_nComp;
 
 FieldSolver::FieldSolver()
+  : m_className("FieldSolver"), m_isVoltageSet(false), m_realm(Realm::Primal), m_regridSlopes(true), m_verbosity(-1)
 {
   CH_TIME("FieldSolver::FieldSolver()");
 
   // Default settings.
-  m_className    = "FieldSolver";
-  m_realm        = Realm::Primal;
-  m_isVoltageSet = false;
-  m_regridSlopes = true;
-  m_verbosity    = -1;
 
   this->setDataLocation(Location::Cell::Center);
   this->setDefaultDomainBcFunctions();
 }
 
-FieldSolver::~FieldSolver()
-{}
+FieldSolver::~FieldSolver() = default;
 
 void
 FieldSolver::setDataLocation(const Location::Cell a_dataLocation)
@@ -967,8 +962,9 @@ FieldSolver::parseDomainBc()
                                                                                         const Real     a_time) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
-              if (d != dir)
+              if (d != dir) {
                 r2 += a_pos[d] * a_pos[d];
+              }
             }
             return table->interpolate<1>(std::sqrt(r2)) * voltage(time) * val;
           };
@@ -979,8 +975,9 @@ FieldSolver::parseDomainBc()
           curFunc = [table, val, dir](const RealVect a_pos, const Real a_time) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
-              if (d != dir)
+              if (d != dir) {
                 r2 += a_pos[d] * a_pos[d];
+              }
             }
             return table->interpolate<1>(std::sqrt(r2)) * val;
           };

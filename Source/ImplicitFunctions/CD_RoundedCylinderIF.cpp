@@ -32,22 +32,17 @@ RoundedCylinderIF::RoundedCylinderIF(const RealVect a_center1,
                                      const Real     a_radius,
                                      const Real     a_curv,
                                      const bool     a_fluidInside)
+  : m_center1(a_center1), m_center2(a_center2), m_curv(a_curv), m_fluidInside(a_fluidInside), m_radius(a_radius)
 {
-  m_center1     = a_center1;
-  m_center2     = a_center2;
-  m_length      = (m_center2 - m_center1).vectorLength();
-  m_radius      = a_radius;
-  m_curv        = a_curv;
-  m_fluidInside = a_fluidInside;
+
+  m_length = (m_center2 - m_center1).vectorLength();
 
   this->makeBaseIF();
 }
 
 RoundedCylinderIF::RoundedCylinderIF(const RoundedCylinderIF& a_inputIF)
-{
-  m_fluidInside = a_inputIF.m_fluidInside;
-  m_baseIF      = a_inputIF.m_baseIF;
-}
+  : m_fluidInside(a_inputIF.m_fluidInside), m_baseIF(a_inputIF.m_baseIF)
+{}
 
 Real
 RoundedCylinderIF::value(const RealVect& a_point) const
@@ -77,7 +72,7 @@ RoundedCylinderIF::makeBaseIF()
 #endif
 
   // Rotate and translate into place
-  TransformIF* transif = new TransformIF(*bif);
+  auto* transif = new TransformIF(*bif);
 
   const int      dir = SpaceDim - 1;
   const RealVect up  = BASISREALV(dir);

@@ -34,11 +34,10 @@ MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC(const phase
                       a_weight,
                       a_radius,
                       a_ghostCF,
-                      a_ghostPhi)
+                      a_ghostPhi),
+    m_phase(a_phase)
 {
   CH_TIME("MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC");
-
-  m_phase = a_phase;
 }
 
 MFHelmholtzSaturationChargeJumpBC::~MFHelmholtzSaturationChargeJumpBC()

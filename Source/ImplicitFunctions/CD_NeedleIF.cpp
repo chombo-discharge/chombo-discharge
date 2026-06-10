@@ -56,11 +56,9 @@ NeedleIF::NeedleIF(const Real& a_length,
 }
 
 NeedleIF::NeedleIF(const NeedleIF& a_inputIF)
+  : m_implicitFunction(a_inputIF.m_implicitFunction), m_tipRadius(a_inputIF.m_tipRadius)
 {
   CH_TIME("NeedleIF::NeedleIF(copy constructor)");
-
-  this->m_implicitFunction = a_inputIF.m_implicitFunction;
-  this->m_tipRadius        = a_inputIF.m_tipRadius;
 }
 
 Real

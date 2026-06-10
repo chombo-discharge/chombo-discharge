@@ -49,7 +49,7 @@ initialize(int argc, char* argv[])
   int provided;
   MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
   if (provided < MPI_THREAD_FUNNELED) {
-    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << std::endl;
+    std::cerr << "Warning: MPI thread support level insufficient for MPI+OpenMP" << endl;
   }
 #else
   // MPI only
@@ -136,7 +136,7 @@ initialize(int argc, char* argv[])
     pout() << "  PETSc:  FALSE\n";
 #endif
     pout() << "==========================================================================================" << endl;
-    pout() << std::endl;
+    pout() << endl;
   }
 
 #if defined(CH_USE_PETSC)

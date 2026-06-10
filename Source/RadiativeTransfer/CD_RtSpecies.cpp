@@ -14,14 +14,12 @@
 #include <CD_RtSpecies.H>
 #include <CD_NamespaceHeader.H>
 
-RtSpecies::RtSpecies()
+RtSpecies::RtSpecies() : m_name("DefaultRtSpecies")
 {
   // Default settings
-  m_name = "DefaultRtSpecies";
 }
 
-RtSpecies::~RtSpecies()
-{}
+RtSpecies::~RtSpecies() = default;
 
 std::string
 RtSpecies::getName() const

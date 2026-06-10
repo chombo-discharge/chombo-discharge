@@ -1614,7 +1614,7 @@ ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseF
         const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
         if (!(maskBox.contains(iv))) {
-          std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << std::endl;
+          std::cout << a_level << "\t" << iv << "\t" << x << "\t" << maskBox << endl;
 
           MayDay::Error("ParticleContainer::copyMaskParticles -- logic bust. Particle has fallen off grid");
         }
@@ -1680,7 +1680,7 @@ ParticleContainer<P>::transferMaskParticles(const int a_level, const LevelData<B
         const IntVect  iv = ParticleOps::getParticleCellIndex(x, m_probLo, dx);
 
         if (!(maskBox.contains(iv))) {
-          //        std::cout << a_level << "\t" << iv << "\t" << x << std::endl;
+          //        std::cout << a_level << "\t" << iv << "\t" << x << endl;
 
           MayDay::Warning("ParticleContainer::transferMaskParticles -- logic bust. Particle has fallen off grid");
 

@@ -16,10 +16,8 @@
 
 using namespace Physics::ItoKMC;
 
-ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies() noexcept
-{
-  m_isDefined = false;
-}
+ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies() noexcept : m_isDefined(false)
+{}
 
 ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies(const std::string&   a_name,
                                                  const MolarFraction& a_molarFraction) noexcept
@@ -27,8 +25,7 @@ ItoKMCBackgroundSpecies::ItoKMCBackgroundSpecies(const std::string&   a_name,
   this->define(a_name, a_molarFraction);
 }
 
-ItoKMCBackgroundSpecies::~ItoKMCBackgroundSpecies() noexcept
-{}
+ItoKMCBackgroundSpecies::~ItoKMCBackgroundSpecies() noexcept = default;
 
 void
 ItoKMCBackgroundSpecies::define(const std::string& a_name, const MolarFraction& a_molarFraction) noexcept

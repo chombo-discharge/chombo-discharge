@@ -18,12 +18,9 @@
 #include <CD_MFHelmholtzRobinDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory()
+MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C)
@@ -88,7 +85,7 @@ MFHelmholtzRobinDomainBCFactory::create(const int a_iphase) const
       "MFHelmholtzRobinDomaniBCFactory::create -- not using constant or function. Did you forget to set coefficients?");
   }
 
-  EBHelmholtzRobinDomainBC* bc = new EBHelmholtzRobinDomainBC();
+  auto* bc = new EBHelmholtzRobinDomainBC();
 
   if (m_useConstant) {
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);

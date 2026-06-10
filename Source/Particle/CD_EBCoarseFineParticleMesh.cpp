@@ -27,22 +27,18 @@
 constexpr int EBCoarseFineParticleMesh::m_comp;
 constexpr int EBCoarseFineParticleMesh::m_nComp;
 
-EBCoarseFineParticleMesh::EBCoarseFineParticleMesh() noexcept
+EBCoarseFineParticleMesh::EBCoarseFineParticleMesh() noexcept : m_isDefined(false), m_verbose(false)
 {
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
-
-  m_isDefined = false;
-  m_verbose   = false;
 }
 
 EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
                                                    const EBLevelGrid& a_eblgFine,
                                                    const int          a_refRat,
                                                    const IntVect      a_ghost) noexcept
+  : m_verbose(false)
 {
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
-
-  m_verbose = false;
 
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_ghost);
 }

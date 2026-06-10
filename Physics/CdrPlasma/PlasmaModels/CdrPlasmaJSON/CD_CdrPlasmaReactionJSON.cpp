@@ -20,15 +20,13 @@ CdrPlasmaReactionJSON::CdrPlasmaReactionJSON(const std::list<int> a_plasmaReacta
                                              const std::list<int> a_neutralReactants,
                                              const std::list<int> a_plasmaProducts,
                                              const std::list<int> a_photonProducts)
-{
-  m_plasmaReactants  = a_plasmaReactants;
-  m_neutralReactants = a_neutralReactants;
-  m_plasmaProducts   = a_plasmaProducts;
-  m_photonProducts   = a_photonProducts;
-}
-
-CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON()
+  : m_plasmaReactants(a_plasmaReactants),
+    m_neutralReactants(a_neutralReactants),
+    m_photonProducts(a_photonProducts),
+    m_plasmaProducts(a_plasmaProducts)
 {}
+
+CdrPlasmaReactionJSON::~CdrPlasmaReactionJSON() = default;
 
 const std::list<int>&
 CdrPlasmaReactionJSON::getPlasmaReactants() const

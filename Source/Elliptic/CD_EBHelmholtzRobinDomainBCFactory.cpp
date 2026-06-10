@@ -18,12 +18,9 @@
 #include <CD_EBHelmholtzRobinDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory()
+EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C)
@@ -42,8 +39,7 @@ EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory(const std::func
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-EBHelmholtzRobinDomainBCFactory::~EBHelmholtzRobinDomainBCFactory()
-{}
+EBHelmholtzRobinDomainBCFactory::~EBHelmholtzRobinDomainBCFactory() = default;
 
 void
 EBHelmholtzRobinDomainBCFactory::setCoefficients(const Real a_A, const Real a_B, const Real a_C)
@@ -85,7 +81,7 @@ EBHelmholtzRobinDomainBCFactory::create() const
       "EBHelmholtzRobinDomainBCFactory::create -- not using constant or function. Did you forget to set coefficients?");
   }
 
-  EBHelmholtzRobinDomainBC* bc = new EBHelmholtzRobinDomainBC();
+  auto* bc = new EBHelmholtzRobinDomainBC();
 
   if (m_useConstant) {
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);

@@ -20,15 +20,13 @@
 #include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
-CdrCTU::CdrCTU()
+CdrCTU::CdrCTU() : m_limiter(Limiter::MonotonizedCentral), m_useCTU(true)
 {
   CH_TIME("CdrCTU::CdrCTU()");
 
   // Class and object name
   m_className = "CdrCTU";
   m_name      = "CdrCTU";
-  m_limiter   = Limiter::MonotonizedCentral;
-  m_useCTU    = true;
 }
 
 CdrCTU::~CdrCTU()

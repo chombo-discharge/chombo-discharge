@@ -20,11 +20,8 @@ using namespace Physics::CdrPlasma;
 CdrPlasmaGodunovStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                 const std::string             a_realm,
                                                 const phase::which_phase      a_phase)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_phase = a_phase;
-}
+  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
+{}
 
 CdrPlasmaGodunovStepper::CdrStorage::~CdrStorage()
 {
@@ -83,11 +80,8 @@ CdrPlasmaGodunovStepper::CdrStorage::deallocateStorage()
 CdrPlasmaGodunovStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string             a_realm,
                                                     const phase::which_phase      a_phase)
-{
-  m_amr   = a_amr;
-  m_phase = a_phase;
-  m_realm = a_realm;
-}
+  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
+{}
 
 CdrPlasmaGodunovStepper::FieldStorage::~FieldStorage()
 {
@@ -117,14 +111,10 @@ CdrPlasmaGodunovStepper::FieldStorage::deallocateStorage()
 CdrPlasmaGodunovStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                               const std::string             a_realm,
                                               const phase::which_phase      a_phase)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_phase = a_phase;
-}
-
-CdrPlasmaGodunovStepper::RtStorage::~RtStorage()
+  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
 {}
+
+CdrPlasmaGodunovStepper::RtStorage::~RtStorage() = default;
 
 void
 CdrPlasmaGodunovStepper::RtStorage::allocateStorage()
@@ -149,14 +139,10 @@ CdrPlasmaGodunovStepper::RtStorage::deallocateStorage()
 CdrPlasmaGodunovStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string             a_realm,
                                                     const phase::which_phase      a_phase)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_phase = a_phase;
-}
-
-CdrPlasmaGodunovStepper::SigmaStorage::~SigmaStorage()
+  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
 {}
+
+CdrPlasmaGodunovStepper::SigmaStorage::~SigmaStorage() = default;
 
 void
 CdrPlasmaGodunovStepper::SigmaStorage::allocateStorage()

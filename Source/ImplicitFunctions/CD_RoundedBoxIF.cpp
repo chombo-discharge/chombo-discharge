@@ -23,8 +23,8 @@ RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
                            const RealVect a_hiCorner,
                            const Real     a_curv,
                            const bool     a_fluidInside)
+  : m_fluidInside(a_fluidInside)
 {
-  m_fluidInside = a_fluidInside;
 
   const RealVect xyz = a_hiCorner - a_loCorner;
 
@@ -42,10 +42,10 @@ RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
   }
 
   // Do rounded corners.
-  BaseIF* bif = (BaseIF*)new SmoothUnion(parts, a_curv);
+  auto* bif = (BaseIF*)new SmoothUnion(parts, a_curv);
 
   // Translate box
-  TransformIF* tif = new TransformIF(*bif);
+  auto* tif = new TransformIF(*bif);
   tif->translate(a_loCorner + 0.5 * xyz);
 
   delete bif;
@@ -58,13 +58,10 @@ RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
 }
 
 RoundedBoxIF::RoundedBoxIF(const RoundedBoxIF& a_inputIF)
-{
-  m_fluidInside = a_inputIF.m_fluidInside;
-  m_baseIF      = a_inputIF.m_baseIF;
-}
-
-RoundedBoxIF::~RoundedBoxIF()
+  : m_fluidInside(a_inputIF.m_fluidInside), m_baseIF(a_inputIF.m_baseIF)
 {}
+
+RoundedBoxIF::~RoundedBoxIF() = default;
 
 Real
 RoundedBoxIF::value(const RealVect& a_point) const

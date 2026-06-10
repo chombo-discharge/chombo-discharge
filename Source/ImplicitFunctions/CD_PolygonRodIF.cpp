@@ -63,10 +63,10 @@ PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
   planes.push_back((BaseIF*)(new PlaneIF(zhat, RealVect::Zero, a_fluidInside)));
 
   // Make a smooth union of those planes.
-  BaseIF* isect = (BaseIF*)new SmoothUnion(planes, a_cornerCurv);
+  auto* isect = (BaseIF*)new SmoothUnion(planes, a_cornerCurv);
 
   // Do a transform, translating the rod into its specified place.
-  TransformIF* transif = new TransformIF(*isect);
+  auto* transif = new TransformIF(*isect);
 
   if (a_endPoint2[2] >= a_endPoint1[2]) {
     transif->rotate(zhat, a_endPoint2 - a_endPoint1);
@@ -85,13 +85,10 @@ PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
   }
 }
 
-PolygonRodIF::PolygonRodIF(const PolygonRodIF& a_inputIF)
-{
-  m_baseif = a_inputIF.m_baseif;
-}
-
-PolygonRodIF::~PolygonRodIF()
+PolygonRodIF::PolygonRodIF(const PolygonRodIF& a_inputIF) : m_baseif(a_inputIF.m_baseif)
 {}
+
+PolygonRodIF::~PolygonRodIF() = default;
 
 Real
 PolygonRodIF::value(const RealVect& a_pos) const

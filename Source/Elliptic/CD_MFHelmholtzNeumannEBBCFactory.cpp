@@ -18,12 +18,9 @@
 #include <CD_MFHelmholtzNeumannEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory()
+MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(const Real a_DphiDn)
@@ -98,7 +95,7 @@ MFHelmholtzNeumannEBBCFactory::create(const int a_iphase, const RefCountedPtr<MF
 
   CH_assert(m_useFunction || m_useConstant);
 
-  auto bc = new MFHelmholtzNeumannEBBC(a_iphase, a_jumpBC);
+  auto* bc = new MFHelmholtzNeumannEBBC(a_iphase, a_jumpBC);
 
   if (m_multByBco) {
     if (m_useConstant) {

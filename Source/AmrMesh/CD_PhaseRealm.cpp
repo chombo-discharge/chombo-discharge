@@ -26,14 +26,11 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-PhaseRealm::PhaseRealm()
+PhaseRealm::PhaseRealm() : m_isDefined(false), m_profile(false), m_verbose(false)
 {
   CH_TIME("PhaseRealm::PhaseRealm");
 
   // Default settings
-  m_isDefined = false;
-  m_profile   = false;
-  m_verbose   = false;
 
   this->registerOperator(s_eb_gradient);
   this->registerOperator(s_eb_irreg_interp);
@@ -44,8 +41,7 @@ PhaseRealm::PhaseRealm()
   pp.query("verbosity", m_verbose);
 }
 
-PhaseRealm::~PhaseRealm()
-{}
+PhaseRealm::~PhaseRealm() = default;
 
 void
 PhaseRealm::define(const Vector<DisjointBoxLayout>&      a_grids,
@@ -339,12 +335,10 @@ PhaseRealm::registerOperator(const std::string a_operator)
   }
 
   // These are the supported operators - issue an error if we ask for something that is not supported.
-  if (!(a_operator.compare(s_eb_coar_ave) == 0 || a_operator.compare(s_eb_fill_patch) == 0 ||
-        a_operator.compare(s_eb_fine_interp) == 0 || a_operator.compare(s_eb_flux_reg) == 0 ||
-        a_operator.compare(s_eb_redist) == 0 || a_operator.compare(s_noncons_div) == 0 ||
-        a_operator.compare(s_eb_gradient) == 0 || a_operator.compare(s_particle_mesh) == 0 ||
-        a_operator.compare(s_eb_irreg_interp) == 0 || a_operator.compare(s_eb_multigrid) == 0 ||
-        a_operator.compare(s_levelset) == 0)) {
+  if (!(a_operator == s_eb_coar_ave || a_operator == s_eb_fill_patch || a_operator == s_eb_fine_interp ||
+        a_operator == s_eb_flux_reg || a_operator == s_eb_redist || a_operator == s_noncons_div ||
+        a_operator == s_eb_gradient || a_operator == s_particle_mesh || a_operator == s_eb_irreg_interp ||
+        a_operator == s_eb_multigrid || a_operator == s_levelset)) {
 
     const std::string str = "PhaseRealm::registerOperator - unknown operator '" + a_operator + "' requested";
     MayDay::Error(str.c_str());

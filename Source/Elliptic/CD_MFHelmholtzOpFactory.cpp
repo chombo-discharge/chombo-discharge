@@ -56,46 +56,36 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
                                            const int&              a_preCondSmooth,
                                            const int&              a_blockingFactor,
                                            const AmrLevelGrids&    a_deeperLevelGrids)
+  : m_mfis(a_mfis),
+    m_alpha(a_alpha),
+    m_amrAcoef(a_amrAcoef),
+    m_amrBcoef(a_amrBcoef),
+    m_amrBcoefIrreg(a_amrBcoefIrreg),
+    m_amrCoarseners(a_amrCoarseners),
+    m_amrFluxRegisters(a_amrFluxRegisters),
+    m_amrInterpolators(a_amrInterpolators),
+    m_amrLevelGrids(a_amrLevelGrids),
+    m_amrRefRatios(a_amrRefRatios),
+    m_amrResolutions(a_amrResolutions),
+    m_beta(a_beta),
+    m_bottomDomain(a_bottomDomain),
+    m_dataLocation(a_dataLocation),
+    m_deeperLevelGrids(a_deeperLevelGrids),
+    m_domainBcFactory(a_domainBcFactory),
+    m_ebBcFactory(a_ebBcFactory),
+    m_ghostPhi(a_ghostPhi),
+    m_ghostRhs(a_ghostRhs),
+    m_jumpBcFactory(a_jumpBcFactory),
+    m_jumpOrder(a_jumpOrder),
+    m_jumpWeight(a_jumpWeight),
+    m_mgBlockingFactor(a_blockingFactor),
+    m_numPreCondSmooth(a_preCondSmooth),
+    m_probLo(a_probLo),
+    m_relaxFactor(a_relaxFactor),
+    m_smoother(a_smoother),
+    m_validCells(a_validCells)
 {
   CH_TIME("MFHelmholtzOpFactory::MFHelmholtzOpFactory()");
-
-  m_mfis         = a_mfis;
-  m_dataLocation = a_dataLocation;
-
-  m_alpha  = a_alpha;
-  m_beta   = a_beta;
-  m_probLo = a_probLo;
-
-  m_amrLevelGrids    = a_amrLevelGrids;
-  m_validCells       = a_validCells;
-  m_amrInterpolators = a_amrInterpolators;
-  m_amrFluxRegisters = a_amrFluxRegisters;
-  m_amrCoarseners    = a_amrCoarseners;
-  m_amrRefRatios     = a_amrRefRatios;
-  m_amrResolutions   = a_amrResolutions;
-
-  m_amrAcoef      = a_amrAcoef;
-  m_amrBcoef      = a_amrBcoef;
-  m_amrBcoefIrreg = a_amrBcoefIrreg;
-
-  m_domainBcFactory = a_domainBcFactory;
-  m_ebBcFactory     = a_ebBcFactory;
-  m_jumpBcFactory   = a_jumpBcFactory;
-
-  m_ghostPhi = a_ghostPhi;
-  m_ghostRhs = a_ghostRhs;
-
-  m_smoother     = a_smoother;
-  m_relaxFactor  = a_relaxFactor;
-  m_bottomDomain = a_bottomDomain;
-
-  m_jumpOrder        = a_jumpOrder;
-  m_jumpWeight       = a_jumpWeight;
-  m_numPreCondSmooth = a_preCondSmooth;
-
-  m_mgBlockingFactor = a_blockingFactor;
-
-  m_deeperLevelGrids = a_deeperLevelGrids;
 
   m_numAmrLevels = m_amrLevelGrids.size();
 
@@ -608,7 +598,7 @@ MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bo
   RefCountedPtr<LevelData<MFFluxFAB>>       Bcoef;
   RefCountedPtr<LevelData<MFBaseIVFAB>>     BcoefIrreg;
   RefCountedPtr<LevelData<BaseIVFAB<Real>>> jump;
-  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells(NULL);
+  RefCountedPtr<LevelData<BaseFab<bool>>>   validCells(nullptr);
 
   bool foundMgLevel = false;
 
@@ -764,39 +754,39 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
     CH_assert(gotCoarse);
   }
 
-  MFHelmholtzOp* op = new MFHelmholtzOp(m_dataLocation,
-                                        mflgFine,
-                                        mflg,
-                                        mflgCoFi,
-                                        mflgCoar,
-                                        mflgCoarMG,
-                                        m_amrInterpolators[amrLevel],
-                                        m_amrFluxRegisters[amrLevel],
-                                        m_amrCoarseners[amrLevel],
-                                        m_validCells[amrLevel],
-                                        m_domainBcFactory,
-                                        m_ebBcFactory,
-                                        m_jumpBcFactory,
-                                        m_probLo,
-                                        dx,
-                                        refToFine,
-                                        refToCoar,
-                                        hasFine,
-                                        hasCoar,
-                                        hasMGObjects,
-                                        false, // Not an MG operator.
-                                        m_alpha,
-                                        m_beta,
-                                        m_amrAcoef[amrLevel],
-                                        m_amrBcoef[amrLevel],
-                                        m_amrBcoefIrreg[amrLevel],
-                                        m_ghostPhi,
-                                        m_ghostRhs,
-                                        m_jumpOrder,
-                                        m_jumpWeight,
-                                        m_numPreCondSmooth,
-                                        m_smoother,
-                                        m_relaxFactor);
+  auto* op = new MFHelmholtzOp(m_dataLocation,
+                               mflgFine,
+                               mflg,
+                               mflgCoFi,
+                               mflgCoar,
+                               mflgCoarMG,
+                               m_amrInterpolators[amrLevel],
+                               m_amrFluxRegisters[amrLevel],
+                               m_amrCoarseners[amrLevel],
+                               m_validCells[amrLevel],
+                               m_domainBcFactory,
+                               m_ebBcFactory,
+                               m_jumpBcFactory,
+                               m_probLo,
+                               dx,
+                               refToFine,
+                               refToCoar,
+                               hasFine,
+                               hasCoar,
+                               hasMGObjects,
+                               false, // Not an MG operator.
+                               m_alpha,
+                               m_beta,
+                               m_amrAcoef[amrLevel],
+                               m_amrBcoef[amrLevel],
+                               m_amrBcoefIrreg[amrLevel],
+                               m_ghostPhi,
+                               m_ghostRhs,
+                               m_jumpOrder,
+                               m_jumpWeight,
+                               m_numPreCondSmooth,
+                               m_smoother,
+                               m_relaxFactor);
 
   // Give the operator access by reference to the jump data.
   op->setJump(m_amrJump[amrLevel]);

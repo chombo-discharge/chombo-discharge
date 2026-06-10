@@ -17,19 +17,14 @@
 
 using namespace Physics::CdrPlasma;
 
-CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage()
-{}
+CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage() = default;
 
 CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                 const std::string             a_realm,
                                                 const phase::which_phase      a_phase,
                                                 const int                     a_ncomp)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_phase = a_phase;
-  m_ncomp = a_ncomp;
-}
+  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+{}
 
 CdrPlasmaImExSdcStepper::CdrStorage::~CdrStorage()
 {
@@ -107,19 +102,14 @@ CdrPlasmaImExSdcStepper::CdrStorage::deallocateStorage()
   }
 }
 
-CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage()
-{}
+CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage() = default;
 
 CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string             a_realm,
                                                     const phase::which_phase      a_phase,
                                                     const int                     a_ncomp)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_ncomp = a_ncomp;
-  m_phase = a_phase;
-}
+  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+{}
 
 CdrPlasmaImExSdcStepper::FieldStorage::~FieldStorage()
 {
@@ -148,19 +138,14 @@ CdrPlasmaImExSdcStepper::FieldStorage::deallocateStorage()
   m_amr->deallocate(m_E_dom);
 }
 
-CdrPlasmaImExSdcStepper::RtStorage::RtStorage()
-{}
+CdrPlasmaImExSdcStepper::RtStorage::RtStorage() = default;
 
 CdrPlasmaImExSdcStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                               const std::string             a_realm,
                                               const phase::which_phase      a_phase,
                                               const int                     a_ncomp)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_phase = a_phase;
-  m_ncomp = a_ncomp;
-}
+  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+{}
 
 CdrPlasmaImExSdcStepper::RtStorage::~RtStorage()
 {
@@ -185,19 +170,14 @@ CdrPlasmaImExSdcStepper::RtStorage::deallocateStorage()
   m_amr->deallocate(m_scratchIF);
 }
 
-CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage()
-{}
+CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage() = default;
 
 CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string             a_realm,
                                                     const phase::which_phase      a_phase,
                                                     const int                     a_ncomp)
-{
-  m_amr   = a_amr;
-  m_realm = a_realm;
-  m_phase = a_phase;
-  m_ncomp = a_ncomp;
-}
+  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+{}
 
 CdrPlasmaImExSdcStepper::SigmaStorage::~SigmaStorage()
 {

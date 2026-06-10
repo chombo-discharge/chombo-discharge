@@ -19,11 +19,9 @@
 #include <CD_CoarseInterpQuadCF.H>
 #include <CD_NamespaceHeader.H>
 
-CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept
+CoarseInterpQuadCF::CoarseInterpQuadCF() noexcept : m_isDefined(false)
 {
   CH_TIME("CoarseInterpQuadCF::CoarseInterpQuadCF()");
-
-  m_isDefined = false;
 }
 
 CoarseInterpQuadCF::~CoarseInterpQuadCF() noexcept

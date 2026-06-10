@@ -22,11 +22,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBGhostCellInterpolator::EBGhostCellInterpolator() noexcept
+EBGhostCellInterpolator::EBGhostCellInterpolator() noexcept : m_isDefined(false)
 {
   CH_TIME("EBGhostCellInterpolator::EBGhostCellInterpolator(weak)");
-
-  m_isDefined = false;
 }
 
 EBGhostCellInterpolator::EBGhostCellInterpolator(const EBLevelGrid& a_eblgFine,

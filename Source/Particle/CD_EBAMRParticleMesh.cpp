@@ -18,11 +18,9 @@
 #include <CD_EBAMRParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
-EBAMRParticleMesh::EBAMRParticleMesh()
+EBAMRParticleMesh::EBAMRParticleMesh() : m_isDefined(false)
 {
   CH_TIME("EBAMRParticleMesh::EBAMRParticleMesh()");
-
-  m_isDefined = false;
 }
 
 EBAMRParticleMesh::EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid>>& a_eblgs,

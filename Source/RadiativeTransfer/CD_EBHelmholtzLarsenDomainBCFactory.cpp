@@ -19,28 +19,21 @@ EBHelmholtzLarsenDomainBCFactory::EBHelmholtzLarsenDomainBCFactory(const RefCoun
                                                                    const Real                      a_r1,
                                                                    const Real                      a_r2,
                                                                    const SourceFunction            a_source)
-{
-  m_species = a_species;
-  m_r1      = a_r1;
-  m_r2      = a_r2;
-  m_source  = a_source;
-}
+  : m_species(a_species), m_r1(a_r1), m_r2(a_r2), m_source(a_source)
+{}
 
 EBHelmholtzLarsenDomainBCFactory::EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
                                                                    const Real                      a_r1,
                                                                    const Real                      a_r2)
+  : m_species(a_species), m_r1(a_r1), m_r2(a_r2)
 {
-  m_species = a_species;
-  m_r1      = a_r1;
-  m_r2      = a_r2;
 
   m_source = [](const RealVect& a_position) {
     return 0.0;
   };
 }
 
-EBHelmholtzLarsenDomainBCFactory::~EBHelmholtzLarsenDomainBCFactory()
-{}
+EBHelmholtzLarsenDomainBCFactory::~EBHelmholtzLarsenDomainBCFactory() = default;
 
 RefCountedPtr<EBHelmholtzDomainBC>
 EBHelmholtzLarsenDomainBCFactory::create() const

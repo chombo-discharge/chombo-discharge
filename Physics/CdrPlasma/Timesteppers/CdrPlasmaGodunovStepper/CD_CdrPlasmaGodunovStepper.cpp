@@ -34,14 +34,13 @@ typedef CdrPlasmaGodunovStepper::SigmaStorage SigmaStorage;
 /// @endcond
 
 CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics)
+  : m_extrapAdvect(true), m_regridSlopes(true)
 {
   CH_TIME("CdrPlasmaGodunovStepper::CdrPlasmaGodunovStepper()");
 
   // Default settings
-  m_className    = "CdrPlasmaGodunovStepper";
-  m_physics      = a_physics;
-  m_extrapAdvect = true;
-  m_regridSlopes = true;
+  m_className = "CdrPlasmaGodunovStepper";
+  m_physics   = a_physics;
 }
 
 CdrPlasmaGodunovStepper::~CdrPlasmaGodunovStepper()
@@ -709,7 +708,7 @@ CdrPlasmaGodunovStepper::deallocateInternals()
     const int idx = solverIt.index();
 
     m_cdrScratch[idx]->deallocateStorage();
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(nullptr);
   }
 
   // Run through RTE solvers and deallocate the transient memory associated with them.
@@ -717,17 +716,17 @@ CdrPlasmaGodunovStepper::deallocateInternals()
     const int idx = solverIt.index();
 
     m_rteScratch[idx]->deallocateStorage();
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(nullptr);
   }
 
   m_cdrScratch.resize(0);
   m_rteScratch.resize(0);
 
   m_fieldScratch->deallocateStorage();
-  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
+  m_fieldScratch = RefCountedPtr<FieldStorage>(nullptr);
 
   m_sigmaScratch->deallocateStorage();
-  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(nullptr);
 
   // Deallocate storage for the semi-implicit solve.
   m_amr->deallocate(m_semiImplicitRho);
@@ -751,7 +750,7 @@ CdrPlasmaGodunovStepper::deallocateScratch()
     const int idx = solverIt.index();
 
     m_cdrScratch[idx]->deallocateStorage();
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(nullptr);
   }
 
   // Run through RTE solvers and deallocate the transient memory associated with them.
@@ -759,17 +758,17 @@ CdrPlasmaGodunovStepper::deallocateScratch()
     const int idx = solverIt.index();
 
     m_rteScratch[idx]->deallocateStorage();
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(nullptr);
   }
 
   m_cdrScratch.resize(0);
   m_rteScratch.resize(0);
 
   m_fieldScratch->deallocateStorage();
-  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
+  m_fieldScratch = RefCountedPtr<FieldStorage>(nullptr);
 
   m_sigmaScratch->deallocateStorage();
-  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(nullptr);
 }
 
 void
@@ -1548,8 +1547,8 @@ CdrPlasmaGodunovStepper::computeDt()
     }
 
     // Turn off implicit diffusion for all species.
-    for (int i = 0; i < m_useImplicitDiffusion.size(); i++) {
-      m_useImplicitDiffusion[i] = false;
+    for (auto&& i : m_useImplicitDiffusion) {
+      i = false;
     }
   }
   else if (m_diffusionAlgorithm == DiffusionAlgorithm::Implicit) {
@@ -1559,8 +1558,8 @@ CdrPlasmaGodunovStepper::computeDt()
     dt = m_cfl * m_dtCFL;
 
     // Turn on implicit diffusion for all species.
-    for (int i = 0; i < m_useImplicitDiffusion.size(); i++) {
-      m_useImplicitDiffusion[i] = true;
+    for (auto&& i : m_useImplicitDiffusion) {
+      i = true;
     }
   }
   else if (m_diffusionAlgorithm == DiffusionAlgorithm::Automatic) {

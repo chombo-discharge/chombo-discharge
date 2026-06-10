@@ -21,15 +21,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()
+  : m_order(-1), m_domainDropOrder(-1), m_useConstant(false), m_useFunction(false), m_weight(-1)
 {
   CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const int  a_order,
@@ -240,7 +234,7 @@ EBHelmholtzRobinEBBC::define()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         fluxStencil.clear();
       }

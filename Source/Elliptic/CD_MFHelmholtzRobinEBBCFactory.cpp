@@ -121,7 +121,7 @@ MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHe
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  auto bc = new MFHelmholtzRobinEBBC(a_iphase, a_jumpBC);
+  auto* bc = new MFHelmholtzRobinEBBC(a_iphase, a_jumpBC);
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

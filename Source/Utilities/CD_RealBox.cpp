@@ -17,17 +17,11 @@
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
-RealBox::RealBox()
-{
-  m_lo = RealVect::Zero;
-  m_hi = RealVect::Zero;
-}
+RealBox::RealBox() : m_lo(RealVect::Zero), m_hi(RealVect::Zero)
+{}
 
-RealBox::RealBox(const RealVect a_lo, const RealVect a_hi)
-{
-  m_lo = a_lo;
-  m_hi = a_hi;
-}
+RealBox::RealBox(const RealVect a_lo, const RealVect a_hi) : m_lo(a_lo), m_hi(a_hi)
+{}
 
 RealBox::RealBox(const Box a_box, const RealVect a_origin, const Real a_dx)
 {
@@ -38,9 +32,6 @@ RealBox::RealBox(const Box a_box, const RealVect a_origin, const Real a_dx)
   m_lo = a_origin + a_dx * RealVect(lo);
   m_hi = a_origin + a_dx * RealVect(hi);
 }
-
-RealBox::~RealBox()
-{}
 
 RealVect
 RealBox::getLo() const

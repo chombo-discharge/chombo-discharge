@@ -18,12 +18,9 @@
 #include <CD_MFHelmholtzDirichletDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory()
+MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzDirichletDomainBCFactory::MFHelmholtzDirichletDomainBCFactory(const Real a_value)
@@ -80,7 +77,7 @@ MFHelmholtzDirichletDomainBCFactory::create(const int a_iphase) const
     MayDay::Error("MFHelmholtzDirichletDomainBCFactory::create - logic bust, not using function or constant!");
   }
 
-  auto bc = new EBHelmholtzDirichletDomainBC();
+  auto* bc = new EBHelmholtzDirichletDomainBC();
 
   if (m_useConstant) {
     bc->setValue(m_constantValue);

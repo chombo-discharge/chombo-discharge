@@ -40,10 +40,12 @@ DomainFluxIFFAB::~DomainFluxIFFAB()
   CH_TIME("DomainFluxIFFAB::~DomainFluxIFFAB");
 
   for (int dir = 0; dir < SpaceDim; dir++) {
-    if (m_fluxLo[dir] != nullptr)
+    if (m_fluxLo[dir] != nullptr) {
       delete m_fluxLo[dir];
-    if (m_fluxHi[dir] != nullptr)
+    }
+    if (m_fluxHi[dir] != nullptr) {
       delete m_fluxHi[dir];
+    }
   }
 }
 
@@ -98,7 +100,7 @@ DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
 {
   CH_TIME("DomainFluxIFFAB::linearOut");
 
-  unsigned char* charbuf = (unsigned char*)buf;
+  auto* charbuf = (unsigned char*)buf;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     m_fluxLo[dir]->linearOut(charbuf, R, comps);
@@ -118,7 +120,7 @@ DomainFluxIFFAB::linearIn(void* buf, const Box& R, const Interval& comps)
 {
   CH_TIME("DomainFluxIFFAB::linearIn");
 
-  unsigned char* charbuf = (unsigned char*)buf;
+  auto* charbuf = (unsigned char*)buf;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     m_fluxLo[dir]->linearIn(charbuf, R, comps);
@@ -191,7 +193,7 @@ DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebisbox,
 
 #if 0
     if(!ivsLo.isEmpty()){
-      std::cout << ivsLo << std::endl;
+      std::cout << ivsLo << endl;
     }
 
     for (IVSIterator iter(ivsLo); iter.ok(); ++iter){

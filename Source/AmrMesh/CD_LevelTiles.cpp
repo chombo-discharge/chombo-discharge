@@ -19,11 +19,9 @@
 #include <CD_LevelTiles.H>
 #include <CD_NamespaceHeader.H>
 
-LevelTiles::LevelTiles() noexcept
+LevelTiles::LevelTiles() noexcept : m_isDefined(false)
 {
   CH_TIME("LevelTiles::LevelTiles(weak)");
-
-  m_isDefined = false;
 }
 
 LevelTiles::LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept

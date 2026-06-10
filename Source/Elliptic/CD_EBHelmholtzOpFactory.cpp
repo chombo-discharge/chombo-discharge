@@ -46,39 +46,33 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocatio
                                            const ProblemDomain&    a_bottomDomain,
                                            const int&              a_mgBlockingFactor,
                                            const AmrLevelGrids&    a_deeperLevelGrids)
+  : m_dataLocation(a_dataLocation),
+    m_alpha(a_alpha),
+    m_amrAcoef(a_amrAcoef),
+    m_amrBcoef(a_amrBcoef),
+    m_amrBcoefIrreg(a_amrBcoefIrreg),
+    m_amrCoarseners(a_amrCoarseners),
+    m_amrFluxRegisters(a_amrFluxRegisters),
+    m_amrInterpolators(a_amrInterpolators),
+    m_amrLevelGrids(a_amrLevelGrids),
+    m_amrRefRatios(a_amrRefRatios),
+    m_amrResolutions(a_amrResolutions),
+    m_beta(a_beta),
+    m_bottomDomain(a_bottomDomain),
+    m_deeperLevelGrids(a_deeperLevelGrids),
+    m_domainBcFactory(a_domainBcFactory),
+    m_ebBcFactory(a_ebbcFactory),
+    m_ghostPhi(a_ghostPhi),
+    m_ghostRhs(a_ghostRhs),
+    m_mgBlockingFactor(a_mgBlockingFactor),
+    m_probLo(a_probLo),
+    m_relaxFactor(a_relaxFactor),
+    m_smoother(a_smoother),
+    m_validCells(a_validCells)
 {
   CH_TIME("EBHelmholtzOpFactory::EBHelmholtzOpFactory(...)");
 
   // Define constructor arguments.
-  m_dataLocation = a_dataLocation;
-  m_alpha        = a_alpha;
-  m_beta         = a_beta;
-
-  m_probLo = a_probLo;
-
-  m_amrLevelGrids    = a_amrLevelGrids;
-  m_validCells       = a_validCells;
-  m_amrInterpolators = a_amrInterpolators;
-  m_amrFluxRegisters = a_amrFluxRegisters;
-  m_amrCoarseners    = a_amrCoarseners;
-  m_amrResolutions   = a_amrResolutions;
-  m_amrRefRatios     = a_amrRefRatios;
-
-  m_amrAcoef      = a_amrAcoef;
-  m_amrBcoef      = a_amrBcoef;
-  m_amrBcoefIrreg = a_amrBcoefIrreg;
-
-  m_domainBcFactory = a_domainBcFactory;
-  m_ebBcFactory     = a_ebbcFactory;
-
-  m_ghostPhi = a_ghostPhi;
-  m_ghostRhs = a_ghostRhs;
-
-  m_smoother         = a_smoother;
-  m_relaxFactor      = a_relaxFactor;
-  m_bottomDomain     = a_bottomDomain;
-  m_mgBlockingFactor = a_mgBlockingFactor;
-  m_deeperLevelGrids = a_deeperLevelGrids;
 
   m_numAmrLevels = m_amrLevelGrids.size();
 

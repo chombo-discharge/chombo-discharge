@@ -21,10 +21,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCoarAve::EBCoarAve() noexcept
+EBCoarAve::EBCoarAve() noexcept : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve");
-  m_isDefined = false;
 }
 
 EBCoarAve::~EBCoarAve() noexcept
@@ -67,10 +66,9 @@ EBCoarAve::EBCoarAve(const EBLevelGrid& a_eblgFine,
                      const EBLevelGrid& a_eblgCoar,
                      const EBLevelGrid& a_eblgCoFi,
                      const int&         a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBCoarAve::EBCoarAve(EBLevelGrid version)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_eblgCoFi, a_refRat);
 }

@@ -437,8 +437,9 @@ CdrPlasmaImExSdcStepper::setupQmj(const int a_p)
     int LDB  = nnodes;
     int INFO = 10;
     dgesv_(&N, &NRHS, V, &LDA, IPIV, cj, &LDB, &INFO);
-    if (INFO != 0)
+    if (INFO != 0) {
       MayDay::Abort("CdrPlasmaImExSdcStepper::setupQmj - could not compute weights");
+    }
 
     // Now construct qmj
     for (int m = 0; m < a_p; m++) {
@@ -486,10 +487,12 @@ CdrPlasmaImExSdcStepper::quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>
     pout() << "CdrPlasmaImExSdcStepper::quad" << endl;
   }
 
-  if (a_m < 0)
+  if (a_m < 0) {
     MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m < 0");
-  if (a_m >= m_p)
+  }
+  if (a_m >= m_p) {
     MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m >= m_p");
+  }
 
   DataOps::setValue(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++) {
@@ -505,10 +508,12 @@ CdrPlasmaImExSdcStepper::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_
     pout() << "CdrPlasmaImExSdcStepper::quad" << endl;
   }
 
-  if (a_m < 0)
+  if (a_m < 0) {
     MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m < 0");
-  if (a_m >= m_p)
+  }
+  if (a_m >= m_p) {
     MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m >= m_p");
+  }
 
   DataOps::setValue(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++) {
@@ -596,8 +601,9 @@ CdrPlasmaImExSdcStepper::advance(const Real a_dt)
 
       // Compute error and check if we need to keep iterating
       CdrPlasmaImExSdcStepper::finalizeErrors();
-      if (m_maxError < m_errThresh && m_adaptiveDt && icorr >= m_minCorr)
+      if (m_maxError < m_errThresh && m_adaptiveDt && icorr >= m_minCorr) {
         break; // No need in going beyond
+      }
     }
 
     // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
@@ -636,10 +642,12 @@ CdrPlasmaImExSdcStepper::advance(const Real a_dt)
   CdrPlasmaStepper::computeCdrDiffusion(m_fieldScratch->getElectricFieldCell(), m_fieldScratch->getElectricFieldEb());
 
   // Profile step
-  if (m_printReport)
+  if (m_printReport) {
     CdrPlasmaImExSdcStepper::adaptiveReport(first_dt, actual_dt, m_newDt, num_corrections, num_reject, m_maxError);
-  if (m_profileSteps)
+  }
+  if (m_profileSteps) {
     CdrPlasmaImExSdcStepper::writeStepProfile(actual_dt, m_maxError, m_p, num_corrections, num_reject);
+  }
 
   // Store current error.
   m_haveError = true;
@@ -759,8 +767,9 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
 
     // This does the transient rte advance. Source terms were uåpdated in the computeReactionNetwork routine above.
     t0 = Timer::wallClock();
-    if (!(m_rte->isStationary()))
+    if (!(m_rte->isStationary())) {
       CdrPlasmaImExSdcStepper::integrateRtTransient(a_dt);
+    }
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     t0 = Timer::wallClock();
@@ -780,8 +789,9 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
     const Real             t_mp1             = m_tm[m + 1];
 
     // Update electric field and stationary RTE equations
-    if (m_consistentE)
+    if (m_consistentE) {
       CdrPlasmaImExSdcStepper::updateField(cdr_densities_mp1, sigma_mp1);
+    }
     if (m_consistentRTE) {
       if (m_rte->isStationary()) {
         CdrPlasmaImExSdcStepper::computeReactionNetwork(m + 1, time + m_dtm[m], m_dtm[m]);
@@ -794,12 +804,15 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
     // boundary conditions in the next SDC sweep, or we allow the next time step to take care of this.
     const int last = m == m_p - 1;
     if (!last) {
-      if (m_computeS)
+      if (m_computeS) {
         CdrPlasmaImExSdcStepper::computeCdrGradients(cdr_densities_mp1);
-      if (m_computeV)
+      }
+      if (m_computeV) {
         CdrPlasmaImExSdcStepper::computeCdrVelo(cdr_densities_mp1, t_mp1);
-      if (m_computeD)
+      }
+      if (m_computeD) {
         CdrPlasmaImExSdcStepper::updateDiffusionCoefficients();
+      }
 
       // Update boundary conditions for cdr and sigma equations. We need them for the next step
       CdrPlasmaImExSdcStepper::computeCdrEbStates(cdr_densities_mp1);
@@ -1193,7 +1206,7 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
       }
 #if 0 // Debug
       if(procID() == 0){
-	std::cout << "Lerr = " << Lerr << "\t Lphi = " << Lphi << "\t Lerr/Lphi = " << Lerr/Lphi << std::endl;
+	std::cout << "Lerr = " << Lerr << "\t Lphi = " << Lphi << "\t Lerr/Lphi = " << Lerr/Lphi << endl;
       }
 #endif
     }
@@ -1265,7 +1278,7 @@ CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt, cons
 			      << " dt = " << a_dt
 			      << " new_dt = " << m_newDt
 			      << " fraction = " << m_newDt/a_dt
-			      << std::endl;
+			      << endl;
 #endif
 
   m_haveDtErr = true;
@@ -1369,7 +1382,7 @@ CdrPlasmaImExSdcStepper::computeDt()
 
 #if 0 // Debug
   if(procID() == 0){
-    std::cout << "computeDt = " << a_dt << "\t m_newDt = " << m_newDt << std::endl; 
+    std::cout << "computeDt = " << a_dt << "\t m_newDt = " << m_newDt << endl; 
   }
 #endif
 
@@ -1460,23 +1473,23 @@ CdrPlasmaImExSdcStepper::deallocateInternals()
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it) {
     const int idx = solver_it.index();
     m_cdrScratch[idx]->deallocateStorage();
-    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(0);
+    m_cdrScratch[idx] = RefCountedPtr<CdrStorage>(nullptr);
   }
 
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it) {
     const int idx = solver_it.index();
     m_rteScratch[idx]->deallocateStorage();
-    m_rteScratch[idx] = RefCountedPtr<RtStorage>(0);
+    m_rteScratch[idx] = RefCountedPtr<RtStorage>(nullptr);
   }
 
   m_cdrScratch.resize(0);
   m_rteScratch.resize(0);
 
   m_fieldScratch->deallocateStorage();
-  m_fieldScratch = RefCountedPtr<FieldStorage>(0);
+  m_fieldScratch = RefCountedPtr<FieldStorage>(nullptr);
 
   m_sigmaScratch->deallocateStorage();
-  m_sigmaScratch = RefCountedPtr<SigmaStorage>(0);
+  m_sigmaScratch = RefCountedPtr<SigmaStorage>(nullptr);
 }
 
 void

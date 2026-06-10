@@ -545,19 +545,19 @@ LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
       a_stencil += stenOtherPlane;
 
 #if 0 // debugging hook
-      std::cout << "vof = " << a_vof.gridIndex() << std::endl;
-      std::cout << "stencil size = " << a_stencil.size() << std::endl;
-      std::cout << "stencil0 size = " << stenThisPlane.size() << std::endl;
-      std::cout << "stencil1 size = " << stenOtherPlane.size() << std::endl;
+      std::cout << "vof = " << a_vof.gridIndex() << endl;
+      std::cout << "stencil size = " << a_stencil.size() << endl;
+      std::cout << "stencil0 size = " << stenThisPlane.size() << endl;
+      std::cout << "stencil1 size = " << stenOtherPlane.size() << endl;
       for (int i = 0; i < a_stencil.size(); i++){
-	//	std::cout << a_stencil.vof(i).gridIndex() << "\t" << a_stencil.weight(i) << std::endl;
+	//	std::cout << a_stencil.vof(i).gridIndex() << "\t" << a_stencil.weight(i) << endl;
       }
 
       for (int i = 0; i < stenThisPlane.size(); i++){
-	std::cout << stenThisPlane.vof(i).gridIndex() << "\t" << stenThisPlane.weight(i) << std::endl;
+	std::cout << stenThisPlane.vof(i).gridIndex() << "\t" << stenThisPlane.weight(i) << endl;
       }
       for (int i = 0; i < stenOtherPlane.size(); i++){
-	std::cout << stenOtherPlane.vof(i).gridIndex() << "\t" << stenOtherPlane.weight(i) << std::endl;
+	std::cout << stenOtherPlane.vof(i).gridIndex() << "\t" << stenOtherPlane.weight(i) << endl;
       }
       MayDay::Warning("stop");
 #endif

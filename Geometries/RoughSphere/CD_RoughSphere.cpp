@@ -59,12 +59,15 @@ RoughSphere::RoughSphere()
     RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF>(
       new PerlinSphereSdf(r, c, false, amp, f, persist, octaves, reseed));
 
-    if (whichMaterial == "electrode")
+    if (whichMaterial == "electrode") {
       m_electrodes.push_back(Electrode(sph, live));
-    else if (whichMaterial == "dielectric")
+    }
+    else if (whichMaterial == "dielectric") {
       m_dielectrics.push_back(Dielectric(sph, eps));
-    else
+    }
+    else {
       MayDay::Abort("RoughSphere::RoughSphere - unknown material requested");
+    }
   }
 }
 

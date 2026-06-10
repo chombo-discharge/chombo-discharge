@@ -27,18 +27,16 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-ComputationalGeometry::ComputationalGeometry()
+ComputationalGeometry::ComputationalGeometry() : m_eps0(1.0), m_useScanShop(false)
 {
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
 
   // Default parameters.
-  m_eps0 = 1.0;
 
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
 
-  m_useScanShop = false;
-  m_scanDomain  = ProblemDomain();
+  m_scanDomain = ProblemDomain();
 
   m_multifluidIndexSpace = RefCountedPtr<MultiFluidIndexSpace>(new MultiFluidIndexSpace());
 }
@@ -211,14 +209,14 @@ ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 
   // Build the EBIS geometry. Use either ScanShop or Chombo here.
   if (m_useScanShop) {
-    ScanShop* scanShop = new ScanShop(*m_implicitFunctionGas,
-                                      0,
-                                      a_finestDx,
-                                      a_probLo,
-                                      a_finestDomain,
-                                      m_scanDomain,
-                                      m_maxGhostEB,
-                                      s_thresh);
+    auto* scanShop = new ScanShop(*m_implicitFunctionGas,
+                                  0,
+                                  a_finestDx,
+                                  a_probLo,
+                                  a_finestDomain,
+                                  m_scanDomain,
+                                  m_maxGhostEB,
+                                  s_thresh);
 
     scanShop->setProfileFileName("ScanShopReportGasPhase.dat");
 
@@ -276,14 +274,14 @@ ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 
     // Build the EBIS geometry. Use either ScanShop or Chombo here.
     if (m_useScanShop) {
-      ScanShop* scanShop = new ScanShop(*m_implicitFunctionSolid,
-                                        0,
-                                        a_finestDx,
-                                        a_probLo,
-                                        a_finestDomain,
-                                        m_scanDomain,
-                                        m_maxGhostEB,
-                                        s_thresh);
+      auto* scanShop = new ScanShop(*m_implicitFunctionSolid,
+                                    0,
+                                    a_finestDx,
+                                    a_probLo,
+                                    a_finestDomain,
+                                    m_scanDomain,
+                                    m_maxGhostEB,
+                                    s_thresh);
 
       scanShop->setProfileFileName("ScanShopReportSolidPhase.dat");
 

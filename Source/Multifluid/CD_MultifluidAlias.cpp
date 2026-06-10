@@ -38,10 +38,8 @@ MultifluidAlias::aliasMF(LevelData<BaseIVFAB<Real>>& a_alias, const int a_phase,
 
 // Private cell stuff below here
 MultifluidAlias::MfCellAliasFactory::MfCellAliasFactory(LevelData<MFCellFAB>* a_mf, const int a_phase)
-{
-  m_mf    = a_mf;
-  m_phase = a_phase;
-}
+  : m_mf(a_mf), m_phase(a_phase)
+{}
 
 EBCellFAB*
 MultifluidAlias::MfCellAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const
@@ -57,10 +55,8 @@ MultifluidAlias::MfCellAliasFactory::callDelete() const
 
 // Private flux stuff below here
 MultifluidAlias::MfFluxAliasFactory::MfFluxAliasFactory(LevelData<MFFluxFAB>* a_mf, const int a_phase)
-{
-  m_mf    = a_mf;
-  m_phase = a_phase;
-}
+  : m_mf(a_mf), m_phase(a_phase)
+{}
 
 EBFluxFAB*
 MultifluidAlias::MfFluxAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const
@@ -76,10 +72,8 @@ MultifluidAlias::MfFluxAliasFactory::callDelete() const
 
 // Private iv below here
 MultifluidAlias::MfIVAliasFactory::MfIVAliasFactory(LevelData<MFBaseIVFAB>* a_mf, const int a_phase)
-{
-  m_mf    = a_mf;
-  m_phase = a_phase;
-}
+  : m_mf(a_mf), m_phase(a_phase)
+{}
 
 BaseIVFAB<Real>*
 MultifluidAlias::MfIVAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const

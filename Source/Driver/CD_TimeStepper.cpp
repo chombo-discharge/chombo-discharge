@@ -18,8 +18,7 @@
 TimeStepper::TimeStepper() : m_keepGoing(true)
 {}
 
-TimeStepper::~TimeStepper()
-{}
+TimeStepper::~TimeStepper() = default;
 
 void
 TimeStepper::setAmr(const RefCountedPtr<AmrMesh>& a_amr)

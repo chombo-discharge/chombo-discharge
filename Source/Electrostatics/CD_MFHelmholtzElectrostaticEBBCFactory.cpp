@@ -79,7 +79,7 @@ MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCounted
   CH_assert(m_order > 0);
   CH_assert(m_weight >= 0);
 
-  auto bc = new MFHelmholtzElectrostaticEBBC(a_iphase, m_electrostaticBCs, a_jumpBC);
+  auto* bc = new MFHelmholtzElectrostaticEBBC(a_iphase, m_electrostaticBCs, a_jumpBC);
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

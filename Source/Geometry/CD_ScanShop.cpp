@@ -30,17 +30,16 @@ ScanShop::ScanShop(const BaseIF& a_localGeom,
                    ProblemDomain a_scanLevel,
                    int           a_ebGhost,
                    Real          a_thrshdVoF)
-  : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF)
+  : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF),
+    m_baseIF(&a_localGeom),
+    m_boxSorting(BoxSorting::Morton),
+    m_ebGhost(a_ebGhost),
+    m_fileName("ScanShopReport.dat"),
+    m_hasScanLevel(false),
+    m_profile(false)
 {
 
   CH_TIME("ScanShop::ScanShop(BaseIF, int, Real, RealVect, ProblemDomain, ProblemDomain, int, Real)");
-
-  m_baseIF       = &a_localGeom;
-  m_hasScanLevel = false;
-  m_profile      = false;
-  m_ebGhost      = a_ebGhost;
-  m_fileName     = "ScanShopReport.dat";
-  m_boxSorting   = BoxSorting::Morton;
 
   // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
   // need to construct these here, and then extract the proper resolution when we actually call makeGrids

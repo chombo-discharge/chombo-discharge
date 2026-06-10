@@ -26,12 +26,10 @@
 
 using namespace Physics::ItoKMC;
 
-ItoKMCJSON::ItoKMCJSON()
+ItoKMCJSON::ItoKMCJSON() : m_verbose(false), m_previewRates(false)
 {
   CH_TIME("ItoKMCJSON::ItoKMCJSON");
 
-  m_verbose      = false;
-  m_previewRates = false;
   m_className    = "ItoKMCJSON";
   m_hasKMCSolver = false;
 
@@ -174,7 +172,7 @@ ItoKMCJSON::containsWildcard(const std::string a_str) const noexcept
     pout() << m_className + "::containsWildcard" << endl;
   }
 
-  return (a_str.find("@") != std::string::npos);
+  return (a_str.find('@') != std::string::npos);
 }
 
 bool
@@ -287,7 +285,7 @@ ItoKMCJSON::parseJSON()
   if (!(this->doesFileExist(m_jsonFile))) {
     const std::string parseError = baseError + " -- file '" + m_jsonFile + "' does not exist";
 
-    this->throwParserError(parseError.c_str());
+    this->throwParserError(parseError);
   }
   else {
     // Parse the JSON file.
@@ -543,7 +541,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
       const int idx = m_backgroundSpecies.size();
 
-      m_backgroundSpecies.push_back(ItoKMCBackgroundSpecies(speciesName, molarFraction));
+      m_backgroundSpecies.emplace_back(speciesName, molarFraction);
       m_backgroundSpeciesPlot.push_back(plotSpecies);
       m_backgroundSpeciesMap[speciesName] = idx;
       m_backgroundSpeciesMapInverse[idx]  = speciesName;
@@ -990,8 +988,8 @@ ItoKMCJSON::printFluidRates() const noexcept
       for (int i = 0; i < numPoints; i++) {
         outputFile << std::left << std::setw(14) << EN[i];
 
-        for (int k = 0; k < m_fluidRates.size(); k++) {
-          outputFile << std::left << std::setw(14) << m_fluidRates[k](E[i], position);
+        for (const auto& m_fluidRate : m_fluidRates) {
+          outputFile << std::left << std::setw(14) << m_fluidRate(E[i], position);
         }
         outputFile << "\n";
       }
@@ -1269,7 +1267,7 @@ ItoKMCJSON::initializeParticles()
           if (!(this->doesFileExist(f))) {
             const std::string parseError = baseError + " but file '" + f + "' does not exist";
 
-            this->throwParserError(parseError.c_str());
+            this->throwParserError(parseError);
           }
 
           unsigned int xcol = 0;
@@ -1376,7 +1374,7 @@ ItoKMCJSON::initializeDensities()
       if (speciesType == SpeciesType::CDR) {
         const int idx = m_cdrSpeciesMap.at(speciesID);
 
-        auto species = static_cast<ItoKMCCDRSpecies*>(&(*m_cdrSpecies[idx]));
+        auto* species = static_cast<ItoKMCCDRSpecies*>(&(*m_cdrSpecies[idx]));
 
         species->setInitialData(initFunc);
       }
@@ -1903,7 +1901,7 @@ ItoKMCJSON::initializePlasmaReactions()
       const auto gradientCorrection = this->parsePlasmaReactionGradientCorrection(reactionJSON);
       const auto useReactionDt      = this->parsePlasmaReactionDt(reactionJSON);
 
-      m_kmcReactions.emplace_back(KMCReaction(plasmaReactants, plasmaProducts, photonProducts));
+      m_kmcReactions.emplace_back(plasmaReactants, plasmaProducts, photonProducts);
       m_kmcReactionRates.emplace_back(reactionRates.first);
       m_kmcReactionRatePlots.emplace_back(reactionPlot);
       m_kmcReactionGradientCorrections.emplace_back(gradientCorrection);
@@ -1995,7 +1993,7 @@ ItoKMCJSON::initializePhotoReactions()
                                trimmedProducts);
 
       // Add the reaction
-      m_photoReactions.emplace_back(ItoKMCPhotoReaction(photonReactants.front(), plasmaProducts, photoiEfficiency));
+      m_photoReactions.emplace_back(photonReactants.front(), plasmaProducts, photoiEfficiency);
     }
   }
 }
@@ -2524,8 +2522,9 @@ ItoKMCJSON::parseReactionString(std::vector<std::string>& a_reactants,
   const auto& it = std::find(segments.begin(), segments.end(), "->");
 
   // Make sure that -> is in the reaction string.
-  if (it == segments.end())
+  if (it == segments.end()) {
     this->throwParserError(baseError + " -- Reaction '" + a_reaction + "' does not contain '->");
+  }
 
   // Left of "->" are reactants and right of "->" are products
   a_reactants = std::vector<std::string>(segments.begin(), it);
@@ -2943,7 +2942,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     const auto thresh  = a_reactionJSON["ppc threshold"]["ppc"].get<long long>();
     const auto cutoff  = a_reactionJSON["ppc threshold"]["valid region"].get<std::string>();
 
-    if (species.size() == 0) {
+    if (species.empty()) {
       this->throwParserError(derivedError + "but array 'species' is empty");
     }
     else {
@@ -3106,7 +3105,7 @@ ItoKMCJSON::parsePlasmaReactionGradientCorrection(const nlohmann::json& a_reacti
     default: {
       const std::string err = baseError + " - logic bust";
 
-      this->throwParserError(err.c_str());
+      this->throwParserError(err);
 
       break;
     }
@@ -3557,7 +3556,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
         const Real N     = m_gasNumberDensity(a_cellCenter + a_dx * a_cellCentroid);
         const Real JdAdt = J(a_E.vectorLength(), N) * std::pow(a_dx, SpaceDim - 1) * a_bndryArea * a_dt;
 
-        const long long numEmission = Random::getPoisson<long long>(JdAdt);
+        const auto numEmission = Random::getPoisson<long long>(JdAdt);
 
         if (numEmission > 0LL) {
           const RealVect x = a_cellCenter + a_cellCentroid * a_dx;
@@ -3602,14 +3601,14 @@ ItoKMCJSON::getNumberOfPlotVariables() const noexcept
     numPlots += 3;
   }
 
-  for (int i = 0; i < m_backgroundSpeciesPlot.size(); i++) {
-    if (m_backgroundSpeciesPlot[i]) {
+  for (bool i : m_backgroundSpeciesPlot) {
+    if (i) {
       numPlots++;
     }
   }
 
-  for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
-    if (std::get<0>(m_kmcReactionRatePlots[i])) {
+  for (const auto& m_kmcReactionRatePlot : m_kmcReactionRatePlots) {
+    if (std::get<0>(m_kmcReactionRatePlot)) {
       numPlots++;
     }
   }
@@ -3647,9 +3646,9 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
     }
   }
 
-  for (int i = 0; i < m_kmcReactionRatePlots.size(); i++) {
-    if (std::get<0>(m_kmcReactionRatePlots[i])) {
-      plotVariableNames.push_back(std::get<1>(m_kmcReactionRatePlots[i]));
+  for (const auto& m_kmcReactionRatePlot : m_kmcReactionRatePlots) {
+    if (std::get<0>(m_kmcReactionRatePlot)) {
+      plotVariableNames.push_back(std::get<1>(m_kmcReactionRatePlot));
     }
   }
 

@@ -30,8 +30,8 @@ PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
                              const Real     a_cornerCurv,
                              const bool     a_reseed,
                              const bool     a_fluidInside)
+  : m_fluidInside(a_fluidInside)
 {
-  m_fluidInside = a_fluidInside;
 
   constexpr int up = CH_SPACEDIM - 1;
 
@@ -44,7 +44,7 @@ PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
       const RealVect p = n * 0.5 * a_xyz[dir];
 
       if (dir == up && sit() == Side::Hi) {
-        BaseIF*
+        auto*
           baseif = (BaseIF*)new PerlinPlaneSdf(n, p, true, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
         parts.push_back(baseif);
       }
@@ -56,10 +56,10 @@ PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
   }
 
   // Do rounded corners.
-  BaseIF* bif = (BaseIF*)new SmoothUnion(parts, a_cornerCurv);
+  auto* bif = (BaseIF*)new SmoothUnion(parts, a_cornerCurv);
 
   // // Rotate and translate into place
-  TransformIF* tif = new TransformIF(*bif);
+  auto* tif = new TransformIF(*bif);
   tif->translate(-0.5 * BASISREALV(up) *
                  a_xyz[up]);             // Move so that "top" point is at RealVect::Zero. This is the rotation point
   tif->rotate(BASISREALV(up), a_normal); // Rotate so that +z/+y points along a_normal
@@ -75,13 +75,10 @@ PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
 }
 
 PerlinSlabSdf::PerlinSlabSdf(const PerlinSlabSdf& a_inputIF)
-{
-  m_baseif      = a_inputIF.m_baseif;
-  m_fluidInside = a_inputIF.m_fluidInside;
-}
-
-PerlinSlabSdf::~PerlinSlabSdf()
+  : m_baseif(a_inputIF.m_baseif), m_fluidInside(a_inputIF.m_fluidInside)
 {}
+
+PerlinSlabSdf::~PerlinSlabSdf() = default;
 
 Real
 PerlinSlabSdf::value(const RealVect& a_pos) const

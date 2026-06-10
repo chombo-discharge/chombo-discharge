@@ -19,12 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory()
+  : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory()");
-
-  m_multByBco   = true;
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(const Real a_DphiDn)
@@ -100,7 +97,7 @@ EBHelmholtzNeumannDomainBCFactory::create() const
 
   CH_assert(m_useConstant || m_useFunction);
 
-  auto bc = new EBHelmholtzNeumannDomainBC();
+  auto* bc = new EBHelmholtzNeumannDomainBC();
 
   if (m_multByBco) {
     if (m_useConstant) {

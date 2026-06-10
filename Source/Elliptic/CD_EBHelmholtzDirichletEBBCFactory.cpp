@@ -19,14 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()
+  : m_order(-1), m_domainDropOrder(0), m_useConstant(false), m_useFunction(false), m_weight(-1)
 {
   CH_TIME("EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = 0;
-  m_useConstant     = false;
-  m_useFunction     = false;
 }
 
 EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int  a_order,
@@ -133,7 +128,7 @@ EBHelmholtzDirichletEBBCFactory::create()
     MayDay::Error("EBHelmholtzDirichletEBBCFactory::create() - logic bust, must have m_order > 0 && m_weight >= 0");
   }
 
-  auto bc = new EBHelmholtzDirichletEBBC();
+  auto* bc = new EBHelmholtzDirichletEBBC();
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);

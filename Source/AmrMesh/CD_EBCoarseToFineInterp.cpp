@@ -23,11 +23,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept
+EBCoarseToFineInterp::EBCoarseToFineInterp() noexcept : m_isDefined(false)
 {
   CH_TIME("EBCoarseToFineInterp::EBCoarseToFineInterp(weak)");
-
-  m_isDefined = false;
 }
 
 EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
@@ -40,8 +38,7 @@ EBCoarseToFineInterp::EBCoarseToFineInterp(const EBLevelGrid& a_eblgFine,
   this->define(a_eblgFine, a_eblgCoFi, a_eblgCoar, a_refRat);
 }
 
-EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept
-{}
+EBCoarseToFineInterp::~EBCoarseToFineInterp() noexcept = default;
 
 void
 EBCoarseToFineInterp::define(const EBLevelGrid& a_eblgFine,
@@ -711,7 +708,7 @@ EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
       delta / std::abs(std::max(sumCoar, sumFine)) > 1.E-10) {
 
     const std::string baseErr = "EBCoarseToFineInterp::checkConservation(EBCellFAB) - did not conserve = ";
-    std::cout << baseErr << sumFine << "\t" << sumCoar << std::endl;
+    std::cout << baseErr << sumFine << "\t" << sumCoar << endl;
   }
 }
 
@@ -754,7 +751,7 @@ EBCoarseToFineInterp::checkConservation(const BaseIVFAB<Real>& a_fineData,
       delta / std::abs(std::max(sumCoar, sumFine)) > 1.E-10) {
 
     const std::string baseErr = "EBCoarseToFineInterp::checkConservation(BaseIVFAB) - did not conserve = ";
-    std::cout << baseErr << sumFine << "\t" << sumCoar << std::endl;
+    std::cout << baseErr << sumFine << "\t" << sumCoar << endl;
   }
 }
 

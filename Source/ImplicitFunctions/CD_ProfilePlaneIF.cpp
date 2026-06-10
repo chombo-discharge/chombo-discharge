@@ -53,12 +53,12 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
   Vector<BaseIF*> parts;
   const RealVect  lo  = point - 0.5 * a_width * xhat - 1.E3 * yhat;
   const RealVect  hi  = point + 0.5 * a_width * xhat;
-  BaseIF*         box = (BaseIF*)(new RoundedBoxIF(lo, hi, a_curv, false)); // Construct base box with fluid outside.
+  auto*           box = (BaseIF*)(new RoundedBoxIF(lo, hi, a_curv, false)); // Construct base box with fluid outside.
   parts.push_back(box);
 
   // Left profile holes
   for (int ileft = 0; ileft < a_num_left; ileft++) {
-    TransformIF* transIF = new TransformIF(*a_impFunc);
+    auto* transIF = new TransformIF(*a_impFunc);
 
     const RealVect shift = -(ileft + 0.5) * a_ccDist * xhat + a_xShift * xhat + a_yShift * yhat;
     transIF->translate(shift);
@@ -68,7 +68,7 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
 
   // Right profile holes
   for (int iright = 0; iright < a_num_right; iright++) {
-    TransformIF* transIF = new TransformIF(*a_impFunc);
+    auto* transIF = new TransformIF(*a_impFunc);
 
     const RealVect shift = (iright + 0.5) * a_ccDist * xhat + a_xShift * xhat + a_yShift * yhat;
     transIF->translate(shift);
@@ -80,13 +80,10 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect a_point,
 }
 
 ProfilePlaneIF::ProfilePlaneIF(const ProfilePlaneIF& a_inputIF)
-{
-  m_fluidInside = a_inputIF.m_fluidInside;
-  m_baseif      = a_inputIF.m_baseif;
-}
-
-ProfilePlaneIF::~ProfilePlaneIF()
+  : m_fluidInside(a_inputIF.m_fluidInside), m_baseif(a_inputIF.m_baseif)
 {}
+
+ProfilePlaneIF::~ProfilePlaneIF() = default;
 
 Real
 ProfilePlaneIF::value(const RealVect& a_pos) const

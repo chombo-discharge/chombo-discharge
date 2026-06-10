@@ -19,13 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory()
+  : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory()");
-
-  m_multByBco = true;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(const Real a_DphiDn)
@@ -100,7 +96,7 @@ EBHelmholtzNeumannEBBCFactory::create()
 
   CH_assert(m_useConstant || m_useFunction);
 
-  auto bc = new EBHelmholtzNeumannEBBC();
+  auto* bc = new EBHelmholtzNeumannEBBC();
 
   if (m_multByBco) {
     if (m_useConstant) {

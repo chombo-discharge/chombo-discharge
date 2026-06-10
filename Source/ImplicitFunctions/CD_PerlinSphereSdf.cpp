@@ -22,25 +22,19 @@ PerlinSphereSdf::PerlinSphereSdf(const Real&     a_rad,
                                  const Real&     a_persistence,
                                  const int&      a_octaves,
                                  const bool&     a_reseed)
+  : m_rad(a_rad - a_noiseAmp), m_center(a_center), m_inside(a_inside)
 {
 
   //
-  m_rad      = a_rad - a_noiseAmp;
-  m_center   = a_center;
-  m_inside   = a_inside;
+
   m_perlinIF = RefCountedPtr<BaseIF>(new PerlinSdf(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
 }
 
 PerlinSphereSdf::PerlinSphereSdf(const PerlinSphereSdf& a_inputIF)
-{
-  m_rad      = a_inputIF.m_rad;
-  m_center   = a_inputIF.m_center;
-  m_inside   = a_inputIF.m_inside;
-  m_perlinIF = a_inputIF.m_perlinIF;
-}
-
-PerlinSphereSdf::~PerlinSphereSdf()
+  : m_rad(a_inputIF.m_rad), m_center(a_inputIF.m_center), m_inside(a_inputIF.m_inside), m_perlinIF(a_inputIF.m_perlinIF)
 {}
+
+PerlinSphereSdf::~PerlinSphereSdf() = default;
 
 Real
 PerlinSphereSdf::value(const RealVect& a_pos) const

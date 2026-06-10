@@ -504,8 +504,9 @@ VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
     // Add if not already added
     bool haveStartVof = false;
     for (int ivof = 0; ivof < a_vofList.size(); ivof++) {
-      if (a_vofList[ivof] == a_startVof)
+      if (a_vofList[ivof] == a_startVof) {
         haveStartVof = true;
+      }
     }
 
     if (!haveStartVof) {

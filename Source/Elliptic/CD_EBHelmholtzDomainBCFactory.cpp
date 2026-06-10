@@ -14,8 +14,7 @@
 #include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDomainBCFactory::EBHelmholtzDomainBCFactory()
-{}
+EBHelmholtzDomainBCFactory::EBHelmholtzDomainBCFactory() = default;
 
 EBHelmholtzDomainBCFactory::~EBHelmholtzDomainBCFactory()
 {}

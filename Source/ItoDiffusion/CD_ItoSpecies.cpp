@@ -14,30 +14,24 @@
 #include <CD_ItoSpecies.H>
 #include <CD_NamespaceHeader.H>
 
-ItoSpecies::ItoSpecies()
+ItoSpecies::ItoSpecies() : m_name("ItoSpecies"), m_chargeNumber(0), m_isDiffusive(false), m_isMobile(false)
 {
-  m_name           = "ItoSpecies";
-  m_isMobile       = false;
-  m_isDiffusive    = false;
-  m_chargeNumber   = 0;
+
   m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
     return 0.0;
   };
 }
 
 ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive)
+  : m_name(a_name), m_chargeNumber(a_chargeNumber), m_isDiffusive(a_diffusive), m_isMobile(a_mobile)
 {
-  m_name           = a_name;
-  m_chargeNumber   = a_chargeNumber;
-  m_isMobile       = a_mobile;
-  m_isDiffusive    = a_diffusive;
+
   m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
     return 0.0;
   };
 }
 
-ItoSpecies::~ItoSpecies()
-{}
+ItoSpecies::~ItoSpecies() = default;
 
 std::string
 ItoSpecies::getName() const

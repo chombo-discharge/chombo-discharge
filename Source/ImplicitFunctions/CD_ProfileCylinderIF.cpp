@@ -48,11 +48,11 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
                                                a_cylinderRadius,
                                                a_roundingRadius,
                                                a_fluidInside);
-  BaseIF* torus = (BaseIF*)new TorusSdf(center, a_torusMajorRadius, a_torusMinorRadius, !a_fluidInside);
+  auto*   torus = (BaseIF*)new TorusSdf(center, a_torusMajorRadius, a_torusMinorRadius, !a_fluidInside);
 
   // "Left" profiles
   for (int ileft = 0; ileft < a_numLeft; ileft++) {
-    TransformIF* transif = new TransformIF(*torus);
+    auto* transif = new TransformIF(*torus);
 
     const RealVect shift = (-ileft + 0.5) * a_ccDistance * zhat + a_shift * zhat;
 
@@ -62,7 +62,7 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
 
   // "Right" profiles
   for (int iright = 0; iright < a_numRight; iright++) {
-    TransformIF* transif = new TransformIF(*torus);
+    auto* transif = new TransformIF(*torus);
 
     const RealVect shift = (iright + 0.5) * a_ccDistance * zhat + a_shift * zhat;
 
@@ -73,10 +73,10 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
   parts.push_back(cyl);
 
   // Make the union
-  BaseIF* base = (BaseIF*)(new SmoothUnion(parts, a_roundingRadius));
+  auto* base = (BaseIF*)(new SmoothUnion(parts, a_roundingRadius));
 
   // Translate it
-  TransformIF* transif = new TransformIF(*base);
+  auto* transif = new TransformIF(*base);
 
   if (a_endPoint2[2] >= a_endPoint1[2]) {
     transif->rotate(zhat, a_endPoint2 - a_endPoint1);
@@ -96,13 +96,10 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
   delete base;
 }
 
-ProfileCylinderIF::ProfileCylinderIF(const ProfileCylinderIF& a_inputIF)
-{
-  m_baseIF = a_inputIF.m_baseIF;
-}
-
-ProfileCylinderIF::~ProfileCylinderIF()
+ProfileCylinderIF::ProfileCylinderIF(const ProfileCylinderIF& a_inputIF) : m_baseIF(a_inputIF.m_baseIF)
 {}
+
+ProfileCylinderIF::~ProfileCylinderIF() = default;
 
 Real
 ProfileCylinderIF::value(const RealVect& a_pos) const

@@ -13,7 +13,7 @@
 
 // Std includes
 #include <chrono>
-#include <time.h>
+#include <ctime>
 
 // Chombo includes
 #include <ParmParse.H>
@@ -39,24 +39,22 @@ EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Real a_
   return 1.0;
 }
 
-EddingtonSP1::EddingtonSP1() : RtSolver()
+EddingtonSP1::EddingtonSP1() : m_isSolverSetup(false), m_regridSlopes(true)
 {
 
   // Default settings
   m_name      = "EddingtonSP1";
   m_className = "EddingtonSP1";
 
-  m_verbosity     = -1;
-  m_isSolverSetup = false;
-  m_dataLocation  = Location::Cell::Center;
-  m_regridSlopes  = true;
+  m_verbosity = -1;
+
+  m_dataLocation = Location::Cell::Center;
 
   // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side.
   this->setDefaultDomainBcFunctions();
 }
 
-EddingtonSP1::~EddingtonSP1()
-{}
+EddingtonSP1::~EddingtonSP1() = default;
 
 void
 EddingtonSP1::parseOptions()
@@ -341,10 +339,12 @@ EddingtonSP1::parsePlotVariables()
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++) {
-    if (str[i] == "phi")
+    if (str[i] == "phi") {
       m_plotPhi = true;
-    else if (str[i] == "src")
+    }
+    else if (str[i] == "src") {
       m_plotSource = true;
+    }
   }
 }
 
@@ -701,14 +701,14 @@ EddingtonSP1::advanceEuler(EBAMRCellData&       a_phi,
   Vector<AMRLevelOp<LevelData<EBCellFAB>>*> amrOps = m_multigridSolver->getAMROperators();
   Vector<MGLevelOp<LevelData<EBCellFAB>>*>  mgOps  = m_multigridSolver->getAllOperators();
   for (int i = 0; i < amrOps.size(); i++) {
-    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
+    auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)amrOps[i];
 
     helmholtzOperator->diagonalScale(*scratch[i], false);
   }
 
   // Set coefficients for multigrid solve.
   for (int i = 0; i < mgOps.size(); i++) {
-    TGAHelmOp<LevelData<EBCellFAB>>* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
+    auto* helmholtzOperator = (TGAHelmOp<LevelData<EBCellFAB>>*)mgOps[i];
 
     helmholtzOperator->setAlphaAndBeta(1.0, -a_dt);
   }
@@ -983,7 +983,7 @@ EddingtonSP1::setupMultigrid()
   }
 
   // Select the bottom solver
-  LinearSolver<LevelData<EBCellFAB>>* botsolver = NULL;
+  LinearSolver<LevelData<EBCellFAB>>* botsolver = nullptr;
   if (m_bottomSolverType == BottomSolverType::Simple) {
     botsolver = &m_simpleSolver;
   }

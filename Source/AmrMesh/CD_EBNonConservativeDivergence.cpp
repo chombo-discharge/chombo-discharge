@@ -19,11 +19,9 @@
 #include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
-EBNonConservativeDivergence::EBNonConservativeDivergence() noexcept
+EBNonConservativeDivergence::EBNonConservativeDivergence() noexcept : m_isDefined(false)
 {
   CH_TIME("EBNonConservativeDivergence::EBNonConservativeDivergence(weak)");
-
-  m_isDefined = false;
 }
 
 EBNonConservativeDivergence::EBNonConservativeDivergence(const EBLevelGrid& a_eblg, const int a_radius) noexcept

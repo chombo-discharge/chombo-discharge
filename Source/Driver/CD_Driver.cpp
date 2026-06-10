@@ -44,10 +44,17 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
                const RefCountedPtr<CellTagger>&            a_cellTagger)
+  : m_verbosity(-1),
+    m_doCoarsening(true),
+    m_dt(0.0),
+    m_outputDt(-1.0),
+    m_profile(false),
+    m_realm(Realm::Primal),
+    m_time(0.0),
+    m_time(m_startTime),
+    m_timeStep(0)
 {
   CH_TIME("Driver::Driver");
-
-  m_verbosity = -1;
 
   this->setComputationalGeometry(a_computationalGeometry); // Set computational geometry
   this->setTimeStepper(a_timeStepper);                     // Set time stepper
@@ -59,26 +66,17 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_amr->buildDomains(); // Build domains and resolutions, nothing else
 
   // Reset time steps.
-  m_timeStep = 0;
-  m_time     = 0.0;
-  m_dt       = 0.0;
-  m_outputDt = -1.0;
-
-  m_profile      = false;
-  m_doCoarsening = true;
 
   // Parse some class options and create the output directories for the simulation.
   this->parseOptions();
 
   // Always register this Realm and these operators.
-  m_realm = Realm::Primal;
+
   m_amr->registerRealm(m_realm);
   m_amr->registerOperator(s_eb_fill_patch, m_realm, phase::gas);
 
   // Seed the RNG.
   Random::seed();
-
-  m_time = m_startTime;
 }
 
 Driver::~Driver()
@@ -285,9 +283,7 @@ Driver::getGeometryTags()
 
     const int nGhost = std::min(2, m_amr->getNumberOfGhostCells());
 
-    for (int is = 0; is < 2; is++) {
-      const RefCountedPtr<EBIndexSpace>& ebis = indexSpaces[is];
-
+    for (const auto& ebis : indexSpaces) {
       if (!(ebis.isNull())) {
         DisjointBoxLayout irregGrids = ebis->getIrregGrids(curDomain);
         EBISLayout        ebisl;
@@ -361,8 +357,9 @@ Driver::getGeometryTags()
   // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
   int deepestTagLevel = 0;
   for (int lvl = 0; lvl < m_geomTags.size(); lvl++) {
-    if (!m_geomTags[lvl].isEmpty())
+    if (!m_geomTags[lvl].isEmpty()) {
       deepestTagLevel = lvl;
+    }
   }
 
   m_geometricTagsDepth = ParallelOps::max(deepestTagLevel);
@@ -1277,61 +1274,61 @@ Driver::createOutputDirectories()
     cmd     = "mkdir -p " + m_outputDirectory;
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/plt";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create plot directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create plot directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/geo";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create geo directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create geo directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/chk";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create checkpoint directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create checkpoint directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/mpi";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create mpi directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/mpi/memory";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create mpi/memory directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi/memory directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/mpi/loads";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create mpi/loads directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi/loads directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/regrid";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create regrid directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create regrid directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/restart";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create restart directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create restart directory" << endl;
     }
 
     cmd     = "mkdir -p " + m_outputDirectory + "/crash";
     success = system(cmd.c_str());
     if (success != 0) {
-      std::cout << "Driver::createOutputDirectories - master could not create crash directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create crash directory" << endl;
     }
   }
 
@@ -1455,8 +1452,9 @@ Driver::setupGeometryOnly()
                                            m_amr->getNumberOfEbGhostCells(),
                                            numCoarsenings);
   const Real t1 = Timer::wallClock();
-  if (procID() == 0)
-    std::cout << "geotime = " << t1 - t0 << std::endl;
+  if (procID() == 0) {
+    std::cout << "geotime = " << t1 - t0 << endl;
+  }
 
   // Set implicit functions now.
   m_amr->setBaseImplicitFunction(phase::gas, m_computationalGeometry->getGasImplicitFunction());
@@ -2082,7 +2080,7 @@ Driver::writeComputationalLoads()
     // Write header
     std::stringstream ss;
     ss << std::left << std::setw(width) << "# Rank";
-    for (auto r : realmLoads) {
+    for (const auto& r : realmLoads) {
       ss << std::left << std::setw(width) << r.first;
     }
     f << ss.str() << endl;
@@ -2095,7 +2093,7 @@ Driver::writeComputationalLoads()
       for (auto r : realmLoads) {
         ds << std::left << std::setw(width) << r.second[irank];
       }
-      f << ds.str() << std::endl;
+      f << ds.str() << endl;
     }
 
     f.close();
@@ -2289,7 +2287,7 @@ Driver::writePlotFile(const std::string a_filename)
 
     // Write HDF5 header.
 #ifdef CH_USE_HDF5
-    HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+    HDF5Handle handle(a_filename, HDF5Handle::CREATE);
     DischargeIO::writeEBHDF5Header(handle, numPlotLevels, m_amr->getProbLo(), plotVariableNames);
     handle.close();
 #endif
@@ -2323,7 +2321,7 @@ Driver::writePlotFile(const std::string a_filename)
       }
 
       timer.startEvent("HDF5 write");
-      HDF5Handle handle(a_filename.c_str(), HDF5Handle::OPEN_RDWR);
+      HDF5Handle handle(a_filename, HDF5Handle::OPEN_RDWR);
       const int  refRat = (lvl < m_amr->getFinestLevel()) ? m_amr->getRefinementRatios()[lvl] : 1;
       DischargeIO::writeEBHDF5Level(handle,
                                     outputData,
@@ -2572,7 +2570,7 @@ Driver::writeCheckpointFile()
 
   // Write realm names -- these are needed because we also write computational loads to checkpoint files
   // so we can load balance on immediately restart, using the checkpointed loads.
-  for (auto r : m_amr->getRealms()) {
+  for (const auto& r : m_amr->getRealms()) {
     header.m_string[r] = r;
   }
 
@@ -2586,7 +2584,7 @@ Driver::writeCheckpointFile()
   const std::string str = prefix + suffix;
 
   // Output file
-  HDF5Handle handleOut(str.c_str(), HDF5Handle::CREATE);
+  HDF5Handle handleOut(str, HDF5Handle::CREATE);
   header.writeToFile(handleOut);
 
   Timer timer("Driver::writeCheckpointFile");
@@ -2700,7 +2698,7 @@ Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level)
   LevelData<FArrayBox> scratch(dbl, 1, IntVect::Zero);
 
   // Get loads.
-  for (auto r : m_amr->getRealms()) {
+  for (const auto& r : m_amr->getRealms()) {
     const Vector<long int> loads = m_timeStepper->getCheckpointLoads(r, a_level);
 
 #pragma omp parallel for schedule(runtime)
@@ -2753,7 +2751,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
 
   // Get the names of the realms that were checkpointed. This is a part of the HDF header.
   std::map<std::string, Vector<Vector<long int>>> checkpointedLoads;
-  for (auto s : header.m_string) {
+  for (const auto& s : header.m_string) {
     checkpointedLoads.emplace(s.second, Vector<Vector<long int>>());
   }
 
@@ -2768,7 +2766,7 @@ Driver::readCheckpointFile(const std::string& a_restartFile)
   // Print checkpointed Realm names.
   if (m_verbosity > 2) {
     pout() << "Driver::readCheckpointFile - checked Realms are: ";
-    for (auto r : checkpointedLoads) {
+    for (const auto& r : checkpointedLoads) {
       pout() << '"' << r.first << '"' << "\t";
     }
     pout() << endl;

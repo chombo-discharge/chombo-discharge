@@ -18,13 +18,9 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()
+EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC() : m_multByBco(true), m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()");
-
-  m_multByBco   = true;
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()
@@ -164,8 +160,6 @@ EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
     BoxLoops::loop(a_vofit, kernel);
   }
-
-  return;
 }
 
 #include <CD_NamespaceFooter.H>

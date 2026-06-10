@@ -22,11 +22,10 @@
 using namespace Physics::BrownianWalker;
 
 BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr<ItoSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr)
+  : m_solver(a_solver), m_amr(a_amr)
 {
   CH_TIME("BrownianWalkerTagger::BrownianWalkerTagger");
 
-  m_solver    = a_solver;
-  m_amr       = a_amr;
   m_name      = "BrownianWalker";
   m_verbosity = -1;
 }

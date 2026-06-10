@@ -39,14 +39,15 @@ RodDielectric::RodDielectric()
   ppRod.get("on", useRod);
   ppIns.get("on", useIns);
 
-  if (useRod)
+  if (useRod) {
     this->defineElectrode();
-  if (useIns)
+  }
+  if (useIns) {
     this->defineInsulator();
+  }
 }
 
-RodDielectric::~RodDielectric()
-{}
+RodDielectric::~RodDielectric() = default;
 
 void
 RodDielectric::defineElectrode()

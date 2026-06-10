@@ -13,7 +13,7 @@
 
 // Std includes
 #include <limits>
-#include <time.h>
+#include <ctime>
 #include <chrono>
 
 // Chombo includes
@@ -32,19 +32,17 @@
 #include <CD_DischargeIO.H>
 #include <CD_NamespaceHeader.H>
 
-McPhoto::McPhoto()
+McPhoto::McPhoto() : m_dirtySampling(false)
 {
   CH_TIME("McPhoto::McPhoto");
 
   m_name      = "McPhoto";
   m_className = "McPhoto";
 
-  m_stationary    = false;
-  m_dirtySampling = false;
+  m_stationary = false;
 }
 
-McPhoto::~McPhoto()
-{}
+McPhoto::~McPhoto() = default;
 
 bool
 McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi)
@@ -1068,13 +1066,13 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
             const RealVect lo = probLo + RealVect(iv) * dx;
             const RealVect hi = lo + RealVect::Unit * dx;
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
               const RealVect pos    = Random::randomPosition(lo, hi);
               const RealVect v      = Units::c * Random::getDirection();
-              const Real     weight = (Real)photonWeights[i];
+              const Real     weight = (Real)photonWeight;
               const Real     kappa  = m_rtSpecies->getAbsorptionCoefficient(pos);
 
               photons.add(Photon(pos, v / v.vectorLength(), kappa, weight));
@@ -1108,13 +1106,13 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
               DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
             }
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
               const RealVect pos    = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
               const RealVect v      = Units::c * Random::getDirection();
-              const Real     weight = (Real)photonWeights[i];
+              const Real     weight = (Real)photonWeight;
 
               photons.add(Photon(pos, v, m_rtSpecies->getAbsorptionCoefficient(pos), weight));
             }
@@ -1180,7 +1178,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
             const RealVect lo = probLo + RealVect(iv) * dx;
             const RealVect hi = lo + RealVect::Unit * dx;
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
@@ -1190,7 +1188,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               const Real     travelDistance = this->randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;
 
-              photons.add(PointParticle(finalPos, (Real)photonWeights[i]));
+              photons.add(PointParticle(finalPos, (Real)photonWeight));
             }
           }
         }
@@ -1221,13 +1219,13 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
               DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
             }
 
-            for (size_t i = 0; i < photonWeights.size(); i++) {
+            for (unsigned long photonWeight : photonWeights) {
 
               // Determine starting position within cell, propagation direction, absorption
               // length, and weight.
               const RealVect pos = Random::randomPosition(cellPos, lo, hi, bndryCentroid, bndryNormal, dx, volFrac);
               const RealVect direction      = Random::getDirection();
-              const Real     weight         = (Real)photonWeights[i];
+              const Real     weight         = (Real)photonWeight;
               const Real     kappa          = m_rtSpecies->getAbsorptionCoefficient(pos);
               const Real     travelDistance = this->randomExponential(kappa);
               const RealVect finalPos       = pos + travelDistance * direction;

@@ -31,8 +31,9 @@
 
 RodPlaneProfile::RodPlaneProfile()
 {
-  if (SpaceDim == 3)
+  if (SpaceDim == 3) {
     MayDay::Abort("RodPlaneProfile::RodPlaneProfile - this is currently for 2D only");
+  }
   std::string  str;
   Vector<Real> vec(SpaceDim);
 
@@ -97,8 +98,7 @@ RodPlaneProfile::RodPlaneProfile()
   this->setGasPermittivity(1.0);
 }
 
-RodPlaneProfile::~RodPlaneProfile()
-{}
+RodPlaneProfile::~RodPlaneProfile() = default;
 
 BaseIF*
 RodPlaneProfile::getBaseIF()

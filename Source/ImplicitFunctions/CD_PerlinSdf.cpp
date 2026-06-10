@@ -43,12 +43,11 @@ PerlinSdf::PerlinSdf(const Real     a_noiseAmp,
 }
 
 PerlinSdf::PerlinSdf(const PerlinSdf& a_inputIF)
+  : m_noiseAmp(a_inputIF.m_noiseAmp),
+    m_noiseFreq(a_inputIF.m_noiseFreq),
+    m_octaves(a_inputIF.m_octaves),
+    m_persistence(a_inputIF.m_persistence)
 {
-
-  m_noiseAmp    = a_inputIF.m_noiseAmp;
-  m_noiseFreq   = a_inputIF.m_noiseFreq;
-  m_persistence = a_inputIF.m_persistence;
-  m_octaves     = a_inputIF.m_octaves;
 
   for (int i = 0; i < 256; i++) {
     p[i]       = a_inputIF.p[i];
@@ -56,8 +55,7 @@ PerlinSdf::PerlinSdf(const PerlinSdf& a_inputIF)
   }
 }
 
-PerlinSdf::~PerlinSdf()
-{}
+PerlinSdf::~PerlinSdf() = default;
 
 Real
 PerlinSdf::value(const RealVect& a_pos) const

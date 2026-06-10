@@ -19,12 +19,9 @@
 #include <CD_EBHelmholtzDirichletDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC()
+EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC() : m_useConstant(false), m_useFunction(false)
 {
   CH_TIME("EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC()");
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(const Real a_value)

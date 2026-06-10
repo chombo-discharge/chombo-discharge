@@ -414,12 +414,13 @@ CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&          a_coarsenedCells,
     if (!isPointInside) {
       a_coarsenedCells |= vof.gridIndex();
     }
-    else
+    else {
       // Reconstruct the tracer fields and gradients again.
       for (int i = 0; i < m_numTracers; i++) {
         tr[i] = (*a_tracers[i])(vof, 0);
         gt[i] = RealVect(D_DECL((*a_gradTracers[i])(vof, 0), (*a_gradTracers[i])(vof, 1), (*a_gradTracers[i])(vof, 2)));
       }
+    }
 
     // Call the per-cell refinement method.
     const bool coarsen = this->coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);

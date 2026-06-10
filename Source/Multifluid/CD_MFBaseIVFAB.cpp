@@ -14,8 +14,7 @@
 #include <CD_MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
 
-MFBaseIVFAB::MFBaseIVFAB()
-{}
+MFBaseIVFAB::MFBaseIVFAB() = default;
 
 MFBaseIVFAB::MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
                          const Vector<EBGraph>&    a_phaseGraphs,
@@ -116,8 +115,8 @@ MFBaseIVFAB::linearOut(void* buf, const Box& R, const Interval& comps) const
     *buffer = m_phase[i]->size(R, comps);
     ++buffer;
   }
-  int*           size     = (int*)buf;
-  unsigned char* ebbuffer = (unsigned char*)buffer;
+  int*  size     = (int*)buf;
+  auto* ebbuffer = (unsigned char*)buffer;
   for (int i = 0; i < m_phase.size(); ++i) {
     m_phase[i]->linearOut(ebbuffer, R, comps);
     ebbuffer += size[i];
@@ -133,7 +132,7 @@ MFBaseIVFAB::linearIn(void* buf, const Box& R, const Interval& comps)
     CH_assert(size[i] == m_phase[i]->size(R, comps));
   }
 
-  unsigned char* ebbuffer = (unsigned char*)(size + m_phase.size());
+  auto* ebbuffer = (unsigned char*)(size + m_phase.size());
   for (int i = 0; i < m_phase.size(); ++i) {
     m_phase[i]->linearIn(ebbuffer, R, comps);
     ebbuffer += size[i];

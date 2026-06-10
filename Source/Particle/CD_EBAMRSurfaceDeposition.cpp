@@ -21,12 +21,9 @@
 #include <CD_EBAMRSurfaceDeposition.H>
 #include <CD_NamespaceHeader.H>
 
-EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept
+EBAMRSurfaceDeposition::EBAMRSurfaceDeposition() noexcept : m_debug(false), m_verbose(false)
 {
   CH_TIME("EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(weak)");
-
-  m_debug   = false;
-  m_verbose = false;
 }
 
 EBAMRSurfaceDeposition::EBAMRSurfaceDeposition(const Vector<RefCountedPtr<EBLevelGrid>>& a_ebGrids,

@@ -15,11 +15,9 @@
 #include <CD_Dielectric.H>
 #include <CD_NamespaceHeader.H>
 
-Dielectric::Dielectric()
+Dielectric::Dielectric() : m_isDefined(false)
 {
   CH_TIME("Dielectric::Dielectric()");
-
-  m_isDefined = false;
 }
 
 Dielectric::Dielectric(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity) : Dielectric()
@@ -42,8 +40,7 @@ Dielectric::Dielectric(const RefCountedPtr<BaseIF>&                     a_baseIF
   this->define(a_baseIF, a_permittivity);
 }
 
-Dielectric::~Dielectric()
-{}
+Dielectric::~Dielectric() = default;
 
 void
 Dielectric::define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity)

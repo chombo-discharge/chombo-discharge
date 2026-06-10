@@ -27,10 +27,11 @@ BoundedNoisePlane::BoundedNoisePlane(const std::string a_orientation,
                                      const Real        a_persistence,
                                      const int         a_octaves,
                                      const bool        a_reseed)
+  : m_maxAmp(0.0)
 {
 
   // Maximum amplitude that the Perlin noise function can spit out.
-  m_maxAmp = 0.0;
+
   for (int i = 0; i < a_octaves; i++) {
     m_maxAmp += a_noiseAmp * pow(a_persistence, i);
   }
@@ -74,20 +75,17 @@ BoundedNoisePlane::BoundedNoisePlane(const std::string a_orientation,
 }
 
 BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane& a_inputIF)
-{
-
-  m_normal  = a_inputIF.m_normal;
-  m_maxAmp  = a_inputIF.m_maxAmp;
-  m_point   = a_inputIF.m_point;
-  m_plane   = a_inputIF.m_plane;
-  m_perlin  = a_inputIF.m_perlin;
-  m_clampLo = a_inputIF.m_clampLo;
-  m_clampHi = a_inputIF.m_clampHi;
-  m_clampK  = a_inputIF.m_clampK;
-}
-
-BoundedNoisePlane::~BoundedNoisePlane()
+  : m_normal(a_inputIF.m_normal),
+    m_clampHi(a_inputIF.m_clampHi),
+    m_clampK(a_inputIF.m_clampK),
+    m_clampLo(a_inputIF.m_clampLo),
+    m_maxAmp(a_inputIF.m_maxAmp),
+    m_perlin(a_inputIF.m_perlin),
+    m_plane(a_inputIF.m_plane),
+    m_point(a_inputIF.m_point)
 {}
+
+BoundedNoisePlane::~BoundedNoisePlane() = default;
 
 Real
 BoundedNoisePlane::value(const RealVect& a_pos) const

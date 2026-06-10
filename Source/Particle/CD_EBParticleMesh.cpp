@@ -18,11 +18,9 @@
 #include <CD_EBParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
-EBParticleMesh::EBParticleMesh()
+EBParticleMesh::EBParticleMesh() : m_verbose(false)
 {
   CH_TIME("EBParticleMesh::EBParticleMesh");
-
-  m_verbose = false;
 }
 
 EBParticleMesh::EBParticleMesh(const ProblemDomain& a_domain,

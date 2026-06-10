@@ -16,7 +16,6 @@
 #include <EBCellFactory.H>
 #include <EBLevelGrid.H>
 #include <EBFluxFactory.H>
-#include <EBCellFactory.H>
 #include <EBLevelDataOps.H>
 #include <CH_Timer.H>
 
@@ -74,11 +73,9 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
     m_beta(a_beta),
     m_dx(a_dx),
     m_probLo(a_probLo),
-    m_eblgFine(),
+
     m_eblg(a_eblg),
-    m_eblgCoFi(),
-    m_eblgCoar(),
-    m_eblgCoarMG(),
+
     m_domainBc(a_domainBc),
     m_ebBc(a_ebBc),
     m_validCells(a_validCells),
@@ -820,7 +817,7 @@ EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&             a_Lphi,
     // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
     // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
     if (m_hasFine && m_doCoarsen) {
-      EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+      auto* fineOp = (EBHelmholtzOp*)a_finerOp;
       fineOp->coarsenCell((LevelData<EBCellFAB>&)a_phi, a_phiFine);
     }
 
@@ -855,7 +852,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
   // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level.
   if (m_hasFine && m_doCoarsen) {
-    EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+    auto* fineOp = (EBHelmholtzOp*)a_finerOp;
     fineOp->coarsenCell((LevelData<EBCellFAB>&)a_phi, a_phiFine);
   }
 
@@ -865,7 +862,7 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // are there because MFHelmholtzOp might decide to update ghost cells for us, in
   // which case we won't redo them.
   if (m_doExchange) {
-    LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
+    auto& phi = (LevelData<EBCellFAB>&)a_phi;
 
     phi.exchange(m_exchangeCopier);
   }
@@ -880,11 +877,11 @@ EBHelmholtzOp::refluxFreeAMROperator(LevelData<EBCellFAB>&             a_Lphi,
   // although this MIGHT have been done already we have no guarantee of that. Then we coarsen those fluxes
   // onto this level.
   if (m_hasFine) {
-    EBHelmholtzOp* fineOp = (EBHelmholtzOp*)a_finerOp;
+    auto* fineOp = (EBHelmholtzOp*)a_finerOp;
 
     fineOp->allocateFlux();
 
-    LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
+    auto& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
 
     phiFine.exchange(m_exchangeCopierFine);
     fineOp->inhomogeneousCFInterp(phiFine, a_phi);
@@ -1161,7 +1158,7 @@ EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 
   // Nasty cast, but there's no guarantee that a_phi came in with valid ghost cells. We could
   // do a local copy, but that can end up being expensive since this is called on every relaxation.
-  LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&)a_phi;
+  auto& phi = (LevelData<EBCellFAB>&)a_phi;
 
   if (m_doExchange) {
     phi.exchange(m_exchangeCopier);
@@ -1908,8 +1905,9 @@ EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&             a_Lcorr,
     IntVect loIV = a_cellBox.smallEnd();
     IntVect hiIV = a_cellBox.bigEnd();
     for (int dir = 0; dir < SpaceDim; dir++) {
-      if (loIV[dir] % 2 != a_color[dir])
+      if (loIV[dir] % 2 != a_color[dir]) {
         loIV[dir]++;
+      }
     }
 
     if (loIV <= hiIV) {
@@ -2319,8 +2317,8 @@ EBHelmholtzOp::reflux(LevelData<EBCellFAB>&             a_Lphi,
   // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid fluxes.
   //
 
-  EBHelmholtzOp&        finerOp = (EBHelmholtzOp&)(a_finerOp);
-  LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
+  auto& finerOp = (EBHelmholtzOp&)(a_finerOp);
+  auto& phiFine = (LevelData<EBCellFAB>&)a_phiFine;
   phiFine.exchange(m_exchangeCopierFine);
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
 

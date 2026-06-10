@@ -32,9 +32,11 @@ DischargeIO::numberFmt(const long long n, char sep) noexcept
   string s = fmt.str();
   s.reserve(s.length() + s.length() / 3);
 
-  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j)
-    if (i != 0 && j % 3 == 0)
+  for (int i = 0, j = 3 - s.length() % 3; i < s.length(); ++i, ++j) {
+    if (i != 0 && j % 3 == 0) {
       s.insert(i++, 1, sep);
+    }
+  }
 
   return s;
 }
@@ -394,7 +396,7 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
 #endif
-  HDF5Handle handle(a_filename.c_str(), HDF5Handle::CREATE);
+  HDF5Handle handle(a_filename, HDF5Handle::CREATE);
 
   // write header data
   DischargeIO::writeEBHDF5Header(handle, a_numLevels, a_probLo, a_variableNames);

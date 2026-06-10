@@ -173,7 +173,7 @@ MechanicalShaft::defineDielectric() noexcept
 
   ParmParse pp("MechanicalShaft");
 
-  std::string shape       = "";
+  std::string shape;
   std::string orientation = "+z";
 
   Real eps       = -1.0;

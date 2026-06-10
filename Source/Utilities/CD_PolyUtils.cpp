@@ -112,8 +112,9 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
         q = (q - 1.0) * (r - 1.0) * (s - 1.0);
       }
 
-      if (p > 0)
+      if (p > 0) {
         q = -q;
+      }
 
       p = Abs(p);
 
@@ -155,7 +156,7 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
     }
 
     fb = -a_impFunc->value(bPt + a_point1);
-    //    std::cout << "Iteration: " << i << "\t Function value: " << fb << std::endl;
+    //    std::cout << "Iteration: " << i << "\t Function value: " << fb << endl;
   }
 
   // if(i >= maxIter){

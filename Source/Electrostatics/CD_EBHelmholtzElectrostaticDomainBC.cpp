@@ -17,10 +17,9 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs)
+  : m_electrostaticBCs(a_electrostaticBCs)
 {
   CH_TIME("EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC()");
-
-  m_electrostaticBCs = a_electrostaticBCs;
 
   for (int dir = 0; dir < SpaceDim; dir++) {
     for (SideIterator sit; sit.ok(); ++sit) {

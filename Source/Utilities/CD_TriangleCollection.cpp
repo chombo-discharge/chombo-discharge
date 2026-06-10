@@ -18,10 +18,8 @@
 #include <CD_TriangleCollection.H>
 #include <CD_NamespaceHeader.H>
 
-TriangleCollection::TriangleCollection() noexcept
-{
-  m_isDefined = false;
-}
+TriangleCollection::TriangleCollection() noexcept : m_isDefined(false)
+{}
 
 TriangleCollection::TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
@@ -33,13 +31,12 @@ TriangleCollection::TriangleCollection(const std::string& a_filename, const std:
   this->define(DataParser::readTriangles(a_filename, a_vertexDataIdentifier));
 }
 
-TriangleCollection::~TriangleCollection() noexcept
-{}
+TriangleCollection::~TriangleCollection() noexcept = default;
 
 void
 TriangleCollection::define(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {
-  CH_assert(a_triangles.size() > 0);
+  CH_assert(!a_triangles.empty());
   if (a_triangles.empty()) {
     return;
   }

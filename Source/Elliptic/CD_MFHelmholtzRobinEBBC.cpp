@@ -21,15 +21,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_order(-1), m_useConstant(false), m_useFunction(false), m_weight(-1)
 {
   CH_TIME("MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
-
-  m_order  = -1;
-  m_weight = -1;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 MFHelmholtzRobinEBBC::~MFHelmholtzRobinEBBC()
@@ -210,7 +204,7 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
         // const std::string vofErr  = " on vof = ";
         // const std::string impErr  = " (this may cause multigrid divergence)";
 
-        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << std::endl;
+        // std::cout << baseErr << m_eblg.getDomain() << vofErr << vof << impErr << endl;
 
         fluxStencil.clear();
       }
@@ -265,8 +259,6 @@ MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhas
 
     BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
-
-  return;
 }
 
 VoFStencil

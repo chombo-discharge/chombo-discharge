@@ -20,18 +20,15 @@
 #include <CD_EBMGProlong.H>
 #include <CD_NamespaceHeader.H>
 
-EBMGProlong::EBMGProlong() noexcept
+EBMGProlong::EBMGProlong() noexcept : m_isDefined(false)
 {
   CH_TIME("EBMGProlong::EBMGProlong(default)");
-
-  m_isDefined = false;
 }
 
 EBMGProlong::EBMGProlong(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar, const int& a_refRat) noexcept
+  : m_isDefined(false)
 {
   CH_TIME("EBMGProlong::EBMGProlong(full)");
-
-  m_isDefined = false;
 
   this->define(a_eblgFine, a_eblgCoar, a_refRat);
 }
