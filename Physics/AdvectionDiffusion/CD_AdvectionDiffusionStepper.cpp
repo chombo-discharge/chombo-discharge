@@ -24,11 +24,11 @@ using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionStepper::AdvectionDiffusionStepper()
   : m_realm(Realm::Primal),
-    m_debug(false),
-    m_forceCFL(-1.0),
-    m_maxDt(std::numeric_limits<Real>::max()),
+    m_phase(phase::gas),
     m_minDt(0.0),
-    m_phase(phase::gas)
+    m_maxDt(std::numeric_limits<Real>::max()),
+    m_forceCFL(-1.0),
+    m_debug(false)
 {
   CH_TIME("AdvectionDiffusionStepper::AdvectionDiffusionStepper");
 

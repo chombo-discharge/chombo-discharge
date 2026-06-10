@@ -15,11 +15,11 @@
 #include <CD_NamespaceHeader.H>
 
 SphereSdf::SphereSdf(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside)
-  : m_center(a_center), m_fluidInside(a_fluidInside), m_radius(a_radius)
+  : m_center(a_center), m_radius(a_radius), m_fluidInside(a_fluidInside)
 {}
 
 SphereSdf::SphereSdf(const SphereSdf& a_inputIF)
-  : m_center(a_inputIF.m_center), m_fluidInside(a_inputIF.m_fluidInside), m_radius(a_inputIF.m_radius)
+  : m_center(a_inputIF.m_center), m_radius(a_inputIF.m_radius), m_fluidInside(a_inputIF.m_fluidInside)
 {}
 
 SphereSdf::~SphereSdf() = default;

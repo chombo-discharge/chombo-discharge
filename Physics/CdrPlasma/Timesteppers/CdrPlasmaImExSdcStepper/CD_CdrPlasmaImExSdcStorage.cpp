@@ -23,7 +23,7 @@ CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_
                                                 const std::string&            a_realm,
                                                 const phase::which_phase      a_phase,
                                                 const int                     a_ncomp)
-  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+  : m_realm(a_realm), m_amr(a_amr), m_phase(a_phase), m_ncomp(a_ncomp)
 {}
 
 CdrPlasmaImExSdcStepper::CdrStorage::~CdrStorage()
@@ -108,7 +108,7 @@ CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>
                                                     const std::string&            a_realm,
                                                     const phase::which_phase      a_phase,
                                                     const int                     a_ncomp)
-  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+  : m_realm(a_realm), m_amr(a_amr), m_phase(a_phase), m_ncomp(a_ncomp)
 {}
 
 CdrPlasmaImExSdcStepper::FieldStorage::~FieldStorage()
@@ -144,7 +144,7 @@ CdrPlasmaImExSdcStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_am
                                               const std::string&            a_realm,
                                               const phase::which_phase      a_phase,
                                               const int                     a_ncomp)
-  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+  : m_realm(a_realm), m_amr(a_amr), m_phase(a_phase), m_ncomp(a_ncomp)
 {}
 
 CdrPlasmaImExSdcStepper::RtStorage::~RtStorage()
@@ -176,7 +176,7 @@ CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>
                                                     const std::string&            a_realm,
                                                     const phase::which_phase      a_phase,
                                                     const int                     a_ncomp)
-  : m_amr(a_amr), m_ncomp(a_ncomp), m_phase(a_phase), m_realm(a_realm)
+  : m_realm(a_realm), m_amr(a_amr), m_phase(a_phase), m_ncomp(a_ncomp)
 {}
 
 CdrPlasmaImExSdcStepper::SigmaStorage::~SigmaStorage()

@@ -21,11 +21,11 @@
 #include <CD_NamespaceHeader.H>
 
 BoxSdf::BoxSdf(const RealVect& a_loCorner, const RealVect& a_hiCorner, const bool& a_fluidInside)
-  : m_loCorner(a_loCorner), m_fluidInside(a_fluidInside), m_hiCorner(a_hiCorner)
+  : m_loCorner(a_loCorner), m_hiCorner(a_hiCorner), m_fluidInside(a_fluidInside)
 {}
 
 BoxSdf::BoxSdf(const BoxSdf& a_inputIF)
-  : m_loCorner(a_inputIF.m_loCorner), m_fluidInside(a_inputIF.m_fluidInside), m_hiCorner(a_inputIF.m_hiCorner)
+  : m_loCorner(a_inputIF.m_loCorner), m_hiCorner(a_inputIF.m_hiCorner), m_fluidInside(a_inputIF.m_fluidInside)
 {}
 
 BoxSdf::~BoxSdf() = default;

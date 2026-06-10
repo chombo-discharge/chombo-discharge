@@ -19,7 +19,7 @@
 MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int                               a_phase,
                                                            const ElectrostaticEbBc&                a_electrostaticBCs,
                                                            const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_electrostaticBCs(a_electrostaticBCs), m_order(-1), m_weight(-1)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_order(-1), m_weight(-1), m_electrostaticBCs(a_electrostaticBCs)
 {
   CH_TIME("MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC");
 

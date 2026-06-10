@@ -18,14 +18,14 @@ TorusSdf::TorusSdf(const RealVect& a_center,
                    const Real      a_majorRadius,
                    const Real      a_minorRadius,
                    const bool      a_fluidInside)
-  : m_center(a_center), m_fluidInside(a_fluidInside), m_majorRadius(a_majorRadius), m_minorRadius(a_minorRadius)
+  : m_center(a_center), m_majorRadius(a_majorRadius), m_minorRadius(a_minorRadius), m_fluidInside(a_fluidInside)
 {}
 
 TorusSdf::TorusSdf(const TorusSdf& a_inputIF)
   : m_center(a_inputIF.m_center),
-    m_fluidInside(a_inputIF.m_fluidInside),
     m_majorRadius(a_inputIF.m_majorRadius),
-    m_minorRadius(a_inputIF.m_minorRadius)
+    m_minorRadius(a_inputIF.m_minorRadius),
+    m_fluidInside(a_inputIF.m_fluidInside)
 {}
 
 TorusSdf::~TorusSdf() = default;

@@ -20,7 +20,7 @@ using namespace Physics::CdrPlasma;
 CdrPlasmaGodunovStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                 const std::string&            a_realm,
                                                 const phase::which_phase      a_phase)
-  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
+  : m_amr(a_amr), m_realm(a_realm), m_phase(a_phase)
 {}
 
 CdrPlasmaGodunovStepper::CdrStorage::~CdrStorage()
@@ -80,7 +80,7 @@ CdrPlasmaGodunovStepper::CdrStorage::deallocateStorage()
 CdrPlasmaGodunovStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string&            a_realm,
                                                     const phase::which_phase      a_phase)
-  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
+  : m_amr(a_amr), m_realm(a_realm), m_phase(a_phase)
 {}
 
 CdrPlasmaGodunovStepper::FieldStorage::~FieldStorage()
@@ -111,7 +111,7 @@ CdrPlasmaGodunovStepper::FieldStorage::deallocateStorage()
 CdrPlasmaGodunovStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                               const std::string&            a_realm,
                                               const phase::which_phase      a_phase)
-  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
+  : m_amr(a_amr), m_realm(a_realm), m_phase(a_phase)
 {}
 
 CdrPlasmaGodunovStepper::RtStorage::~RtStorage() = default;
@@ -139,7 +139,7 @@ CdrPlasmaGodunovStepper::RtStorage::deallocateStorage()
 CdrPlasmaGodunovStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
                                                     const std::string&            a_realm,
                                                     const phase::which_phase      a_phase)
-  : m_amr(a_amr), m_phase(a_phase), m_realm(a_realm)
+  : m_amr(a_amr), m_realm(a_realm), m_phase(a_phase)
 {}
 
 CdrPlasmaGodunovStepper::SigmaStorage::~SigmaStorage() = default;

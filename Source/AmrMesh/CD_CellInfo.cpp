@@ -16,7 +16,7 @@
 #include <CD_NamespaceHeader.H>
 
 CellInfo::CellInfo(const IntVect a_gridIndex, const Real a_dx) noexcept
-  : m_gridIndex(a_gridIndex), m_bndryCentroid(RealVect::Zero), m_bndryNormal(RealVect::Zero), m_dx(a_dx), m_volFrac(1.0)
+  : m_gridIndex(a_gridIndex), m_dx(a_dx), m_volFrac(1.0), m_bndryCentroid(RealVect::Zero), m_bndryNormal(RealVect::Zero)
 {
 
   m_validLo = -0.5 * RealVect::Unit;
@@ -29,10 +29,10 @@ CellInfo::CellInfo(const IntVect   a_gridIndex,
                    const RealVect& a_bndryCentroid,
                    const RealVect& a_bndryNormal) noexcept
   : m_gridIndex(a_gridIndex),
-    m_bndryCentroid(a_bndryCentroid),
-    m_bndryNormal(a_bndryNormal),
     m_dx(a_dx),
-    m_volFrac(a_volFrac)
+    m_volFrac(a_volFrac),
+    m_bndryCentroid(a_bndryCentroid),
+    m_bndryNormal(a_bndryNormal)
 {
 
   m_validLo = -0.5 * RealVect::Unit;

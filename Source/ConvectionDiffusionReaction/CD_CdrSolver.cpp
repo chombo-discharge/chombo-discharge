@@ -27,7 +27,7 @@
 constexpr int CdrSolver::m_comp;
 constexpr int CdrSolver::m_nComp;
 
-CdrSolver::CdrSolver() : m_verbosity(-1), m_className("CdrSolver"), m_name("CdrSolver"), m_regridSlopes(true)
+CdrSolver::CdrSolver() : m_name("CdrSolver"), m_className("CdrSolver"), m_verbosity(-1), m_regridSlopes(true)
 {
 
   // Default options.

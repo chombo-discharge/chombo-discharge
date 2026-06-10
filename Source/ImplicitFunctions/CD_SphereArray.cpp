@@ -72,10 +72,10 @@ SphereArray::SphereArray(const Real      a_radius,
 }
 
 SphereArray::SphereArray(const SphereArray& a_input)
-  : m_slowUnion(a_input.m_slowUnion),
-    m_fastUnion(a_input.m_fastUnion),
+  : m_useFast(a_input.m_useFast),
     m_flipInside(a_input.m_flipInside),
-    m_useFast(a_input.m_useFast)
+    m_slowUnion(a_input.m_slowUnion),
+    m_fastUnion(a_input.m_fastUnion)
 {
   CH_TIME("SphereArray::SphereArray(other)");
 }

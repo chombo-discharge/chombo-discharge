@@ -20,7 +20,7 @@
 #include <CD_CellTagger.H>
 #include <CD_NamespaceHeader.H>
 
-CellTagger::CellTagger() : m_verbosity(-1), m_buffer(0), m_name("CellTagger")
+CellTagger::CellTagger() : m_name("CellTagger"), m_verbosity(-1), m_buffer(0)
 {
   CH_TIME("CellTagger::CellTagger()");
 

@@ -31,12 +31,12 @@ ScanShop::ScanShop(const BaseIF&        a_localGeom,
                    int                  a_ebGhost,
                    Real                 a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF),
-    m_baseIF(&a_localGeom),
-    m_boxSorting(BoxSorting::Morton),
-    m_ebGhost(a_ebGhost),
     m_fileName("ScanShopReport.dat"),
-    m_hasScanLevel(false),
-    m_profile(false)
+    m_boxSorting(BoxSorting::Morton),
+    m_profile(false),
+    m_ebGhost(a_ebGhost),
+    m_baseIF(&a_localGeom),
+    m_hasScanLevel(false)
 {
 
   CH_TIME("ScanShop::ScanShop(BaseIF, int, Real, RealVect, ProblemDomain, ProblemDomain, int, Real)");

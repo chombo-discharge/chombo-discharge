@@ -44,14 +44,14 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
                const RefCountedPtr<TimeStepper>&           a_timeStepper,
                const RefCountedPtr<AmrMesh>&               a_amr,
                const RefCountedPtr<CellTagger>&            a_cellTagger)
-  : m_verbosity(-1),
-    m_doCoarsening(true),
-    m_dt(0.0),
+  : m_realm(Realm::Primal),
+    m_verbosity(-1),
+    m_timeStep(0),
     m_outputDt(-1.0),
-    m_profile(false),
-    m_realm(Realm::Primal),
+    m_dt(0.0),
     m_time(0.0),
-    m_timeStep(0)
+    m_profile(false),
+    m_doCoarsening(true)
 {
   CH_TIME("Driver::Driver");
 

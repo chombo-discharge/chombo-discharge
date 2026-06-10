@@ -23,9 +23,9 @@ CylinderSdf::CylinderSdf(const RealVect& a_center1,
                          const bool&     a_fluidInside)
   : m_endPoint1(a_center1),
     m_endPoint2(a_center2),
-    m_fluidInside(a_fluidInside),
     m_length(m_top.vectorLength()),
-    m_radius(a_radius)
+    m_radius(a_radius),
+    m_fluidInside(a_fluidInside)
 {
 
   m_center = 0.5 * (m_endPoint1 + m_endPoint2);
@@ -36,13 +36,13 @@ CylinderSdf::CylinderSdf(const RealVect& a_center1,
 
 CylinderSdf::CylinderSdf(const CylinderSdf& a_inputIF)
   : m_endPoint1(a_inputIF.m_endPoint1),
+    m_endPoint2(a_inputIF.m_endPoint2),
+    m_top(a_inputIF.m_top),
     m_axis(a_inputIF.m_axis),
     m_center(a_inputIF.m_center),
-    m_endPoint2(a_inputIF.m_endPoint2),
-    m_fluidInside(a_inputIF.m_fluidInside),
     m_length(a_inputIF.m_length),
     m_radius(a_inputIF.m_radius),
-    m_top(a_inputIF.m_top)
+    m_fluidInside(a_inputIF.m_fluidInside)
 {}
 
 Real

@@ -20,7 +20,7 @@ EBHelmholtzEddingtonSP1DomainBCFactory::EBHelmholtzEddingtonSP1DomainBCFactory(
   const RefCountedPtr<RtSpecies>& a_species,
   const Real                      a_r1,
   const Real                      a_r2)
-  : m_eddingtonBCs(a_eddingtonBCs), m_r1(a_r1), m_r2(a_r2), m_species(a_species)
+  : m_eddingtonBCs(a_eddingtonBCs), m_species(a_species), m_r1(a_r1), m_r2(a_r2)
 {}
 
 EBHelmholtzEddingtonSP1DomainBCFactory::~EBHelmholtzEddingtonSP1DomainBCFactory() = default;

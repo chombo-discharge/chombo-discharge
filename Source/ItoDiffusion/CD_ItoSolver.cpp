@@ -34,16 +34,16 @@ constexpr int ItoSolver::m_comp;
 constexpr int ItoSolver::m_nComp;
 
 ItoSolver::ItoSolver()
-  : m_verbosity(-1),
-    m_checkpointing(WhichCheckpoint::Particles),
-    m_className("ItoSolver"),
-    m_coarseFineDeposition(CoarseFineDeposition::Transition),
-    m_deposition(DepositionType::CIC),
+  : m_checkpointing(WhichCheckpoint::Particles),
     m_mobilityInterp(WhichMobilityInterpolation::Direct),
-    m_name("ItoSolver"),
+    m_realm(Realm::primal),
     m_phase(phase::gas),
-    m_plotDeposition(DepositionType::CIC),
-    m_realm(Realm::primal)
+    m_name("ItoSolver"),
+    m_className("ItoSolver"),
+    m_verbosity(-1),
+    m_deposition(DepositionType::CIC),
+    m_coarseFineDeposition(CoarseFineDeposition::Transition),
+    m_plotDeposition(DepositionType::CIC)
 {
   CH_TIME("ItoSolver::ItoSolver");
 

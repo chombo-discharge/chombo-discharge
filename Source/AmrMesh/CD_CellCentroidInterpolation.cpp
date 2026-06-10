@@ -21,7 +21,7 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-CellCentroidInterpolation::CellCentroidInterpolation() noexcept : m_dx(-1.0), m_isDefined(false)
+CellCentroidInterpolation::CellCentroidInterpolation() noexcept : m_isDefined(false), m_dx(-1.0)
 {
   CH_TIME("CellCentroidInterpolation:CellCentroidInterpolation(weak)");
 }

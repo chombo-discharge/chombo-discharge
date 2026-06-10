@@ -21,11 +21,11 @@
 
 MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
   : MFHelmholtzEBBC(a_phase, a_jumpBC),
-    m_dropOrder(false),
-    m_order(-1),
     m_useConstant(false),
     m_useFunction(false),
-    m_weight(-1)
+    m_order(-1),
+    m_weight(-1),
+    m_dropOrder(false)
 {
   CH_TIME("MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 

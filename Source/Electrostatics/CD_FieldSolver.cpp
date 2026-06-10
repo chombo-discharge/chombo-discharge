@@ -32,7 +32,7 @@ constexpr int FieldSolver::m_comp;
 constexpr int FieldSolver::m_nComp;
 
 FieldSolver::FieldSolver()
-  : m_className("FieldSolver"), m_isVoltageSet(false), m_realm(Realm::Primal), m_regridSlopes(true), m_verbosity(-1)
+  : m_realm(Realm::Primal), m_className("FieldSolver"), m_isVoltageSet(false), m_regridSlopes(true), m_verbosity(-1)
 {
   CH_TIME("FieldSolver::FieldSolver()");
 

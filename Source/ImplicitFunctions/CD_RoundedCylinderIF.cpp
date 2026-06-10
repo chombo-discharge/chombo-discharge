@@ -32,7 +32,7 @@ RoundedCylinderIF::RoundedCylinderIF(const RealVect& a_center1,
                                      const Real      a_radius,
                                      const Real      a_curv,
                                      const bool      a_fluidInside)
-  : m_center1(a_center1), m_center2(a_center2), m_curv(a_curv), m_fluidInside(a_fluidInside), m_radius(a_radius)
+  : m_center1(a_center1), m_center2(a_center2), m_radius(a_radius), m_curv(a_curv), m_fluidInside(a_fluidInside)
 {
 
   m_length = (m_center2 - m_center1).vectorLength();

@@ -76,13 +76,13 @@ BoundedNoisePlane::BoundedNoisePlane(const std::string& a_orientation,
 
 BoundedNoisePlane::BoundedNoisePlane(const BoundedNoisePlane& a_inputIF)
   : m_normal(a_inputIF.m_normal),
+    m_point(a_inputIF.m_point),
+    m_clampLo(a_inputIF.m_clampLo),
     m_clampHi(a_inputIF.m_clampHi),
     m_clampK(a_inputIF.m_clampK),
-    m_clampLo(a_inputIF.m_clampLo),
     m_maxAmp(a_inputIF.m_maxAmp),
-    m_perlin(a_inputIF.m_perlin),
     m_plane(a_inputIF.m_plane),
-    m_point(a_inputIF.m_point)
+    m_perlin(a_inputIF.m_perlin)
 {}
 
 BoundedNoisePlane::~BoundedNoisePlane() = default;

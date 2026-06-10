@@ -21,7 +21,7 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
-  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_order(-1), m_useConstant(false), m_useFunction(false), m_weight(-1)
+  : MFHelmholtzEBBC(a_phase, a_jumpBC), m_useConstant(false), m_useFunction(false), m_order(-1), m_weight(-1)
 {
   CH_TIME("MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 }

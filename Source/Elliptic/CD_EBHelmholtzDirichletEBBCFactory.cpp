@@ -19,7 +19,7 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()
-  : m_order(-1), m_domainDropOrder(0), m_useConstant(false), m_useFunction(false), m_weight(-1)
+  : m_useConstant(false), m_useFunction(false), m_order(-1), m_weight(-1), m_domainDropOrder(0)
 {
   CH_TIME("EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory()");
 }

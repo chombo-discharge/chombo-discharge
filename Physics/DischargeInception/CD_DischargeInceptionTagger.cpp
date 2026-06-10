@@ -27,7 +27,7 @@ DischargeInceptionTagger::DischargeInceptionTagger(
   const EBAMRCellData* const                                 a_electricField,
   const std::function<Real(const Real E, const RealVect x)>& a_alphaEff,
   const phase::which_phase                                   a_phase)
-  : m_amr(a_amrMesh), m_alphaEff(a_alphaEff), m_electricField(a_electricField), m_phase(a_phase), m_plot(true)
+  : m_amr(a_amrMesh), m_electricField(a_electricField), m_alphaEff(a_alphaEff), m_phase(a_phase), m_plot(true)
 {
   CH_TIME("DischargeInceptionTagger::DischargeInceptionTagger()");
 

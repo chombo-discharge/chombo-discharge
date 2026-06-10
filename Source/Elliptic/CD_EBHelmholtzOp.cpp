@@ -76,9 +76,9 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                             a_
 
     m_eblg(a_eblg),
 
+    m_validCells(a_validCells),
     m_domainBc(a_domainBc),
     m_ebBc(a_ebBc),
-    m_validCells(a_validCells),
     m_interpolator(a_interpolator),
     m_fluxReg(a_fluxReg),
     m_coarAve(a_coarAve),

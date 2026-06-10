@@ -32,7 +32,7 @@ RandomInterface::ClampedNoisePlane::ClampedNoisePlane(const Vec3& a_point,
                                                       const Real  a_noiseAmplitude,
                                                       const Real  a_noisePersistence,
                                                       const int   a_noiseOctaves) noexcept
-  : m_point(a_point), m_clampDx(a_clampDx), m_normal(a_normal)
+  : m_point(a_point), m_normal(a_normal), m_clampDx(a_clampDx)
 {
 
   for (int dir = 0; dir < SpaceDim; dir++) {

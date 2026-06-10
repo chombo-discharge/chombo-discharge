@@ -80,7 +80,7 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect& a_point,
 }
 
 ProfilePlaneIF::ProfilePlaneIF(const ProfilePlaneIF& a_inputIF)
-  : m_fluidInside(a_inputIF.m_fluidInside), m_baseif(a_inputIF.m_baseif)
+  : m_baseif(a_inputIF.m_baseif), m_fluidInside(a_inputIF.m_fluidInside)
 {}
 
 ProfilePlaneIF::~ProfilePlaneIF() = default;

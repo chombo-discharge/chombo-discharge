@@ -29,7 +29,7 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
-AmrMesh::AmrMesh() : m_finestLevel(0), m_hasGrids(false), m_oldFinestLevel(-1)
+AmrMesh::AmrMesh() : m_finestLevel(0), m_oldFinestLevel(-1), m_hasGrids(false)
 {
 
   // Default things
