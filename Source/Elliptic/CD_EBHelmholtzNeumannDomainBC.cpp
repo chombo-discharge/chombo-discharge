@@ -176,7 +176,6 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex& a_vof,
             centeredDphiDn = m_functionDphiDn(this->getBoundaryPosition(curVof.gridIndex(), a_dir, a_side));
           }
           else {
-            centeredDphiDn = 0.0;
             MayDay::Error("EBHelmholtzNeumannDomainBC::getFaceFlux - logic bust");
           }
 

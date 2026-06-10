@@ -726,12 +726,6 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
   // 1. The first time we enter this routine, velocities were updated.
   // 2. For further calls, source terms and velocities have been overwritten, but since the explicit
   //    operator slopes do not change, this is perfectly fine. We just increment with the lagged terms.
-  Real t0, t1;
-  Real total_time     = 0.0;
-  Real setup_time     = 0.0;
-  Real advect_time    = 0.0;
-  Real diffusive_time = 0.0;
-
   // We begin with phi[0] = phi(t_n). Then update phi[m+1].
   Real time = a_time;
   for (int m = 0; m < m_p; m++) {
@@ -741,43 +735,29 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
     CdrPlasmaImExSdcStepper::computeReactionNetwork(
       m,
       a_time,
-      m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
+      m_dtm[m]); // Update the CDR and RTE source terms using the correct step size
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
     // which is what we need to do at the start of the time step. In principle, these things do not change
     // and so we could probably store them somewhere for increased performance.
-    if (m == 0 &&
-        !a_lagged_terms) { // This updates the CDR boundary conditions; since these are used to compute the slopes,
-      t0 = Timer::
-        wallClock(); // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor.
+    if (m == 0 && !a_lagged_terms) {
       CdrPlasmaImExSdcStepper::computeCdrEbStates();
       CdrPlasmaImExSdcStepper::computeCdrFluxes(a_time);
       CdrPlasmaImExSdcStepper::computeCdrDomainStates();
       CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(a_time);
       CdrPlasmaImExSdcStepper::computeSigmaFlux();
-      t1 = Timer::wallClock();
-
-      total_time = -t0;
-      setup_time = t1 - t0;
     }
 
-    // This does the transient rte advance. Source terms were uåpdated in the computeReactionNetwork routine above.
-    t0 = Timer::wallClock();
+    // This does the transient rte advance. Source terms were updated in the computeReactionNetwork routine above.
     if (!(m_rte->isStationary())) {
       CdrPlasmaImExSdcStepper::integrateRtTransient(a_dt);
     }
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
-    t0 = Timer::wallClock();
     CdrPlasmaImExSdcStepper::integrateAdvectionReaction(a_dt, m, a_lagged_terms);
-    t1 = Timer::wallClock();
-    advect_time += t1 - t0;
 
     // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit diffusion solve
-    t0 = Timer::wallClock();
     CdrPlasmaImExSdcStepper::integrateDiffusion(a_dt, m, a_lagged_terms);
-    t1 = Timer::wallClock();
-    diffusive_time += t1 - t0;
 
     // After the diffusion step we update the Poisson and *stationary* RTE equations
     Vector<EBAMRCellData*> cdr_densities_mp1 = CdrPlasmaImExSdcStepper::getCdrSolversPhiK(m + 1);
@@ -820,18 +800,6 @@ CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const boo
 
     time += m_dtm[m];
   }
-  t1 = Timer::wallClock();
-
-  total_time += t1;
-
-#if 0
-  pout() << endl
-	 << "setup time = " << setup_time << endl
-	 << "advect_time = " << advect_time << endl
-	 << "diffusive_time = " << diffusive_time << endl
-	 << "total time = " << total_time << endl
-	 << endl;
-#endif
 }
 
 void

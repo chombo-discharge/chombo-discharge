@@ -202,10 +202,6 @@ EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
         C = a_useHomogeneous ? 0 : this->m_functionC(pos);
       }
       else {
-        A = 0.0;
-        B = 0.0;
-        C = 0.0;
-
         MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (VolIndex version) - logic bust");
       }
 
