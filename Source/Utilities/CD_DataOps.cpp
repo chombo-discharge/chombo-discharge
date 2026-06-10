@@ -24,7 +24,7 @@
 #include <CD_MultifluidAlias.H>
 #include <CD_NamespaceHeader.H>
 
-static void
+void
 DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceData,
                                            const EBAMRCellData&         a_cellData,
                                            const Vector<ProblemDomain>& a_domains,
@@ -41,7 +41,7 @@ DataOps::averageCellVelocityToFaceVelocity(EBAMRFluxData&               a_faceDa
   }
 }
 
-static void
+void
 DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceData,
                                            const LevelData<EBCellFAB>& a_cellData,
                                            const ProblemDomain&        a_domain,
@@ -150,7 +150,7 @@ DataOps::averageCellVelocityToFaceVelocity(LevelData<EBFluxFAB>&       a_faceDat
   a_faceData.exchange();
 }
 
-static void
+void
 DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
                            const EBAMRCellData&         a_cellData,
                            const Vector<ProblemDomain>& a_domains)
@@ -166,7 +166,7 @@ DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
   }
 }
 
-static void
+void
 DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
                            const EBAMRCellData&         a_cellData,
                            const Vector<ProblemDomain>& a_domains,
@@ -188,7 +188,7 @@ DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
   }
 }
 
-static void
+void
 DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
                            const LevelData<EBCellFAB>& a_cellData,
                            const ProblemDomain&        a_domain,
@@ -366,7 +366,7 @@ DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
   a_faceData.exchange();
 }
 
-static void
+void
 DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
                            const EBAMRFluxData&         a_faceData,
                            const Vector<ProblemDomain>& a_domains)
@@ -378,7 +378,7 @@ DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
   }
 }
 
-static void
+void
 DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
                            const LevelData<EBFluxFAB>& a_fluxData,
                            const ProblemDomain& /*a_domain*/)
@@ -457,7 +457,7 @@ DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
   a_cellData.exchange();
 }
 
-static void
+void
 DataOps::axby(LevelData<EBCellFAB>&       a_lhs,
               const LevelData<EBCellFAB>& a_x,
               const LevelData<EBCellFAB>& a_y,
@@ -477,7 +477,7 @@ DataOps::axby(LevelData<EBCellFAB>&       a_lhs,
   }
 }
 
-static void
+void
 DataOps::compute(EBAMRCellData& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
 {
   CH_TIME("DataOps::compute(EBAMRCellData, std::function)");
@@ -487,7 +487,7 @@ DataOps::compute(EBAMRCellData& a_data, const std::function<Real(const Real a_ce
   }
 }
 
-static void
+void
 DataOps::compute(LevelData<EBCellFAB>& a_data, const std::function<Real(const Real a_cellValue)>& a_func) noexcept
 {
   CH_TIME("DataOps::compute(LevelData<EBCellFAB>, std::function)");
@@ -540,7 +540,7 @@ DataOps::dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const
   }
 }
 
-static void
+void
 DataOps::dotProduct(LevelData<MFCellFAB>&       a_result,
                     const LevelData<MFCellFAB>& a_data1,
                     const LevelData<MFCellFAB>& a_data2)
@@ -586,7 +586,7 @@ DataOps::dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const
   }
 }
 
-static void
+void
 DataOps::dotProduct(LevelData<EBCellFAB>&       a_result,
                     const LevelData<EBCellFAB>& a_data1,
                     const LevelData<EBCellFAB>& a_data2)
@@ -613,7 +613,7 @@ DataOps::dotProduct(LevelData<EBCellFAB>&       a_result,
   }
 }
 
-static void
+void
 DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box)
 {
   CH_TIME("DataOps::dotProduct(EBCellFAB)");
@@ -657,7 +657,7 @@ DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellF
   BoxLoops::loop(vofit, irregularKernel);
 }
 
-static void
+void
 DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_stride, const bool a_zeroEB) noexcept
 {
   CH_TIME("DataOps::filterSmooth(EBAMRCellData)");
@@ -667,7 +667,7 @@ DataOps::filterSmooth(EBAMRCellData& a_data, const Real a_alpha, const int a_str
   }
 }
 
-static void
+void
 DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
                       const Real            a_alpha,
                       const int             a_stride,
@@ -794,7 +794,7 @@ DataOps::filterSmooth(LevelData<EBCellFAB>& a_data,
   }
 }
 
-static void
+void
 DataOps::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale) noexcept
 {
   CH_TIME("DataOps::incr(MFAMRCellData)");
@@ -806,7 +806,7 @@ DataOps::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_sca
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale) noexcept
 {
   CH_TIME("DataOps::incr(LD<MFCellFAB)");
@@ -828,7 +828,7 @@ DataOps::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, co
   }
 }
 
-static void
+void
 DataOps::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale) noexcept
 {
   CH_TIME("DataOps::incr(EBAMRCellData)");
@@ -840,7 +840,7 @@ DataOps::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_sc
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale) noexcept
 {
   CH_TIME("DataOps::incr(LD<EBCellFAB)");
@@ -873,7 +873,7 @@ DataOps::plus(EBAMRCellData&       a_lhs,
   }
 }
 
-static void
+void
 DataOps::plus(LevelData<EBCellFAB>&       a_lhs,
               const LevelData<EBCellFAB>& a_rhs,
               const int                   a_srcComp,
@@ -898,7 +898,7 @@ DataOps::plus(LevelData<EBCellFAB>&       a_lhs,
   }
 }
 
-static void
+void
 DataOps::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(EBAMRFluxData)");
@@ -908,7 +908,7 @@ DataOps::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_sc
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(LD<EBFluxData>)");
@@ -927,7 +927,7 @@ DataOps::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, co
   }
 }
 
-static void
+void
 DataOps::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(EBFluxData)");
@@ -945,7 +945,7 @@ DataOps::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(EBAMRIVData)");
@@ -955,7 +955,7 @@ DataOps::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(LD<BaseIVFAB>)");
@@ -988,7 +988,7 @@ DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>
   }
 }
 
-static void
+void
 DataOps::incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(EBAMRIFData)");
@@ -998,7 +998,7 @@ DataOps::incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale)
 {
   CH_TIME("DataOps::incr(LD<DomainFluxIFFAB>)");
@@ -1039,7 +1039,7 @@ DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB
   }
 }
 
-static void
+void
 DataOps::incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale)
 {
   CH_TIME("DataOps::incr(EBAMRCellData, EBAMRIVData)");
@@ -1049,7 +1049,7 @@ DataOps::incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs, const Real a_scale)
 {
   CH_TIME("DataOps::incr(LD<EBCellFAB>, LD<BaseIVFAB>)");
@@ -1083,7 +1083,7 @@ DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_r
   }
 }
 
-static void
+void
 DataOps::incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale)
 {
   CH_TIME("DataOps::incr(EBAMRIVData, EBAMRCellData)");
@@ -1093,7 +1093,7 @@ DataOps::incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale
   }
 }
 
-static void
+void
 DataOps::incr(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale)
 {
   CH_TIME("DataOps::incr(LD<BaseIVFAB>, LD<EBCellFAB>)");
@@ -1153,7 +1153,7 @@ DataOps::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src)
   }
 }
 
-static void
+void
 DataOps::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src)
 {
   CH_TIME("DataOps::copy(EBAMRIVData)");
@@ -1177,7 +1177,7 @@ DataOps::divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lh
   }
 }
 
-static void
+void
 DataOps::divide(LevelData<EBCellFAB>&       a_lhs,
                 const LevelData<EBCellFAB>& a_rhs,
                 const int                   a_lhsComp,
@@ -1213,7 +1213,7 @@ DataOps::divideByScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("DataOps::divideByScalar(LD<EBCellFAB>)");
@@ -1240,7 +1240,7 @@ DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denom
   }
 }
 
-static void
+void
 DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
                         const LevelData<EBCellFAB>& a_denominator,
                         const LevelData<EBCellFAB>& a_fallback)
@@ -1310,7 +1310,7 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
   }
 }
 
-static void
+void
 DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const Real a_fallback)
 {
   CH_TIME("DataOps::divideFallback(EBAMRCellData)");
@@ -1320,7 +1320,7 @@ DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denom
   }
 }
 
-static void
+void
 DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
                         const LevelData<EBCellFAB>& a_denominator,
                         const Real                  a_fallback)
@@ -1387,7 +1387,7 @@ DataOps::divideFallback(LevelData<EBCellFAB>&       a_numerator,
   }
 }
 
-static void
+void
 DataOps::floor(EBAMRCellData& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::floor(EBAMRCellData)");
@@ -1397,7 +1397,7 @@ DataOps::floor(EBAMRCellData& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::floor(LD<EBCelLFAB>)");
@@ -1442,7 +1442,7 @@ DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::floor(EBAMRIVData& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::floor(EBAMRIVData)");
@@ -1452,7 +1452,7 @@ DataOps::floor(EBAMRIVData& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::floor(LD<BaseIVFAB<Real> >)");
@@ -1485,7 +1485,7 @@ DataOps::floor(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::roof(EBAMRCellData& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::roof(EBAMRCellData)");
@@ -1495,7 +1495,7 @@ DataOps::roof(EBAMRCellData& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::roof(LD<EBCelLFAB>)");
@@ -1540,7 +1540,7 @@ DataOps::roof(LevelData<EBCellFAB>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::roof(EBAMRIVData& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::roof(EBAMRIVData)");
@@ -1550,7 +1550,7 @@ DataOps::roof(EBAMRIVData& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::roof(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::roof(LD<BaseIVFAB<Real> >)");
@@ -1593,7 +1593,7 @@ DataOps::max(EBAMRCellData& a_data, const EBAMRCellData& a_data1, const EBAMRCel
   }
 }
 
-static void
+void
 DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2)
 {
   CH_TIME("DataOps::max(LD<EBCellFAB> x3)");
@@ -1644,7 +1644,7 @@ DataOps::max(LevelData<EBCellFAB>& a_data, const LevelData<EBCellFAB>& a_data1, 
   }
 }
 
-static void
+void
 DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_comp)
 {
   CH_TIME("DataOps::getMaxMin(EBAMRCellData)");
@@ -1663,7 +1663,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_
   }
 }
 
-static void
+void
 DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const int a_comp)
 {
   CH_TIME("DataOps::getMaxMin(LD<EBCellFAB>)");
@@ -1709,7 +1709,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const
   a_min = ParallelOps::min(a_min);
 }
 
-static void
+void
 DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRFluxData& a_data, const int a_comp) noexcept
 {
   CH_TIME("DataOps::getMaxMin(Real, Real, EBAMRFluxData, int>)");
@@ -1728,7 +1728,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRFluxData& a_data, const int a_
   }
 }
 
-static void
+void
 DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBFluxFAB>& a_data, const int a_comp) noexcept
 {
   CH_TIME("DataOps::getMaxMin(Real, Real, LD<EBFluxFAB>, int>)");
@@ -1772,7 +1772,7 @@ DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBFluxFAB>& a_data, const
   }
 }
 
-static void
+void
 DataOps::getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data)
 {
   CH_TIME("DataOps::getMaxMin(Vector<EBAMRCellData>)");
@@ -1790,7 +1790,7 @@ DataOps::getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellDat
   }
 }
 
-static void
+void
 DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data)
 {
   CH_TIME("DataOps::getMaxMinNorm(EBAMRCellData)");
@@ -1809,7 +1809,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data)
   }
 }
 
-static void
+void
 DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
 {
   CH_TIME("DataOps::LD<EBCelLFAB>");
@@ -1880,7 +1880,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data)
   a_min = ParallelOps::min(a_min);
 }
 
-static void
+void
 DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data)
 {
   CH_TIME("DataOps::getMaxMinNorm(EBAMRIVData)");
@@ -1899,7 +1899,7 @@ DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data)
   }
 }
 
-static void
+void
 DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real>>& a_data)
 {
   CH_TIME("DataOps::getMaxMinNorm(LD<BaseIVFAB>)");
@@ -1950,7 +1950,7 @@ DataOps::invert(EBAMRFluxData& a_data)
   }
 }
 
-static void
+void
 DataOps::invert(LevelData<EBFluxFAB>& a_data)
 {
   CH_TIME("DataOps::invert(LD<EBFluxFAB>)");
@@ -2007,7 +2007,7 @@ DataOps::invert(LevelData<EBFluxFAB>& a_data)
   }
 }
 
-static void
+void
 DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs, const int a_comp)
 {
   CH_TIME("DataOps::kappaSum");
@@ -2061,7 +2061,7 @@ DataOps::kappaScale(EBAMRCellData& a_data) noexcept
   }
 }
 
-static void
+void
 DataOps::kappaScale(LevelData<EBCellFAB>& a_data) noexcept
 {
   CH_TIME("DataOps::kappaScale(LD<EBCellFAB>)");
@@ -2103,7 +2103,7 @@ DataOps::kappaScale(MFAMRCellData& a_data) noexcept
   }
 }
 
-static void
+void
 DataOps::kappaScale(LevelData<MFCellFAB>& a_data) noexcept
 {
   CH_TIME("DataOps::kappaScale(LD<MFCellFAB>)");
@@ -2139,7 +2139,7 @@ DataOps::kappaScale(LevelData<MFCellFAB>& a_data) noexcept
   }
 }
 
-static void
+void
 DataOps::volumeScale(EBAMRCellData& a_data, const Vector<Real>& a_dx)
 {
   CH_TIME("DataOps::volumeScale(EBAMRCellData, Vector<Real>");
@@ -2159,7 +2159,7 @@ DataOps::multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("DataOps::multiply(LD<EBCellFAB>)");
@@ -2186,7 +2186,7 @@ DataOps::multiply(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs)
 {
   CH_TIME("DataOps::multiply(LD<EBFluxFAB>)");
@@ -2203,7 +2203,7 @@ DataOps::multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs
   }
 }
 
-static void
+void
 DataOps::multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs)
 {
   CH_TIME("DataOps::multiply(EBAMRIVData)");
@@ -2213,7 +2213,7 @@ DataOps::multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::multiply(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs)
 {
   CH_TIME("DataOps::multiply(LD<BaseIVFAB>)");
@@ -2256,7 +2256,7 @@ DataOps::multiplyScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::multiplyScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("DataOps::multiplyScalar(LD<EBCellFAB>)");
@@ -2290,7 +2290,7 @@ DataOps::multiplyScalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseIVFAB<Real>>& a_rhs)
 {
   CH_TIME("DataOps::multiplyScalar(LD<BaseIVFAB>)");
@@ -2323,7 +2323,7 @@ DataOps::multiplyScalar(LevelData<BaseIVFAB<Real>>& a_lhs, const LevelData<BaseI
   }
 }
 
-static Real
+Real
 DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_comp)
 {
   CH_TIME("DataOps::norm");
@@ -2391,7 +2391,7 @@ DataOps::norm(const LevelData<EBCellFAB>& a_data, const int a_p, const int a_com
   return L;
 }
 
-static void
+void
 DataOps::scale(MFAMRCellData& a_lhs, const Real& a_scale) noexcept
 {
   CH_TIME("DataOps::scale(MFAMRCellData)");
@@ -2401,7 +2401,7 @@ DataOps::scale(MFAMRCellData& a_lhs, const Real& a_scale) noexcept
   }
 }
 
-static void
+void
 DataOps::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) noexcept
 
 {
@@ -2419,7 +2419,7 @@ DataOps::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) noexcept
   }
 }
 
-static void
+void
 DataOps::scale(MFAMRFluxData& a_lhs, const Real& a_scale)
 {
   CH_TIME("DataOps::scale(MFAMRFluxData)");
@@ -2429,7 +2429,7 @@ DataOps::scale(MFAMRFluxData& a_lhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale)
 {
   CH_TIME("DataOps::scale(LD<MFFluxFAB>)");
@@ -2452,7 +2452,7 @@ DataOps::scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::scale(EBAMRIVData& a_lhs, const Real& a_scale)
 {
   CH_TIME("DataOps::scale(EBAMRIVData)");
@@ -2462,7 +2462,7 @@ DataOps::scale(EBAMRIVData& a_lhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::scale(EBAMRCellData& a_lhs, const Real a_scale) noexcept
 {
   CH_TIME("DataOps::scale(EBAMRCellData)");
@@ -2472,7 +2472,7 @@ DataOps::scale(EBAMRCellData& a_lhs, const Real a_scale) noexcept
   }
 }
 
-static void
+void
 DataOps::scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale) noexcept
 {
   CH_TIME("DataOps::scale(LD<EBCellFAB>)");
@@ -2489,7 +2489,7 @@ DataOps::scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale) noexcept
   }
 }
 
-static void
+void
 DataOps::scale(EBAMRFluxData& a_lhs, const Real a_scale)
 {
   CH_TIME("DataOps::scale(EBAMRFluxData))");
@@ -2499,7 +2499,7 @@ DataOps::scale(EBAMRFluxData& a_lhs, const Real a_scale)
   }
 }
 
-static void
+void
 DataOps::scale(LevelData<EBFluxFAB>& a_lhs, const Real a_scale)
 {
   CH_TIME("DataOps::scale(LD<EBFluxFAB>)");
@@ -2518,7 +2518,7 @@ DataOps::scale(LevelData<EBFluxFAB>& a_lhs, const Real a_scale)
   }
 }
 
-static void
+void
 DataOps::scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale)
 {
   CH_TIME("DataOps::scale(LD<BaseIVFAB>)");
@@ -2545,7 +2545,7 @@ DataOps::scale(LevelData<BaseIVFAB<Real>>& a_lhs, const Real& a_scale)
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(EBAMRCellData)");
@@ -2555,7 +2555,7 @@ DataOps::setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_va
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(LD<EBCellFAB>)");
@@ -2585,7 +2585,7 @@ DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Re
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(EBAMRCellData& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(EBAMRCellData, Real)");
@@ -2595,7 +2595,7 @@ DataOps::setCoveredValue(EBAMRCellData& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setCoveredValue(LD<EBCellFAB>, Real)");
@@ -2605,7 +2605,7 @@ DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(EBAMRFluxData& a_lhs, const int a_comp, const Real a_value) noexcept
 {
   CH_TIME("DataOps::setCoveredValue(EBAMRFluxData, int, Real)");
@@ -2615,7 +2615,7 @@ DataOps::setCoveredValue(EBAMRFluxData& a_lhs, const int a_comp, const Real a_va
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const int a_comp, const Real a_value) noexcept
 {
   CH_TIME("DataOps::setCoveredValue(LD<EBFluxFAB>, int, Real)");
@@ -2636,7 +2636,7 @@ DataOps::setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const int a_comp, const Re
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(EBAMRFluxData& a_lhs, const Real a_value) noexcept
 {
   CH_TIME("DataOps::setCoveredValue(EBAMRFluxData, Real)");
@@ -2646,7 +2646,7 @@ DataOps::setCoveredValue(EBAMRFluxData& a_lhs, const Real a_value) noexcept
   }
 }
 
-static void
+void
 DataOps::setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value) noexcept
 {
   CH_TIME("DataOps::setCoveredValue(LD<EBFluxFAB>, Real)");
@@ -2656,7 +2656,7 @@ DataOps::setCoveredValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value) noexce
   }
 }
 
-static void
+void
 DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, const Real a_value)
 {
   CH_TIME("DataOps::setInvalidValud(EBAMRCellData, Vector<int>, Real)");
@@ -2725,7 +2725,7 @@ DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, cons
   }
 }
 
-static void
+void
 DataOps::setValue(MFAMRCellData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2739,7 +2739,7 @@ DataOps::setValue(MFAMRCellData&                             a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2792,7 +2792,7 @@ DataOps::setValue(LevelData<MFCellFAB>&                      a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRCellData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2806,7 +2806,7 @@ DataOps::setValue(EBAMRCellData&                             a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2854,7 +2854,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                      a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRFluxData&                             a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2868,7 +2868,7 @@ DataOps::setValue(EBAMRFluxData&                             a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2917,7 +2917,7 @@ DataOps::setValue(LevelData<EBFluxFAB>&                      a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRIVData&                               a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2931,7 +2931,7 @@ DataOps::setValue(EBAMRIVData&                               a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
                   const std::function<Real(const RealVect)>& a_function,
                   const RealVect                             a_probLo,
@@ -2968,7 +2968,7 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>&                a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRCellData&                                 a_lhs,
                   const std::function<RealVect(const RealVect)>& a_function,
                   const RealVect                                 a_probLo,
@@ -2981,7 +2981,7 @@ DataOps::setValue(EBAMRCellData&                                 a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
                   const std::function<RealVect(const RealVect)>& a_function,
                   const RealVect                                 a_probLo,
@@ -3037,7 +3037,7 @@ DataOps::setValue(LevelData<EBCellFAB>&                          a_lhs,
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRCellData& a_data, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(EBAMRCellData, Real)");
@@ -3047,7 +3047,7 @@ DataOps::setValue(EBAMRCellData& a_data, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp)
 {
   CH_TIME("DataOps::setValue(EBAMRCellData, Real, int)");
@@ -3057,7 +3057,7 @@ DataOps::setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp)
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp)
 {
   CH_TIME("DataOps::setValue(LD<EBCellFAB>, Real, int)");
@@ -3074,7 +3074,7 @@ DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_c
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setValue(LD<EBCellFAB>, Real)");
@@ -3091,7 +3091,7 @@ DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setValue(LD<EBFluxFAB>, Real)");
@@ -3108,7 +3108,7 @@ DataOps::setValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setValue(LD<BaseIVFAB>, Real)");
@@ -3125,7 +3125,7 @@ DataOps::setValue(LevelData<BaseIVFAB<Real>>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRFluxData& a_data, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(EBAMRFluxData, Real)");
@@ -3135,7 +3135,7 @@ DataOps::setValue(EBAMRFluxData& a_data, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRIVData& a_data, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(EBAMRIVData, Real)");
@@ -3145,7 +3145,7 @@ DataOps::setValue(EBAMRIVData& a_data, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(MFAMRCellData& a_lhs, const Real& a_value) noexcept
 {
   CH_TIME("DataOps::setValue(MFAMRCellData, Real)");
@@ -3155,7 +3155,7 @@ DataOps::setValue(MFAMRCellData& a_lhs, const Real& a_value) noexcept
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value) noexcept
 {
   CH_TIME("DataOps::setValue(LD<MFCellFAB>, Real)");
@@ -3172,7 +3172,7 @@ DataOps::setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value) noexcept
   }
 }
 
-static void
+void
 DataOps::setValue(MFAMRFluxData& a_lhs, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(MFAMRFluxFAB, Real)");
@@ -3182,7 +3182,7 @@ DataOps::setValue(MFAMRFluxData& a_lhs, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<MFFluxFAB>& a_lhs, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(LD<MFFluxFAB>, Real)");
@@ -3200,7 +3200,7 @@ DataOps::setValue(LevelData<MFFluxFAB>& a_lhs, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(MFAMRIVData& a_lhs, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(MFAMRIVData, Real)");
@@ -3210,7 +3210,7 @@ DataOps::setValue(MFAMRIVData& a_lhs, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value)
 {
   CH_TIME("DataOps::setValue(LD<MFBaseIVFAB>, Real)");
@@ -3227,7 +3227,7 @@ DataOps::setValue(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(EBAMRIFData& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setValue(EBAMRIFData, Real)");
@@ -3237,7 +3237,7 @@ DataOps::setValue(EBAMRIFData& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::setValue(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value)
 {
   CH_TIME("DataOps::setValue(LD<DomainFluxIFFAB>, Real)");
@@ -3260,7 +3260,7 @@ DataOps::setValue(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value)
   }
 }
 
-static void
+void
 DataOps::sum(Real& a_value)
 {
   CH_TIME("DataOps::sum");
@@ -3287,7 +3287,7 @@ DataOps::squareRoot(EBAMRFluxData& a_lhs)
   }
 }
 
-static void
+void
 DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs)
 {
   CH_TIME("DataOps::squareRoot(LD<EBFluxFAB>)");
@@ -3352,7 +3352,7 @@ DataOps::squareRoot(MFAMRCellData& a_lhs)
   }
 }
 
-static void
+void
 DataOps::squareRoot(LevelData<MFCellFAB>& a_lhs)
 {
   CH_TIME("DataOps::squareRoot(LD<MFCellFAB>)");
@@ -3407,7 +3407,7 @@ DataOps::vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("DataOps::vectorLength(LD<EBCellFAB>");
@@ -3431,7 +3431,7 @@ DataOps::vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a
   }
 }
 
-static void
+void
 DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box)
 {
   CH_TIME("DataOps::vectorLength(EBCellFAB)");
@@ -3494,7 +3494,7 @@ DataOps::vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs)
   }
 }
 
-static void
+void
 DataOps::vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("DataOps::vectorLength2(LD<EBCellFAB>)");
@@ -3519,7 +3519,7 @@ DataOps::vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& 
   }
 }
 
-static void
+void
 DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box)
 {
   CH_TIME("DataOps::vectorLength2(EBCellFAB)");
@@ -3568,7 +3568,7 @@ DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_bo
   BoxLoops::loop(vofit, irregularKernel);
 }
 
-static void
+void
 DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid)
 {
   CH_TIME("DataOps::computeMinValidBox");
@@ -3635,7 +3635,7 @@ DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_nor
   }
 }
 
-static bool
+bool
 DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid)
 {
   CH_TIME("DataOps::allCornersInsideEb");
@@ -3652,7 +3652,7 @@ DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_
   return ret;
 }
 
-static void
+void
 DataOps::shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance)
 {
   CH_TIME("DataOps::shiftCorners");

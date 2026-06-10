@@ -285,12 +285,12 @@ EBCoarseToFineInterp::interpolate(LevelData<BaseIVFAB<Real>>&       a_fineData,
   }
 }
 
-static void
+void
 EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
                                      const EBCellFAB& a_coarData,
                                      const DataIndex& a_dit,
                                      const int&       a_fineVar,
-                                     const int&       a_coarVar) noexcept
+                                     const int&       a_coarVar) const noexcept
 {
   CH_TIMERS("EBCoarseToFineInterp::interpolatePWC(EBCellFAB)");
   CH_TIMER("EBCoarseToFineInterp::regular_regrid", t1);
@@ -575,12 +575,12 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
 #endif
 }
 
-static void
+void
 EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>&       a_fineData,
                                      const BaseIVFAB<Real>& a_coarData,
                                      const DataIndex&       a_dit,
                                      const int&             a_fineVar,
-                                     const int&             a_coarVar) noexcept
+                                     const int&             a_coarVar) const noexcept
 {
   CH_TIME("EBCoarseToFineInterp::interpolatePWC(BaseIVFAB<Real>)");
 
@@ -641,12 +641,12 @@ EBCoarseToFineInterp::interpolateConservativePWC(BaseIVFAB<Real>&       a_fineDa
 #endif
 }
 
-static void
+void
 EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
                                         const EBCellFAB& a_coarData,
                                         const DataIndex& a_dit,
                                         const int        a_fineVar,
-                                        const int        a_coarVar) noexcept
+                                        const int        a_coarVar) const noexcept
 {
   CH_TIME("EBCoarseToFineInterp::checkConservation(EBCellFAB)");
 
@@ -702,12 +702,12 @@ EBCoarseToFineInterp::checkConservation(const EBCellFAB& a_fineData,
   }
 }
 
-static void
+void
 EBCoarseToFineInterp::checkConservation(const BaseIVFAB<Real>& a_fineData,
                                         const BaseIVFAB<Real>& a_coarData,
                                         const DataIndex&       a_dit,
                                         const int              a_fineVar,
-                                        const int              a_coarVar) noexcept
+                                        const int              a_coarVar) const noexcept
 {
   CH_TIME("EBCoarseToFineInterp::checkConservation(EBCellFAB)");
 

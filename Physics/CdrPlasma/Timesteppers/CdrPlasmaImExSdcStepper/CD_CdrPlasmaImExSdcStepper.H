@@ -362,25 +362,25 @@ namespace Physics {
       /**
          @brief Allocate scratch storage for all CDR solvers.
       */
-      static void
+      void
       allocateCdrStorage();
 
       /**
          @brief Allocate scratch storage for the field solver.
       */
-      static void
+      void
       allocateFieldStorage();
 
       /**
          @brief Allocate scratch storage for all RTE solvers.
       */
-      static void
+      void
       allocateRtStorage();
 
       /**
          @brief Allocate scratch storage for the surface charge solver.
       */
-      static void
+      void
       allocateSigmaStorage();
 
       /**

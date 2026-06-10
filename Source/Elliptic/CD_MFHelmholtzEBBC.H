@@ -94,7 +94,7 @@ protected:
   /**
     @brief Define stuff for multi-phase
   */
-  static void
+  void
   defineMultiPhase();
 
   /**

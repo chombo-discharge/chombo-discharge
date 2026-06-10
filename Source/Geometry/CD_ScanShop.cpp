@@ -484,12 +484,12 @@ ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   m_timer.stopEvent("Set box types");
 }
 
-static GeometryService::InOut
+GeometryService::InOut
 ScanShop::InsideOutside(const Box&           a_region,
                         const ProblemDomain& a_domain,
                         const RealVect&      a_probLo,
                         const Real&          a_dx,
-                        const DataIndex&     a_dit)
+                        const DataIndex&     a_dit) const
 {
   CH_TIME("ScanShop::InsideOutSide(Box, ProblemDomain, RealVect, Real, DataIndex)");
 

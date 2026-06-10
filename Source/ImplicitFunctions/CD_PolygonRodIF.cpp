@@ -29,7 +29,7 @@ PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
                            const Real     a_radius,
                            const Real     a_cornerCurv,
                            const int      a_numSides,
-                           const bool /*a_fluidInside*/)
+                           const bool     a_fluidInside)
 {
   if (SpaceDim != 3) {
     MayDay::Error("PolygonRodIF::PolygonRodIF - this is a 3D object!");

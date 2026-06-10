@@ -576,7 +576,7 @@ public:
     @param[out] a_lhs Equal to a_lhs*a_rhs on output
     @param[in] a_rhs Scaling data
   */
-  static void
+  void
   scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) noexcept;
 
   /**
@@ -857,14 +857,14 @@ public:
   /**
     @brief Allocate m_flux
   */
-  static void
-  allocateFlux() noexcept;
+  void
+  allocateFlux() const noexcept;
 
   /**
     @brief Deallocate m_flux
   */
-  static void
-  deallocateFlux() noexcept;
+  void
+  deallocateFlux() const noexcept;
 
   /**
     @brief Returns m_flux. This is used in refluxing routines. 
@@ -1222,19 +1222,19 @@ protected:
   /**
     @brief Calculate the weight of the diagonal term
   */
-  static void
+  void
   computeDiagWeight();
 
   /**
     @brief Calculate relaxation coefficient
   */
-  static void
+  void
   computeRelaxationCoefficient();
 
   /**
     @brief Compute aggregated stencils
   */
-  static void
+  void
   makeAggStencil();
 
   /**

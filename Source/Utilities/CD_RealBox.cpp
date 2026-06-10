@@ -45,8 +45,8 @@ RealBox::getHi() const
   return m_hi;
 }
 
-static Vector<RealVect>
-RealBox::getCorners()
+Vector<RealVect>
+RealBox::getCorners() const
 {
 
   Vector<RealVect> corners(pow(2, SpaceDim));
@@ -73,7 +73,7 @@ RealBox::getCorners()
 }
 
 bool
-RealBox::intersect(const RealBox& a_box)
+RealBox::intersect(const RealBox& a_box) const
 {
 
   //  bool ret = false;
@@ -104,8 +104,8 @@ RealBox::intersect(const RealBox& a_box)
   // return ret;
 }
 
-static bool
-RealBox::isPointInside(const RealVect a_point)
+bool
+RealBox::isPointInside(const RealVect a_point) const
 {
 
   bool ret = false;

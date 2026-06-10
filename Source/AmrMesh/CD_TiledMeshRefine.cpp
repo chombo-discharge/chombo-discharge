@@ -48,8 +48,8 @@ TiledMeshRefine::~TiledMeshRefine() noexcept
   CH_TIME("TiledMeshRefine::~TiledMeshRefine");
 }
 
-static int
-TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) noexcept
+int
+TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tags) const noexcept
 {
   CH_TIME("TiledMeshRefine::regrid");
 
@@ -97,13 +97,13 @@ TiledMeshRefine::regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet
   return newFinestLevel;
 }
 
-static void
+void
 TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
                                 const TileSet&       a_fineTiles,
                                 const IntVectSet&    a_coarTags,
                                 const ProblemDomain& a_domain,
                                 const int            a_refToFine,
-                                const int            a_refToCoar) noexcept
+                                const int            a_refToCoar) const noexcept
 {
   CH_TIMERS("TiledMeshRefine::makeLevelTiles");
   CH_TIMER("TiledMeshRefine::makeLevelTiles::tag_tiles", t1);
@@ -203,10 +203,10 @@ TiledMeshRefine::makeLevelTiles(TileSet&             a_tiles,
   CH_STOP(t3);
 }
 
-static void
+void
 TiledMeshRefine::makeBoxesFromTiles(Vector<Box>&         a_boxes,
                                     const TileSet&       a_tileSet,
-                                    const ProblemDomain& a_domain) noexcept
+                                    const ProblemDomain& a_domain) const noexcept
 {
   CH_TIME("TiledMeshRefine::makeBoxesFromTiles");
 

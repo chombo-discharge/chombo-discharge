@@ -29,10 +29,14 @@ for c in cmds:
     if 'command' in c:
         c['command'] = re.sub(r'-I(/[^ ]*Submodules[^ ]*)', r'-isystem \1', c['command'])
     elif 'arguments' in c:
-        c['arguments'] = [
-            re.sub(r'^-I(/.*Submodules.*)$', r'-isystem \1', a)
-            for a in c['arguments']
-        ]
+        new_args = []
+        for a in c['arguments']:
+            m = re.match(r'^-I(/.*Submodules.*)$', a)
+            if m:
+                new_args.extend(['-isystem', m.group(1)])
+            else:
+                new_args.append(a)
+        c['arguments'] = new_args
 with open(out + '/compile_commands.json', 'w') as f:
     json.dump(cmds, f)
 PYEOF

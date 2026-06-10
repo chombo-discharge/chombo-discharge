@@ -757,7 +757,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
   }
 }
 
-static Real
+Real
 CdrCTU::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
@@ -769,8 +769,8 @@ CdrCTU::minmod(const Real& dwl, const Real& dwr) noexcept
   return slope;
 }
 
-static Real
-CdrCTU::superbee(const Real& dwl, const Real& dwr) noexcept
+Real
+CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
 {
   Real slope = 0.0;
 
@@ -786,7 +786,7 @@ CdrCTU::superbee(const Real& dwl, const Real& dwr) noexcept
   return slope;
 }
 
-static Real
+Real
 CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;

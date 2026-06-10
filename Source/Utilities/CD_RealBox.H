@@ -78,8 +78,8 @@ public:
     @param[in] a_box Other box
     @return True if intersection found, false otherwise
   */
-  static bool
-  intersect(const RealBox& a_box);
+  bool
+  intersect(const RealBox& a_box) const;
 
   /**
     @brief Check if a_point is inside this box

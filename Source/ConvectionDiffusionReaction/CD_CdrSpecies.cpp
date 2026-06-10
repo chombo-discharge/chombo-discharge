@@ -39,8 +39,8 @@ CdrSpecies::CdrSpecies(const std::string a_name,
 
 CdrSpecies::~CdrSpecies() = default;
 
-static Real
-CdrSpecies::initialData(const RealVect /*a_pos*/, const Real /*a_time*/)
+Real
+CdrSpecies::initialData(const RealVect /*a_pos*/, const Real /*a_time*/) const
 {
   CH_TIME("CdrSpecies::initialData(RealVect, Real)");
 
@@ -79,15 +79,15 @@ CdrSpecies::isMobile() const
   return m_isMobile;
 }
 
-static const List<PointParticle>&
-CdrSpecies::getInitialParticles()
+const List<PointParticle>&
+CdrSpecies::getInitialParticles() const
 {
   CH_TIME("CdrSpecies::getInitialParticles()");
 
   return m_initialParticles;
 }
 
-static List<PointParticle>&
+List<PointParticle>&
 CdrSpecies::getInitialParticles()
 {
   CH_TIME("CdrSpecies::getInitialParticles()");

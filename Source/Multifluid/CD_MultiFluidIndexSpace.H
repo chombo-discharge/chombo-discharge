@@ -124,8 +124,8 @@ public:
     @brief Get number of phases
     @return Number of phases.
   */
-  static int
-  numPhases();
+  int
+  numPhases() const;
 
 protected:
   /**

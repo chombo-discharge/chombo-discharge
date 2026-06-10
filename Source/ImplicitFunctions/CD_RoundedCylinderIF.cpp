@@ -91,7 +91,7 @@ RoundedCylinderIF::makeBaseIF()
 }
 
 #if CH_SPACEDIM == 2
-static BaseIF*
+BaseIF*
 RoundedCylinderIF::makeBaseIF2D()
 {
   const RealVect x0 = RealVect::Zero - m_radius * BASISREALV(0);

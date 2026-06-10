@@ -54,8 +54,8 @@ MultiIndex::getNumIndices() const
   return m_indices.size();
 }
 
-static int
-MultiIndex::getLinearIndex(const IntVect a_multiIndex)
+int
+MultiIndex::getLinearIndex(const IntVect a_multiIndex) const
 {
   int ret = -1;
 
@@ -69,8 +69,8 @@ MultiIndex::getLinearIndex(const IntVect a_multiIndex)
   return ret;
 }
 
-static IntVect
-MultiIndex::getMultiIndex(const int a_linearIndex)
+IntVect
+MultiIndex::getMultiIndex(const int a_linearIndex) const
 {
   IntVect ret;
 
@@ -108,7 +108,7 @@ MultiIndex::factorial(const int a_n) const
 }
 
 int
-MultiIndex::factorial()
+MultiIndex::factorial() const
 {
   int fact = 1;
   for (int dir = 0; dir < SpaceDim; dir++) {
@@ -124,7 +124,7 @@ MultiIndex::norm() const
   return norm((*m_iter));
 }
 
-static int
+int
 MultiIndex::norm(const IntVect a_iv)
 {
   int retval = 0;
@@ -135,7 +135,7 @@ MultiIndex::norm(const IntVect a_iv)
   return retval;
 }
 
-static Real
+Real
 MultiIndex::pow(const RealVect& a_vec)
 {
 

@@ -72,13 +72,13 @@ GeometryStepper::getNumberOfPlotVariables() const
   return 0;
 }
 
-static Vector<std::string>
-GeometryStepper::getPlotVariableNames()
+Vector<std::string>
+GeometryStepper::getPlotVariableNames() const
 {
   return Vector<std::string>();
 }
 
-static Real
+Real
 GeometryStepper::computeDt()
 {
   return 0.0;

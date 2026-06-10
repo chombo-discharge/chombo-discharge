@@ -80,7 +80,7 @@ MFLevelGrid::getGrids() const
   return m_eblg[0].getDBL();
 }
 
-static EBLevelGrid&
+EBLevelGrid&
 MFLevelGrid::getEBLevelGrid(int a_phase)
 {
   if (a_phase < 0 || a_phase >= m_eblg.size()) {
@@ -89,8 +89,8 @@ MFLevelGrid::getEBLevelGrid(int a_phase)
   return m_eblg[a_phase];
 }
 
-static const EBLevelGrid&
-MFLevelGrid::getEBLevelGrid(int a_phase)
+const EBLevelGrid&
+MFLevelGrid::getEBLevelGrid(int a_phase) const
 {
   if (a_phase < 0 || a_phase >= m_eblg.size()) {
     MayDay::Error("MFLevelGrid::getEBLevelGrid -- phase index out of range");
@@ -98,8 +98,8 @@ MFLevelGrid::getEBLevelGrid(int a_phase)
   return m_eblg[a_phase];
 }
 
-static IntVectSet
-MFLevelGrid::interfaceRegion(const Box& a_box, const DataIndex& a_dit, const int a_phase1, const int a_phase2)
+IntVectSet
+MFLevelGrid::interfaceRegion(const Box& a_box, const DataIndex& a_dit, const int a_phase1, const int a_phase2) const
 {
 
   IntVectSet ret;

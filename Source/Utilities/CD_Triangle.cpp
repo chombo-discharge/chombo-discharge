@@ -52,8 +52,8 @@ Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept
   return a_point - dot(a_point - m_vertexPositions[0], m_triangleNormal) * m_triangleNormal;
 }
 
-static bool
-Triangle::isInside(const Vec3& a_point) noexcept
+bool
+Triangle::isInside(const Vec3& a_point) const noexcept
 {
   auto sgn = [](const Real x) -> int {
     return (x >= 0.0) ? 1 : -1;
@@ -70,7 +70,7 @@ Triangle::isInside(const Vec3& a_point) noexcept
   return !((dot(u, v) < 0.0) || (dot(u, w) < 0.0));
 }
 
-static Real
+Real
 Triangle::computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3) noexcept
 {
   const Vec3 a = a_x2 - a_x1;
@@ -79,8 +79,8 @@ Triangle::computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3)
   return 0.5 * (a.cross(b)).length();
 }
 
-static Real
-Triangle::interpolate(const Vec3& a_point) noexcept
+Real
+Triangle::interpolate(const Vec3& a_point) const noexcept
 {
   if (m_area <= Real(0)) {
     return Real(0);

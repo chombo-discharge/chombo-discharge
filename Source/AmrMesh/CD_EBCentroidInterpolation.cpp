@@ -157,11 +157,11 @@ EBCentroidInterpolation::define(const EBLevelGrid& a_eblg, const Real& a_dx, con
   m_isDefined = true;
 }
 
-static bool
+bool
 EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
                                           const VolIndex&      a_vof,
                                           const EBISBox&       a_ebisBox,
-                                          const ProblemDomain& a_domain) noexcept
+                                          const ProblemDomain& a_domain) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getLinearStencil");
 
@@ -174,11 +174,11 @@ EBCentroidInterpolation::getLinearStencil(VoFStencil&          a_stencil,
   return foundStencil;
 }
 
-static bool
+bool
 EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil,
                                                        const VolIndex& a_vof,
                                                        const EBISBox&  a_ebisBox,
-                                                       const ProblemDomain& /*a_domain*/) noexcept
+                                                       const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getTaylorExtrapolationStencil");
 
@@ -194,11 +194,11 @@ EBCentroidInterpolation::getTaylorExtrapolationStencil(VoFStencil&     a_stencil
   return (order > 0);
 }
 
-static bool
+bool
 EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
                                                 const VolIndex& a_vof,
                                                 const EBISBox&  a_ebisBox,
-                                                const ProblemDomain& /*a_domain*/) noexcept
+                                                const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getLeastSquaresStencil");
 
@@ -222,11 +222,11 @@ EBCentroidInterpolation::getLeastSquaresStencil(VoFStencil&     a_stencil,
   return (a_stencil.size() > 0);
 }
 
-static bool
+bool
 EBCentroidInterpolation::getPiecewiseLinearStencil(VoFStencil&     a_stencil,
                                                    const VolIndex& a_vof,
                                                    const EBISBox&  a_ebisBox,
-                                                   const ProblemDomain& /*a_domain*/) noexcept
+                                                   const ProblemDomain& /*a_domain*/) const noexcept
 {
   CH_TIME("EBCentroidInterpolation::getPiecewiseLinearStencil");
 
@@ -430,7 +430,7 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
   }
 }
 
-static Real
+Real
 EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
@@ -442,7 +442,7 @@ EBCentroidInterpolation::MinMod(const Real& a_dwl, const Real& a_dwr) noexcept
   return slope;
 }
 
-static Real
+Real
 EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
@@ -457,7 +457,7 @@ EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr
   return slope;
 }
 
-static Real
+Real
 EBCentroidInterpolation::Superbee(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;

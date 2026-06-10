@@ -31,7 +31,7 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect a_endPoint1,
                                      const Real     a_roundingRadius,
                                      const int      a_numLeft,
                                      const int      a_numRight,
-                                     const bool /*a_fluidInside*/)
+                                     const bool     a_fluidInside)
 {
   if (SpaceDim != 3) {
     MayDay::Abort("ProfileCylinderIF::ProfileCylinderIF - this is a 3D object!");

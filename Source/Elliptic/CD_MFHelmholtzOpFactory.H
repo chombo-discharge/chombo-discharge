@@ -424,7 +424,7 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has fewer grid points than a_domainTwo
   */
-  static bool
+  bool
   isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
@@ -445,11 +445,11 @@ protected:
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
     the blocking factor. Otherwise we try to coarsen directly. 
   */
-  static bool
+  bool
   getCoarserLayout(MFLevelGrid&       a_coarMflg,
                    const MFLevelGrid& a_fineMflg,
                    const int          a_refRat,
-                   const int          a_blockingFactor);
+                   const int          a_blockingFactor) const;
 
   /**
     @brief Coarsen coefficients (conservatively)

@@ -210,13 +210,13 @@ EBGhostCellInterpolator::interpolate(LevelData<EBCellFAB>&       a_phiFine,
   a_phiFine.exchange(a_variables);
 }
 
-static void
+void
 EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
                                             const FArrayBox& a_phiCoar,
                                             const DataIndex& a_dit,
                                             const int        a_fineVar,
                                             const int        a_coarVar,
-                                            const Type       a_interpType) noexcept
+                                            const Type       a_interpType) const noexcept
 {
   CH_TIMERS("EBGhostCellInterpolator::interpolateRegular");
   CH_TIMER("EBGhostCellInterpolator::interpolateRegular::set_fine_to_coar", t1);
@@ -480,7 +480,7 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   CH_STOP(t2);
 }
 
-static Real
+Real
 EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
@@ -492,8 +492,8 @@ EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) noexcept
   return slope;
 }
 
-static Real
-EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) noexcept
+Real
+EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexcept
 {
   Real slope = 0.0;
 
@@ -509,7 +509,7 @@ EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) noexcept
   return slope;
 }
 
-static Real
+Real
 EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;

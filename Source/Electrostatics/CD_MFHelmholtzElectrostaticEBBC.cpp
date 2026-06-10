@@ -199,14 +199,14 @@ MFHelmholtzElectrostaticEBBC::defineSinglePhase()
   }
 }
 
-static void
+void
 MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
                                                      EBCellFAB&   a_Lphi,
                                                      const EBCellFAB& /*a_phi*/,
                                                      const BaseIVFAB<Real>& a_Bcoef,
                                                      const DataIndex&       a_dit,
                                                      const Real&            a_beta,
-                                                     const bool&            a_homogeneousPhysBC)
+                                                     const bool&            a_homogeneousPhysBC) const
 {
   CH_TIME(
     "MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");

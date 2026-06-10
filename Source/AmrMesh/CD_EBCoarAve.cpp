@@ -1013,12 +1013,12 @@ EBCoarAve::arithmeticAverage(BaseIVFAB<Real>&       a_coarData,
   BoxLoops::loop(vofit, irregularKernel);
 }
 
-static void
+void
 EBCoarAve::harmonicAverage(BaseIVFAB<Real>&       a_coarData,
                            const BaseIVFAB<Real>& a_fineData,
                            const DataIndex&       a_datInd,
                            const int&             a_coarVar,
-                           const int&             a_fineVar) noexcept
+                           const int&             a_fineVar) const noexcept
 {
   CH_TIME("EBCoarAve::harmonicAverage(BaseIVFAB<Real>)");
 

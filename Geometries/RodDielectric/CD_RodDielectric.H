@@ -37,7 +37,7 @@ protected:
   /**
     @brief Define the electrode geometry.
   */
-  static void
+  void
   defineElectrode();
 
   /**

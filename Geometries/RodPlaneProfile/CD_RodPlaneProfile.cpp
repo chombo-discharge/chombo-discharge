@@ -118,7 +118,7 @@ RodPlaneProfile::getBaseIF()
   return ret;
 }
 
-static BaseIF*
+BaseIF*
 RodPlaneProfile::getBaseIFCircle()
 {
   ParmParse pp("RodPlaneProfile");
@@ -135,7 +135,7 @@ RodPlaneProfile::getBaseIFCircle()
   return new SphereSdf(point, rad, true);
 }
 
-static BaseIF*
+BaseIF*
 RodPlaneProfile::getBaseIFSquare()
 {
   ParmParse pp("RodPlaneProfile");

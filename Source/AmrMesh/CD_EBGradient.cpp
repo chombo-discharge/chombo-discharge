@@ -190,8 +190,8 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
   }
 }
 
-static void
-EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) noexcept
+void
+EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient, const LevelData<EBCellFAB>& a_phi) const noexcept
 {
   CH_TIMERS("EBGradient::computeNormalDerivative");
   CH_TIMER("EBGradient::computeNormalDerivative::regular_faces", t1);
@@ -500,10 +500,10 @@ EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>
   coFiMaskInvalid.copyTo(interv, a_coarMaskInvalid, interv, copierInvalid, LDaddOp<FArrayBox>());
 }
 
-static bool
+bool
 EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
                                            const EBISBox&   a_ebisBox,
-                                           const FArrayBox& a_invalidRegion) noexcept
+                                           const FArrayBox& a_invalidRegion) const noexcept
 {
   CH_TIME("EBGradient::isFiniteDifferenceStencilValid");
 
@@ -756,12 +756,12 @@ EBGradient::defineBuffers() noexcept
   m_copier.define(m_eblgFine.getDBL(), m_eblgFiCo.getDBL(), m_ghostVector);
 }
 
-static bool
+bool
 EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
                                        const VolIndex&        a_vof,
                                        const EBISBox&         a_ebisBox,
                                        const DenseIntVectSet& a_validRegion,
-                                       const Real             a_dx) noexcept
+                                       const Real             a_dx) const noexcept
 {
   CH_TIME("EBGradient::getFiniteDifferenceStencil");
 
@@ -853,7 +853,7 @@ EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
                                    const Real&            a_dxCoar,
                                    const Real&            a_dxFine,
                                    const int&             a_order,
-                                   const int& /*a_weight*/) const noexcept
+                                   const int&             a_weight) const noexcept
 {
   CH_TIME("EBGradient::getLeastSquaresStencil");
 

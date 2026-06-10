@@ -54,8 +54,8 @@ EBHelmholtzEBBC::define(const Location::Cell a_dataLocation,
   this->define();
 }
 
-static const LayoutData<BaseIVFAB<VoFStencil>>&
-EBHelmholtzEBBC::getGradPhiStencils()
+const LayoutData<BaseIVFAB<VoFStencil>>&
+EBHelmholtzEBBC::getGradPhiStencils() const
 {
   CH_TIME("EBHelmholtzEBBC::getGradPhiStencils()");
 

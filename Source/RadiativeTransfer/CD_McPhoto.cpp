@@ -871,7 +871,7 @@ McPhoto::getNumberOfPlotVariables() const
   return numPlotVars;
 }
 
-static int
+int
 McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side)
 {
   const int iside = (a_side == Side::Lo) ? 0 : 1;
@@ -879,7 +879,7 @@ McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side)
   return 2 * a_dir + iside;
 }
 
-static Real
+Real
 McPhoto::randomExponential(const Real a_rate) noexcept
 {
   if (a_rate <= 0.0) {

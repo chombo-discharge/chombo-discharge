@@ -52,7 +52,7 @@ BrownianWalkerTagger::parseOptions()
   this->parseBuffer();
 }
 
-static bool
+bool
 BrownianWalkerTagger::tagCells(EBAMRTags& /*a_tags*/)
 {
   return true;

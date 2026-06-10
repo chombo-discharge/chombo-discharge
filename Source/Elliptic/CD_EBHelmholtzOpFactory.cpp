@@ -291,7 +291,7 @@ EBHelmholtzOpFactory::coarsenCoefficientsMG()
   }
 }
 
-static void
+void
 EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_coarAcoef,
                                           LevelData<EBFluxFAB>&             a_coarBcoef,
                                           LevelData<BaseIVFAB<Real>>&       a_coarBcoefIrreg,
@@ -332,7 +332,7 @@ EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_co
   }
 }
 
-static bool
+bool
 EBHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("EBHelmholtzOpFactory::isCoarser(ProblemDomain, ProblemDomain)");
@@ -340,7 +340,7 @@ EBHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
   return A.domainBox().numPts() < B.domainBox().numPts();
 }
 
-static bool
+bool
 EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("EBHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
@@ -348,11 +348,11 @@ EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
-static bool
+bool
 EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
                                        const EBLevelGrid& a_fineEblg,
                                        const int          a_refRat,
-                                       const int          a_blockingFactor)
+                                       const int          a_blockingFactor) const
 {
   CH_TIME("EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid, EBLevelGrid, int, int)");
 
@@ -638,8 +638,8 @@ EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
   return op;
 }
 
-static int
-EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain)
+int
+EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const
 {
   CH_TIME("EBHelmholtzOpFactory::refToFiner(ProblemDomain)");
 
@@ -661,8 +661,8 @@ EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain)
   return ref;
 }
 
-static int
-EBHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain)
+int
+EBHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const
 {
   CH_TIME("EBHelmholtzOpFactory::findAmrLevel(ProblemDomain)");
 

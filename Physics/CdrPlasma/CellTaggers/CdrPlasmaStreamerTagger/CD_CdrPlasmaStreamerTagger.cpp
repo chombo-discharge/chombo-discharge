@@ -76,7 +76,7 @@ CdrPlasmaStreamerTagger::parseRuntimeOptions()
   this->parseOptions();
 }
 
-static Vector<Real>
+Vector<Real>
 CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
                                 const Real /*a_time*/,
                                 const Real /*a_dx*/,
@@ -85,7 +85,7 @@ CdrPlasmaStreamerTagger::tracer(const RealVect a_pos,
                                 const Real a_maxElectricField,
                                 const RealVect /*a_gradElectricField*/,
                                 const Real /*a_minGradElectricField*/,
-                                const Real /*a_maxGradElectricField*/)
+                                const Real /*a_maxGradElectricField*/) const
 {
   Vector<Real> tracers(m_numTracers, 0.0);
 

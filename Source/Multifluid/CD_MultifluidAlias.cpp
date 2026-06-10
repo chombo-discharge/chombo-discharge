@@ -15,21 +15,21 @@
 #include <CD_NamespaceHeader.H>
 
 // Public, callable function.
-static void
+void
 MultifluidAlias::aliasMF(LevelData<EBCellFAB>& a_alias, const int a_phase, const LevelData<MFCellFAB>& a_input)
 {
   MultifluidAlias::MfCellAliasFactory factory((LevelData<MFCellFAB>*)&a_input, a_phase);
   a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
 }
 
-static void
+void
 MultifluidAlias::aliasMF(LevelData<EBFluxFAB>& a_alias, const int a_phase, const LevelData<MFFluxFAB>& a_input)
 {
   MultifluidAlias::MfFluxAliasFactory factory((LevelData<MFFluxFAB>*)&a_input, a_phase);
   a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
 }
 
-static void
+void
 MultifluidAlias::aliasMF(LevelData<BaseIVFAB<Real>>& a_alias, const int a_phase, const LevelData<MFBaseIVFAB>& a_input)
 {
   MultifluidAlias::MfIVAliasFactory factory((LevelData<MFBaseIVFAB>*)&a_input, a_phase);

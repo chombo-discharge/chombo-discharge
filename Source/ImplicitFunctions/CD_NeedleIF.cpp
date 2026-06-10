@@ -25,7 +25,7 @@ NeedleIF::NeedleIF(const Real& a_length,
                    const Real& a_radius,
                    const Real& a_tipRadius,
                    const Real& a_angle,
-                   const bool& /*a_flipInside*/)
+                   const bool& a_flipInside)
 {
   CH_TIME("NeedleIF::NeedleIF");
 
@@ -60,8 +60,8 @@ NeedleIF::NeedleIF(const NeedleIF& a_inputIF)
   CH_TIME("NeedleIF::NeedleIF(copy constructor)");
 }
 
-static Real
-NeedleIF::value(const RealVect& a_point)
+Real
+NeedleIF::value(const RealVect& a_point) const
 {
   CH_TIME("NeedleIF::value");
 

@@ -24,21 +24,21 @@ thread_local KMCSolverType                                   ItoKMCPhysics::m_km
 thread_local KMCState                                        ItoKMCPhysics::m_kmcState;
 thread_local std::vector<std::shared_ptr<const KMCReaction>> ItoKMCPhysics::m_kmcReactionsThreadLocal;
 
-static Vector<std::string>
-ItoKMCPhysics::getPlotVariableNames() noexcept
+Vector<std::string>
+ItoKMCPhysics::getPlotVariableNames() const noexcept
 {
   CH_TIME("ItoKMCPhysics::getPlotVariableNames");
 
   return Vector<std::string>(0);
 }
 
-static Vector<Real>
+Vector<Real>
 ItoKMCPhysics::getPlotVariables(const RealVect /*a_E*/,
                                 const RealVect /*a_pos*/,
                                 const Vector<Real>& /*a_phi*/,
                                 const Vector<RealVect>& /*a_gradPhi*/,
                                 const Real /*a_dx*/,
-                                const Real /*a_kappa*/) noexcept
+                                const Real /*a_kappa*/) const noexcept
 {
   CH_TIME("ItoKMCPhysics::getPlotVariables");
 

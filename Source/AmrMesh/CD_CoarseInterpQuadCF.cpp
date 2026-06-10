@@ -308,10 +308,10 @@ CoarseInterpQuadCF::computeSecondDeriv(const FArrayBox& a_coarPhi,
   return secondDeriv;
 }
 
-static Real
+Real
 CoarseInterpQuadCF::computeMixedDeriv(const FArrayBox& /*a_coarPhi*/,
                                       const IntVect& a_ivCoar,
-                                      const int /*a_coarVar*/) noexcept
+                                      const int /*a_coarVar*/) const noexcept
 {
   CH_TIME("CoarseInterpQuadCF::computeMixedDeriv");
 
@@ -452,8 +452,8 @@ CoarseInterpQuadCF::getSecondDerivStencil(const IntVect& a_ivCoar, const int a_d
   return stencil;
 }
 
-static DerivStencil
-CoarseInterpQuadCF::getMixedDerivStencil(const IntVect& a_ivCoar) noexcept
+DerivStencil
+CoarseInterpQuadCF::getMixedDerivStencil(const IntVect& a_ivCoar) const noexcept
 {
   CH_TIME("CoarseInterpQuadCF::getMixedDerivStencil");
 

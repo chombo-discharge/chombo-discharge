@@ -51,7 +51,7 @@ public:
   /**
     @brief Clears the object. 
   */
-  static void
+  void
   clear();
 
   /**

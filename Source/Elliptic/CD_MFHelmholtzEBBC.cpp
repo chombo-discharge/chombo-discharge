@@ -126,14 +126,14 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator& /*a_vofit*/,
   this->applyEBFluxMultiPhase(multiPhaseVofs, a_Lphi, a_phi, a_Bcoef, a_dit, a_beta, a_homogeneousPhysBC);
 }
 
-static void
+void
 MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
                                        EBCellFAB&   a_Lphi,
                                        const EBCellFAB& /*a_phi*/,
                                        const BaseIVFAB<Real>& a_Bcoef,
                                        const DataIndex&       a_dit,
                                        const Real&            a_beta,
-                                       const bool& /*a_homogeneousPhysBC*/)
+                                       const bool& /*a_homogeneousPhysBC*/) const
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFtIerator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
@@ -150,13 +150,13 @@ MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
   BoxLoops::loop(a_multiPhaseVofs, kernel);
 }
 
-static bool
+bool
 MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
                                                     const VolIndex&              a_vof,
                                                     const VofUtils::Neighborhood a_neighborhood,
                                                     const DataIndex&             a_dit,
                                                     const int                    a_order,
-                                                    const int                    a_weight)
+                                                    const int                    a_weight) const
 {
   CH_TIME("MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(...)");
 

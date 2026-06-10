@@ -35,7 +35,7 @@ Loads::~Loads() noexcept
   m_loads.clear();
 }
 
-static std::map<int, Real>&
+std::map<int, Real>&
 Loads::getLoads() noexcept
 {
   CH_TIME("Loads::getLoads");
@@ -43,8 +43,8 @@ Loads::getLoads() noexcept
   return (m_loads);
 }
 
-static const std::map<int, Real>&
-Loads::getLoads() noexcept
+const std::map<int, Real>&
+Loads::getLoads() const noexcept
 {
   CH_TIME("Loads::getLoads");
 
@@ -63,7 +63,7 @@ Loads::resetLoads() noexcept
   }
 }
 
-static void
+void
 Loads::assignLoads(const std::map<int, Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(std::map)");
@@ -80,7 +80,7 @@ Loads::assignLoads(const std::map<int, Real>& a_assignedLoads) noexcept
   }
 }
 
-static void
+void
 Loads::assignLoads(const std::vector<Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(std::vector)");
@@ -97,7 +97,7 @@ Loads::assignLoads(const std::vector<Real>& a_assignedLoads) noexcept
   }
 }
 
-static void
+void
 Loads::assignLoads(const Vector<Real>& a_assignedLoads) noexcept
 {
   CH_TIME("Loads::assignLoads(Vector)");
@@ -114,7 +114,7 @@ Loads::assignLoads(const Vector<Real>& a_assignedLoads) noexcept
   }
 }
 
-static void
+void
 Loads::incrementLoads(const std::map<int, Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(std::map)");
@@ -131,7 +131,7 @@ Loads::incrementLoads(const std::map<int, Real>& a_increments) noexcept
   }
 }
 
-static void
+void
 Loads::incrementLoads(const std::vector<Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(std::vector)");
@@ -148,7 +148,7 @@ Loads::incrementLoads(const std::vector<Real>& a_increments) noexcept
   }
 }
 
-static void
+void
 Loads::incrementLoads(const Vector<Real>& a_increments) noexcept
 {
   CH_TIME("Loads::incrementLoads(Vector)");
@@ -165,7 +165,7 @@ Loads::incrementLoads(const Vector<Real>& a_increments) noexcept
   }
 }
 
-static void
+void
 Loads::incrementLoad(const int a_rank, const Real a_increment) noexcept
 {
   CH_TIME("Loads::incrementLoad");
@@ -180,8 +180,8 @@ Loads::incrementLoad(const int a_rank, const Real a_increment) noexcept
   }
 }
 
-static std::vector<std::pair<int, Real>>
-Loads::getSortedLoads() noexcept
+std::vector<std::pair<int, Real>>
+Loads::getSortedLoads() const noexcept
 {
   CH_TIME("Loads::sortedLoads");
 

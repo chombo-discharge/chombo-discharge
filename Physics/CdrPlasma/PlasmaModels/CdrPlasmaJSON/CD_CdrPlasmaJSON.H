@@ -1367,7 +1367,7 @@ namespace Physics {
          @param[in] a_str Input string. If it contains the at character we throw an error. 
         @return Return value
       */
-      static bool
+      bool
       containsWildcard(const std::string a_str);
 
       /**
@@ -1375,7 +1375,7 @@ namespace Physics {
          @param[in] a_str Input string. If it contains any bracket we throw an error.
         @return Return value
       */
-      static bool
+      bool
       containsBracket(const std::string a_str);
 
       /**
@@ -1383,7 +1383,7 @@ namespace Physics {
          @param[in] a_str Input string. 
          @return True if the first character in the string is ( and the last character is )
       */
-      static bool
+      bool
       isBracketed(const std::string a_str);
 
       /**
@@ -1399,24 +1399,24 @@ namespace Physics {
          @param[in] a_name Neutral species name
         @return True if neutral species, false otherwise
       */
-      static bool
-      isNeutralSpecies(const std::string& a_name);
+      bool
+      isNeutralSpecies(const std::string& a_name) const;
 
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Cdr species name
         @return True if plasma species, false otherwise
       */
-      static bool
-      isPlasmaSpecies(const std::string& a_name);
+      bool
+      isPlasmaSpecies(const std::string& a_name) const;
 
       /**
          @brief Return true if species exists in map and false otherwise
          @param[in] a_name Rte species name
         @return True if photon species, false otherwise
       */
-      static bool
-      isPhotonSpecies(const std::string& a_name);
+      bool
+      isPhotonSpecies(const std::string& a_name) const;
 
       /**
          @brief Check if file exists

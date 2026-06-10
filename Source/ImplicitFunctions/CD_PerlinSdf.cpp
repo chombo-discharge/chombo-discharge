@@ -145,8 +145,8 @@ PerlinSdf::noise(const double a_x, const double a_y, const double a_z) const
                    lerp(u, grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1))));
 }
 
-static Real
-PerlinSdf::noise(const RealVect& a_pos)
+Real
+PerlinSdf::noise(const RealVect& a_pos) const
 {
 
   Real x, y, z;
@@ -186,19 +186,19 @@ PerlinSdf::octaveNoise(const RealVect& a_pos) const
   return result;
 }
 
-static Real
+Real
 PerlinSdf::lerp(const Real t, const Real a, const Real b)
 {
   return a + t * (b - a);
 }
 
-static Real
+Real
 PerlinSdf::fade(const Real t)
 {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-static Real
+Real
 PerlinSdf::grad(const int hash, const double x, const double y, const double /*z*/)
 {
   const int    h = hash & 15;
