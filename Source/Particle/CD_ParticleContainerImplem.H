@@ -32,14 +32,7 @@
 #include <CD_NamespaceHeader.H>
 
 template <class P>
-ParticleContainer<P>::ParticleContainer()
-{
-  m_isDefined         = false;
-  m_isOrganizedByCell = false;
-  m_profile           = false;
-  m_debug             = false;
-  m_verbose           = false;
-}
+ParticleContainer<P>::ParticleContainer() = default;
 
 template <class P>
 ParticleContainer<P>::ParticleContainer(const Vector<DisjointBoxLayout>&         a_grids,
@@ -121,7 +114,7 @@ ParticleContainer<P>::define(const Vector<DisjointBoxLayout>&         a_grids,
 
 template <class P>
 void
-ParticleContainer<P>::setupGrownGrids(const int a_base, const int a_finestLevel)
+ParticleContainer<P>::setupGrownGrids(const int /*a_base*/, const int a_finestLevel)
 {
   CH_TIME("ParticleContainer::setupGrownGrids");
   if (m_verbose) {
@@ -237,7 +230,7 @@ ParticleContainer<P>::getFinestLevel() const
 }
 
 template <class P>
-const std::string
+std::string
 ParticleContainer<P>::getRealm() const
 {
   CH_assert(m_isDefined);
@@ -253,14 +246,14 @@ ParticleContainer<P>::getGrids() const
 }
 
 template <class P>
-const RealVect
+RealVect
 ParticleContainer<P>::getProbLo() const noexcept
 {
   return m_probLo;
 }
 
 template <class P>
-const Vector<RealVect>
+Vector<RealVect>
 ParticleContainer<P>::getDx() const noexcept
 {
   return m_dx;
@@ -1217,7 +1210,7 @@ ParticleContainer<P>::assignLocalParticles(ParticleMap<List<P>>& a_mappedParticl
 
 template <class P>
 void
-ParticleContainer<P>::preRegrid(const int a_lmin)
+ParticleContainer<P>::preRegrid(const int /*a_lmin*/)
 {
   CH_TIME("ParticleContainer::preRegrid");
   if (m_verbose) {
@@ -1272,7 +1265,7 @@ ParticleContainer<P>::resetParticleIDs() noexcept
 
   int32_t counter = 0;
 
-  const int32_t myRank = static_cast<uint32_t>(procID());
+  const auto myRank = static_cast<uint32_t>(procID());
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++) {
     const DisjointBoxLayout& dbl = m_grids[lvl];

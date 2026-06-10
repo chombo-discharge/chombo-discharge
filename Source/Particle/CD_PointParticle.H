@@ -46,12 +46,12 @@ public:
   */
   inline ~PointParticle() override;
 
-  PointParticle(const PointParticle&) = delete;
+  PointParticle(const PointParticle&) = default;
   PointParticle&
-  operator=(const PointParticle&) = delete;
-  PointParticle(PointParticle&&)  = delete;
+  operator=(const PointParticle&) = default;
+  PointParticle(PointParticle&&) = default;
   PointParticle&
-  operator=(PointParticle&&) = delete;
+  operator=(PointParticle&&) = default;
 
   /**
     @brief Full define function

@@ -90,10 +90,10 @@ public:
 
   ParticleContainer(const ParticleContainer&) = delete;
   ParticleContainer&
-  operator=(const ParticleContainer&)    = delete;
-  ParticleContainer(ParticleContainer&&) = delete;
+  operator=(const ParticleContainer&) = delete;
+  ParticleContainer(ParticleContainer&&) = default;
   ParticleContainer&
-  operator=(ParticleContainer&&) = delete;
+  operator=(ParticleContainer&&) = default;
 
   /**
     @brief Define the container. This will do a clear-out of all particles. 
@@ -241,7 +241,7 @@ public:
     @brief Get the realm where this ParticleContainer lives. 
     @return Realm
   */
-  const std::string
+  std::string
   getRealm() const;
 
   /**
@@ -297,14 +297,14 @@ public:
     @brief Get lower-left corner
     @return m_probLo
   */
-  const RealVect
+  RealVect
   getProbLo() const noexcept;
 
   /**
     @brief Get grid resolutions
     @return m_dx
   */
-  const Vector<RealVect>
+  Vector<RealVect>
   getDx() const noexcept;
 
   /**
@@ -586,27 +586,27 @@ protected:
   /**
     @brief Check if particle container is defined.
   */
-  bool m_isDefined;
+  bool m_isDefined = false;
 
   /**
-    @brief Check if particle container is "cell sorted". 
+    @brief Check if particle container is "cell sorted".
   */
-  bool m_isOrganizedByCell;
+  bool m_isOrganizedByCell = false;
 
   /**
     @brief Profile or not
   */
-  bool m_profile;
+  bool m_profile = false;
 
   /**
     @brief Debug or not
   */
-  bool m_debug;
+  bool m_debug = false;
 
   /**
     @brief Verbose or not
   */
-  bool m_verbose;
+  bool m_verbose = false;
 
   /**
     @brief Tiled AMR space

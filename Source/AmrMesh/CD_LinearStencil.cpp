@@ -135,11 +135,11 @@ LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
 }
 
 bool
-LinearStencil::computeInterpStencil2D(VoFStencil&     a_stencil,
-                                      const RealVect& a_pos,
-                                      const VolIndex& a_vof,
-                                      const ProblemDomain& /*a_domain*/,
-                                      const EBISBox& a_ebisbox,
+LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
+                                      const RealVect&      a_pos,
+                                      const VolIndex&      a_vof,
+                                      const ProblemDomain& a_domain,
+                                      const EBISBox&       a_ebisbox,
                                       const int /*a_noInterpDir*/)
 {
   CH_TIME("LinearStencil::computeInterpStencil2D");

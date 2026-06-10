@@ -122,18 +122,18 @@ pass, but inline headers are the long-term goal so the catch-all can eventually 
 - [x] `Source/ImplicitFunctions/CD_SphereArray.H`
 - [x] `Source/KineticMonteCarlo/CD_KMCSingleStateReaction.H`
 - [x] `Source/KineticMonteCarlo/CD_KMCSingleStateReactionImplem.H`
-- [ ] `Source/KineticMonteCarlo/CD_KMCSolver.H`
-- [ ] `Source/KineticMonteCarlo/CD_KMCSolverImplem.H`
-- [ ] `Source/MeshODESolver/CD_MeshODESolver.H`
+- [x] `Source/KineticMonteCarlo/CD_KMCSolver.H`
+- [x] `Source/KineticMonteCarlo/CD_KMCSolverImplem.H`
+- [x] `Source/MeshODESolver/CD_MeshODESolver.H`
 - [x] `Source/MeshODESolver/CD_MeshODESolverImplem.H`
 - [x] `Source/Particle/CD_EBAMRParticleMesh.H`
 - [x] `Source/Particle/CD_EBAMRParticleMeshImplem.H`
 - [x] `Source/Particle/CD_GenericParticle.H`
 - [x] `Source/Particle/CD_GenericParticleImplem.H`
 - [x] `Source/Particle/CD_ParticleContainer.H`
-- [ ] `Source/Particle/CD_ParticleContainerImplem.H`
+- [x] `Source/Particle/CD_ParticleContainerImplem.H`
 - [x] `Source/Particle/CD_PointParticle.H`
-- [ ] `Source/Particle/CD_PointParticleImplem.H`
+- [x] `Source/Particle/CD_PointParticleImplem.H`
 - [x] `Source/Utilities/CD_DischargeIO.H`
 - [x] `Source/Utilities/CD_DischargeIOImplem.H`
 - [x] `Source/Utilities/CD_LeastSquares.H`

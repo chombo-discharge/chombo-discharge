@@ -62,7 +62,7 @@ KMCSolver<R, State, T>::define(const ReactionList& a_reactions) noexcept
 
 template <typename R, typename State, typename T>
 inline void
-KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
+KMCSolver<R, State, T>::setSolverParameters(const T    a_numCrit,
                                             const T    a_numSSA,
                                             const T    a_maxIter,
                                             const Real a_eps,
@@ -71,7 +71,7 @@ KMCSolver<R, State, T>::setSolverParameters(const T    a_Ncrit,
 {
   CH_TIME("KMCSolver::setSolverParameters");
 
-  m_Ncrit   = a_Ncrit;
+  m_Ncrit   = a_numCrit;
   m_numSSA  = a_numSSA;
   m_maxIter = a_maxIter;
   m_eps     = a_eps;
@@ -763,31 +763,31 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   };
 
   // Allocate memory for the Jacobian (J), the Newton increment (X), and F(X) (F). Also include the constant term from the Poisson sampling (c)
-  double* J = new double[N * N];
-  double* X = new double[N];
-  double* F = new double[N];
-  double* C = new double[N];
+  std::vector<double> J(static_cast<size_t>(N * N));
+  std::vector<double> X(static_cast<size_t>(N));
+  std::vector<double> F(static_cast<size_t>(N));
+  std::vector<double> C(static_cast<size_t>(N));
 
   // Temporary storage used for computing the Jacobian matrix.
-  double* X1 = new double[N];
-  double* X2 = new double[N];
-  double* F1 = new double[N];
-  double* F2 = new double[N];
+  std::vector<double> X1(static_cast<size_t>(N));
+  std::vector<double> X2(static_cast<size_t>(N));
+  std::vector<double> F1(static_cast<size_t>(N));
+  std::vector<double> F2(static_cast<size_t>(N));
 
   // Things that are required by LAPACK
-  int  INFO = 0;
-  int  NRHS = 1;
-  int* IPIV = new int[N];
+  int              INFO = 0;
+  int              NRHS = 1;
+  std::vector<int> IPIV(static_cast<size_t>(N));
 
   // Compute the constant term.
-  compConstantTerm(C, X, a_state, a_dt);
+  compConstantTerm(C.data(), X.data(), a_state, a_dt);
 
   // Compute the max-norm of F(0) to use as an exit criterion.
   for (int i = 0; i < N; i++) {
     X1[i] = 0.0;
   }
 
-  const Real initNorm = computeNorm(F, X1, C);
+  const Real initNorm = computeNorm(F.data(), X1.data(), C.data());
 
   bool converged = true;
 
@@ -804,8 +804,8 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
 
       X2[j] += std::max(0.01 * X[j], 1.0);
 
-      computeF(F1, X1, C);
-      computeF(F2, X2, C);
+      computeF(F1.data(), X1.data(), C.data());
+      computeF(F2.data(), X2.data(), C.data());
 
       for (int i = 0; i < N; i++) {
         J[i + j * N] = (F2[i] - F1[i]) / (X2[j] - X1[j]);
@@ -813,11 +813,11 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
     }
 
     // Compute F
-    computeF(F, X, C);
+    computeF(F.data(), X.data(), C.data());
 
     // Solve J*dX = F, but note that the true system is J*dX = -F, so we invert the
     // dX vector below.
-    dgesv_((int*)&N, (int*)&NRHS, J, (int*)&N, IPIV, F, (int*)&N, &INFO);
+    dgesv_((int*)&N, &NRHS, J.data(), (int*)&N, IPIV.data(), F.data(), (int*)&N, &INFO);
 
     if (INFO != 0) {
 #if 1 // Could not solve
@@ -837,7 +837,7 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
     }
 
     // Recompute the norm and exit if necessary.
-    const Real norm = computeNorm(F, X, C);
+    const Real norm = computeNorm(F.data(), X.data(), C.data());
 
     if (norm / initNorm < m_exitTol) {
       break;
@@ -860,21 +860,6 @@ KMCSolver<R, State, T>::stepImplicitEuler(State&              a_state,
   }
 
   a_state.linearIn(outputState);
-
-  // Cleanup
-  delete[] J;
-  delete[] X;
-  delete[] F;
-  delete[] C;
-
-  delete[] X1;
-  delete[] X2;
-  delete[] F1;
-  delete[] F2;
-
-  delete[] IPIV;
-
-  return;
 }
 
 template <typename R, typename State, typename T>

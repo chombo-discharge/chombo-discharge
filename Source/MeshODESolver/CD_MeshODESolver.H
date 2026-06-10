@@ -97,12 +97,12 @@ public:
   allocate() noexcept;
 
   /**
-    @brief Set phi for a specific component. 
+    @brief Set phi for a specific component.
     @param[in] a_phiFunc Phi function
     @param[in] a_comp    Component
   */
   virtual void
-  setPhi(const std::function<Real(const RealVect& a_pos)>& a_phiFunc, const size_t a_comp) noexcept;
+  setPhi(const std::function<Real(const RealVect& a_pos)>& a_phiFunc, size_t a_comp) noexcept;
 
   /**
     @brief Set phi everywhere. 
@@ -112,12 +112,12 @@ public:
   setPhi(const std::function<std::array<Real, N>(const RealVect& a_pos)>& a_phiFunc) noexcept;
 
   /**
-    @brief Set right-hand side for specified component. 
+    @brief Set right-hand side for specified component.
     @param[in] a_srcFunc Source term function.
     @param[in] a_comp    Component
   */
   virtual void
-  setRHS(const std::function<Real(const RealVect& a_pos)>& a_srcFunc, const size_t a_comp) noexcept;
+  setRHS(const std::function<Real(const RealVect& a_pos)>& a_srcFunc, size_t a_comp) noexcept;
 
   /**
     @brief Compute right-hand side from left-hand side. I.e. compute f = f(y,t). 
@@ -163,23 +163,23 @@ public:
   getRHS() const noexcept;
 
   /**
-    @brief Perform pre-regrid operations. 
-    @param[in] a_lbase          Coarsest level that changed during regrid. 
-    @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
+    @brief Perform pre-regrid operations.
+    @param[in] a_lbase          Coarsest level that changed during regrid.
+    @param[in] a_oldFinestLevel Finest grid level before the regrid operation.
     @note This copies m_phi onto m_cache
   */
   virtual void
-  preRegrid(const int a_lbase, const int a_oldFinestLevel) noexcept;
+  preRegrid(int a_lbase, int a_oldFinestLevel) noexcept;
 
   /**
-    @brief Regrid this solver. 
-    @param[in] a_lmin           Coarsest level where grids did not change. 
-    @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
-    @param[in] a_newFinestLevel Finest AMR level after the regrid. 
-    @details This linearly interpolates (potentially with limiters) m_phi to the new grids. 
+    @brief Regrid this solver.
+    @param[in] a_lmin           Coarsest level where grids did not change.
+    @param[in] a_oldFinestLevel Finest AMR level before the regrid.
+    @param[in] a_newFinestLevel Finest AMR level after the regrid.
+    @details This linearly interpolates (potentially with limiters) m_phi to the new grids.
   */
   virtual void
-  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) noexcept;
+  regrid(int a_lmin, int a_oldFinestLevel, int a_newFinestLevel) noexcept;
 
   /**
     @brief Get the realm where this solver is registered. 
@@ -215,7 +215,7 @@ public:
     @param[in] a_realm Realm identifier
   */
   virtual void
-  setRealm(const std::string a_realm) noexcept;
+  setRealm(std::string a_realm) noexcept;
 
   /**
     @brief Set phase.
@@ -226,20 +226,20 @@ public:
 
   /**
     @brief Set verbosity.
-    @param[in] a_verbosity Verbosity level. 
+    @param[in] a_verbosity Verbosity level.
   */
   virtual void
-  setVerbosity(const int a_verbosity) noexcept;
+  setVerbosity(int a_verbosity) noexcept;
 
   /**
-    @brief Set the time for this solver. 
+    @brief Set the time for this solver.
     @param[in] a_step Time step number
     @param[in] a_time Time (in seconds)
     @param[in] a_dt   Time step increment
     @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
   */
   virtual void
-  setTime(const int a_step, const Real a_time, const Real a_dt) noexcept;
+  setTime(int a_step, Real a_time, Real a_dt) noexcept;
 
   /**
     @brief Write plot file
@@ -264,17 +264,17 @@ public:
   getPlotVariableNames() const noexcept;
 
   /**
-    @brief Write plot data to output holder. 
+    @brief Write plot data to output holder.
     @param[in,out] a_output            Output data holder.
-    @param[in,out] a_icomp             Starting component in a_output to begin at. 
+    @param[in,out] a_icomp             Starting component in a_output to begin at.
     @param[in]    a_outputRealm       Realm where a_output belongs
     @param[in]    a_level             Grid level
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_icomp,
-                const std::string     a_outputRealm,
-                const int             a_level) const noexcept;
+                std::string           a_outputRealm,
+                int                   a_level) const noexcept;
 
   /**
     @brief Write checkpoint data into HDF5 file. 
@@ -283,17 +283,17 @@ public:
   */
 #ifdef CH_USE_HDF5
   virtual void
-  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const noexcept;
+  writeCheckpointLevel(HDF5Handle& a_handle, int a_level) const noexcept;
 #endif
 
   /**
-    @brief Read checkpoint data from HDF5 file. 
+    @brief Read checkpoint data from HDF5 file.
     @param[in] a_handle HDF5 handle.
     @param[in] a_level Grid level
   */
 #ifdef CH_USE_HDF5
   virtual void
-  readCheckpointLevel(HDF5Handle& a_handle, const int a_level) noexcept;
+  readCheckpointLevel(HDF5Handle& a_handle, int a_level) noexcept;
 #endif
 
 protected:
@@ -387,10 +387,10 @@ protected:
   writeData(LevelData<EBCellFAB>& a_output,
             int&                  a_comp,
             const EBAMRCellData&  a_data,
-            const std::string     a_outputRealm,
-            const int             a_level,
-            const bool            a_interpToCentroids,
-            const bool            a_interpGhost) const noexcept;
+            std::string           a_outputRealm,
+            int                   a_level,
+            bool                  a_interpToCentroids,
+            bool                  a_interpGhost) const noexcept;
 
   /**
     @brief Parse plot variables
