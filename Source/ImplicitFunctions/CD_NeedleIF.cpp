@@ -33,7 +33,6 @@ NeedleIF::NeedleIF(const Real& a_length,
 
   // a_angle is entire opening angle, dividing by two to get half of the opening angle
   const Real bodyRadius = a_radius - a_tipRadius;
-  const Real tipLength  = bodyRadius / std::tan((0.5 * a_angle) * Units::pi / 180.0);
 
   // The center of the needle tip is set to origo in order for the rotation to work more easily
   const Vec3 bodyBackPosition(0.0, 0.0, 0.0);

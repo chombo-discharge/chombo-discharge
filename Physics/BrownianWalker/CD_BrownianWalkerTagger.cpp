@@ -53,7 +53,7 @@ BrownianWalkerTagger::parseOptions()
 }
 
 bool
-BrownianWalkerTagger::tagCells(EBAMRTags& a_tags)
+BrownianWalkerTagger::tagCells(EBAMRTags& /*a_tags*/)
 {
   return true;
 }

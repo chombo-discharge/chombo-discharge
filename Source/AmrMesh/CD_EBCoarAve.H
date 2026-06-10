@@ -329,8 +329,8 @@ protected:
   arithmeticAverage(EBFaceFAB&       a_coarData,
                     const EBFaceFAB& a_fineData,
                     const DataIndex& a_datInd,
-                    const int&       a_fineVar,
                     const int&       a_coarVar,
+                    const int&       a_fineVar,
                     const int&       a_dir) const noexcept;
 
   /**

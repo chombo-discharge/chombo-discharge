@@ -390,7 +390,6 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   const int indexAreaFrac     = indexBoundaryArea + 1;
   const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
   const int indexDist         = indexNormal + SpaceDim;
-  const int numCompTotal      = indexDist + 1;
 
   // Write header.
 #ifdef CH_MPI

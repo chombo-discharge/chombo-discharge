@@ -290,7 +290,6 @@ EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>&       a_co
   const DataIterator& ditCoFi = dblCoFi.dataIterator();
 
   const int nboxFine = ditFine.size();
-  const int nboxCoFi = ditCoFi.size();
 
   const Real factor = 1. / pow(m_refRat, SpaceDim);
 

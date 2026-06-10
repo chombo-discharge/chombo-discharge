@@ -44,7 +44,7 @@ namespace DischargeIO {
     @return Return value
   */
   std::string
-  numberFmt(long long a_number, char a_sep = ',') noexcept;
+  numberFmt(long long n, char a_sep = ',') noexcept;
 
   /**
     @brief Number formatting game. This just prints the number 123456 as 123,456

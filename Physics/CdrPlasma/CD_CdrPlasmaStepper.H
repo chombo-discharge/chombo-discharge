@@ -290,7 +290,7 @@ namespace Physics {
          @param[in]  a_phase            Input phase
       */
       virtual void
-      computeMaxElectricField(Real& a_maxElectricField, const phase::which_phase a_phase);
+      computeMaxElectricField(Real& a_maximumElectricField, const phase::which_phase a_phase);
 
       /**
          @brief Return the current simulation time.
@@ -481,7 +481,7 @@ namespace Physics {
                              const LevelData<EBCellFAB>&          a_E,
                              const Real&                          a_time,
                              const Real&                          a_dt,
-                             const int                            a_level);
+                             const int                            a_lvl);
       /**
          @brief Compute reaction network sources. This is the regular version which does not do the cut-cells.
          @param[out] a_cdrSources   Source terms for the CDR solvers. 
@@ -566,7 +566,7 @@ namespace Physics {
                                         const Real&               a_time,
                                         const Real&               a_dt,
                                         const Real&               a_dx,
-                                        const Box&                a_box,
+                                        const Box&                a_cellBox,
                                         const int                 a_lvl,
                                         const DataIndex&          a_dit);
 
@@ -739,7 +739,7 @@ namespace Physics {
         @param[in] a_E E
       */
       virtual void
-      computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
+      computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_cdrVelocities,
                                 const Vector<EBAMRCellData*>& a_cdrDensities,
                                 const EBAMRCellData&          a_E,
                                 const Real&                   a_time);
@@ -790,7 +790,7 @@ namespace Physics {
         @param[in] a_velocities Velocities
       */
       virtual void
-      computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
+      computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_cdrVelocities,
                                          const Vector<EBCellFAB*>& a_cdrDensities,
                                          const EBCellFAB&          a_electricField,
                                          const Real&               a_time,
@@ -860,7 +860,7 @@ namespace Physics {
                              const Vector<EBAMRIFData*>& a_extrapCdrVelocities,
                              const Vector<EBAMRIFData*>& a_extrapCdrGradients,
                              const Vector<EBAMRIFData*>& a_extrapRteFluxes,
-                             const EBAMRIFData&          a_field,
+                             const EBAMRIFData&          a_electricField,
                              const Real&                 a_time);
 
       /**
@@ -1445,14 +1445,14 @@ namespace Physics {
         @param[in] a_comp Comp
       */
       virtual void
-      writeJ(LevelData<EBCellFAB>& a_output, int& a_comp, const std::string a_outputRealm, const int a_level) const;
+      writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string a_outputRealm, const int a_level) const;
 
       /**
          @brief Calculate the user-supplied plot variables
         @param[in,out] a_physicsPlotVars Description
       */
       virtual void
-      computePhysicsPlotVars(EBAMRCellData& a_physicsPlotVars) const noexcept;
+      computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexcept;
 
       /**
          @brief Write data to output. Convenience function. 

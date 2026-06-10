@@ -81,7 +81,7 @@ TriangleCollection::getClosestTriangles(const Vec3& a_point) const noexcept
 
   // Visitation pattern. Go into the node if the point is inside or the distance to the BV is shorter than the shortest distance
   // that we've found so far.
-  EBGeometry::BVH::Visiter<Node, Real> visiter = [&shortestDistanceSoFar](const Node&    a_node,
+  EBGeometry::BVH::Visiter<Node, Real> visiter = [&shortestDistanceSoFar](const Node& /*a_node*/,
                                                                           const BVHMeta& a_bvDist) noexcept -> bool {
     return a_bvDist <= 0.0 || a_bvDist <= shortestDistanceSoFar;
   };

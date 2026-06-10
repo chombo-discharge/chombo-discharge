@@ -827,7 +827,7 @@ FieldSolverGMG::setupMultigrid()
 }
 
 Vector<long long>
-FieldSolverGMG::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
+FieldSolverGMG::computeLoads(const DisjointBoxLayout& /*a_dbl*/, const int a_level)
 {
   CH_TIME("FieldSolverGMG::computeLoads(DisjointBoxLayout, int)");
   if (m_verbosity > 5) {

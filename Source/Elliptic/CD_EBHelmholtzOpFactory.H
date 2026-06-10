@@ -136,7 +136,7 @@ public:
                        const EBBCFactory&      a_ebbcFactory,
                        const IntVect&          a_ghostPhi,
                        const IntVect&          a_ghostRHS,
-                       const Smoother&         a_relaxationMethod,
+                       const Smoother&         a_smoother,
                        const Real&             a_relaxFactor,
                        const ProblemDomain&    a_bottomDomain,
                        const int&              a_mgBlockingFactor,
@@ -190,7 +190,7 @@ public:
     @param[in,out] a_indexspace Description
   */
   int
-  refToFiner(const ProblemDomain& a_indexspace) const final;
+  refToFiner(const ProblemDomain& a_domain) const final;
 
 protected:
   /**
@@ -361,8 +361,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has fewer grid points than a_domainTwo
   */
-  bool
-  isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  static bool
+  isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
     @brief Check if a domain is finer than the other
@@ -370,8 +370,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has more grid points than a_domainTwo
   */
-  bool
-  isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  static bool
+  isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
     @brief Construct coarsening of a grid level. 
@@ -382,7 +382,7 @@ protected:
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we coarsen directly. 
   */
   bool
-  getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, int a_refRat, int a_blockingFactor) const;
+  getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, int a_refRat, int a_blockingFactor) const;
 
   /**
     @brief Coarsen coefficients (conservatively)
@@ -396,7 +396,7 @@ protected:
     @param[in]  a_eblgFine       Fine grids
     @param[in]  a_refRat         Coarsening factor
   */
-  void
+  static void
   coarsenCoefficients(LevelData<EBCellFAB>&             a_coarAcoef,
                       LevelData<EBFluxFAB>&             a_coarBcoef,
                       LevelData<BaseIVFAB<Real>>&       a_coarBcoefIrreg,

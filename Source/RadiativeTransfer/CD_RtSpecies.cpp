@@ -28,7 +28,7 @@ RtSpecies::getName() const
 }
 
 Real
-RtSpecies::getScatteringCoefficient(const RealVect a_pos) const
+RtSpecies::getScatteringCoefficient(const RealVect /*a_pos*/) const
 {
   return 0.0;
 }

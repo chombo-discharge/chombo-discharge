@@ -82,7 +82,6 @@ EBGhostCellInterpolator::defineGhostRegions() noexcept
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const ProblemDomain& domainFine = m_eblgFine.getDomain();
-  const ProblemDomain& domainCoar = m_eblgCoFi.getDomain();
 
   const DataIterator dit = dblFine.dataIterator();
 
@@ -375,14 +374,12 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   CH_assert(a_phiFine.nComp() > a_fineVar);
   CH_assert(a_phiCoar.nComp() > a_coarVar);
 
-  const ProblemDomain& fineDomain = m_eblgFine.getDomain();
-  const ProblemDomain& coarDomain = m_eblgCoFi.getDomain();
+  const ProblemDomain& fineDomain    = m_eblgFine.getDomain();
+  const ProblemDomain& coarDomain    = m_eblgCoFi.getDomain();
+  const Box            coarDomainBox = coarDomain.domainBox();
 
   const EBISLayout& fineEBISL = m_eblgFine.getEBISL();
   const EBISLayout& coarEBISL = m_eblgCoFi.getEBISL();
-
-  const Box fineDomainBox = fineDomain.domainBox();
-  const Box coarDomainBox = coarDomain.domainBox();
 
   const EBISBox& fineEBISBox = a_phiFine.getEBISBox();
   const EBISBox& coarEBISBox = a_phiCoar.getEBISBox();
@@ -484,7 +481,7 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
 }
 
 Real
-EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -513,7 +510,7 @@ EBGhostCellInterpolator::superbee(const Real& dwl, const Real& dwr) const noexce
 }
 
 Real
-EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept
+EBGhostCellInterpolator::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

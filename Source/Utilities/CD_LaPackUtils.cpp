@@ -21,7 +21,7 @@
 #include <CD_NamespaceHeader.H>
 
 int
-LaPackUtils::linearIndex(const int irow, const int jcol, const int M, const int N)
+LaPackUtils::linearIndex(const int irow, const int jcol, const int M, const int /*N*/)
 {
   return irow + jcol * M;
 }

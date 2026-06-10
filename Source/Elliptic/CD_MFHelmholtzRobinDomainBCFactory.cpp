@@ -73,7 +73,7 @@ MFHelmholtzRobinDomainBCFactory::setCoefficients(const std::function<Real(const 
 }
 
 RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzRobinDomainBCFactory::create(const int a_iphase) const
+MFHelmholtzRobinDomainBCFactory::create(const int /*a_iphase*/) const
 {
   CH_TIME("MFHelmholtzRobinDomainBCFactory::create(int)");
 

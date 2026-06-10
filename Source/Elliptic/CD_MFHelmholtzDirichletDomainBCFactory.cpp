@@ -66,7 +66,7 @@ MFHelmholtzDirichletDomainBCFactory::setValue(const std::function<Real(const Rea
 }
 
 RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzDirichletDomainBCFactory::create(const int a_iphase) const
+MFHelmholtzDirichletDomainBCFactory::create(const int /*a_iphase*/) const
 {
   CH_TIME("MFHelmholtzDirichletDomainBCFactory::create(int)");
 

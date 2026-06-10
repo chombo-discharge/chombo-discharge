@@ -142,8 +142,8 @@ protected:
     @param[in] dwr Right slope.
     @return Limited slope.
   */
-  Real
-  minmod(const Real& dwl, const Real& dwr) const noexcept;
+  static Real
+  minmod(const Real& dwl, const Real& dwr) noexcept;
 
   /**
     @brief Superbee slope limiter.
@@ -160,8 +160,8 @@ protected:
     @param[in] dwr Right slope.
     @return Limited slope.
   */
-  Real
-  monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept;
+  static Real
+  monotonizedCentral(const Real& dwl, const Real& dwr) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

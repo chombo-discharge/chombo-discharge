@@ -301,7 +301,7 @@ protected:
   getFiniteDifferenceStencil(VoFStencil&            a_stencil,
                              const VolIndex&        a_vof,
                              const EBISBox&         a_ebisBox,
-                             const DenseIntVectSet& a_invalidRegion,
+                             const DenseIntVectSet& a_validRegion,
                              const Real             a_dx) const noexcept;
 
   /**

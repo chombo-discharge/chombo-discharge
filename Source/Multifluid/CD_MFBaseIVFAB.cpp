@@ -160,7 +160,7 @@ MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nCo
 }
 
 MFBaseIVFAB*
-MFBaseIVFABFactory::create(const Box& a_box, int a_ignored_argument, const DataIndex& a_dit) const
+MFBaseIVFABFactory::create(const Box& a_box, int /*a_ignored_argument*/, const DataIndex& a_dit) const
 {
   CH_TIME("MFBaseIVFABFactory::create");
 

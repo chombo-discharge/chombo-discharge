@@ -169,8 +169,6 @@ MFHelmholtzJumpBC::defineStencils()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box box = dbl[din];
-
       m_gradPhiStencils[din].define(m_mflg, din);
       m_gradPhiWeights[din].define(m_mflg, din);
       m_boundaryPhi[din].define(m_mflg, din);
@@ -191,7 +189,6 @@ MFHelmholtzJumpBC::defineStencils()
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const Box         box     = dbl[din];
         const EBISBox&    ebisbox = ebisl[din];
         const EBGraph&    ebgraph = ebisbox.getEBGraph();
         const IntVectSet& ivs     = m_ivs[din];
@@ -322,7 +319,6 @@ MFHelmholtzJumpBC::buildAverageStencils()
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box         box     = dbl[din];
       const EBISBox&    ebisbox = ebisl[din];
       const IntVectSet& ivs     = m_ivs[din];
 
@@ -620,17 +616,10 @@ MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   const EBCellFAB& phiPhase0 = a_phi.getPhase(firstPhase);
   const EBCellFAB& phiPhase1 = a_phi.getPhase(secondPhase);
 
-  const EBISBox& ebisBoxPhase0 = phiPhase0.getEBISBox();
-  const EBISBox& ebisBoxPhase1 = phiPhase1.getEBISBox();
-
   BaseIVFAB<Real>& bndryPhiPhase0 = m_boundaryPhi[a_dit].getIVFAB(firstPhase);
   BaseIVFAB<Real>& bndryPhiPhase1 = m_boundaryPhi[a_dit].getIVFAB(secondPhase);
 
-  const BaseIVFAB<VoFStencil>& avgStencilsPhase0 = m_avgStencils[a_dit].getIVFAB(firstPhase);
-  const BaseIVFAB<VoFStencil>& avgStencilsPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase);
-
   const BaseIVFAB<Real>& denomFactorPhase0 = m_denom[a_dit].getIVFAB(firstPhase);
-  const BaseIVFAB<Real>& denomFactorPhase1 = m_denom[a_dit].getIVFAB(secondPhase);
 
   const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase0 = m_avgVoFs[a_dit].getIVFAB(firstPhase);
   const BaseIVFAB<Vector<VolIndex>>& avgVoFsPhase1 = m_avgVoFs[a_dit].getIVFAB(secondPhase);

@@ -95,8 +95,8 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                         const BaseFab<Real>&  a_Bcoef,
                                         const int&            a_dir,
                                         const Side::LoHiSide& a_side,
-                                        const DataIndex&      a_dit,
-                                        const bool            a_useHomogeneous) const
+                                        const DataIndex& /*a_dit*/,
+                                        const bool a_useHomogeneous) const
 {
   CH_TIME("EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, DataIndex, bool)");
 
@@ -136,8 +136,8 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 }
 
 Real
-EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
-                                        const EBCellFAB&      a_phi,
+EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex& a_vof,
+                                        const EBCellFAB& /*a_phi*/,
                                         const EBFaceFAB&      a_Bcoef,
                                         const int&            a_dir,
                                         const Side::LoHiSide& a_side,

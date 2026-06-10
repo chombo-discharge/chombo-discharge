@@ -187,19 +187,19 @@ PerlinSdf::octaveNoise(const RealVect& a_pos) const
 }
 
 Real
-PerlinSdf::lerp(const Real t, const Real a, const Real b) const
+PerlinSdf::lerp(const Real t, const Real a, const Real b)
 {
   return a + t * (b - a);
 }
 
 Real
-PerlinSdf::fade(const Real t) const
+PerlinSdf::fade(const Real t)
 {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 Real
-PerlinSdf::grad(const int hash, const double x, const double y, const double z) const
+PerlinSdf::grad(const int hash, const double x, const double y, const double /*z*/)
 {
   const int    h = hash & 15;
   const double u = h < 8 ? x : y;

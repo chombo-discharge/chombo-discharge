@@ -35,8 +35,8 @@ public:
     @param[in] a_numSides    Number of sides
     @param[in] a_fluidInside Fluid on inside or not
   */
-  PolygonRodIF(const RealVect a_center1,
-               const RealVect a_center2,
+  PolygonRodIF(const RealVect a_endPoint1,
+               const RealVect a_endPoint2,
                const Real     a_radius,
                const Real     a_cornerCurv,
                const int      a_numSides,

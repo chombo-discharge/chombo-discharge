@@ -246,8 +246,8 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
                             const EBCellFAB&     a_cellPhi,
                             const Box&           a_cellBox,
                             const ProblemDomain& a_domain,
-                            const int            a_level,
-                            const DataIndex&     a_dit)
+                            const int /*a_level*/,
+                            const DataIndex& /*a_dit*/)
 {
   CH_TIME("CdrCTU::computeNormalSlopes(EBCellFAB, EBCellFAB, Box, ProblemDomain, int, DataIndex)");
   if (m_verbosity > 5) {
@@ -464,8 +464,8 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
                const ProblemDomain& a_domain,
                const Box&           a_cellBox,
                const int&           a_level,
-               const DataIndex&     a_dit,
-               const Real&          a_dt)
+               const DataIndex& /*a_dit*/,
+               const Real& a_dt)
 {
   CH_TIME("CdrCTU::upwind(EBFluxFAB, EBCellFABx3, EBFluxFAB, ProblemDomain, Box, int, DataIndex, Real)");
   if (m_verbosity > 5) {
@@ -758,7 +758,7 @@ CdrCTU::upwind(EBFluxFAB&           a_facePhi,
 }
 
 Real
-CdrCTU::minmod(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::minmod(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 
@@ -787,7 +787,7 @@ CdrCTU::superbee(const Real& dwl, const Real& dwr) const noexcept
 }
 
 Real
-CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) const noexcept
+CdrCTU::monotonizedCentral(const Real& dwl, const Real& dwr) noexcept
 {
   Real slope = 0.0;
 

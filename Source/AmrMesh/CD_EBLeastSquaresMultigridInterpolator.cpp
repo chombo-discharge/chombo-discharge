@@ -467,7 +467,6 @@ EBLeastSquaresMultigridInterpolator::defineStencilsEBCF() noexcept
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const int nboxFine = ditFine.size();
-  const int nboxCoar = ditCoar.size();
 
   CH_START(t1);
   m_fineStencils.define(dblFine);
@@ -823,18 +822,15 @@ EBLeastSquaresMultigridInterpolator::regularCoarseFineInterp(LevelData<EBCellFAB
   const Real L1 = (xi - x0) * (xi - x2) / ((x1 - x0) * (x1 - x2));
   const Real L2 = (xi - x0) * (xi - x1) / ((x2 - x0) * (x2 - x1));
 
-  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
-  const ProblemDomain&     domainCoar = m_eblgCoFi.getDomain();
-  const DataIterator&      ditFine    = dblFine.dataIterator();
-  const int                nboxFine   = ditFine.size();
+  const DisjointBoxLayout& dblFine  = m_eblgFine.getDBL();
+  const DataIterator&      ditFine  = dblFine.dataIterator();
+  const int                nboxFine = ditFine.size();
 
   // We are interpolating the first layer of ghost cells to O(h^3). To do this, we must first do an interpolation on the
   // coarse grid, and then cubic interpolation on the fine grid.
 #pragma omp parallel for schedule(runtime)
   for (int mybox = 0; mybox < nboxFine; mybox++) {
     const DataIndex& din = ditFine[mybox];
-
-    const Box fineBox = dblFine[din];
 
     FArrayBox&       finePhi = a_finePhi[din].getFArrayBox();
     const FArrayBox& coarPhi = a_coarPhi[din].getFArrayBox();

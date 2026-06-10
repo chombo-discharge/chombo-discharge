@@ -108,7 +108,6 @@ RodNeedleDisk::defineRodNeedle() noexcept
   if (useNeedle) {
     // a_angle is entire opening angle, dividing by two to get half of the opening angle
     const Real bodyRadius       = needleRadius - needleTipRadius;
-    const Real tipLength        = bodyRadius / std::tan((0.5 * needleAngle) * Units::pi / 180.0);
     const Real transitionRadius = 0.25 * needleTipRadius;
 
     // The center of the needle tip is set to origo in order for the rotation to work more easily

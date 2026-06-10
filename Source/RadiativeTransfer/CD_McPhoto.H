@@ -153,7 +153,7 @@ public:
   */
   virtual void
   computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
-                            EBAMRCellData&       a_numPhysPhotonsPerPacket,
+                            EBAMRCellData&       a_numPhysPhotonsPacket,
                             const EBAMRCellData& a_source,
                             const Real           a_dt) const noexcept;
 
@@ -165,7 +165,7 @@ public:
   */
   virtual void
   generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
-                               const EBAMRCellData&       a_numPhysicalPhotons,
+                               const EBAMRCellData&       a_numPhysPhotons,
                                const size_t               a_maxPhotonsPerCell) const noexcept;
 
   /**
@@ -257,7 +257,7 @@ public:
     @param[in] a_oldFinestLevel Finest grid level before regrid
   */
   virtual void
-  preRegrid(const int a_base, const int a_oldFinestLevel) override;
+  preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
 
   /**
     @brief Deallocate internal storage
@@ -359,7 +359,7 @@ public:
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
-                int&                  a_icomp,
+                int&                  a_comp,
                 const std::string     a_outputRealm,
                 const int             a_level) const noexcept override;
 
@@ -656,7 +656,7 @@ protected:
     @param[in] a_side Coordinate side
     @return Return value
   */
-  int
+  static int
   domainBcMap(const int a_dir, const Side::LoHiSide a_side);
 
   /**
@@ -664,8 +664,8 @@ protected:
     @param[in] a_rate Rate (lambda) of the exponential distribution. Mean free path = 1/a_rate.
     @return Return value
   */
-  Real
-  randomExponential(const Real a_rate) const noexcept;
+  static Real
+  randomExponential(const Real a_rate) noexcept;
 
   /**
     @brief This computes the "conservative" deposition, multiplied by kappa
@@ -771,7 +771,7 @@ protected:
   */
   virtual void
   depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,
-                    const ParticleContainer<Photon>& a_particles,
+                    const ParticleContainer<Photon>& a_photons,
                     const int                        a_level) const noexcept;
 };
 

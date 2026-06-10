@@ -107,7 +107,7 @@ MFHelmholtzEBBC::defineMultiPhase()
 }
 
 void
-MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
+MFHelmholtzEBBC::applyEBFlux(VoFIterator& /*a_vofit*/,
                              EBCellFAB&             a_Lphi,
                              const EBCellFAB&       a_phi,
                              const BaseIVFAB<Real>& a_Bcoef,
@@ -127,13 +127,13 @@ MFHelmholtzEBBC::applyEBFlux(VoFIterator&           a_vofit,
 }
 
 void
-MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&           a_multiPhaseVofs,
-                                       EBCellFAB&             a_Lphi,
-                                       const EBCellFAB&       a_phi,
+MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator& a_multiPhaseVofs,
+                                       EBCellFAB&   a_Lphi,
+                                       const EBCellFAB& /*a_phi*/,
                                        const BaseIVFAB<Real>& a_Bcoef,
                                        const DataIndex&       a_dit,
                                        const Real&            a_beta,
-                                       const bool&            a_homogeneousPhysBC) const
+                                       const bool& /*a_homogeneousPhysBC*/) const
 {
   CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFtIerator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 

@@ -175,7 +175,7 @@ public:
     @param[in] a_domainflux Domainflux
   */
   virtual void
-  computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
+  computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data) override;
 
   /**
     @brief Compute the flux. For Eddington, the flux is F = -c/(3*kappa)*grad(phi)

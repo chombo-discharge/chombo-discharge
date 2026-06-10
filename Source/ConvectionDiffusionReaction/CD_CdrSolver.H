@@ -371,7 +371,7 @@ public:
     @note This will evaluate the function in all grid cells and set the diffusion coefficient 
   */
   virtual void
-  setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffusionCoefficient);
+  setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo);
 
   /**
     @brief Data based version of setting source terms. 

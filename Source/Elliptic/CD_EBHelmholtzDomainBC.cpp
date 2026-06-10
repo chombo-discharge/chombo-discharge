@@ -51,7 +51,7 @@ void
 EBHelmholtzDomainBC::multiplyByBcoef(BaseFab<Real>&       a_flux,
                                      const BaseFab<Real>& a_bco,
                                      const int            a_dir,
-                                     const Side::LoHiSide a_side) const
+                                     const Side::LoHiSide a_side)
 {
   CH_TIME("EBHelmholtzDomainBC::multiplyByBcoef");
 

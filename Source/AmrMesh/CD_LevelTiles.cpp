@@ -41,8 +41,7 @@ LevelTiles::define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) n
 {
   CH_TIME("LevelTiles::define");
 
-  const unsigned int numRanks = numProc();
-  const unsigned int myRank   = procID();
+  const unsigned int myRank = procID();
 
   m_myTiles.clear();
   m_otherTiles.clear();

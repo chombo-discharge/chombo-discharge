@@ -125,7 +125,7 @@ MultiIndex::norm() const
 }
 
 int
-MultiIndex::norm(const IntVect a_iv) const
+MultiIndex::norm(const IntVect a_iv)
 {
   int retval = 0;
   for (int dir = 0; dir < SpaceDim; dir++) {

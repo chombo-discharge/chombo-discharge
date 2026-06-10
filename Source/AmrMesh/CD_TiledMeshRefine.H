@@ -61,7 +61,7 @@ public:
     @return Returns the new finest grid level. 
   */
   virtual int
-  regrid(Vector<Vector<Box>>& a_newBoxes, const Vector<IntVectSet>& a_tagsLevel) const noexcept;
+  regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tagsLevel) const noexcept;
 
 protected:
   /**

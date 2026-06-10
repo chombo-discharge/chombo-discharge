@@ -71,8 +71,8 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
                                           const BaseFab<Real>&  a_Bcoef,
                                           const int&            a_dir,
                                           const Side::LoHiSide& a_side,
-                                          const DataIndex&      a_dit,
-                                          const bool            a_useHomogeneous) const
+                                          const DataIndex& /*a_dit*/,
+                                          const bool a_useHomogeneous) const
 {
   CH_TIME(
     "EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");

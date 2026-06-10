@@ -600,8 +600,7 @@ BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int>>&             a_p
   //       Once we've put that data on the new mesh, we can simply compute the sum of all mesh data in each grid patch. That sum is equal to the number of particles
   //       in the patch, which we can use for load balancing.
 
-  constexpr int comp  = 0;
-  constexpr int nComp = 1;
+  constexpr int comp = 0;
 
   // Make some storage for the number of particles per cell on the new grids.
   EBAMRCellData newParticlesPerCell;

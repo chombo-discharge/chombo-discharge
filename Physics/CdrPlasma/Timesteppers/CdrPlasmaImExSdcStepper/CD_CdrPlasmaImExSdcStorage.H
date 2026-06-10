@@ -47,7 +47,7 @@ namespace Physics {
       CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
                  const std::string             a_realm,
                  const phase::which_phase      a_phase,
-                 const int                     m_ncomp);
+                 const int                     a_ncomp);
 
       /**
          @brief Destructor.

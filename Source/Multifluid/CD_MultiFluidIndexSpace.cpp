@@ -36,7 +36,7 @@ MultiFluidIndexSpace::define(const Box&                      a_domain,
                              const bool                      a_distributedData,
                              int                             a_nCellMax,
                              int                             a_max_coar,
-                             bool                            a_fix_phase)
+                             bool /*a_fix_phase*/)
 {
 
   // Define the gas geoserver

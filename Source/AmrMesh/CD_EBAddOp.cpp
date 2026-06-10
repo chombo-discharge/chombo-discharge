@@ -47,8 +47,8 @@ EBAddOp::linearIn(EBCellFAB& a_data, void* a_buffer, const Box& a_region, const 
 }
 
 void
-EBAddOp::op(EBCellFAB&       a_dst,
-            const Box&       a_regionFrom,
+EBAddOp::op(EBCellFAB& a_dst,
+            const Box& /*a_regionFrom*/,
             const Interval&  a_dstVars,
             const Box&       a_regionTo,
             const EBCellFAB& a_src,

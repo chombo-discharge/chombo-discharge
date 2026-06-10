@@ -17,7 +17,7 @@
 ItoSpecies::ItoSpecies() : m_name("ItoSpecies"), m_chargeNumber(0), m_isDiffusive(false), m_isMobile(false)
 {
 
-  m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
+  m_initialDensity = [](const RealVect& /*x*/, const Real& /*t*/) -> Real {
     return 0.0;
   };
 }
@@ -26,7 +26,7 @@ ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const
   : m_name(a_name), m_chargeNumber(a_chargeNumber), m_isDiffusive(a_diffusive), m_isMobile(a_mobile)
 {
 
-  m_initialDensity = [](const RealVect& x, const Real& t) -> Real {
+  m_initialDensity = [](const RealVect& /*x*/, const Real& /*t*/) -> Real {
     return 0.0;
   };
 }
@@ -82,13 +82,13 @@ ItoSpecies::getInitialParticles() const
 }
 
 Real
-ItoSpecies::mobility(const Real a_energy) const
+ItoSpecies::mobility(const Real /*a_energy*/) const
 {
   return 0.0;
 }
 
 Real
-ItoSpecies::diffusion(const Real a_energy) const
+ItoSpecies::diffusion(const Real /*a_energy*/) const
 {
   return 0.0;
 }

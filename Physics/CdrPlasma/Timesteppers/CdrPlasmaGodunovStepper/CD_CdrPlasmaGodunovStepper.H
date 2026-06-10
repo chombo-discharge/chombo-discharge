@@ -99,7 +99,7 @@ namespace Physics {
         @param[in] a_lbase Lbase
       */
       void
-      preRegrid(int a_lbase, int a_oldFinestLevel) override;
+      preRegrid(int a_lbase, int a_finestLevel) override;
 
       /**
          @brief Regrid method. 

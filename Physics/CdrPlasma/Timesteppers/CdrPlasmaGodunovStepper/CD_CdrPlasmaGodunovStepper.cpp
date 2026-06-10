@@ -574,7 +574,9 @@ CdrPlasmaGodunovStepper::postCheckpointSetup()
 }
 
 void
-CdrPlasmaGodunovStepper::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+CdrPlasmaGodunovStepper::regridInternals(const int /*a_lmin*/,
+                                         const int /*a_oldFinestLevel*/,
+                                         const int /*a_newFinestLevel*/)
 {
   CH_TIME("CdrPlasmaGodunovStepper::regridInternals(int, int, int)");
   if (m_verbosity > 5) {
@@ -825,7 +827,7 @@ CdrPlasmaGodunovStepper::computeCdrGradients()
 }
 
 void
-CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real a_dt)
+CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(const Real /*a_dt*/)
 {
   CH_TIME("CdrPlasmaGodunovStepper::extrapolateWithSourceTerm(Real)");
   if (m_verbosity > 5) {
@@ -1462,7 +1464,7 @@ CdrPlasmaGodunovStepper::computeCdrDriftVelocities(const Real a_time)
 }
 
 void
-CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real a_time)
+CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(const Real /*a_time*/)
 {
   CH_TIME("CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(Real)");
   if (m_verbosity > 5) {

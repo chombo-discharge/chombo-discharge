@@ -338,11 +338,11 @@ MFHelmholtzOp::fillGrad(const LevelData<MFCellFAB>& a_phi)
 }
 
 void
-MFHelmholtzOp::getFlux(MFFluxFAB&                  a_flux,
-                       const LevelData<MFCellFAB>& a_data,
-                       const Box&                  a_grid,
-                       const DataIndex&            a_dit,
-                       Real                        a_scale)
+MFHelmholtzOp::getFlux(MFFluxFAB& /*a_flux*/,
+                       const LevelData<MFCellFAB>& /*a_data*/,
+                       const Box& /*a_grid*/,
+                       const DataIndex& /*a_dit*/,
+                       Real /*a_scale*/)
 {
   MayDay::Warning("MFHelmholtzOp::getFlux - not implemented (yet)");
 }
@@ -464,10 +464,8 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
         sumVolume += kappa;
       };
 
-      const bool isCovered   = ebisbox.isAllCovered();
-      const bool isRegular   = ebisbox.isAllRegular();
-      const bool isIrregular = !isCovered && !isRegular;
-
+      const bool isCovered = ebisbox.isAllCovered();
+      const bool isRegular = ebisbox.isAllRegular();
       if (!isCovered) {
         VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 
@@ -506,7 +504,7 @@ MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a
 }
 
 void
-MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted)
+MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool /*a_ghosted*/)
 {
   CH_TIME("MFHelmholtzOp::createCoarser");
 
@@ -522,7 +520,7 @@ MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFC
 }
 
 void
-MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat)
+MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& /*a_refRat*/)
 {
   CH_TIME("MFHelmholtzOp::createCoarsened");
 
@@ -1110,8 +1108,6 @@ MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 {
   CH_TIME("MFHelmholtzOp::AMROperatorNF");
 
-  constexpr bool homogeneousCFBC = false;
-
   // Note; There is no coarse-fine interpolation here because that will have been
   // done by AMROperator (which is called before this routine).
   this->exchangeGhost(a_phi);
@@ -1197,8 +1193,6 @@ MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&             a_Lphi,
                            AMRLevelOp<LevelData<MFCellFAB>>* a_finerOp)
 {
   CH_TIME("MFHelmholtzOp::AMROperator");
-
-  constexpr bool homogeneousCFBC = false;
 
   if (m_hasFine) {
     auto* finerOp = (MFHelmholtzOp*)a_finerOp;

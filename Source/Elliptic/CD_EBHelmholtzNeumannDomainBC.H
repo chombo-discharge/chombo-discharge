@@ -44,7 +44,7 @@ public:
     @note A positive values gives a flux INTO the domain. 
     @param[in] a_value Value
   */
-  EBHelmholtzNeumannDomainBC(const std::function<Real(const RealVect& a_pos)>& a_value);
+  EBHelmholtzNeumannDomainBC(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /**
     @brief Destructor

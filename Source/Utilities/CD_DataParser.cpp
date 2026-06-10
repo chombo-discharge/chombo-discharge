@@ -146,10 +146,10 @@ DataParser::fractionalFileReadASCII(const std::string       a_fileName,
 }
 
 List<PointParticle>
-DataParser::readPointParticlesASCII(const std::string       a_fileName,
-                                    const unsigned int      a_xColumn,
-                                    const unsigned int      a_yColumn,
-                                    const unsigned int      a_zColumn,
+DataParser::readPointParticlesASCII(const std::string  a_fileName,
+                                    const unsigned int a_xColumn,
+                                    const unsigned int a_yColumn,
+                                    const unsigned int /*a_zColumn*/,
                                     const unsigned int      a_wColumn,
                                     const std::vector<char> a_ignoreChars)
 {

@@ -457,6 +457,8 @@ CdrMultigrid::setupMultigrid()
     botsolver = &m_gmres;
 
     m_gmres.m_verbosity = 0; // Shut up.
+
+    break;
   }
   default: {
     MayDay::Error("CdrMultigrid::setupMultigrid() - logic bust in bottom solver setup");

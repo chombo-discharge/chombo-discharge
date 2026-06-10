@@ -133,7 +133,7 @@ void
 ScanShop::makeGrids(const ProblemDomain& a_domain,
                     DisjointBoxLayout&   a_grids,
                     const int&           a_maxGridSize,
-                    const int&           a_maxIrregGridSize)
+                    const int& /*a_maxIrregGridSize*/)
 {
   CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");
   m_timer.startEvent("Make grids");

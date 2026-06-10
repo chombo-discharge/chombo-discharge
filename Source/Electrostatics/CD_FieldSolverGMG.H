@@ -80,7 +80,7 @@ public:
     @note a_sigma must be defined on the gas phase. 
   */
   virtual bool
-  solve(MFAMRCellData&       a_potential,
+  solve(MFAMRCellData&       a_phi,
         const MFAMRCellData& a_rho,
         const EBAMRIVData&   a_sigma,
         const bool           a_zeroPhi = false) override;

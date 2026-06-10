@@ -85,7 +85,7 @@ GeometryStepper::computeDt()
 }
 
 Real
-GeometryStepper::advance(const Real a_dt)
+GeometryStepper::advance(const Real /*a_dt*/)
 {
   return std::numeric_limits<Real>::max();
 }

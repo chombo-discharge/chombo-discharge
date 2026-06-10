@@ -245,13 +245,43 @@ Add `static_cast<TargetType>(expr)` for `size_t`→`int` and `long long`→`doub
 - [ ] `Source/Driver/CD_Driver.cpp` (10 warnings)
 - [ ] Other files (1–3 each)
 
-#### 3d. `clang-diagnostic-unused-variable` (30 warnings)
+#### 3d. `clang-diagnostic-unused-variable` (30+ warnings)
 Remove or `(void)var;` unused variables.
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (8)
+- [x] `Source/AmrMesh/CD_EBCoarseToFineInterp.cpp` — `domainFine`, `ebisBoxFine` (×3 functions), `ebisBoxCoar`, `coarBox`, `volFactor`
+- [x] `Source/AmrMesh/CD_EBGhostCellInterpolator.cpp` — `domainCoar` (in `define`), `fineDomainBox` (in `interpolateIrregular`); note: `domainFine` and `coarDomainBox` are used and were kept
+- [x] `Source/AmrMesh/CD_EBFluxRedistribution.cpp` — `cellBox`, `domainCoar`, `domain`
+- [x] `Source/AmrMesh/CD_LevelTiles.cpp` — `numRanks`
+- [x] `Source/AmrMesh/CD_EBReflux.cpp` — `domainCoFi`, `boxFine`, `graphFine`, `dxFine`, etc.
+- [x] `Source/AmrMesh/CD_CellCentroidInterpolation.cpp` — `domainBox` (×3)
+- [x] `Source/AmrMesh/CD_PhaseRealm.cpp` — `comps` (×2)
+- [x] `Source/AmrMesh/CD_EBLeastSquaresMultigridInterpolator.cpp` — `nboxCoar`, `domainCoar`, `fineBox`
+- [x] `Source/AmrMesh/CD_EBGradient.cpp` — `cellBox`, `irregularKernel`, `domainFine`, `levelStencils`
+- [x] `Source/AmrMesh/CD_EBAMRParticleMesh.cpp` — `domainFine`, `domainCoar`, `numBoxesCoar`
+- [x] `Source/Driver/CD_Driver.cpp` — `probLo`
+- [x] `Source/Utilities/CD_PolyUtils.cpp` — `x`, `fx`
+- [x] `Source/Utilities/CD_DischargeIO.cpp` — `numCompTotal`
+- [x] `Source/Utilities/CD_DataOps.cpp` — `irregularKernel`, `dbl` (×6)
+- [x] `Source/Elliptic/CD_MFHelmholtzOp.cpp` — `isIrregular`, `homogeneousCFBC` (×2)
+- [x] `Source/Elliptic/CD_MFHelmholtzOpFactory.cpp` — `found`
+- [x] `Source/Elliptic/CD_EBHelmholtzOp.cpp` — `tol`
+- [x] `Source/Elliptic/CD_MFHelmholtzRobinEBBC.cpp` — `box`
+- [x] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` — `box` (×3), `ebisBoxPhase0`, `ebisBoxPhase1`, `avgStencilsPhase0`, `avgStencilsPhase1`, `denomFactorPhase1`
+- [x] `Source/RadiativeTransfer/CD_McPhoto.cpp` — `factor` (dead store), `box`
+- [x] `Source/RadiativeTransfer/CD_EddingtonSP1.cpp` — `helmAcoBox`, `helmBcoBox`, `finestLevel`
+- [x] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` — dangling `:` in constructor
+- [x] `Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp` — `cellBox` (×3)
+- [x] `Source/ItoDiffusion/CD_ItoSolver.cpp` — `dx`, `origin`, `box`, `probLo` (×3 functions)
+- [x] `Source/Particle/CD_EBCoarseFineParticleMesh.cpp` — `nboxCoFi`
+- [x] `Source/ImplicitFunctions/CD_NeedleIF.cpp` — `tipLength`
+- [x] `Geometries/GECReferenceCell/CD_GECReferenceCell.cpp` — `h`
+- [x] `Geometries/RodNeedleDisk/CD_RodNeedleDisk.cpp` — `tipLength`
+- [x] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp` — `fluxFunc` (×2)
+- [x] `Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp` — `nComp`
+- [x] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` — `normal`, `domain`, `electricFieldCell`, `ebgraph`, `cellBox`
+- [x] `Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp` — `sigma_p`, `safety`, `max_dt_cfl`, `t`
+- [x] `Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCJSON.cpp` — `plasmaProducts`, `N`
+- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (8 warnings — header-only template file)
 - [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H` (1)
-- [ ] `Source/AmrMesh/CD_CellCentroidInterpolation.cpp` (3)
-- [ ] `Source/Driver/CD_Driver.cpp` (1)
-- [ ] `Source/Utilities/CD_PolyUtils.cpp` (2)
 
 #### 3e. `readability-inconsistent-declaration-parameter-name` (25 warnings)
 Sync parameter names in `.H` declarations to match the `.cpp`/`Implem.H` definitions.
@@ -266,40 +296,49 @@ Sync parameter names in `.H` declarations to match the `.cpp`/`Implem.H` definit
 - [ ] `Source/ImplicitFunctions/CD_ProfilePlaneIF.H`
 - [ ] `Physics/ItoKMC/…/CD_ItoKMCGodunovStepper.H`
 
-#### 3f. `clang-analyzer-deadcode.DeadStores` (10 warnings)
+#### 3f. `clang-analyzer-deadcode.DeadStores` (10+ warnings)
 Remove or use dead-stored variables.
-- [ ] `Source/Driver/CD_Driver.cpp` — `numThreads` (line 515), `lastOutputTime` (line 885)
-- [ ] `Source/Utilities/CD_PolyUtils.cpp` — `c` (63), `x`+`fx` (195–196)
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` — various
+- [x] `Source/Driver/CD_Driver.cpp` — `numThreads` (wrapped in `#ifdef _OPENMP`), `lastOutputTime`, `probLo`
+- [x] `Source/Utilities/CD_PolyUtils.cpp` — `c` (dead store before unreachable), `x`, `fx`
+- [x] `Source/RadiativeTransfer/CD_McPhoto.cpp` — `factor = 0.0` before `MayDay::Error`
+- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` — various (header-only template file)
 
-#### 3g. `readability-convert-member-functions-to-static` (8 warnings)
+#### 3g. `performance-unnecessary-value-param` (417 warnings)
+Pass parameters by `const&` instead of by value where the parameter is not mutated and copy is not
+intentional. Requires changing both the `.H` declaration and the `.cpp`/`Implem.H` definition.
+Heavy files: `Physics/CdrPlasma/` (~130), `Physics/ItoKMC/` (~90), `Source/Elliptic/` (~50).
+Not auto-fixed in Step 2 because it changes function signatures.
+- [ ] `Physics/CdrPlasma/` (~130 warnings)
+- [ ] `Physics/ItoKMC/` (~90 warnings)
+- [ ] `Source/Elliptic/` (~50 warnings)
+- [ ] Remaining files (~147 warnings spread across Source/ and other Physics/)
+
+#### 3h. `readability-convert-member-functions-to-static` (8 warnings)
 Verify function doesn't use `this`, then add `static`.
 - [ ] `Source/Geometry/CD_ScanShopImplem.H:61` — `getSortedBoxesAndTypes`
 - [ ] Other files
 
-#### 3h. `clang-diagnostic-overloaded-virtual` (2 warnings)
-Add `using Base::method;` like the ScanShop fix.
+#### 3i. `clang-diagnostic-overloaded-virtual` (2 warnings)
+Add `using Base::method;` to bring hidden base overloads into scope.
 - [ ] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.H`
   - `computeCdrDomainFluxes` (line 389)
   - `computeCdrDriftVelocities` (line 459)
 
-#### 3i. Uninitialized variable — real bug (priority)
-- [ ] `Source/Geometry/CD_ScanShop.cpp:158` — `whichLevel` uninitialized after for-loop; used at line 165
-
-#### 3j. Possibly swapped arguments — investigate (priority)
-- [ ] `Source/Elliptic/CD_MFHelmholtzOp.cpp:1099,1183` — `a_phiFine`/`a_phi`/`a_phiCoar` order
-
-#### 3k. Small-count fixes
+#### 3j. Small-count fixes
 - [ ] `Source/Particle/CD_ParticleContainer.H:96` — add `noexcept` to move assignment
 - [ ] `Source/ItoDiffusion/CD_ItoSolver.H:89` — add `noexcept` to move assignment
 - [ ] `Source/ItoDiffusion/CD_ItoParticleImplem.H:41` — copy ctor calls wrong base
 - [ ] `Physics/ItoKMC/CD_ItoKMCSurfaceReactionSet.H:73` — `const int max` member → non-const
 - [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H:403` — remove unused `std::string str`
 
-#### 3l. Real bugs from clang-analyzer (priority — investigate before committing)
+#### 3k. Real bugs from clang-analyzer (priority — investigate before committing)
 
 These emerged from the full run after `HeaderFilterRegex` was fixed to cover all four directories.
 Run `./run_clang_tidy.sh 2>&1 | grep -E "clang-analyzer|clang-diagnostic-(sometimes|uninitialized|vla)"` to get per-file details.
+
+- [x] `Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp` — missing `break` in GMRES case of
+  bottom-solver `switch`; without it, GMRES fell through to `default: MayDay::Error(...)` and
+  aborted the program whenever GMRES was the selected solver. Fixed by adding `break;`.
 
 - [ ] `clang-analyzer-core.NullDereference` (~49 warnings): potential null pointer dereferences.
   Likely concentrated in `Physics/ItoKMC/` and `Physics/CdrPlasma/` — needs per-file investigation.

@@ -580,7 +580,6 @@ CdrPlasmaImExSdcStepper::advance(const Real a_dt)
   bool retry_step      = true;
 
   m_maxError = 0.1234E5;
-  Real t     = 0.0;
   while (!accept_step && retry_step) {
     num_corrections = 0;
     CdrPlasmaImExSdcStepper::setupSubintervals(m_time, actual_dt);
@@ -950,7 +949,7 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
 }
 
 void
-CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, const bool a_lagged_terms)
+CdrPlasmaImExSdcStepper::integrateAdvection(const Real /*a_dt*/, const int a_m, const bool a_lagged_terms)
 {
   CH_TIME("CdrPlasmaImExSdcStepper::integrateAdvection");
   if (m_verbosity > 5) {
@@ -1005,7 +1004,7 @@ CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, cons
 }
 
 void
-CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, const bool a_lagged_terms)
+CdrPlasmaImExSdcStepper::integrateDiffusion(const Real /*a_dt*/, const int a_m, const bool a_lagged_terms)
 {
   CH_TIME("CdrPlasmaImExSdcStepper::integrateDiffusion");
   if (m_verbosity > 5) {
@@ -1079,7 +1078,6 @@ CdrPlasmaImExSdcStepper::reconcileIntegrands()
   //       do need the extra slopes for the explicit operators
 
   Vector<EBAMRCellData*> cdr_densities_p = CdrPlasmaImExSdcStepper::getCdrSolversPhiK(m_p);
-  EBAMRIVData&           sigma_p         = CdrPlasmaImExSdcStepper::getSigmaSolverK(m_p);
   const Real             t_p             = m_tm[m_p];
 
   // Update boundary conditions for cdr and sigma equations before getting the slope at the final node
@@ -1179,8 +1177,6 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
     pout() << "CdrPlasmaImExSdcStepper::corrector_finalizeErrors" << endl;
   }
 
-  const Real safety = 1.E-20;
-
   m_maxError = 0.0;
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it) {
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
@@ -1240,7 +1236,6 @@ CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt, cons
   const Real rel_err    = (m_safety * m_errThresh) / m_maxError;
   const Real dt_adapt   = (m_maxError > 0.0) ? a_dt * pow(rel_err, 1.0 / (a_num_corrections + 1)) : m_maxDt;
   const Real min_dt_cfl = dt_cfl * m_minCFL;
-  const Real max_dt_cfl = dt_cfl * m_maxCFL;
 
   if (m_maxError <= m_errThresh) { // Always accept, and compute new step
     a_accept_step = true;
@@ -1390,7 +1385,9 @@ CdrPlasmaImExSdcStepper::computeDt()
 }
 
 void
-CdrPlasmaImExSdcStepper::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+CdrPlasmaImExSdcStepper::regridInternals(const int /*a_lmin*/,
+                                         const int /*a_oldFinestLevel*/,
+                                         const int /*a_newFinestLevel*/)
 {
   CH_TIME("CdrPlasmaImExSdcStepper::regridInternals(int, int, int)");
   if (m_verbosity > 5) {
@@ -2026,10 +2023,10 @@ CdrPlasmaImExSdcStepper::getSigmaSolverK(const int a_m)
 
 void
 CdrPlasmaImExSdcStepper::writeStepProfile(const Real a_dt,
-                                          const Real a_error,
-                                          const int  a_substeps,
-                                          const int  a_corrections,
-                                          const int  a_rejections)
+                                          const Real /*a_error*/,
+                                          const int a_substeps,
+                                          const int a_corrections,
+                                          const int a_rejections)
 {
   CH_TIME("sissdc::writeStepProfile");
   if (m_verbosity > 5) {

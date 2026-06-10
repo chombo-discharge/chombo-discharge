@@ -185,7 +185,7 @@ Driver::allocateInternals()
 }
 
 void
-Driver::cacheTags(const EBAMRTags& a_tags)
+Driver::cacheTags(const EBAMRTags& /*a_tags*/)
 {
   CH_TIME("Driver::cacheTags(EBAMRTags)");
   if (m_verbosity > 5) {
@@ -287,8 +287,7 @@ Driver::getGeometryTags()
         EBISLayout        ebisl;
         ebis->fillEBISLayout(ebisl, irregGrids, curDomain, nGhost);
 
-        const RealVect     probLo = m_amr->getProbLo();
-        const DataIterator dit    = irregGrids.dataIterator();
+        const DataIterator dit = irregGrids.dataIterator();
 
         const int nbox = dit.size();
 
@@ -504,11 +503,13 @@ Driver::gridReport()
     totalValidCells += validLevelCells[lvl];
   }
 
+#ifdef _OPENMP
   int numThreads = 0;
 #pragma omp parallel reduction(+ : numThreads)
   {
     numThreads += 1;
   }
+#endif
 
   // Begin writing a report.
   pout() << "=======================================================================" << endl
@@ -870,14 +871,12 @@ Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps)
       if (m_outputDt > 0.0) {
         const int k = std::floor(m_time / m_outputDt);
 
-        Real lastOutputTime = k * m_outputDt;
         Real nextOutputTime = (k + 1) * m_outputDt;
 
         const Real thresh = 1.E-10 * m_outputDt;
 
         // Weird, but can happen due to flooring when m_time is an integer multiple of m_outputDt
         if (std::abs(m_time - nextOutputTime) < thresh) {
-          lastOutputTime += m_outputDt;
           nextOutputTime += m_outputDt;
         }
 

@@ -44,7 +44,7 @@ public:
   MFLevelGrid(const DisjointBoxLayout&                   a_dbl,
               const ProblemDomain&                       a_domain,
               const int                                  a_ebghost,
-              const RefCountedPtr<MultiFluidIndexSpace>& a_mfis);
+              const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace);
 
   /**
     @brief Alternative full constructor - RefCounted storage so no allocation here

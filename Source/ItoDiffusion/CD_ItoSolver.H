@@ -513,7 +513,7 @@ public:
     @param[in] a_container Container
   */
   virtual unsigned long long
-  getNumParticles(WhichContainer a_container, bool a_localOnly) const;
+  getNumParticles(WhichContainer a_whichContainer, bool a_localOnly) const;
 
   /**
     @brief Register operators
@@ -722,7 +722,7 @@ public:
     @param[in] a_diffusion Particle diffusion value.
   */
   virtual void
-  setParticleDiffusion(Real a_diffusion);
+  setParticleDiffusion(Real a_diffCo);
 
   /**
     @brief Interpolate the particle velocities.
@@ -740,7 +740,7 @@ public:
     @param[in] a_dit   Grid index
   */
   virtual void
-  interpolateVelocities(int a_level, const DataIndex& a_dit);
+  interpolateVelocities(int a_lvl, const DataIndex& a_dit);
 
   /**
     @brief Interpolate mobilities
@@ -826,7 +826,7 @@ public:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_particlesPerCell) const noexcept;
+  mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with KD/BVH trees
@@ -835,9 +835,7 @@ public:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
-                                  const CellInfo&    a_cellInfo,
-                                  int                a_particlesPerCell) const noexcept;
+  makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node. 
@@ -848,7 +846,7 @@ public:
   virtual void
   makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
                                     const CellInfo&    a_cellInfo,
-                                    int                a_particlesPerCell) const noexcept;
+                                    int                a_ppc) const noexcept;
 
   /**
     @brief Particle re-initialization algorithm
@@ -857,9 +855,7 @@ public:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  reinitializeParticles(List<ItoParticle>& a_particles,
-                        const CellInfo&    a_cellInfo,
-                        int                a_particlesPerCell) const noexcept;
+  reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Remap the bulk particle container.
@@ -1486,7 +1482,7 @@ protected:
     @param[in] a_velocityMagnitude Velocity magnitude.
   */
   virtual void
-  interpolateMobilities(int a_level, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
+  interpolateMobilities(int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
 
   /**
     @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch. 
@@ -1494,7 +1490,7 @@ protected:
     @param[in] a_dit   Grid index.
   */
   virtual void
-  interpolateMobilitiesDirect(int a_level, const DataIndex& a_dit) noexcept;
+  interpolateMobilitiesDirect(int a_lvl, const DataIndex& a_dit) noexcept;
 
   /**
     @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch. 
@@ -1503,7 +1499,7 @@ protected:
     @param[in] a_velocityMagnitude Velocity magnitude.
   */
   virtual void
-  interpolateMobilitiesVelocity(int a_level, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
+  interpolateMobilitiesVelocity(int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
 
   /**
     @brief Update mobilities parametrically from the particle energy.
@@ -1521,7 +1517,7 @@ protected:
     @param[in] a_dit   Grid index
   */
   virtual void
-  interpolateDiffusion(int a_level, const DataIndex& a_dit);
+  interpolateDiffusion(int a_lvl, const DataIndex& a_dit);
 
   /**
     @brief Update mobilities parametrically from the particle energy. 

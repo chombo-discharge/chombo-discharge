@@ -34,13 +34,13 @@ public:
     @param[in] a_value  Constant value on EB
     @note The order is also the attempted radius of the stencil. 
   */
-  MFHelmholtzNeumannEBBCFactory(const Real a_value);
+  MFHelmholtzNeumannEBBCFactory(const Real a_DphiDn);
 
   /**
     @brief Full constructor which sets order and spatially varying value on EBs
     @param[in] a_value Spatially varying value on EBs
   */
-  MFHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_value);
+  MFHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /**
     @brief Default constructor

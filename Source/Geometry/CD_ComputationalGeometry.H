@@ -72,7 +72,7 @@ public:
     @param[in] a_startDomain Coarse domain where ScanShop begins the load balancing recursion process.
   */
   void
-  useScanShop(const ProblemDomain a_startDomain);
+  useScanShop(const ProblemDomain a_beginDomain);
 
   /**
     @brief Calls for ComputationalGeometry to use Chombo's geometry generation tool

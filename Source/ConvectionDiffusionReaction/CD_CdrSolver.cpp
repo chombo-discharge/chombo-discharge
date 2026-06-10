@@ -71,7 +71,7 @@ CdrSolver::setDefaultDomainBC()
   // TLDR: This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass).
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
-  auto zero = [](const RealVect a_position, const Real a_time) -> Real {
+  auto zero = [](const RealVect /*a_position*/, const Real /*a_time*/) -> Real {
     return 0.0;
   };
 
@@ -389,7 +389,7 @@ CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCell
 }
 
 void
-CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+CdrSolver::preRegrid(const int /*a_lmin*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("CdrSolver::preRegrid(int, int)");
   if (m_verbosity > 5) {
@@ -2178,7 +2178,6 @@ CdrSolver::computeAdvectionDiffusionDt()
         const EBCellFAB& velo       = (*m_cellVelocity[lvl])[din];
         const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[din];
         const EBISBox&   ebisbox    = ebisl[din];
-        const Box        cellBox    = dbl[din];
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -2270,9 +2269,8 @@ CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance)
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const EBCellFAB& phi     = (*m_phi[lvl])[din];
-        const EBCellFAB& source  = (*m_source[lvl])[din];
-        const Box        cellBox = dbl[din];
+        const EBCellFAB& phi    = (*m_phi[lvl])[din];
+        const EBCellFAB& source = (*m_source[lvl])[din];
 
         VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[din];
 
@@ -2749,7 +2747,6 @@ CdrSolver::extrapolateAdvectiveFluxToEB(EBAMRIVData& a_ebFlux) const noexcept
       for (int mybox = 0; mybox < nbox; mybox++) {
         const DataIndex& din = dit[mybox];
 
-        const Box      cellBox = dbl[din];
         const EBISBox& ebisBox = ebisl[din];
 
         BaseIVFAB<Real>&       scalarFlux = (*a_ebFlux[lvl])[din];

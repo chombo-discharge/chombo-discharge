@@ -45,7 +45,7 @@ McPhoto::McPhoto() : m_dirtySampling(false)
 McPhoto::~McPhoto() = default;
 
 bool
-McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi)
+McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool /*a_zerophi*/)
 {
   CH_TIME("McPhoto::advance");
   if (m_verbosity > 5) {
@@ -546,7 +546,7 @@ McPhoto::allocate()
 }
 
 void
-McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel)
+McPhoto::preRegrid(const int a_lmin, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("McPhoto::preRegrid");
   if (m_verbosity > 5) {
@@ -578,7 +578,7 @@ McPhoto::deallocate()
 }
 
 void
-McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel)
+McPhoto::regrid(const int a_lmin, const int /*a_oldFinestLevel*/, const int a_newFinestLevel)
 {
   CH_TIME("McPhoto::regrid");
   if (m_verbosity > 5) {
@@ -707,7 +707,7 @@ McPhoto::registerOperators()
 }
 
 void
-McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi)
+McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeBoundaryFlux");
   if (m_verbosity > 5) {
@@ -718,7 +718,7 @@ McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi)
 }
 
 void
-McPhoto::computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& a_phi)
+McPhoto::computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeDomainFlux");
   if (m_verbosity > 5) {
@@ -729,7 +729,7 @@ McPhoto::computeDomainFlux(EBAMRIFData& a_domainFlux, const EBAMRCellData& a_phi
 }
 
 void
-McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
+McPhoto::computeFlux(EBAMRCellData& /*a_flux*/, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeFlux");
   if (m_verbosity > 5) {
@@ -743,7 +743,7 @@ McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi)
 }
 
 void
-McPhoto::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi)
+McPhoto::computeDensity(EBAMRCellData& /*a_isotropic*/, const EBAMRCellData& /*a_phi*/)
 {
   CH_TIME("McPhoto::computeDensity");
   if (m_verbosity > 5) {
@@ -880,7 +880,7 @@ McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side)
 }
 
 Real
-McPhoto::randomExponential(const Real a_rate) const noexcept
+McPhoto::randomExponential(const Real a_rate) noexcept
 {
   if (a_rate <= 0.0) {
     return std::numeric_limits<Real>::infinity();
@@ -998,8 +998,6 @@ McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt) 
     factor = a_dt;
   }
   else {
-    factor = 0.0;
-
     MayDay::Error("McPhoto::drawPhotons -- logic bust");
   }
 
@@ -1338,7 +1336,6 @@ McPhoto::depositHybrid(EBAMRCellData&     a_depositionH,
       BaseIVFAB<Real>&       deltaM = (*a_massDifference[lvl])[din];
       const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[din];
 
-      const Box      box     = dbl.get(din);
       const EBISBox& ebisbox = ebisl[din];
 
       // Iteration space for kernel.

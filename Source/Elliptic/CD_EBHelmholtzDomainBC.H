@@ -164,11 +164,8 @@ protected:
     face/edge. So we need to shift the box over when we multiply. Because both Dirichlet, Neumann, and the Robin Bcs need to do this,
     I'm putting this routine in the parent class. 
   */
-  void
-  multiplyByBcoef(BaseFab<Real>&       a_flux,
-                  const BaseFab<Real>& a_bco,
-                  const int            a_dir,
-                  const Side::LoHiSide a_side) const;
+  static void
+  multiplyByBcoef(BaseFab<Real>& a_flux, const BaseFab<Real>& a_bco, const int a_dir, const Side::LoHiSide a_side);
 };
 
 #include <CD_NamespaceFooter.H>

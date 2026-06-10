@@ -561,7 +561,7 @@ MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid&       a_coarMflg,
 }
 
 MFHelmholtzOp*
-MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly)
+MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool /*a_homogeneousOnly*/)
 {
   CH_TIME("EBHelmholtzOpFactory::MGnewOp(ProblemDomain, int, bool)");
 
@@ -795,7 +795,7 @@ MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain)
 }
 
 bool
-MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) const
+MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("MFHelmholtzOpFactory::isCoarser(ProblemDomain, ProblemDomain)");
 
@@ -803,7 +803,7 @@ MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) 
 }
 
 bool
-MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B) const
+MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("MFHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
 
@@ -815,13 +815,11 @@ MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const
 {
   CH_TIME("MFHelmholtzOpFactory::refToFiner(ProblemDomain)");
 
-  int  ref   = -1;
-  bool found = false;
+  int ref = -1;
 
   for (int ilev = 0; ilev < m_amrLevelGrids.size(); ilev++) {
     if (m_amrLevelGrids[ilev].getDomain() == a_domain) {
-      found = true;
-      ref   = m_amrRefRatios[ilev];
+      ref = m_amrRefRatios[ilev];
     }
   }
 

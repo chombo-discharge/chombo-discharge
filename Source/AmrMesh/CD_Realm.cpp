@@ -209,7 +209,7 @@ Realm::defineMasks(const int a_lmin)
 }
 
 void
-Realm::defineMFLevelGrid(const int a_lmin)
+Realm::defineMFLevelGrid(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineMFLevelGrid");
   if (m_verbosity > 5) {
@@ -281,7 +281,7 @@ Realm::defineMFLevelGrid(const int a_lmin)
 }
 
 void
-Realm::defineOuterHaloMask(const int a_lmin)
+Realm::defineOuterHaloMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
@@ -335,11 +335,11 @@ Realm::defineOuterHaloMask(const int a_lmin)
 void
 Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
                            const ProblemDomain&      a_domainCoar,
-                           const ProblemDomain&      a_domainFine,
-                           const DisjointBoxLayout&  a_gridsCoar,
-                           const DisjointBoxLayout&  a_gridsFine,
-                           const int                 a_buffer,
-                           const int                 a_refRat)
+                           const ProblemDomain& /*a_domainFine*/,
+                           const DisjointBoxLayout& a_gridsCoar,
+                           const DisjointBoxLayout& a_gridsFine,
+                           const int                a_buffer,
+                           const int                a_refRat)
 {
   CH_TIME("Realm::defineOuterHaloMask");
   if (m_verbosity > 5) {
@@ -468,7 +468,7 @@ Realm::defineOuterHaloMask(LevelData<BaseFab<bool>>& a_coarMask,
 }
 
 void
-Realm::defineInnerHaloMask(const int a_lmin)
+Realm::defineInnerHaloMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineInnerHaloMask");
   if (m_verbosity > 5) {
@@ -621,7 +621,7 @@ Realm::defineInnerHaloMask(const int a_lmin)
 }
 
 void
-Realm::defineOuterCFMask(const int a_lmin)
+Realm::defineOuterCFMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineOuterCFMask");
   if (m_verbosity > 5) {
@@ -675,11 +675,11 @@ Realm::defineOuterCFMask(const int a_lmin)
 void
 Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
                          const ProblemDomain&      a_domainCoar,
-                         const ProblemDomain&      a_domainFine,
-                         const DisjointBoxLayout&  a_gridsCoar,
-                         const DisjointBoxLayout&  a_gridsFine,
-                         const int                 a_buffer,
-                         const int                 a_refRat)
+                         const ProblemDomain& /*a_domainFine*/,
+                         const DisjointBoxLayout& a_gridsCoar,
+                         const DisjointBoxLayout& a_gridsFine,
+                         const int                a_buffer,
+                         const int                a_refRat)
 {
   CH_TIME("Realm::defineOuterCFMask");
   if (m_verbosity > 5) {
@@ -808,7 +808,7 @@ Realm::defineOuterCFMask(LevelData<BaseFab<bool>>& a_coarMask,
 }
 
 void
-Realm::defineInnerCFMask(const int a_lmin)
+Realm::defineInnerCFMask(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineInnerCFMask");
   if (m_verbosity > 5) {
@@ -888,7 +888,7 @@ Realm::defineInnerCFMask(const int a_lmin)
 }
 
 void
-Realm::defineCFIVS(const int a_lmin)
+Realm::defineCFIVS(const int /*a_lmin*/)
 {
   CH_TIME("Realm::defineCFIVS");
   if (m_verbosity > 5) {

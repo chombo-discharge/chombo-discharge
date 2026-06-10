@@ -209,8 +209,8 @@ private:
   /**
     @brief Get norm
   */
-  int
-  norm(const IntVect a_index) const;
+  static int
+  norm(const IntVect a_iv);
 };
 
 #include <CD_NamespaceFooter.H>

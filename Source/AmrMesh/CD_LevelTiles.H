@@ -74,7 +74,7 @@ public:
     @param[in] a_blockingFactor Grid size. 
     @param[in] a_grids Grids
   */
-  LevelTiles(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
+  LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
 
   /**
     @brief Destructor (does nothing)
@@ -87,7 +87,7 @@ public:
     @param[in] a_grids Grids
   */
   virtual void
-  define(const DisjointBoxLayout& a_grids, const int a_blockingFactor) noexcept;
+  define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
 
   /**
     @brief Get the tiles own by this rank

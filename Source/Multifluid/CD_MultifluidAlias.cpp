@@ -42,7 +42,7 @@ MultifluidAlias::MfCellAliasFactory::MfCellAliasFactory(LevelData<MFCellFAB>* a_
 {}
 
 EBCellFAB*
-MultifluidAlias::MfCellAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const
+MultifluidAlias::MfCellAliasFactory::create(const Box& /*box*/, int /*ncomps*/, const DataIndex& a_datInd) const
 {
   return (*m_mf)[a_datInd].getPhasePtr(m_phase);
 }
@@ -59,7 +59,7 @@ MultifluidAlias::MfFluxAliasFactory::MfFluxAliasFactory(LevelData<MFFluxFAB>* a_
 {}
 
 EBFluxFAB*
-MultifluidAlias::MfFluxAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const
+MultifluidAlias::MfFluxAliasFactory::create(const Box& /*box*/, int /*ncomps*/, const DataIndex& a_datInd) const
 {
   return (*m_mf)[a_datInd].getPhasePtr(m_phase);
 }
@@ -76,7 +76,7 @@ MultifluidAlias::MfIVAliasFactory::MfIVAliasFactory(LevelData<MFBaseIVFAB>* a_mf
 {}
 
 BaseIVFAB<Real>*
-MultifluidAlias::MfIVAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const
+MultifluidAlias::MfIVAliasFactory::create(const Box& /*box*/, int /*ncomps*/, const DataIndex& a_datInd) const
 {
   return (*m_mf)[a_datInd].getPhasePtr(m_phase);
 }

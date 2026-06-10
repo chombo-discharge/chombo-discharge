@@ -62,7 +62,7 @@ EBFluxRedistribution::define(const EBLevelGrid& a_eblgCoar,
                              const EBLevelGrid& a_eblgFine,
                              const int          a_refToCoar,
                              const int          a_refToFine,
-                             const bool         a_redistributeOutside) noexcept
+                             const bool /*a_redistributeOutside*/) noexcept
 {
   CH_TIME("EBFluxRedistribution::define");
 
@@ -348,8 +348,6 @@ EBFluxRedistribution::defineValidCells(LevelData<BaseFab<bool>>& a_validCells) c
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box cellBox = dbl[din];
-
       BaseFab<bool>&   validCells = a_validCells[din];
       const FArrayBox& mask       = data[din];
 
@@ -487,11 +485,10 @@ EBFluxRedistribution::redistributeCoar(LevelData<EBCellFAB>&             a_phiCo
   CH_assert(a_phiCoar.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dblCoar    = m_eblgCoarsened.getDBL();
-  const DataIterator&      ditCoar    = dblCoar.dataIterator();
-  const EBISLayout&        ebislCoar  = m_eblgCoarsened.getEBISL();
-  const ProblemDomain&     domainCoar = m_eblgCoarsened.getDomain();
-  const int                nbox       = ditCoar.size();
+  const DisjointBoxLayout& dblCoar   = m_eblgCoarsened.getDBL();
+  const DataIterator&      ditCoar   = dblCoar.dataIterator();
+  const EBISLayout&        ebislCoar = m_eblgCoarsened.getEBISL();
+  const int                nbox      = ditCoar.size();
 
   LevelData<EBCellFAB> coarBuffer(dblCoar, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebislCoar));
 
@@ -546,11 +543,10 @@ EBFluxRedistribution::redistributeLevel(LevelData<EBCellFAB>&             a_phi,
   CH_assert(a_phi.nComp() > a_variables.end());
   CH_assert(a_deltaM.nComp() > a_variables.end());
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const DataIterator&      dit    = dbl.dataIterator();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const int                nbox   = dit.size();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const DataIterator&      dit   = dbl.dataIterator();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const int                nbox  = dit.size();
 
   LevelData<EBCellFAB> levelBuffer(dbl, 1, m_redistRadius * IntVect::Unit, EBCellFactory(ebisl));
 

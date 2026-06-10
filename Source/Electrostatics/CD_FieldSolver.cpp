@@ -110,9 +110,9 @@ FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zeroPhi)
 }
 
 void
-FieldSolver::setSolverPermittivities(const MFAMRCellData& a_permittivityCell,
-                                     const MFAMRFluxData& a_permittivityFace,
-                                     const MFAMRIVData&   a_permittivityEB)
+FieldSolver::setSolverPermittivities(const MFAMRCellData& /*a_permittivityCell*/,
+                                     const MFAMRFluxData& /*a_permittivityFace*/,
+                                     const MFAMRIVData& /*a_permittivityEB*/)
 {
   CH_TIME("FieldSolver::setSolverPermittivities");
   if (m_verbosity > 5) {
@@ -160,7 +160,7 @@ FieldSolver::allocate()
 }
 
 void
-FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+FieldSolver::preRegrid(const int /*a_lbase*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("FieldSolver::preRegrid(int, int)");
   if (m_verbosity > 5) {
@@ -390,7 +390,7 @@ FieldSolver::computeCapacitance()
 
   // Do a backup of the voltage.
   auto voltageBackup = m_voltage;
-  auto voltageOne    = [](const Real a_time) -> Real {
+  auto voltageOne    = [](const Real /*a_time*/) -> Real {
     return 1.0;
   };
 
@@ -752,7 +752,7 @@ FieldSolver::setDefaultDomainBcFunctions()
   }
 
   // Default space/time dependency of domain BCs.
-  auto defaultDomainBcFunction = [](const RealVect a_position, const Real a_time) -> Real {
+  auto defaultDomainBcFunction = [](const RealVect /*a_position*/, const Real /*a_time*/) -> Real {
     return 1.0;
   };
 
@@ -787,7 +787,8 @@ FieldSolver::setDefaultEbBcFunctions()
     const Real frac = elec.getFraction();
 
     ElectrostaticEbBc::BcFunction curFunc =
-      [&, &time = this->m_time, &voltage = this->m_voltage, val, frac](const RealVect a_position, const Real a_time) {
+      [&, &time = this->m_time, &voltage = this->m_voltage, val, frac](const RealVect /*a_position*/,
+                                                                       const Real /*a_time*/) {
         return voltage(time) * val * frac;
       };
 
@@ -875,14 +876,14 @@ FieldSolver::parseDomainBc()
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
           curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, tangDir](const RealVect a_pos,
-                                                                                            const Real     a_time) {
+                                                                                            const Real /*a_time*/) {
             return table->interpolate<0>(a_pos[tangDir]) * voltage(time) * val;
           };
 
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [table, val, tangDir](const RealVect a_pos, const Real a_time) {
+          curFunc = [table, val, tangDir](const RealVect a_pos, const Real /*a_time*/) {
             return table->interpolate<0>(a_pos[tangDir]) * val;
           };
 
@@ -959,7 +960,7 @@ FieldSolver::parseDomainBc()
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
           curFunc = [table, &voltage = this->m_voltage, &time = this->m_time, val, dir](const RealVect a_pos,
-                                                                                        const Real     a_time) {
+                                                                                        const Real /*a_time*/) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
               if (d != dir) {
@@ -972,7 +973,7 @@ FieldSolver::parseDomainBc()
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [table, val, dir](const RealVect a_pos, const Real a_time) {
+          curFunc = [table, val, dir](const RealVect a_pos, const Real /*a_time*/) {
             Real r2 = 0.0;
             for (int d = 0; d < SpaceDim; d++) {
               if (d != dir) {
@@ -996,7 +997,7 @@ FieldSolver::parseDomainBc()
           MayDay::Error("FieldSolver::parseDomainBc -- dirichlet/neumann_custom takes exactly 1 argument");
         }
 
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -1017,14 +1018,14 @@ FieldSolver::parseDomainBc()
         switch (bcType) {
         case ElectrostaticDomainBc::BcType::Dirichlet: {
           curFunc = [&bcFunc, &voltage = this->m_voltage, &time = this->m_time, val](const RealVect a_pos,
-                                                                                     const Real     a_time) {
+                                                                                     const Real /*a_time*/) {
             return bcFunc(a_pos, time) * voltage(time) * val;
           };
 
           break;
         }
         case ElectrostaticDomainBc::BcType::Neumann: {
-          curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real a_time) {
+          curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real /*a_time*/) {
             return bcFunc(a_pos, time) * val;
           };
 
@@ -1185,10 +1186,10 @@ FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
 
 void
 FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
-                                 const Box&       a_cellBox,
-                                 const EBISBox&   a_ebisbox,
-                                 const RealVect&  a_probLo,
-                                 const Real&      a_dx)
+                                 const Box& /*a_cellBox*/,
+                                 const EBISBox& a_ebisbox,
+                                 const RealVect& /*a_probLo*/,
+                                 const Real& a_dx)
 {
   CH_TIME("FieldSolver::setEbPermittivities(BaseIVFAB<Real>, Box, EBISBox, RealVect, Real)");
   if (m_verbosity > 10) {
@@ -1769,7 +1770,7 @@ FieldSolver::getPlotVariableNames() const
 }
 
 Vector<long long>
-FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level)
+FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int /*a_level*/)
 {
   CH_TIME("FieldSolver::computeLoads(DisjointBoxLayout, int)");
   if (m_verbosity > 5) {

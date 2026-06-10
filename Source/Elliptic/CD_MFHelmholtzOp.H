@@ -135,7 +135,7 @@ public:
                 const int&                                       a_jumpOrder,
                 const int&                                       a_jumpWeight,
                 const int&                                       a_preCondSmooth,
-                const Smoother&                                  a_smoother,
+                const Smoother&                                  a_relaxType,
                 const Real&                                      a_relaxFactor);
 
   /**
@@ -374,7 +374,7 @@ public:
     @param[in,out] a_2 Description
   */
   Real
-  dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) override final;
+  dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /**
     @brief Scale function

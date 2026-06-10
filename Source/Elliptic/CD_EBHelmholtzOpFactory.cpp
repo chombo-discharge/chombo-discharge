@@ -333,7 +333,7 @@ EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&             a_co
 }
 
 bool
-EBHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) const
+EBHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("EBHelmholtzOpFactory::isCoarser(ProblemDomain, ProblemDomain)");
 
@@ -341,7 +341,7 @@ EBHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) 
 }
 
 bool
-EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B) const
+EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B)
 {
   CH_TIME("EBHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
 
@@ -418,7 +418,7 @@ EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid&       a_coarEblg,
 }
 
 EBHelmholtzOp*
-EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly)
+EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool /*a_homogeneousOnly*/)
 {
   CH_TIME("EBHelmholtzOpFactory::MGnewOp(ProblemDomain, int, bool)");
 

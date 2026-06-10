@@ -162,16 +162,16 @@ protected:
     @param[in] a Description
     @param[in] b Description
   */
-  Real
-  lerp(const Real t, const Real a, const Real b) const;
+  static Real
+  lerp(const Real t, const Real a, const Real b);
 
   /**
     @brief Fade function
     @return Return value
     @param[in] t Description
   */
-  Real
-  fade(const Real t) const;
+  static Real
+  fade(const Real t);
 
   /**
     @brief Gradient function using hash table lookup
@@ -181,8 +181,8 @@ protected:
     @param[in] y Description
     @param[in] z Description
   */
-  Real
-  grad(const int hash, const double x, const double y, const double z) const;
+  static Real
+  grad(const int hash, const double x, const double y, const double z);
 };
 
 #include <CD_NamespaceFooter.H>

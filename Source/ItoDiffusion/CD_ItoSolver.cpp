@@ -1971,7 +1971,7 @@ ItoSolver::isDiffusive() const
 }
 
 void
-ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel)
+ItoSolver::preRegrid(const int a_lbase, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("ItoSolver::preRegrid");
   if (m_verbosity > 5) {
@@ -2182,9 +2182,6 @@ ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit)
 
   if (m_isMobile) {
     const EBCellFAB& velo_func = (*m_velocityFunction[a_lvl])[a_dit];
-    const RealVect   dx        = m_amr->getDx()[a_lvl] * RealVect::Unit;
-    const RealVect   origin    = m_amr->getProbLo();
-    const Box        box       = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
@@ -2295,9 +2292,6 @@ ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit) 
   EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);
 
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const RealVect   dx               = m_amr->getDx()[a_lvl] * RealVect::Unit;
-  const RealVect   probLo           = m_amr->getProbLo();
-  const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
   List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
@@ -2329,9 +2323,6 @@ ItoSolver::interpolateMobilitiesVelocity(const int        a_lvl,
 
   const EBAMRParticleMesh& particleMesh     = m_amr->getParticleMesh(m_realm, m_phase);
   const EBCellFAB&         mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const RealVect           dx               = m_amr->getDx()[a_lvl] * RealVect::Unit;
-  const RealVect           probLo           = m_amr->getProbLo();
-  const Box                box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
   const EBParticleMesh&    meshInterp       = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
   ParticleContainer<ItoParticle>& particles    = m_particleContainers.at(WhichContainer::Bulk);
@@ -3176,8 +3167,8 @@ ItoSolver::mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cell
 
 void
 ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
-                                           const CellInfo&    a_cellInfo,
-                                           const int          a_ppc) const noexcept
+                                           const CellInfo& /*a_cellInfo*/,
+                                           const int a_ppc) const noexcept
 {
   CH_TIMERS("ItoSolver::makeSuperparticlesEqualWeightKD");
   CH_TIMER("ItoSolver::makeSuperparticlesEqualWeightKD::populate_list", t1);

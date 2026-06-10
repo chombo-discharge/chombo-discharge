@@ -67,11 +67,11 @@ VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 }
 
 Vector<VolIndex>
-VofUtils::restrictVofsToQuadrant(const Vector<VolIndex>& a_vofs,
-                                 const VolIndex&         a_startVof,
-                                 const EBISBox&          a_ebisbox,
-                                 const RealVect&         a_normal,
-                                 const int               a_radius)
+VofUtils::restrictVofsToQuadrant(const Vector<VolIndex>& /*a_vofs*/,
+                                 const VolIndex& a_startVof,
+                                 const EBISBox&  a_ebisbox,
+                                 const RealVect& a_normal,
+                                 const int       a_radius)
 {
   Vector<VolIndex> vofs;
 

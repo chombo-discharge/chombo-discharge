@@ -305,13 +305,8 @@ EBCoarseToFineInterp::interpolatePWC(EBCellFAB&       a_fineData,
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-  const EBISBox& ebisBoxFine = ebislFine[a_dit];
-  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
-
   const Box coarBox = dblCoar[a_dit];
   const Box refiBox = Box(IntVect::Zero, (m_refRat - 1) * IntVect::Unit);
-
-  const Real volFactor = std::pow(m_refRat, SpaceDim);
 
   FArrayBox&       fineDataReg = a_fineData.getFArrayBox();
   const FArrayBox& coarDataReg = a_coarData.getFArrayBox();
@@ -364,9 +359,6 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
 
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
-
-  const EBISBox& ebisBoxFine = ebislFine[a_dit];
-  const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
 
   const Box fineBox = dblFine[a_dit];
   const Box coarBox = dblCoar[a_dit];
@@ -426,10 +418,8 @@ EBCoarseToFineInterp::interpolateConservativeSlope(EBCellFAB&          a_fineDat
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
-  const ProblemDomain& domainFine = m_eblgFine.getDomain();
   const ProblemDomain& domainCoar = m_eblgCoar.getDomain();
 
-  const EBISBox& ebisBoxFine = ebislFine[a_dit];
   const EBISBox& ebisBoxCoar = ebislCoar[a_dit];
 
   const Box coarBox = dblCoar[a_dit];

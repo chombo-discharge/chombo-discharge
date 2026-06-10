@@ -350,7 +350,7 @@ protected:
     @param[in] a_validBox Description
   */
   static void
-  getVofsInMonotonePath(std::set<VolIndex>& a_vofList,
+  getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
                         const VolIndex&     a_startVof,
                         const EBISBox&      a_ebisbox,
                         const Box&          a_validBox,

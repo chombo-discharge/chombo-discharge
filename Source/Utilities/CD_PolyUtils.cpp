@@ -60,7 +60,6 @@ PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVec
   // Init to be safe
   a = 0.;
   b = 0.;
-  c = 0.;
   d = 0.;
   e = 0.;
 
@@ -192,9 +191,6 @@ PolyUtils::brentSolve(const Real a_point1, const Real a_point2, const std::funct
   Real fc = fa;
   Real d  = b - a;
   Real e  = d;
-
-  Real x  = b;
-  Real fx = fb;
 
   for (int iter = 0; iter < maxIter; iter++) {
     if ((fb > 0 && fc > 0) || (fb < 0 && fc < 0)) {

@@ -59,14 +59,14 @@ protected:
     @brief Get the base implicit function for a circular profile.
     @return Implicit function for the circular surface profile.
   */
-  BaseIF*
+  static BaseIF*
   getBaseIFCircle();
 
   /**
     @brief Get the base implicit function for a square profile.
     @return Implicit function for the square surface profile.
   */
-  BaseIF*
+  static BaseIF*
   getBaseIFSquare();
 };
 

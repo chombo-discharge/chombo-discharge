@@ -33,12 +33,12 @@ ItoKMCPhysics::getPlotVariableNames() const noexcept
 }
 
 Vector<Real>
-ItoKMCPhysics::getPlotVariables(const RealVect          a_E,
-                                const RealVect          a_pos,
-                                const Vector<Real>&     a_phi,
-                                const Vector<RealVect>& a_gradPhi,
-                                const Real              a_dx,
-                                const Real              a_kappa) const noexcept
+ItoKMCPhysics::getPlotVariables(const RealVect /*a_E*/,
+                                const RealVect /*a_pos*/,
+                                const Vector<Real>& /*a_phi*/,
+                                const Vector<RealVect>& /*a_gradPhi*/,
+                                const Real /*a_dx*/,
+                                const Real /*a_kappa*/) const noexcept
 {
   CH_TIME("ItoKMCPhysics::getPlotVariables");
 

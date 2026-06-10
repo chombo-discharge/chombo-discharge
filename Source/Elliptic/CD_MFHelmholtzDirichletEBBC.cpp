@@ -237,9 +237,9 @@ MFHelmholtzDirichletEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                                 EBCellFAB&             a_Lphi,
-                                                 const EBCellFAB&       a_phi,
+MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                                 EBCellFAB&   a_Lphi,
+                                                 const EBCellFAB& /*a_phi*/,
                                                  const BaseIVFAB<Real>& a_Bcoef,
                                                  const DataIndex&       a_dit,
                                                  const Real&            a_beta,

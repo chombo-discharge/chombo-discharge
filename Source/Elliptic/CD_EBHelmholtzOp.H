@@ -123,9 +123,9 @@ public:
                 const Real&                                      a_beta,
                 const RefCountedPtr<LevelData<EBCellFAB>>&       a_Acoef,
                 const RefCountedPtr<LevelData<EBFluxFAB>>&       a_Bcoef,
-                const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoIrreg,
-                const IntVect&                                   a_ghostCellsPhi,
-                const IntVect&                                   a_ghostCellsRHS,
+                const RefCountedPtr<LevelData<BaseIVFAB<Real>>>& a_BcoefIrreg,
+                const IntVect&                                   a_ghostPhi,
+                const IntVect&                                   a_ghostRhs,
                 const Smoother&                                  a_smoother,
                 const Real&                                      a_relaxFactor);
 
@@ -576,8 +576,8 @@ public:
     @param[out] a_lhs Equal to a_lhs*a_rhs on output
     @param[in] a_rhs Scaling data
   */
-  void
-  scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) const noexcept;
+  static void
+  scaleLocal(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) noexcept;
 
   /**
     @brief Compute norm of data
@@ -830,7 +830,7 @@ public:
     @param[in,out] a_phi Description
   */
   void
-  applyOpNoBoundary(LevelData<EBCellFAB>& a_ans, const LevelData<EBCellFAB>& a_phi) override final;
+  applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi) override final;
 
   /**
     @brief Not called, I think

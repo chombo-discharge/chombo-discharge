@@ -789,7 +789,7 @@ protected:
     @param[in]  a_dx      Resolution
   */
   virtual void
-  setCellPermittivities(EBCellFAB&      a_perm,
+  setCellPermittivities(EBCellFAB&      a_relPerm,
                         const Box&      a_cellBox,
                         const EBISBox&  a_ebisbox,
                         const RealVect& a_probLo,
@@ -804,7 +804,7 @@ protected:
     @param[in]  a_dx       Resolution
   */
   virtual void
-  setFacePermittivities(EBFluxFAB&      a_perm,
+  setFacePermittivities(EBFluxFAB&      a_relPerm,
                         const Box&      a_cellBox,
                         const EBISBox&  a_ebisbox,
                         const RealVect& a_probLo,
@@ -819,7 +819,7 @@ protected:
     @param[in] a_origin Origin
   */
   virtual void
-  setEbPermittivities(BaseIVFAB<Real>& a_perm,
+  setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
                       const Box&       a_cellBox,
                       const EBISBox&   a_ebisbox,
                       const RealVect&  a_origin,

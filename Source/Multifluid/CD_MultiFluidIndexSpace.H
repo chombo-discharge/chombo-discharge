@@ -76,7 +76,7 @@ public:
          const Vector<GeometryService*>& a_geoservers,
          const bool                      a_distributedData,
          int                             a_nCellMax                              = -1,
-         int                             a_maxCoarsenings                        = -1,
+         int                             a_max_coar                              = -1,
          bool                            a_fixOnlyFirstPhaseRegNextToMultiValued = false);
 
   /**

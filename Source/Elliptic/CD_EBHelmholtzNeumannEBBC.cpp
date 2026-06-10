@@ -119,9 +119,9 @@ EBHelmholtzNeumannEBBC::define()
 }
 
 void
-EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&           a_vofit,
-                                    EBCellFAB&             a_Lphi,
-                                    const EBCellFAB&       a_phi,
+EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator& a_vofit,
+                                    EBCellFAB&   a_Lphi,
+                                    const EBCellFAB& /*a_phi*/,
                                     const BaseIVFAB<Real>& a_Bcoef,
                                     const DataIndex&       a_dit,
                                     const Real&            a_beta,

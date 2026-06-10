@@ -340,13 +340,13 @@ ItoKMCJSON::initializeGasLaw()
     const Real P0   = m_json["gas"]["law"][curLaw]["pressure"].get<Real>();
     const Real Rho0 = (P0 * Units::Na) / (T0 * Units::R);
 
-    m_gasTemperature = [T0](const RealVect a_position) -> Real {
+    m_gasTemperature = [T0](const RealVect /*a_position*/) -> Real {
       return T0;
     };
-    m_gasPressure = [P0](const RealVect a_position) -> Real {
+    m_gasPressure = [P0](const RealVect /*a_position*/) -> Real {
       return P0;
     };
-    m_gasNumberDensity = [Rho0](const RealVect a_position) -> Real {
+    m_gasNumberDensity = [Rho0](const RealVect /*a_position*/) -> Real {
       return Rho0;
     };
   }
@@ -413,7 +413,7 @@ ItoKMCJSON::initializeBackgroundSpecies()
 
         const Real m = species["molar fraction"]["value"].get<Real>();
 
-        molarFraction = [m](const RealVect x) -> Real {
+        molarFraction = [m](const RealVect /*x*/) -> Real {
           return m;
         };
       }
@@ -691,7 +691,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
 
   const std::string baseError = "ItoKMCJSON::initializeTownsendCoefficient";
 
-  FunctionEX func = [](const Real& E, const RealVect& x) -> Real {
+  FunctionEX func = [](const Real& /*E*/, const RealVect& /*x*/) -> Real {
     return 0.0;
   };
 
@@ -715,7 +715,7 @@ ItoKMCJSON::initializeTownsendCoefficient(const std::string a_coeff)
       this->throwParserError(baseError + " and got 'constant' but can't have negative coefficient");
     }
 
-    func = [value](const Real E, const RealVect x) -> Real {
+    func = [value](const Real /*E*/, const RealVect /*x*/) -> Real {
       return value;
     };
   }
@@ -872,7 +872,6 @@ ItoKMCJSON::initializeAutomaticTownsend(const std::string a_coeff)
     for (int i = 0; i < m_kmcReactions.size(); i++) {
       const std::list<size_t>& bgReactants     = m_plasmaReactionBackgroundReactants[i];
       const std::list<size_t>& plasmaReactants = m_plasmaReactionPlasmaReactants[i];
-      const std::list<size_t>& plasmaProducts  = m_plasmaReactionPlasmaProducts[i];
 
       if (plasmaReactants.size() == 1 && plasmaReactants.front() == speciesIdx) {
         const FPR stateChange = m_kmcReactions[i].getStateChange(speciesIdx);
@@ -957,8 +956,6 @@ ItoKMCJSON::printFluidRates() const noexcept
 
     CH_assert(maxEByN > minEByN);
     CH_assert(numPoints >= 2);
-
-    const Real N = m_gasNumberDensity(position);
 
     // Build the grid
     std::vector<Real> EN;
@@ -1367,7 +1364,7 @@ ItoKMCJSON::initializeDensities()
       }
 
       // Make the initial density function.
-      auto initFunc = [density](const RealVect x, const Real t) -> Real {
+      auto initFunc = [density](const RealVect /*x*/, const Real /*t*/) -> Real {
         return density;
       };
 
@@ -1401,7 +1398,7 @@ ItoKMCJSON::initializeMobilities()
 
   // Read in mobilities
   for (const auto& species : m_json["plasma species"]) {
-    FunctionEX mobilityFunction = [](const Real E, const RealVect x) -> Real {
+    FunctionEX mobilityFunction = [](const Real /*E*/, const RealVect /*x*/) -> Real {
       return 0.0;
     };
 
@@ -1434,7 +1431,7 @@ ItoKMCJSON::initializeMobilities()
           this->throwParserError(baseErrorID + " and got constant mobility but mobility should not be negative");
         }
 
-        mobilityFunction = [mu](const Real E, const RealVect x) -> Real {
+        mobilityFunction = [mu](const Real /*E*/, const RealVect /*x*/) -> Real {
           return mu;
         };
       }
@@ -1449,7 +1446,7 @@ ItoKMCJSON::initializeMobilities()
           this->throwParserError(baseErrorID + " and got 'constant mu*N' but 'value' can't be negative");
         }
 
-        mobilityFunction = [this, mu](const Real E, const RealVect x) -> Real {
+        mobilityFunction = [this, mu](const Real /*E*/, const RealVect x) -> Real {
           const Real N = m_gasNumberDensity(x);
 
           return mu / (std::numeric_limits<Real>::epsilon() + N);
@@ -1496,7 +1493,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
   m_diffusionCoefficients.resize(m_numPlasmaSpecies);
 
   for (const auto& species : m_json["plasma species"]) {
-    FunctionEX diffusionCoefficient = [](const Real E, const RealVect x) -> Real {
+    FunctionEX diffusionCoefficient = [](const Real /*E*/, const RealVect /*x*/) -> Real {
       return 0.0;
     };
 
@@ -1529,7 +1526,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           this->throwParserError(baseErrorID + " and got constant diffusion but coefficient should not be negative");
         }
 
-        diffusionCoefficient = [D](const Real E, const RealVect x) -> Real {
+        diffusionCoefficient = [D](const Real /*E*/, const RealVect /*x*/) -> Real {
           return D;
         };
       }
@@ -1544,7 +1541,7 @@ ItoKMCJSON::initializeDiffusionCoefficients()
           this->throwParserError(baseErrorID + " and got 'constant D*N' but 'value' can't be negative");
         }
 
-        diffusionCoefficient = [this, D](const Real E, const RealVect x) -> Real {
+        diffusionCoefficient = [this, D](const Real /*E*/, const RealVect x) -> Real {
           const Real N = m_gasNumberDensity(x);
 
           return D / (std::numeric_limits<Real>::epsilon() + N);
@@ -1591,7 +1588,7 @@ ItoKMCJSON::initializeTemperatures()
   m_plasmaTemperatures.resize(m_numPlasmaSpecies);
 
   for (const auto& species : m_json["plasma species"]) {
-    FunctionEX temperature = [](const Real E, const RealVect x) -> Real {
+    FunctionEX temperature = [](const Real /*E*/, const RealVect /*x*/) -> Real {
       return 0.0;
     };
 
@@ -1608,7 +1605,7 @@ ItoKMCJSON::initializeTemperatures()
       const std::string type = temperatureJSON["type"].get<std::string>();
 
       if (type == "gas") {
-        temperature = [T = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+        temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect x) -> Real {
           return T(x);
         };
       }
@@ -1623,7 +1620,7 @@ ItoKMCJSON::initializeTemperatures()
           this->throwParserError(baseErrorID + " and got constant temperature but 'T' should not be negative");
         }
 
-        temperature = [T](const Real E, const RealVect x) -> Real {
+        temperature = [T](const Real /*E*/, const RealVect /*x*/) -> Real {
           return T;
         };
       }
@@ -1650,7 +1647,7 @@ ItoKMCJSON::initializeTemperatures()
       }
     }
     else {
-      temperature = [T = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+      temperature = [T = this->m_gasTemperature](const Real /*E*/, const RealVect x) -> Real {
         return T(x);
       };
     }
@@ -1680,7 +1677,7 @@ ItoKMCJSON::initializePhotonSpecies()
     const std::string speciesID   = species["id"].get<std::string>();
     const std::string baseErrorID = baseError + " for species '" + speciesID + "'";
 
-    FunctionX kappaFunction = [](const RealVect a_pos) -> Real {
+    FunctionX kappaFunction = [](const RealVect /*a_pos*/) -> Real {
       return 0.0;
     };
 
@@ -1711,7 +1708,7 @@ ItoKMCJSON::initializePhotonSpecies()
         this->throwParserError(baseErrorID + " and got constant kappa but 'value' field can not be negative");
       }
 
-      kappaFunction = [value](const RealVect a_pos) -> Real {
+      kappaFunction = [value](const RealVect /*a_pos*/) -> Real {
         return value;
       };
     }
@@ -2217,14 +2214,16 @@ ItoKMCJSON::initializeFieldEmission()
     }
 
     if (surface == "electrode") {
-      m_electrodeFieldEmission.emplace_back(m_itoSpeciesMap.at(species), [](const Real E, const Real N) -> Real {
-        return 0.0;
-      });
+      m_electrodeFieldEmission.emplace_back(m_itoSpeciesMap.at(species),
+                                            [](const Real /*E*/, const Real /*N*/) -> Real {
+                                              return 0.0;
+                                            });
     }
     else if (surface == "dielectric") {
-      m_dielectricFieldEmission.emplace_back(m_itoSpeciesMap.at(species), [](const Real E, const Real N) -> Real {
-        return 0.0;
-      });
+      m_dielectricFieldEmission.emplace_back(m_itoSpeciesMap.at(species),
+                                             [](const Real /*E*/, const Real /*N*/) -> Real {
+                                               return 0.0;
+                                             });
     }
     else {
       this->throwParserError(baseError + " but 'surface' must be either 'dielectric' or 'electrode'");
@@ -2251,7 +2250,7 @@ ItoKMCJSON::initializeFieldEmission()
         this->throwParserError(baseError + "but 'beta' must be real-valued and > 0");
       }
 
-      J = [=](const Real E, const Real N) -> Real {
+      J = [=](const Real E, const Real /*N*/) -> Real {
         return FowlerNordheim(work, beta, E) / Units::Qe;
       };
     }
@@ -2287,7 +2286,7 @@ ItoKMCJSON::initializeFieldEmission()
         this->throwParserError(baseError + "but 'lambda' must be real-valued and > 0");
       }
 
-      J = [=](const Real E, const Real N) -> Real {
+      J = [=](const Real E, const Real /*N*/) -> Real {
         return Schottky(T, work, lambda, beta, E) / Units::Qe;
       };
     }
@@ -2617,11 +2616,11 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
   //       using the microscopic rates, we must add this scaling back in. Also note that this scaling does not matter if background species enter on the left
   //       hand side because the rates are simply absorbed into the rate itself.
 
-  FunctionEX fluidRate = [](const Real E, const RealVect x) -> Real {
+  FunctionEX fluidRate = [](const Real /*E*/, const RealVect /*x*/) -> Real {
     return 0.0;
   };
 
-  FunctionDXP gridFactor = [](const Real dx, const Vector<Real>& phi) -> Real {
+  FunctionDXP gridFactor = [](const Real /*dx*/, const Vector<Real>& /*phi*/) -> Real {
     return 1.0;
   };
 
@@ -2662,7 +2661,7 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
       this->throwParserError(baseError + " and got constant rate but 'value' cannot be negative");
     }
 
-    fluidRate = [value](const Real E, const RealVect x) -> Real {
+    fluidRate = [value](const Real /*E*/, const RealVect /*x*/) -> Real {
       return value;
     };
   }
@@ -2746,7 +2745,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
 
     FunctionEX speciesTemperature;
     if (isBackground) {
-      speciesTemperature = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+      speciesTemperature = [&backgroundTemperature = this->m_gasTemperature](const Real /*E*/,
+                                                                             const RealVect x) -> Real {
         return backgroundTemperature(x);
       };
     }
@@ -2794,7 +2794,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     FunctionEX speciesTemperature2;
 
     if (isBackgroundT1) {
-      speciesTemperature1 = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+      speciesTemperature1 = [&backgroundTemperature = this->m_gasTemperature](const Real /*E*/,
+                                                                              const RealVect x) -> Real {
         return backgroundTemperature(x);
       };
     }
@@ -2803,7 +2804,8 @@ ItoKMCJSON::parsePlasmaReactionRate(const nlohmann::json&    a_reactionJSON,
     }
 
     if (isBackgroundT2) {
-      speciesTemperature2 = [&backgroundTemperature = this->m_gasTemperature](const Real E, const RealVect x) -> Real {
+      speciesTemperature2 = [&backgroundTemperature = this->m_gasTemperature](const Real /*E*/,
+                                                                              const RealVect x) -> Real {
         return backgroundTemperature(x);
       };
     }
@@ -3344,7 +3346,7 @@ ItoKMCJSON::computeEta(const Real a_E, const RealVect a_pos) const noexcept
 }
 
 Vector<Real>
-ItoKMCJSON::computeMobilities(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
+ItoKMCJSON::computeMobilities(const Real /*a_time*/, const RealVect a_pos, const RealVect a_E) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeMobilities");
   if (m_verbose) {
@@ -3362,7 +3364,7 @@ ItoKMCJSON::computeMobilities(const Real a_time, const RealVect a_pos, const Rea
 }
 
 Vector<Real>
-ItoKMCJSON::computeDiffusionCoefficients(const Real a_time, const RealVect a_pos, const RealVect a_E) const noexcept
+ItoKMCJSON::computeDiffusionCoefficients(const Real /*a_time*/, const RealVect a_pos, const RealVect a_E) const noexcept
 {
   CH_TIME("ItoKMCJSON::computeDiffusionCoefficients");
   if (m_verbose) {
@@ -3387,7 +3389,7 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
                                 const Vector<RealVect>&                          a_gradPhi,
                                 const Real                                       a_dt,
                                 const Real                                       a_dx,
-                                const Real                                       a_kappa) const noexcept
+                                const Real /*a_kappa*/) const noexcept
 {
   CH_TIME("ItoKMCJSON::updateReactionRates");
   if (m_verbose) {
@@ -3429,9 +3431,9 @@ ItoKMCJSON::updateReactionRates(std::vector<std::shared_ptr<const KMCReaction>>&
 }
 
 void
-ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryParticles,
-                                Vector<Real>&                    a_secondaryCDRFluxes,
-                                Vector<List<Photon>>&            a_secondaryPhotons,
+ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>& a_secondaryParticles,
+                                Vector<Real>&              a_secondaryCDRFluxes,
+                                Vector<List<Photon>>& /*a_secondaryPhotons*/,
                                 const Vector<List<ItoParticle>>& a_primaryParticles,
                                 const Vector<Real>&              a_primaryCDRFluxes,
                                 const Vector<List<Photon>>&      a_primaryPhotons,
@@ -3444,7 +3446,7 @@ ItoKMCJSON::secondaryEmissionEB(Vector<List<ItoParticle>>&       a_secondaryPart
                                 const Real                       a_dx,
                                 const Real                       a_dt,
                                 const bool                       a_isDielectric,
-                                const int                        a_matIndex) const noexcept
+                                const int /*a_matIndex*/) const noexcept
 {
   CH_TIME("ItoKMCJSON::secondaryEmissionEB");
   if (m_verbose) {
@@ -3663,12 +3665,12 @@ ItoKMCJSON::getPlotVariableNames() const noexcept
 }
 
 Vector<Real>
-ItoKMCJSON::getPlotVariables(const RealVect          a_E,
-                             const RealVect          a_pos,
-                             const Vector<Real>&     a_phi,
-                             const Vector<RealVect>& a_gradPhi,
-                             const Real              a_dx,
-                             const Real              a_kappa) const noexcept
+ItoKMCJSON::getPlotVariables(const RealVect a_E,
+                             const RealVect a_pos,
+                             const Vector<Real>& /*a_phi*/,
+                             const Vector<RealVect>& /*a_gradPhi*/,
+                             const Real /*a_dx*/,
+                             const Real /*a_kappa*/) const noexcept
 {
 
   CH_TIME("ItoKMCJSON::getPlotVariables");

@@ -152,7 +152,6 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
     EBCellFAB&       grad    = a_gradient[din];
     const EBCellFAB& phi     = a_phi[din];
     const EBISBox&   ebisBox = ebisl[din];
-    const Box        cellBox = dbl[din];
 
     if (!ebisBox.isAllCovered()) {
 
@@ -165,23 +164,6 @@ EBGradient::computeLevelGradient(LevelData<EBCellFAB>& a_gradient, const LevelDa
       auto regularKernel = [&](const IntVect& iv) -> void {
         for (int dir = 0; dir < SpaceDim; dir++) {
           gradFAB(iv, dir) = idx * (phiFAB(iv + BASISV(dir), m_comp) - phiFAB(iv - BASISV(dir), m_comp));
-        }
-      };
-
-      // Irregular kernel -- this is the kernel used in the cut-cells. It simply applies the finite difference based stencil.
-      auto irregularKernel = [&, this](const VolIndex& vof) -> void {
-        for (int dir = 0; dir < SpaceDim; dir++) {
-          grad(vof, dir) = 0.0;
-        }
-
-        // Apply stencil. Note that the stencil "variable" is the gradient component (i.e., direction)
-        const auto& sten = m_levelStencils[din](vof, m_comp);
-        for (int i = 0; i < sten.size(); i++) {
-          const VolIndex& ivof    = sten.vof(i);
-          const Real&     iweight = sten.weight(i);
-          const Real&     ivar    = sten.variable(i);
-
-          grad(vof, ivar) += iweight * phi(ivof, m_comp);
         }
       };
 
@@ -587,8 +569,7 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
   const EBISLayout& ebisl     = m_eblg.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
-  const ProblemDomain& domain     = m_eblg.getDomain();
-  const ProblemDomain& domainFine = m_eblgFine.getDomain();
+  const ProblemDomain& domain = m_eblg.getDomain();
 
   const DataIterator& dit  = dbl.dataIterator();
   const int           nbox = dit.size();
@@ -702,8 +683,6 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     VoFIterator&           ebcfIterator = m_ebcfIterator[din];
     BaseIVFAB<VoFStencil>& coarStencils = m_ebcfStencilsCoar[din];
     BaseIVFAB<VoFStencil>& fineStencils = m_ebcfStencilsFine[din];
-
-    const BaseIVFAB<VoFStencil>& levelStencils = m_levelStencils[din];
 
     // Make the invalid region mask into a DenseIntVectSet because that's what LeastSquares wants.
     DenseIntVectSet validRegionCoar(grownBox, true);

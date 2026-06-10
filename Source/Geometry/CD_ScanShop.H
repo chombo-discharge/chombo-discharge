@@ -245,7 +245,7 @@ protected:
     @param[in] a_finerLevel Finer level
   */
   void
-  buildCoarseLevel(int a_finerLevel, int a_maxGridSize);
+  buildCoarseLevel(int a_level, int a_maxGridSize);
 
   /**
     @brief Check if every point in input box is regular

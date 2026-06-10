@@ -34,7 +34,7 @@ constexpr Real EddingtonSP1::m_alpha;
 constexpr Real EddingtonSP1::m_beta;
 
 Real
-EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time)
+EddingtonSP1::s_defaultDomainBcFunction(const RealVect /*a_position*/, const Real /*a_time*/)
 {
   return 1.0;
 }
@@ -220,7 +220,7 @@ EddingtonSP1::parseDomainBC()
         pp.get(bcString.c_str(), str, 0);
 
         // Set the function. Capture solver time by reference.
-        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time](const RealVect a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time);
         };
 
@@ -249,7 +249,7 @@ EddingtonSP1::parseDomainBC()
 
         bcType = this->parseBcString(str);
 
-        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real a_time) {
+        curFunc = [&bcFunc, &time = this->m_time, val](const RealVect a_pos, const Real /*a_time*/) {
           return bcFunc(a_pos, time) * val;
         };
 
@@ -470,7 +470,7 @@ EddingtonSP1::parseRegridSlopes()
 }
 
 void
-EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel)
+EddingtonSP1::preRegrid(const int /*a_base*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("EddingtonSP1::preRegrid");
   if (m_verbosity > 5) {
@@ -813,9 +813,7 @@ EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   const EBISBox& ebisbox = a_helmAco.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-  const Box cellBox    = m_amr->getGrids(m_realm)[a_lvl][a_dit];
-  const Box helmAcoBox = a_helmAco.box() & m_amr->getDomains()[a_lvl];
-  const Box helmBcoBox = a_helmBco.box() & m_amr->getDomains()[a_lvl];
+  const Box cellBox = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
   // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
   // outside of the cell-centered grid patch.
@@ -1058,8 +1056,6 @@ EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
 
   // TLDR: Equations say boundary flux => F_n = c*Psi/2, so we
   //       extrapolate the solution to the boundary and multiply by c/2.
-
-  const int finestLevel = m_amr->getFinestLevel();
 
   m_amr->interpToEB(a_ebFlux, a_phi, m_realm, m_phase);
   m_amr->conservativeAverage(a_ebFlux, m_realm, m_phase);

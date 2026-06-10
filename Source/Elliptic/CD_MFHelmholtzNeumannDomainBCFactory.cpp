@@ -91,7 +91,7 @@ MFHelmholtzNeumannDomainBCFactory::setBxDphiDn(const std::function<Real(const Re
 }
 
 RefCountedPtr<EBHelmholtzDomainBC>
-MFHelmholtzNeumannDomainBCFactory::create(const int a_iphase) const
+MFHelmholtzNeumannDomainBCFactory::create(const int /*a_iphase*/) const
 {
   CH_TIME("MFHelmholtzNeumannDomainBCFactory::create(int)");
 

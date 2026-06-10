@@ -104,7 +104,7 @@ protected:
     @details This functions calls Chombo code which implements the Graves/Trebotich discretization.
   */
   virtual void
-  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
+  advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) override;
 };
 
 #include <CD_NamespaceFooter.H>

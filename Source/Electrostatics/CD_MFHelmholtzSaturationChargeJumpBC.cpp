@@ -48,7 +48,7 @@ MFHelmholtzSaturationChargeJumpBC::~MFHelmholtzSaturationChargeJumpBC()
 void
 MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
                                            const MFCellFAB& a_phi,
-                                           const bool       a_homogeneousPhysBC,
+                                           const bool /*a_homogeneousPhysBC*/,
                                            const DataIndex& a_dit) const
 {
   CH_assert(m_multiPhase);

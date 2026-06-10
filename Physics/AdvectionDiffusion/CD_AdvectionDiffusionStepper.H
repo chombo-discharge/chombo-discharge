@@ -173,7 +173,7 @@ namespace Physics {
         @param[in] a_finestLevel Finest level
       */
       void
-      preRegrid(const int a_lbase, const int a_finestLevel) override;
+      preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
 
       /**
          @brief Instantiate the species and configure the solver with realm, phase, and AMR data.

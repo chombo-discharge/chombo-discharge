@@ -985,7 +985,7 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_
                                                     Vector<EBCellFAB*>&       a_rteSources,
                                                     const Vector<EBCellFAB*>& a_cdrDensities,
                                                     const Vector<EBCellFAB*>& a_cdrGradients,
-                                                    const Vector<EBCellFAB*>& a_cdrVelocities,
+                                                    const Vector<EBCellFAB*>& /*a_cdrVelocities*/,
                                                     const Vector<EBCellFAB*>& a_rteDensities,
                                                     const EBCellFAB&          a_E,
                                                     const Real&               a_time,
@@ -1033,10 +1033,8 @@ CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_
 
   // Irregular grid kernel.
   auto irregularKernel = [&](const VolIndex& vof) -> void {
-    const Real     kappa  = ebisbox.volFrac(vof);
-    const RealVect pos    = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
-    const RealVect normal = ebisbox.normal(vof);
-
+    const Real     kappa = ebisbox.volFrac(vof);
+    const RealVect pos   = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
     // Electric field
     const RealVect E = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
 
@@ -1099,15 +1097,15 @@ CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&       a_
                                                     Vector<EBCellFAB*>&       a_rteSources,
                                                     const Vector<EBCellFAB*>& a_cdrDensities,
                                                     const Vector<EBCellFAB*>& a_cdrGradients,
-                                                    const Vector<EBCellFAB*>& a_cdrVelocities,
+                                                    const Vector<EBCellFAB*>& /*a_cdrVelocities*/,
                                                     const Vector<EBCellFAB*>& a_rteDensities,
                                                     const EBCellFAB&          a_E,
                                                     const Real&               a_time,
                                                     const Real&               a_dt,
                                                     const Real&               a_dx,
-                                                    const Box&                a_cellBox,
-                                                    const int                 a_lvl,
-                                                    const DataIndex&          a_dit)
+                                                    const Box& /*a_cellBox*/,
+                                                    const int        a_lvl,
+                                                    const DataIndex& a_dit)
 {
   CH_TIME("CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>x6, ...)");
   if (m_verbosity > 5) {
@@ -2789,7 +2787,7 @@ CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
 }
 
 void
-CdrPlasmaStepper::preRegridInternals(const int a_lbase, const int a_oldFinestLevel)
+CdrPlasmaStepper::preRegridInternals(const int /*a_lbase*/, const int /*a_oldFinestLevel*/)
 {
   CH_TIME("CdrPlasmaStepper::preRegridInternals(int, int)");
   if (m_verbosity > 5) {
@@ -2942,10 +2940,8 @@ CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldF
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
 
     // Patch distribution and EB information on this level.
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const DataIterator&      dit    = dbl.dataIterator();
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
-    const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const DataIterator&      dit = dbl.dataIterator();
 
     // Patch loop
     const int nbox = dit.size();
@@ -2953,11 +2949,6 @@ CdrPlasmaStepper::computeElectricField(EBAMRFluxData&           a_electricFieldF
 #pragma omp parallel for schedule(runtime)
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
-
-      const EBCellFAB& electricFieldCell = (*a_electricFieldCell[lvl])[din];
-      const EBISBox&   ebisbox           = ebisl[din];
-      const EBGraph&   ebgraph           = ebisbox.getEBGraph();
-      const Box&       cellBox           = dbl.get(din);
 
       // Do faces in all directions.
       for (int dir = 0; dir < SpaceDim; dir++) {

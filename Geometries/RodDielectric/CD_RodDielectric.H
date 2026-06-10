@@ -50,28 +50,28 @@ protected:
     @brief Get an axis-aligned box implicit function.
     @return Signed distance function for a box.
   */
-  RefCountedPtr<BaseIF>
+  static RefCountedPtr<BaseIF>
   getBox();
 
   /**
     @brief Get a plane implicit function.
     @return Signed distance function for a plane.
   */
-  RefCountedPtr<BaseIF>
+  static RefCountedPtr<BaseIF>
   getPlane();
 
   /**
     @brief Get a sphere implicit function.
     @return Signed distance function for a sphere.
   */
-  RefCountedPtr<BaseIF>
+  static RefCountedPtr<BaseIF>
   getSphere();
 
   /**
     @brief Get a Perlin-noise-perturbed box implicit function.
     @return Signed distance function for a Perlin box.
   */
-  RefCountedPtr<BaseIF>
+  static RefCountedPtr<BaseIF>
   getPerlinBox();
 };
 

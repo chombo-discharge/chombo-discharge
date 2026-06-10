@@ -108,7 +108,7 @@ public:
     @param[in] a_species Species (see RtSpecies.H)
   */
   virtual void
-  setRtSpecies(const RefCountedPtr<RtSpecies>& a_species);
+  setRtSpecies(const RefCountedPtr<RtSpecies>& a_RtSpecies);
 
   /**
     @brief Set computational geometry

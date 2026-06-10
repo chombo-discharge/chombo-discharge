@@ -28,7 +28,7 @@ EBHelmholtzLarsenDomainBCFactory::EBHelmholtzLarsenDomainBCFactory(const RefCoun
   : m_species(a_species), m_r1(a_r1), m_r2(a_r2)
 {
 
-  m_source = [](const RealVect& a_position) {
+  m_source = [](const RealVect& /*a_position*/) {
     return 0.0;
   };
 }

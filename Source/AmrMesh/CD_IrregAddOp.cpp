@@ -54,8 +54,8 @@ IrregAddOp::linearIn(BaseIVFAB<Real>& a_data, void* a_buffer, const Box& a_regio
 }
 
 void
-IrregAddOp::op(BaseIVFAB<Real>&       a_dst,
-               const Box&             a_regionFrom,
+IrregAddOp::op(BaseIVFAB<Real>& a_dst,
+               const Box& /*a_regionFrom*/,
                const Interval&        a_dstVars,
                const Box&             a_regionTo,
                const BaseIVFAB<Real>& a_src,

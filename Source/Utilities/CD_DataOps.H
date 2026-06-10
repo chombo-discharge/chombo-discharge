@@ -101,8 +101,8 @@ public:
                     const EBAMRCellData&         a_cellData,
                     const Vector<ProblemDomain>& a_domains,
                     const int                    a_tanGhosts,
-                    const Interval&              a_faceVars,
-                    const Interval&              a_cellVars,
+                    const Interval&              a_faceInterval,
+                    const Interval&              a_cellInterval,
                     const Average&               a_average);
 
   /**
@@ -123,8 +123,8 @@ public:
                     const LevelData<EBCellFAB>& a_cellData,
                     const ProblemDomain&        a_domain,
                     const int                   a_tanGhosts,
-                    const Interval&             a_faceVars,
-                    const Interval&             a_cellVars,
+                    const Interval&             a_faceInterval,
+                    const Interval&             a_cellInterval,
                     const Average&              a_average);
 
   /**
@@ -135,7 +135,7 @@ public:
     @note Only valid cells are filled (not ghost cells)
   */
   static void
-  averageFaceToCell(EBAMRCellData& a_cellData, const EBAMRFluxData& a_fluxData, const Vector<ProblemDomain>& a_domains);
+  averageFaceToCell(EBAMRCellData& a_cellData, const EBAMRFluxData& a_faceData, const Vector<ProblemDomain>& a_domains);
 
   /**
     @brief Average all components of face centered data to cell centers.
@@ -1207,7 +1207,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(EBAMRCellData& a_lhs, const Real& a_value);
+  setValue(EBAMRCellData& a_data, const Real& a_value);
 
   /**
     @brief Set value in data with specified component. 
@@ -1257,7 +1257,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(EBAMRFluxData& a_lhs, const Real& a_value);
+  setValue(EBAMRFluxData& a_data, const Real& a_value);
 
   /**
     @brief Set value in data
@@ -1265,7 +1265,7 @@ public:
     @param[in]  a_value Value to set
   */
   static void
-  setValue(EBAMRIVData& a_lhs, const Real& a_value);
+  setValue(EBAMRIVData& a_data, const Real& a_value);
 
   /**
     @brief Set value in data
@@ -1359,14 +1359,14 @@ public:
     @param[in,out] a_data Input data
   */
   static void
-  squareRoot(MFAMRCellData& a_data);
+  squareRoot(MFAMRCellData& a_lhs);
 
   /**
     @brief Take the square root of the input data
     @param[in,out] a_data Input data
   */
   static void
-  squareRoot(LevelData<MFCellFAB>& a_data);
+  squareRoot(LevelData<MFCellFAB>& a_lhs);
 
   /**
     @brief Compute the vector length of a data holder. Sets a_lhs = |a_rhs| where a_rhs contains SpaceDim components. 

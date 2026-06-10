@@ -583,7 +583,6 @@ PhaseRealm::defineFillPatch(const int a_lmin)
 
   if (doThisOperator) {
 
-    const int     comps  = SpaceDim;
     const int     radius = m_numGhostCells;
     const IntVect ghost  = m_numGhostCells * IntVect::Unit;
 
@@ -648,8 +647,6 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
 
   if (doThisOperator) {
 
-    const int comps = a_regsize;
-
     for (int lvl = std::max(0, a_lmin - 1); lvl <= m_finestLevel; lvl++) {
 
       const bool hasFine = lvl < m_finestLevel;
@@ -664,7 +661,7 @@ PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize)
 }
 
 void
-PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize)
+PhaseRealm::defineRedistOper(const int a_lmin, const int /*a_regsize*/)
 {
   CH_TIME("PhaseRealm::defineRedistOper");
   if (m_verbose) {
@@ -735,7 +732,7 @@ PhaseRealm::defineParticleMesh()
 }
 
 void
-PhaseRealm::defineGradSten(const int a_lmin)
+PhaseRealm::defineGradSten(const int /*a_lmin*/)
 {
   CH_TIME("PhaseRealm::defineGradSten");
   if (m_verbose) {
@@ -812,7 +809,7 @@ PhaseRealm::defineIrregSten()
 }
 
 void
-PhaseRealm::defineNonConservativeDivergence(const int a_lmin)
+PhaseRealm::defineNonConservativeDivergence(const int /*a_lmin*/)
 {
   CH_TIME("PhaseRealm::defineNonConservativeDivergence");
   if (m_verbose) {

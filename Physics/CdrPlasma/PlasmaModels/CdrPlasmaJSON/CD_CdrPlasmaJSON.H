@@ -1079,7 +1079,7 @@ namespace Physics {
          @param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
       */
       virtual void
-      parsePlasmaReactionScaling(const int a_reactionIndex, const json& a_reactionJSON);
+      parsePlasmaReactionScaling(const int a_index, const json& a_reactionJSON);
 
       /**
          @brief Parse reaction plotting. 
@@ -1352,47 +1352,47 @@ namespace Physics {
          @brief Throw a parser error
          @param[in] a_error Error code.
       */
-      void
-      throwParserError(const std::string a_error) const;
+      static void
+      throwParserError(const std::string a_error);
 
       /**
          @brief Throw a parser wearning
         @param[in] a_warning Warning
       */
-      void
-      throwParserWarning(const std::string a_warning) const;
+      static void
+      throwParserWarning(const std::string a_warning);
 
       /**
          @brief Protect the @ character in a string
          @param[in] a_str Input string. If it contains the at character we throw an error. 
         @return Return value
       */
-      bool
-      containsWildcard(const std::string a_str) const;
+      static bool
+      containsWildcard(const std::string a_str);
 
       /**
          @brief Protect all kinds of brackets in a string.
          @param[in] a_str Input string. If it contains any bracket we throw an error.
         @return Return value
       */
-      bool
-      containsBracket(const std::string a_str) const;
+      static bool
+      containsBracket(const std::string a_str);
 
       /**
          @brief Return true if string starts and ends with a parenthesis.
          @param[in] a_str Input string. 
          @return True if the first character in the string is ( and the last character is )
       */
-      bool
-      isBracketed(const std::string a_str) const;
+      static bool
+      isBracketed(const std::string a_str);
 
       /**
          @brief Remove whitespace from string
         @return Return value
         @param[in,out] a_string Description
       */
-      std::string
-      trim(const std::string& a_string) const;
+      static std::string
+      trim(const std::string& a_string);
 
       /**
          @brief Return true if species exists in map and false otherwise
@@ -1423,8 +1423,8 @@ namespace Physics {
          @param[in] a_filename File name
         @return Return value
       */
-      bool
-      doesFileExist(const std::string a_filename) const;
+      static bool
+      doesFileExist(const std::string a_filename);
 
       /**
          @brief Add photoionization products to transport equations source terms.

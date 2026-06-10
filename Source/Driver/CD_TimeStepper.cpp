@@ -94,7 +94,7 @@ TimeStepper::getCheckpointLoads(std::string a_realm, int a_level) const
 }
 
 bool
-TimeStepper::loadBalanceThisRealm(std::string a_realm) const
+TimeStepper::loadBalanceThisRealm(std::string /*a_realm*/) const
 {
   CH_TIME("TimeStepper::loadBalanceThisRealm(string)");
   if (m_verbosity > 5) {
@@ -105,12 +105,12 @@ TimeStepper::loadBalanceThisRealm(std::string a_realm) const
 }
 
 void
-TimeStepper::loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
-                              Vector<Vector<Box>>&             a_boxes,
-                              std::string                      a_realm,
+TimeStepper::loadBalanceBoxes(Vector<Vector<int>>& a_procs,
+                              Vector<Vector<Box>>& a_boxes,
+                              std::string /*a_realm*/,
                               const Vector<DisjointBoxLayout>& a_grids,
-                              int                              a_lmin,
-                              int                              a_finestLevel)
+                              int /*a_lmin*/,
+                              int a_finestLevel)
 {
   CH_TIME("TimeStepper::loadBalanceBoxes");
   if (m_verbosity > 5) {

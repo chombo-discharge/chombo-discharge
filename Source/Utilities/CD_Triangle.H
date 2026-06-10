@@ -130,8 +130,8 @@ protected:
     @return Triangle area: 0.5 * ||(a_x2 - a_x1) x (a_x3 - a_x1)||. Returns zero for degenerate
     (collinear or coincident) vertices.
   */
-  inline Real
-  computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3) const noexcept;
+  static inline Real
+  computeTriangleArea(const Vec3 a_x1, const Vec3 a_x2, const Vec3 a_x3) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

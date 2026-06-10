@@ -203,7 +203,7 @@ public:
     @param[in,out] a_indexspace Description
   */
   int
-  refToFiner(const ProblemDomain& a_indexspace) const override final;
+  refToFiner(const ProblemDomain& a_domain) const override final;
 
 protected:
   /**
@@ -424,8 +424,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has fewer grid points than a_domainTwo
   */
-  bool
-  isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  static bool
+  isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
     @brief Check if a domain is finer than the other
@@ -433,8 +433,8 @@ protected:
     @param[in] a_domainTwo The second domain
     @return Returns true of a_domainOne has more grid points than a_domainTwo
   */
-  bool
-  isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+  static bool
+  isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
     @brief Construct coarsening of a grid level. 
@@ -446,8 +446,8 @@ protected:
     the blocking factor. Otherwise we try to coarsen directly. 
   */
   bool
-  getCoarserLayout(MFLevelGrid&       a_coarseGrid,
-                   const MFLevelGrid& a_fineGrid,
+  getCoarserLayout(MFLevelGrid&       a_coarMflg,
+                   const MFLevelGrid& a_fineMflg,
                    const int          a_refRat,
                    const int          a_blockingFactor) const;
 
@@ -463,15 +463,15 @@ protected:
     @param[in]  a_eblgFine       Fine grids
     @param[in]  a_refRat         Coarsening factor
   */
-  void
+  static void
   coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAcoef,
                       LevelData<MFFluxFAB>&         a_coarBcoef,
                       LevelData<MFBaseIVFAB>&       a_coarBcoefIrreg,
                       const LevelData<MFCellFAB>&   a_fineAcoef,
                       const LevelData<MFFluxFAB>&   a_fineBcoef,
                       const LevelData<MFBaseIVFAB>& a_fineBcoefIrreg,
-                      const MFLevelGrid&            a_eblgCoar,
-                      const MFLevelGrid&            a_eblgFine,
+                      const MFLevelGrid&            a_mflgCoar,
+                      const MFLevelGrid&            a_mflgFine,
                       const int                     a_refRat);
 
   /**

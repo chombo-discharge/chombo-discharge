@@ -72,7 +72,7 @@ CdrPlasmaJSON::CdrPlasmaJSON()
   m_numRtSpecies  = m_rtSpecies.size();
 }
 
-CdrPlasmaJSON::CdrPlasmaJSON(const int a_dummy)
+CdrPlasmaJSON::CdrPlasmaJSON(const int /*a_dummy*/)
 {
   CH_TIME("CdrPlasmaJSON::CdrPlasmaJSON(int)");
 }
@@ -159,7 +159,7 @@ CdrPlasmaJSON::parseJSON()
 }
 
 void
-CdrPlasmaJSON::throwParserError(const std::string a_error) const
+CdrPlasmaJSON::throwParserError(const std::string a_error)
 {
   pout() << a_error << endl;
 
@@ -167,7 +167,7 @@ CdrPlasmaJSON::throwParserError(const std::string a_error) const
 }
 
 void
-CdrPlasmaJSON::throwParserWarning(const std::string a_warning) const
+CdrPlasmaJSON::throwParserWarning(const std::string a_warning)
 {
   pout() << a_warning << endl;
 
@@ -175,13 +175,13 @@ CdrPlasmaJSON::throwParserWarning(const std::string a_warning) const
 }
 
 bool
-CdrPlasmaJSON::containsWildcard(const std::string a_str) const
+CdrPlasmaJSON::containsWildcard(const std::string a_str)
 {
   return (a_str.find('@') != std::string::npos);
 }
 
 bool
-CdrPlasmaJSON::containsBracket(const std::string a_str) const
+CdrPlasmaJSON::containsBracket(const std::string a_str)
 {
   const std::list<char> bracketList{'(', ')', '[', ']', '{', '}'};
 
@@ -199,7 +199,7 @@ CdrPlasmaJSON::containsBracket(const std::string a_str) const
 }
 
 bool
-CdrPlasmaJSON::isBracketed(const std::string a_str) const
+CdrPlasmaJSON::isBracketed(const std::string a_str)
 {
   return (a_str.front() == '(' && a_str.back() == ')');
 }
@@ -240,7 +240,7 @@ CdrPlasmaJSON::sanityCheckSpecies() const
 }
 
 std::string
-CdrPlasmaJSON::trim(const std::string& a_string) const
+CdrPlasmaJSON::trim(const std::string& a_string)
 {
   auto ltrim = [](const std::string a_s) -> std::string {
     std::string s = a_s;
@@ -409,13 +409,13 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real P    = P0 * Units::atm2pascal;
     const Real Rho0 = (P * Units::Na) / (T0 * Units::R);
 
-    m_gasTemperature = [T0](const RealVect a_position) -> Real {
+    m_gasTemperature = [T0](const RealVect /*a_position*/) -> Real {
       return T0;
     };
-    m_gasPressure = [P](const RealVect a_position) -> Real {
+    m_gasPressure = [P](const RealVect /*a_position*/) -> Real {
       return P;
     };
-    m_gasDensity = [Rho0](const RealVect a_position) -> Real {
+    m_gasDensity = [Rho0](const RealVect /*a_position*/) -> Real {
       return Rho0;
     };
   }
@@ -789,7 +789,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
   const std::string baseError = "CdrPlasmaJSON::parsePlasmaSpeciesInitialData for species '" + species + "' ";
 
   // This is the returned data function.
-  InitialDataFunction initFunc = [](const RealVect a_position, const Real a_time) {
+  InitialDataFunction initFunc = [](const RealVect /*a_position*/, const Real /*a_time*/) {
     return 0.0;
   };
 
@@ -971,7 +971,7 @@ CdrPlasmaJSON::parsePlasmaSpeciesInitialData(const json& a_json) const
 
     // Set the friggin function.
     initFunc = [uniformDensity, gauss2Functions, gauss4Functions, heightProfile](const RealVect a_position,
-                                                                                 const Real     a_time) {
+                                                                                 const Real /*a_time*/) {
       Real retVal = uniformDensity;
 
       // Add contribution from Gaussian seeds
@@ -1151,7 +1151,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
 }
 
     // Set the kappa-function needed by RteSpeciesJSON.
-    std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect a_position) -> Real {
+    std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect  /*a_position*/) -> Real {
       return 1.0;
     };
 
@@ -1162,7 +1162,7 @@ CdrPlasmaJSON::initializePhotonSpecies()
 
       const Real value = species["value"].get<Real>();
 
-      kappaFunction = [value](const RealVect a_position) {
+      kappaFunction = [value](const RealVect  /*a_position*/) {
         return value;
       };
     }
@@ -1284,7 +1284,7 @@ CdrPlasmaJSON::initializeSigma()
     pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
   }
 
-  m_initialSigma = [](const RealVect a_pos, const Real a_time) -> Real {
+  m_initialSigma = [](const RealVect  /*a_pos*/, const Real  /*a_time*/) -> Real {
     return 0.0;
   };
 
@@ -1292,7 +1292,7 @@ CdrPlasmaJSON::initializeSigma()
     if (m_json["sigma"].contains("initial density")) {
       const Real sigma = m_json["sigma"]["initial density"].get<Real>();
 
-      m_initialSigma = [sigma](const RealVect a_position, const Real a_time) -> Real {
+      m_initialSigma = [sigma](const RealVect  /*a_position*/, const Real  /*a_time*/) -> Real {
         return sigma;
       };
     }
@@ -1903,7 +1903,7 @@ CdrPlasmaJSON::parseMobilities()
         // This is a hook for fetching the positive ion from the Morrow-Lowke model. The expression
         // is found in 'Streamer propagation in air', J. Phys. D: Appl. Phys. 30 614
 
-        auto func = [&P = this->m_gasPressure](const Real E, const RealVect x) -> Real {
+        auto func = [&P = this->m_gasPressure](const Real  /*E*/, const RealVect x) -> Real {
           constexpr Real P0 = Units::atm2pascal; // One atmosphere in Pascal.
 
           return 2.34E-4 * P0 / P(x);
@@ -2291,7 +2291,7 @@ CdrPlasmaJSON::parseTemperatures()
 
         // Create a function which returns a constant value everywhere.
         m_temperatureLookup.emplace(idx, LookupMethod::FunctionX);
-        m_temperatureConstants.emplace(idx, [value](const RealVect a_psition) -> Real {
+        m_temperatureConstants.emplace(idx, [value](const RealVect  /*a_psition*/) -> Real {
           return value;
         });
       }
@@ -3181,19 +3181,19 @@ CdrPlasmaJSON::parsePlasmaReactionScaling(const int a_index, const json& a_R)
     this->throwParserError(baseError + "- cannot specify both 'photoionization' and 'quenching pressure'");
   }
   else if (doPressureQuenching && !doPhotoIonization) {
-    func = [scale, pq, p = this->m_gasPressure](const Real E, const RealVect x) {
+    func = [scale, pq, p = this->m_gasPressure](const Real  /*E*/, const RealVect x) {
       return scale * pq / (pq + p(x));
     };
   }
   else if (!doPressureQuenching && doPhotoIonization) {
-    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real E, const RealVect x) -> Real {
+    func = [scale, kr, kp, kqN, photoiEff, exciteEff, &N = this->m_gasDensity](const Real  /*E*/, const RealVect x) -> Real {
       const Real kq = kqN * N(x);
 
       return scale * kr / (kr + kp + kq) * photoiEff * exciteEff;
     };
   }
   else {
-    func = [scale](const Real E, const RealVect x) -> Real {
+    func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
       return scale;
     };
   }
@@ -3540,12 +3540,12 @@ CdrPlasmaJSON::parsePhotoReactionScaling(const int a_reactionIndex, const json& 
   FunctionEX func;
 
   if (doHelmholtz) {
-    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real E, const RealVect x) {
+    func = [scale, helmholtzFactor, &p = this->m_gasPressure](const Real  /*E*/, const RealVect x) {
       return scale * helmholtzFactor * p(x);
     };
   }
   else {
-    func = [scale](const Real E, const RealVect x) {
+    func = [scale](const Real  /*E*/, const RealVect  /*x*/) {
       return scale;
     };
   }
@@ -3787,7 +3787,7 @@ CdrPlasmaJSON::parseElectrodeReactionScaling(const int a_reactionIndex, const js
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real E, const RealVect x) -> Real {
+  auto func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
     return scale;
   };
 
@@ -4028,7 +4028,7 @@ CdrPlasmaJSON::parseDielectricReactionScaling(const int a_reactionIndex, const j
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real E, const RealVect x) -> Real {
+  auto func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
     return scale;
   };
 
@@ -4257,7 +4257,7 @@ CdrPlasmaJSON::parseDomainReactionScaling(const int                       a_reac
 
   // Create a function = scale everywhere. Extensions to scaling of more generic types of surface
   // reactions can be done by expanding this routine.
-  auto func = [scale](const Real E, const RealVect x) -> Real {
+  auto func = [scale](const Real  /*E*/, const RealVect  /*x*/) -> Real {
     return scale;
   };
 
@@ -4405,13 +4405,13 @@ CdrPlasmaJSON::getPlotVariableNames() const
 Vector<Real>
 CdrPlasmaJSON::getPlotVariables(const Vector<Real>     a_cdrDensities,
                                 const Vector<RealVect> a_cdrGradients,
-                                const Vector<Real>     a_rteDensities,
+                                const Vector<Real>      /*a_rteDensities*/,
                                 const RealVect         a_E,
                                 const RealVect         a_pos,
-                                const Real             a_dx,
-                                const Real             a_dt,
+                                const Real              /*a_dx*/,
+                                const Real              /*a_dt*/,
                                 const Real             a_time,
-                                const Real             a_kappa) const
+                                const Real              /*a_kappa*/) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::getPlotVariables" << endl;
@@ -4537,7 +4537,7 @@ CdrPlasmaJSON::isPhotonSpecies(const std::string& a_name) const
 }
 
 bool
-CdrPlasmaJSON::doesFileExist(const std::string a_filename) const
+CdrPlasmaJSON::doesFileExist(const std::string a_filename) 
 {
   std::ifstream istream(a_filename);
 
@@ -4828,7 +4828,7 @@ CdrPlasmaJSON::computePlasmaReactionRate(const int&                   a_reaction
                                          const Real&                  a_N,
                                          const Real&                  a_alpha,
                                          const Real&                  a_eta,
-                                         const Real&                  a_time) const
+                                         const Real&                   /*a_time*/) const
 {
   const LookupMethod&          method   = m_plasmaReactionLookup.at(a_reactionIndex);
   const CdrPlasmaReactionJSON& reaction = m_plasmaReactions[a_reactionIndex];
@@ -5130,7 +5130,7 @@ CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
   }
 
 Vector<RealVect>
-CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
+CdrPlasmaJSON::computeCdrDriftVelocities(const Real          /*a_time*/,
                                          const RealVect     a_position,
                                          const RealVect     a_E,
                                          const Vector<Real> a_cdrDensities) const
@@ -5177,7 +5177,7 @@ CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a_time,
+CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real          /*a_time*/,
                                                const RealVect     a_position,
                                                const RealVect     a_E,
                                                const Vector<Real> a_cdrDensities) const
@@ -5196,13 +5196,13 @@ CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a_time,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
+CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real          /*a_time*/,
                                          const RealVect     a_pos,
                                          const RealVect     a_normal,
                                          const RealVect     a_E,
                                          const Vector<Real> a_cdrDensities,
-                                         const Vector<Real> a_cdrVelocities,
-                                         const Vector<Real> a_cdrGradients,
+                                         const Vector<Real>  /*a_cdrVelocities*/,
+                                         const Vector<Real>  /*a_cdrGradients*/,
                                          const Vector<Real> a_rteFluxes,
                                          const Vector<Real> a_extrapCdrFluxes) const
 {
@@ -5341,13 +5341,13 @@ CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
+CdrPlasmaJSON::computeCdrDielectricFluxes(const Real          /*a_time*/,
                                           const RealVect     a_pos,
                                           const RealVect     a_normal,
                                           const RealVect     a_E,
                                           const Vector<Real> a_cdrDensities,
-                                          const Vector<Real> a_cdrVelocities,
-                                          const Vector<Real> a_cdrGradients,
+                                          const Vector<Real>  /*a_cdrVelocities*/,
+                                          const Vector<Real>  /*a_cdrGradients*/,
                                           const Vector<Real> a_rteFluxes,
                                           const Vector<Real> a_extrapCdrFluxes) const
 {
@@ -5483,14 +5483,14 @@ CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
 }
 
 Vector<Real>
-CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
+CdrPlasmaJSON::computeCdrDomainFluxes(const Real            /*a_time*/,
                                       const RealVect       a_pos,
                                       const int            a_dir,
                                       const Side::LoHiSide a_side,
                                       const RealVect       a_E,
-                                      const Vector<Real>   a_cdrDensities,
-                                      const Vector<Real>   a_cdrVelocities,
-                                      const Vector<Real>   a_cdrGradients,
+                                      const Vector<Real>    /*a_cdrDensities*/,
+                                      const Vector<Real>    /*a_cdrVelocities*/,
+                                      const Vector<Real>    /*a_cdrGradients*/,
                                       const Vector<Real>   a_rteFluxes,
                                       const Vector<Real>   a_extrapCdrFluxes) const
 {
@@ -5614,7 +5614,7 @@ CdrPlasmaJSON::addPhotoIonization(std::vector<Real>&       a_cdrSources,
                                   const RealVect           a_position,
                                   const Real               a_E,
                                   const Real               a_dt,
-                                  const Real               a_dx) const
+                                  const Real                /*a_dx*/) const
 {
   // Add photo-ionization.
   for (int i = 0; i < m_photoReactions.size(); i++) {
@@ -5748,9 +5748,9 @@ CdrPlasmaJSON::fillSourceTerms(std::vector<Real>&          a_cdrSources,
                                const std::vector<RealVect> a_cdrGradients,
                                const RealVect              a_E,
                                const RealVect              a_pos,
-                               const Real                  a_dx,
+                               const Real                   /*a_dx*/,
                                const Real                  a_time,
-                               const Real                  a_kappa) const
+                               const Real                   /*a_kappa*/) const
 {
   if (m_verbose) {
     pout() << "CdrPlasmaJSON::fillSourceTerms" << endl;

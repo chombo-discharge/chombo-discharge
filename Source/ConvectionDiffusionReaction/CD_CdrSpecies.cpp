@@ -40,7 +40,7 @@ CdrSpecies::CdrSpecies(const std::string a_name,
 CdrSpecies::~CdrSpecies() = default;
 
 Real
-CdrSpecies::initialData(const RealVect a_pos, const Real a_time) const
+CdrSpecies::initialData(const RealVect /*a_pos*/, const Real /*a_time*/) const
 {
   CH_TIME("CdrSpecies::initialData(RealVect, Real)");
 

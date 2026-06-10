@@ -230,8 +230,7 @@ EBAMRParticleMesh::defineOuterHaloMasks()
       const DisjointBoxLayout& grids     = m_eblgs[lvl]->getDBL();
       const DisjointBoxLayout& gridsFine = m_eblgs[lvl + 1]->getDBL();
 
-      const ProblemDomain& domain     = m_eblgs[lvl]->getDomain();
-      const ProblemDomain& domainFine = m_eblgs[lvl + 1]->getDomain();
+      const ProblemDomain& domain = m_eblgs[lvl]->getDomain();
 
       // Create the coarsened fine grid.
       DisjointBoxLayout gridsCoFi;
@@ -379,14 +378,12 @@ EBAMRParticleMesh::defineTransitionMasks()
       const DisjointBoxLayout& gridsFine = eblgFine.getDBL();
       const DisjointBoxLayout& gridsFiCo = eblgFiCo.getDBL();
 
-      const ProblemDomain& domainCoar = eblgCoar.getDomain();
       const ProblemDomain& domainFine = eblgFine.getDomain();
 
       const DataIterator& ditCoar = gridsCoar.dataIterator();
       const DataIterator& ditFine = gridsFine.dataIterator();
       const DataIterator& ditFiCo = gridsFiCo.dataIterator();
 
-      const int numBoxesCoar = ditCoar.size();
       const int numBoxesFine = ditFine.size();
       const int numBoxesFiCo = ditFiCo.size();
 

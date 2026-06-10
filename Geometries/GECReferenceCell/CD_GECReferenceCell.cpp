@@ -26,7 +26,6 @@ GECReferenceCell::GECReferenceCell()
 
   const Real H   = 0.1016;
   const Real g   = 0.0254;
-  const Real h   = 0.5 * (H - g);
   const Real r1  = 0.0508;
   const Real r2  = 0.0523;
   const Real r3  = 0.0538;

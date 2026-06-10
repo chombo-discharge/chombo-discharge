@@ -510,7 +510,7 @@ public:
            const std::string        a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
-           const int                a_nGhost = -1) const;
+           const int                a_ghost = -1) const;
 
   /**
     @brief Allocate data on specific level
@@ -528,7 +528,7 @@ public:
            const phase::which_phase a_phase,
            const int                a_level,
            const int                a_nComp,
-           const int                a_nGhost = -1) const;
+           const int                a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm
@@ -544,7 +544,7 @@ public:
            const std::string        a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
-           const int                a_nGhost = -1) const;
+           const int                a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm
@@ -560,7 +560,7 @@ public:
            const std::string        a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
-           const int                a_nGhost = -1) const;
+           const int                a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm
@@ -576,7 +576,7 @@ public:
            const std::string        a_realm,
            const phase::which_phase a_phase,
            const int                a_nComp,
-           const int                a_nGhost = -1) const;
+           const int                a_ghost = -1) const;
 
   /**
     @brief Allocate Boolean data over a specific realm
@@ -587,7 +587,7 @@ public:
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void
-  allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1) const;
+  allocate(EBAMRBool& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm.
@@ -598,7 +598,7 @@ public:
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
   void
-  allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_nGhost = -1) const;
+  allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_nComp, const int a_ghost = -1) const;
 
   /**
     @brief Allocate a data holder over a specific realm.
@@ -1192,7 +1192,7 @@ public:
   void
   interpGhost(LevelData<EBCellFAB>&       a_fineData,
               const LevelData<EBCellFAB>& a_coarData,
-              const int                   a_level,
+              const int                   a_fineLevel,
               const std::string           a_realm,
               const phase::which_phase    a_phase) const;
 

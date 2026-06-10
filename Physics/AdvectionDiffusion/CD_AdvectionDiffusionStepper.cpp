@@ -64,7 +64,7 @@ AdvectionDiffusionStepper::AdvectionDiffusionStepper()
     return RealVect(D_DECL(-r * omega * sin(theta), r * omega * cos(theta), 0.));
   };
 
-  m_diffCo = [diffCo](const RealVect& pos) -> Real {
+  m_diffCo = [diffCo](const RealVect& /*pos*/) -> Real {
     return diffCo;
   };
 
@@ -215,13 +215,6 @@ AdvectionDiffusionStepper::initialData()
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);
   }
-
-  // Set flux functions
-  auto fluxFunc = [](const RealVect a_pos, const Real a_time) {
-    return 0.0;
-  };
-
-  //  m_solver->setDomainFlux(fluxFunc);
 }
 
 #ifdef CH_USE_HDF5
@@ -267,13 +260,6 @@ AdvectionDiffusionStepper::postCheckpointSetup()
   if (m_solver->isMobile()) {
     m_solver->setVelocity(m_velocity);
   }
-
-  // Set flux functions
-  auto fluxFunc = [](const RealVect a_pos, const Real a_time) {
-    return 0.0;
-  };
-
-  //  m_solver->setDomainFlux(fluxFunc);
 }
 
 int

@@ -124,7 +124,6 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    const Box      box     = dbl[din];
     const EBISBox& ebisbox = m_eblg.getEBISL()[din];
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights[din];
@@ -215,9 +214,9 @@ MFHelmholtzRobinEBBC::defineSinglePhase()
 }
 
 void
-MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&           a_singlePhaseVofs,
-                                             EBCellFAB&             a_Lphi,
-                                             const EBCellFAB&       a_phi,
+MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator& a_singlePhaseVofs,
+                                             EBCellFAB&   a_Lphi,
+                                             const EBCellFAB& /*a_phi*/,
                                              const BaseIVFAB<Real>& a_Bcoef,
                                              const DataIndex&       a_dit,
                                              const Real&            a_beta,
