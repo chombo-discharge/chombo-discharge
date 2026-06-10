@@ -23,7 +23,14 @@ class RoughSphere : public ComputationalGeometry
 {
 public:
   RoughSphere();
-  ~RoughSphere();
+  ~RoughSphere() override;
+
+  RoughSphere(const RoughSphere&) = default;
+  RoughSphere&
+  operator=(const RoughSphere&) = default;
+  RoughSphere(RoughSphere&&) = default;
+  RoughSphere&
+  operator=(RoughSphere&&) noexcept = default;
 };
 
 #include <CD_NamespaceFooter.H>

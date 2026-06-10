@@ -19,10 +19,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzSaturationChargeJumpBCFactory::MFHelmholtzSaturationChargeJumpBCFactory(const phase::which_phase a_phase)
+  : m_phase(a_phase)
 {
   CH_TIME("MFHelmholtzSaturationChargeJumpBCFactory::MFHelmholtzSaturationChargeJumpBCFactory");
-
-  m_phase = a_phase;
 }
 
 MFHelmholtzSaturationChargeJumpBCFactory::~MFHelmholtzSaturationChargeJumpBCFactory()

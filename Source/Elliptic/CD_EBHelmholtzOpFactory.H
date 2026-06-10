@@ -145,7 +145,7 @@ public:
   /**
     @brief Destructor. Does nothing.
   */
-  virtual ~EBHelmholtzOpFactory();
+  ~EBHelmholtzOpFactory() override;
 
   /**
     @brief Disallowed assignment operator
@@ -173,7 +173,7 @@ public:
     @return Return value
   */
   EBHelmholtzOp*
-  MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) override final;
+  MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly = true) final;
 
   /**
     @brief Create AMR operator for specified domain
@@ -181,7 +181,7 @@ public:
     @return Return value
   */
   EBHelmholtzOp*
-  AMRnewOp(const ProblemDomain& a_domain) override final;
+  AMRnewOp(const ProblemDomain& a_domain) final;
 
   /**
     @brief Get refinement ratio to next finest level.
@@ -190,7 +190,7 @@ public:
     @param[in,out] a_indexspace Description
   */
   int
-  refToFiner(const ProblemDomain& a_indexspace) const override final;
+  refToFiner(const ProblemDomain& a_indexspace) const final;
 
 protected:
   /**

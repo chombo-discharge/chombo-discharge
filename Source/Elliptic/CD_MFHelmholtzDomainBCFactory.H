@@ -47,13 +47,17 @@ public:
   MFHelmholtzDomainBCFactory&
   operator=(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
+  MFHelmholtzDomainBCFactory(MFHelmholtzDomainBCFactory&&) = default;
+  MFHelmholtzDomainBCFactory&
+  operator=(MFHelmholtzDomainBCFactory&&) = default;
+
   /**
     @brief Factory method
     @return Return value
     @param[in] a_iphase Description
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC>
-  create(const int a_iphase) const = 0;
+  create(int a_iphase) const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

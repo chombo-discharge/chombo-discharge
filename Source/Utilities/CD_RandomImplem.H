@@ -15,7 +15,9 @@
 
 // Std includes
 #include <chrono>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 // Chombo includes
 #include <SPMD.H>
@@ -87,7 +89,7 @@ Random::setSeed(const int a_seed)
 inline void
 Random::setRandomSeed()
 {
-  int seed = std::chrono::system_clock::now().time_since_epoch().count();
+  auto seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 
   // Special hook for MPI -- master rank broadcasts the seed and everyone increments by their processor ID.
 #ifdef CH_MPI

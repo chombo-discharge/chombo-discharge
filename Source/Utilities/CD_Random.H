@@ -18,7 +18,9 @@
 #include <memory>
 #include <mutex>
 #include <type_traits>
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 // Chombo includes
 #include <REAL.H>
@@ -180,7 +182,7 @@ public:
                  const RealVect a_lo,
                  const RealVect a_hi,
                  const RealVect a_bndryCentroid,
-                 const RealVect a_normal,
+                 const RealVect a_bndryNormal,
                  const Real     a_dx,
                  const Real     a_kappa) noexcept;
 
@@ -196,7 +198,7 @@ public:
   randomPosition(const RealVect a_lo,
                  const RealVect a_hi,
                  const RealVect a_bndryCentroid,
-                 const RealVect a_normal) noexcept;
+                 const RealVect a_bndryNormal) noexcept;
 
 private:
   /**

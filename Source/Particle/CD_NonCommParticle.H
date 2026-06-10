@@ -49,6 +49,23 @@ public:
   inline virtual ~NonCommParticle();
 
   /**
+    @brief Copy assignment operator.
+  */
+  NonCommParticle&
+  operator=(const NonCommParticle&) = default;
+
+  /**
+    @brief Move constructor.
+  */
+  NonCommParticle(NonCommParticle&&) = default;
+
+  /**
+    @brief Move assignment operator.
+  */
+  NonCommParticle&
+  operator=(NonCommParticle&&) = default;
+
+  /**
     @brief Get one of the scalars. 
     @details Template parameter is the position in the m_scalars array. This is templated so that compilers may throw
     compile-time errors if trying to fetch elements out of range. 

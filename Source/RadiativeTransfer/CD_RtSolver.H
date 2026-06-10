@@ -51,7 +51,7 @@ public:
     @brief Get the realm where the solver lives.
     @return m_realm
   */
-  virtual const std::string
+  virtual std::string
   getRealm() const;
 
   /**
@@ -430,12 +430,12 @@ protected:
   /**
     @brief Name for this solver. 
   */
-  std::string m_name;
+  std::string m_name = "RtSolver";
 
   /**
-    @brief Class name -- needed because inherited classes will be named different. 
+    @brief Class name -- needed because inherited classes will be named different.
   */
-  std::string m_className;
+  std::string m_className = "RtSolver";
 
   /**
     @brief Cached state used for regridding
@@ -495,7 +495,7 @@ protected:
     @brief
   */
   /** @brief Verbosity. */
-  int m_verbosity;
+  int m_verbosity = -1;
 
   /**
     @brief Time step

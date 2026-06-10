@@ -41,6 +41,28 @@ public:
   virtual ~TimeStepper();
 
   /**
+    @brief Disallow copy construction.
+  */
+  TimeStepper(const TimeStepper&) = delete;
+
+  /**
+    @brief Disallow copy assignment.
+  */
+  TimeStepper&
+  operator=(const TimeStepper&) = delete;
+
+  /**
+    @brief Allow move construction.
+  */
+  TimeStepper(TimeStepper&&) = default;
+
+  /**
+    @brief Allow move assignment.
+  */
+  TimeStepper&
+  operator=(TimeStepper&&) = default;
+
+  /**
     @brief Set AmrMesh
     @param[in] a_amr AmrMesh
   */
@@ -131,7 +153,7 @@ public:
     typically call the solvers' checkpointing routine, but more data can be added.
   */
   virtual void
-  writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;
+  writeCheckpointData(HDF5Handle& a_handle, int a_lvl) const = 0;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -142,7 +164,7 @@ public:
     @details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting routine. 
   */
   virtual void
-  readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
+  readCheckpointData(HDF5Handle& a_handle, int a_lvl) = 0;
 #endif
 
   /**
@@ -170,8 +192,8 @@ public:
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
                 int&                  a_icomp,
-                const std::string     a_outputRealm,
-                const int             a_level) const = 0;
+                std::string           a_outputRealm,
+                int                   a_level) const = 0;
 
   /**
     @brief An option for calling special functions prior to plotting data. 
@@ -202,7 +224,7 @@ public:
     
   */
   virtual Vector<long int>
-  getCheckpointLoads(const std::string a_realm, const int a_level) const;
+  getCheckpointLoads(std::string a_realm, int a_level) const;
 
   /**
     @brief Compute a time step to be used by Driver.
@@ -218,7 +240,7 @@ public:
     @note The return value does not need to equal a_dt. Adaptive time stepping methods will generally return != a_dt.
   */
   virtual Real
-  advance(const Real a_dt) = 0;
+  advance(Real a_dt) = 0;
 
   /**
     @brief Synchronzie solver times and time steps
@@ -227,7 +249,7 @@ public:
     @param[in] a_dt   Time step that was used. 
   */
   virtual void
-  synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) = 0;
+  synchronizeSolverTimes(int a_step, Real a_time, Real a_dt) = 0;
 
   /**
     @brief Print a step report. 
@@ -244,7 +266,7 @@ public:
     @param[in] a_oldFinestLevel The finest level before the regrid. 
   */
   virtual void
-  preRegrid(const int a_lmin, const int a_oldFinestLevel) = 0;
+  preRegrid(int a_lmin, int a_oldFinestLevel) = 0;
 
   /**
     @brief Time stepper regrid method. 
@@ -253,7 +275,7 @@ public:
     @param[in] a_newFinestLevel The finest level after the regrid. 
   */
   virtual void
-  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
+  regrid(int a_lmin, int a_oldFinestLevel, int a_newFinestLevel) = 0;
 
   /**
     @brief Perform post-regrid operations. 
@@ -286,7 +308,7 @@ public:
     @return True if the realm should be load-balanced during regrids.
   */
   virtual bool
-  loadBalanceThisRealm(const std::string a_realm) const;
+  loadBalanceThisRealm(std::string a_realm) const;
 
   /**
     @brief Load balance grid boxes for a specified realm. 
@@ -304,10 +326,10 @@ public:
   virtual void
   loadBalanceBoxes(Vector<Vector<int>>&             a_procs,
                    Vector<Vector<Box>>&             a_boxes,
-                   const std::string                a_realm,
+                   std::string                      a_realm,
                    const Vector<DisjointBoxLayout>& a_grids,
-                   const int                        a_lmin,
-                   const int                        a_finestLevel);
+                   int                              a_lmin,
+                   int                              a_finestLevel);
 
 protected:
   /**

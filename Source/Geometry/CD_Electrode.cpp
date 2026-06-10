@@ -17,8 +17,6 @@
 Electrode::Electrode()
 {
   CH_TIME("Electrode::Electrode()");
-
-  m_isDefined = false;
 }
 
 Electrode::Electrode(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction)
@@ -31,8 +29,7 @@ Electrode::Electrode(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, c
   this->define(a_baseIF, a_live, a_voltageFraction);
 }
 
-Electrode::~Electrode()
-{}
+Electrode::~Electrode() = default;
 
 void
 Electrode::define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction)

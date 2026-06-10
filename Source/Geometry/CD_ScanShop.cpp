@@ -22,14 +22,14 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-ScanShop::ScanShop(const BaseIF&       a_localGeom,
-                   const int           a_verbosity,
-                   const Real          a_dx,
-                   const RealVect      a_probLo,
-                   const ProblemDomain a_finestDomain,
-                   const ProblemDomain a_scanLevel,
-                   const int           a_ebGhost,
-                   const Real          a_thrshdVoF)
+ScanShop::ScanShop(const BaseIF& a_localGeom,
+                   int           a_verbosity,
+                   Real          a_dx,
+                   RealVect      a_probLo,
+                   ProblemDomain a_finestDomain,
+                   ProblemDomain a_scanLevel,
+                   int           a_ebGhost,
+                   Real          a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx * RealVect::Unit, a_thrshdVoF)
 {
 
@@ -83,7 +83,7 @@ ScanShop::~ScanShop()
 }
 
 void
-ScanShop::setProfileFileName(const std::string a_fileName)
+ScanShop::setProfileFileName(std::string a_fileName)
 {
   m_fileName = a_fileName;
 
@@ -91,10 +91,10 @@ ScanShop::setProfileFileName(const std::string a_fileName)
 }
 
 void
-ScanShop::makeDomains(const Real          a_dx,
-                      const RealVect      a_probLo,
-                      const ProblemDomain a_finestDomain,
-                      const ProblemDomain a_scanLevel)
+ScanShop::makeDomains(Real          a_dx,
+                      RealVect      a_probLo,
+                      ProblemDomain a_finestDomain,
+                      ProblemDomain a_scanLevel)
 {
   CH_TIME("ScanShop::makeDomains(Real, RealVect, ProblemDomain, ProblemDomain)");
 
@@ -195,7 +195,7 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
 }
 
 void
-ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
+ScanShop::buildCoarseLevel(int a_level, int a_maxGridSize)
 {
   CH_TIME("ScanShop::buildCoarseLevel(int, int)");
 
@@ -270,7 +270,7 @@ ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize)
 }
 
 void
-ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize)
+ScanShop::buildFinerLevels(int a_coarserLevel, int a_maxGridSize)
 {
   CH_TIME("ScanShop::buildFinerLevels(int, int)");
 
@@ -362,7 +362,7 @@ void
 ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
                       Vector<Box>& a_regularBoxes,
                       Vector<Box>& a_cutCellBoxes,
-                      const int    a_level)
+                      int          a_level)
 {
   CH_TIME("ScanShop::defineLevel");
 

@@ -47,25 +47,51 @@ public:
     @param[in] a_thrshdVoF     Threshold for GeometryShop
   */
   ScanShop(const BaseIF&       a_localGeom,
-           const int           a_verbosity,
-           const Real          a_dx,
-           const RealVect      a_probLo,
-           const ProblemDomain a_finestDomain,
-           const ProblemDomain a_scanLevel,
-           const int           a_ebGhost   = 4,
-           const Real          a_thrshdVoF = 1.0e-16);
+           int                 a_verbosity,
+           Real                a_dx,
+           RealVect            a_probLo,
+           ProblemDomain       a_finestDomain,
+           ProblemDomain       a_scanLevel,
+           int                 a_ebGhost   = 4,
+           Real                a_thrshdVoF = 1.0e-16);
 
   /**
     @brief Destructor (does nothing)
   */
-  ~ScanShop();
+  ~ScanShop() override;
+
+  /**
+    @brief Disallow copy construction.
+  */
+  ScanShop(const ScanShop&) = delete;
+
+  /**
+    @brief Disallow copy assignment.
+  */
+  ScanShop&
+  operator=(const ScanShop&) = delete;
+
+  /**
+    @brief Disallow move construction.
+  */
+  ScanShop(ScanShop&&) = delete;
+
+  /**
+    @brief Disallow move assignment.
+  */
+  ScanShop&
+  operator=(ScanShop&&) = delete;
 
   /**
     @brief If doing profiling, set the output name.
     @param[in] a_fileName Description
   */
+  using GeometryShop::InsideOutside;
+  using GeometryShop::isRegular;
+  using GeometryShop::isCovered;
+
   void
-  setProfileFileName(const std::string a_fileName);
+  setProfileFileName(std::string a_fileName);
 
   /**
     @brief This grid generation method is called by EBISLevel when using distributed data. 
@@ -111,7 +137,7 @@ public:
     @param[in]    a_dx              Grid resolution
     @param[in]    a_di              Grid index
   */
-  virtual void
+  void
   fillGraph(BaseFab<int>&        a_regIrregCovered,
             Vector<IrregNode>&   a_nodes,
             const Box&           a_validRegion,
@@ -201,10 +227,10 @@ protected:
     @param[in] a_scanLevel    Domain where we initiate the load balanced recursion process. 
   */
   void
-  makeDomains(const Real          a_dx,
-              const RealVect      a_probLo,
-              const ProblemDomain a_finestDomain,
-              const ProblemDomain a_scanLevel);
+  makeDomains(Real          a_dx,
+              RealVect      a_probLo,
+              ProblemDomain a_finestDomain,
+              ProblemDomain a_scanLevel);
 
   /**
     @brief Refine levels recursively down to the finest level
@@ -212,7 +238,7 @@ protected:
     @param[in] a_maxGridSize Maximum patch size
   */
   void
-  buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize);
+  buildFinerLevels(int a_coarserLevel, int a_maxGridSize);
 
   /**
     @brief Build the "coarse level" where we initiate the recursion process.
@@ -222,7 +248,7 @@ protected:
     @param[in] a_finerLevel Finer level
   */
   void
-  buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
+  buildCoarseLevel(int a_finerLevel, int a_maxGridSize);
 
   /**
     @brief Check if every point in input box is regular
@@ -231,7 +257,7 @@ protected:
     @param[in] a_dx     Grid resolution
   */
   inline bool
-  isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
+  isRegular(Box a_box, RealVect a_probLo, Real a_dx) const;
 
   /**
     @brief Check if every point in box is covered
@@ -241,7 +267,7 @@ protected:
     @return True if covered, false otherwise
   */
   inline bool
-  isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
+  isCovered(Box a_box, RealVect a_probLo, Real a_dx) const;
 
   /**
     @brief Sort boxes lexicographically. 
@@ -261,7 +287,7 @@ protected:
     @param[in] a_level Description
   */
   void
-  defineLevel(Vector<Box>& coveredBoxes, Vector<Box>& regularBoxes, Vector<Box>& cutCellBoxes, const int a_level);
+  defineLevel(Vector<Box>& coveredBoxes, Vector<Box>& regularBoxes, Vector<Box>& cutCellBoxes, int a_level);
 };
 
 #include <CD_NamespaceFooter.H>

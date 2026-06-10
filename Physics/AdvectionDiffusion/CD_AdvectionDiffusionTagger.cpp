@@ -22,6 +22,7 @@
 using namespace Physics::AdvectionDiffusion;
 
 AdvectionDiffusionTagger::AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr)
+  : m_realm(a_solver->getRealm())
 {
   CH_TIME("AdvectionDiffusionTagger::AdvectionDiffusionTagger");
 
@@ -29,7 +30,6 @@ AdvectionDiffusionTagger::AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_s
   m_amr       = a_amr;
   m_name      = "AdvectionDiffusion";
   m_verbosity = -1;
-  m_realm     = a_solver->getRealm();
 }
 
 AdvectionDiffusionTagger::~AdvectionDiffusionTagger()

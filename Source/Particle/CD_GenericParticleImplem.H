@@ -18,11 +18,9 @@
 #include <CD_NamespaceHeader.H>
 
 template <size_t M, size_t N>
-inline GenericParticle<M, N>::GenericParticle() : m_position(RealVect::Zero)
+inline GenericParticle<M, N>::GenericParticle()
+  : m_particleID(-1), m_rankID(-1), m_position(RealVect::Zero)
 {
-  m_particleID = -1;
-  m_rankID     = -1;
-
   for (auto& s : m_scalars) {
     s = 0.0;
   }
@@ -41,7 +39,7 @@ inline GenericParticle<M, N>::GenericParticle(const GenericParticle<M, N>& a_oth
 }
 
 template <size_t M, size_t N>
-inline GenericParticle<M, N>::~GenericParticle() = default;
+GenericParticle<M, N>::~GenericParticle() = default;
 
 template <size_t M, size_t N>
 inline RealVect&
@@ -209,7 +207,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearOut(void* const a_buffer) const
 {
-  uint8_t* p = static_cast<uint8_t*>(a_buffer);
+  auto* p = static_cast<uint8_t*>(a_buffer);
 
   detail::pushParticleProperty(p, m_particleID);
   detail::pushParticleProperty(p, m_rankID);
@@ -237,7 +235,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::linearIn(const void* const a_buffer)
 {
-  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
+  const auto* p = static_cast<const uint8_t*>(a_buffer);
 
   detail::pullParticleProperty(p, m_particleID);
   detail::pullParticleProperty(p, m_rankID);
@@ -278,7 +276,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::H5linearOut(void* const a_buffer) const
 {
-  uint8_t* p = static_cast<uint8_t*>(a_buffer);
+  auto* p = static_cast<uint8_t*>(a_buffer);
 
   detail::pushParticleProperty(p, m_position[0]);
   detail::pushParticleProperty(p, m_position[1]);
@@ -303,7 +301,7 @@ template <size_t M, size_t N>
 inline void
 GenericParticle<M, N>::H5linearIn(const void* const a_buffer)
 {
-  const uint8_t* p = static_cast<const uint8_t*>(a_buffer);
+  const auto* p = static_cast<const uint8_t*>(a_buffer);
 
   detail::pullParticleProperty(p, m_position[0]);
   detail::pullParticleProperty(p, m_position[1]);

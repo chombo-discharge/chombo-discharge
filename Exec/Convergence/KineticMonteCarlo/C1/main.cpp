@@ -99,7 +99,7 @@ main(int argc, char* argv[])
   Vector<Real> algMean(numSteps.size(), 0.0);
   Vector<Real> algVar(numSteps.size(), 0.0);
 
-  for (int istep = numSteps.size() - 1; istep >= 0; istep--) {
+  for (int istep = static_cast<int>(numSteps.size()) - 1; istep >= 0; istep--) {
     Vector<Real> algSoln;
 
     for (int irun = 0; irun < numRuns; irun++) {

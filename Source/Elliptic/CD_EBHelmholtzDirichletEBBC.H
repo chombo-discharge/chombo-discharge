@@ -104,32 +104,32 @@ protected:
   /**
     @brief Use constant for BC
   */
-  bool m_useConstant;
+  bool m_useConstant = false;
 
   /**
     @brief Use function for BC value
   */
-  bool m_useFunction;
+  bool m_useFunction = false;
 
   /**
     @brief Stencil approximation order,
   */
-  int m_order;
+  int m_order = -1;
 
   /**
     @brief Distance weighting factor for stencils.
   */
-  int m_weight;
+  int m_weight = -1;
 
   /**
     @brief Special flag for dropping stencil order when domains become coarser than this.
   */
-  int m_domainDropOrder;
+  int m_domainDropOrder = 0;
 
   /**
     @brief Special flag for dropping stencil order if the cell is a coarsened cell
   */
-  bool m_dropOrder;
+  bool m_dropOrder = false;
 
   /**
     @brief Value on EB

@@ -44,6 +44,13 @@ public:
   */
   virtual ~CoarseInterpQuadCF() noexcept;
 
+  CoarseInterpQuadCF(const CoarseInterpQuadCF&) = delete;
+  CoarseInterpQuadCF&
+  operator=(const CoarseInterpQuadCF&) = delete;
+  CoarseInterpQuadCF(CoarseInterpQuadCF&&) = default;
+  CoarseInterpQuadCF&
+  operator=(CoarseInterpQuadCF&&) noexcept = default;
+
   /**
     @brief Define function. Puts object in usable state.
     @param[in] a_dblFine Fine grids
@@ -59,8 +66,8 @@ public:
          const ProblemDomain&     a_domainCoar,
          const DataIndex&         a_dit,
          const Box&               a_fineGhostCells,
-         const int                a_refRat,
-         const int                a_ignoreDir) noexcept;
+         int                      a_refRat,
+         int                      a_ignoreDir) noexcept;
 
   /**
     @brief Compute first-derivative Taylor term in direction a_dir. 
@@ -73,11 +80,11 @@ public:
   virtual Real
   computeFirstDeriv(const FArrayBox& a_coarPhi,
                     const IntVect&   a_ivCoar,
-                    const int        a_dir,
-                    const int        a_coarVar) const noexcept;
+                    int              a_dir,
+                    int              a_coarVar) const noexcept;
 
   /**
-    @brief Compute second-derivative Taylor term in direction a_dir. 
+    @brief Compute second-derivative Taylor term in direction a_dir.
     @param[in] a_coarPhi Coarse-side phi. 
     @param[in] a_ivCoar Cell where we compute.
     @param[in] a_dir Direction of derivative. Must be different from m_ignoreDir
@@ -87,8 +94,8 @@ public:
   virtual Real
   computeSecondDeriv(const FArrayBox& a_coarPhi,
                      const IntVect&   a_ivCoar,
-                     const int        a_dir,
-                     const int        a_coarVar) const noexcept;
+                     int              a_dir,
+                     int              a_coarVar) const noexcept;
 
   /**
     @brief Compute mixed-derivative Taylor term in directions orthogonal m_ignoreDir.
@@ -98,7 +105,7 @@ public:
     @return Computed mixed deriv
   */
   virtual Real
-  computeMixedDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, const int a_coarVar) const noexcept;
+  computeMixedDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, int a_coarVar) const noexcept;
 
   /**
     @brief Get the first derivative stencil for the input coarse vof.
@@ -109,7 +116,7 @@ public:
     @return First deriv stencil
   */
   virtual DerivStencil
-  getFirstDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
+  getFirstDerivStencil(const IntVect& a_ivCoar, int a_dir) const noexcept;
 
   /**
     @brief Get the second derivative stencil for the input coarse vof.
@@ -120,7 +127,7 @@ public:
     @return Second deriv stencil
   */
   virtual DerivStencil
-  getSecondDerivStencil(const IntVect& a_ivCoar, const int a_dir) const noexcept;
+  getSecondDerivStencil(const IntVect& a_ivCoar, int a_dir) const noexcept;
 
   /**
     @brief Get the second derivative stencil for the input coarse vof.

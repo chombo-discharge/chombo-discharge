@@ -89,7 +89,7 @@ protected:
   /**
     @brief Is defined or not
   */
-  bool m_isDefined;
+  bool m_isDefined = false;
 
   /**
     @brief Fraction of the live potential

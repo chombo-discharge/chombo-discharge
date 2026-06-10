@@ -24,14 +24,6 @@
 EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()
 {
   CH_TIME("EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()");
-
-  m_order           = -1;
-  m_weight          = -1;
-  m_domainDropOrder = 0;
-  m_dropOrder       = false;
-
-  m_useConstant = false;
-  m_useFunction = false;
 }
 
 EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC()
@@ -231,7 +223,7 @@ EBHelmholtzDirichletEBBC::define()
 void
 EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
                                       EBCellFAB&             a_Lphi,
-                                      const EBCellFAB&       a_phi,
+                                      const EBCellFAB&       /*a_phi*/,
                                       const BaseIVFAB<Real>& a_Bcoef,
                                       const DataIndex&       a_dit,
                                       const Real&            a_beta,
@@ -266,8 +258,6 @@ EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&           a_vofit,
 
     BoxLoops::loop(a_vofit, kernel);
   }
-
-  return;
 }
 
 bool

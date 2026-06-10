@@ -89,7 +89,7 @@ namespace Physics {
          @param[out] a_gradientElectricField Cell-centered gradient of |E|.
       */
       virtual void
-      computeElectricField(EBAMRCellData& a_electricField, EBAMRCellData& a_gradientElectricField) const;
+      computeElectricField(EBAMRCellData& a_electricField, EBAMRCellData& a_gradElectricField) const;
 
       /**
          @brief Per-cell tracer field evaluation. Must be implemented by subclasses.

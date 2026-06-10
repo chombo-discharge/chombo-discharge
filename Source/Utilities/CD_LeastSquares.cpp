@@ -44,7 +44,7 @@ LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
                                                                         a_dx);
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int K = static_cast<int>(displacements.size());
 
   VoFStencil ret;
   if (K > M) { // Have enough equations to compute.
@@ -125,12 +125,15 @@ LeastSquares::getGradSten(const FaceIndex&   a_face,
                                                         true);
 
     std::set<VolIndex> setVofs;
-    for (const auto& v : loVofs.stdVector())
+    for (const auto& v : loVofs.stdVector()) {
       setVofs.emplace(v);
-    for (const auto& v : hiVofs.stdVector())
+    }
+    for (const auto& v : hiVofs.stdVector()) {
       setVofs.emplace(v);
-    for (const auto& v : setVofs)
+    }
+    for (const auto& v : setVofs) {
       allVofs.push_back(v);
+    }
 
     // Can be smaller than order if you've eliminated some equations.
     const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
@@ -508,7 +511,7 @@ LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
 
     // This is because some unknowns (rows) can be been eliminated.
     const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts();
-    const int K = a_displacements.size();
+    const int K = static_cast<int>(a_displacements.size());
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 

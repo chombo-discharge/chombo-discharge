@@ -25,11 +25,6 @@ constexpr int RtSolver::m_nComp;
 RtSolver::RtSolver()
 {
   CH_TIME("RtSolver::RtSolver");
-
-  // Default settings
-  m_verbosity = -1;
-  m_name      = "RtSolver";
-  m_className = "RtSolver";
 }
 
 RtSolver::~RtSolver()
@@ -43,7 +38,7 @@ RtSolver::getName()
   return m_name;
 }
 
-const std::string
+std::string
 RtSolver::getRealm() const
 {
   return m_realm;
@@ -455,7 +450,7 @@ RtSolver::parseVerbosity() noexcept
 }
 
 void
-RtSolver::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level) const noexcept
+RtSolver::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_dbl, const int /*a_level*/) const noexcept
 {
   CH_TIME("RtSolver::computeLoads");
   if (m_verbosity > 5) {
@@ -472,7 +467,7 @@ RtSolver::computeLoads(Vector<long long>& a_loads, const DisjointBoxLayout& a_db
   for (int mybox = 0; mybox < nbox; mybox++) {
     const DataIndex& din = dit[mybox];
 
-    a_loads[din.intCode()] = a_dbl[din].numPts();
+    a_loads[din.intCode()] = static_cast<long long>(a_dbl[din].numPts());
   }
 }
 

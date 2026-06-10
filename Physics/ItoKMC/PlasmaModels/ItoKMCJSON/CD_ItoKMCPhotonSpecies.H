@@ -32,16 +32,22 @@ namespace Physics {
 	@param[in] a_kappaFunction Absorption function
       */
       ItoKMCPhotonSpecies(const std::string a_name, const std::function<Real(const RealVect& a_pos)>& a_kappaFunction)
+        : m_kappa(a_kappaFunction)
       {
-        m_name  = a_name;
-        m_kappa = a_kappaFunction;
+        m_name = a_name;
       }
 
       /**
 	@brief Destructor. Does nothing
       */
-      virtual ~ItoKMCPhotonSpecies() noexcept
-      {}
+      ~ItoKMCPhotonSpecies() noexcept override = default;
+
+      ItoKMCPhotonSpecies(const ItoKMCPhotonSpecies&) = default;
+      ItoKMCPhotonSpecies&
+      operator=(const ItoKMCPhotonSpecies&) = default;
+      ItoKMCPhotonSpecies(ItoKMCPhotonSpecies&&) = default;
+      ItoKMCPhotonSpecies&
+      operator=(ItoKMCPhotonSpecies&&) = default;
 
       /**
 	@brief Get absorption coefficient at a physical position.
@@ -49,7 +55,7 @@ namespace Physics {
 	@return Absorption coefficient (inverse absorption length) at a_pos.
       */
       Real
-      getAbsorptionCoefficient(const RealVect a_pos) const override final
+      getAbsorptionCoefficient(const RealVect a_pos) const final
       {
         return m_kappa(a_pos);
       }

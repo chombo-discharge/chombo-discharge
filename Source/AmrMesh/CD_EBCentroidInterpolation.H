@@ -212,8 +212,8 @@ protected:
     @param[in] a_dwr Right slope
     @return Return value
   */
-  inline Real
-  Superbee(const Real& a_dwl, const Real& a_dwr) const noexcept;
+  static inline Real
+  Superbee(const Real& a_dwl, const Real& a_dwr) noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

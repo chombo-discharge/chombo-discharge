@@ -21,7 +21,7 @@
 #include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
-EBCentroidInterpolation::EBCentroidInterpolation() noexcept : m_dx(-1.0), m_isDefined(false)
+EBCentroidInterpolation::EBCentroidInterpolation() noexcept : m_isDefined(false), m_dx(-1.0)
 {
   CH_TIME("EBCentroidInterpolation:EBCentroidInterpolation(weak)");
 }
@@ -282,11 +282,8 @@ EBCentroidInterpolation::interpolate(LevelData<BaseIVFAB<Real>>& a_centroidData,
   CH_assert(a_cellData.disjointBoxLayout() == m_eblg.getDBL());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl       = m_eblg.getDBL();
-  const ProblemDomain&     domain    = m_eblg.getDomain();
-  const EBISLayout&        ebisl     = m_eblg.getEBISL();
-  const Box&               domainBox = domain.domainBox();
-  const DataIterator&      dit       = dbl.dataIterator();
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  const DataIterator&      dit = dbl.dataIterator();
 
   const int nbox = dit.size();
 
@@ -316,7 +313,6 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
   const Box&               domainBox = domain.domainBox();
 
   const EBISBox&               ebisBox  = ebisl[a_din];
-  const Box&                   cellBox  = dbl[a_din];
   const BaseIVFAB<VoFStencil>& stencils = m_interpStencils[a_din];
 
   const int nComp = a_cellData.nComp();
@@ -382,17 +378,17 @@ EBCentroidInterpolation::interpolate(BaseIVFAB<Real>& a_centroidData,
         // Limit the slopes.
         switch (m_interpolationType) {
         case Type::MinMod: {
-          slope = this->MinMod(dwl, dwr);
+          slope = MinMod(dwl, dwr);
 
           break;
         }
         case Type::MonotonizedCentral: {
-          slope = this->MonotonizedCentral(dwl, dwr);
+          slope = MonotonizedCentral(dwl, dwr);
 
           break;
         }
         case Type::Superbee: {
-          slope = this->Superbee(dwl, dwr);
+          slope = Superbee(dwl, dwr);
 
           break;
         }
@@ -462,13 +458,13 @@ EBCentroidInterpolation::MonotonizedCentral(const Real& a_dwl, const Real& a_dwr
 }
 
 Real
-EBCentroidInterpolation::Superbee(const Real& a_dwl, const Real& a_dwr) const noexcept
+EBCentroidInterpolation::Superbee(const Real& a_dwl, const Real& a_dwr) noexcept
 {
   Real slope = 0.0;
 
   if (a_dwl * a_dwr > 0.0) {
-    const Real s1 = this->MinMod(a_dwl, 2 * a_dwr);
-    const Real s2 = this->MinMod(a_dwr, 2 * a_dwl);
+    const Real s1 = MinMod(a_dwl, 2 * a_dwr);
+    const Real s2 = MinMod(a_dwr, 2 * a_dwl);
 
     if (s1 * s2 > 0.0) {
       slope = std::abs(s1) > std::abs(s2) ? s1 : s2;

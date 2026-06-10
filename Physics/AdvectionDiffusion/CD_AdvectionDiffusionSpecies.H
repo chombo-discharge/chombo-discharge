@@ -38,8 +38,8 @@ namespace Physics {
       AdvectionDiffusionSpecies(const std::function<Real(const RealVect& a_pos)>& a_initialData,
                                 const bool                                        a_mobile,
                                 const bool                                        a_diffusive)
+        : m_initialData(a_initialData)
       {
-        m_initialData  = a_initialData;
         m_isMobile     = a_mobile;
         m_isDiffusive  = a_diffusive;
         m_chargeNumber = 0;
@@ -49,8 +49,14 @@ namespace Physics {
       /**
          @brief Destructor.
       */
-      virtual ~AdvectionDiffusionSpecies()
-      {}
+      ~AdvectionDiffusionSpecies() override = default;
+
+      AdvectionDiffusionSpecies(const AdvectionDiffusionSpecies&) = default;
+      AdvectionDiffusionSpecies&
+      operator=(const AdvectionDiffusionSpecies&) = default;
+      AdvectionDiffusionSpecies(AdvectionDiffusionSpecies&&) = default;
+      AdvectionDiffusionSpecies&
+      operator=(AdvectionDiffusionSpecies&&) = default;
 
       /**
          @brief Return the initial scalar concentration at a given position and time.
@@ -59,7 +65,7 @@ namespace Physics {
          @return Initial concentration evaluated at a_pos.
       */
       Real
-      initialData(const RealVect a_pos, const Real a_time) const override
+      initialData(const RealVect a_pos, const Real /*a_time*/) const override
       {
         return m_initialData(a_pos);
       }

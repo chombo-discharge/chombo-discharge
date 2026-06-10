@@ -46,6 +46,13 @@ namespace Physics {
       */
       virtual ~CdrStorage();
 
+      CdrStorage(const CdrStorage&) = delete;
+      CdrStorage&
+      operator=(const CdrStorage&) = delete;
+      CdrStorage(CdrStorage&&) = delete;
+      CdrStorage&
+      operator=(CdrStorage&&) = delete;
+
       /**
          @brief Allocation function. This will allocate all transient storage in this class
       */
@@ -279,8 +286,15 @@ namespace Physics {
       */
       virtual ~FieldStorage();
 
+      FieldStorage(const FieldStorage&) = delete;
+      FieldStorage&
+      operator=(const FieldStorage&) = delete;
+      FieldStorage(FieldStorage&&) = delete;
+      FieldStorage&
+      operator=(FieldStorage&&) = delete;
+
       /**
-         @brief Allocation function -- allocates all the necessary memory. 
+         @brief Allocation function -- allocates all the necessary memory.
       */
       virtual void
       allocateStorage();
@@ -378,6 +392,13 @@ namespace Physics {
       */
       virtual ~RtStorage();
 
+      RtStorage(const RtStorage&) = delete;
+      RtStorage&
+      operator=(const RtStorage&) = delete;
+      RtStorage(RtStorage&&) = delete;
+      RtStorage&
+      operator=(RtStorage&&) = delete;
+
       /**
          @brief Allocate function -- allocates the flux data holders
       */
@@ -461,6 +482,13 @@ namespace Physics {
          @brief Destructor
       */
       virtual ~SigmaStorage();
+
+      SigmaStorage(const SigmaStorage&) = delete;
+      SigmaStorage&
+      operator=(const SigmaStorage&) = delete;
+      SigmaStorage(SigmaStorage&&) = delete;
+      SigmaStorage&
+      operator=(SigmaStorage&&) = delete;
 
       /**
          @brief Allocation function -- allocates the storage

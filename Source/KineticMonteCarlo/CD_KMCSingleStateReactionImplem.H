@@ -23,11 +23,9 @@
 template <typename State, typename T>
 inline KMCSingleStateReaction<State, T>::KMCSingleStateReaction(const std::list<size_t>& a_reactants,
                                                                 const std::list<size_t>& a_products) noexcept
+  : m_reactants(a_reactants), m_products(a_products)
 {
   CH_TIME("KMCSingleStateReaction::KMCSingleStateReaction");
-
-  m_reactants = a_reactants;
-  m_products  = a_products;
 
   this->computeStateChanges();
 }

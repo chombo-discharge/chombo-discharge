@@ -13,6 +13,9 @@
 #ifndef CD_ITOKMCSURFACEREACTIONSIMPLEM_H
 #define CD_ITOKMCSURFACEREACTIONSIMPLEM_H
 
+// Chombo includes
+#include <MayDay.H>
+
 // Our includes
 #include <CD_ItoKMCSurfaceReactions.H>
 #include <CD_NamespaceHeader.H>

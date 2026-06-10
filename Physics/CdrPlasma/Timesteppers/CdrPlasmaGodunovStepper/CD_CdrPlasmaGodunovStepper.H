@@ -62,7 +62,14 @@ namespace Physics {
       /**
          @brief Destructor
       */
-      virtual ~CdrPlasmaGodunovStepper();
+      ~CdrPlasmaGodunovStepper() override;
+
+      CdrPlasmaGodunovStepper(const CdrPlasmaGodunovStepper&) = delete;
+      CdrPlasmaGodunovStepper&
+      operator=(const CdrPlasmaGodunovStepper&) = delete;
+      CdrPlasmaGodunovStepper(CdrPlasmaGodunovStepper&&) = delete;
+      CdrPlasmaGodunovStepper&
+      operator=(CdrPlasmaGodunovStepper&&) = delete;
 
       /**
          @brief Parse startup options
@@ -536,8 +543,8 @@ namespace Physics {
            @param[in,out] a_handle HDF5 fil
            @param[in]    a_lvl    Grid level
       */
-      virtual void
-      writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+      void
+      writeCheckpointData(HDF5Handle& a_handle, int a_lvl) const override;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -547,8 +554,8 @@ namespace Physics {
          @param[in,out] a_handle HDF5 file
          @param[in]    a_lvl    Grid level
       */
-      virtual void
-      readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+      void
+      readCheckpointData(HDF5Handle& a_handle, int a_lvl) override;
 #endif
     };
   } // namespace CdrPlasma

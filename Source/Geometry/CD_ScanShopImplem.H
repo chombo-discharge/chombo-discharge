@@ -20,7 +20,7 @@
 #include <CD_NamespaceHeader.H>
 
 inline bool
-ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const
+ScanShop::isRegular(Box a_box, RealVect a_probLo, Real a_dx) const
 {
   CH_TIME("ScanShop::isRegular(Box, RealVect, Real)");
 
@@ -39,7 +39,7 @@ ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) c
 }
 
 inline bool
-ScanShop::isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const
+ScanShop::isCovered(Box a_box, RealVect a_probLo, Real a_dx) const
 {
   CH_TIME("ScanShop::isCovered(Box, RealVect, Real)");
 

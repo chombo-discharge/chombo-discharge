@@ -24,7 +24,6 @@ Vessel::Vessel()
 {
   ParmParse pp("Vessel");
 
-  std::string  str;
   Vector<Real> vec(SpaceDim);
 
   pp.get("rod_radius", m_rod_R);

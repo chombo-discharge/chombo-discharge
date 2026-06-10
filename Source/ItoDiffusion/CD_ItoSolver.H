@@ -67,6 +67,28 @@ public:
   virtual ~ItoSolver();
 
   /**
+    @brief Deleted copy constructor.
+  */
+  ItoSolver(const ItoSolver&) = delete;
+
+  /**
+    @brief Deleted copy assignment operator.
+  */
+  ItoSolver&
+  operator=(const ItoSolver&) = delete;
+
+  /**
+    @brief Default move constructor.
+  */
+  ItoSolver(ItoSolver&&) = default;
+
+  /**
+    @brief Default move assignment operator.
+  */
+  ItoSolver&
+  operator=(ItoSolver&&) = default;
+
+  /**
     @brief Set the particle merger. This will get called when merging particles using makeSuperparticles.
     @param[in] a_particleMerger Particle merger
   */
@@ -92,7 +114,7 @@ public:
     @param[in] a_realm Realm name. 
   */
   virtual void
-  setRealm(const std::string a_realm);
+  setRealm(std::string a_realm);
 
   /**
     @brief Parse class options
@@ -129,7 +151,7 @@ public:
   virtual void
   generateParticlesFromDensity(ParticleContainer<ItoParticle>&              a_particles,
                                const std::function<Real(const RealVect x)>& a_densityFunc,
-                               const int                                    a_maxParticlesPerCell) const noexcept;
+                               int                                          a_maxParticlesPerCell) const noexcept;
 
   /**
     @brief Regrid this solver. 
@@ -138,7 +160,7 @@ public:
     @param[in] a_newFinestLevel Finest AMR level after the regrid. 
   */
   virtual void
-  regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+  regrid(int a_lmin, int a_oldFinestLevel, int a_newFinestLevel);
 
   /**
     @brief Allocate internal storage
@@ -153,7 +175,7 @@ public:
     @param[in] a_container Container
   */
   virtual void
-  clear(const WhichContainer a_container);
+  clear(WhichContainer a_container);
 
   /**
     @brief Clear a particle container -- this will delete all the particles in the input container. 
@@ -189,8 +211,8 @@ public:
   virtual void
   depositConductivity(EBAMRCellData&                  a_phi,
                       ParticleContainer<ItoParticle>& a_particles,
-                      const DepositionType            a_deposition,
-                      const CoarseFineDeposition      a_coarseFineDeposition) const;
+                      DepositionType                  a_deposition,
+                      CoarseFineDeposition            a_coarseFineDeposition) const;
 
   /**
     @brief Deposit diffusivity (i.e. mass*D/volume)
@@ -213,8 +235,8 @@ public:
   virtual void
   depositDiffusivity(EBAMRCellData&                  a_phi,
                      ParticleContainer<ItoParticle>& a_particles,
-                     const DepositionType            a_deposition,
-                     const CoarseFineDeposition      a_coarseFineDeposition) const;
+                     DepositionType                  a_deposition,
+                     CoarseFineDeposition            a_coarseFineDeposition) const;
 
   /**
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
@@ -237,8 +259,8 @@ public:
   virtual void
   depositEnergyDensity(EBAMRCellData&                  a_phi,
                        ParticleContainer<ItoParticle>& a_particles,
-                       const DepositionType            a_deposition,
-                       const CoarseFineDeposition      a_coarseFineDeposition) const;
+                       DepositionType                  a_deposition,
+                       CoarseFineDeposition            a_coarseFineDeposition) const;
 
   /**
     @brief Compute average mobility. 
@@ -282,7 +304,7 @@ public:
     @note Calls the general version with arguments: m_phi, m_particles.at(a_container), m_deposition.
   */
   virtual void
-  depositParticles(const WhichContainer a_container);
+  depositParticles(WhichContainer a_container);
 
   /**
     @brief Do an NGP deposit on a specific grid level. Used for IO.
@@ -294,7 +316,7 @@ public:
   void
   depositParticlesNGP(LevelData<EBCellFAB>&       a_output,
                       const ParticleContainer<P>& a_particles,
-                      const int                   a_level) const noexcept;
+                      int                         a_level) const noexcept;
 
   /**
     @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
@@ -318,10 +340,10 @@ public:
   */
   template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
-  depositParticles(EBAMRCellData&             a_phi,
-                   ParticleContainer<P>&      a_particles,
-                   const DepositionType       a_deposition,
-                   const CoarseFineDeposition a_coarseFineDeposition) const;
+  depositParticles(EBAMRCellData&        a_phi,
+                   ParticleContainer<P>& a_particles,
+                   DepositionType        a_deposition,
+                   CoarseFineDeposition  a_coarseFineDeposition) const;
 
   /**
     @brief Remove particles that are inside the EB. 
@@ -330,7 +352,7 @@ public:
     @param[in] a_representation Representation
   */
   virtual void
-  removeCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
+  removeCoveredParticles(EBRepresentation a_representation, Real a_tol);
 
   /**
     @brief Remove particles that are inside the EB. 
@@ -340,7 +362,7 @@ public:
     @param[in] a_representation Representation
   */
   virtual void
-  removeCoveredParticles(const WhichContainer a_container, const EBRepresentation a_representation, const Real a_tol);
+  removeCoveredParticles(WhichContainer a_container, EBRepresentation a_representation, Real a_tol);
 
   /**
     @brief Remove particles that are inside the EB
@@ -350,8 +372,8 @@ public:
   */
   virtual void
   removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles,
-                         const EBRepresentation          a_representation,
-                         const Real                      a_tol) const;
+                         EBRepresentation                a_representation,
+                         Real                            a_tol) const;
 
   /**
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -360,7 +382,7 @@ public:
     @param[in] a_representation Representation
   */
   virtual void
-  transferCoveredParticles(const EBRepresentation a_representation, const Real a_tol);
+  transferCoveredParticles(EBRepresentation a_representation, Real a_tol);
 
   /**
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -370,10 +392,10 @@ public:
     @param[in] a_representation Representation
   */
   virtual void
-  transferCoveredParticles(const WhichContainer   a_containerFrom,
-                           const WhichContainer   a_containerTo,
-                           const EBRepresentation a_representation,
-                           const Real             a_tol);
+  transferCoveredParticles(WhichContainer   a_containerFrom,
+                           WhichContainer   a_containerTo,
+                           EBRepresentation a_representation,
+                           Real             a_tol);
 
   /**
     @brief Transfer particles that are inside the EB to another container. 
@@ -385,8 +407,8 @@ public:
   virtual void
   transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
                            ParticleContainer<ItoParticle>& a_particlesTo,
-                           const EBRepresentation          a_representation,
-                           const Real                      a_tol) const;
+                           EBRepresentation                a_representation,
+                           Real                            a_tol) const;
 
   /**
     @brief Do boundary intersection tests.
@@ -399,9 +421,9 @@ public:
   */
   virtual void
   intersectParticles(
-    const EBIntersection                    a_ebIntersection,
-    const bool                              a_deleteParticles,
-    const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+    EBIntersection                    a_ebIntersection,
+    bool                              a_deleteParticles,
+    std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
       return;
     });
 
@@ -419,12 +441,12 @@ public:
   */
   virtual void
   intersectParticles(
-    const WhichContainer                    a_particles,
-    const WhichContainer                    a_ebParticles,
-    const WhichContainer                    a_domainParticles,
-    const EBIntersection                    a_ebIntersection,
-    const bool                              a_deleteParticles,
-    const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+    WhichContainer                    a_particles,
+    WhichContainer                    a_ebParticles,
+    WhichContainer                    a_domainParticles,
+    EBIntersection                    a_ebIntersection,
+    bool                              a_deleteParticles,
+    std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
       return;
     });
 
@@ -441,12 +463,12 @@ public:
   */
   virtual void
   intersectParticles(
-    ParticleContainer<ItoParticle>&         a_particles,
-    ParticleContainer<ItoParticle>&         a_ebParticles,
-    ParticleContainer<ItoParticle>&         a_domainParticles,
-    const EBIntersection                    a_ebIntersection,
-    const bool                              a_deleteParticles,
-    const std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
+    ParticleContainer<ItoParticle>&   a_particles,
+    ParticleContainer<ItoParticle>&   a_ebParticles,
+    ParticleContainer<ItoParticle>&   a_domainParticles,
+    EBIntersection                    a_ebIntersection,
+    bool                              a_deleteParticles,
+    std::function<void(ItoParticle&)> a_nonDeletionModifier = [](ItoParticle&) -> void {
       return;
     });
 
@@ -457,7 +479,7 @@ public:
     @param[in]  a_level Grid level
   */
   virtual void
-  computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level);
+  computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, int a_level);
 
   /**
     @brief Get number of plot variables
@@ -482,10 +504,7 @@ public:
     @param[in] a_comp Comp
   */
   virtual void
-  writePlotData(LevelData<EBCellFAB>& a_output,
-                int&                  a_comp,
-                const std::string     a_outputRealm,
-                const int             a_level) const noexcept;
+  writePlotData(LevelData<EBCellFAB>& a_output, int& a_comp, std::string a_outputRealm, int a_level) const noexcept;
 
   /**
     @brief Get number of particles in a specified particle container
@@ -494,7 +513,7 @@ public:
     @param[in] a_container Container
   */
   virtual unsigned long long
-  getNumParticles(const WhichContainer a_container, const bool a_localOnly) const;
+  getNumParticles(WhichContainer a_container, bool a_localOnly) const;
 
   /**
     @brief Register operators
@@ -522,14 +541,14 @@ public:
     @param[in] a_phase Phase
   */
   virtual void
-  setPhase(const phase::which_phase a_phase);
+  setPhase(phase::which_phase a_phase);
 
   /**
     @brief Set verbosity level for this solver. 
     @param[in] a_verbosity Verbosity level.
   */
   virtual void
-  setVerbosity(const int a_verbosity);
+  setVerbosity(int a_verbosity);
 
   /**
     @brief Set the time for this solver. 
@@ -539,7 +558,7 @@ public:
     @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
   */
   virtual void
-  setTime(const int a_step, const Real a_time, const Real a_dt);
+  setTime(int a_step, Real a_time, Real a_dt);
 
 #ifdef CH_USE_HDF5
   /**
@@ -550,7 +569,7 @@ public:
     @param[in]  a_level Grid level
   */
   virtual void
-  writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+  writeCheckpointLevel(HDF5Handle& a_handle, int a_level) const;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -561,7 +580,7 @@ public:
     @param[in]  a_level Grid level
   */
   virtual void
-  readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+  readCheckpointLevel(HDF5Handle& a_handle, int a_level);
 #endif
 
   /**
@@ -578,7 +597,7 @@ public:
     @note This caches the bulk particles. 
   */
   virtual void
-  preRegrid(const int a_lbase, const int a_oldFinestLevel);
+  preRegrid(int a_lbase, int a_oldFinestLevel);
 
   /**
     @brief Add particles to a contain. This adds into a specific grid level and patch. The user can delete the input particles. 
@@ -589,10 +608,7 @@ public:
   */
   template <ItoSolver::WhichContainer C = WhichContainer::Bulk>
   void
-  addParticles(ListBox<ItoParticle>& a_inputParticles,
-               const int             a_lvl,
-               const DataIndex       a_dit,
-               const bool            a_destructive);
+  addParticles(ListBox<ItoParticle>& a_inputParticles, int a_lvl, DataIndex a_dit, bool a_destructive);
 
   /**
     @brief Check if solver is mobile
@@ -614,7 +630,7 @@ public:
     @return Particles
   */
   virtual ParticleContainer<ItoParticle>&
-  getParticles(const WhichContainer a_container);
+  getParticles(WhichContainer a_container);
 
   /**
     @brief Get a general particle container
@@ -622,7 +638,7 @@ public:
     @return Particles
   */
   virtual const ParticleContainer<ItoParticle>&
-  getParticles(const WhichContainer a_container) const;
+  getParticles(WhichContainer a_container) const;
 
   /**
     @brief Get the species
@@ -685,28 +701,28 @@ public:
     @param[in] a_diffusionCoefficient Diffusion coefficient
   */
   virtual void
-  setDiffusionFunction(const Real a_diffusionCoefficient);
+  setDiffusionFunction(Real a_diffusionCoefficient);
 
   /**
     @brief Utility function -- set a constant velocity
     @param[in] a_velocity Velocity
   */
   virtual void
-  setVelocityFunction(const RealVect a_velocity);
+  setVelocityFunction(RealVect a_velocity);
 
   /**
     @brief Sets mobility coefficient for all particles.
     @param[in] a_mobility Particle mobility.
   */
   virtual void
-  setParticleMobility(const Real a_mobility);
+  setParticleMobility(Real a_mobility);
 
   /**
     @brief Sets diffusion coefficient for all particles.
     @param[in] a_diffusion Particle diffusion value.
   */
   virtual void
-  setParticleDiffusion(const Real a_diffusion);
+  setParticleDiffusion(Real a_diffusion);
 
   /**
     @brief Interpolate the particle velocities.
@@ -724,7 +740,7 @@ public:
     @param[in] a_dit   Grid index
   */
   virtual void
-  interpolateVelocities(const int a_level, const DataIndex& a_dit);
+  interpolateVelocities(int a_level, const DataIndex& a_dit);
 
   /**
     @brief Interpolate mobilities
@@ -759,14 +775,14 @@ public:
     @param[in] a_container Container to be sorted. 
   */
   virtual void
-  organizeParticlesByCell(const WhichContainer a_container);
+  organizeParticlesByCell(WhichContainer a_container);
 
   /**
     @brief Sort the input particle container by patch.
     @param[in] a_container Container to be sorted. 
   */
   virtual void
-  organizeParticlesByPatch(const WhichContainer a_container);
+  organizeParticlesByPatch(WhichContainer a_container);
 
   /**
     @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
@@ -774,7 +790,7 @@ public:
     @param[in] a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell);
+  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell);
 
   /**
     @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
@@ -782,7 +798,7 @@ public:
     @param[in] a_particlesPerCell Target number of particles per cell. Vector indicates grid levels. 
   */
   virtual void
-  makeSuperparticles(const WhichContainer a_container, const Vector<int> a_particlesPerCell);
+  makeSuperparticles(WhichContainer a_container, Vector<int> a_particlesPerCell);
 
   /**
     @brief Make superparticles for a particle container -- this is used for a specified grid level. 
@@ -791,7 +807,7 @@ public:
     @param[in] a_level            Grid level
   */
   virtual void
-  makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell, const int a_level);
+  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell, int a_level);
 
   /**
     @brief Make superparticles for a particle container -- this is used for a specified grid level and patch
@@ -801,10 +817,7 @@ public:
     @param[in] a_dit              Grid index
   */
   virtual void
-  makeSuperparticles(const WhichContainer a_container,
-                     const int            a_particlesPerCell,
-                     const int            a_level,
-                     const DataIndex      a_dit);
+  makeSuperparticles(WhichContainer a_container, int a_particlesPerCell, int a_level, DataIndex a_dit);
 
   /**
     @brief General superparticle merging with underlying algorithm through m_particleMerger
@@ -813,9 +826,7 @@ public:
     @param[in]    a_particlesPerCell Target number of particles per cell
   */
   virtual void
-  mergeParticles(List<ItoParticle>& a_particles,
-                 const CellInfo&    a_cellInfo,
-                 const int          a_particlesPerCell) const noexcept;
+  mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_particlesPerCell) const noexcept;
 
   /**
     @brief Superparticle merging with KD/BVH trees
@@ -826,7 +837,7 @@ public:
   virtual void
   makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
                                   const CellInfo&    a_cellInfo,
-                                  const int          a_particlesPerCell) const noexcept;
+                                  int                a_particlesPerCell) const noexcept;
 
   /**
     @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node. 
@@ -837,7 +848,7 @@ public:
   virtual void
   makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
                                     const CellInfo&    a_cellInfo,
-                                    const int          a_particlesPerCell) const noexcept;
+                                    int                a_particlesPerCell) const noexcept;
 
   /**
     @brief Particle re-initialization algorithm
@@ -848,7 +859,7 @@ public:
   virtual void
   reinitializeParticles(List<ItoParticle>& a_particles,
                         const CellInfo&    a_cellInfo,
-                        const int          a_particlesPerCell) const noexcept;
+                        int                a_particlesPerCell) const noexcept;
 
   /**
     @brief Remap the bulk particle container.
@@ -861,7 +872,7 @@ public:
     @param[in] a_container Particle container
   */
   virtual void
-  remap(const WhichContainer a_container);
+  remap(WhichContainer a_container);
 
   /**
     @brief Remap all particle containers
@@ -908,7 +919,7 @@ public:
     @return Computed dt
   */
   virtual Real
-  computeDt(const int a_lvl) const;
+  computeDt(int a_lvl) const;
 
   /**
     @brief Compute a time step for the advance -- this returns the maximum permitted time step on the input grid patch.
@@ -922,7 +933,7 @@ public:
     @return Computed dt
   */
   virtual Real
-  computeDt(const int a_lvl, const DataIndex& a_dit) const;
+  computeDt(int a_lvl, const DataIndex& a_dit) const;
 
   /**
     @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on any grid level.
@@ -937,7 +948,7 @@ public:
     @return Computed hop dt
   */
   virtual Real
-  computeHopDt(const Real a_maxCellsToMove) const;
+  computeHopDt(Real a_maxCellsToMove) const;
 
   /**
     @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on the input grid level.
@@ -953,7 +964,7 @@ public:
     @return Computed hop dt
   */
   virtual Real
-  computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const;
+  computeHopDt(Real a_maxCellsToMove, int a_lvl) const;
 
   /**
     @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on the input grid level.
@@ -970,7 +981,7 @@ public:
     @return Computed hop dt
   */
   virtual Real
-  computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
+  computeHopDt(Real a_maxCellsToMove, int a_lvl, const DataIndex& a_dit) const;
 
   /**
     @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. 
@@ -985,7 +996,7 @@ public:
     @return Computed advective dt
   */
   virtual Real
-  computeAdvectiveDt(const int a_lvl) const;
+  computeAdvectiveDt(int a_lvl) const;
 
   /**
     @brief Compute the drift dt. This computes the minimum dt = dx/vMax on one level and one box. 
@@ -994,7 +1005,7 @@ public:
     @return Computed advective dt
   */
   virtual Real
-  computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;
+  computeAdvectiveDt(int a_lvl, const DataIndex& a_dit) const;
 
   /**
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles
@@ -1009,7 +1020,7 @@ public:
     @return Computed diffusive dt
   */
   virtual Real
-  computeDiffusiveDt(const int a_lvl) const;
+  computeDiffusiveDt(int a_lvl) const;
 
   /**
     @brief Compute the diffusive dt. This computes dt = dx*dx/(2*SpaceDim*D) for all particles on the input grid patch
@@ -1018,7 +1029,7 @@ public:
     @return Computed diffusive dt
   */
   virtual Real
-  computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const;
+  computeDiffusiveDt(int a_lvl, const DataIndex& a_dit) const;
 
   /**
     @brief Get deposition method
@@ -1376,7 +1387,7 @@ protected:
     @param[in]  a_level Grid level
   */
   virtual void
-  writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level) const;
+  writeCheckPointLevelParticles(HDF5Handle& a_handle, int a_level) const;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -1388,7 +1399,7 @@ protected:
     @param[in]  a_level Grid level
   */
   virtual void
-  writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) const;
+  writeCheckPointLevelFluid(HDF5Handle& a_handle, int a_level) const;
 #endif
 
 #ifdef CH_USE_HDF5
@@ -1399,7 +1410,7 @@ protected:
     @param[in]  a_level Grid level
   */
   virtual void
-  readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level);
+  readCheckpointLevelParticles(HDF5Handle& a_handle, int a_level);
 #endif
 
 #ifdef CH_USE_HDF5
@@ -1410,7 +1421,7 @@ protected:
     @param[in]  a_level Grid level
   */
   virtual void
-  readCheckpointLevelFluid(HDF5Handle& a_handle, const int a_level);
+  readCheckpointLevelFluid(HDF5Handle& a_handle, int a_level);
 #endif
 
   /**
@@ -1421,7 +1432,7 @@ protected:
     @param[in] a_newPPC           Desired number of computational particles per cell
   */
   void
-  drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, const int a_level, const int a_newPPC);
+  drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, int a_level, int a_newPPC);
 
   /**
     @brief Compute the cell-centered deposition -- this is the main deposition function.
@@ -1434,10 +1445,10 @@ protected:
   */
   template <class P, class Ret, Ret (P ::*MemberFunc)() const>
   void
-  depositKappaConservative(EBAMRCellData&             a_phi,
-                           ParticleContainer<P>&      a_particles,
-                           const DepositionType       a_deposition,
-                           const CoarseFineDeposition a_coarseFineDeposition) const;
+  depositKappaConservative(EBAMRCellData&        a_phi,
+                           ParticleContainer<P>& a_particles,
+                           DepositionType        a_deposition,
+                           CoarseFineDeposition  a_coarseFineDeposition) const;
 
   /**
     @brief Redistribute mass in an AMR context. 
@@ -1475,7 +1486,7 @@ protected:
     @param[in] a_velocityMagnitude Velocity magnitude.
   */
   virtual void
-  interpolateMobilities(const int a_level, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
+  interpolateMobilities(int a_level, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
 
   /**
     @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch. 
@@ -1483,7 +1494,7 @@ protected:
     @param[in] a_dit   Grid index.
   */
   virtual void
-  interpolateMobilitiesDirect(const int a_level, const DataIndex& a_dit) noexcept;
+  interpolateMobilitiesDirect(int a_level, const DataIndex& a_dit) noexcept;
 
   /**
     @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch. 
@@ -1492,9 +1503,7 @@ protected:
     @param[in] a_velocityMagnitude Velocity magnitude.
   */
   virtual void
-  interpolateMobilitiesVelocity(const int        a_level,
-                                const DataIndex& a_dit,
-                                const EBCellFAB& a_velocityMagnitude) noexcept;
+  interpolateMobilitiesVelocity(int a_level, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
 
   /**
     @brief Update mobilities parametrically from the particle energy.
@@ -1503,7 +1512,7 @@ protected:
     @param[in] a_dit   Grid index
   */
   virtual void
-  updateMobilities(const int a_level, const DataIndex a_dit);
+  updateMobilities(int a_level, DataIndex a_dit);
 
   /**
     @brief Interpolate the diffusion field to the particle positions. 
@@ -1512,7 +1521,7 @@ protected:
     @param[in] a_dit   Grid index
   */
   virtual void
-  interpolateDiffusion(const int a_level, const DataIndex& a_dit);
+  interpolateDiffusion(int a_level, const DataIndex& a_dit);
 
   /**
     @brief Update mobilities parametrically from the particle energy. 
@@ -1521,7 +1530,7 @@ protected:
     @param[in] a_dit   Grid index    
   */
   virtual void
-  updateDiffusion(const int a_level, const DataIndex a_dit);
+  updateDiffusion(int a_level, DataIndex a_dit);
 
   /**
     @brief Write data to output. Convenience function. 
@@ -1537,10 +1546,10 @@ protected:
   writeData(LevelData<EBCellFAB>& a_output,
             int&                  a_comp,
             const EBAMRCellData&  a_data,
-            const std::string     a_outputRealm,
-            const int             a_level,
-            const bool            a_interpToCentroids,
-            const bool            a_interpGhost) const noexcept;
+            std::string           a_outputRealm,
+            int                   a_level,
+            bool                  a_interpToCentroids,
+            bool                  a_interpGhost) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

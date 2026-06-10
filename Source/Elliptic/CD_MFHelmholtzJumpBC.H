@@ -70,16 +70,16 @@ public:
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
     @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
   */
-  MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
+  MFHelmholtzJumpBC(Location::Cell       a_dataLocation,
                     const MFLevelGrid&   a_mflg,
                     const BcoefPtr&      a_Bcoef,
                     const AmrMask&       a_validCells,
-                    const Real           a_dx,
-                    const int            a_order,
-                    const int            a_weight,
-                    const int            a_radius,
-                    const int            a_ghostCF,
-                    const IntVect        a_ghostPhi);
+                    Real                 a_dx,
+                    int                  a_order,
+                    int                  a_weight,
+                    int                  a_radius,
+                    int                  a_ghostCF,
+                    IntVect              a_ghostPhi);
 
   /**
     @brief Disallowed copy constructor
@@ -96,6 +96,10 @@ public:
   */
   MFHelmholtzJumpBC&
   operator=(const MFHelmholtzJumpBC& a_other) = delete;
+
+  MFHelmholtzJumpBC(MFHelmholtzJumpBC&&) = delete;
+  MFHelmholtzJumpBC&
+  operator=(MFHelmholtzJumpBC&&) = delete;
 
   /**
     @brief Set B-coefficient. This updates the stencils
@@ -137,7 +141,7 @@ public:
     @param[in] a_dropOrder
   */
   void
-  setCoarseGridDropOrder(const bool a_dropOrder);
+  setCoarseGridDropOrder(bool a_dropOrder);
 
   /**
     @brief Match the BC
@@ -146,7 +150,7 @@ public:
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not
   */
   virtual void
-  matchBC(LevelData<BaseIVFAB<Real>>& a_jump, const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC) const;
+  matchBC(LevelData<BaseIVFAB<Real>>& a_jump, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBC) const;
 
   /**
     @brief Match the BC
@@ -158,7 +162,7 @@ public:
   virtual void
   matchBC(BaseIVFAB<Real>& a_jump,
           const MFCellFAB& a_phi,
-          const bool       a_homogeneousPhysBC,
+          bool             a_homogeneousPhysBC,
           const DataIndex& a_dit) const;
 
   /**
@@ -168,7 +172,7 @@ public:
     @return Returns phi on the boundary. On multivalued cells, phi always lies on VolIndex(iv, 0). 
   */
   virtual const BaseIVFAB<Real>&
-  getBndryPhi(const int a_phase, const DataIndex& a_dit) const;
+  getBndryPhi(int a_phase, const DataIndex& a_dit) const;
 
   /**
     @brief Return vof iterator which iterates over single-phase cells on a specific phase and box. 
@@ -177,7 +181,7 @@ public:
     @param[in,out] a_dit Description
   */
   virtual VoFIterator&
-  getSinglePhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+  getSinglePhaseVofs(int a_phase, const DataIndex& a_dit) const;
 
   /**
     @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
@@ -186,7 +190,7 @@ public:
     @param[in,out] a_dit Description
   */
   virtual VoFIterator&
-  getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+  getMultiPhaseVofs(int a_phase, const DataIndex& a_dit) const;
 
   /**
     @brief Get stencils for computing dphi/dn at the boundary
@@ -371,8 +375,8 @@ protected:
   getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
                                      const VolIndex&              a_vof,
                                      const EBISBox&               a_ebisbox,
-                                     const VofUtils::Neighborhood a_neighborhood,
-                                     const int                    a_order) const;
+                                     VofUtils::Neighborhood       a_neighborhood,
+                                     int                          a_order) const;
 
   /**
     @brief Check if stencil is valid. 

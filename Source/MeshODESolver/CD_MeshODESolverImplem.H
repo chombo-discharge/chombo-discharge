@@ -25,14 +25,10 @@
 #include <CD_NamespaceHeader.H>
 
 template <size_t N>
-MeshODESolver<N>::MeshODESolver() : m_verbosity(-1), m_phase(phase::gas)
+MeshODESolver<N>::MeshODESolver()
+  : m_verbosity(-1), m_name("MeshODESolver"), m_className("MeshODESolver"), m_realm(Realm::Primal), m_phase(phase::gas)
 {
   CH_TIME("MeshODESolver::MeshODESolver()");
-
-  // Default settings.
-  m_name      = "MeshODESolver";
-  m_className = "MeshODESolver";
-  m_realm     = Realm::Primal;
 
   this->parseOptions();
 }
@@ -229,7 +225,7 @@ MeshODESolver<N>::setPhi(const std::function<std::array<Real, N>(const RealVect&
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
-          phiFAB(iv, i) = y[i];
+          phiFAB(iv, static_cast<int>(i)) = y[i];
         }
       };
 
@@ -325,7 +321,7 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
 
           // Make y from the mesh data.
           for (size_t i = 0; i < N; i++) {
-            y[i] = phiFAB(iv, i);
+            y[i] = phiFAB(iv, static_cast<int>(i));
           }
 
           // Compute the right-hand side.
@@ -334,7 +330,7 @@ MeshODESolver<N>::computeRHS(EBAMRCellData& a_rhs, const RHSFunction& a_rhsFunct
 
         // Put right-hand side in mesh data. This is set to zero if the cell is covered by a finer grid cell.
         for (size_t i = 0; i < N; i++) {
-          rhsFAB(iv, i) = f[i];
+          rhsFAB(iv, static_cast<int>(i)) = f[i];
         }
       };
 
@@ -586,11 +582,11 @@ MeshODESolver<N>::getNumberOfPlotVariables() const noexcept
   int numPlotVars = 0;
 
   if (m_plotPhi) {
-    numPlotVars += int(N);
+    numPlotVars += static_cast<int>(N);
   }
 
   if (m_plotRHS) {
-    numPlotVars += int(N);
+    numPlotVars += static_cast<int>(N);
   }
 
   return numPlotVars;
@@ -727,12 +723,12 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0, N - 1), false);
+  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0, static_cast<int>(N) - 1), false);
   read<EBCellFAB>(a_handle,
                   *m_rhs[a_level],
                   m_name + "_src",
                   m_amr->getGrids(m_realm)[a_level],
-                  Interval(0, N - 1),
+                  Interval(0, static_cast<int>(N) - 1),
                   false);
 }
 #endif

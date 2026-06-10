@@ -30,8 +30,7 @@ CdrPlasmaFieldTagger::CdrPlasmaFieldTagger()
   m_name = "CdrPlasmaFieldTagger";
 }
 
-CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger()
-{}
+CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger() = default;
 
 void
 CdrPlasmaFieldTagger::allocateStorage() const

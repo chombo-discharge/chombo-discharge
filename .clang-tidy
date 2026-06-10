@@ -6,6 +6,7 @@ Checks: >
     '-*,
      bugprone-*,
        -bugprone-branch-clone,
+       -bugprone-casting-through-void,
        -bugprone-easily-swappable-parameters,
        -bugprone-exception-escape,
        -bugprone-implicit-widening-of-multiplication-result,
@@ -47,6 +48,7 @@ Checks: >
        -readability-implicit-bool-conversion,
        -readability-isolate-declaration,
        -readability-magic-numbers,
+       -readability-make-member-function-const,
        -readability-named-parameter,
        -readability-simplify-boolean-expr,
     '

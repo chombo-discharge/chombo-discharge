@@ -92,7 +92,7 @@ LinearStencil::computeInterpStencil1D(VoFStencil&     a_stencil,
 
     // Get all Vofs to the correct side.
     const Vector<VolIndex> otherVoFs    = a_ebisbox.getVoFs(a_vof, a_interpDir, side, 1);
-    const int              numOtherVoFs = otherVoFs.size();
+    const int              numOtherVoFs = static_cast<int>(otherVoFs.size());
 
     if (numOtherVoFs > 0) { // We can find a stencil
       foundStencil = true;
