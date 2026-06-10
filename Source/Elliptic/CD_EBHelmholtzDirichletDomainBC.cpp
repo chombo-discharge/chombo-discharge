@@ -138,7 +138,6 @@ EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
   const int            isign   = (a_side == Side::Lo) ? -1 : 1;
   const Real           ihdx    = 2.0 / m_dx;
-  const IntVect        iv      = a_vof.gridIndex();
   const EBISBox&       ebisbox = m_eblg.getEBISL()[a_dit];
   const ProblemDomain& domain  = m_eblg.getDomain();
 

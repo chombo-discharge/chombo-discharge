@@ -279,8 +279,6 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
     pout() << "EBAMRSurfaceDeposition::defineDepositionStencils" << endl;
   }
 
-  constexpr int nComp = 1;
-
   CH_START(t1);
   m_depositionStencils.resize(1 + m_finestLevel);
 
@@ -322,9 +320,7 @@ EBAMRSurfaceDeposition::defineDepositionStencils() noexcept
     for (int mybox = 0; mybox < nbox; mybox++) {
       const DataIndex& din = dit[mybox];
 
-      const Box      box     = dbl[din];
       const EBISBox& ebisBox = ebisl[din];
-      const EBGraph& ebGraph = ebisBox.getEBGraph();
 
       BaseIVFAB<VoFStencil>& stencils = (*m_depositionStencils[lvl])[din];
 

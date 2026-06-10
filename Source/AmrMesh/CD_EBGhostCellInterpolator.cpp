@@ -374,14 +374,12 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
   CH_assert(a_phiFine.nComp() > a_fineVar);
   CH_assert(a_phiCoar.nComp() > a_coarVar);
 
-  const ProblemDomain& fineDomain    = m_eblgFine.getDomain();
   const ProblemDomain& coarDomain    = m_eblgCoFi.getDomain();
   const Box            coarDomainBox = coarDomain.domainBox();
 
   const EBISLayout& fineEBISL = m_eblgFine.getEBISL();
   const EBISLayout& coarEBISL = m_eblgCoFi.getEBISL();
 
-  const EBISBox& fineEBISBox = a_phiFine.getEBISBox();
   const EBISBox& coarEBISBox = a_phiCoar.getEBISBox();
 
   VoFIterator&     vofitCoar = m_coarIrregCells[a_dit];

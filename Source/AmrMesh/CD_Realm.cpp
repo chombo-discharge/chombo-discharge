@@ -522,13 +522,11 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
           const DisjointBoxLayout& gridsFine = m_grids[lvl];
 
           const ProblemDomain& domainCoar = m_domains[lvl - 1];
-          const ProblemDomain& domainFine = m_domains[lvl];
 
           const DataIterator& ditCoar = gridsCoar.dataIterator();
           const DataIterator& ditFine = gridsFine.dataIterator();
 
           const int numBoxesCoar = ditCoar.size();
-          const int numBoxesFine = ditFine.size();
 
           Vector<Box> boxesCoar = gridsCoar.boxArray();
           Vector<Box> boxesFine = gridsFine.boxArray();
@@ -579,8 +577,7 @@ Realm::defineInnerHaloMask(const int /*a_lmin*/)
           // Reset the mask on the coarsened grid
 #pragma omp parallel for schedule(runtime)
           for (int mybox = 0; mybox < numBoxes; mybox++) {
-            const DataIndex& din     = dit[mybox];
-            const Box&       cellBox = boxLayoutCoFi[din];
+            const DataIndex& din = dit[mybox];
 
             FArrayBox& coFiMask = coFiLevelMask[din];
 
@@ -815,7 +812,6 @@ Realm::defineInnerCFMask(const int /*a_lmin*/)
     pout() << "Realm::defineInnerCFMask" << endl;
   }
 
-  const int comp    = 0;
   const int numComp = 1;
 
   // Loop through all masks and do something about the halo masks only.
@@ -1023,8 +1019,6 @@ Realm::defineValidCells()
 #pragma omp parallel for schedule(runtime)
       for (int mybox = 0; mybox < nboxCoar; mybox++) {
         const DataIndex& din = ditCoar[mybox];
-
-        const Box cellBox = dblCoar[din];
 
         BaseFab<bool>&   boolMask = (*m_validCells[lvl])[din];
         const FArrayBox& fabMask  = coarData[din];

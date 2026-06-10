@@ -327,7 +327,6 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
-  const Real dxCoar         = 1.0;
   const Real invFinePerCoar = 1.0 / std::pow(m_refRat, SpaceDim - 1);
 
   const int nbox = ditCoar.size();
@@ -337,8 +336,6 @@ EBReflux::coarsenFluxesCF(LevelData<EBFluxFAB>&       a_coarFluxes,
 
     const Box& coarCellBox = dblCoar[din];
 
-    const EBISBox& coarEBISBox = ebislCoar[din];
-    const EBISBox& fineEBISBox = ebislFine[din];
 
     for (int dir = 0; dir < SpaceDim; dir++) {
 

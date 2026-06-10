@@ -847,11 +847,9 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
   // if m=0 and a_lagged_terms=true, we can increment directly with the precomputed advection-reaction. This means that
   // we can skip the advective advance. The sigma advance is accordingly also skipped.
   const bool skip = (a_m == 0 && a_lagged_terms);
-  const Real t0   = Timer::wallClock();
   if (!skip) {
     CdrPlasmaImExSdcStepper::integrateAdvection(a_dt, a_m, a_lagged_terms);
   }
-  const Real t1 = Timer::wallClock();
 
   // Add in the reaction term and then compute the new operator slopes.
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
@@ -913,7 +911,6 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
                     0.5 * a_dt); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
     }
   }
-  const Real t2 = Timer::wallClock();
 
   // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
   EBAMRIVData&       sigma_m1 = m_sigmaScratch->getSigmaSolver()[a_m + 1];
@@ -924,7 +921,6 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
     DataOps::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
   }
 
-  const Real t3 = Timer::wallClock();
   if (a_lagged_terms) { // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m.
     EBAMRIVData& Fsig_lag = m_sigmaScratch->getFold()[a_m];
     DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
@@ -934,15 +930,6 @@ CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a
     CdrPlasmaImExSdcStepper::quad(scratch, m_sigmaScratch->getFold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5 * a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
-  const Real t4 = Timer::wallClock();
-
-#if 0
-  pout() << "integrateAdvectionReaction::" << endl;
-  pout() << "t1-t0 = " << t1-t0 << endl;
-  pout() << "t2-t1 = " << t2-t2 << endl;
-  pout() << "t3-t2 = " << t3-t2 << endl;
-  pout() << "t4-t3 = " << t4-t3 << endl;
-#endif
 }
 
 void
@@ -1146,7 +1133,6 @@ CdrPlasmaImExSdcStepper::initializeErrors()
   }
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<CdrSolver>&  solver  = solver_it();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     const int                  idx     = solver_it.index();
 
@@ -1176,7 +1162,6 @@ CdrPlasmaImExSdcStepper::finalizeErrors()
 
   m_maxError = 0.0;
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it) {
-    RefCountedPtr<CdrSolver>&  solver  = solver_it();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     const int                  idx     = solver_it.index();
 
@@ -1688,8 +1673,7 @@ CdrPlasmaImExSdcStepper::computeCdrDomainStates(const Vector<EBAMRCellData*>& a_
   Vector<EBAMRCellData*> cdr_gradients;
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it) {
-    const RefCountedPtr<CdrSolver>& solver  = solver_it();
-    RefCountedPtr<CdrStorage>&      storage = this->getCdrStorage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solver_it);
 
     domain_states.push_back(&(storage->getDomainState()));
     domain_gradients.push_back(&(storage->getDomainGrad()));

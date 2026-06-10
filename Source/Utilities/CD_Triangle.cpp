@@ -55,10 +55,6 @@ Triangle::projectToTrianglePlane(const Vec3& a_point) const noexcept
 bool
 Triangle::isInside(const Vec3& a_point) const noexcept
 {
-  auto sgn = [](const Real x) -> int {
-    return (x >= 0.0) ? 1 : -1;
-  };
-
   const Vec3 A = m_vertexPositions[0] - a_point;
   const Vec3 B = m_vertexPositions[1] - a_point;
   const Vec3 C = m_vertexPositions[2] - a_point;

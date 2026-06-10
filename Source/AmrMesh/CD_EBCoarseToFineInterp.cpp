@@ -361,7 +361,6 @@ EBCoarseToFineInterp::interpolateConservativePWC(EBCellFAB&       a_fineData,
   const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
 
   const Box fineBox = dblFine[a_dit];
-  const Box coarBox = dblCoar[a_dit];
 
   const BaseIVFAB<Real>& volumeFactor = m_volumeWeights[a_dit];
 

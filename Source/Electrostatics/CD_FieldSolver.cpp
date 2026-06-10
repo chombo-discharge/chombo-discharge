@@ -308,9 +308,8 @@ FieldSolver::computeEnergy(const MFAMRCellData& a_electricField)
     Real energy = 0.0;
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-      const Real               dx     = m_amr->getDx()[lvl];
-      const RealVect           probLo = m_amr->getProbLo();
-      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const Real               dx  = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, a_phase)[lvl];
       const DataIterator&      dit    = dbl.dataIterator();
       const Real               dV     = std::pow(dx, SpaceDim);
@@ -1573,7 +1572,6 @@ FieldSolver::writeMultifluidData(LevelData<EBCellFAB>&    a_output,
         auto kernel = [&](const IntVect& iv) -> void {
           const bool coveredGas = ebisBoxGas.isCovered(iv);
           const bool irregGas   = ebisBoxGas.isIrregular(iv);
-          const bool regularGas = ebisBoxGas.isRegular(iv);
 
           const bool coveredSolid = ebisBoxSolid.isCovered(iv);
           const bool irregSolid   = ebisBoxSolid.isIrregular(iv);

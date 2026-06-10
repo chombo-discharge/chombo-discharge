@@ -281,9 +281,8 @@ CellCentroidInterpolation::interpolate(LevelData<BaseIVFAB<Real>>& a_centroidDat
   CH_assert(a_cellData.disjointBoxLayout() == m_eblg.getDBL());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
   const DataIterator&      dit    = dbl.dataIterator();
 
   const int nbox = dit.size();
@@ -309,9 +308,8 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>&       a_centroidDat
   CH_assert(a_cellData.disjointBoxLayout() == m_eblg.getDBL());
   CH_assert(a_centroidData.nComp() == a_cellData.nComp());
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
   const DataIterator&      dit    = dbl.dataIterator();
 
   const int nbox = dit.size();
@@ -335,9 +333,8 @@ CellCentroidInterpolation::interpolate(LevelData<EBCellFAB>& a_data) const noexc
   CH_assert(a_data.isDefined());
   CH_assert(a_data.disjointBoxLayout() == m_eblg.getDBL());
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
   const DataIterator&      dit    = dbl.dataIterator();
 
   const int nbox = dit.size();

@@ -465,7 +465,6 @@ MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFC
       };
 
       const bool isCovered = ebisbox.isAllCovered();
-      const bool isRegular = ebisbox.isAllRegular();
       if (!isCovered) {
         VoFIterator vofit(ebisbox.getIrregIVS(cellBox), ebgraph);
 

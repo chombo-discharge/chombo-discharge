@@ -153,7 +153,6 @@ EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex& a_vof,
   }
   else {
     const int            isign   = (a_side == Side::Lo) ? -1 : 1;
-    const IntVect        iv      = a_vof.gridIndex();
     const EBISBox&       ebisbox = m_eblg.getEBISL()[a_dit];
     const ProblemDomain& domain  = m_eblg.getDomain();
 

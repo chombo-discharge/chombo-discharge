@@ -51,10 +51,9 @@ EBNonConservativeDivergence::define(const EBLevelGrid& a_eblg, const int a_radiu
 
   m_eblg = a_eblg;
 
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-  const DataIterator&      dit    = dbl.dataIterator();
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DataIterator&      dit   = dbl.dataIterator();
 
   m_vofIterator.define(dbl);
   m_stencils.define(dbl);

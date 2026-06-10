@@ -2442,7 +2442,6 @@ ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit)
 
     // Create the particle interpolator.
     const EBCellFAB& Dcoef = (*m_diffusionFunction[a_lvl])[a_dit];
-    const RealVect   dx    = m_amr->getDx()[a_lvl] * RealVect::Unit;
 
     const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
@@ -3181,8 +3180,6 @@ ItoSolver::makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles,
   using Node         = KDNode<PType>;
   using ParticleList = KDNode<PType>::ParticleList;
 
-  const RealVect probLo = m_amr->getProbLo();
-
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   CH_START(t1);
   Real         W = 0.0;
@@ -3258,8 +3255,6 @@ ItoSolver::makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
   using PType        = NonCommParticle<2, 1>;
   using Node         = KDNode<PType>;
   using ParticleList = KDNode<PType>::ParticleList;
-
-  const RealVect probLo = m_amr->getProbLo();
 
   // 1. Make the input list into a vector of particles with a smaller memory footprint.
   CH_START(t1);

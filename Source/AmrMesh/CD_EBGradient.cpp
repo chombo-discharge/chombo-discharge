@@ -569,8 +569,6 @@ EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF,
   const EBISLayout& ebisl     = m_eblg.getEBISL();
   const EBISLayout& ebislFine = m_eblgFine.getEBISL();
 
-  const ProblemDomain& domain = m_eblg.getDomain();
-
   const DataIterator& dit  = dbl.dataIterator();
   const int           nbox = dit.size();
 
@@ -675,8 +673,7 @@ EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_coarMaskInvalid) no
     const Box grownBox     = grow(cellBox, 1) & domain;
     const Box grownBoxFine = refine(grownBox, m_refRat);
 
-    const EBISBox& ebisBox     = ebisl[din];
-    const EBISBox& ebisBoxFine = ebislFine[din];
+    const EBISBox& ebisBox = ebisl[din];
 
     const FArrayBox& coarMaskInvalid = a_coarMaskInvalid[din];
 

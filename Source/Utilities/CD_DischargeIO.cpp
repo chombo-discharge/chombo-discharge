@@ -382,15 +382,6 @@ DischargeIO::writeEBHDF5(const std::string&                   a_filename,
   CH_assert(a_data.size() >= a_numLevels);
   CH_assert(a_refinementRatios.size() >= a_numLevels - 1);
 
-  // Indices for where we store the Chombo stuff. This is for storing the volume fraction, EB boundary area,
-  // face area fractions etc. These things are written AFTER the user input variables.
-  const int numInputVars      = a_data[0]->nComp();
-  const int indexVolFrac      = numInputVars;
-  const int indexBoundaryArea = indexVolFrac + 1;
-  const int indexAreaFrac     = indexBoundaryArea + 1;
-  const int indexNormal       = indexAreaFrac + 2 * SpaceDim;
-  const int indexDist         = indexNormal + SpaceDim;
-
   // Write header.
 #ifdef CH_MPI
   MPI_Barrier(Chombo_MPI::comm);
