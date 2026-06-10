@@ -44,7 +44,7 @@ namespace Physics {
 
       ItoKMCPhotonSpecies(const ItoKMCPhotonSpecies&) = default;
       ItoKMCPhotonSpecies&
-      operator=(const ItoKMCPhotonSpecies&) = default;
+      operator=(const ItoKMCPhotonSpecies&)      = default;
       ItoKMCPhotonSpecies(ItoKMCPhotonSpecies&&) = default;
       ItoKMCPhotonSpecies&
       operator=(ItoKMCPhotonSpecies&&) = default;

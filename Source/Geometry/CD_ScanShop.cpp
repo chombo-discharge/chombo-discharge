@@ -91,10 +91,7 @@ ScanShop::setProfileFileName(std::string a_fileName)
 }
 
 void
-ScanShop::makeDomains(Real          a_dx,
-                      RealVect      a_probLo,
-                      ProblemDomain a_finestDomain,
-                      ProblemDomain a_scanLevel)
+ScanShop::makeDomains(Real a_dx, RealVect a_probLo, ProblemDomain a_finestDomain, ProblemDomain a_scanLevel)
 {
   CH_TIME("ScanShop::makeDomains(Real, RealVect, ProblemDomain, ProblemDomain)");
 

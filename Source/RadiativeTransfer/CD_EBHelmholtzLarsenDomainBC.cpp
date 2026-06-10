@@ -32,10 +32,9 @@ EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpeci
 EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
                                                      const Real                      a_r1,
                                                      const Real                      a_r2)
-  : m_species(a_species),
-    m_r1(a_r1),
-    m_r2(a_r2),
-    m_source([](const RealVect& /*a_position*/) { return 0.0; })
+  : m_species(a_species), m_r1(a_r1), m_r2(a_r2), m_source([](const RealVect& /*a_position*/) {
+      return 0.0;
+    })
 {
   CH_TIME("EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC");
 

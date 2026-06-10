@@ -90,7 +90,7 @@ public:
 
   ParticleContainer(const ParticleContainer&) = delete;
   ParticleContainer&
-  operator=(const ParticleContainer&) = delete;
+  operator=(const ParticleContainer&)    = delete;
   ParticleContainer(ParticleContainer&&) = default;
   ParticleContainer&
   operator=(ParticleContainer&&) = default;

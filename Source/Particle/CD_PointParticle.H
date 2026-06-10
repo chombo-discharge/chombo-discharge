@@ -49,7 +49,7 @@ public:
   PointParticle(const PointParticle&) = default;
   PointParticle&
   operator=(const PointParticle&) = default;
-  PointParticle(PointParticle&&) = default;
+  PointParticle(PointParticle&&)  = default;
   PointParticle&
   operator=(PointParticle&&) = default;
 

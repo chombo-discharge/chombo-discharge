@@ -28,7 +28,7 @@ public:
   RoughSphere(const RoughSphere&) = default;
   RoughSphere&
   operator=(const RoughSphere&) = default;
-  RoughSphere(RoughSphere&&) = default;
+  RoughSphere(RoughSphere&&)    = default;
   RoughSphere&
   operator=(RoughSphere&&) noexcept = default;
 };

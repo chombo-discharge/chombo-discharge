@@ -70,16 +70,16 @@ public:
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
     @param[in] a_ghostPhi     Number of ghost cells in phi (needed for AggStencil)
   */
-  MFHelmholtzJumpBC(Location::Cell       a_dataLocation,
-                    const MFLevelGrid&   a_mflg,
-                    const BcoefPtr&      a_Bcoef,
-                    const AmrMask&       a_validCells,
-                    Real                 a_dx,
-                    int                  a_order,
-                    int                  a_weight,
-                    int                  a_radius,
-                    int                  a_ghostCF,
-                    IntVect              a_ghostPhi);
+  MFHelmholtzJumpBC(Location::Cell     a_dataLocation,
+                    const MFLevelGrid& a_mflg,
+                    const BcoefPtr&    a_Bcoef,
+                    const AmrMask&     a_validCells,
+                    Real               a_dx,
+                    int                a_order,
+                    int                a_weight,
+                    int                a_radius,
+                    int                a_ghostCF,
+                    IntVect            a_ghostPhi);
 
   /**
     @brief Disallowed copy constructor
@@ -160,10 +160,7 @@ public:
     @param[in]    a_dit               Grid index
   */
   virtual void
-  matchBC(BaseIVFAB<Real>& a_jump,
-          const MFCellFAB& a_phi,
-          bool             a_homogeneousPhysBC,
-          const DataIndex& a_dit) const;
+  matchBC(BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, bool a_homogeneousPhysBC, const DataIndex& a_dit) const;
 
   /**
     @brief Get phi on the boundary. 

@@ -66,7 +66,7 @@ namespace Physics {
 
       CdrPlasmaGodunovStepper(const CdrPlasmaGodunovStepper&) = delete;
       CdrPlasmaGodunovStepper&
-      operator=(const CdrPlasmaGodunovStepper&) = delete;
+      operator=(const CdrPlasmaGodunovStepper&)          = delete;
       CdrPlasmaGodunovStepper(CdrPlasmaGodunovStepper&&) = delete;
       CdrPlasmaGodunovStepper&
       operator=(CdrPlasmaGodunovStepper&&) = delete;

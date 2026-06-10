@@ -46,14 +46,14 @@ public:
     @param[in] a_ebGhost       Number of EB ghost cells
     @param[in] a_thrshdVoF     Threshold for GeometryShop
   */
-  ScanShop(const BaseIF&       a_localGeom,
-           int                 a_verbosity,
-           Real                a_dx,
-           RealVect            a_probLo,
-           ProblemDomain       a_finestDomain,
-           ProblemDomain       a_scanLevel,
-           int                 a_ebGhost   = 4,
-           Real                a_thrshdVoF = 1.0e-16);
+  ScanShop(const BaseIF& a_localGeom,
+           int           a_verbosity,
+           Real          a_dx,
+           RealVect      a_probLo,
+           ProblemDomain a_finestDomain,
+           ProblemDomain a_scanLevel,
+           int           a_ebGhost   = 4,
+           Real          a_thrshdVoF = 1.0e-16);
 
   /**
     @brief Destructor (does nothing)
@@ -87,8 +87,8 @@ public:
     @param[in] a_fileName Description
   */
   using GeometryShop::InsideOutside;
-  using GeometryShop::isRegular;
   using GeometryShop::isCovered;
+  using GeometryShop::isRegular;
 
   void
   setProfileFileName(std::string a_fileName);
@@ -227,10 +227,7 @@ protected:
     @param[in] a_scanLevel    Domain where we initiate the load balanced recursion process. 
   */
   void
-  makeDomains(Real          a_dx,
-              RealVect      a_probLo,
-              ProblemDomain a_finestDomain,
-              ProblemDomain a_scanLevel);
+  makeDomains(Real a_dx, RealVect a_probLo, ProblemDomain a_finestDomain, ProblemDomain a_scanLevel);
 
   /**
     @brief Refine levels recursively down to the finest level

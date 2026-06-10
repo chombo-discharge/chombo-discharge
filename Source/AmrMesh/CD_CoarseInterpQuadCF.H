@@ -46,7 +46,7 @@ public:
 
   CoarseInterpQuadCF(const CoarseInterpQuadCF&) = delete;
   CoarseInterpQuadCF&
-  operator=(const CoarseInterpQuadCF&) = delete;
+  operator=(const CoarseInterpQuadCF&)     = delete;
   CoarseInterpQuadCF(CoarseInterpQuadCF&&) = default;
   CoarseInterpQuadCF&
   operator=(CoarseInterpQuadCF&&) noexcept = default;
@@ -78,10 +78,7 @@ public:
     @return Computed first deriv
   */
   virtual Real
-  computeFirstDeriv(const FArrayBox& a_coarPhi,
-                    const IntVect&   a_ivCoar,
-                    int              a_dir,
-                    int              a_coarVar) const noexcept;
+  computeFirstDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, int a_dir, int a_coarVar) const noexcept;
 
   /**
     @brief Compute second-derivative Taylor term in direction a_dir.
@@ -92,10 +89,7 @@ public:
     @return Computed second deriv
   */
   virtual Real
-  computeSecondDeriv(const FArrayBox& a_coarPhi,
-                     const IntVect&   a_ivCoar,
-                     int              a_dir,
-                     int              a_coarVar) const noexcept;
+  computeSecondDeriv(const FArrayBox& a_coarPhi, const IntVect& a_ivCoar, int a_dir, int a_coarVar) const noexcept;
 
   /**
     @brief Compute mixed-derivative Taylor term in directions orthogonal m_ignoreDir.

@@ -49,7 +49,7 @@ namespace Physics {
       CdrStorage(const CdrStorage&) = delete;
       CdrStorage&
       operator=(const CdrStorage&) = delete;
-      CdrStorage(CdrStorage&&) = delete;
+      CdrStorage(CdrStorage&&)     = delete;
       CdrStorage&
       operator=(CdrStorage&&) = delete;
 
@@ -289,7 +289,7 @@ namespace Physics {
       FieldStorage(const FieldStorage&) = delete;
       FieldStorage&
       operator=(const FieldStorage&) = delete;
-      FieldStorage(FieldStorage&&) = delete;
+      FieldStorage(FieldStorage&&)   = delete;
       FieldStorage&
       operator=(FieldStorage&&) = delete;
 
@@ -395,7 +395,7 @@ namespace Physics {
       RtStorage(const RtStorage&) = delete;
       RtStorage&
       operator=(const RtStorage&) = delete;
-      RtStorage(RtStorage&&) = delete;
+      RtStorage(RtStorage&&)      = delete;
       RtStorage&
       operator=(RtStorage&&) = delete;
 
@@ -486,7 +486,7 @@ namespace Physics {
       SigmaStorage(const SigmaStorage&) = delete;
       SigmaStorage&
       operator=(const SigmaStorage&) = delete;
-      SigmaStorage(SigmaStorage&&) = delete;
+      SigmaStorage(SigmaStorage&&)   = delete;
       SigmaStorage&
       operator=(SigmaStorage&&) = delete;
 

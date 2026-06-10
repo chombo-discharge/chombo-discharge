@@ -53,7 +53,7 @@ namespace Physics {
 
       AdvectionDiffusionSpecies(const AdvectionDiffusionSpecies&) = default;
       AdvectionDiffusionSpecies&
-      operator=(const AdvectionDiffusionSpecies&) = default;
+      operator=(const AdvectionDiffusionSpecies&)            = default;
       AdvectionDiffusionSpecies(AdvectionDiffusionSpecies&&) = default;
       AdvectionDiffusionSpecies&
       operator=(AdvectionDiffusionSpecies&&) = default;

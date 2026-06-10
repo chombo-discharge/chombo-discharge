@@ -723,7 +723,12 @@ MeshODESolver<N>::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) n
     pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0, static_cast<int>(N) - 1), false);
+  read<EBCellFAB>(a_handle,
+                  *m_phi[a_level],
+                  m_name,
+                  m_amr->getGrids(m_realm)[a_level],
+                  Interval(0, static_cast<int>(N) - 1),
+                  false);
   read<EBCellFAB>(a_handle,
                   *m_rhs[a_level],
                   m_name + "_src",
