@@ -525,7 +525,7 @@ EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>&
   CH_TIME("EBHelmholtzOp::preCond");
 
   this->assignLocal(a_corr, a_residual);
-  this->scaleLocal(a_corr, m_relCoef);
+  scaleLocal(a_corr, m_relCoef);
 
   this->relax(a_corr, a_residual, m_numSmoothPreCond);
 }

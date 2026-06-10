@@ -244,7 +244,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
 
     // We can have a multigrid level either if the refinement factor to the coarse level is larger than two, or we are at the bottom
     // of the AMR hierarchy.
-    if (amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel].getDomain())) {
+    if (amrLevel == 0 && isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel].getDomain())) {
       m_hasMgLevels[amrLevel] = true;
     }
 
@@ -297,7 +297,7 @@ MFHelmholtzOpFactory::defineMultigridLevels()
         // Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
         // we will terminate the coarsening and let AMRMultiGrid do the bottom solve.
         if (hasCoarser) {
-          if (this->isCoarser(mgMflgCoar.getDomain(), m_bottomDomain)) {
+          if (isCoarser(mgMflgCoar.getDomain(), m_bottomDomain)) {
             hasCoarser = false;
           }
           else {

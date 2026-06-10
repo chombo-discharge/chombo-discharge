@@ -333,7 +333,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         const Real dwr = phiReg(iv + shift, m_comp) - phiReg(iv, m_comp);
 
         if (dwl * dwr > 0.0) {
-          slopesReg(iv, dir) = this->superbee(dwl, dwr);
+          slopesReg(iv, dir) = superbee(dwl, dwr);
         }
         else {
           slopesReg(iv, dir) = 0.0;
@@ -432,7 +432,7 @@ CdrCTU::computeNormalSlopes(EBCellFAB&           a_normalSlopes,
         break;
       }
       case Limiter::Superbee: {
-        a_normalSlopes(vof, dir) = this->superbee(dwl, dwr);
+        a_normalSlopes(vof, dir) = superbee(dwl, dwr);
 
         break;
       }

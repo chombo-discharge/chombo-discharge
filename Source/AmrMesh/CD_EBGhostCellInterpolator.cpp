@@ -315,7 +315,7 @@ EBGhostCellInterpolator::interpolateRegular(FArrayBox&       a_phiFine,
               const bool hasHi = domainCoar.contains(iv + s);
 
               if (hasLo && hasHi) {
-                slopes(iv, 0) = this->superbee(dwl, dwr);
+                slopes(iv, 0) = superbee(dwl, dwr);
               }
               else if (hasLo && !hasHi) {
                 slopes(iv, 0) = dwl;
@@ -447,7 +447,7 @@ EBGhostCellInterpolator::interpolateIrregular(EBCellFAB&       a_phiFine,
         break;
       }
       case EBGhostCellInterpolator::Type::Superbee: {
-        slopes(coarVoF, dir) = this->superbee(dwl, dwr);
+        slopes(coarVoF, dir) = superbee(dwl, dwr);
 
         break;
       }

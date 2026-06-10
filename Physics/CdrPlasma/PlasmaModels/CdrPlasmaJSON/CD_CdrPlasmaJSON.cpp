@@ -602,13 +602,13 @@ CdrPlasmaJSON::initializeNeutralSpecies()
     const Real        speciesFraction = species["molar fraction"].get<Real>() / molarSum;
 
     // Names can not contain the at letter.
-    if (this->containsWildcard(speciesName)) {
+    if (containsWildcard(speciesName)) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(
         baseError + " -- species name must not contain '@' letter");
     }
 
     // Names can not contain parenthesis either
-    if (this->containsBracket(speciesName)) {
+    if (containsBracket(speciesName)) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + speciesName +
                                                                            "' can not contain brackets");
     }
@@ -684,11 +684,11 @@ CdrPlasmaJSON::initializePlasmaSpecies()
     const auto diffusive = species["diffusive"].get<bool>();
 
     // Names do not get to contain wildcards, brackets, or replicate former species names.
-    if (this->containsWildcard(name)) {
+    if (containsWildcard(name)) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + name +
                                                                            "' can not contain the '@' letter");
     }
-    if (this->containsBracket(name)) {
+    if (containsBracket(name)) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but species '" + name +
                                                                            "' can not contain brackets");
     }
@@ -1183,12 +1183,12 @@ CdrPlasmaJSON::initializePhotonSpecies()
     const auto kappa = trim(species["kappa"].get<std::string>());
 
     // Does not get to contain at letter.
-    if (this->containsWildcard(name)) {
+    if (containsWildcard(name)) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but photon species '" + name + "' cannot contain '@'");
 }
 
     // Names can not contain parenthesis either
-    if (this->containsBracket(name)) {
+    if (containsBracket(name)) {
       ChomboDischarge::Physics::CdrPlasma::CdrPlasmaJSON::throwParserError(baseError + "but photon species '" + name + "' can not contain brackets");
 }
 
@@ -2489,7 +2489,7 @@ CdrPlasmaJSON::parsePlasmaReactions()
       // Go through the right-hand side of the reaction and ignore any species that are bracketed.
       std::vector<std::string> trimmedProducts;
       for (const auto& p : curProducts) {
-        if (!(this->isBracketed(p))) {
+        if (!(isBracketed(p))) {
           trimmedProducts.emplace_back(p);
         }
       }
@@ -2548,7 +2548,7 @@ CdrPlasmaJSON::parseReactionWildcards(const std::vector<std::string>& a_reactant
 
   // Check if reaction string had a wildcard '@'. If it did we replace the wildcard with the corresponding species. This means that we need to
   // build additional reactions.
-  const bool containsWildcard = this->containsWildcard(reaction);
+  const bool containsWildcard = CdrPlasmaJSON::containsWildcard(reaction);
 
   if (containsWildcard) {
     if (!(a_R.contains("@"))) {
@@ -2565,7 +2565,7 @@ CdrPlasmaJSON::parseReactionWildcards(const std::vector<std::string>& a_reactant
 
       // Replace by wildcard in reactants.
       for (const auto& r : a_reactants) {
-        if (this->containsWildcard(r)) {
+        if (CdrPlasmaJSON::containsWildcard(r)) {
           curReactants.emplace_back(w);
         }
         else {
@@ -2575,7 +2575,7 @@ CdrPlasmaJSON::parseReactionWildcards(const std::vector<std::string>& a_reactant
 
       // Replace by wildcard in reactants.
       for (const auto& p : a_products) {
-        if (this->containsWildcard(p)) {
+        if (CdrPlasmaJSON::containsWildcard(p)) {
           curProducts.emplace_back(w);
         }
         else {
@@ -3286,7 +3286,7 @@ CdrPlasmaJSON::parsePlasmaReactionDescription(const int a_reactionIndex, const j
   }
 
   // If the reaction string contained a wildcard, we append the description with the wildcard name.
-  if (this->containsWildcard(reactionString)) {
+  if (containsWildcard(reactionString)) {
     description = description + " " + a_wildcard;
   }
 
@@ -3479,7 +3479,7 @@ CdrPlasmaJSON::parsePhotoReactions()
     // Ignore products on the right-hand side that are bracketed.
     std::vector<std::string> trimmedProducts;
     for (const auto& p : products) {
-      if (!(this->isBracketed(p))) {
+      if (!(isBracketed(p))) {
         trimmedProducts.emplace_back(p);
       }
     }
