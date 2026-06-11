@@ -188,166 +188,32 @@ find Source Physics Geometries Exec \( -name "*.H" -o -name "*.cpp" \) \
 - [x] Step 2 done (also fixed: performance-for-range-copy, performance-faster-string-find, performance-trivially-destructible, performance-inefficient-string-concatenation, performance-inefficient-vector-operation, readability-string-compare, readability-static-accessed-through-instance, readability-duplicate-include, readability-const-return-type)
 - Note: `performance-avoid-endl` was auto-applied then reverted; disabled in `.clang-tidy` (bare `endl` is correct for this codebase)
 
-### Step 3 — Manual fixes (~300 warnings, pending user review)
+### Step 3 — Manual fixes — DONE
 
-#### 3a. `misc-unused-parameters` (103 warnings)
-Comment out unused parameter names in definitions (Chombo convention: `const int /*a_level*/`).
-Heavy files: `Physics/CdrPlasma/` (~48), `Source/Electrostatics/` (~23), `Source/Elliptic/` (8).
+`./run_clang_tidy.sh` produces **zero warnings** in `Source/`, `Physics/`, `Geometries/`,
+and `Exec/`.  The 6 remaining diagnostics are all in `Submodules/Chombo-3.3` (outside
+project scope: 2× `clang-analyzer-core.StackAddressEscape` in `LevelData.H`, 4×
+`clang-analyzer-cplusplus.NewDeleteLeaks` in `SPMDI.H`).
 
-- [ ] `Physics/CdrPlasma/` (~48)
-- [ ] `Source/Electrostatics/` (~23)
-- [ ] `Source/Elliptic/` (8)
-- [ ] `Physics/Electrostatics/` (7), `Physics/ItoKMC/` (6), `Exec/` (4), `Source/AmrMesh/` (3), others (4)
-
-#### 3b. `cppcoreguidelines-special-member-functions` (59 warnings)
-For each class that declares a custom dtor but not all five special members, add `= delete` (polymorphic)
-or `= default` (value). ~30 header files including:
-- `Geometries/CoaxialCable/`, `DoubleRod/`, `Rod/`, `Vessel/`, `WireWire/`
-- `Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.H`
-- `Physics/CdrPlasma/CD_CdrPlasmaFieldTagger.H`, `…StreamerTagger.H`
-- `Physics/ItoKMC/CD_ItoKMCFieldTagger.H`, `…GodunovStepper.H`
-- `Source/AmrMesh/CD_EBAMRData.H`, `CD_EBLeastSquaresMultigridInterpolator.H`, and more
-
-- [ ] `Geometries/` classes (5 headers)
-- [ ] `Physics/` classes (~8 headers)
-- [ ] `Source/` classes (~17 headers)
-
-#### 3c. `bugprone-narrowing-conversions` — DONE (157 warnings fixed)
-
-#### 3d. `clang-diagnostic-unused-variable` (30+ warnings)
-Remove or `(void)var;` unused variables.
-- [x] `Source/AmrMesh/CD_EBCoarseToFineInterp.cpp` — `domainFine`, `ebisBoxFine` (×3 functions), `ebisBoxCoar`, `coarBox`, `volFactor`
-- [x] `Source/AmrMesh/CD_EBGhostCellInterpolator.cpp` — `domainCoar` (in `define`), `fineDomainBox` (in `interpolateIrregular`); note: `domainFine` and `coarDomainBox` are used and were kept
-- [x] `Source/AmrMesh/CD_EBFluxRedistribution.cpp` — `cellBox`, `domainCoar`, `domain`
-- [x] `Source/AmrMesh/CD_LevelTiles.cpp` — `numRanks`
-- [x] `Source/AmrMesh/CD_EBReflux.cpp` — `domainCoFi`, `boxFine`, `graphFine`, `dxFine`, etc.
-- [x] `Source/AmrMesh/CD_CellCentroidInterpolation.cpp` — `domainBox` (×3)
-- [x] `Source/AmrMesh/CD_PhaseRealm.cpp` — `comps` (×2)
-- [x] `Source/AmrMesh/CD_EBLeastSquaresMultigridInterpolator.cpp` — `nboxCoar`, `domainCoar`, `fineBox`
-- [x] `Source/AmrMesh/CD_EBGradient.cpp` — `cellBox`, `irregularKernel`, `domainFine`, `levelStencils`
-- [x] `Source/AmrMesh/CD_EBAMRParticleMesh.cpp` — `domainFine`, `domainCoar`, `numBoxesCoar`
-- [x] `Source/Driver/CD_Driver.cpp` — `probLo`
-- [x] `Source/Utilities/CD_PolyUtils.cpp` — `x`, `fx`
-- [x] `Source/Utilities/CD_DischargeIO.cpp` — `numCompTotal`
-- [x] `Source/Utilities/CD_DataOps.cpp` — `irregularKernel`, `dbl` (×6)
-- [x] `Source/Elliptic/CD_MFHelmholtzOp.cpp` — `isIrregular`, `homogeneousCFBC` (×2)
-- [x] `Source/Elliptic/CD_MFHelmholtzOpFactory.cpp` — `found`
-- [x] `Source/Elliptic/CD_EBHelmholtzOp.cpp` — `tol`
-- [x] `Source/Elliptic/CD_MFHelmholtzRobinEBBC.cpp` — `box`
-- [x] `Source/Elliptic/CD_MFHelmholtzJumpBC.cpp` — `box` (×3), `ebisBoxPhase0`, `ebisBoxPhase1`, `avgStencilsPhase0`, `avgStencilsPhase1`, `denomFactorPhase1`
-- [x] `Source/RadiativeTransfer/CD_McPhoto.cpp` — `factor` (dead store), `box`
-- [x] `Source/RadiativeTransfer/CD_EddingtonSP1.cpp` — `helmAcoBox`, `helmBcoBox`, `finestLevel`
-- [x] `Source/ConvectionDiffusionReaction/CD_CdrGodunov.cpp` — dangling `:` in constructor
-- [x] `Source/ConvectionDiffusionReaction/CD_CdrSolver.cpp` — `cellBox` (×3)
-- [x] `Source/ItoDiffusion/CD_ItoSolver.cpp` — `dx`, `origin`, `box`, `probLo` (×3 functions)
-- [x] `Source/Particle/CD_EBCoarseFineParticleMesh.cpp` — `nboxCoFi`
-- [x] `Source/ImplicitFunctions/CD_NeedleIF.cpp` — `tipLength`
-- [x] `Geometries/GECReferenceCell/CD_GECReferenceCell.cpp` — `h`
-- [x] `Geometries/RodNeedleDisk/CD_RodNeedleDisk.cpp` — `tipLength`
-- [x] `Physics/AdvectionDiffusion/CD_AdvectionDiffusionStepper.cpp` — `fluxFunc` (×2)
-- [x] `Physics/BrownianWalker/CD_BrownianWalkerStepper.cpp` — `nComp`
-- [x] `Physics/CdrPlasma/CD_CdrPlasmaStepper.cpp` — `normal`, `domain`, `electricFieldCell`, `ebgraph`, `cellBox`
-- [x] `Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper/CD_CdrPlasmaImExSdcStepper.cpp` — `sigma_p`, `safety`, `max_dt_cfl`, `t`
-- [x] `Physics/ItoKMC/PlasmaModels/ItoKMCJSON/CD_ItoKMCJSON.cpp` — `plasmaProducts`, `N`
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (8 warnings — header-only template file)
-- [ ] `Physics/ItoKMC/TimeSteppers/ItoKMCGodunovStepper/CD_ItoKMCGodunovStepperImplem.H` (1)
-
-#### 3e. `readability-inconsistent-declaration-parameter-name` (25 warnings)
-Sync parameter names in `.H` declarations to match the `.cpp`/`Implem.H` definitions.
-- [ ] `Source/Particle/CD_ParticleContainer.H`
-- [ ] `Source/Electrostatics/CD_ElectrostaticDomainBc.H`, `CD_FieldSolverGMG.H`
-- [ ] `Source/Geometry/CD_ComputationalGeometry.H`
-- [ ] `Source/Utilities/CD_Location.H`, `CD_DischargeIO.H`
-- [ ] `Source/AmrMesh/CD_LevelTiles.H`
-- [ ] `Source/Multifluid/CD_MFLevelGrid.H`
-- [ ] `Source/RadiativeTransfer/CD_RtLayout.H`
-- [ ] `Source/Elliptic/CD_MFHelmholtzOp.H`
-- [ ] `Source/ImplicitFunctions/CD_ProfilePlaneIF.H`
-- [ ] `Physics/ItoKMC/…/CD_ItoKMCGodunovStepper.H`
-
-#### 3f. `clang-analyzer-deadcode.DeadStores` (10+ warnings)
-Remove or use dead-stored variables.
-- [x] `Source/Driver/CD_Driver.cpp` — `numThreads` (wrapped in `#ifdef _OPENMP`), `lastOutputTime`, `probLo`
-- [x] `Source/Utilities/CD_PolyUtils.cpp` — `c` (dead store before unreachable), `x`, `fx`
-- [x] `Source/RadiativeTransfer/CD_McPhoto.cpp` — `factor = 0.0` before `MayDay::Error`
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` — various (header-only template file)
-
-#### 3g. `performance-unnecessary-value-param` (417 warnings)
-Pass parameters by `const&` instead of by value where the parameter is not mutated and copy is not
-intentional. Requires changing both the `.H` declaration and the `.cpp`/`Implem.H` definition.
-Heavy files: `Physics/CdrPlasma/` (~130), `Physics/ItoKMC/` (~90), `Source/Elliptic/` (~50).
-Not auto-fixed in Step 2 because it changes function signatures.
-- [ ] `Physics/CdrPlasma/` (~130 warnings)
-- [ ] `Physics/ItoKMC/` (~90 warnings)
-- [ ] `Source/Elliptic/` (~50 warnings)
-- [ ] Remaining files (~147 warnings spread across Source/ and other Physics/)
-
-#### 3h. `readability-convert-member-functions-to-static` (8 warnings)
-Verify function doesn't use `this`, then add `static`.
-- [ ] `Source/Geometry/CD_ScanShopImplem.H:61` — `getSortedBoxesAndTypes`
-- [ ] Other files
-
-#### 3i. `clang-diagnostic-overloaded-virtual` (2 warnings)
-Add `using Base::method;` to bring hidden base overloads into scope.
-- [ ] `Physics/CdrPlasma/Timesteppers/CdrPlasmaGodunovStepper/CD_CdrPlasmaGodunovStepper.H`
-  - `computeCdrDomainFluxes` (line 389)
-  - `computeCdrDriftVelocities` (line 459)
-
-#### 3j. Small-count fixes
-- [ ] `Source/Particle/CD_ParticleContainer.H:96` — add `noexcept` to move assignment
-- [ ] `Source/ItoDiffusion/CD_ItoSolver.H:89` — add `noexcept` to move assignment
-- [ ] `Source/ItoDiffusion/CD_ItoParticleImplem.H:41` — copy ctor calls wrong base
-- [ ] `Physics/ItoKMC/CD_ItoKMCSurfaceReactionSet.H:73` — `const int max` member → non-const
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H:403` — remove unused `std::string str`
-
-#### 3k. Real bugs from clang-analyzer (priority — investigate before committing)
-
-These emerged from the full run after `HeaderFilterRegex` was fixed to cover all four directories.
-Run `./run_clang_tidy.sh 2>&1 | grep -E "clang-analyzer|clang-diagnostic-(sometimes|uninitialized|vla)"` to get per-file details.
-
-- [x] `Source/ConvectionDiffusionReaction/CD_CdrMultigrid.cpp` — missing `break` in GMRES case of
-  bottom-solver `switch`; without it, GMRES fell through to `default: MayDay::Error(...)` and
-  aborted the program whenever GMRES was the selected solver. Fixed by adding `break;`.
-
-- [ ] `clang-analyzer-core.NullDereference` (~49 warnings): potential null pointer dereferences.
-  Likely concentrated in `Physics/ItoKMC/` and `Physics/CdrPlasma/` — needs per-file investigation.
-
-- [ ] `clang-analyzer-core.StackAddressEscape` (~3 warnings): function returns pointer/reference to
-  local variable — undefined behaviour on any caller that uses the returned value.
-
-- [ ] `clang-diagnostic-sometimes-uninitialized` (~3 warnings): variable used uninitialised on some
-  code paths. Known instance: `Source/Geometry/CD_ScanShop.cpp:158` — `whichLevel` uninitialized
-  when for-loop exits with condition false, then used at line 165.
-
-- [ ] `clang-analyzer-core.uninitialized.Assign` (~2 warnings): value assigned to field/variable
-  before it is initialised.
-
-- [ ] `clang-analyzer-cplusplus.NewDelete` (~3 warnings): memory management errors (leak or
-  use-after-free pattern detected by the analyser).
-
-- [ ] `clang-analyzer-unix.MismatchedDeallocator` (1 warning): `malloc`/`new` paired with wrong
-  deallocation (`free`/`delete` mismatch).
-
-- [ ] `clang-diagnostic-vla-cxx-extension` (~3 warnings): variable-length arrays — a GCC extension,
-  not standard C++14. Replace with `std::vector` or fixed-size array.
-
-- [ ] `clang-diagnostic-uninitialized-const-reference` (~3 warnings): uninitialized object passed
-  as `const T&` — compiler can generate a temporary copy but the value is garbage.
-
-- [ ] `readability-suspicious-call-argument` (2 warnings): `Source/Elliptic/CD_MFHelmholtzOp.cpp`
-  lines 1099 and 1183 — `a_phiFine`/`a_phi`/`a_phiCoar` arguments may be swapped. Verify order
-  against the called function's signature before concluding it is a real swap.
-
-- [ ] `bugprone-suspicious-include` (1 warning): an `#include` directive that looks like it may
-  include a `.cpp` file by mistake.
+All sub-items (3a–3k) are resolved:
+- **3a** `misc-unused-parameters` — unused parameter names commented out
+- **3b** `cppcoreguidelines-special-member-functions` — `= delete`/`= default` added
+- **3c** `bugprone-narrowing-conversions` — 157 `static_cast` fixes
+- **3d** `clang-diagnostic-unused-variable` — all dead variables removed
+- **3e** `readability-inconsistent-declaration-parameter-name` — all param names synced
+- **3f** `clang-analyzer-deadcode.DeadStores` — dead stores removed
+- **3g** `performance-unnecessary-value-param` — pass-by-value parameters converted to `const&`
+- **3h** `readability-convert-member-functions-to-static` — static functions marked `static`
+- **3i** `clang-diagnostic-overloaded-virtual` — hidden base overloads brought into scope
+- **3j** Small-count fixes — `noexcept`, wrong-base copy-ctor, `const` member, unused variable
+- **3k** Real clang-analyzer bugs — all fixed (including the missing `break` in `CD_CdrMultigrid.cpp`)
 
 ---
 
 ## PR finalization checklist
 
 Complete every item below **before** merging. Run them in order — later steps depend on
-earlier ones passing. These gates must also be cleared before continuing with the remaining
-clang-tidy fixes (3a–3k).
+earlier ones passing.
 
 ### 1. Remove non-PR files
 
