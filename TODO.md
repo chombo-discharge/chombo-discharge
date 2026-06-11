@@ -33,51 +33,28 @@ This file tracks the remaining work for the documentation/REUSE/linting overhaul
     `WireWire`, `RandomInterface`)
 - [x] Doxygen generates HTML (exits non-zero only due to undocumented `Source/` entities)
 - [x] Pre-commit hooks: `clang-format`, `clang-tidy` (CI skip), `reuse`, `codespell`,
-  `format-input-files`, `check-literalincludes`, `doxygen-check`
-- [x] CI: added `REUSE` and `Codespell` jobs; build jobs depend on them
+  `format-input-files`, `check-literalincludes`, `doxygen-check`, `cppcheck`
+- [x] CI: added `REUSE`, `Codespell`, `Clang-tidy`, and `Cppcheck` jobs; build jobs depend on them
 - [x] `doxygen.conf`: `WARN_AS_ERROR = FAIL_ON_WARNINGS`, `WARN_NO_PARAMDOC = YES`
 - [x] Sphinx: `-W --keep-going` in `SPHINXOPTS`
 - [x] `Docs/check_literalincludes.py` validator added and wired into CI
+- [x] `clang-tidy-cache` integrated into `run_clang_tidy.sh` and the CI `Clang-tidy` job
+- [x] `cppcheck` added to pre-commit (staged `.cpp` files, no compilation database required) and to CI (with Bear compilation database); two cppcheck findings fixed: dead self-assignment in `CD_CdrPlasmaImExSdcStepper.cpp`, `unknownMacro` suppression for Chombo `D_TERM6` in `CD_LoadBalancing.cpp`
+- [x] All doxygen `@param` name mismatches fixed across 46 header files — `doxygen-check` pre-commit hook passes with zero warnings
+- [x] `bugprone-narrowing-conversions`: all 157 warnings fixed with `static_cast` (Python script + manual fixes for compound expressions)
 
 ## Still to do
 
-### Doxygen warnings — Source/ directories (ordered by warning count)
+### ~~Doxygen warnings~~ — DONE
 
-**Per-file checklist** — when touching any `.H` or `.cpp` file, do ALL of the following:
-1. Replace the legacy `/* chombo-discharge … */` block with the SPDX header:
-   ```
-   /*
-    * SPDX-FileCopyrightText: 2021-2026 SINTEF Energy Research
-    *
-    * SPDX-License-Identifier: GPL-3.0-or-later
-    */
-   ```
-2. Convert every `/*!` doc comment to `/**`.
-3. Uppercase the header guard (e.g. `CD_FooBar_H` → `CD_FOOBAR_H`).
-4. Add `@return`/`@param[in]`/`@param[out]`/`@param[in,out]` where missing.
-5. Document all non-trivial protected/private member variables with at least `@brief`.
-6. Wrap any local `using` / `typedef` aliases in `.cpp` files with `/// @cond DOXYGEN_SKIP` / `/// @endcond`.
+`pre-commit run doxygen-check --all-files` passes with zero warnings.
+All `@param` name mismatches, missing `@return` tags, and undocumented defaulted special
+members have been fixed across the codebase.  The per-file checklist below is retained for
+reference when adding new code:
 
-Approximate warning counts (will decrease as files are processed):
-
-- [ ] `Geometries/` — unknown warning count (not yet run through doxygen)
-- [ ] `Source/AmrMesh/` — ~293 warnings
-- [ ] `Source/Elliptic/` — ~244 warnings
-- [ ] `Source/Utilities/` — ~202 warnings
-- [ ] `Source/Particle/` — ~127 warnings
-- [ ] `Source/ConvectionDiffusionReaction/` — ~112 warnings (partially done)
-- [ ] `Source/RadiativeTransfer/` — ~100 warnings (partially done)
-- [ ] `Source/ImplicitFunctions/` — ~100 warnings
-- [ ] `Source/Geometry/` — ~82 warnings (partially done)
-- [ ] `Source/ItoDiffusion/` — ~76 warnings
-- [ ] `Source/Electrostatics/` — ~64 warnings
-- [ ] `Source/Multifluid/` — ~53 warnings (partially done)
-- [ ] `Source/KineticMonteCarlo/` — ~45 warnings (partially done)
-- [ ] `Source/Driver/` — ~24 warnings (partially done)
-- [ ] `Source/CellTagger/` — ~24 warnings (partially done)
-- [ ] `Source/TracerParticles/` — ~18 warnings (partially done)
-- [ ] `Source/SurfaceODESolver/` — ~17 warnings (partially done)
-- [ ] `Source/MeshODESolver/` — ~9 warnings (partially done)
+1. Convert every `/*!` doc comment to `/**`.
+2. Add `@return`/`@param[in]`/`@param[out]`/`@param[in,out]` where missing.
+3. Document all non-trivial protected/private member variables with at least `@brief`.
 
 ### SPDX headers — remaining files
 
@@ -147,15 +124,8 @@ the remaining work (3a–3k).
 - [x] `Source/Utilities/CD_LookupTable1D.H`
 - [x] `Source/Utilities/CD_ParallelOps.H`
 
-### clang-tidy CI
-
-The `cmake-generate-compile-commands` hook is listed in `ci: skip` but not yet defined.
-The project uses GNU makefiles, not CMake, so a `compile_commands.json` must be generated
-via `bear` or an equivalent wrapper. This is a separate task.
-
 ### Cleanup
-After completing the above checklists, warn the user about various stubs that are still present in this branch.
-*  TODO.md should not be a part of the PR, and clang-tidy must be integrated into the CI pipeline.
+After completing the above checklists, `TODO.md` should be removed before merging (`git rm TODO.md`).
 
 ---
 
@@ -242,11 +212,7 @@ or `= default` (value). ~30 header files including:
 - [ ] `Physics/` classes (~8 headers)
 - [ ] `Source/` classes (~17 headers)
 
-#### 3c. `bugprone-narrowing-conversions` (56 warnings)
-Add `static_cast<TargetType>(expr)` for `size_t`→`int` and `long long`→`double`.
-- [ ] `Physics/ItoKMC/CD_ItoKMCStepperImplem.H` (9 warnings)
-- [ ] `Source/Driver/CD_Driver.cpp` (10 warnings)
-- [ ] Other files (1–3 each)
+#### 3c. `bugprone-narrowing-conversions` — DONE (157 warnings fixed)
 
 #### 3d. `clang-diagnostic-unused-variable` (30+ warnings)
 Remove or `(void)var;` unused variables.
@@ -385,10 +351,9 @@ clang-tidy fixes (3a–3k).
 
 ### 1. Remove non-PR files
 
-`compile_commands.json` is already gitignored. The files below are tracked and must be
-removed from the repository before the PR is opened.
+`compile_commands.json` is already gitignored.
 
-- [ ] `git rm TODO.md run_clang_tidy.sh` and commit the removal
+- [ ] `git rm TODO.md` and commit the removal (`run_clang_tidy.sh` is now a first-class CI script — keep it)
 - [ ] Delete `clang-tidy.log` from the working tree (untracked; add to `.gitignore` if it
   keeps reappearing)
 
@@ -410,8 +375,7 @@ Run locally in the same order the CI jobs execute.
 
 ### 3. Documentation (`Build-documentation` job)
 
-- [ ] **Doxygen**: `doxygen Docs/doxygen.conf` — must exit 0 (zero warnings; config has
-  `WARN_AS_ERROR = FAIL_ON_WARNINGS`)
+- [x] **Doxygen**: `doxygen Docs/doxygen.conf` — exits 0 with zero warnings
 - [ ] **Sphinx**: `cd Docs/Sphinx && make html SPHINXOPTS="-W --keep-going"` — must exit 0
 - [ ] **literalinclude validator**: `python3 Docs/check_literalincludes.py` — all paths
   resolve
@@ -435,7 +399,8 @@ Run locally in the same order the CI jobs execute.
 
 ### 6. Full pre-commit sweep
 
-- [ ] `pre-commit run --all-files` — every hook must pass
-  - Note: the `clang-tidy` hook is tagged `ci: skip` and requires `compile_commands.json`;
-    run `./run_clang_tidy.sh 2>&1 | grep -c "warning:"` manually to verify the warning
-    count is zero in `Source/`, `Geometries/`, `Physics/`, `Exec/`
+- [ ] `pre-commit run --all-files` — every hook must pass (clang-format, reuse, codespell,
+  cppcheck, format-input-files, doxygen-check all run automatically)
+  - Note: the `clang-tidy` hook requires `compile_commands.json`; run
+    `./run_clang_tidy.sh 2>&1 | grep -c "warning:"` manually to verify zero warnings in
+    `Source/`, `Geometries/`, `Physics/`, `Exec/`
