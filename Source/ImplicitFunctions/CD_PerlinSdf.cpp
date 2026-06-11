@@ -203,7 +203,16 @@ PerlinSdf::grad(const int hash, const double x, const double y, const double /*z
 {
   const int    h = hash & 15;
   const double u = h < 8 ? x : y;
-  const double v = h < 4 ? y : h == 12 || h == 14 ? x : y;
+  double       v;
+  if (h < 4) {
+    v = y;
+  }
+  else if (h == 12 || h == 14) {
+    v = x;
+  }
+  else {
+    v = y;
+  }
   return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 
