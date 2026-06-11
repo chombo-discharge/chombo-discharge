@@ -467,7 +467,7 @@ Driver::gridReport()
   Vector<long long> validLevelCells;
 
   // Total number of grid points for a Cartesian grid covering entire finest domain. Used for "grid sparsity".
-  const long long uniformPoints = static_cast<long long>((domains[finestLevel].domainBox()).numPts());
+  const auto uniformPoints = static_cast<long long>((domains[finestLevel].domainBox()).numPts());
 
   // Some stuff
   const ProblemDomain coarsest_domain = m_amr->getDomains()[0];

@@ -1055,7 +1055,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-          const size_t num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
+          const auto num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1085,7 +1085,7 @@ McPhoto::generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
 
         if (validCells(iv, 0)) {
 
-          const size_t num = static_cast<size_t>(numPhysPhotons(vof, 0));
+          const auto num = static_cast<size_t>(numPhysPhotons(vof, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1167,7 +1167,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
       auto regularKernel = [&](const IntVect& iv) -> void {
         if (ebisbox.isRegular(iv) && validCells(iv, 0)) {
 
-          const size_t num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
+          const auto num = static_cast<size_t>(numPhysPhotonsReg(iv, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,
@@ -1198,7 +1198,7 @@ McPhoto::dirtySamplePhotons(ParticleContainer<PointParticle>& a_photons,
 
         if (validCells(iv, 0)) {
 
-          const size_t num = static_cast<size_t>(numPhysPhotons(vof, 0));
+          const auto num = static_cast<size_t>(numPhysPhotons(vof, 0));
 
           if (num > 0) {
             const std::vector<size_t> photonWeights = ParticleManagement::partitionParticleWeights(num,

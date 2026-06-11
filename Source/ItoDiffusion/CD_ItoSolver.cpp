@@ -3390,7 +3390,7 @@ ItoSolver::reinitializeParticles(List<ItoParticle>& a_particles,
   a_particles.clear();
 
   for (const auto& wt : weights) {
-    const double   w = static_cast<double>(wt);
+    const auto w = static_cast<double>(wt);
     const RealVect x = Random::randomPosition(cellPos, validLo, validHi, bndryCentroid, bndryNormal, dx, kappa);
 
     a_particles.add(ItoParticle(w, x, RealVect::Zero, 0.0, 0.0, averageEnergy));

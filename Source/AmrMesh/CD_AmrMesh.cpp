@@ -1149,8 +1149,7 @@ AmrMesh::buildGrids(const Vector<IntVectSet>& a_tags, const int a_lmin, const in
   // baseLevel is the coarsest level which does not change. topLevel is the finest level where we have tags. We should never
   // have tags on max_amr_depth, and we make that restriction here.
   const int baseLevel = std::max(0, a_lmin - 1);
-  const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? static_cast<int>(m_finestLevel) - 1
-                                                         : static_cast<int>(a_tags.size()) - 1;
+  const int topLevel  = (m_finestLevel == m_maxAmrDepth) ? m_finestLevel - 1 : static_cast<int>(a_tags.size()) - 1;
 
   // New and old grid boxes
   Vector<Vector<Box>> newBoxes(1 + topLevel);
