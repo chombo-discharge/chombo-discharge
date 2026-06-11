@@ -124,8 +124,8 @@ namespace Physics {
         @brief Write plot data to output holder (no-op).
         @param[in,out] a_output       Output data holder.
         @param[in,out] a_icomp        Starting component in a_output.
-        @param[in]    a_realm        Output realm name.
-        @param[in]    a_level        Grid level.
+        @param[in]     a_outputRealm  Output realm name.
+        @param[in]     a_level        Grid level.
       */
       virtual void
       writePlotData(LevelData<EBCellFAB>& a_output,

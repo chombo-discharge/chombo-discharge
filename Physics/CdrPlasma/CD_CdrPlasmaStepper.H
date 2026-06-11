@@ -285,9 +285,9 @@ namespace Physics {
                            const EBAMRCellData&     a_electricFieldCell) const;
 
       /**
-         @brief Compute the maximum of the electric field
-         @param[out] a_maxElectricField Maximum electric field magnitude evaluated over the input phase
-         @param[in]  a_phase            Input phase
+         @brief Compute the maximum of the electric field.
+         @param[out] a_maximumElectricField Maximum electric field magnitude evaluated over the input phase.
+         @param[in]  a_phase                Input phase.
       */
       virtual void
       computeMaxElectricField(Real& a_maximumElectricField, const phase::which_phase a_phase);
@@ -469,8 +469,8 @@ namespace Physics {
          @param[in]  a_rteDensities Cell-centered densities for the radiative transfer equations (i.e., RTE solvers).
          @param[in]  a_E            Cell-centered electric field. 
          @param[in]  a_time         Time
-         @param[in]  a_dt           Time step.
-         @param[in]  a_level        Grid level. 
+         @param[in]  a_dt    Time step.
+         @param[in]  a_lvl   Grid level.
       */
       virtual void
       advanceReactionNetwork(Vector<LevelData<EBCellFAB>*>&       a_cdrSources,
@@ -550,10 +550,10 @@ namespace Physics {
          @param[in]  a_E              Cell-centered electric field. 
          @param[in]  a_time           Time
          @param[in]  a_dt             Time step.
-         @param[in]  a_dx             Grid resolution.
-         @param[in]  a_lvl            Grid level
-         @param[in]  a_dit            Grid patch index
-        @param[in] a_box Box
+         @param[in]  a_dx      Grid resolution.
+         @param[in]  a_lvl     Grid level.
+         @param[in]  a_cellBox Grid patch box.
+         @param[in]  a_dit     Grid patch index.
       */
       virtual void
       advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&       a_cdrSources,
@@ -733,10 +733,10 @@ namespace Physics {
 
       /**
          @brief Compute the cell-centered CDR velocities. This will call the level version.
-         @param[out] a_cdrDensities  Cell-centered CDR densities
-         @param[in]  a_time          Time
-        @param[in] a_velocities Velocities
-        @param[in] a_E E
+         @param[out] a_cdrVelocities Cell-centered CDR drift velocities.
+         @param[in]  a_cdrDensities  Cell-centered CDR densities.
+         @param[in]  a_E             Cell-centered electric field.
+         @param[in]  a_time          Time.
       */
       virtual void
       computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_cdrVelocities,
@@ -779,15 +779,15 @@ namespace Physics {
                                        const Real&               a_dx);
 
       /**
-         @brief Compute the cell-centered CDR velocities. 
-         @details This is patch version for irregular grid cells. 
-         @param[out] a_cdrDensities  Cell-centered CDR densities
-         @param[in]  a_electricField The cell-centered electric field
-         @param[in]  a_time          Time
-         @param[in]  a_dx            Grid resolution
-         @param[in]  a_lvl           Grid level
-         @param[in]  a_dit           Grid index
-        @param[in] a_velocities Velocities
+         @brief Compute the cell-centered CDR velocities.
+         @details This is patch version for irregular grid cells.
+         @param[out] a_cdrVelocities Cell-centered CDR drift velocities.
+         @param[in]  a_cdrDensities  Cell-centered CDR densities.
+         @param[in]  a_electricField The cell-centered electric field.
+         @param[in]  a_time          Time.
+         @param[in]  a_dx            Grid resolution.
+         @param[in]  a_lvl           Grid level.
+         @param[in]  a_dit           Grid index.
       */
       virtual void
       computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_cdrVelocities,
@@ -850,8 +850,8 @@ namespace Physics {
          @param[in]  a_extrapCdrVelocities CDR velocities extrapolated to the domain faces. 
          @param[in]  a_extrapCdrGradients  CDR gradients extrapolated to the domain faces. 
          @param[in]  a_extrapRteFluxes     RTE fluxes on the domain faces. 
-         @param[in]  a_time                Time.
-        @param[in] a_field Field
+         @param[in]  a_time          Time.
+         @param[in]  a_electricField Electric field on the domain faces.
       */
       virtual void
       computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_cdrFluxes,
@@ -1438,18 +1438,18 @@ namespace Physics {
       parseSourceComputation();
 
       /**
-         @brief Compute and put the current density in output data holder
-         @param[in,out] a_output Output data holder.
-         @param[in]    a_outputRealm Realm where a_output lives    
-         @param[in]    a_level  Grid level
-        @param[in] a_comp Comp
+         @brief Compute and put the current density in output data holder.
+         @param[in,out] a_output      Output data holder.
+         @param[in,out] a_icomp       Starting component in a_output; incremented on exit.
+         @param[in]     a_outputRealm Realm where a_output lives.
+         @param[in]     a_level       Grid level.
       */
       virtual void
       writeJ(LevelData<EBCellFAB>& a_output, int& a_icomp, const std::string& a_outputRealm, const int a_level) const;
 
       /**
-         @brief Calculate the user-supplied plot variables
-        @param[in,out] a_physicsPlotVars Description
+         @brief Calculate the user-supplied plot variables.
+         @param[in,out] a_plotVars Output data holder for the plot variables.
       */
       virtual void
       computePhysicsPlotVars(EBAMRCellData& a_plotVars) const noexcept;

@@ -28,8 +28,8 @@ class PolygonRodIF : public BaseIF
 public:
   /**
     @brief Base constructor
-    @param[in] a_center1     One endpoint
-    @param[in] a_center2     Other endpoint
+    @param[in] a_endPoint1   One endpoint
+    @param[in] a_endPoint2   Other endpoint
     @param[in] a_radius      Outer radius
     @param[in] a_cornerCurv  Rounding radius on corners
     @param[in] a_numSides    Number of sides

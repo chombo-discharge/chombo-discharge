@@ -39,7 +39,7 @@
 namespace DischargeIO {
   /**
     @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
-    @param[in] a_number Number to format as string with separator
+    @param[in] n Number to format as string with separator
     @param[in] a_sep    Separator
     @return Return value
   */

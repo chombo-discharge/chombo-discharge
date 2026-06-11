@@ -41,7 +41,7 @@ public:
   /**
     @brief Full constructor. Sets corners from input box
     @param[in] a_box    IntVect-box
-    @param[in] a_probLo Lower-left corner of physical domain
+    @param[in] a_origin Lower-left corner of physical domain
     @param[in] a_dx     Grid resolution.
     @details This sets the low corner as a_probLo + a_box.lowEnd()*a_dx
   */

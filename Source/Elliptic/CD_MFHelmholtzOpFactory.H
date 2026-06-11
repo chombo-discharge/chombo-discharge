@@ -200,7 +200,7 @@ public:
     @brief Get refinement ratio to next finest level.
     @note Returns -1 when there are no finer levels. 
     @return Return value
-    @param[in,out] a_indexspace Description
+    @param[in] a_domain Domain
   */
   int
   refToFiner(const ProblemDomain& a_domain) const override final;
@@ -421,8 +421,8 @@ protected:
   /**
     @brief Check if a domain is coarser than the other
     @param[in] a_domainOne The first domain
-    @param[in] a_domainTwo The second domain
-    @return Returns true of a_domainOne has fewer grid points than a_domainTwo
+    @param[in] B           The second domain
+    @return Returns true of a_domainOne has fewer grid points than B
   */
   static bool
   isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& B);
@@ -430,20 +430,20 @@ protected:
   /**
     @brief Check if a domain is finer than the other
     @param[in] a_domainOne The first domain
-    @param[in] a_domainTwo The second domain
-    @return Returns true of a_domainOne has more grid points than a_domainTwo
+    @param[in] B           The second domain
+    @return Returns true of a_domainOne has more grid points than B
   */
   static bool
   isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& B);
 
   /**
-    @brief Construct coarsening of a grid level. 
-    @param[out] a_coarseGrid     The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
-    @param[in]  a_fineGrid       The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
-    @param[in]  a_refRat         Refinement ratio
+    @brief Construct coarsening of a grid level.
+    @param[out] a_coarMflg      The coarse grid layout. Must be an undefined MFLevelGrid on input.
+    @param[in]  a_fineMflg      The fine grid layout.
+    @param[in]  a_refRat        Refinement ratio
     @param[in]  a_blockingFactor Blocking factor to use for grid aggregation
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
-    the blocking factor. Otherwise we try to coarsen directly. 
+    the blocking factor. Otherwise we try to coarsen directly.
   */
   bool
   getCoarserLayout(MFLevelGrid&       a_coarMflg,
@@ -459,8 +459,8 @@ protected:
     @param[in]  a_fineAcoef      Fine A-coefficient
     @param[in]  a_fineBcoef      Fine B-coefficient
     @param[in]  a_fineBcoefIrreg Fine B-coefficient on EB faces
-    @param[in]  a_eblgCoar       Coarse grids
-    @param[in]  a_eblgFine       Fine grids
+    @param[in]  a_mflgCoar       Coarse grids
+    @param[in]  a_mflgFine       Fine grids
     @param[in]  a_refRat         Coarsening factor
   */
   static void

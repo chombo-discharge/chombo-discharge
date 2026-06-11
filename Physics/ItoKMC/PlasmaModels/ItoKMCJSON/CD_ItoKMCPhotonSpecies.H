@@ -42,12 +42,33 @@ namespace Physics {
       */
       ~ItoKMCPhotonSpecies() noexcept override = default;
 
-      ItoKMCPhotonSpecies(const ItoKMCPhotonSpecies&) = default;
+      /**
+         @brief Copy constructor.
+         @param[in] a_other Object to copy.
+      */
+      ItoKMCPhotonSpecies(const ItoKMCPhotonSpecies& a_other) = default;
+
+      /**
+         @brief Copy assignment operator.
+         @param[in] a_other Object to copy.
+         @return Reference to this object.
+      */
       ItoKMCPhotonSpecies&
-      operator=(const ItoKMCPhotonSpecies&)      = default;
-      ItoKMCPhotonSpecies(ItoKMCPhotonSpecies&&) = default;
+      operator=(const ItoKMCPhotonSpecies& a_other) = default;
+
+      /**
+         @brief Move constructor.
+         @param[in,out] a_other Object to move from.
+      */
+      ItoKMCPhotonSpecies(ItoKMCPhotonSpecies&& a_other) = default;
+
+      /**
+         @brief Move assignment operator.
+         @param[in,out] a_other Object to move from.
+         @return Reference to this object.
+      */
       ItoKMCPhotonSpecies&
-      operator=(ItoKMCPhotonSpecies&&) = default;
+      operator=(ItoKMCPhotonSpecies&& a_other) = default;
 
       /**
 	@brief Get absorption coefficient at a physical position.

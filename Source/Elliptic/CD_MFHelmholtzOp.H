@@ -97,7 +97,7 @@ public:
     @param[in] a_Bcoef         Operator B-coefficient
     @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
     @param[in] a_jumpOrder     Stencil order to use on jump cells
-    @param[in] a_smoother      Which smoother to use
+    @param[in] a_relaxType     Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
     @param[in] a_ghostPhi Description
     @param[in] a_ghostRhs Description
@@ -225,9 +225,9 @@ public:
   divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs) override final;
 
   /**
-    @brief Apply operator but turn off all BCs. 
-    @param[in,out] a_ans Description
-    @param[in,out] a_phi Description
+    @brief Apply operator but turn off all BCs.
+    @param[in,out] a_ans  L(phi) on output
+    @param[in]     a_phi  Phi
   */
   void
   applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi) override final;
@@ -370,8 +370,8 @@ public:
   /**
     @brief Dot product.
     @return Return value
-    @param[in,out] a_lhs Description
-    @param[in,out] a_2 Description
+    @param[in] a_lhs First operand
+    @param[in] a_rhs Second operand
   */
   Real
   dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
@@ -570,13 +570,13 @@ public:
                 bool                        a_homogeneousPhysBC) override final;
 
   /**
-    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels. 
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels.
     @param[out] a_Lphi              L(phi)
+    @param[in]  a_phiFine           Phi on fine level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
-    @param[in] a_phiCoar Phi coar
-    @param[in] a_finerOp Finer op
   */
   void
   AMROperatorNC(LevelData<MFCellFAB>&             a_Lphi,

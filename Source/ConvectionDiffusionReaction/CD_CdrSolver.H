@@ -366,9 +366,9 @@ public:
   setDiffusionCoefficient(const Real a_diffusionCoefficient);
 
   /**
-    @brief Polymorphic way of setting diffusion coefficients every. 
-    @param[in] a_diffusionCoefficient Diffusion coefficient. 
-    @note This will evaluate the function in all grid cells and set the diffusion coefficient 
+    @brief Polymorphic way of setting diffusion coefficients every.
+    @param[in] a_diffCo Diffusion coefficient.
+    @note This will evaluate the function in all grid cells and set the diffusion coefficient
   */
   virtual void
   setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo);

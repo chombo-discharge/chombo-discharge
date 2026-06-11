@@ -94,9 +94,9 @@ namespace Physics {
 
       /**
          @brief Pre-regrid method. Used for storing important variables for the solvers
-         @details This is overridden because the semi-implicit scheme requires us to store some extra variables on the old grids. 
-         @param[in] a_oldFinestLevel The finest level before the regrid. 
-        @param[in] a_lbase Lbase
+         @details This is overridden because the semi-implicit scheme requires us to store some extra variables on the old grids.
+         @param[in] a_lbase        Coarsest level that changes during the regrid.
+         @param[in] a_finestLevel  The finest level before the regrid.
       */
       void
       preRegrid(int a_lbase, int a_finestLevel) override;

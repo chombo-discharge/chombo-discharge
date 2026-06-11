@@ -58,6 +58,7 @@ public:
 
   /**
     @brief Allow move assignment.
+    @return Reference to this.
   */
   TimeStepper&
   operator=(TimeStepper&&) = default;

@@ -82,14 +82,14 @@ public:
   ScanShop&
   operator=(ScanShop&&) = delete;
 
-  /**
-    @brief If doing profiling, set the output name.
-    @param[in] a_fileName Description
-  */
   using GeometryShop::InsideOutside;
   using GeometryShop::isCovered;
   using GeometryShop::isRegular;
 
+  /**
+    @brief If doing profiling, set the output name.
+    @param[in] a_fileName File name for profiling output
+  */
   void
   setProfileFileName(std::string a_fileName);
 
@@ -244,8 +244,8 @@ protected:
     @brief Build the "coarse level" where we initiate the recursion process.
     @details This level must be defined in order to recurse towards deeper levels. Which is why this is ALWAYS called exact ONCE before buildFinerLevels builds
     the finer levels.
+    @param[in] a_level       Level index for the coarse level
     @param[in] a_maxGridSize Maximum patch size
-    @param[in] a_finerLevel Finer level
   */
   void
   buildCoarseLevel(int a_level, int a_maxGridSize);

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
+/**
   @file   CD_MFHelmholtzDomainBCFactory.H
   @brief  Declaration of a factory class for making boundary condition objects for MFHelmholtzOp
   @author Robert Marskar
@@ -47,7 +47,15 @@ public:
   MFHelmholtzDomainBCFactory&
   operator=(const MFHelmholtzDomainBCFactory& a_other) = delete;
 
+  /**
+    @brief Move constructor
+  */
   MFHelmholtzDomainBCFactory(MFHelmholtzDomainBCFactory&&) = default;
+
+  /**
+    @brief Move assignment operator
+    @return Reference to this object
+  */
   MFHelmholtzDomainBCFactory&
   operator=(MFHelmholtzDomainBCFactory&&) = default;
 

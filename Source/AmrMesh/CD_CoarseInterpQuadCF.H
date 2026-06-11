@@ -44,10 +44,26 @@ public:
   */
   virtual ~CoarseInterpQuadCF() noexcept;
 
+  /**
+    @brief Copy constructor — deleted.
+  */
   CoarseInterpQuadCF(const CoarseInterpQuadCF&) = delete;
+
+  /**
+    @brief Copy assignment — deleted.
+  */
   CoarseInterpQuadCF&
-  operator=(const CoarseInterpQuadCF&)     = delete;
+  operator=(const CoarseInterpQuadCF&) = delete;
+
+  /**
+    @brief Move constructor.
+  */
   CoarseInterpQuadCF(CoarseInterpQuadCF&&) = default;
+
+  /**
+    @brief Move assignment.
+    @return Reference to this object.
+  */
   CoarseInterpQuadCF&
   operator=(CoarseInterpQuadCF&&) noexcept = default;
 

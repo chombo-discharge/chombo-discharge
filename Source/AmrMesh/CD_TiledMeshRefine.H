@@ -56,9 +56,9 @@ public:
 
   /**
     @brief Regrid using the tile clustering algorithm.
-    @param[out] a_newBoxes  The new grid boxes
+    @param[out] a_newGrids  The new grid boxes
     @param[in]  a_tagsLevel Grid tags on each level
-    @return Returns the new finest grid level. 
+    @return Returns the new finest grid level.
   */
   virtual int
   regrid(Vector<Vector<Box>>& a_newGrids, const Vector<IntVectSet>& a_tagsLevel) const noexcept;
@@ -92,12 +92,12 @@ protected:
 
   /**
     @brief Make tiles on the current level from tags and tile coarsening from finer levels
-    @param[in,out] a_tiles Description
-    @param[in,out] a_fineTiles Description
-    @param[in,out] a_coarTags Description
-    @param[in,out] a_domain Description
-    @param[in] a_refToFine Description
-    @param[in] a_refToCoar Description
+    @param[out] a_tiles      Tiles on the current level
+    @param[in]  a_fineTiles  Tiles on the finer level
+    @param[in]  a_coarTags   Refinement tags on the current level
+    @param[in]  a_domain     Problem domain on the current level
+    @param[in]  a_refToFine  Refinement ratio to the finer level
+    @param[in]  a_refToCoar  Refinement ratio to the coarser level
   */
   virtual void
   makeLevelTiles(TileSet&             a_tiles,
@@ -109,9 +109,9 @@ protected:
 
   /**
     @brief Turn tiles into boxes
-    @param[in,out] a_boxes Description
-    @param[in,out] a_tiles Description
-    @param[in,out] a_domain Description
+    @param[out] a_boxes  Grid boxes generated from the tiles
+    @param[in]  a_tiles  Tiles to convert
+    @param[in]  a_domain Problem domain
   */
   virtual void
   makeBoxesFromTiles(Vector<Box>& a_boxes, const TileSet& a_tiles, const ProblemDomain& a_domain) const noexcept;

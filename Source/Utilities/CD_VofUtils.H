@@ -340,13 +340,13 @@ protected:
                         const IntVect&    a_pathSign);
 
   /**
-    @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
-    @param[in,out] a_vofList    List of vofs that were within the monotone path
-    @param[in]    a_startVof   Starting vof. 
+    @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction.
+    @param[in,out] a_vofSet     List of vofs that were within the monotone path
+    @param[in]    a_startVof   Starting vof.
     @param[in]    a_ebisbox    EBISBox.
-    @param[in]    a_radius     Maximum radius. 
+    @param[in]    a_radius     Maximum radius.
     @param[in]    a_timesMoved Number of times moved in any direction
-    @param[in]    a_pathSign   Path sign. 
+    @param[in]    a_pathSign   Path sign.
     @param[in] a_validBox Description
   */
   static void

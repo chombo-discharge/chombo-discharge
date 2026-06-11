@@ -25,12 +25,33 @@ public:
   RoughSphere();
   ~RoughSphere() override;
 
-  RoughSphere(const RoughSphere&) = default;
+  /**
+    @brief Copy constructor
+    @param[in] a_other Other geometry
+  */
+  RoughSphere(const RoughSphere& a_other) = default;
+
+  /**
+    @brief Copy assignment
+    @param[in] a_other Other geometry
+    @return Reference to this
+  */
   RoughSphere&
-  operator=(const RoughSphere&) = default;
-  RoughSphere(RoughSphere&&)    = default;
+  operator=(const RoughSphere& a_other) = default;
+
+  /**
+    @brief Move constructor
+    @param[in,out] a_other Other geometry
+  */
+  RoughSphere(RoughSphere&& a_other) = default;
+
+  /**
+    @brief Move assignment
+    @param[in,out] a_other Other geometry
+    @return Reference to this
+  */
   RoughSphere&
-  operator=(RoughSphere&&) noexcept = default;
+  operator=(RoughSphere&& a_other) noexcept = default;
 };
 
 #include <CD_NamespaceFooter.H>

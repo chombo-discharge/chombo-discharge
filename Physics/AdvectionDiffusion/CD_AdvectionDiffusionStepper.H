@@ -170,7 +170,7 @@ namespace Physics {
       /**
          @brief Pre-regrid hook. Notifies the solver to store data before the mesh changes.
          @param[in] a_lbase          Coarsest level that will change.
-        @param[in] a_finestLevel Finest level
+         @param[in] a_oldFinestLevel Finest level before the regrid.
       */
       void
       preRegrid(const int a_lbase, const int a_oldFinestLevel) override;

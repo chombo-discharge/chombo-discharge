@@ -105,7 +105,7 @@ public:
 
   /**
     @brief Set the radiative transfer species (RtSpecies)
-    @param[in] a_species Species (see RtSpecies.H)
+    @param[in] a_RtSpecies Species (see RtSpecies.H)
   */
   virtual void
   setRtSpecies(const RefCountedPtr<RtSpecies>& a_RtSpecies);

@@ -70,9 +70,9 @@ public:
   LevelTiles() noexcept;
 
   /**
-    @brief Full constructor - puts object in usable state. 
-    @param[in] a_blockingFactor Grid size. 
-    @param[in] a_grids Grids
+    @brief Full constructor - puts object in usable state.
+    @param[in] a_dbl            Grids
+    @param[in] a_blockingFactor Grid size.
   */
   LevelTiles(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;
 
@@ -82,9 +82,9 @@ public:
   virtual ~LevelTiles() noexcept;
 
   /**
-    @brief Define function. Puts object in usable state. 
-    @param[in] a_blockingFactor Grid size. 
-    @param[in] a_grids Grids
+    @brief Define function. Puts object in usable state.
+    @param[in] a_dbl            Grids
+    @param[in] a_blockingFactor Grid size.
   */
   virtual void
   define(const DisjointBoxLayout& a_dbl, const int a_blockingFactor) noexcept;

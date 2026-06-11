@@ -66,7 +66,7 @@ public:
     @param[in] a_geoservers      Generators for cut-cells
     @param[in] a_distributedData Special flag for Chombo (passing grid generation to the geometryservice)
     @param[in] a_nCellMax        Minimum number of cells in the coarsening
-    @param[in] a_maxCoarsenings  Maximum number of coarsenings.
+    @param[in] a_max_coar        Maximum number of coarsenings.
     @param[in] a_fixOnlyFirstPhaseRegNextToMultiValued Special flag for Chombo.
   */
   virtual void

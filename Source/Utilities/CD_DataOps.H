@@ -88,13 +88,13 @@ public:
     @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
     faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
     directions.
-    @param[out] a_faceData Face data. 
-    @param[in]  a_cellData Cell data. 
-    @param[in]  a_faceVars Face variables
-    @param[in]  a_cellVars Cell variables
-    @param[in]  a_average  Averaging method
-    @param[in] a_domains Domains
-    @param[in] a_tanGhosts Tan ghosts
+    @param[out] a_faceData     Face data.
+    @param[in]  a_cellData     Cell data.
+    @param[in]  a_domains      AMR domains.
+    @param[in]  a_tanGhosts    Tangential ghost faces to fill.
+    @param[in]  a_faceInterval Face variables
+    @param[in]  a_cellInterval Cell variables
+    @param[in]  a_average      Averaging method
   */
   static void
   averageCellToFace(EBAMRFluxData&               a_faceData,
@@ -110,13 +110,13 @@ public:
     @details User can choose what type of averaging to use, as well as choosing the number of ghost face to fill. These
     faces are "tangential ghost faces", i.e. if the face direction is along +x, we extend the box with faces in the y- and z-
     directions.
-    @param[out] a_faceData Face data. 
-    @param[in]  a_cellData Cell data. 
-    @param[in]  a_domain   Problem domain
-    @param[in]  a_faceVars Face variables
-    @param[in]  a_cellVars Cell variables
-    @param[in]  a_average  Averaging method
-    @param[in] a_tanGhosts Tan ghosts
+    @param[out] a_faceData     Face data.
+    @param[in]  a_cellData     Cell data.
+    @param[in]  a_domain       Problem domain.
+    @param[in]  a_tanGhosts    Tangential ghost faces to fill.
+    @param[in]  a_faceInterval Face variables
+    @param[in]  a_cellInterval Cell variables
+    @param[in]  a_average      Averaging method
   */
   static void
   averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
@@ -130,7 +130,7 @@ public:
   /**
     @brief Average all components of face centered data to cell centers.
     @param[out] a_cellData Cell data.
-    @param[in]  a_fluxData Face data.
+    @param[in]  a_faceData Face data.
     @param[in]  a_domains  AMR domains.
     @note Only valid cells are filled (not ghost cells)
   */
@@ -1203,7 +1203,7 @@ public:
 
   /**
     @brief Set value in data
-    @param[out] a_lhs   Input/output data
+    @param[out] a_data  Input/output data
     @param[in]  a_value Value to set
   */
   static void
@@ -1253,7 +1253,7 @@ public:
 
   /**
     @brief Set value in data
-    @param[out] a_lhs   Input/output data
+    @param[out] a_data  Input/output data
     @param[in]  a_value Value to set
   */
   static void
@@ -1261,7 +1261,7 @@ public:
 
   /**
     @brief Set value in data
-    @param[out] a_lhs   Input/output data
+    @param[out] a_data  Input/output data
     @param[in]  a_value Value to set
   */
   static void
@@ -1356,14 +1356,14 @@ public:
 
   /**
     @brief Take the square root of the input data
-    @param[in,out] a_data Input data
+    @param[in,out] a_lhs Input data
   */
   static void
   squareRoot(MFAMRCellData& a_lhs);
 
   /**
     @brief Take the square root of the input data
-    @param[in,out] a_data Input data
+    @param[in,out] a_lhs Input data
   */
   static void
   squareRoot(LevelData<MFCellFAB>& a_lhs);

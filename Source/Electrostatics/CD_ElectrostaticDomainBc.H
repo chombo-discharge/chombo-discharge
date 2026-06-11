@@ -97,10 +97,10 @@ public:
   virtual ~ElectrostaticDomainBc();
 
   /**
-    @brief Set the boundary condition on a domain side. You must set both the type, and the associated function. 
+    @brief Set the boundary condition on a domain side. You must set both the type, and the associated function.
+    @param[in] a_domainSide Domain side
     @param[in] a_bc         BC type and function
     @note If the boundary condition had been set previously, this code will overwrite the previous setting.
-    @param[in] a_wall Wall
   */
   void
   setBc(const DomainSide a_domainSide, const Bc& a_bc);

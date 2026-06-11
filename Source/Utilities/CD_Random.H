@@ -172,7 +172,7 @@ public:
     @param[in] a_lo            Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. 
     @param[in] a_hi            Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. 
     @param[in] a_bndryCentroid EB centroid position
-    @param[in] a_normal        EB normal (points into the fluid region)
+    @param[in] a_bndryNormal   EB normal (points into the fluid region)
     @param[in] a_dx            Grid resolution
     @param[in] a_kappa         Cell volume
     @return Return value
@@ -191,8 +191,8 @@ public:
     @param[in] a_lo            Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. 
     @param[in] a_hi            Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. 
     @param[in] a_bndryCentroid EB centroid position
-    @param[in] a_normal        EB normal (points into the fluid region)
-    @return Returns a position inside the cut-cell and on the correct side of the EB. 
+    @param[in] a_bndryNormal   EB normal (points into the fluid region)
+    @return Returns a position inside the cut-cell and on the correct side of the EB.
   */
   inline static RealVect
   randomPosition(const RealVect& a_lo,

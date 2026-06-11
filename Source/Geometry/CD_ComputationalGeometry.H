@@ -69,7 +69,7 @@ public:
 
   /**
     @brief Calls for ComputationalGeometry to use ScanShop rather than Chombo's default geometry generation tool.
-    @param[in] a_startDomain Coarse domain where ScanShop begins the load balancing recursion process.
+    @param[in] a_beginDomain Coarse domain where ScanShop begins the load balancing recursion process.
   */
   void
   useScanShop(const ProblemDomain& a_beginDomain);

@@ -46,12 +46,33 @@ public:
   */
   inline ~PointParticle() override;
 
-  PointParticle(const PointParticle&) = default;
+  /**
+    @brief Copy constructor.
+    @param[in] a_other Other particle.
+  */
+  PointParticle(const PointParticle& a_other) = default;
+
+  /**
+    @brief Copy assignment operator.
+    @param[in] a_other Other particle.
+    @return Reference to this.
+  */
   PointParticle&
-  operator=(const PointParticle&) = default;
-  PointParticle(PointParticle&&)  = default;
+  operator=(const PointParticle& a_other) = default;
+
+  /**
+    @brief Move constructor.
+    @param[in] a_other Other particle.
+  */
+  PointParticle(PointParticle&& a_other) = default;
+
+  /**
+    @brief Move assignment operator.
+    @param[in] a_other Other particle.
+    @return Reference to this.
+  */
   PointParticle&
-  operator=(PointParticle&&) = default;
+  operator=(PointParticle&& a_other) = default;
 
   /**
     @brief Full define function

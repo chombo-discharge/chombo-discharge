@@ -42,7 +42,7 @@ namespace Physics {
          @param[in] a_amr   AMR mesh used to allocate data.
          @param[in] a_realm Realm on which storage is allocated.
          @param[in] a_phase Phase on which storage is allocated.
-         @param[in] m_ncomp Number of components (1 for scalar CDR species).
+         @param[in] a_ncomp Number of components (1 for scalar CDR species).
       */
       CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
                  const std::string&            a_realm,

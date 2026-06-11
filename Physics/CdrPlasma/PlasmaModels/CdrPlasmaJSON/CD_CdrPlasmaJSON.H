@@ -1074,9 +1074,9 @@ namespace Physics {
       parsePlasmaReactionRate(const int a_reactionIndex, const json& a_reactionJSON);
 
       /**
-         @brief Parse scaling factors for reactions. 
-         @param[in] a_reactionIndex  Reaction index. 
-         @param[in] a_reactionJSON   Input reaction. Must be one of the entries in the 'plasma reactions' array. 
+         @brief Parse scaling factors for reactions.
+         @param[in] a_index        Reaction index.
+         @param[in] a_reactionJSON Input reaction. Must be one of the entries in the 'plasma reactions' array.
       */
       virtual void
       parsePlasmaReactionScaling(const int a_index, const json& a_reactionJSON);

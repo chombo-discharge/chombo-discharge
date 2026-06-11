@@ -94,11 +94,11 @@ public:
     @param[in] a_beta          Operator beta
     @param[in] a_Acoef         Operator A-coefficient
     @param[in] a_Bcoef         Operator B-coefficient
-    @param[in] a_ghostCellsPhi Ghost cells in data holders
+    @param[in] a_ghostPhi      Ghost cells in solution vector
+    @param[in] a_ghostRhs      Ghost cells in right-hand side
     @param[in] a_smoother      Which smoother to use
     @param[in] a_relaxFactor   Relaxation factor
-    @param[in] a_BcoIrreg Bco irreg
-    @param[in] a_ghostCellsRHS Ghost cells r h s
+    @param[in] a_BcoefIrreg    B-coefficient on EB faces
   */
   EBHelmholtzOp(const Location::Cell                             a_dataLocation,
                 const EBLevelGrid&                               a_eblgFine,
@@ -743,13 +743,13 @@ public:
                 bool                        a_homogeneousPhysBC) override final;
 
   /**
-    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels. 
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels.
     @param[out] a_Lphi              L(phi)
+    @param[in]  a_phiFine           Phi on fine level
     @param[in]  a_phi               Phi on this level
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operator
     @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
-    @param[in] a_phiCoar Phi coar
-    @param[in] a_finerOp Finer op
   */
   void
   AMROperatorNC(LevelData<EBCellFAB>&             a_Lphi,
@@ -825,9 +825,9 @@ public:
   divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) override final;
 
   /**
-    @brief Apply operator but turn off all BCs. 
-    @param[in,out] a_ans Description
-    @param[in,out] a_phi Description
+    @brief Apply operator but turn off all BCs.
+    @param[in,out] a_Lphi L(phi) on output
+    @param[in]     a_phi  Phi
   */
   void
   applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi) override final;

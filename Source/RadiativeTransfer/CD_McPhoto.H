@@ -146,10 +146,10 @@ public:
 
   /**
     @brief Compute the number of physical photons in each grid cell.
-    @param[out] a_numPhysPhotonsTotal Total number of physical photons to be generated in each grid cell.
-    @param[in] a_source Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
-    @param[in] a_dt Time step
-    @param[in] a_numPhysPhotonsPerPacket Num phys photons per packet
+    @param[out] a_numPhysPhotonsTotal   Total number of physical photons to be generated in each grid cell.
+    @param[out] a_numPhysPhotonsPacket  Num phys photons per packet
+    @param[in]  a_source                Source term -- the interpretation of this depends on the user-specified interpretation of the source term.
+    @param[in]  a_dt                    Time step
   */
   virtual void
   computeNumPhysicalPhotons(EBAMRCellData&       a_numPhysPhotonsTotal,
@@ -159,9 +159,9 @@ public:
 
   /**
     @brief Generate computational photons.
-    @param[in,out] a_photons Computational photons
-    @param[in] a_numPhysicalPhotons Number of physical photons to add to a_photons
-    @param[in] a_maxPhotonsPerCell Maximum number of photons generated per cell.
+    @param[in,out] a_photons           Computational photons
+    @param[in]     a_numPhysPhotons    Number of physical photons to add to a_photons
+    @param[in]     a_maxPhotonsPerCell Maximum number of photons generated per cell.
   */
   virtual void
   generateComputationalPhotons(ParticleContainer<Photon>& a_photons,
@@ -253,7 +253,7 @@ public:
 
   /**
     @brief preRegrid operations
-    @param[in] a_base Coarsest level which changes during regrid
+    @param[in] a_lmin           Coarsest level which changes during regrid
     @param[in] a_oldFinestLevel Finest grid level before regrid
   */
   virtual void
@@ -352,10 +352,10 @@ public:
 
   /**
     @brief Write plot data
-    @param[in,out] a_icomp       Starting component where we begin to write data to a_output
-    @param[in]    a_outputRealm Realm where a_output belongs
-    @param[in]    a_level       Grid level
-    @param[in] a_output Output
+    @param[in,out] a_output       Output data holder
+    @param[in,out] a_comp         Starting component where we begin to write data to a_output
+    @param[in]     a_outputRealm  Realm where a_output belongs
+    @param[in]     a_level        Grid level
   */
   virtual void
   writePlotData(LevelData<EBCellFAB>& a_output,
@@ -765,9 +765,9 @@ protected:
 
   /**
     @brief Do an NGP deposit on a specific grid level. Used for IO.
-    @param[out] a_output Contains NGP deposition of photons. Ignores cut-cells.
-    @param[in] a_level Grid level
-    @param[in] a_particles Particles
+    @param[out] a_output  Contains NGP deposition of photons. Ignores cut-cells.
+    @param[in]  a_photons Particles
+    @param[in]  a_level   Grid level
   */
   virtual void
   depositPhotonsNGP(LevelData<EBCellFAB>&            a_output,

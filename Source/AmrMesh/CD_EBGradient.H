@@ -290,11 +290,11 @@ protected:
 
   /**
     @brief Get a finite difference stencil, assuming that the data is cell-centered
-    @param[out] a_stencil       Finite difference stencil. 
-    @param[in]  a_vof           Grid cell
-    @param[in]  a_ebisBox       EBISBox
-    @param[in]  a_invalidRegion Map of cells that can/can't be used. 
-    @param[in]  a_dx            Grid resolution
+    @param[out] a_stencil      Finite difference stencil.
+    @param[in]  a_vof          Grid cell
+    @param[in]  a_ebisBox      EBISBox
+    @param[in]  a_validRegion  Map of cells that can/can't be used.
+    @param[in]  a_dx           Grid resolution
     @return Finite difference stencil
   */
   virtual bool
@@ -308,18 +308,18 @@ protected:
     @brief Build a gradient stencil using least squares. 
     @param[out] a_stencilCoar       Coarse-grid stencil
     @param[out] a_stencilFine       Fine-grid stencil
-    @param[in]  a_vofCoar           VoF on the coarse level. 
+    @param[in]  a_vofCoar           VoF on the coarse level.
     @param[in]  a_dataLocation      Data location
-    @param[in]  a_validCellsCoar    Map of cells that are valid on the coarse domain. 
-    @param[in]  a_validCellsFine    Map of cells that are valid on the coarse domain. 
+    @param[in]  a_ebislCoar         EBISLayout on the coarse level
+    @param[in]  a_ebislFine         EBISLayout on the fine level
+    @param[in]  a_dit               Data index
+    @param[in]  a_validCellsCoar    Map of cells that are valid on the coarse domain.
+    @param[in]  a_validCellsFine    Map of cells that are valid on the fine domain.
     @param[in]  a_dxCoar            Grid resolution on the coarse level
     @param[in]  a_dxFine            Grid resolution on the fine level
     @param[in]  a_order             Interpolation order
-    @param[in]  a_weight            Equation weighting for least squares reconstruction. 
-    @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar. 
-    @param[in] a_ebislCoar Ebisl coar
-    @param[in] a_ebislFine Ebisl fine
-    @param[in] a_dit Dit
+    @param[in]  a_weight            Equation weighting for least squares reconstruction.
+    @return Returns true if a stencil was found, in which case it is defined in a_stencilFine and a_stencilCoar.
   */
   virtual bool
   getLeastSquaresStencil(VoFStencil&            a_stencilCoar,

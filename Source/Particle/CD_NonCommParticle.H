@@ -50,6 +50,7 @@ public:
 
   /**
     @brief Copy assignment operator.
+    @return Reference to this.
   */
   NonCommParticle&
   operator=(const NonCommParticle&) = default;
@@ -61,6 +62,7 @@ public:
 
   /**
     @brief Move assignment operator.
+    @return Reference to this.
   */
   NonCommParticle&
   operator=(NonCommParticle&&) = default;

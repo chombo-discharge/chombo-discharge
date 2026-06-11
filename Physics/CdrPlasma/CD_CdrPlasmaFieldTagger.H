@@ -86,7 +86,7 @@ namespace Physics {
       /**
          @brief Compute the centroid-centered electric field and its gradient magnitude.
          @param[out] a_electricField         Cell-centered electric field vector.
-         @param[out] a_gradientElectricField Cell-centered gradient of |E|.
+         @param[out] a_gradElectricField Cell-centered gradient of |E|.
       */
       virtual void
       computeElectricField(EBAMRCellData& a_electricField, EBAMRCellData& a_gradElectricField) const;

@@ -502,8 +502,8 @@ public:
     @param[in]  a_realm  Realm of the name where the data will be allocated. 
     @param[in]  a_phase  Phase (gas or solid)
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(EBAMRCellData&           a_data,
@@ -519,8 +519,8 @@ public:
     @param[in]  a_phase  Phase (gas or solid)
     @param[in]  a_level  AMR level
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(LevelData<EBCellFAB>&    a_data,
@@ -536,8 +536,8 @@ public:
     @param[in]  a_realm  Realm of the name where the data will be allocated. 
     @param[in]  a_phase  Phase (gas or solid)
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(EBAMRFluxData&           a_data,
@@ -552,8 +552,8 @@ public:
     @param[in]  a_realm  Realm of the name where the data will be allocated. 
     @param[in]  a_phase  Phase (gas or solid)
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(EBAMRIVData&             a_data,
@@ -568,8 +568,8 @@ public:
     @param[in]  a_realm  Realm of the name where the data will be allocated.
     @param[in]  a_phase  Phase (gas or solid).
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells.
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(EBAMRIFData&             a_data,
@@ -581,10 +581,10 @@ public:
   /**
     @brief Allocate Boolean data over a specific realm
     @param[out] a_data   Data holder to be allocated
-    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_realm  Realm of the name where the data will be allocated.
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(EBAMRBool& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = -1) const;
@@ -592,10 +592,10 @@ public:
   /**
     @brief Allocate a data holder over a specific realm.
     @param[out] a_data   Data holder to be allocated
-    @param[in]  a_realm  Realm of the name where the data will be allocated. 
+    @param[in]  a_realm  Realm of the name where the data will be allocated.
     @param[in]  a_nComp  Number of components in a_data
-    @param[in]  a_nGhost Number of ghost cells for a_data
-    @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
+    @param[in]  a_ghost  Number of ghost cells for a_data
+    @note If a_ghost < 0, this routine will use the default number of ghost cells.
   */
   void
   allocate(MFAMRCellData& a_data, const std::string& a_realm, const int a_nComp, const int a_ghost = -1) const;
@@ -1183,11 +1183,11 @@ public:
 
   /**
     @brief Interpolate ghost cells over a realm, using the default ghost cell interpolation method on a specific level. 
-    @param[in,out] a_fineData Fine grid data
-    @param[in,out] a_coarData Coarse grid data
-    @param[in]    a_level    The grid level corresponding to a_fineData
-    @param[in]    a_realm    Realm name
-    @param[in]    a_phase    Phase (gas or solid)
+    @param[in,out] a_fineData  Fine grid data
+    @param[in,out] a_coarData  Coarse grid data
+    @param[in]    a_fineLevel The grid level corresponding to a_fineData
+    @param[in]    a_realm     Realm name
+    @param[in]    a_phase     Phase (gas or solid)
   */
   void
   interpGhost(LevelData<EBCellFAB>&       a_fineData,

@@ -171,8 +171,8 @@ public:
 
   /**
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
-    @param[in]  a_phi        Isotropic part of the RTE solution
-    @param[in] a_domainflux Domainflux
+    @param[in,out] a_domainflux Domainflux
+    @param[in]     a_data       Isotropic part of the RTE solution
   */
   virtual void
   computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data) override;

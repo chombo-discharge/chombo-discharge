@@ -36,8 +36,8 @@ public:
     @param[in] a_point       Point on the plane
     @param[in] a_width       Box width
     @param[in] a_impFunc     Implicit function to extract from the box
-    @param[in] a_numLeft     Number of holes to the left (of the centerpoint)
-    @param[in] a_numRight    Number of holes to the right (of the centerpoint)
+    @param[in] a_num_left    Number of holes to the left (of the centerpoint)
+    @param[in] a_num_right   Number of holes to the right (of the centerpoint)
     @param[in] a_ccDist      Distance between holes
     @param[in] a_xShift      Profile shift to the left/right (relative to centerponit)
     @param[in] a_yShift      Profile shift up/down (relative to centerponit)

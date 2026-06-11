@@ -99,7 +99,7 @@ protected:
   /**
     @brief Godunov face extrapolation method for advection.
     @param[out] a_facePhi  Phi on face centers.
-    @param[in]  a_phi      Phi on cell centers.
+    @param[in]  a_cellPhi  Phi on cell centers.
     @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states.
     @details This functions calls Chombo code which implements the Graves/Trebotich discretization.
   */

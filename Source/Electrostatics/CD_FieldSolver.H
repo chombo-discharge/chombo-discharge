@@ -782,7 +782,7 @@ protected:
 
   /**
     @brief Set cell-centered permittivities
-    @param[out] a_perm    Permittivity (on either cell center or centroid)
+    @param[out] a_relPerm Permittivity (on either cell center or centroid)
     @param[in]  a_cellBox Computation box
     @param[in]  a_ebisbox EBIS box
     @param[in]  a_probLo  Lower-left corner off comptuational domain
@@ -797,7 +797,7 @@ protected:
 
   /**
     @brief Set face-centered permittivities
-    @param[out] a_perm Permittivity (on face centroid or center)
+    @param[out] a_relPerm Permittivity (on face centroid or center)
     @param[in]  a_cellBox Computation box
     @param[in]  a_ebisbox EBIS box
     @param[in]  a_probLo  Lower-left corner off comptuational domain
@@ -812,11 +812,11 @@ protected:
 
   /**
     @brief Set EB-centered permittivities
-    @param[out] a_perm Permittivity (on face centroid or center)
+    @param[out] a_relPerm Permittivity (on face centroid or center)
     @param[in]  a_cellBox Computation box
     @param[in]  a_ebisbox EBIS box
-    @param[in]  a_dx       Resolution
-    @param[in] a_origin Origin
+    @param[in]  a_origin  Origin
+    @param[in]  a_dx      Resolution
   */
   virtual void
   setEbPermittivities(BaseIVFAB<Real>& a_relPerm,

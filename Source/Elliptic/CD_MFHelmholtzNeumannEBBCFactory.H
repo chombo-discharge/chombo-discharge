@@ -30,15 +30,15 @@ public:
   MFHelmholtzNeumannEBBCFactory();
 
   /**
-    @brief Full constructor which sets order and value on EB. 
-    @param[in] a_value  Constant value on EB
-    @note The order is also the attempted radius of the stencil. 
+    @brief Full constructor which sets order and value on EB.
+    @param[in] a_DphiDn Constant value of dphi/dn on EB.
+    @note The order is also the attempted radius of the stencil.
   */
   MFHelmholtzNeumannEBBCFactory(const Real a_DphiDn);
 
   /**
     @brief Full constructor which sets order and spatially varying value on EBs
-    @param[in] a_value Spatially varying value on EBs
+    @param[in] a_DphiDn Spatially varying value of dphi/dn on EBs.
   */
   MFHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 

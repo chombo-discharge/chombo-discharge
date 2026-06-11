@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-/*
+/**
   @file   CD_EBHelmholtzNeumannDomainBC.H
   @brief  Declaration of a Neumann boundary condition class for EBHelmholtzOp
   @author Robert Marskar
@@ -40,9 +40,9 @@ public:
   EBHelmholtzNeumannDomainBC(const Real a_DphiDn);
 
   /**
-    @brief Full constructor. 
-    @note A positive values gives a flux INTO the domain. 
-    @param[in] a_value Value
+    @brief Full constructor.
+    @param[in] a_DphiDn Spatially varying value of dphi/dn on all domain sides.
+    @note A positive values gives a flux INTO the domain.
   */
   EBHelmholtzNeumannDomainBC(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 

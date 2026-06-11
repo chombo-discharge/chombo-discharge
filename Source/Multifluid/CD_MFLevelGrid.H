@@ -36,10 +36,10 @@ public:
 
   /**
     @brief Full constructor.
-    @param[in] a_dbl     Grids
-    @param[in] a_domain  Domains
-    @param[in] a_ebghost Number of eb ghosts to fill
-    @param[in] a_mfis    Multifluid index space
+    @param[in] a_dbl                  Grids
+    @param[in] a_domain               Domains
+    @param[in] a_ebghost              Number of eb ghosts to fill
+    @param[in] a_multiFluidIndexSpace Multifluid index space
   */
   MFLevelGrid(const DisjointBoxLayout&                   a_dbl,
               const ProblemDomain&                       a_domain,

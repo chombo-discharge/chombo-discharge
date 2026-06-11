@@ -84,6 +84,7 @@ public:
 
   /**
     @brief Default move assignment operator.
+    @return Reference to this object
   */
   ItoSolver&
   operator=(ItoSolver&&) = default;
@@ -508,9 +509,9 @@ public:
 
   /**
     @brief Get number of particles in a specified particle container
+    @param[in] a_whichContainer Container
     @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
     @return Num particles
-    @param[in] a_container Container
   */
   virtual unsigned long long
   getNumParticles(WhichContainer a_whichContainer, bool a_localOnly) const;
@@ -719,7 +720,7 @@ public:
 
   /**
     @brief Sets diffusion coefficient for all particles.
-    @param[in] a_diffusion Particle diffusion value.
+    @param[in] a_diffCo Particle diffusion value.
   */
   virtual void
   setParticleDiffusion(Real a_diffCo);
@@ -735,9 +736,9 @@ public:
   /**
     @brief Interpolate the particle velocities.
     @details This will compute the particle velocities as v = mu * V(Xp) where mu is the particle mobility and V(Xp) is the interpolation of m_velocityFunction
-    to the particle position. 
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
+    to the particle position.
+    @param[in] a_lvl Grid level
+    @param[in] a_dit Grid index
   */
   virtual void
   interpolateVelocities(int a_lvl, const DataIndex& a_dit);
@@ -821,27 +822,27 @@ public:
 
   /**
     @brief General superparticle merging with underlying algorithm through m_particleMerger
-    @param[in,out] a_particles        Particles to be merged/split
-    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
-    @param[in]    a_particlesPerCell Target number of particles per cell
+    @param[in,out] a_particles Particles to be merged/split
+    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
+    @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
   mergeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
     @brief Superparticle merging with KD/BVH trees
-    @param[in,out] a_particles        Particles to be merged/split
-    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
-    @param[in]    a_particlesPerCell Target number of particles per cell
+    @param[in,out] a_particles Particles to be merged/split
+    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
+    @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
   makeSuperparticlesEqualWeightKD(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
 
   /**
-    @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node. 
-    @param[in,out] a_particles        Particles to be merged/split
-    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
-    @param[in]    a_particlesPerCell Target number of particles per cell
+    @brief Superparticle merging with BVH trees. This reinitializes particles within each BVH node.
+    @param[in,out] a_particles Particles to be merged/split
+    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
+    @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
   makeSuperparticlesBVHReinitialize(List<ItoParticle>& a_particles,
@@ -850,9 +851,9 @@ public:
 
   /**
     @brief Particle re-initialization algorithm
-    @param[in,out] a_particles        Particles to be merged/split
-    @param[in]    a_cellInfo         Arithmetic information about the current grid cell. 
-    @param[in]    a_particlesPerCell Target number of particles per cell
+    @param[in,out] a_particles Particles to be merged/split
+    @param[in]    a_cellInfo  Arithmetic information about the current grid cell.
+    @param[in]    a_ppc       Target number of particles per cell
   */
   virtual void
   reinitializeParticles(List<ItoParticle>& a_particles, const CellInfo& a_cellInfo, int a_ppc) const noexcept;
@@ -1477,7 +1478,7 @@ protected:
 
   /**
     @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.
-    @param[in] a_level             Grid level.
+    @param[in] a_lvl               Grid level.
     @param[in] a_dit               Grid index.
     @param[in] a_velocityMagnitude Velocity magnitude.
   */
@@ -1485,16 +1486,16 @@ protected:
   interpolateMobilities(int a_lvl, const DataIndex& a_dit, const EBCellFAB& a_velocityMagnitude) noexcept;
 
   /**
-    @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch. 
-    @param[in] a_level Grid level.
-    @param[in] a_dit   Grid index.
+    @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch.
+    @param[in] a_lvl Grid level.
+    @param[in] a_dit Grid index.
   */
   virtual void
   interpolateMobilitiesDirect(int a_lvl, const DataIndex& a_dit) noexcept;
 
   /**
-    @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch. 
-    @param[in] a_level             Grid level.
+    @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch.
+    @param[in] a_lvl               Grid level.
     @param[in] a_dit               Grid index.
     @param[in] a_velocityMagnitude Velocity magnitude.
   */
@@ -1511,10 +1512,10 @@ protected:
   updateMobilities(int a_level, const DataIndex& a_dit);
 
   /**
-    @brief Interpolate the diffusion field to the particle positions. 
-    @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. 
-    @param[in] a_level Grid level
-    @param[in] a_dit   Grid index
+    @brief Interpolate the diffusion field to the particle positions.
+    @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh.
+    @param[in] a_lvl Grid level
+    @param[in] a_dit Grid index
   */
   virtual void
   interpolateDiffusion(int a_lvl, const DataIndex& a_dit);

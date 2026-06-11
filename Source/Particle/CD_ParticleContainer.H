@@ -90,8 +90,17 @@ public:
 
   ParticleContainer(const ParticleContainer&) = delete;
   ParticleContainer&
-  operator=(const ParticleContainer&)    = delete;
+  operator=(const ParticleContainer&) = delete;
+
+  /**
+    @brief Move constructor.
+  */
   ParticleContainer(ParticleContainer&&) = default;
+
+  /**
+    @brief Move assignment operator.
+    @return Reference to this.
+  */
   ParticleContainer&
   operator=(ParticleContainer&&) = default;
 
@@ -142,8 +151,8 @@ public:
          int                                      a_newFinestLevel);
 
   /**
-    @brief Cache particles before calling regrid. 
-    @param[in] a_base Coarsest grid level which will not change. 
+    @brief Cache particles before calling regrid.
+    @param[in] a_lmin Coarsest grid level which will not change.
   */
   void
   preRegrid(int a_lmin);
@@ -309,7 +318,7 @@ public:
 
   /**
     @brief Get particle data on a level
-    @param[in] a_level AMR level
+    @param[in] a_lvl AMR level
     @return Return value
   */
   ParticleData<P>&
@@ -317,7 +326,7 @@ public:
 
   /**
     @brief Get data on a level. Const version.
-    @param[in] a_lvl AMR level
+    @param[in] a_level AMR level
     @return Return value
   */
   const ParticleData<P>&

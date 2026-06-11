@@ -71,13 +71,13 @@ public:
   virtual ~FieldSolverGMG();
 
   /**
-    @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
-    @param[in,out] a_potential Potential
-    @param[in] a_rho Space charge density
-    @param[in] a_sigma Surface charge density. 
-    @param[in] a_zeroPhi Set a_potential to zero first. 
-    @return True if we found a solution and false otherwise. 
-    @note a_sigma must be defined on the gas phase. 
+    @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides.
+    @param[in,out] a_phi     Potential
+    @param[in]     a_rho     Space charge density
+    @param[in]     a_sigma   Surface charge density.
+    @param[in]     a_zeroPhi Set a_phi to zero first.
+    @return True if we found a solution and false otherwise.
+    @note a_sigma must be defined on the gas phase.
   */
   virtual bool
   solve(MFAMRCellData&       a_phi,
