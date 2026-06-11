@@ -412,7 +412,7 @@ CdrPlasmaImExSdcStepper::setupQmj(const int a_p)
   for (int j = 0; j < nnodes; j++) {
 
     // Set up the Vandermonde matrix (in Fortran order since we will call LaPack)
-    double V[nnodes * nnodes];
+    std::vector<double> V(nnodes * nnodes);
     for (int j = 0; j < nnodes; j++) {
       for (int i = 0; i < nnodes; i++) {
         const int k = j * nnodes + i;
@@ -421,19 +421,19 @@ CdrPlasmaImExSdcStepper::setupQmj(const int a_p)
     }
 
     // Setup f = delta_kj. When we solve, this becomes the solution vector
-    double cj[nnodes];
+    std::vector<double> cj(nnodes);
     for (int k = 0; k < nnodes; k++) {
       cj[k] = (k == j) ? 1.0 : 0.0;
     }
 
     // Solve V*c = f. This calls LAPACK
-    int N    = nnodes;
-    int NRHS = 1;
-    int LDA  = nnodes;
-    int IPIV[nnodes];
-    int LDB  = nnodes;
+    int              N    = nnodes;
+    int              NRHS = 1;
+    int              LDA  = nnodes;
+    std::vector<int> IPIV(nnodes);
+    int              LDB  = nnodes;
     int INFO = 10;
-    dgesv_(&N, &NRHS, V, &LDA, IPIV, cj, &LDB, &INFO);
+    dgesv_(&N, &NRHS, V.data(), &LDA, IPIV.data(), cj.data(), &LDB, &INFO);
     if (INFO != 0) {
       MayDay::Abort("CdrPlasmaImExSdcStepper::setupQmj - could not compute weights");
     }

@@ -156,13 +156,14 @@ ScanShop::makeGrids(const ProblemDomain& a_domain,
   }
 
   // Find the level corresponding to a_domain
-  int whichLevel;
+  int whichLevel = -1;
   for (int lvl = 0; lvl < m_domains.size(); lvl++) {
     if (m_domains[lvl].domainBox() == a_domain.domainBox()) {
       whichLevel = lvl;
       break;
     }
   }
+  CH_assert(whichLevel >= 0);
 
   if (m_hasThisLevel[whichLevel]) {
     a_grids = m_grids[whichLevel];

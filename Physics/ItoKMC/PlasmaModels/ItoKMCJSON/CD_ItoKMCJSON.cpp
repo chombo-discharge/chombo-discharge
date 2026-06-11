@@ -961,8 +961,7 @@ ItoKMCJSON::printFluidRates() const noexcept
     std::vector<Real> EN;
     std::vector<Real> E;
     for (int i = 0; i < numPoints; i++) {
-      Real curEN;
-      Real curE;
+      Real curEN = 0.0;
       if (spacing == "uniform") {
         curEN = minEByN + i * (maxEByN - minEByN) / (numPoints - 1);
       }
@@ -970,7 +969,7 @@ ItoKMCJSON::printFluidRates() const noexcept
         curEN = minEByN * std::pow(10.0, i * log10(maxEByN / minEByN) / (numPoints - 1));
       }
 
-      curE = curEN * m_gasNumberDensity(position) * Units::Td;
+      const Real curE = curEN * m_gasNumberDensity(position) * Units::Td;
 
       EN.push_back(curEN);
       E.push_back(curE);
@@ -1055,7 +1054,7 @@ ItoKMCJSON::previewFunctionEX(const nlohmann::json& a_json, const FunctionEX& a_
       outputFile.open(fileName);
 
       for (int i = 0; i < numPoints; i++) {
-        Real EN;
+        Real EN = 0.0;
         if (spacing == "uniform") {
           EN = minEbyN + i * (maxEbyN - minEbyN) / (numPoints - 1);
         }
