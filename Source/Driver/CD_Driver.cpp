@@ -74,7 +74,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   // Seed the RNG.
   Random::seed();
 
-  m_time = m_startTime;
+  m_time = m_startTime; // NOLINT(cppcoreguidelines-prefer-member-initializer) -- depends on parseOptions()
 }
 
 Driver::~Driver()

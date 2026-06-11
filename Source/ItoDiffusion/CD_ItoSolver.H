@@ -106,7 +106,7 @@ public:
     @brief Get the realm where this solver is registered.
     @return m_realm
   */
-  virtual const std::string
+  virtual std::string
   getRealm() const;
 
   /**

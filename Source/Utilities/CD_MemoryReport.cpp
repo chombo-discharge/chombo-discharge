@@ -111,8 +111,8 @@ MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
     a_unfreed[i] = 1.0 * unfreed[i] / BytesPerMB;
   }
 
-  delete unfreed;
-  delete peak;
+  free(unfreed);
+  free(peak);
 #else
   a_peak.resize(1);
   a_unfreed.resize(1);

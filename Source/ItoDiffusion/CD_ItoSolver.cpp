@@ -68,7 +68,7 @@ ItoSolver::getName() const
   return m_name;
 }
 
-const std::string
+std::string
 ItoSolver::getRealm() const
 {
   CH_TIME("ItoSolver::getRealm");

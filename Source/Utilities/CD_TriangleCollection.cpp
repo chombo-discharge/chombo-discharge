@@ -18,8 +18,7 @@
 #include <CD_TriangleCollection.H>
 #include <CD_NamespaceHeader.H>
 
-TriangleCollection::TriangleCollection() noexcept : m_isDefined(false)
-{}
+TriangleCollection::TriangleCollection() noexcept = default;
 
 TriangleCollection::TriangleCollection(const std::vector<std::shared_ptr<Triangle>>& a_triangles) noexcept
 {

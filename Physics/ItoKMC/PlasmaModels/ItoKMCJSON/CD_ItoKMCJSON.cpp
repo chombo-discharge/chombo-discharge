@@ -1633,7 +1633,7 @@ ItoKMCJSON::initializeTemperatures()
 
         constexpr Real eVToKelvin = 2.0 * Units::Qe / (3.0 * Units::kb);
 
-        temperature = [this, eVToKelvin, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
+        temperature = [this, tabulatedCoeff](const Real E, const RealVect& x) -> Real {
           const Real N   = m_gasNumberDensity(x);
           const Real Etd = E / (N * Units::Td);
 
